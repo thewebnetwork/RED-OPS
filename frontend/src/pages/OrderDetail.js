@@ -341,6 +341,7 @@ export default function OrderDetail() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Add File</DialogTitle>
+                        <DialogDescription>Add a file link or URL to this order.</DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleAddFile} className="space-y-4">
                         <div>
