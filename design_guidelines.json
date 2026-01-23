@@ -1,0 +1,128 @@
+{
+  "brand_identity": {
+    "name": "RED RIBBON OPS PORTAL",
+    "tone": "Professional, Efficient, Creative, Structured",
+    "aesthetic": "Clean Industrial, Dark Mode Sidebar, High Contrast, Red Accents",
+    "archetype": "The Performance Pro (Elite Efficiency)"
+  },
+  "typography": {
+    "headings": {
+      "family": "DM Sans, sans-serif",
+      "weights": ["500", "700"],
+      "usage": "Page titles, Card headers, KPI values"
+    },
+    "body": {
+      "family": "Inter, sans-serif",
+      "weights": ["400", "500", "600"],
+      "usage": "Table data, Chat messages, Form labels"
+    },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "usage": "Order IDs, Timecodes, File metadata"
+    }
+  },
+  "colors": {
+    "primary": {
+      "name": "Ribbon Red",
+      "hex": "#E11D48",
+      "tailwind": "bg-rose-600",
+      "usage": "Primary buttons, Active states, Notification badges, Key highlights"
+    },
+    "sidebar": {
+      "background": "#0F172A",
+      "foreground": "#F8FAFC",
+      "active_item_bg": "#1E293B",
+      "border": "#1E293B"
+    },
+    "background": {
+      "page": "#F8FAFC",
+      "card": "#FFFFFF",
+      "input": "#FFFFFF"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#64748B",
+      "muted": "#94A3B8"
+    },
+    "status": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#3B82F6"
+    }
+  },
+  "layout": {
+    "structure": "Sidebar Navigation (Left, Fixed, Dark) + Top Header (Sticky, Light) + Main Content Area (Scrollable, Light)",
+    "grid_system": {
+      "dashboard": "Bento Grid (grid-cols-1 md:grid-cols-4 gap-6)",
+      "orders_list": "Full width table container",
+      "order_detail": "Two-column: Main Chat/Preview (2/3) + Sidebar Details (1/3)"
+    },
+    "spacing": {
+      "page_padding": "p-6 md:p-8",
+      "card_padding": "p-6",
+      "gap_standard": "gap-6"
+    },
+    "container": {
+      "max_width": "max-w-[1600px] mx-auto"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-rose-600 hover:bg-rose-700 text-white shadow-sm rounded-md px-4 py-2 font-medium transition-all",
+      "secondary": "bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 shadow-sm rounded-md px-4 py-2 font-medium",
+      "ghost": "hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-md px-3 py-2"
+    },
+    "cards": {
+      "style": "bg-white border border-slate-200 shadow-sm rounded-lg",
+      "hover": "hover:shadow-md transition-shadow duration-200"
+    },
+    "inputs": {
+      "style": "bg-white border-slate-200 focus:ring-2 focus:ring-rose-100 focus:border-rose-600 rounded-md"
+    },
+    "badges": {
+      "base": "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+      "variants": {
+        "default": "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        "secondary": "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        "destructive": "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        "outline": "text-foreground"
+      }
+    },
+    "navigation": {
+      "sidebar_item": "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors",
+      "sidebar_item_active": "bg-rose-600 text-white shadow-md"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_background": "https://images.unsplash.com/photo-1574867022210-bd9ecc413bf3?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "dashboard_banner": "https://images.unsplash.com/photo-1616057646498-13410ed6912a?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "placeholder_avatar": "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&auto=format&fit=crop&q=60",
+      "video_thumbnail_placeholder": "https://images.unsplash.com/photo-1618256506572-4c3a7082e4c1?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px, size 18px or 20px"
+    }
+  },
+  "motion": {
+    "transitions": "transition-all duration-200 ease-in-out",
+    "hover_effects": "transform hover:-translate-y-0.5",
+    "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-500"
+  },
+  "accessibility": {
+    "contrast": "Ensure text-slate-500 is not used on white backgrounds for essential text. Use text-slate-600 minimum.",
+    "focus_states": "Visible focus rings on all interactive elements (ring-rose-200).",
+    "aria": "Use aria-label for icon-only buttons."
+  },
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds, stick to solid clean colors.",
+    "Use 'sonner' for all toast notifications.",
+    "All interactive elements MUST have data-testid attributes.",
+    "Use Shadcn UI components as the base, but override styles to match the Red Ribbon theme.",
+    "Sidebar must be dark mode (slate-900), content area light mode.",
+    "Order Detail page must have a dedicated 'Files' tab and 'Activity' tab.",
+    "Use 'Badge' component for Order Status (Pending, In Progress, Review, Completed)."
+  ]
+}
