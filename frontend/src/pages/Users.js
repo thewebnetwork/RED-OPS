@@ -150,17 +150,17 @@ export default function Users() {
           <h1 className="text-2xl font-bold text-slate-900">Users</h1>
           <p className="text-slate-500 mt-1">{users.length} users</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="bg-rose-600 hover:bg-rose-700"
-              onClick={() => handleOpenDialog()}
-              data-testid="add-user-btn"
-            >
-              <Plus size={18} className="mr-2" />
-              Add User
-            </Button>
-          </DialogTrigger>
+        <Button 
+          className="bg-rose-600 hover:bg-rose-700"
+          onClick={() => handleOpenDialog()}
+          data-testid="add-user-btn"
+        >
+          <Plus size={18} className="mr-2" />
+          Add User
+        </Button>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          if (!open) setDialogOpen(false);
+        }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
