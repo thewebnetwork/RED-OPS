@@ -5,15 +5,14 @@ import {
   LayoutDashboard,
   ClipboardList,
   Users,
-  Building2,
-  Ticket,
   Bell,
   LogOut,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Plus
 } from 'lucide-react';
-import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +22,7 @@ import {
 import { useNotifications } from '../hooks/useNotifications';
 
 export default function Layout({ children }) {
-  const { user, logout, hasRole } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,15 +34,13 @@ export default function Layout({ children }) {
   };
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Manager', 'Editor', 'Client'] },
-    { path: '/orders', icon: ClipboardList, label: 'Orders', roles: ['Admin', 'Manager', 'Editor', 'Client'] },
-    { path: '/clients', icon: Building2, label: 'Clients', roles: ['Admin', 'Manager'] },
-    { path: '/tickets', icon: Ticket, label: 'Tickets', roles: ['Admin', 'Manager', 'Editor', 'Client'] },
+    { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Editor', 'Requester'] },
+    { path: '/orders', icon: ClipboardList, label: 'All Orders', roles: ['Admin'] },
     { path: '/users', icon: Users, label: 'Users', roles: ['Admin'] },
   ];
 
   const filteredNavItems = navItems.filter(item => 
-    item.roles.some(role => hasRole(role))
+    item.roles.includes(user?.role)
   );
 
   return (
@@ -93,6 +90,18 @@ export default function Layout({ children }) {
               </Link>
             ))}
           </div>
+
+          {/* Quick Action for Requester */}
+          {user?.role === 'Requester' && (
+            <div className="mt-6 px-2">
+              <Link to="/orders/new">
+                <Button className="w-full bg-rose-600 hover:bg-rose-700">
+                  <Plus size={18} className="mr-2" />
+                  New Request
+                </Button>
+              </Link>
+            </div>
+          )}
         </nav>
 
         {/* User section */}
@@ -182,6 +191,7 @@ export default function Layout({ children }) {
               <div className="px-3 py-2 border-b border-slate-100">
                 <p className="font-medium text-sm">{user?.name}</p>
                 <p className="text-xs text-slate-500">{user?.email}</p>
+                <p className="text-xs text-rose-600 font-medium mt-1">{user?.role}</p>
               </div>
               <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                 <LogOut size={16} className="mr-2" />

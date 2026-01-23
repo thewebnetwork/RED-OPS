@@ -8,9 +8,6 @@ import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import CreateOrder from "./pages/CreateOrder";
-import Clients from "./pages/Clients";
-import Tickets from "./pages/Tickets";
-import TicketDetail from "./pages/TicketDetail";
 import Users from "./pages/Users";
 
 function PrivateRoute({ children, roles }) {
@@ -75,7 +72,7 @@ function AppRoutes() {
       <Route 
         path="/orders" 
         element={
-          <PrivateRoute>
+          <PrivateRoute roles={["Admin"]}>
             <Orders />
           </PrivateRoute>
         } 
@@ -83,7 +80,7 @@ function AppRoutes() {
       <Route 
         path="/orders/new" 
         element={
-          <PrivateRoute roles={["Admin", "Manager"]}>
+          <PrivateRoute roles={["Requester", "Admin"]}>
             <CreateOrder />
           </PrivateRoute>
         } 
@@ -93,30 +90,6 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <OrderDetail />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/clients" 
-        element={
-          <PrivateRoute roles={["Admin", "Manager"]}>
-            <Clients />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/tickets" 
-        element={
-          <PrivateRoute>
-            <Tickets />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/tickets/:ticketId" 
-        element={
-          <PrivateRoute>
-            <TicketDetail />
           </PrivateRoute>
         } 
       />
