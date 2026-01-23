@@ -9,6 +9,7 @@ import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import CreateOrder from "./pages/CreateOrder";
 import Users from "./pages/Users";
+import Notifications from "./pages/Notifications";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
@@ -98,6 +99,14 @@ function AppRoutes() {
         element={
           <PrivateRoute roles={["Admin"]}>
             <Users />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/notifications" 
+        element={
+          <PrivateRoute>
+            <Notifications />
           </PrivateRoute>
         } 
       />
