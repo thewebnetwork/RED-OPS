@@ -105,10 +105,12 @@ export default function Users() {
         await axios.patch(`${API}/users/${editingUser.id}`, updateData);
         toast.success('User updated');
       } else {
+        console.log('Creating user with data:', formData);
         await axios.post(`${API}/users`, formData);
         toast.success('User created');
       }
       setDialogOpen(false);
+      setFormData({ name: '', email: '', password: '', role: 'Editor' });
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
