@@ -1,53 +1,146 @@
-import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { Toaster } from "./components/ui/sonner";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
+import CreateOrder from "./pages/CreateOrder";
+import Clients from "./pages/Clients";
+import Tickets from "./pages/Tickets";
+import TicketDetail from "./pages/TicketDetail";
+import Users from "./pages/Users";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+function PrivateRoute({ children, roles }) {
+  const { isAuthenticated, loading, user } = useAuth();
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
 
+  if (roles && !roles.includes(user?.role)) {
+    return <Navigate to="/" />;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
+function PublicRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+}
+
+function AppRoutes() {
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <Routes>
+      <Route 
+        path="/login" 
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } 
+      />
+      <Route 
+        path="/" 
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/orders" 
+        element={
+          <PrivateRoute>
+            <Orders />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/orders/new" 
+        element={
+          <PrivateRoute roles={["Admin", "Manager"]}>
+            <CreateOrder />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/orders/:orderId" 
+        element={
+          <PrivateRoute>
+            <OrderDetail />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/clients" 
+        element={
+          <PrivateRoute roles={["Admin", "Manager"]}>
+            <Clients />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/tickets" 
+        element={
+          <PrivateRoute>
+            <Tickets />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/tickets/:ticketId" 
+        element={
+          <PrivateRoute>
+            <TicketDetail />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/users" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Users />
+          </PrivateRoute>
+        } 
+      />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
-};
+}
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+        <Toaster position="top-right" richColors />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
