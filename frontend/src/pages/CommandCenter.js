@@ -62,8 +62,6 @@ const BLOCKED_EXTENSIONS = [
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
 const statusColors = {
   'Open': 'bg-blue-100 text-blue-700',
   'In Progress': 'bg-amber-100 text-amber-700',
