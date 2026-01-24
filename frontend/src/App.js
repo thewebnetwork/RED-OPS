@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import RateSurvey from "./pages/RateSurvey";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
