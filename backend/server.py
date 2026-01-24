@@ -738,30 +738,12 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=401, detail="Account is deactivated")
     
     token = create_access_token({"sub": user["id"], "role": user["role"]})
-    return LoginResponse(
-        token=token,
-        user=UserResponse(
-            id=user["id"],
-            name=user["name"],
-            email=user["email"],
-            role=user["role"],
-            active=user.get("active", True),
-            avatar=user.get("avatar"),
-            created_at=user["created_at"]
-        )
-    )
+    user_response = await build_user_response(user)
+    return LoginResponse(token=token, user=user_response)
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
-    return UserResponse(
-        id=user["id"],
-        name=user["name"],
-        email=user["email"],
-        role=user["role"],
-        active=user.get("active", True),
-        avatar=user.get("avatar"),
-        created_at=user["created_at"]
-    )
+    return await build_user_response(user)
 
 @api_router.patch("/auth/profile", response_model=UserResponse)
 async def update_profile(profile_data: ProfileUpdate, current_user: dict = Depends(get_current_user)):
@@ -776,7 +758,7 @@ async def update_profile(profile_data: ProfileUpdate, current_user: dict = Depen
         await db.users.update_one({"id": current_user["id"]}, {"$set": update_dict})
     
     updated = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "password": 0})
-    return UserResponse(**updated)
+    return await build_user_response(updated)
 
 @api_router.post("/auth/change-password")
 async def change_password(password_data: PasswordChange, current_user: dict = Depends(get_current_user)):
