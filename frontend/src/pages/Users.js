@@ -375,19 +375,6 @@ export default function Users() {
     </div>
   );
 }
-                              size="icon"
-                              onClick={() => handleDelete(user.id)}
-                              className="h-8 w-8 text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
             </table>
           </div>
         )}
