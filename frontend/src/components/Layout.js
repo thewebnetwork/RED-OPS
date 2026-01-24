@@ -17,7 +17,8 @@ import {
   User,
   Shield,
   UsersRound,
-  Star
+  Star,
+  GitBranch
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -60,6 +61,7 @@ export default function Layout({ children }) {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Editor', 'Requester'] },
     { path: '/command-center', icon: Command, label: 'Command Center', roles: ['Admin', 'Requester'] },
     { path: '/orders', icon: ClipboardList, label: 'All Orders', roles: ['Admin'] },
+    { path: '/workflows', icon: GitBranch, label: 'Workflows', roles: ['Admin'] },
     { path: '/users', icon: Users, label: 'Users', roles: ['Admin'] },
     { path: '/teams', icon: UsersRound, label: 'Teams', roles: ['Admin'] },
     { path: '/roles', icon: Shield, label: 'Roles', roles: ['Admin'] },
