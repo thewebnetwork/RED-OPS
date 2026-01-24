@@ -612,11 +612,10 @@ export default function CommandCenter() {
 }
 
 // Editing Request Form (reuses existing workflow)
-function EditingRequestForm({ title, categoryL1Id, categoryL2Id, onSuccess }) {
+function EditingRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     priority: 'Normal',
-    description: '',
     video_script: '',
     reference_links: '',
     footage_links: '',
@@ -631,7 +630,7 @@ function EditingRequestForm({ title, categoryL1Id, categoryL2Id, onSuccess }) {
       toast.error('Please enter a title');
       return;
     }
-    if (!formData.description) {
+    if (!description) {
       toast.error('Please enter a description');
       return;
     }
@@ -640,8 +639,10 @@ function EditingRequestForm({ title, categoryL1Id, categoryL2Id, onSuccess }) {
     try {
       await axios.post(`${API}/orders`, {
         title,
+        description,
         category_l1_id: categoryL1Id,
         category_l2_id: categoryL2Id,
+        attachment_count: attachments?.length || 0,
         ...formData
       });
       onSuccess();
