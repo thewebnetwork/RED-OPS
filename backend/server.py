@@ -91,11 +91,33 @@ class RoleResponse(BaseModel):
     active: bool
     created_at: str
 
+# Team Models
+class TeamCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    color: Optional[str] = None
+
+class TeamUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    color: Optional[str] = None
+    active: Optional[bool] = None
+
+class TeamResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    color: Optional[str] = None
+    active: bool
+    member_count: int = 0
+    created_at: str
+
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
     role: str  # Now dynamic - any role name
+    team_id: Optional[str] = None  # Team assignment
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
