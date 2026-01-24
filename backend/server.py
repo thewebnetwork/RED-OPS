@@ -417,6 +417,21 @@ def require_roles(allowed_roles: List[str]):
         return user
     return role_checker
 
+async def validate_role(role_name: str):
+    """Check if a role exists in the database"""
+    role = await db.roles.find_one({"name": role_name, "active": True}, {"_id": 0})
+    return role
+
+async def get_role_by_name(role_name: str):
+    """Get full role details by name"""
+    role = await db.roles.find_one({"name": role_name}, {"_id": 0})
+    return role
+
+async def is_service_provider(role_name: str):
+    """Check if a role is a service provider (can pick orders)"""
+    role = await db.roles.find_one({"name": role_name, "can_pick_orders": True}, {"_id": 0})
+    return role is not None
+
 async def get_next_code(counter_name: str, prefix: str):
     counter = await db.counters.find_one_and_update(
         {"_id": counter_name},
