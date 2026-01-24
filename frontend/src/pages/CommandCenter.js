@@ -222,7 +222,7 @@ export default function CommandCenter() {
                           className="sr-only"
                         />
                         <Bug size={18} className={requestType === 'Bug' ? 'text-rose-600' : 'text-slate-400'} />
-                        <span className={requestType === 'Bug' ? 'text-rose-700 font-medium' : 'text-slate-600'}>Incident / Bug</span>
+                        <span className={requestType === 'Bug' ? 'text-rose-700 font-medium' : 'text-slate-600'}>Incident / Issues</span>
                       </label>
                     </div>
                   </div>
