@@ -111,18 +111,6 @@ export default function Layout({ children }) {
             ))}
           </div>
 
-          {/* Quick Action for Requester */}
-          {(user?.role === 'Requester' || user?.role === 'Admin') && (
-            <div className="mt-6 px-2">
-              <Link to="/command-center">
-                <Button className="w-full bg-rose-600 hover:bg-rose-700" data-testid="new-request-btn">
-                  <Plus size={18} className="mr-2" />
-                  New Request
-                </Button>
-              </Link>
-            </div>
-          )}
-
           {/* Quick Links */}
           {filteredQuickLinks.length > 0 && (
             <div className="mt-6">
