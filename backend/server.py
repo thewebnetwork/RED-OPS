@@ -567,6 +567,61 @@ async def send_password_reset_email(to_email: str, user_name: str, reset_link: s
     
     await send_email_notification(to_email, subject, body)
 
+async def send_satisfaction_survey_email(to_email: str, requester_name: str, resolver_name: str, order_code: str, order_title: str, survey_link: str):
+    """Send satisfaction survey email after order is delivered"""
+    subject = f"How was your experience? Rate {resolver_name} - {order_code}"
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: #DC2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .stars {{ font-size: 32px; color: #fbbf24; letter-spacing: 4px; }}
+            .button {{ display: inline-block; background: #DC2626; color: white; padding: 14px 40px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; }}
+            .order-box {{ background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0; }}
+            .footer {{ margin-top: 20px; font-size: 12px; color: #6b7280; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 style="margin: 0;">Red Ribbon Ops Portal</h1>
+            </div>
+            <div class="content">
+                <h2 style="text-align: center;">Your Order Has Been Delivered! 🎉</h2>
+                <p>Hi {requester_name},</p>
+                <p>Great news! <strong>{resolver_name}</strong> has completed your order.</p>
+                
+                <div class="order-box">
+                    <p style="margin: 0; font-size: 14px; color: #6b7280;">Order</p>
+                    <p style="margin: 4px 0 0 0; font-weight: bold;">{order_code} - {order_title}</p>
+                </div>
+                
+                <p style="text-align: center;">How would you rate your experience?</p>
+                <p style="text-align: center;" class="stars">★★★★★</p>
+                
+                <p style="text-align: center;">
+                    <a href="{survey_link}" class="button" style="color: white;">Leave Your Rating</a>
+                </p>
+                
+                <p style="text-align: center; font-size: 14px; color: #6b7280;">
+                    Your feedback helps us maintain quality and recognize great work.
+                </p>
+                
+                <div class="footer">
+                    <p>This is an automated message from Red Ribbon Ops Portal.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    await send_email_notification(to_email, subject, body)
+
 async def notify_status_change(order: dict, old_status: str, new_status: str, changed_by: dict):
     """Send notifications when order status changes"""
     order_code = order['order_code']
