@@ -38,6 +38,7 @@ export default function Users() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,7 +47,8 @@ export default function Users() {
     name: '',
     email: '',
     password: '',
-    role: ''
+    role: '',
+    team_id: ''
   });
 
   useEffect(() => {
@@ -55,12 +57,14 @@ export default function Users() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, rolesRes] = await Promise.all([
+      const [usersRes, rolesRes, teamsRes] = await Promise.all([
         axios.get(`${API}/users`),
-        axios.get(`${API}/roles`)
+        axios.get(`${API}/roles`),
+        axios.get(`${API}/teams`)
       ]);
       setUsers(usersRes.data);
       setRoles(rolesRes.data);
+      setTeams(teamsRes.data);
       // Set default role to first available role
       if (rolesRes.data.length > 0 && !formData.role) {
         setFormData(prev => ({ ...prev, role: rolesRes.data[0].name }));
