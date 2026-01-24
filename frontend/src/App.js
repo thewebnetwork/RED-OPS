@@ -163,6 +163,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/teams" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Teams />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/profile" 
         element={
           <PrivateRoute>
