@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,10 +25,42 @@ import {
   ChevronRight,
   Clock,
   FileText,
-  ArrowRight
+  ArrowRight,
+  Upload,
+  X,
+  File,
+  Image,
+  FileVideo,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Allowed file extensions (safe files only)
+const ALLOWED_EXTENSIONS = [
+  // Images
+  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp',
+  // Documents
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.rtf', '.csv',
+  // Videos
+  '.mp4', '.mov', '.avi', '.mkv', '.webm',
+  // Audio
+  '.mp3', '.wav', '.ogg', '.m4a',
+  // Archives
+  '.zip', '.rar', '.7z'
+];
+
+// Blocked extensions (dangerous files)
+const BLOCKED_EXTENSIONS = [
+  '.exe', '.bat', '.cmd', '.msi', '.dll', '.scr', '.pif', '.com',
+  '.js', '.vbs', '.vbe', '.jse', '.ws', '.wsf', '.wsc', '.wsh',
+  '.ps1', '.psm1', '.psd1', '.ps1xml', '.psc1', '.msc',
+  '.hta', '.cpl', '.msp', '.inf', '.reg', '.jar', '.sh', '.bash'
+];
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
