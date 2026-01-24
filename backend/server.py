@@ -162,6 +162,68 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+# ============== WORKFLOW MODELS ==============
+class WorkflowStepCreate(BaseModel):
+    name: str
+    order: int
+    color: Optional[str] = None
+    is_initial: bool = False
+    is_final: bool = False
+    requires_approval: bool = False
+    notify_requester: bool = True
+
+class WorkflowStep(WorkflowStepCreate):
+    id: str
+
+class FormFieldCreate(BaseModel):
+    name: str
+    label: str
+    field_type: Literal["text", "textarea", "number", "email", "url", "date", "select", "multiselect", "checkbox", "file"]
+    required: bool = False
+    placeholder: Optional[str] = None
+    options: Optional[List[str]] = None  # For select/multiselect
+    order: int = 0
+
+class FormField(FormFieldCreate):
+    id: str
+
+class WorkflowCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    role_id: Optional[str] = None  # Role this workflow is assigned to
+    color: Optional[str] = None
+    steps: List[WorkflowStepCreate] = []
+    form_fields: List[FormFieldCreate] = []
+
+class WorkflowUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    role_id: Optional[str] = None
+    color: Optional[str] = None
+    active: Optional[bool] = None
+
+class WorkflowResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    role_id: Optional[str] = None
+    role_name: Optional[str] = None
+    color: Optional[str] = None
+    steps: List[WorkflowStep] = []
+    form_fields: List[FormField] = []
+    active: bool
+    created_at: str
+
+# ============== UI SETTINGS MODELS ==============
+class UISettingUpdate(BaseModel):
+    value: str
+
+class UISettingResponse(BaseModel):
+    key: str
+    value: str
+    category: str
+    description: Optional[str] = None
+
 # Satisfaction Ratings
 class RatingCreate(BaseModel):
     token: str
