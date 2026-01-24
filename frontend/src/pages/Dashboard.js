@@ -472,7 +472,6 @@ function EditorDashboard() {
 
 // Requester Dashboard
 function RequesterDashboard() {
-function RequesterDashboard() {
   const [dashboard, setDashboard] = useState({
     open_orders: [],
     in_progress: [],
