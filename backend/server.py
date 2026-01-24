@@ -227,7 +227,9 @@ class WorkflowEdge(BaseModel):
 class WorkflowCreate(BaseModel):
     name: str
     description: Optional[str] = None
-    assigned_roles: List[str] = []  # Roles that can use this workflow
+    assigned_roles: List[str] = []  # Role IDs that can use this workflow
+    assigned_teams: List[str] = []  # Team IDs that can use this workflow
+    trigger_categories: List[str] = []  # Category IDs that trigger this workflow
     color: Optional[str] = None
     nodes: List[WorkflowNode] = []
     edges: List[WorkflowEdge] = []
@@ -237,6 +239,8 @@ class WorkflowUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     assigned_roles: Optional[List[str]] = None
+    assigned_teams: Optional[List[str]] = None
+    trigger_categories: Optional[List[str]] = None
     color: Optional[str] = None
     nodes: Optional[List[WorkflowNode]] = None
     edges: Optional[List[WorkflowEdge]] = None
@@ -248,6 +252,10 @@ class WorkflowResponse(BaseModel):
     description: Optional[str] = None
     assigned_roles: List[str] = []
     assigned_role_names: List[str] = []
+    assigned_teams: List[str] = []
+    assigned_team_names: List[str] = []
+    trigger_categories: List[str] = []
+    trigger_category_names: List[str] = []
     color: Optional[str] = None
     nodes: List[dict] = []
     edges: List[dict] = []
