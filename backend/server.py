@@ -168,6 +168,17 @@ class ResetPasswordRequest(BaseModel):
 NODE_TYPES = ["trigger", "form", "action", "condition", "delay", "end"]
 ACTION_TYPES = ["assign_role", "forward_ticket", "email_user", "email_requester", "update_status", "notify", "webhook"]
 
+# Conditional sub-field model for dynamic form fields
+class ConditionalSubField(BaseModel):
+    id: str
+    parent_value: str  # When parent field equals this value, show this sub-field
+    label: str
+    field_type: Literal["text", "textarea", "number", "email", "url", "date", "select", "multiselect", "checkbox", "file", "phone"]
+    required: bool = False
+    placeholder: Optional[str] = None
+    options: Optional[List[str]] = None  # For select/multiselect
+    is_trigger: bool = False  # If true, this field value can trigger workflow actions
+
 class FormFieldSchema(BaseModel):
     id: str
     name: str
@@ -179,6 +190,8 @@ class FormFieldSchema(BaseModel):
     default_value: Optional[str] = None
     validation_regex: Optional[str] = None
     help_text: Optional[str] = None
+    is_trigger: bool = False  # If true, this field value can trigger workflow conditions/actions
+    sub_fields: Optional[List[ConditionalSubField]] = None  # Conditional sub-fields based on this field's value
 
 class NodeAction(BaseModel):
     id: str
