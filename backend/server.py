@@ -1566,7 +1566,7 @@ async def seed_data():
             "id": str(uuid.uuid4()),
             "name": "Admin",
             "email": "admin@redribbonops.com",
-            "password": hash_password("admin123"),
+            "password": hash_password("Fmtvvl171**"),
             "role": "Admin",
             "active": True,
             "avatar": None,
