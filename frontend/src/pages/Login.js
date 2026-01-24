@@ -59,14 +59,10 @@ export default function Login() {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img 
-              src="/assets/logos/logo-badge.jpg" 
-              alt="Red Ribbon" 
-              className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-[#A2182C]"
+              src="/assets/logos/logo-realty.jpg" 
+              alt="Red Ribbon Realty" 
+              className="h-28 object-contain mb-2"
             />
-            <div className="text-center">
-              <h1 className="text-xl font-bold text-[#A2182C]">{t('auth.loginTitle')}</h1>
-              <p className="text-sm text-slate-500">{t('auth.loginSubtitle')}</p>
-            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
