@@ -104,6 +104,8 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - GET `/api/workflows` - List all workflows
 - GET `/api/workflows/{id}` - Get specific workflow
 - GET `/api/workflows/by-role/{role_name}` - Get workflows for role
+- GET `/api/workflows/by-team/{team_id}` - Get workflows for team
+- GET `/api/workflows/by-category/{category_id}` - Get workflows triggered by category
 - POST `/api/workflows` - Create workflow (Admin)
 - PUT `/api/workflows/{id}` - Full update with nodes/edges (Admin)
 - PATCH `/api/workflows/{id}` - Partial update (Admin)
