@@ -472,12 +472,14 @@ function EditorDashboard() {
 
 // Requester Dashboard
 function RequesterDashboard() {
+function RequesterDashboard() {
   const [dashboard, setDashboard] = useState({
     open_orders: [],
     in_progress: [],
     needs_review: [],
     delivered: []
   });
+  const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -486,8 +488,12 @@ function RequesterDashboard() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/dashboard/requester`);
-      setDashboard(res.data);
+      const [dashboardRes, ratingsRes] = await Promise.all([
+        axios.get(`${API}/dashboard/requester`),
+        axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
+      ]);
+      setDashboard(dashboardRes.data);
+      setRatingStats(ratingsRes.data);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
@@ -513,6 +519,11 @@ function RequesterDashboard() {
           </Button>
         </Link>
       </div>
+
+      {/* Rating Stats for Requester (if they also resolve orders) */}
+      {ratingStats && ratingStats.total_delivered > 0 && (
+        <RatingStatsCard stats={ratingStats} title="Your Ratings (as Resolver)" />
+      )}
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
