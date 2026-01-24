@@ -371,8 +371,8 @@ export default function Categories() {
                 <div>
                   <p className="font-medium text-slate-900">About Editor Workflow</p>
                   <p className="text-sm text-slate-500 mt-1">
-                    When a subcategory has "Editor Workflow" enabled, requests under that category will be visible 
-                    in the Editor's order pool and follow the standard editing workflow (Open → In Progress → Pending → Delivered).
+                    When a subcategory has &quot;Editor Workflow&quot; enabled, requests under that category will be visible 
+                    in the Editor&apos;s order pool and follow the standard editing workflow (Open → In Progress → Pending → Delivered).
                   </p>
                 </div>
               </div>
