@@ -253,6 +253,11 @@ function AdminDashboard() {
         </Link>
       </div>
 
+      {/* Rating Stats for Admin (if they have any) */}
+      {ratingStats && ratingStats.total_delivered > 0 && (
+        <RatingStatsCard stats={ratingStats} title="Your Ratings" />
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <KPICard label="Open" value={stats.open_count} icon={Inbox} color="bg-blue-500" />
         <KPICard label="In Progress" value={stats.in_progress_count} icon={Clock} color="bg-amber-500" />
