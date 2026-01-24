@@ -18,6 +18,8 @@ import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 import Roles from "./pages/Roles";
 import Teams from "./pages/Teams";
+import Workflows from "./pages/Workflows";
+import WorkflowEditor from "./pages/WorkflowEditor";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
@@ -167,6 +169,22 @@ function AppRoutes() {
         element={
           <PrivateRoute roles={["Admin"]}>
             <Teams />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/workflows" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Workflows />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/workflows/:workflowId" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <WorkflowEditor />
           </PrivateRoute>
         } 
       />
