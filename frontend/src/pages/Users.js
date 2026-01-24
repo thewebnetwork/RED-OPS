@@ -325,6 +325,7 @@ export default function Users() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">User</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Team</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Created</th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
@@ -352,6 +353,13 @@ export default function Users() {
                       <Badge style={getRoleColor(user.role)}>
                         {roles.find(r => r.name === user.role)?.display_name || user.role}
                       </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      {user.team_name ? (
+                        <span className="text-sm text-slate-600">{user.team_name}</span>
+                      ) : (
+                        <span className="text-sm text-slate-400">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <Badge className={user.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
