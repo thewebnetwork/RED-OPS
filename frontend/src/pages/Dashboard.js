@@ -196,6 +196,7 @@ function EditorDashboard() {
     delivered: [],
     sla_breaching: []
   });
+  const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -204,8 +205,12 @@ function EditorDashboard() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/dashboard/editor`);
-      setDashboard(res.data);
+      const [dashboardRes, ratingsRes] = await Promise.all([
+        axios.get(`${API}/dashboard/editor`),
+        axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
+      ]);
+      setDashboard(dashboardRes.data);
+      setRatingStats(ratingsRes.data);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
@@ -233,6 +238,80 @@ function EditorDashboard() {
         <h1 className="text-2xl font-bold text-slate-900">Editor Dashboard</h1>
         <p className="text-slate-500 mt-1">Manage your video editing orders</p>
       </div>
+
+      {/* Rating Stats Card - Google Review Style */}
+      {ratingStats && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6" data-testid="rating-stats-card">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Your Ratings</h3>
+          <div className="flex items-start gap-6">
+            {/* Left: Big Number & Stars */}
+            <div className="text-center">
+              <div className="text-5xl font-bold text-slate-900">{ratingStats.average_rating.toFixed(1)}</div>
+              <div className="mt-2 flex gap-0.5 justify-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    className={`w-6 h-6 ${
+                      star <= Math.round(ratingStats.average_rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'fill-gray-200 text-gray-200'
+                    }`}
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <div className="text-sm text-slate-500 mt-1">
+                {ratingStats.total_ratings} {ratingStats.total_ratings === 1 ? 'review' : 'reviews'}
+              </div>
+            </div>
+
+            {/* Right: Distribution Bars */}
+            <div className="flex-1 space-y-1.5">
+              {[5, 4, 3, 2, 1].map((stars) => {
+                const count = ratingStats.rating_distribution[stars] || 0;
+                const maxCount = Math.max(...Object.values(ratingStats.rating_distribution), 1);
+                const percentage = (count / maxCount) * 100;
+                
+                return (
+                  <div key={stars} className="flex items-center gap-2 text-sm">
+                    <span className="w-3 text-slate-600">{stars}</span>
+                    <svg className="w-3 h-3 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-yellow-400 rounded-full transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="w-6 text-right text-slate-500 text-xs">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Stats Footer */}
+          <div className="mt-6 pt-4 border-t border-slate-100 flex justify-center gap-8">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-900">{ratingStats.total_delivered}</div>
+              <div className="text-xs text-slate-500">Orders Delivered</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-900">{ratingStats.total_ratings}</div>
+              <div className="text-xs text-slate-500">Ratings Received</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-900">
+                {ratingStats.total_delivered > 0 ? Math.round((ratingStats.total_ratings / ratingStats.total_delivered) * 100) : 0}%
+              </div>
+              <div className="text-xs text-slate-500">Response Rate</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
