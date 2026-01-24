@@ -1293,7 +1293,7 @@ async def get_editor_dashboard(current_user: dict = Depends(require_roles(["Edit
     sla_breaching = await db.orders.find({"editor_id": current_user["id"], "status": {"$ne": "Delivered"}, "sla_deadline": {"$lt": now}}, {"_id": 0}).to_list(100)
     
     def enrich(orders):
-        return [OrderResponse(**o, is_sla_breached=is_sla_breached(o['sla_deadline'], o['status'])) for o in orders]
+        return [OrderResponse(**normalize_order(o), is_sla_breached=is_sla_breached(o['sla_deadline'], o['status'])) for o in orders]
     
     return {
         "new_orders": enrich(new_orders),
@@ -1312,7 +1312,7 @@ async def get_requester_dashboard(current_user: dict = Depends(require_roles(["R
     delivered = await db.orders.find({"requester_id": current_user["id"], "status": "Delivered"}, {"_id": 0}).sort("delivered_at", -1).limit(20).to_list(20)
     
     def enrich(orders):
-        return [OrderResponse(**o, is_sla_breached=is_sla_breached(o['sla_deadline'], o['status'])) for o in orders]
+        return [OrderResponse(**normalize_order(o), is_sla_breached=is_sla_breached(o['sla_deadline'], o['status'])) for o in orders]
     
     return {
         "open_orders": enrich(open_orders),
