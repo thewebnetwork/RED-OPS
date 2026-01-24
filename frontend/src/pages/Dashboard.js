@@ -15,12 +15,108 @@ import {
   AlertTriangle,
   Inbox,
   Send,
-  RotateCcw
+  RotateCcw,
+  Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Reusable Rating Stats Card Component (Google Review Style)
+function RatingStatsCard({ stats, title = "Your Ratings" }) {
+  if (!stats || stats.total_ratings === 0) {
+    return (
+      <Card className="border-slate-200">
+        <CardContent className="p-6 text-center">
+          <div className="flex gap-1 justify-center mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star key={star} size={24} className="fill-gray-200 text-gray-200" />
+            ))}
+          </div>
+          <p className="text-slate-500">No ratings yet</p>
+          <p className="text-xs text-slate-400 mt-1">Complete orders to receive ratings</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-slate-200" data-testid="rating-stats-card">
+      <CardHeader className="border-b border-slate-100 pb-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Star size={18} className="text-yellow-500 fill-yellow-500" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="flex items-start gap-6">
+          {/* Left: Big Number & Stars */}
+          <div className="text-center">
+            <div className="text-5xl font-bold text-slate-900">{stats.average_rating.toFixed(1)}</div>
+            <div className="mt-2 flex gap-0.5 justify-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={24}
+                  className={
+                    star <= Math.round(stats.average_rating)
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'fill-gray-200 text-gray-200'
+                  }
+                />
+              ))}
+            </div>
+            <div className="text-sm text-slate-500 mt-1">
+              {stats.total_ratings} {stats.total_ratings === 1 ? 'review' : 'reviews'}
+            </div>
+          </div>
+
+          {/* Right: Distribution Bars */}
+          <div className="flex-1 space-y-1.5">
+            {[5, 4, 3, 2, 1].map((stars) => {
+              const count = stats.rating_distribution[stars] || 0;
+              const maxCount = Math.max(...Object.values(stats.rating_distribution), 1);
+              const percentage = (count / maxCount) * 100;
+              
+              return (
+                <div key={stars} className="flex items-center gap-2 text-sm">
+                  <span className="w-3 text-slate-600">{stars}</span>
+                  <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                  <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-yellow-400 rounded-full transition-all duration-500"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-slate-500 text-xs">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Stats Footer */}
+        <div className="mt-6 pt-4 border-t border-slate-100 flex justify-center gap-8">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-slate-900">{stats.total_delivered}</div>
+            <div className="text-xs text-slate-500">Orders Delivered</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-slate-900">{stats.total_ratings}</div>
+            <div className="text-xs text-slate-500">Ratings Received</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-slate-900">
+              {stats.total_delivered > 0 ? Math.round((stats.total_ratings / stats.total_delivered) * 100) : 0}%
+            </div>
+            <div className="text-xs text-slate-500">Response Rate</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 const statusConfig = {
   'Open': { class: 'bg-blue-100 text-blue-700', icon: Inbox },
