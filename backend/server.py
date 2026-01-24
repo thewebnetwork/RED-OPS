@@ -1991,60 +1991,74 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
     count = await db.notifications.count_documents({"user_id": current_user["id"], "is_read": False})
     return {"count": count}
 
-# ============== WORKFLOW ROUTES ==============
+# ============== WORKFLOW ROUTES (Visual Builder) ==============
+
+async def get_role_names_by_ids(role_ids: List[str]) -> List[str]:
+    """Helper to get role display names from IDs"""
+    if not role_ids:
+        return []
+    roles = await db.roles.find({"id": {"$in": role_ids}}, {"_id": 0, "display_name": 1}).to_list(100)
+    return [r["display_name"] for r in roles]
+
+def normalize_workflow(workflow: dict) -> dict:
+    """Normalize workflow dict to ensure all required fields exist"""
+    defaults = {
+        "assigned_roles": [],
+        "assigned_role_names": [],
+        "nodes": [],
+        "edges": [],
+        "is_template": False,
+        "updated_at": None
+    }
+    for key, default_val in defaults.items():
+        if key not in workflow:
+            workflow[key] = default_val
+    return workflow
 
 @api_router.post("/workflows", response_model=WorkflowResponse)
 async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = Depends(require_roles(["Admin"]))):
-    """Create a new workflow"""
+    """Create a new visual workflow"""
     existing = await db.workflows.find_one({"name": workflow_data.name, "active": True})
     if existing:
         raise HTTPException(status_code=400, detail="Workflow with this name already exists")
     
-    # Get role name if role_id provided
-    role_name = None
-    if workflow_data.role_id:
-        role = await db.roles.find_one({"id": workflow_data.role_id}, {"_id": 0})
-        if role:
-            role_name = role["display_name"]
+    # Get role names for assigned roles
+    assigned_role_names = await get_role_names_by_ids(workflow_data.assigned_roles)
     
-    # Process steps with IDs
-    steps = []
-    for step in workflow_data.steps:
-        steps.append(WorkflowStep(
-            id=str(uuid.uuid4()),
-            **step.model_dump()
-        ).model_dump())
-    
-    # Process form fields with IDs
-    form_fields = []
-    for field in workflow_data.form_fields:
-        form_fields.append(FormField(
-            id=str(uuid.uuid4()),
-            **field.model_dump()
-        ).model_dump())
-    
+    now = get_utc_now()
     workflow = {
         "id": str(uuid.uuid4()),
         "name": workflow_data.name,
         "description": workflow_data.description,
-        "role_id": workflow_data.role_id,
-        "role_name": role_name,
+        "assigned_roles": workflow_data.assigned_roles,
+        "assigned_role_names": assigned_role_names,
         "color": workflow_data.color or "#3B82F6",
-        "steps": steps,
-        "form_fields": form_fields,
+        "nodes": [n.model_dump() for n in workflow_data.nodes],
+        "edges": [e.model_dump() for e in workflow_data.edges],
+        "is_template": workflow_data.is_template,
         "active": True,
-        "created_at": get_utc_now()
+        "created_at": now,
+        "updated_at": now
     }
     await db.workflows.insert_one(workflow)
     
     return WorkflowResponse(**workflow)
 
 @api_router.get("/workflows", response_model=List[WorkflowResponse])
-async def list_workflows(active_only: bool = True, current_user: dict = Depends(get_current_user)):
+async def list_workflows(
+    active_only: bool = True,
+    templates_only: bool = False,
+    current_user: dict = Depends(get_current_user)
+):
     """List all workflows"""
-    query = {"active": True} if active_only else {}
+    query = {}
+    if active_only:
+        query["active"] = True
+    if templates_only:
+        query["is_template"] = True
+    
     workflows = await db.workflows.find(query, {"_id": 0}).sort("name", 1).to_list(1000)
-    return [WorkflowResponse(**w) for w in workflows]
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
 
 @api_router.get("/workflows/{workflow_id}", response_model=WorkflowResponse)
 async def get_workflow(workflow_id: str, current_user: dict = Depends(get_current_user)):
@@ -2052,85 +2066,150 @@ async def get_workflow(workflow_id: str, current_user: dict = Depends(get_curren
     workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
-    return WorkflowResponse(**workflow)
+    return WorkflowResponse(**normalize_workflow(workflow))
 
-@api_router.get("/workflows/by-role/{role_id}", response_model=Optional[WorkflowResponse])
-async def get_workflow_by_role(role_id: str, current_user: dict = Depends(get_current_user)):
-    """Get workflow assigned to a specific role"""
-    workflow = await db.workflows.find_one({"role_id": role_id, "active": True}, {"_id": 0})
+@api_router.get("/workflows/by-role/{role_name}")
+async def get_workflows_by_role(role_name: str, current_user: dict = Depends(get_current_user)):
+    """Get workflows assigned to a specific role"""
+    # Find role ID first
+    role = await db.roles.find_one({"name": role_name}, {"_id": 0})
+    if not role:
+        return []
+    
+    workflows = await db.workflows.find({
+        "assigned_roles": role["id"],
+        "active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
+
+@api_router.put("/workflows/{workflow_id}", response_model=WorkflowResponse)
+async def update_workflow_full(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Full update of workflow including nodes and edges"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
     if not workflow:
-        return None
-    return WorkflowResponse(**workflow)
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    update_dict = {}
+    for k, v in workflow_data.model_dump().items():
+        if v is not None:
+            if k == "nodes":
+                update_dict[k] = [n if isinstance(n, dict) else n.model_dump() for n in v]
+            elif k == "edges":
+                update_dict[k] = [e if isinstance(e, dict) else e.model_dump() for e in v]
+            else:
+                update_dict[k] = v
+    
+    # Update role names if assigned_roles changed
+    if "assigned_roles" in update_dict:
+        update_dict["assigned_role_names"] = await get_role_names_by_ids(update_dict["assigned_roles"])
+    
+    update_dict["updated_at"] = get_utc_now()
+    
+    if update_dict:
+        await db.workflows.update_one({"id": workflow_id}, {"$set": update_dict})
+    
+    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    return WorkflowResponse(**normalize_workflow(updated))
 
 @api_router.patch("/workflows/{workflow_id}", response_model=WorkflowResponse)
-async def update_workflow(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
-    """Update workflow metadata"""
+async def update_workflow_partial(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Partial update of workflow metadata only"""
     workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
     
     update_dict = {k: v for k, v in workflow_data.model_dump().items() if v is not None}
     
-    # Update role name if role_id changed
-    if "role_id" in update_dict and update_dict["role_id"]:
-        role = await db.roles.find_one({"id": update_dict["role_id"]}, {"_id": 0})
-        update_dict["role_name"] = role["display_name"] if role else None
+    # Update role names if assigned_roles changed
+    if "assigned_roles" in update_dict:
+        update_dict["assigned_role_names"] = await get_role_names_by_ids(update_dict["assigned_roles"])
+    
+    update_dict["updated_at"] = get_utc_now()
     
     if update_dict:
         await db.workflows.update_one({"id": workflow_id}, {"$set": update_dict})
     
     updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
-    return WorkflowResponse(**updated)
+    return WorkflowResponse(**normalize_workflow(updated))
 
-@api_router.put("/workflows/{workflow_id}/steps")
-async def update_workflow_steps(workflow_id: str, steps: List[WorkflowStepCreate], current_user: dict = Depends(require_roles(["Admin"]))):
-    """Update workflow steps"""
+@api_router.post("/workflows/{workflow_id}/duplicate", response_model=WorkflowResponse)
+async def duplicate_workflow(workflow_id: str, new_name: str = Query(...), current_user: dict = Depends(require_roles(["Admin"]))):
+    """Duplicate an existing workflow"""
     workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
     
-    # Process steps with IDs
-    processed_steps = []
-    for step in steps:
-        processed_steps.append(WorkflowStep(
-            id=str(uuid.uuid4()),
-            **step.model_dump()
-        ).model_dump())
+    # Check if name already exists
+    existing = await db.workflows.find_one({"name": new_name, "active": True})
+    if existing:
+        raise HTTPException(status_code=400, detail="Workflow with this name already exists")
     
-    await db.workflows.update_one({"id": workflow_id}, {"$set": {"steps": processed_steps}})
+    now = get_utc_now()
+    new_workflow = {
+        "id": str(uuid.uuid4()),
+        "name": new_name,
+        "description": workflow.get("description"),
+        "assigned_roles": workflow.get("assigned_roles", []),
+        "assigned_role_names": workflow.get("assigned_role_names", []),
+        "color": workflow.get("color"),
+        "nodes": workflow.get("nodes", []),
+        "edges": workflow.get("edges", []),
+        "is_template": False,
+        "active": True,
+        "created_at": now,
+        "updated_at": now
+    }
+    await db.workflows.insert_one(new_workflow)
     
-    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
-    return WorkflowResponse(**updated)
-
-@api_router.put("/workflows/{workflow_id}/form-fields")
-async def update_workflow_form_fields(workflow_id: str, fields: List[FormFieldCreate], current_user: dict = Depends(require_roles(["Admin"]))):
-    """Update workflow form fields"""
-    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
-    if not workflow:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-    
-    # Process fields with IDs
-    processed_fields = []
-    for field in fields:
-        processed_fields.append(FormField(
-            id=str(uuid.uuid4()),
-            **field.model_dump()
-        ).model_dump())
-    
-    await db.workflows.update_one({"id": workflow_id}, {"$set": {"form_fields": processed_fields}})
-    
-    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
-    return WorkflowResponse(**updated)
+    return WorkflowResponse(**new_workflow)
 
 @api_router.delete("/workflows/{workflow_id}")
 async def delete_workflow(workflow_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
-    """Deactivate a workflow"""
+    """Deactivate a workflow (soft delete)"""
     workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
     if not workflow:
         raise HTTPException(status_code=404, detail="Workflow not found")
     
-    await db.workflows.update_one({"id": workflow_id}, {"$set": {"active": False}})
+    await db.workflows.update_one({"id": workflow_id}, {"$set": {"active": False, "updated_at": get_utc_now()}})
     return {"message": "Workflow deactivated"}
+
+# Get available actions for workflow builder
+@api_router.get("/workflows/meta/actions")
+async def get_workflow_actions(current_user: dict = Depends(get_current_user)):
+    """Get list of available actions for workflow nodes"""
+    return {
+        "actions": [
+            {"type": "assign_role", "label": "Auto-Assign Role", "description": "Automatically assign ticket to a role", "icon": "UserPlus", "config_fields": ["role_id"]},
+            {"type": "forward_ticket", "label": "Forward Ticket", "description": "Forward ticket to another team/user", "icon": "Forward", "config_fields": ["team_id", "user_id"]},
+            {"type": "email_user", "label": "Email Assigned User", "description": "Send email to the assigned user", "icon": "Mail", "config_fields": ["email_template", "subject"]},
+            {"type": "email_requester", "label": "Email Requester", "description": "Send email to the requester", "icon": "Send", "config_fields": ["email_template", "subject"]},
+            {"type": "update_status", "label": "Update Status", "description": "Change ticket status", "icon": "RefreshCw", "config_fields": ["status"]},
+            {"type": "notify", "label": "Send Notification", "description": "Send in-app notification", "icon": "Bell", "config_fields": ["message", "recipients"]},
+            {"type": "webhook", "label": "Trigger Webhook", "description": "Call external API", "icon": "Webhook", "config_fields": ["url", "method", "headers", "body"]},
+            {"type": "delay", "label": "Add Delay", "description": "Wait before next action", "icon": "Clock", "config_fields": ["delay_value", "delay_unit"]},
+        ]
+    }
+
+# Get available field types for form builder
+@api_router.get("/workflows/meta/field-types")
+async def get_form_field_types(current_user: dict = Depends(get_current_user)):
+    """Get list of available form field types"""
+    return {
+        "field_types": [
+            {"type": "text", "label": "Text Input", "icon": "Type"},
+            {"type": "textarea", "label": "Text Area", "icon": "AlignLeft"},
+            {"type": "number", "label": "Number", "icon": "Hash"},
+            {"type": "email", "label": "Email", "icon": "AtSign"},
+            {"type": "phone", "label": "Phone Number", "icon": "Phone"},
+            {"type": "url", "label": "URL", "icon": "Link"},
+            {"type": "date", "label": "Date Picker", "icon": "Calendar"},
+            {"type": "select", "label": "Dropdown", "icon": "ChevronDown"},
+            {"type": "multiselect", "label": "Multi-Select", "icon": "CheckSquare"},
+            {"type": "checkbox", "label": "Checkbox", "icon": "Square"},
+            {"type": "file", "label": "File Upload", "icon": "Upload"},
+        ]
+    }
 
 # ============== UI SETTINGS ROUTES ==============
 
