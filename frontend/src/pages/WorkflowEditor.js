@@ -544,6 +544,133 @@ export default function WorkflowEditor() {
             )}
           </SheetContent>
         </Sheet>
+
+        {/* Workflow Settings Sheet */}
+        <Sheet open={showWorkflowSettings} onOpenChange={setShowWorkflowSettings}>
+          <SheetContent className="w-[400px] sm:w-[500px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2">
+                <Settings size={18} />
+                Workflow Settings
+              </SheetTitle>
+              <SheetDescription>
+                Configure workflow assignment and triggers
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="mt-6 space-y-6">
+              {/* Assign to Roles */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Assign to Roles</Label>
+                <p className="text-xs text-slate-500">Select roles that can use this workflow</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                  {roles.filter(r => r.can_pick_orders).map((role) => (
+                    <div key={role.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`role-${role.id}`}
+                        checked={workflow?.assigned_roles?.includes(role.id)}
+                        onCheckedChange={(checked) => {
+                          const current = workflow?.assigned_roles || [];
+                          const updated = checked
+                            ? [...current, role.id]
+                            : current.filter(id => id !== role.id);
+                          updateWorkflowSettings('assigned_roles', updated);
+                        }}
+                      />
+                      <Label htmlFor={`role-${role.id}`} className="text-sm cursor-pointer">
+                        {role.display_name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {workflow?.assigned_role_names?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {workflow.assigned_role_names.map((name, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">{name}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Assign to Teams */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Assign to Teams</Label>
+                <p className="text-xs text-slate-500">Select teams that can use this workflow</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                  {teams.map((team) => (
+                    <div key={team.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`team-${team.id}`}
+                        checked={workflow?.assigned_teams?.includes(team.id)}
+                        onCheckedChange={(checked) => {
+                          const current = workflow?.assigned_teams || [];
+                          const updated = checked
+                            ? [...current, team.id]
+                            : current.filter(id => id !== team.id);
+                          updateWorkflowSettings('assigned_teams', updated);
+                        }}
+                      />
+                      <Label htmlFor={`team-${team.id}`} className="text-sm cursor-pointer">
+                        {team.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {teams.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2">No teams available</p>
+                  )}
+                </div>
+                {workflow?.assigned_team_names?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {workflow.assigned_team_names.map((name, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs">{name}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Trigger by Category */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Trigger by Category</Label>
+                <p className="text-xs text-slate-500">Auto-trigger this workflow when tickets are created in these categories</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`cat-${cat.id}`}
+                        checked={workflow?.trigger_categories?.includes(cat.id)}
+                        onCheckedChange={(checked) => {
+                          const current = workflow?.trigger_categories || [];
+                          const updated = checked
+                            ? [...current, cat.id]
+                            : current.filter(id => id !== cat.id);
+                          updateWorkflowSettings('trigger_categories', updated);
+                        }}
+                      />
+                      <Label htmlFor={`cat-${cat.id}`} className="text-sm cursor-pointer">
+                        <span className="text-xs text-slate-400 mr-1">[{cat.type}]</span>
+                        {cat.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {categories.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2">No categories available</p>
+                  )}
+                </div>
+                {workflow?.trigger_category_names?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {workflow.trigger_category_names.map((name, idx) => (
+                      <Badge key={idx} variant="default" className="text-xs bg-rose-100 text-rose-700">{name}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
