@@ -34,17 +34,10 @@ import { format } from 'date-fns';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const ROLES = ["Admin", "Editor", "Requester"];
-
-const roleColors = {
-  'Admin': 'bg-rose-100 text-rose-700',
-  'Editor': 'bg-amber-100 text-amber-700',
-  'Requester': 'bg-blue-100 text-blue-700',
-};
-
 export default function Users() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,22 +46,38 @@ export default function Users() {
     name: '',
     email: '',
     password: '',
-    role: 'Editor'
+    role: ''
   });
 
   useEffect(() => {
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/users`);
-      setUsers(res.data);
+      const [usersRes, rolesRes] = await Promise.all([
+        axios.get(`${API}/users`),
+        axios.get(`${API}/roles`)
+      ]);
+      setUsers(usersRes.data);
+      setRoles(rolesRes.data);
+      // Set default role to first available role
+      if (rolesRes.data.length > 0 && !formData.role) {
+        setFormData(prev => ({ ...prev, role: rolesRes.data[0].name }));
+      }
     } catch (error) {
-      toast.error('Failed to load users');
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
+  };
+
+  const getRoleColor = (roleName) => {
+    const role = roles.find(r => r.name === roleName);
+    if (role?.color) {
+      return { backgroundColor: `${role.color}20`, color: role.color };
+    }
+    return { backgroundColor: '#e2e8f0', color: '#475569' };
   };
 
   const handleOpenDialog = (user = null) => {
@@ -82,7 +91,8 @@ export default function Users() {
       });
     } else {
       setEditingUser(null);
-      setFormData({ name: '', email: '', password: '', role: 'Editor' });
+      const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
+      setFormData({ name: '', email: '', password: '', role: defaultRole });
     }
     setDialogOpen(true);
   };
@@ -105,13 +115,13 @@ export default function Users() {
         await axios.patch(`${API}/users/${editingUser.id}`, updateData);
         toast.success('User updated');
       } else {
-        console.log('Creating user with data:', formData);
         await axios.post(`${API}/users`, formData);
         toast.success('User created');
       }
       setDialogOpen(false);
-      setFormData({ name: '', email: '', password: '', role: 'Editor' });
-      fetchUsers();
+      const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
+      setFormData({ name: '', email: '', password: '', role: defaultRole });
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
     }
@@ -121,7 +131,7 @@ export default function Users() {
     try {
       await axios.patch(`${API}/users/${userId}`, { active: !currentActive });
       toast.success(`User ${currentActive ? 'deactivated' : 'activated'}`);
-      fetchUsers();
+      fetchData();
     } catch (error) {
       toast.error('Failed to update user');
     }
@@ -133,7 +143,7 @@ export default function Users() {
     try {
       await axios.delete(`${API}/users/${userId}`);
       toast.success('User deleted');
-      fetchUsers();
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to delete user');
     }
@@ -143,6 +153,11 @@ export default function Users() {
     u.name.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Group roles by type for the dropdown
+  const systemRoles = roles.filter(r => r.role_type === 'system');
+  const serviceProviderRoles = roles.filter(r => r.role_type === 'service_provider');
+  const customRoles = roles.filter(r => r.role_type === 'custom');
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="users-page">
@@ -210,19 +225,35 @@ export default function Users() {
                   onValueChange={(v) => setFormData(prev => ({ ...prev, role: v }))}
                 >
                   <SelectTrigger className="mt-1.5" data-testid="user-role-select">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {ROLES.map(r => (
-                      <SelectItem key={r} value={r}>{r}</SelectItem>
-                    ))}
+                  <SelectContent className="max-h-64">
+                    {systemRoles.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">System Roles</div>
+                        {systemRoles.map(r => (
+                          <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {serviceProviderRoles.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">Service Providers</div>
+                        {serviceProviderRoles.map(r => (
+                          <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {customRoles.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">Custom Roles</div>
+                        {customRoles.map(r => (
+                          <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-slate-500 mt-2">
-                  <strong>Admin:</strong> Full access<br/>
-                  <strong>Editor:</strong> Pick and work on orders<br/>
-                  <strong>Requester:</strong> Submit and track orders
-                </p>
               </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
                 {editingUser ? 'Update User' : 'Add User'}
@@ -258,6 +289,92 @@ export default function Users() {
           <CardContent className="p-12 text-center text-slate-500">
             {search ? 'No users match your search' : 'No users yet'}
           </CardContent>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Created</th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredUsers.map(user => (
+                  <tr key={user.id} className="hover:bg-slate-50" data-testid={`user-row-${user.id}`}>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="font-medium text-slate-600">{user.name.charAt(0)}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{user.name}</p>
+                          <p className="text-sm text-slate-500">{user.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge style={getRoleColor(user.role)}>
+                        {roles.find(r => r.name === user.role)?.display_name || user.role}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge className={user.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+                        {user.active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500">
+                      {format(new Date(user.created_at), 'MMM d, yyyy')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-2">
+                        {user.id !== currentUser.id && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleToggleActive(user.id, user.active)}
+                              title={user.active ? 'Deactivate' : 'Activate'}
+                            >
+                              {user.active ? <UserX size={16} /> : <UserCheck size={16} />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleOpenDialog(user)}
+                            >
+                              <Edit size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500"
+                              onClick={() => handleDelete(user.id)}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
