@@ -13,6 +13,7 @@ import Notifications from "./pages/Notifications";
 import CommandCenter from "./pages/CommandCenter";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
+import Roles from "./pages/Roles";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
@@ -126,6 +127,14 @@ function AppRoutes() {
         element={
           <PrivateRoute roles={["Admin"]}>
             <Categories />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/roles" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Roles />
           </PrivateRoute>
         } 
       />
