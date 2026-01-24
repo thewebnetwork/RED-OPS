@@ -17,6 +17,7 @@ import CommandCenter from "./pages/CommandCenter";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 import Roles from "./pages/Roles";
+import Teams from "./pages/Teams";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
