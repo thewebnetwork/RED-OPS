@@ -326,16 +326,95 @@ export default function CommandCenter() {
                     </div>
                   </div>
 
+                  {/* Description */}
+                  <div>
+                    <Label>Describe your Issue/Request *</Label>
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Please describe your request or issue in detail. The more information you provide, the better we can assist you..."
+                      className="mt-1.5 min-h-[120px]"
+                      data-testid="request-description-input"
+                    />
+                  </div>
+
+                  {/* File Attachments */}
+                  <div>
+                    <Label>Attachments</Label>
+                    <p className="text-xs text-slate-500 mt-1 mb-2">
+                      Upload screenshots, documents, or files (max 50 MB total). Supported: images, PDFs, documents, videos, audio.
+                    </p>
+                    
+                    {/* Upload Area */}
+                    <div 
+                      className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept={ALLOWED_EXTENSIONS.join(',')}
+                        data-testid="file-upload-input"
+                      />
+                      <Upload size={32} className="mx-auto text-slate-400 mb-2" />
+                      <p className="text-sm text-slate-600">Click to upload or drag and drop</p>
+                      <p className="text-xs text-slate-400 mt-1">Max 50 MB • No executable files</p>
+                    </div>
+
+                    {/* Attached Files List */}
+                    {attachments.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {attachments.map((file, index) => {
+                          const FileIcon = getFileIcon(file.name);
+                          return (
+                            <div key={index} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
+                              <FileIcon size={18} className="text-slate-500" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
+                                <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeAttachment(index)}
+                                className="p-1 hover:bg-slate-200 rounded"
+                              >
+                                <X size={16} className="text-slate-500" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <p className="text-xs text-slate-500">
+                          Total: {formatFileSize(attachments.reduce((sum, f) => sum + f.size, 0))} / 50 MB
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Security Notice */}
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+                      <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+                      <p className="text-xs text-amber-700">
+                        For security, executable files (.exe, .bat, .js, etc.) are blocked. If you need to share code or scripts, please use a .txt or .zip file.
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Dynamic Form Based on Category */}
                   {selectedL2 && (
                     <div className="pt-4 border-t border-slate-100">
                       {showEditingForm && (
                         <EditingRequestForm 
                           title={title}
+                          description={description}
+                          attachments={attachments}
                           categoryL1Id={selectedL1}
                           categoryL2Id={selectedL2}
                           onSuccess={() => {
                             setTitle('');
+                            setDescription('');
+                            setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
