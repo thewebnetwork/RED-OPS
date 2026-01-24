@@ -841,7 +841,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
 }
 
 // Bug Report Form
-function BugReportForm({ title, categoryL1Id, categoryL2Id, bugType, onSuccess }) {
+function BugReportForm({ title, description, attachments, categoryL1Id, categoryL2Id, bugType, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     bug_type: bugType,
@@ -860,12 +860,8 @@ function BugReportForm({ title, categoryL1Id, categoryL2Id, bugType, onSuccess }
       toast.error('Please enter a title');
       return;
     }
-    if (!formData.steps_to_reproduce) {
-      toast.error('Please describe the steps to reproduce');
-      return;
-    }
-    if (!formData.expected_behavior || !formData.actual_behavior) {
-      toast.error('Please describe expected and actual behavior');
+    if (!description) {
+      toast.error('Please describe the issue');
       return;
     }
 
@@ -873,8 +869,10 @@ function BugReportForm({ title, categoryL1Id, categoryL2Id, bugType, onSuccess }
     try {
       await axios.post(`${API}/bug-reports`, {
         title,
+        description,
         category_l1_id: categoryL1Id,
         category_l2_id: categoryL2Id,
+        attachment_count: attachments?.length || 0,
         ...formData
       });
       onSuccess();
