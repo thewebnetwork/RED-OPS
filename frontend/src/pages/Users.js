@@ -375,10 +375,3 @@ export default function Users() {
     </div>
   );
 }
-            </table>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-}
