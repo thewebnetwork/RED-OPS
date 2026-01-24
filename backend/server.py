@@ -35,7 +35,7 @@ RESET_TOKEN_EXPIRE_HOURS = 1  # Password reset tokens expire in 1 hour
 SLA_DAYS = 7
 
 # Frontend URL for password reset links
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://request-hub-23.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://nocodehub-2.preview.emergentagent.com')
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
