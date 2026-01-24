@@ -1730,6 +1730,129 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
     count = await db.notifications.count_documents({"user_id": current_user["id"], "is_read": False})
     return {"count": count}
 
+# ============== SATISFACTION RATING ROUTES ==============
+
+@api_router.get("/ratings/verify-token")
+async def verify_rating_token(token: str):
+    """Verify if a rating token is valid and get order details"""
+    survey = await db.rating_surveys.find_one({"token": token, "completed": False}, {"_id": 0})
+    
+    if not survey:
+        raise HTTPException(status_code=400, detail="Invalid or expired survey link")
+    
+    # Check expiry (7 days)
+    created_at = datetime.fromisoformat(survey["created_at"].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > created_at + timedelta(days=7):
+        raise HTTPException(status_code=400, detail="Survey link has expired")
+    
+    order = await db.orders.find_one({"id": survey["order_id"]}, {"_id": 0})
+    resolver = await db.users.find_one({"id": survey["resolver_id"]}, {"_id": 0, "password": 0})
+    
+    return {
+        "valid": True,
+        "order_code": order["order_code"] if order else None,
+        "order_title": order["title"] if order else None,
+        "resolver_name": resolver["name"] if resolver else None,
+        "resolver_avatar": resolver.get("avatar") if resolver else None
+    }
+
+@api_router.post("/ratings/submit")
+async def submit_rating(rating_data: RatingCreate):
+    """Submit a satisfaction rating (public endpoint - uses token)"""
+    survey = await db.rating_surveys.find_one({"token": rating_data.token, "completed": False}, {"_id": 0})
+    
+    if not survey:
+        raise HTTPException(status_code=400, detail="Invalid or expired survey link")
+    
+    # Check if already rated
+    existing = await db.ratings.find_one({"order_id": survey["order_id"]})
+    if existing:
+        raise HTTPException(status_code=400, detail="This order has already been rated")
+    
+    order = await db.orders.find_one({"id": survey["order_id"]}, {"_id": 0})
+    requester = await db.users.find_one({"id": survey["requester_id"]}, {"_id": 0})
+    resolver = await db.users.find_one({"id": survey["resolver_id"]}, {"_id": 0})
+    
+    # Create rating
+    rating = {
+        "id": str(uuid.uuid4()),
+        "order_id": survey["order_id"],
+        "order_code": order["order_code"] if order else "",
+        "requester_id": survey["requester_id"],
+        "requester_name": requester["name"] if requester else "Unknown",
+        "resolver_id": survey["resolver_id"],
+        "resolver_name": resolver["name"] if resolver else "Unknown",
+        "rating": rating_data.rating,
+        "comment": rating_data.comment,
+        "created_at": get_utc_now()
+    }
+    await db.ratings.insert_one(rating)
+    
+    # Mark survey as completed
+    await db.rating_surveys.update_one(
+        {"token": rating_data.token},
+        {"$set": {"completed": True, "completed_at": get_utc_now()}}
+    )
+    
+    # Notify the resolver
+    await create_notification(
+        survey["resolver_id"],
+        "rating",
+        f"New {rating_data.rating}-star rating received",
+        f"You received a {rating_data.rating}-star rating for order {order['order_code']}" + (f": \"{rating_data.comment}\"" if rating_data.comment else ""),
+        survey["order_id"]
+    )
+    
+    return {"message": "Thank you for your feedback!", "rating": rating_data.rating}
+
+@api_router.get("/ratings/resolver/{resolver_id}", response_model=ResolverStatsResponse)
+async def get_resolver_stats(resolver_id: str, current_user: dict = Depends(get_current_user)):
+    """Get resolver's rating statistics"""
+    resolver = await db.users.find_one({"id": resolver_id}, {"_id": 0})
+    if not resolver:
+        raise HTTPException(status_code=404, detail="Resolver not found")
+    
+    # Get all ratings for this resolver
+    ratings = await db.ratings.find({"resolver_id": resolver_id}, {"_id": 0}).to_list(1000)
+    
+    # Get total delivered orders
+    total_delivered = await db.orders.count_documents({"editor_id": resolver_id, "status": "Delivered"})
+    
+    # Calculate stats
+    total_ratings = len(ratings)
+    average_rating = 0.0
+    rating_distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    if total_ratings > 0:
+        total_stars = sum(r["rating"] for r in ratings)
+        average_rating = round(total_stars / total_ratings, 1)
+        for r in ratings:
+            rating_distribution[r["rating"]] += 1
+    
+    return ResolverStatsResponse(
+        resolver_id=resolver_id,
+        resolver_name=resolver["name"],
+        total_delivered=total_delivered,
+        total_ratings=total_ratings,
+        average_rating=average_rating,
+        rating_distribution=rating_distribution
+    )
+
+@api_router.get("/ratings/my-stats", response_model=ResolverStatsResponse)
+async def get_my_rating_stats(current_user: dict = Depends(get_current_user)):
+    """Get current user's rating statistics (for service providers)"""
+    return await get_resolver_stats(current_user["id"], current_user)
+
+@api_router.get("/ratings/resolver/{resolver_id}/reviews", response_model=List[RatingResponse])
+async def get_resolver_reviews(resolver_id: str, limit: int = 10, current_user: dict = Depends(get_current_user)):
+    """Get recent reviews for a resolver"""
+    ratings = await db.ratings.find(
+        {"resolver_id": resolver_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return [RatingResponse(**r) for r in ratings]
+
 # ============== SEED DATA ==============
 
 @api_router.post("/seed")
