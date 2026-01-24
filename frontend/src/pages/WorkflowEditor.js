@@ -704,17 +704,21 @@ function TriggerNodeConfig({ data, updateData }) {
   );
 }
 
-// Form Node Configuration
+// Form Node Configuration with Conditional Sub-fields
 function FormNodeConfig({ data, updateData }) {
   const [fields, setFields] = useState(data?.fields || []);
+  const [expandedField, setExpandedField] = useState(null);
 
   const addField = () => {
     const newField = {
       id: `field-${Date.now()}`,
-      name: '',
+      name: `field_${Date.now()}`,
       label: 'New Field',
       field_type: 'text',
       required: false,
+      is_trigger: false,
+      options: [],
+      sub_fields: [],
     };
     const updated = [...fields, newField];
     setFields(updated);
@@ -735,6 +739,87 @@ function FormNodeConfig({ data, updateData }) {
     updateData('fields', updated);
   };
 
+  const addSubField = (fieldId, parentValue) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        const newSubField = {
+          id: `subfield-${Date.now()}`,
+          parent_value: parentValue || '',
+          label: 'Sub Field',
+          field_type: 'text',
+          required: false,
+          is_trigger: false,
+          options: [],
+        };
+        return { ...f, sub_fields: [...(f.sub_fields || []), newSubField] };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
+  const updateSubField = (fieldId, subFieldId, key, value) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        const updatedSubFields = (f.sub_fields || []).map(sf =>
+          sf.id === subFieldId ? { ...sf, [key]: value } : sf
+        );
+        return { ...f, sub_fields: updatedSubFields };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
+  const removeSubField = (fieldId, subFieldId) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        return { ...f, sub_fields: (f.sub_fields || []).filter(sf => sf.id !== subFieldId) };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
+  const addOption = (fieldId) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        return { ...f, options: [...(f.options || []), `Option ${(f.options?.length || 0) + 1}`] };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
+  const updateOption = (fieldId, index, value) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        const newOptions = [...(f.options || [])];
+        newOptions[index] = value;
+        return { ...f, options: newOptions };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
+  const removeOption = (fieldId, index) => {
+    const updated = fields.map(f => {
+      if (f.id === fieldId) {
+        const newOptions = (f.options || []).filter((_, i) => i !== index);
+        return { ...f, options: newOptions };
+      }
+      return f;
+    });
+    setFields(updated);
+    updateData('fields', updated);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -747,30 +832,47 @@ function FormNodeConfig({ data, updateData }) {
 
       <div className="space-y-3">
         {fields.map((field, idx) => (
-          <div key={field.id} className="p-3 bg-slate-50 rounded-lg border space-y-2">
+          <div key={field.id} className="p-3 bg-slate-50 rounded-lg border space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Field {idx + 1}</span>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6"
-                onClick={() => removeField(field.id)}
-              >
-                <X size={12} />
-              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-slate-500">Field {idx + 1}</span>
+                {field.is_trigger && (
+                  <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">Trigger</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={() => setExpandedField(expandedField === field.id ? null : field.id)}
+                >
+                  <Settings size={12} />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={() => removeField(field.id)}
+                >
+                  <X size={12} />
+                </Button>
+              </div>
             </div>
+            
             <Input
-              placeholder="Field label"
+              placeholder="Field label (e.g., Category, How many bedrooms?)"
               value={field.label}
               onChange={(e) => updateField(field.id, 'label', e.target.value)}
               className="h-8 text-sm"
             />
+            
             <div className="flex gap-2">
               <Select
                 value={field.field_type}
                 onValueChange={(val) => updateField(field.id, 'field_type', val)}
               >
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className="h-8 text-sm flex-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -781,6 +883,7 @@ function FormNodeConfig({ data, updateData }) {
                   <SelectItem value="phone">Phone</SelectItem>
                   <SelectItem value="date">Date</SelectItem>
                   <SelectItem value="select">Dropdown</SelectItem>
+                  <SelectItem value="multiselect">Multi-Select</SelectItem>
                   <SelectItem value="checkbox">Checkbox</SelectItem>
                   <SelectItem value="file">File Upload</SelectItem>
                 </SelectContent>
@@ -791,12 +894,165 @@ function FormNodeConfig({ data, updateData }) {
                   checked={field.required}
                   onCheckedChange={(checked) => updateField(field.id, 'required', checked)}
                 />
-                <Label htmlFor={`req-${field.id}`} className="text-xs">Required</Label>
+                <Label htmlFor={`req-${field.id}`} className="text-xs">Req</Label>
+              </div>
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  id={`trigger-${field.id}`}
+                  checked={field.is_trigger}
+                  onCheckedChange={(checked) => updateField(field.id, 'is_trigger', checked)}
+                />
+                <Label htmlFor={`trigger-${field.id}`} className="text-xs text-amber-600">Trigger</Label>
               </div>
             </div>
+
+            {/* Options for select/multiselect fields */}
+            {(field.field_type === 'select' || field.field_type === 'multiselect') && (
+              <div className="space-y-2 pl-3 border-l-2 border-blue-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-blue-600">Options</span>
+                  <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => addOption(field.id)}>
+                    <Plus size={10} className="mr-1" />
+                    Add Option
+                  </Button>
+                </div>
+                {(field.options || []).map((opt, optIdx) => (
+                  <div key={optIdx} className="flex items-center gap-2">
+                    <Input
+                      value={opt}
+                      onChange={(e) => updateOption(field.id, optIdx, e.target.value)}
+                      className="h-7 text-xs"
+                      placeholder={`Option ${optIdx + 1}`}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => removeOption(field.id, optIdx)}
+                    >
+                      <X size={10} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Expanded settings with sub-fields */}
+            {expandedField === field.id && (
+              <div className="space-y-3 pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-purple-600">Conditional Sub-Fields</span>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-6 text-xs text-purple-600"
+                    onClick={() => addSubField(field.id, field.options?.[0] || '')}
+                  >
+                    <Plus size={10} className="mr-1" />
+                    Add Sub-Field
+                  </Button>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Sub-fields appear when this field has a specific value (e.g., if Category = &quot;Renovation&quot;, show &quot;How many bedrooms?&quot;)
+                </p>
+                
+                {(field.sub_fields || []).map((subField, sfIdx) => (
+                  <div key={subField.id} className="p-2 bg-purple-50 rounded border border-purple-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-purple-700">Sub-Field {sfIdx + 1}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5"
+                        onClick={() => removeSubField(field.id, subField.id)}
+                      >
+                        <X size={10} />
+                      </Button>
+                    </div>
+                    
+                    {/* Show when parent value equals */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-600 whitespace-nowrap">Show when =</span>
+                      {field.field_type === 'select' || field.field_type === 'multiselect' ? (
+                        <Select
+                          value={subField.parent_value}
+                          onValueChange={(val) => updateSubField(field.id, subField.id, 'parent_value', val)}
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Select value" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(field.options || []).map((opt, i) => (
+                              <SelectItem key={i} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          value={subField.parent_value}
+                          onChange={(e) => updateSubField(field.id, subField.id, 'parent_value', e.target.value)}
+                          className="h-7 text-xs"
+                          placeholder="Value to match"
+                        />
+                      )}
+                    </div>
+                    
+                    <Input
+                      value={subField.label}
+                      onChange={(e) => updateSubField(field.id, subField.id, 'label', e.target.value)}
+                      className="h-7 text-xs"
+                      placeholder="Sub-field label"
+                    />
+                    
+                    <div className="flex gap-2">
+                      <Select
+                        value={subField.field_type}
+                        onValueChange={(val) => updateSubField(field.id, subField.id, 'field_type', val)}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="select">Dropdown</SelectItem>
+                          <SelectItem value="checkbox">Checkbox</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="flex items-center gap-1">
+                        <Checkbox
+                          checked={subField.is_trigger}
+                          onCheckedChange={(checked) => updateSubField(field.id, subField.id, 'is_trigger', checked)}
+                        />
+                        <span className="text-xs text-amber-600">Trigger</span>
+                      </div>
+                    </div>
+                    
+                    {/* Options for select sub-fields */}
+                    {subField.field_type === 'select' && (
+                      <div className="space-y-1">
+                        <span className="text-xs text-slate-500">Options (comma separated)</span>
+                        <Input
+                          value={(subField.options || []).join(', ')}
+                          onChange={(e) => updateSubField(field.id, subField.id, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                          className="h-7 text-xs"
+                          placeholder="1, 2, 3, 4+"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
+      
+      {fields.length === 0 && (
+        <p className="text-xs text-slate-400 text-center py-4">
+          No fields yet. Add fields to collect data from users.
+        </p>
+      )}
     </div>
   );
 }
