@@ -124,6 +124,7 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     role: Optional[str] = None  # Now dynamic
+    team_id: Optional[str] = None  # Team assignment
     active: Optional[bool] = None
 
 class ProfileUpdate(BaseModel):
