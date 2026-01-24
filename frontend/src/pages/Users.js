@@ -375,59 +375,6 @@ export default function Users() {
     </div>
   );
 }
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Created</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map(user => (
-                  <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-4 font-medium text-slate-900">{user.name}</td>
-                    <td className="px-4 py-4 text-slate-600">{user.email}</td>
-                    <td className="px-4 py-4">
-                      <Badge className={roleColors[user.role]}>{user.role}</Badge>
-                    </td>
-                    <td className="px-4 py-4">
-                      {user.active ? (
-                        <Badge className="bg-green-100 text-green-700">Active</Badge>
-                      ) : (
-                        <Badge className="bg-slate-100 text-slate-500">Inactive</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-slate-600 text-sm">
-                      {format(new Date(user.created_at), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleOpenDialog(user)}
-                          className="h-8 w-8"
-                        >
-                          <Edit size={14} />
-                        </Button>
-                        {user.id !== currentUser?.id && (
-                          <>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleToggleActive(user.id, user.active)}
-                              className={`h-8 w-8 ${user.active ? 'text-amber-500' : 'text-green-500'}`}
-                            >
-                              {user.active ? <UserX size={14} /> : <UserCheck size={14} />}
-                            </Button>
-                            <Button 
-                              variant="ghost" 
                               size="icon"
                               onClick={() => handleDelete(user.id)}
                               className="h-8 w-8 text-red-500 hover:text-red-700"
