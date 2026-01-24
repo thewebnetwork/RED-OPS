@@ -91,12 +91,13 @@ export default function Users() {
         name: user.name,
         email: user.email,
         password: '',
-        role: user.role
+        role: user.role,
+        team_id: user.team_id || ''
       });
     } else {
       setEditingUser(null);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
-      setFormData({ name: '', email: '', password: '', role: defaultRole });
+      setFormData({ name: '', email: '', password: '', role: defaultRole, team_id: '' });
     }
     setDialogOpen(true);
   };
@@ -113,18 +114,20 @@ export default function Users() {
     }
 
     try {
+      const submitData = { ...formData };
+      if (!submitData.team_id) submitData.team_id = null;
+      
       if (editingUser) {
-        const updateData = { ...formData };
-        if (!updateData.password) delete updateData.password;
-        await axios.patch(`${API}/users/${editingUser.id}`, updateData);
+        if (!submitData.password) delete submitData.password;
+        await axios.patch(`${API}/users/${editingUser.id}`, submitData);
         toast.success('User updated');
       } else {
-        await axios.post(`${API}/users`, formData);
+        await axios.post(`${API}/users`, submitData);
         toast.success('User created');
       }
       setDialogOpen(false);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
-      setFormData({ name: '', email: '', password: '', role: defaultRole });
+      setFormData({ name: '', email: '', password: '', role: defaultRole, team_id: '' });
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
