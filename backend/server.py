@@ -43,13 +43,14 @@ app = FastAPI(title="Red Ribbon Ops Portal API - V2")
 api_router = APIRouter(prefix="/api")
 
 # ============== ENUMS ==============
-USER_ROLES = ["Admin", "Editor", "Requester"]
+SYSTEM_ROLES = ["Admin", "Requester"]  # Base roles that always exist
 ORDER_STATUSES = ["Open", "In Progress", "Pending", "Delivered"]
 REQUEST_TYPES = ["Request", "Bug"]
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
 BUG_SEVERITIES = ["Low", "Normal", "High", "Urgent"]
 BROWSERS = ["Chrome", "Safari", "Firefox", "Edge", "Other"]
 DEVICES = ["Desktop", "Mobile", "Tablet"]
+ROLE_TYPES = ["system", "service_provider", "custom"]  # system=Admin/Requester, service_provider=Editor/Photographer/etc, custom=user-created
 
 # ============== MODELS ==============
 
