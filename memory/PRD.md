@@ -126,9 +126,22 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - PATCH `/api/users/{id}` - Update user including role change
 
 ## Tech Stack
-- **Frontend**: React, React Router, Axios, Shadcn/UI, TailwindCSS, **React Flow**
+- **Frontend**: React, React Router, Axios, Shadcn/UI, TailwindCSS, **React Flow**, **i18next**
 - **Backend**: FastAPI, Pydantic, PyJWT, passlib
 - **Database**: MongoDB (Motor async driver)
+
+## Branding
+- **Primary Color**: Pantone 187 C (#A2182C) - Red Ribbon Red
+- **Secondary Color**: Pantone 730 C (#97662D) - Gold/Brown
+- **Accent Color**: Pantone 5523 C (#AEC6C8) - Light Teal
+- **Logo Assets**: `/public/assets/logos/` (logo-full.jpg, logo-badge.jpg, logo-icon.jpg, house-palm.jpg)
+
+## Internationalization (i18n)
+- **English** (primary) - Default language
+- **Portuguese - Brazil** (secondary)
+- **Spanish - Spain** (third option)
+- Language preference stored in localStorage
+- Translation files: `/src/i18n/locales/` (en.json, pt.json, es.json)
 
 ## MOCKED Features
 - **SMTP email notifications** - Logged but not sent
