@@ -794,6 +794,7 @@ async def list_orders(
     
     result = []
     for order in orders:
+        order = normalize_order(order)
         result.append(OrderResponse(
             **order,
             is_sla_breached=is_sla_breached(order['sla_deadline'], order['status'])
@@ -807,6 +808,7 @@ async def get_order_pool(current_user: dict = Depends(require_roles(["Editor", "
     
     result = []
     for order in orders:
+        order = normalize_order(order)
         result.append(OrderResponse(
             **order,
             is_sla_breached=is_sla_breached(order['sla_deadline'], order['status'])
@@ -826,6 +828,7 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
         if order["status"] != "Open" and order.get("editor_id") != current_user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
     
+    order = normalize_order(order)
     return OrderResponse(
         **order,
         is_sla_breached=is_sla_breached(order['sla_deadline'], order['status'])
