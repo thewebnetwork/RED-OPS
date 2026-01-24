@@ -617,6 +617,11 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
     
+    # Validate role exists
+    role = await validate_role(user_data.role)
+    if not role:
+        raise HTTPException(status_code=400, detail=f"Role '{user_data.role}' does not exist")
+    
     user = {
         "id": str(uuid.uuid4()),
         "name": user_data.name,
@@ -648,6 +653,12 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    # Validate role if being updated
+    if user_data.role:
+        role = await validate_role(user_data.role)
+        if not role:
+            raise HTTPException(status_code=400, detail=f"Role '{user_data.role}' does not exist")
     
     update_dict = {k: v for k, v in user_data.model_dump().items() if v is not None}
     if "password" in update_dict:
