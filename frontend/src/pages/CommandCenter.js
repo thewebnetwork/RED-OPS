@@ -425,10 +425,14 @@ export default function CommandCenter() {
                       {showFeatureForm && (
                         <FeatureRequestForm
                           title={title}
+                          description={description}
+                          attachments={attachments}
                           categoryL1Id={selectedL1}
                           categoryL2Id={selectedL2}
                           onSuccess={() => {
                             setTitle('');
+                            setDescription('');
+                            setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
@@ -439,11 +443,15 @@ export default function CommandCenter() {
                       {showBugForm && (
                         <BugReportForm
                           title={title}
+                          description={description}
+                          attachments={attachments}
                           categoryL1Id={selectedL1}
                           categoryL2Id={selectedL2}
                           bugType={selectedL2Details?.name || ''}
                           onSuccess={() => {
                             setTitle('');
+                            setDescription('');
+                            setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
