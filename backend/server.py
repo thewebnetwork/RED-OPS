@@ -1434,7 +1434,13 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     )
 
 @api_router.get("/dashboard/editor")
-async def get_editor_dashboard(current_user: dict = Depends(require_roles(["Editor"]))):
+async def get_editor_dashboard(current_user: dict = Depends(get_current_user)):
+    """Dashboard for service providers who can pick orders"""
+    # Check if user's role can pick orders
+    role = await get_role_by_name(current_user["role"])
+    if not role or not role.get("can_pick_orders"):
+        raise HTTPException(status_code=403, detail="Your role cannot pick orders")
+    
     now = datetime.now(timezone.utc).isoformat()
     
     new_orders = await db.orders.find({"status": "Open"}, {"_id": 0}).sort("created_at", 1).to_list(100)
