@@ -158,3 +158,4 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - `/app/test_reports/iteration_3.json` - V2 Command Center (100% pass)
 - `/app/test_reports/iteration_4.json` - Phase 1 Dynamic Roles (100% pass)
 - `/app/test_reports/iteration_5.json` - Phase 2 Visual Workflow Builder (100% pass)
+- `/app/test_reports/iteration_6.json` - Workflow Builder Enhancements (100% pass) - Role/Team/Category assignment, Conditional Sub-Fields
