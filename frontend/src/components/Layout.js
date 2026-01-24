@@ -16,7 +16,8 @@ import {
   FolderTree,
   User,
   Settings,
-  Shield
+  Shield,
+  UsersRound
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -44,6 +45,7 @@ export default function Layout({ children }) {
     { path: '/command-center', icon: Command, label: 'Command Center', roles: ['Admin', 'Requester'] },
     { path: '/orders', icon: ClipboardList, label: 'All Orders', roles: ['Admin'] },
     { path: '/users', icon: Users, label: 'Users', roles: ['Admin'] },
+    { path: '/teams', icon: UsersRound, label: 'Teams', roles: ['Admin'] },
     { path: '/roles', icon: Shield, label: 'Roles', roles: ['Admin'] },
     { path: '/categories', icon: FolderTree, label: 'Categories', roles: ['Admin'] },
   ];
