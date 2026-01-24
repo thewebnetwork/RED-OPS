@@ -2021,11 +2021,37 @@ async def get_role_names_by_ids(role_ids: List[str]) -> List[str]:
     roles = await db.roles.find({"id": {"$in": role_ids}}, {"_id": 0, "display_name": 1}).to_list(100)
     return [r["display_name"] for r in roles]
 
+async def get_team_names_by_ids(team_ids: List[str]) -> List[str]:
+    """Helper to get team names from IDs"""
+    if not team_ids:
+        return []
+    teams = await db.teams.find({"id": {"$in": team_ids}}, {"_id": 0, "name": 1}).to_list(100)
+    return [t["name"] for t in teams]
+
+async def get_category_names_by_ids(category_ids: List[str]) -> List[str]:
+    """Helper to get category names from IDs (L1 or L2)"""
+    if not category_ids:
+        return []
+    names = []
+    for cat_id in category_ids:
+        cat = await db.categories_l1.find_one({"id": cat_id}, {"_id": 0, "name": 1})
+        if cat:
+            names.append(cat["name"])
+        else:
+            cat = await db.categories_l2.find_one({"id": cat_id}, {"_id": 0, "name": 1})
+            if cat:
+                names.append(cat["name"])
+    return names
+
 def normalize_workflow(workflow: dict) -> dict:
     """Normalize workflow dict to ensure all required fields exist"""
     defaults = {
         "assigned_roles": [],
         "assigned_role_names": [],
+        "assigned_teams": [],
+        "assigned_team_names": [],
+        "trigger_categories": [],
+        "trigger_category_names": [],
         "nodes": [],
         "edges": [],
         "is_template": False,
@@ -2043,8 +2069,10 @@ async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = De
     if existing:
         raise HTTPException(status_code=400, detail="Workflow with this name already exists")
     
-    # Get role names for assigned roles
+    # Get names for assigned entities
     assigned_role_names = await get_role_names_by_ids(workflow_data.assigned_roles)
+    assigned_team_names = await get_team_names_by_ids(workflow_data.assigned_teams)
+    trigger_category_names = await get_category_names_by_ids(workflow_data.trigger_categories)
     
     now = get_utc_now()
     workflow = {
@@ -2053,6 +2081,10 @@ async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = De
         "description": workflow_data.description,
         "assigned_roles": workflow_data.assigned_roles,
         "assigned_role_names": assigned_role_names,
+        "assigned_teams": workflow_data.assigned_teams,
+        "assigned_team_names": assigned_team_names,
+        "trigger_categories": workflow_data.trigger_categories,
+        "trigger_category_names": trigger_category_names,
         "color": workflow_data.color or "#3B82F6",
         "nodes": [n.model_dump() for n in workflow_data.nodes],
         "edges": [e.model_dump() for e in workflow_data.edges],
