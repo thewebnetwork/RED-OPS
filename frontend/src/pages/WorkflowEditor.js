@@ -118,8 +118,10 @@ export default function WorkflowEditor() {
   
   const [selectedNode, setSelectedNode] = useState(null);
   const [showNodeConfig, setShowNodeConfig] = useState(false);
+  const [showWorkflowSettings, setShowWorkflowSettings] = useState(false);
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // Fetch workflow data
   useEffect(() => {
