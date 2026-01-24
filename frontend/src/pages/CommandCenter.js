@@ -759,7 +759,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
       toast.error('Please enter a title');
       return;
     }
-    if (!formData.description) {
+    if (!description) {
       toast.error('Please describe your request');
       return;
     }
@@ -768,8 +768,10 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
     try {
       await axios.post(`${API}/feature-requests`, {
         title,
+        description,
         category_l1_id: categoryL1Id,
         category_l2_id: categoryL2Id,
+        attachment_count: attachments?.length || 0,
         ...formData
       });
       onSuccess();
@@ -784,17 +786,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
         <p className="text-sm text-indigo-700 font-medium">Feature Request</p>
-        <p className="text-xs text-indigo-600">Tell us about the feature or service you'd like to see.</p>
-      </div>
-
-      <div>
-        <Label>What are you requesting? *</Label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Describe the feature or service you're requesting..."
-          className="mt-1.5 min-h-[100px]"
-        />
+        <p className="text-xs text-indigo-600">Tell us about the feature or service you&apos;d like to see.</p>
       </div>
 
       <div>
