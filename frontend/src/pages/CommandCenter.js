@@ -165,7 +165,7 @@ export default function CommandCenter() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="create" data-testid="create-tab">
+          <TabsTrigger value="create" className="data-[state=active]:bg-rose-600 data-[state=active]:text-white" data-testid="create-tab">
             <Plus size={16} className="mr-2" />
             Create New Request
           </TabsTrigger>
