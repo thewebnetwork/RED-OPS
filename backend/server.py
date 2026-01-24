@@ -1499,8 +1499,61 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/seed")
 async def seed_data():
-    """Seed initial admin user and categories"""
-    # Create admin if not exists
+    """Seed initial admin user, roles, and categories"""
+    
+    # ========== SEED ROLES ==========
+    roles_to_seed = [
+        # System roles (always required)
+        {"name": "Admin", "display_name": "Administrator", "description": "Full system access", "role_type": "system", "icon": "shield", "color": "#DC2626", "can_pick_orders": False, "can_create_orders": True},
+        {"name": "Requester", "display_name": "Requester", "description": "Can submit requests and orders", "role_type": "system", "icon": "user", "color": "#3B82F6", "can_pick_orders": False, "can_create_orders": True},
+        
+        # Real Estate Service Providers
+        {"name": "Editor", "display_name": "Video Editor", "description": "Video editing and post-production", "role_type": "service_provider", "icon": "video", "color": "#F59E0B", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Photographer", "display_name": "Photographer", "description": "Real estate and property photography", "role_type": "service_provider", "icon": "camera", "color": "#8B5CF6", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Videographer", "display_name": "Videographer", "description": "Property videography and drone footage", "role_type": "service_provider", "icon": "film", "color": "#EC4899", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "DroneOperator", "display_name": "Drone Operator", "description": "Aerial photography and videography", "role_type": "service_provider", "icon": "plane", "color": "#06B6D4", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Stager", "display_name": "Home Stager", "description": "Property staging and interior design", "role_type": "service_provider", "icon": "sofa", "color": "#10B981", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "VirtualStager", "display_name": "Virtual Stager", "description": "Virtual staging and 3D rendering", "role_type": "service_provider", "icon": "cube", "color": "#6366F1", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "FloorplanDesigner", "display_name": "Floor Plan Designer", "description": "2D/3D floor plan creation", "role_type": "service_provider", "icon": "layout", "color": "#14B8A6", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "HomeInspector", "display_name": "Home Inspector", "description": "Property inspection services", "role_type": "service_provider", "icon": "clipboard-check", "color": "#F97316", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Appraiser", "display_name": "Appraiser", "description": "Property valuation and appraisal", "role_type": "service_provider", "icon": "calculator", "color": "#84CC16", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "MortgageBroker", "display_name": "Mortgage Broker", "description": "Mortgage and financing services", "role_type": "service_provider", "icon": "landmark", "color": "#0EA5E9", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "TitleCompany", "display_name": "Title Company", "description": "Title search and insurance", "role_type": "service_provider", "icon": "file-text", "color": "#A855F7", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Surveyor", "display_name": "Land Surveyor", "description": "Land surveying and mapping", "role_type": "service_provider", "icon": "map", "color": "#22C55E", "can_pick_orders": True, "can_create_orders": False},
+        
+        # Trades & Contractors
+        {"name": "GeneralContractor", "display_name": "General Contractor", "description": "General construction and renovation", "role_type": "service_provider", "icon": "hard-hat", "color": "#EAB308", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Electrician", "display_name": "Electrician", "description": "Electrical work and repairs", "role_type": "service_provider", "icon": "zap", "color": "#FBBF24", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Plumber", "display_name": "Plumber", "description": "Plumbing installation and repair", "role_type": "service_provider", "icon": "droplet", "color": "#3B82F6", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "HVACTechnician", "display_name": "HVAC Technician", "description": "Heating, ventilation, air conditioning", "role_type": "service_provider", "icon": "thermometer", "color": "#60A5FA", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Roofer", "display_name": "Roofer", "description": "Roofing installation and repair", "role_type": "service_provider", "icon": "home", "color": "#78716C", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Painter", "display_name": "Painter", "description": "Interior and exterior painting", "role_type": "service_provider", "icon": "paintbrush", "color": "#FB923C", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Landscaper", "display_name": "Landscaper", "description": "Landscaping and lawn care", "role_type": "service_provider", "icon": "tree", "color": "#22C55E", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Cleaner", "display_name": "Cleaning Service", "description": "Property cleaning and janitorial", "role_type": "service_provider", "icon": "sparkles", "color": "#06B6D4", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "PestControl", "display_name": "Pest Control", "description": "Pest inspection and treatment", "role_type": "service_provider", "icon": "bug", "color": "#EF4444", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Locksmith", "display_name": "Locksmith", "description": "Lock installation and rekeying", "role_type": "service_provider", "icon": "key", "color": "#A3A3A3", "can_pick_orders": True, "can_create_orders": False},
+        
+        # Marketing Services
+        {"name": "GraphicDesigner", "display_name": "Graphic Designer", "description": "Branding and visual design", "role_type": "service_provider", "icon": "palette", "color": "#E879F9", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "SocialMediaManager", "display_name": "Social Media Manager", "description": "Social media marketing", "role_type": "service_provider", "icon": "share-2", "color": "#F472B6", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "Copywriter", "display_name": "Copywriter", "description": "Property descriptions and marketing copy", "role_type": "service_provider", "icon": "pen-tool", "color": "#818CF8", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "SEOSpecialist", "display_name": "SEO Specialist", "description": "Search engine optimization", "role_type": "service_provider", "icon": "search", "color": "#34D399", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "WebDeveloper", "display_name": "Web Developer", "description": "Website development and maintenance", "role_type": "service_provider", "icon": "code", "color": "#60A5FA", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "PrintSpecialist", "display_name": "Print Specialist", "description": "Flyers, brochures, signage", "role_type": "service_provider", "icon": "printer", "color": "#A78BFA", "can_pick_orders": True, "can_create_orders": False},
+        {"name": "SignInstaller", "display_name": "Sign Installer", "description": "Yard signs and property signage", "role_type": "service_provider", "icon": "signpost", "color": "#FACC15", "can_pick_orders": True, "can_create_orders": False},
+    ]
+    
+    roles_created = 0
+    for role in roles_to_seed:
+        existing = await db.roles.find_one({"name": role["name"]})
+        if not existing:
+            role["id"] = str(uuid.uuid4())
+            role["active"] = True
+            role["created_at"] = get_utc_now()
+            await db.roles.insert_one(role)
+            roles_created += 1
+    
+    # ========== SEED ADMIN USER ==========
     existing = await db.users.find_one({"email": "admin@redribbonops.com"})
     if not existing:
         admin = {
@@ -1515,7 +1568,7 @@ async def seed_data():
         }
         await db.users.insert_one(admin)
     
-    # Seed categories
+    # ========== SEED CATEGORIES ==========
     categories_l1 = [
         {"name": "Media Services", "description": "Video editing and media production services", "icon": "video"},
         {"name": "Feature Requests", "description": "Request new features or services", "icon": "lightbulb"},
@@ -1563,7 +1616,16 @@ async def seed_data():
     await db.counters.update_one({"_id": "feature_request_code"}, {"$setOnInsert": {"seq": 0}}, upsert=True)
     await db.counters.update_one({"_id": "bug_report_code"}, {"$setOnInsert": {"seq": 0}}, upsert=True)
     
-    return {"message": "Seed data created", "admin_email": "admin@redribbonops.com", "admin_password": "admin123"}
+    # Count total roles
+    total_roles = await db.roles.count_documents({"active": True})
+    
+    return {
+        "message": "Seed data created",
+        "admin_email": "admin@redribbonops.com",
+        "admin_password": "admin123",
+        "roles_created": roles_created,
+        "total_roles": total_roles
+    }
 
 # Include router
 app.include_router(api_router)
