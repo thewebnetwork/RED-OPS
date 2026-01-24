@@ -102,6 +102,9 @@ export default function CommandCenter() {
   const [selectedL2, setSelectedL2] = useState('');
   const [requestType, setRequestType] = useState('Request');
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [attachments, setAttachments] = useState([]);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchData();
