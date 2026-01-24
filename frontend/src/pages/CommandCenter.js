@@ -176,6 +176,70 @@ export default function CommandCenter() {
     return FileText;
   };
 
+  // File validation
+  const validateFile = (file) => {
+    const extension = '.' + file.name.split('.').pop().toLowerCase();
+    
+    // Check blocked extensions
+    if (BLOCKED_EXTENSIONS.includes(extension)) {
+      toast.error(`File type ${extension} is not allowed for security reasons`);
+      return false;
+    }
+    
+    // Check allowed extensions
+    if (!ALLOWED_EXTENSIONS.includes(extension)) {
+      toast.error(`File type ${extension} is not supported`);
+      return false;
+    }
+    
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`File "${file.name}" exceeds 50 MB limit`);
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+    
+    for (const file of files) {
+      if (validateFile(file)) {
+        // Check total size
+        const currentSize = attachments.reduce((sum, f) => sum + f.size, 0);
+        if (currentSize + file.size > MAX_FILE_SIZE) {
+          toast.error('Total attachments cannot exceed 50 MB');
+          break;
+        }
+        validFiles.push(file);
+      }
+    }
+    
+    setAttachments(prev => [...prev, ...validFiles]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return Image;
+    if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return FileVideo;
+    return File;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
