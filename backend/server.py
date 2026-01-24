@@ -494,6 +494,25 @@ async def is_service_provider(role_name: str):
     role = await db.roles.find_one({"name": role_name, "can_pick_orders": True}, {"_id": 0})
     return role is not None
 
+async def build_user_response(user: dict) -> UserResponse:
+    """Build UserResponse with team info"""
+    team_name = None
+    if user.get("team_id"):
+        team = await db.teams.find_one({"id": user["team_id"]}, {"_id": 0, "name": 1})
+        team_name = team["name"] if team else None
+    
+    return UserResponse(
+        id=user["id"],
+        name=user["name"],
+        email=user["email"],
+        role=user["role"],
+        team_id=user.get("team_id"),
+        team_name=team_name,
+        active=user.get("active", True),
+        avatar=user.get("avatar"),
+        created_at=user["created_at"]
+    )
+
 async def get_next_code(counter_name: str, prefix: str):
     counter = await db.counters.find_one_and_update(
         {"_id": counter_name},
