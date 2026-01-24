@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -29,10 +30,12 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import NotificationDropdown from './NotificationDropdown';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function Layout({ children }) {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -58,19 +61,19 @@ export default function Layout({ children }) {
   };
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['Admin', 'Editor', 'Requester'] },
-    { path: '/command-center', icon: Command, label: 'Command Center', roles: ['Admin', 'Requester'] },
-    { path: '/orders', icon: ClipboardList, label: 'All Orders', roles: ['Admin'] },
-    { path: '/workflows', icon: GitBranch, label: 'Workflows', roles: ['Admin'] },
-    { path: '/users', icon: Users, label: 'Users', roles: ['Admin'] },
-    { path: '/teams', icon: UsersRound, label: 'Teams', roles: ['Admin'] },
-    { path: '/roles', icon: Shield, label: 'Roles', roles: ['Admin'] },
-    { path: '/categories', icon: FolderTree, label: 'Categories', roles: ['Admin'] },
+    { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Admin', 'Editor', 'Requester'] },
+    { path: '/command-center', icon: Command, labelKey: 'nav.commandCenter', roles: ['Admin', 'Requester'] },
+    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Admin'] },
+    { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Admin'] },
+    { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Admin'] },
+    { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Admin'] },
+    { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Admin'] },
+    { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Admin'] },
   ];
 
   const quickLinks = [
-    { path: '/command-center?category=feature', icon: Lightbulb, label: 'Request a Feature', roles: ['Admin', 'Requester', 'Editor'] },
-    { path: '/command-center?category=bug', icon: Bug, label: 'Report a Bug', roles: ['Admin', 'Requester', 'Editor'] },
+    { path: '/command-center?category=feature', icon: Lightbulb, labelKey: 'commandCenter.featureRequest', roles: ['Admin', 'Requester', 'Editor'] },
+    { path: '/command-center?category=bug', icon: Bug, labelKey: 'commandCenter.bugReport', roles: ['Admin', 'Requester', 'Editor'] },
   ];
 
   const filteredNavItems = navItems.filter(item => 
@@ -92,17 +95,19 @@ export default function Layout({ children }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed left-0 top-0 h-screen w-64 bg-[#A2182C] text-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
+        <div className="h-16 flex items-center px-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">RR</span>
-            </div>
-            <span className="font-semibold text-lg tracking-tight">Red Ribbon Ops</span>
+            <img 
+              src="/assets/logos/logo-icon.jpg" 
+              alt="Red Ribbon" 
+              className="w-10 h-10 rounded-lg object-cover"
+            />
+            <span className="font-semibold text-lg tracking-tight">Red Ribbon</span>
           </div>
           <button 
-            className="ml-auto lg:hidden text-slate-400 hover:text-white"
+            className="ml-auto lg:hidden text-white/70 hover:text-white"
             onClick={() => setSidebarOpen(false)}
           >
             <X size={20} />
@@ -110,7 +115,7 @@ export default function Layout({ children }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-3 overflow-y-auto dark-scrollbar">
+        <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map(item => (
               <Link
@@ -119,12 +124,12 @@ export default function Layout({ children }) {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                   location.pathname === item.path
-                    ? 'bg-rose-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-white text-[#A2182C] shadow-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <item.icon size={18} strokeWidth={1.5} />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </div>
@@ -132,18 +137,18 @@ export default function Layout({ children }) {
           {/* Quick Links */}
           {filteredQuickLinks.length > 0 && (
             <div className="mt-6">
-              <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Quick Links</p>
+              <p className="px-4 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{t('dashboard.quickActions')}</p>
               <div className="space-y-1">
                 {filteredQuickLinks.map(item => (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all duration-200"
-                    data-testid={`quick-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                    data-testid={`quick-link-${item.labelKey}`}
                   >
                     <item.icon size={16} strokeWidth={1.5} />
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 ))}
               </div>
@@ -152,18 +157,18 @@ export default function Layout({ children }) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-sm font-medium">{user?.name?.charAt(0) || 'U'}</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-slate-400">{user?.role}</p>
+              <p className="text-xs text-white/60">{user?.role}</p>
             </div>
             <button 
               onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               data-testid="logout-btn"
             >
               <LogOut size={18} />
@@ -196,7 +201,7 @@ export default function Layout({ children }) {
                     size={14}
                     className={
                       star <= Math.round(ratingStats.average_rating)
-                        ? 'fill-yellow-400 text-yellow-400'
+                        ? 'fill-[#97662D] text-[#97662D]'
                         : 'fill-gray-200 text-gray-200'
                     }
                   />
@@ -207,6 +212,9 @@ export default function Layout({ children }) {
             </div>
           )}
 
+          {/* Language Switcher */}
+          <LanguageSwitcher variant="compact" />
+
           {/* Notification Dropdown */}
           <NotificationDropdown />
 
@@ -214,11 +222,11 @@ export default function Layout({ children }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-lg ml-2" data-testid="user-menu-btn">
-                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-[#AEC6C8] flex items-center justify-center overflow-hidden">
                   {user?.avatar ? (
                     <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-sm font-medium text-slate-700">{user?.name?.charAt(0) || 'U'}</span>
+                    <span className="text-sm font-medium text-[#A2182C]">{user?.name?.charAt(0) || 'U'}</span>
                   )}
                 </div>
                 <ChevronDown size={16} className="text-slate-400" />
@@ -228,18 +236,18 @@ export default function Layout({ children }) {
               <div className="px-3 py-2 border-b border-slate-100">
                 <p className="font-medium text-sm">{user?.name}</p>
                 <p className="text-xs text-slate-500">{user?.email}</p>
-                <p className="text-xs text-rose-600 font-medium mt-1">{user?.role}</p>
+                <p className="text-xs text-[#A2182C] font-medium mt-1">{user?.role}</p>
               </div>
               <DropdownMenuItem asChild>
                 <Link to="/profile" className="flex items-center cursor-pointer" data-testid="profile-menu-item">
                   <User size={16} className="mr-2" />
-                  Profile Settings
+                  {t('nav.profile')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600" data-testid="logout-menu-item">
                 <LogOut size={16} className="mr-2" />
-                Logout
+                {t('auth.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
