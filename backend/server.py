@@ -2136,6 +2136,26 @@ async def get_workflows_by_role(role_name: str, current_user: dict = Depends(get
     
     return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
 
+@api_router.get("/workflows/by-team/{team_id}")
+async def get_workflows_by_team(team_id: str, current_user: dict = Depends(get_current_user)):
+    """Get workflows assigned to a specific team"""
+    workflows = await db.workflows.find({
+        "assigned_teams": team_id,
+        "active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
+
+@api_router.get("/workflows/by-category/{category_id}")
+async def get_workflows_by_category(category_id: str, current_user: dict = Depends(get_current_user)):
+    """Get workflows triggered by a specific category"""
+    workflows = await db.workflows.find({
+        "trigger_categories": category_id,
+        "active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
+
 @api_router.put("/workflows/{workflow_id}", response_model=WorkflowResponse)
 async def update_workflow_full(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
     """Full update of workflow including nodes and edges"""
@@ -2153,9 +2173,13 @@ async def update_workflow_full(workflow_id: str, workflow_data: WorkflowUpdate, 
             else:
                 update_dict[k] = v
     
-    # Update role names if assigned_roles changed
+    # Update names for assigned entities
     if "assigned_roles" in update_dict:
         update_dict["assigned_role_names"] = await get_role_names_by_ids(update_dict["assigned_roles"])
+    if "assigned_teams" in update_dict:
+        update_dict["assigned_team_names"] = await get_team_names_by_ids(update_dict["assigned_teams"])
+    if "trigger_categories" in update_dict:
+        update_dict["trigger_category_names"] = await get_category_names_by_ids(update_dict["trigger_categories"])
     
     update_dict["updated_at"] = get_utc_now()
     
@@ -2174,9 +2198,13 @@ async def update_workflow_partial(workflow_id: str, workflow_data: WorkflowUpdat
     
     update_dict = {k: v for k, v in workflow_data.model_dump().items() if v is not None}
     
-    # Update role names if assigned_roles changed
+    # Update names for assigned entities
     if "assigned_roles" in update_dict:
         update_dict["assigned_role_names"] = await get_role_names_by_ids(update_dict["assigned_roles"])
+    if "assigned_teams" in update_dict:
+        update_dict["assigned_team_names"] = await get_team_names_by_ids(update_dict["assigned_teams"])
+    if "trigger_categories" in update_dict:
+        update_dict["trigger_category_names"] = await get_category_names_by_ids(update_dict["trigger_categories"])
     
     update_dict["updated_at"] = get_utc_now()
     
