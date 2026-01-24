@@ -130,6 +130,13 @@ class LoginResponse(BaseModel):
     token: str
     user: UserResponse
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
 # Categories
 class CategoryL1Create(BaseModel):
     name: str
