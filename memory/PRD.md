@@ -31,6 +31,33 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 2: Visual Workflow Builder ✅ (January 24, 2026)
+A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Visio:
+
+- **Backend**:
+  - Full workflow CRUD API (`/api/workflows`)
+  - Workflow models support: nodes (with position), edges (connections), node-specific data
+  - 5 node types: Trigger, Form, Action, Condition, End
+  - Action types: assign_role, forward_ticket, email_user, email_requester, update_status, notify, webhook
+  - Meta endpoints for available actions and form field types
+  - Duplicate workflow functionality
+
+- **Frontend**:
+  - Workflows management page (`/workflows`) with card grid view
+  - Visual workflow editor using React Flow library
+  - Node palette with 5 node types (color-coded)
+  - Canvas with grid background, drag-and-drop support
+  - Node configuration side panel with type-specific settings
+  - Save, clear, and back navigation
+  - Duplicate and delete workflows
+
+- **Node Types**:
+  - **Trigger** (Green): Start point - Manual, Form Submit, Ticket Created, Status Changed, Schedule, Webhook
+  - **Form** (Blue): Collect user data with customizable fields
+  - **Action** (Amber): Auto-assign role, forward ticket, email user/requester, update status, notify, webhook
+  - **Condition** (Purple): Branch logic with Yes/No outputs
+  - **End** (Red): Workflow completion
+
 ### Phase 1: Dynamic Roles System ✅ (January 24, 2026)
 - **Backend**:
   - Roles CRUD endpoints (`/api/roles`)
@@ -62,9 +89,21 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## Admin Credentials
 - Email: admin@redribbonops.com
-- Password: admin123
+- Password: Fmtvvl171**
 
 ## API Endpoints
+
+### Workflows (NEW)
+- GET `/api/workflows` - List all workflows
+- GET `/api/workflows/{id}` - Get specific workflow
+- GET `/api/workflows/by-role/{role_name}` - Get workflows for role
+- POST `/api/workflows` - Create workflow (Admin)
+- PUT `/api/workflows/{id}` - Full update with nodes/edges (Admin)
+- PATCH `/api/workflows/{id}` - Partial update (Admin)
+- POST `/api/workflows/{id}/duplicate?new_name=X` - Duplicate workflow (Admin)
+- DELETE `/api/workflows/{id}` - Soft delete workflow (Admin)
+- GET `/api/workflows/meta/actions` - Available action types
+- GET `/api/workflows/meta/field-types` - Available form field types
 
 ### Roles
 - GET `/api/roles` - List all roles (filter by role_type, active_only)
@@ -78,7 +117,7 @@ Real estate and marketing professionals who can pick orders from the pool:
 - PATCH `/api/users/{id}` - Update user including role change
 
 ## Tech Stack
-- **Frontend**: React, React Router, Axios, Shadcn/UI, TailwindCSS
+- **Frontend**: React, React Router, Axios, Shadcn/UI, TailwindCSS, **React Flow**
 - **Backend**: FastAPI, Pydantic, PyJWT, passlib
 - **Database**: MongoDB (Motor async driver)
 
@@ -87,25 +126,26 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## Next Phases (Roadmap)
 
-### Phase 2: Visual Workflow Builder 🟡
-- Flowchart-style canvas to design workflows
-- Define status steps per workflow
-- Connect workflows to roles
-- Action triggers (notify, require approval)
-
 ### Phase 3: Full Form Builder 🟢
-- Field types: Text, Textarea, Dropdown, Multi-select, File Upload, Date, Number, Checkbox, URL
-- Drag-and-drop field ordering
-- Required/optional settings
-- Form preview
+- Connect workflow forms to ticket creation
+- Field validation rules
+- Conditional field visibility
+- Form preview mode
 
 ### Phase 4: UI Customization Engine 🔵
 - All text/labels stored in database
 - Admin "Customize UI" page
 - Live preview of changes
 
+### Phase 5: Workflow Execution Engine 🟣
+- Execute workflows when tickets are created
+- Automatic role assignment based on workflow rules
+- Email notifications using workflow actions
+- Status updates based on workflow conditions
+
 ## Test Reports
 - `/app/test_reports/iteration_1.json` - V1 MVP
 - `/app/test_reports/iteration_2.json` - Simplified workflow
 - `/app/test_reports/iteration_3.json` - V2 Command Center (100% pass)
 - `/app/test_reports/iteration_4.json` - Phase 1 Dynamic Roles (100% pass)
+- `/app/test_reports/iteration_5.json` - Phase 2 Visual Workflow Builder (100% pass)
