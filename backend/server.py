@@ -883,25 +883,21 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "email": user_data.email.lower(),
         "password": hash_password(user_data.password),
         "role": user_data.role,
+        "team_id": user_data.team_id,
         "active": True,
         "avatar": None,
         "created_at": get_utc_now()
     }
     await db.users.insert_one(user)
-    return UserResponse(
-        id=user["id"],
-        name=user["name"],
-        email=user["email"],
-        role=user["role"],
-        active=user["active"],
-        avatar=user.get("avatar"),
-        created_at=user["created_at"]
-    )
+    return await build_user_response(user)
 
 @api_router.get("/users", response_model=List[UserResponse])
 async def list_users(current_user: dict = Depends(require_roles(["Admin"]))):
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
-    return [UserResponse(**u) for u in users]
+    result = []
+    for u in users:
+        result.append(await build_user_response(u))
+    return result
 
 @api_router.patch("/users/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
@@ -915,6 +911,12 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         if not role:
             raise HTTPException(status_code=400, detail=f"Role '{user_data.role}' does not exist")
     
+    # Validate team if being updated
+    if user_data.team_id:
+        team = await db.teams.find_one({"id": user_data.team_id, "active": True})
+        if not team:
+            raise HTTPException(status_code=400, detail="Team not found")
+    
     update_dict = {k: v for k, v in user_data.model_dump().items() if v is not None}
     if "password" in update_dict:
         update_dict["password"] = hash_password(update_dict["password"])
@@ -925,7 +927,7 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         await db.users.update_one({"id": user_id}, {"$set": update_dict})
     
     updated = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
-    return UserResponse(**updated)
+    return await build_user_response(updated)
 
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
