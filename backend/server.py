@@ -1317,6 +1317,32 @@ async def deliver_order(order_id: str, background_tasks: BackgroundTasks, curren
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Delivered", current_user)
     
+    # Create satisfaction survey and send email
+    requester = await db.users.find_one({"id": order["requester_id"]}, {"_id": 0})
+    if requester:
+        survey_token = str(uuid.uuid4())
+        survey = {
+            "id": str(uuid.uuid4()),
+            "token": survey_token,
+            "order_id": order_id,
+            "requester_id": order["requester_id"],
+            "resolver_id": current_user["id"],
+            "completed": False,
+            "created_at": get_utc_now()
+        }
+        await db.rating_surveys.insert_one(survey)
+        
+        survey_link = f"{FRONTEND_URL}/rate?token={survey_token}"
+        background_tasks.add_task(
+            send_satisfaction_survey_email,
+            requester["email"],
+            requester["name"],
+            current_user["name"],
+            order["order_code"],
+            order["title"],
+            survey_link
+        )
+    
     return {"message": "Order delivered successfully"}
 
 # ============== FEATURE REQUEST ROUTES ==============
