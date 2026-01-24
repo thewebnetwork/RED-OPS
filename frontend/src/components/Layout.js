@@ -43,17 +43,16 @@ export default function Layout({ children }) {
   const [ratingStats, setRatingStats] = useState(null);
 
   useEffect(() => {
+    const fetchRatingStats = async () => {
+      try {
+        const res = await axios.get(`${API}/ratings/my-stats`);
+        setRatingStats(res.data);
+      } catch (error) {
+        // Silently fail - ratings not critical for layout
+      }
+    };
     fetchRatingStats();
   }, []);
-
-  const fetchRatingStats = async () => {
-    try {
-      const res = await axios.get(`${API}/ratings/my-stats`);
-      setRatingStats(res.data);
-    } catch (error) {
-      // Silently fail - ratings not critical for layout
-    }
-  };
 
   const handleLogout = () => {
     logout();
