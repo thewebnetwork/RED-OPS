@@ -184,6 +184,27 @@ export default function Layout({ children }) {
 
           <div className="flex-1" />
 
+          {/* Rating Display (Google Review Style) */}
+          {ratingStats && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg mr-4" data-testid="header-rating">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={14}
+                    className={
+                      star <= Math.round(ratingStats.average_rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'fill-gray-200 text-gray-200'
+                    }
+                  />
+                ))}
+              </div>
+              <span className="font-semibold text-sm text-slate-900">{ratingStats.average_rating.toFixed(1)}</span>
+              <span className="text-xs text-slate-500">({ratingStats.total_ratings})</span>
+            </div>
+          )}
+
           {/* Notification Dropdown */}
           <NotificationDropdown />
 
