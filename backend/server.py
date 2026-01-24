@@ -620,6 +620,98 @@ async def change_password(password_data: PasswordChange, current_user: dict = De
     )
     return {"message": "Password changed successfully"}
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    """Request a password reset link"""
+    user = await db.users.find_one({"email": request.email.lower()}, {"_id": 0})
+    
+    # Always return success to prevent email enumeration
+    if not user:
+        return {"message": "If an account exists with this email, a password reset link has been sent."}
+    
+    # Generate reset token
+    reset_token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=RESET_TOKEN_EXPIRE_HOURS)
+    
+    # Store reset token in database
+    await db.password_resets.delete_many({"user_id": user["id"]})  # Remove any existing tokens
+    await db.password_resets.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "token": reset_token,
+        "expires_at": expires_at.isoformat(),
+        "used": False,
+        "created_at": get_utc_now()
+    })
+    
+    # Build reset link
+    reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+    
+    # Send email in background
+    background_tasks.add_task(
+        send_password_reset_email,
+        user["email"],
+        user["name"],
+        reset_link
+    )
+    
+    return {"message": "If an account exists with this email, a password reset link has been sent."}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset password using token from email"""
+    # Find valid token
+    reset_record = await db.password_resets.find_one({
+        "token": request.token,
+        "used": False
+    }, {"_id": 0})
+    
+    if not reset_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    # Check if token is expired
+    expires_at = datetime.fromisoformat(reset_record["expires_at"].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    # Validate password
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Update password
+    await db.users.update_one(
+        {"id": reset_record["user_id"]},
+        {"$set": {"password": hash_password(request.new_password)}}
+    )
+    
+    # Mark token as used
+    await db.password_resets.update_one(
+        {"token": request.token},
+        {"$set": {"used": True}}
+    )
+    
+    return {"message": "Password has been reset successfully"}
+
+@api_router.get("/auth/verify-reset-token")
+async def verify_reset_token(token: str):
+    """Verify if a reset token is valid"""
+    reset_record = await db.password_resets.find_one({
+        "token": token,
+        "used": False
+    }, {"_id": 0})
+    
+    if not reset_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    expires_at = datetime.fromisoformat(reset_record["expires_at"].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    # Get user email for display
+    user = await db.users.find_one({"id": reset_record["user_id"]}, {"_id": 0, "email": 1})
+    
+    return {"valid": True, "email": user["email"] if user else None}
+
 # ============== USER ROUTES (Admin only) ==============
 
 @api_router.post("/users", response_model=UserResponse)
