@@ -86,6 +86,10 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/rate" 
+        element={<RateSurvey />}
+      />
+      <Route 
         path="/" 
         element={
           <PrivateRoute>
