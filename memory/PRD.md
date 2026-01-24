@@ -39,6 +39,8 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
   - Workflow models support: nodes (with position), edges (connections), node-specific data
   - 5 node types: Trigger, Form, Action, Condition, End
   - Action types: assign_role, forward_ticket, email_user, email_requester, update_status, notify, webhook
+  - **Workflow Assignment**: Assign workflows to roles AND teams
+  - **Category Triggers**: Auto-trigger workflows when tickets created in specific categories
   - Meta endpoints for available actions and form field types
   - Duplicate workflow functionality
 
@@ -48,12 +50,17 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
   - Node palette with 5 node types (color-coded)
   - Canvas with grid background, drag-and-drop support
   - Node configuration side panel with type-specific settings
+  - **Workflow Settings Panel**: Assign to Roles, Teams, and Trigger Categories
   - Save, clear, and back navigation
   - Duplicate and delete workflows
 
 - **Node Types**:
   - **Trigger** (Green): Start point - Manual, Form Submit, Ticket Created, Status Changed, Schedule, Webhook
   - **Form** (Blue): Collect user data with customizable fields
+    - **Dynamic Fields**: Text, Textarea, Number, Email, Phone, Date, Dropdown, Multi-Select, Checkbox, File
+    - **Field Options**: For dropdown/multiselect types
+    - **Trigger Flag**: Mark fields as triggers for workflow conditions
+    - **Conditional Sub-Fields**: Show additional fields based on parent field value (e.g., if Category="Renovation", show "How many bedrooms?")
   - **Action** (Amber): Auto-assign role, forward ticket, email user/requester, update status, notify, webhook
   - **Condition** (Purple): Branch logic with Yes/No outputs
   - **End** (Red): Workflow completion
