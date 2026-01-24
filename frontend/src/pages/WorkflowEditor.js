@@ -164,6 +164,7 @@ export default function WorkflowEditor() {
     loadData();
     fetchRoles();
     fetchTeams();
+    fetchCategories();
   }, [workflowId, navigate, setNodes, setEdges]);
 
   const fetchRoles = async () => {
@@ -181,6 +182,32 @@ export default function WorkflowEditor() {
       setTeams(res.data);
     } catch (error) {
       console.error('Failed to fetch teams');
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const [l1Res, l2Res] = await Promise.all([
+        axios.get(`${API}/categories/l1`),
+        axios.get(`${API}/categories/l2`)
+      ]);
+      setCategories([
+        ...l1Res.data.map(c => ({ ...c, type: 'L1' })),
+        ...l2Res.data.map(c => ({ ...c, type: 'L2' }))
+      ]);
+    } catch (error) {
+      console.error('Failed to fetch categories');
+    }
+  };
+
+  // Update workflow settings (roles, teams, categories)
+  const updateWorkflowSettings = async (field, value) => {
+    try {
+      await axios.patch(`${API}/workflows/${workflowId}`, { [field]: value });
+      setWorkflow(prev => ({ ...prev, [field]: value }));
+      toast.success('Workflow settings updated');
+    } catch (error) {
+      toast.error('Failed to update settings');
     }
   };
 
