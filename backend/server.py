@@ -141,6 +141,8 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
+    team_id: Optional[str] = None
+    team_name: Optional[str] = None
     active: bool
     avatar: Optional[str] = None
     created_at: str
