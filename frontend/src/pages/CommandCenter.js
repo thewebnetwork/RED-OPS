@@ -687,16 +687,6 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
       </div>
 
       <div>
-        <Label>Description *</Label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Describe what you need edited..."
-          className="mt-1.5 min-h-[100px]"
-        />
-      </div>
-
-      <div>
         <Label>Video Script</Label>
         <Textarea
           value={formData.video_script}
@@ -754,10 +744,9 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
 }
 
 // Feature Request Form
-function FeatureRequestForm({ title, categoryL1Id, categoryL2Id, onSuccess }) {
+function FeatureRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    description: '',
     why_important: '',
     who_is_for: '',
     reference_links: '',
