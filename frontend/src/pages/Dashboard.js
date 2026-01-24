@@ -117,6 +117,7 @@ function AdminDashboard() {
     sla_breaching_count: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
+  const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -125,12 +126,14 @@ function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, ordersRes] = await Promise.all([
+      const [statsRes, ordersRes, ratingsRes] = await Promise.all([
         axios.get(`${API}/dashboard/stats`),
-        axios.get(`${API}/orders`)
+        axios.get(`${API}/orders`),
+        axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
       ]);
       setStats(statsRes.data);
       setRecentOrders(ordersRes.data.slice(0, 10));
+      setRatingStats(ratingsRes.data);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
