@@ -395,7 +395,7 @@ export default function Workflows() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Workflow?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedWorkflow?.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{selectedWorkflow?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

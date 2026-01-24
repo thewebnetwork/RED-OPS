@@ -123,46 +123,46 @@ export default function WorkflowEditor() {
 
   // Fetch workflow data
   useEffect(() => {
-    fetchWorkflow();
+    const loadData = async () => {
+      try {
+        const res = await axios.get(`${API}/workflows/${workflowId}`);
+        setWorkflow(res.data);
+        
+        // Convert stored nodes to React Flow format
+        const flowNodes = (res.data.nodes || []).map(node => ({
+          id: node.id,
+          type: node.type,
+          position: node.position,
+          data: {
+            ...node.data,
+            label: node.label,
+          },
+        }));
+        
+        // Convert stored edges to React Flow format
+        const flowEdges = (res.data.edges || []).map(edge => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle: edge.source_handle,
+          label: edge.label,
+          ...defaultEdgeOptions,
+        }));
+        
+        setNodes(flowNodes);
+        setEdges(flowEdges);
+      } catch (error) {
+        toast.error('Failed to load workflow');
+        navigate('/workflows');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
     fetchRoles();
     fetchTeams();
-  }, [workflowId]);
-
-  const fetchWorkflow = async () => {
-    try {
-      const res = await axios.get(`${API}/workflows/${workflowId}`);
-      setWorkflow(res.data);
-      
-      // Convert stored nodes to React Flow format
-      const flowNodes = (res.data.nodes || []).map(node => ({
-        id: node.id,
-        type: node.type,
-        position: node.position,
-        data: {
-          ...node.data,
-          label: node.label,
-        },
-      }));
-      
-      // Convert stored edges to React Flow format
-      const flowEdges = (res.data.edges || []).map(edge => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        sourceHandle: edge.source_handle,
-        label: edge.label,
-        ...defaultEdgeOptions,
-      }));
-      
-      setNodes(flowNodes);
-      setEdges(flowEdges);
-    } catch (error) {
-      toast.error('Failed to load workflow');
-      navigate('/workflows');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [workflowId, navigate, setNodes, setEdges]);
 
   const fetchRoles = async () => {
     try {
@@ -439,7 +439,7 @@ export default function WorkflowEditor() {
                 Configure {selectedNode?.type} Node
               </SheetTitle>
               <SheetDescription>
-                Customize this node's behavior and settings
+                Customize this node&apos;s behavior and settings
               </SheetDescription>
             </SheetHeader>
 
@@ -923,7 +923,7 @@ function ConditionNodeConfig({ data, updateData }) {
       </div>
 
       <p className="text-xs text-slate-500">
-        Connect "Yes" output to the path when conditions are met, "No" output otherwise.
+        Connect &quot;Yes&quot; output to the path when conditions are met, &quot;No&quot; output otherwise.
       </p>
     </div>
   );
