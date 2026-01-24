@@ -48,6 +48,21 @@ export function AuthProvider({ children }) {
     return user && roles.includes(user.role);
   };
 
+  const updateUser = (updatedData) => {
+    setUser(prev => ({ ...prev, ...updatedData }));
+  };
+
+  const refreshUser = async () => {
+    try {
+      const res = await axios.get(`${API}/auth/me`);
+      setUser(res.data);
+      return res.data;
+    } catch (error) {
+      console.error('Failed to refresh user');
+      return null;
+    }
+  };
+
   const value = {
     user,
     token,
@@ -55,6 +70,8 @@ export function AuthProvider({ children }) {
     login,
     logout,
     hasRole,
+    updateUser,
+    refreshUser,
     isAuthenticated: !!user
   };
 

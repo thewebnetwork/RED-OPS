@@ -10,6 +10,9 @@ import OrderDetail from "./pages/OrderDetail";
 import CreateOrder from "./pages/CreateOrder";
 import Users from "./pages/Users";
 import Notifications from "./pages/Notifications";
+import CommandCenter from "./pages/CommandCenter";
+import Categories from "./pages/Categories";
+import Profile from "./pages/Profile";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
@@ -107,6 +110,30 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Notifications />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/command-center" 
+        element={
+          <PrivateRoute>
+            <CommandCenter />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/categories" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Categories />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/profile" 
+        element={
+          <PrivateRoute>
+            <Profile />
           </PrivateRoute>
         } 
       />
