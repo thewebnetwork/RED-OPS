@@ -40,12 +40,12 @@ export default function ForgotPassword() {
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative"
       style={{
-        backgroundImage: 'url(/assets/logos/house-palm.jpg)',
+        backgroundImage: 'url(/assets/logos/login-background.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#A2182C]/80 via-slate-900/70 to-[#97662D]/60" />
+      <div className="absolute inset-0 bg-black/40" />
       
       {/* Language Switcher */}
       <div className="absolute top-4 right-4 z-10">
