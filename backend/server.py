@@ -335,6 +335,30 @@ def is_sla_breached(sla_deadline: str, status: str) -> bool:
     deadline = datetime.fromisoformat(sla_deadline.replace('Z', '+00:00'))
     return datetime.now(timezone.utc) > deadline
 
+def normalize_order(order: dict) -> dict:
+    """Normalize order dict to ensure all required fields exist for OrderResponse"""
+    defaults = {
+        "request_type": "Editing",
+        "category_l1_id": None,
+        "category_l1_name": None,
+        "category_l2_id": None,
+        "category_l2_name": None,
+        "editor_id": None,
+        "editor_name": None,
+        "video_script": None,
+        "reference_links": None,
+        "footage_links": None,
+        "music_preference": None,
+        "delivery_format": None,
+        "special_instructions": None,
+        "picked_at": None,
+        "delivered_at": None,
+    }
+    for key, default_val in defaults.items():
+        if key not in order:
+            order[key] = default_val
+    return order
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
