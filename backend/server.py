@@ -137,6 +137,32 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+# Satisfaction Ratings
+class RatingCreate(BaseModel):
+    token: str
+    rating: int = Field(..., ge=1, le=5)
+    comment: Optional[str] = None
+
+class RatingResponse(BaseModel):
+    id: str
+    order_id: str
+    order_code: str
+    requester_id: str
+    requester_name: str
+    resolver_id: str
+    resolver_name: str
+    rating: int
+    comment: Optional[str] = None
+    created_at: str
+
+class ResolverStatsResponse(BaseModel):
+    resolver_id: str
+    resolver_name: str
+    total_delivered: int
+    total_ratings: int
+    average_rating: float
+    rating_distribution: dict  # {1: count, 2: count, ...5: count}
+
 # Categories
 class CategoryL1Create(BaseModel):
     name: str
