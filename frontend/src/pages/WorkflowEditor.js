@@ -369,6 +369,14 @@ export default function WorkflowEditor() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            onClick={() => setShowWorkflowSettings(true)}
+            data-testid="workflow-settings-btn"
+          >
+            <Settings size={16} className="mr-2" />
+            Settings
+          </Button>
+          <Button
+            variant="outline"
             onClick={handleSave}
             disabled={saving}
             data-testid="save-workflow-btn"
