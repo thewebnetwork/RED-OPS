@@ -1937,6 +1937,249 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
     count = await db.notifications.count_documents({"user_id": current_user["id"], "is_read": False})
     return {"count": count}
 
+# ============== WORKFLOW ROUTES ==============
+
+@api_router.post("/workflows", response_model=WorkflowResponse)
+async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new workflow"""
+    existing = await db.workflows.find_one({"name": workflow_data.name, "active": True})
+    if existing:
+        raise HTTPException(status_code=400, detail="Workflow with this name already exists")
+    
+    # Get role name if role_id provided
+    role_name = None
+    if workflow_data.role_id:
+        role = await db.roles.find_one({"id": workflow_data.role_id}, {"_id": 0})
+        if role:
+            role_name = role["display_name"]
+    
+    # Process steps with IDs
+    steps = []
+    for step in workflow_data.steps:
+        steps.append(WorkflowStep(
+            id=str(uuid.uuid4()),
+            **step.model_dump()
+        ).model_dump())
+    
+    # Process form fields with IDs
+    form_fields = []
+    for field in workflow_data.form_fields:
+        form_fields.append(FormField(
+            id=str(uuid.uuid4()),
+            **field.model_dump()
+        ).model_dump())
+    
+    workflow = {
+        "id": str(uuid.uuid4()),
+        "name": workflow_data.name,
+        "description": workflow_data.description,
+        "role_id": workflow_data.role_id,
+        "role_name": role_name,
+        "color": workflow_data.color or "#3B82F6",
+        "steps": steps,
+        "form_fields": form_fields,
+        "active": True,
+        "created_at": get_utc_now()
+    }
+    await db.workflows.insert_one(workflow)
+    
+    return WorkflowResponse(**workflow)
+
+@api_router.get("/workflows", response_model=List[WorkflowResponse])
+async def list_workflows(active_only: bool = True, current_user: dict = Depends(get_current_user)):
+    """List all workflows"""
+    query = {"active": True} if active_only else {}
+    workflows = await db.workflows.find(query, {"_id": 0}).sort("name", 1).to_list(1000)
+    return [WorkflowResponse(**w) for w in workflows]
+
+@api_router.get("/workflows/{workflow_id}", response_model=WorkflowResponse)
+async def get_workflow(workflow_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific workflow"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    return WorkflowResponse(**workflow)
+
+@api_router.get("/workflows/by-role/{role_id}", response_model=Optional[WorkflowResponse])
+async def get_workflow_by_role(role_id: str, current_user: dict = Depends(get_current_user)):
+    """Get workflow assigned to a specific role"""
+    workflow = await db.workflows.find_one({"role_id": role_id, "active": True}, {"_id": 0})
+    if not workflow:
+        return None
+    return WorkflowResponse(**workflow)
+
+@api_router.patch("/workflows/{workflow_id}", response_model=WorkflowResponse)
+async def update_workflow(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update workflow metadata"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    update_dict = {k: v for k, v in workflow_data.model_dump().items() if v is not None}
+    
+    # Update role name if role_id changed
+    if "role_id" in update_dict and update_dict["role_id"]:
+        role = await db.roles.find_one({"id": update_dict["role_id"]}, {"_id": 0})
+        update_dict["role_name"] = role["display_name"] if role else None
+    
+    if update_dict:
+        await db.workflows.update_one({"id": workflow_id}, {"$set": update_dict})
+    
+    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    return WorkflowResponse(**updated)
+
+@api_router.put("/workflows/{workflow_id}/steps")
+async def update_workflow_steps(workflow_id: str, steps: List[WorkflowStepCreate], current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update workflow steps"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    # Process steps with IDs
+    processed_steps = []
+    for step in steps:
+        processed_steps.append(WorkflowStep(
+            id=str(uuid.uuid4()),
+            **step.model_dump()
+        ).model_dump())
+    
+    await db.workflows.update_one({"id": workflow_id}, {"$set": {"steps": processed_steps}})
+    
+    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    return WorkflowResponse(**updated)
+
+@api_router.put("/workflows/{workflow_id}/form-fields")
+async def update_workflow_form_fields(workflow_id: str, fields: List[FormFieldCreate], current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update workflow form fields"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    # Process fields with IDs
+    processed_fields = []
+    for field in fields:
+        processed_fields.append(FormField(
+            id=str(uuid.uuid4()),
+            **field.model_dump()
+        ).model_dump())
+    
+    await db.workflows.update_one({"id": workflow_id}, {"$set": {"form_fields": processed_fields}})
+    
+    updated = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    return WorkflowResponse(**updated)
+
+@api_router.delete("/workflows/{workflow_id}")
+async def delete_workflow(workflow_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Deactivate a workflow"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    await db.workflows.update_one({"id": workflow_id}, {"$set": {"active": False}})
+    return {"message": "Workflow deactivated"}
+
+# ============== UI SETTINGS ROUTES ==============
+
+@api_router.get("/ui-settings", response_model=List[UISettingResponse])
+async def get_ui_settings(category: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get all UI settings"""
+    query = {}
+    if category:
+        query["category"] = category
+    
+    settings = await db.ui_settings.find(query, {"_id": 0}).to_list(1000)
+    return [UISettingResponse(**s) for s in settings]
+
+@api_router.get("/ui-settings/{key}", response_model=UISettingResponse)
+async def get_ui_setting(key: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific UI setting"""
+    setting = await db.ui_settings.find_one({"key": key}, {"_id": 0})
+    if not setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    return UISettingResponse(**setting)
+
+@api_router.patch("/ui-settings/{key}", response_model=UISettingResponse)
+async def update_ui_setting(key: str, data: UISettingUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update a UI setting value"""
+    setting = await db.ui_settings.find_one({"key": key}, {"_id": 0})
+    if not setting:
+        raise HTTPException(status_code=404, detail="Setting not found")
+    
+    await db.ui_settings.update_one({"key": key}, {"$set": {"value": data.value}})
+    
+    updated = await db.ui_settings.find_one({"key": key}, {"_id": 0})
+    return UISettingResponse(**updated)
+
+@api_router.post("/ui-settings/bulk-update")
+async def bulk_update_ui_settings(settings: dict, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Bulk update multiple UI settings"""
+    updated_count = 0
+    for key, value in settings.items():
+        result = await db.ui_settings.update_one({"key": key}, {"$set": {"value": value}})
+        if result.modified_count > 0:
+            updated_count += 1
+    
+    return {"message": f"Updated {updated_count} settings"}
+
+@api_router.post("/ui-settings/reset")
+async def reset_ui_settings(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Reset all UI settings to defaults"""
+    # Get default settings from seed
+    default_settings = get_default_ui_settings()
+    
+    for setting in default_settings:
+        await db.ui_settings.update_one(
+            {"key": setting["key"]},
+            {"$set": {"value": setting["default_value"]}},
+            upsert=True
+        )
+    
+    return {"message": "UI settings reset to defaults"}
+
+def get_default_ui_settings():
+    """Return default UI settings"""
+    return [
+        # Branding
+        {"key": "app_name", "value": "Red Ribbon Ops", "default_value": "Red Ribbon Ops", "category": "branding", "description": "Application name shown in header and login"},
+        {"key": "app_tagline", "value": "Operations Portal", "default_value": "Operations Portal", "category": "branding", "description": "Tagline shown under app name"},
+        {"key": "logo_text", "value": "RR", "default_value": "RR", "category": "branding", "description": "Text shown in logo placeholder"},
+        
+        # Navigation
+        {"key": "nav_dashboard", "value": "Dashboard", "default_value": "Dashboard", "category": "navigation", "description": "Dashboard menu item"},
+        {"key": "nav_command_center", "value": "Command Center", "default_value": "Command Center", "category": "navigation", "description": "Command Center menu item"},
+        {"key": "nav_orders", "value": "All Orders", "default_value": "All Orders", "category": "navigation", "description": "Orders menu item"},
+        {"key": "nav_users", "value": "Users", "default_value": "Users", "category": "navigation", "description": "Users menu item"},
+        {"key": "nav_teams", "value": "Teams", "default_value": "Teams", "category": "navigation", "description": "Teams menu item"},
+        {"key": "nav_roles", "value": "Roles", "default_value": "Roles", "category": "navigation", "description": "Roles menu item"},
+        {"key": "nav_categories", "value": "Categories", "default_value": "Categories", "category": "navigation", "description": "Categories menu item"},
+        {"key": "nav_workflows", "value": "Workflows", "default_value": "Workflows", "category": "navigation", "description": "Workflows menu item"},
+        
+        # Buttons
+        {"key": "btn_create_request", "value": "Create New Request", "default_value": "Create New Request", "category": "buttons", "description": "Create request button text"},
+        {"key": "btn_submit", "value": "Submit", "default_value": "Submit", "category": "buttons", "description": "Generic submit button"},
+        {"key": "btn_save", "value": "Save", "default_value": "Save", "category": "buttons", "description": "Generic save button"},
+        {"key": "btn_cancel", "value": "Cancel", "default_value": "Cancel", "category": "buttons", "description": "Generic cancel button"},
+        {"key": "btn_login", "value": "Sign In", "default_value": "Sign In", "category": "buttons", "description": "Login button text"},
+        
+        # Labels
+        {"key": "label_email", "value": "Email", "default_value": "Email", "category": "labels", "description": "Email field label"},
+        {"key": "label_password", "value": "Password", "default_value": "Password", "category": "labels", "description": "Password field label"},
+        {"key": "label_name", "value": "Name", "default_value": "Name", "category": "labels", "description": "Name field label"},
+        {"key": "label_role", "value": "Role", "default_value": "Role", "category": "labels", "description": "Role field label"},
+        {"key": "label_team", "value": "Team", "default_value": "Team", "category": "labels", "description": "Team field label"},
+        
+        # Status labels
+        {"key": "status_open", "value": "Open", "default_value": "Open", "category": "statuses", "description": "Open status label"},
+        {"key": "status_in_progress", "value": "In Progress", "default_value": "In Progress", "category": "statuses", "description": "In Progress status label"},
+        {"key": "status_pending", "value": "Pending", "default_value": "Pending", "category": "statuses", "description": "Pending status label"},
+        {"key": "status_delivered", "value": "Delivered", "default_value": "Delivered", "category": "statuses", "description": "Delivered status label"},
+        
+        # Messages
+        {"key": "msg_welcome", "value": "Welcome back!", "default_value": "Welcome back!", "category": "messages", "description": "Login success message"},
+        {"key": "msg_logout", "value": "Logged out successfully", "default_value": "Logged out successfully", "category": "messages", "description": "Logout message"},
+        {"key": "msg_no_data", "value": "No data found", "default_value": "No data found", "category": "messages", "description": "Empty state message"},
+    ]
+
 # ============== SATISFACTION RATING ROUTES ==============
 
 @api_router.get("/ratings/verify-token")
