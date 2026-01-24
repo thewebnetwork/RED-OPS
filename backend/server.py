@@ -752,6 +752,98 @@ async def delete_category_l2(category_id: str, current_user: dict = Depends(requ
     await db.categories_l2.update_one({"id": category_id}, {"$set": {"active": False}})
     return {"message": "Category deactivated"}
 
+# ============== ROLES ROUTES ==============
+
+@api_router.post("/roles", response_model=RoleResponse)
+async def create_role(role_data: RoleCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new role"""
+    # Check if role name already exists
+    existing = await db.roles.find_one({"name": role_data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Role with this name already exists")
+    
+    role = {
+        "id": str(uuid.uuid4()),
+        "name": role_data.name,
+        "display_name": role_data.display_name,
+        "description": role_data.description,
+        "role_type": role_data.role_type,
+        "icon": role_data.icon,
+        "color": role_data.color,
+        "can_pick_orders": role_data.can_pick_orders,
+        "can_create_orders": role_data.can_create_orders,
+        "active": True,
+        "created_at": get_utc_now()
+    }
+    await db.roles.insert_one(role)
+    return RoleResponse(**role)
+
+@api_router.get("/roles", response_model=List[RoleResponse])
+async def list_roles(
+    role_type: Optional[str] = None,
+    active_only: bool = True,
+    current_user: dict = Depends(get_current_user)
+):
+    """List all roles"""
+    query = {}
+    if active_only:
+        query["active"] = True
+    if role_type:
+        query["role_type"] = role_type
+    
+    roles = await db.roles.find(query, {"_id": 0}).sort("display_name", 1).to_list(1000)
+    return [RoleResponse(**r) for r in roles]
+
+@api_router.get("/roles/service-providers", response_model=List[RoleResponse])
+async def list_service_provider_roles(current_user: dict = Depends(get_current_user)):
+    """List all service provider roles (roles that can pick orders)"""
+    roles = await db.roles.find({"can_pick_orders": True, "active": True}, {"_id": 0}).sort("display_name", 1).to_list(1000)
+    return [RoleResponse(**r) for r in roles]
+
+@api_router.get("/roles/{role_id}", response_model=RoleResponse)
+async def get_role(role_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific role by ID"""
+    role = await db.roles.find_one({"id": role_id}, {"_id": 0})
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return RoleResponse(**role)
+
+@api_router.patch("/roles/{role_id}", response_model=RoleResponse)
+async def update_role(role_id: str, role_data: RoleUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update a role"""
+    role = await db.roles.find_one({"id": role_id}, {"_id": 0})
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    # Don't allow modifying system roles
+    if role.get("role_type") == "system":
+        raise HTTPException(status_code=400, detail="Cannot modify system roles")
+    
+    update_dict = {k: v for k, v in role_data.model_dump().items() if v is not None}
+    if update_dict:
+        await db.roles.update_one({"id": role_id}, {"$set": update_dict})
+    
+    updated = await db.roles.find_one({"id": role_id}, {"_id": 0})
+    return RoleResponse(**updated)
+
+@api_router.delete("/roles/{role_id}")
+async def delete_role(role_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Deactivate a role (soft delete)"""
+    role = await db.roles.find_one({"id": role_id}, {"_id": 0})
+    if not role:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    if role.get("role_type") == "system":
+        raise HTTPException(status_code=400, detail="Cannot delete system roles")
+    
+    # Check if any users have this role
+    users_with_role = await db.users.count_documents({"role": role["name"]})
+    if users_with_role > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete role: {users_with_role} users have this role assigned")
+    
+    await db.roles.update_one({"id": role_id}, {"$set": {"active": False}})
+    return {"message": "Role deactivated"}
+
 # ============== EDITING ORDER ROUTES (existing workflow) ==============
 
 @api_router.post("/orders", response_model=OrderResponse)
