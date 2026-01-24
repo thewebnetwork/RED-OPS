@@ -2233,6 +2233,10 @@ async def duplicate_workflow(workflow_id: str, new_name: str = Query(...), curre
         "description": workflow.get("description"),
         "assigned_roles": workflow.get("assigned_roles", []),
         "assigned_role_names": workflow.get("assigned_role_names", []),
+        "assigned_teams": workflow.get("assigned_teams", []),
+        "assigned_team_names": workflow.get("assigned_team_names", []),
+        "trigger_categories": workflow.get("trigger_categories", []),
+        "trigger_category_names": workflow.get("trigger_category_names", []),
         "color": workflow.get("color"),
         "nodes": workflow.get("nodes", []),
         "edges": workflow.get("edges", []),
@@ -2243,7 +2247,7 @@ async def duplicate_workflow(workflow_id: str, new_name: str = Query(...), curre
     }
     await db.workflows.insert_one(new_workflow)
     
-    return WorkflowResponse(**new_workflow)
+    return WorkflowResponse(**normalize_workflow(new_workflow))
 
 @api_router.delete("/workflows/{workflow_id}")
 async def delete_workflow(workflow_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
