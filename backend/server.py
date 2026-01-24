@@ -162,7 +162,88 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
-# ============== WORKFLOW MODELS ==============
+# ============== WORKFLOW MODELS (Visual Builder) ==============
+
+# Node types for the visual workflow builder
+NODE_TYPES = ["trigger", "form", "action", "condition", "delay", "end"]
+ACTION_TYPES = ["assign_role", "forward_ticket", "email_user", "email_requester", "update_status", "notify", "webhook"]
+
+class FormFieldSchema(BaseModel):
+    id: str
+    name: str
+    label: str
+    field_type: Literal["text", "textarea", "number", "email", "url", "date", "select", "multiselect", "checkbox", "file", "phone"]
+    required: bool = False
+    placeholder: Optional[str] = None
+    options: Optional[List[str]] = None  # For select/multiselect
+    default_value: Optional[str] = None
+    validation_regex: Optional[str] = None
+    help_text: Optional[str] = None
+
+class NodeAction(BaseModel):
+    id: str
+    action_type: str  # assign_role, forward_ticket, email_user, email_requester, update_status, notify, webhook
+    config: dict = {}  # Action-specific config (e.g., role_id for assign_role, email_template for email)
+
+class WorkflowCondition(BaseModel):
+    id: str
+    field: str  # Field to check
+    operator: str  # equals, not_equals, contains, greater_than, less_than, is_empty, is_not_empty
+    value: Optional[str] = None
+
+class WorkflowNode(BaseModel):
+    id: str
+    type: str  # trigger, form, action, condition, delay, end
+    label: str
+    position: dict  # {x: number, y: number}
+    data: dict = {}  # Node-specific data
+    # For form nodes: {fields: FormFieldSchema[]}
+    # For action nodes: {actions: NodeAction[]}
+    # For condition nodes: {conditions: WorkflowCondition[], default_path: str}
+    # For delay nodes: {delay_type: 'minutes'|'hours'|'days', delay_value: int}
+    # For trigger nodes: {trigger_type: 'manual'|'form_submit'|'schedule'|'webhook'}
+
+class WorkflowEdge(BaseModel):
+    id: str
+    source: str  # Source node ID
+    target: str  # Target node ID
+    source_handle: Optional[str] = None  # For condition nodes with multiple outputs
+    label: Optional[str] = None  # Edge label (e.g., "Yes", "No" for conditions)
+    condition_value: Optional[str] = None  # The value this edge represents for condition nodes
+
+class WorkflowCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    assigned_roles: List[str] = []  # Roles that can use this workflow
+    color: Optional[str] = None
+    nodes: List[WorkflowNode] = []
+    edges: List[WorkflowEdge] = []
+    is_template: bool = False  # If true, this is a template for creating new workflows
+
+class WorkflowUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    assigned_roles: Optional[List[str]] = None
+    color: Optional[str] = None
+    nodes: Optional[List[WorkflowNode]] = None
+    edges: Optional[List[WorkflowEdge]] = None
+    active: Optional[bool] = None
+
+class WorkflowResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    assigned_roles: List[str] = []
+    assigned_role_names: List[str] = []
+    color: Optional[str] = None
+    nodes: List[dict] = []
+    edges: List[dict] = []
+    is_template: bool = False
+    active: bool
+    created_at: str
+    updated_at: Optional[str] = None
+
+# Legacy compatibility - keep old models for migration
 class WorkflowStepCreate(BaseModel):
     name: str
     order: int
@@ -181,38 +262,11 @@ class FormFieldCreate(BaseModel):
     field_type: Literal["text", "textarea", "number", "email", "url", "date", "select", "multiselect", "checkbox", "file"]
     required: bool = False
     placeholder: Optional[str] = None
-    options: Optional[List[str]] = None  # For select/multiselect
+    options: Optional[List[str]] = None
     order: int = 0
 
 class FormField(FormFieldCreate):
     id: str
-
-class WorkflowCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    role_id: Optional[str] = None  # Role this workflow is assigned to
-    color: Optional[str] = None
-    steps: List[WorkflowStepCreate] = []
-    form_fields: List[FormFieldCreate] = []
-
-class WorkflowUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    role_id: Optional[str] = None
-    color: Optional[str] = None
-    active: Optional[bool] = None
-
-class WorkflowResponse(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    role_id: Optional[str] = None
-    role_name: Optional[str] = None
-    color: Optional[str] = None
-    steps: List[WorkflowStep] = []
-    form_fields: List[FormField] = []
-    active: bool
-    created_at: str
 
 # ============== UI SETTINGS MODELS ==============
 class UISettingUpdate(BaseModel):
