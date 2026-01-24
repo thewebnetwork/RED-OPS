@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -9,15 +10,14 @@ import {
   Menu,
   X,
   ChevronDown,
-  Plus,
   Bug,
   Lightbulb,
   Command,
   FolderTree,
   User,
-  Settings,
   Shield,
-  UsersRound
+  UsersRound,
+  Star
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -29,11 +29,27 @@ import {
 } from './ui/dropdown-menu';
 import NotificationDropdown from './NotificationDropdown';
 
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ratingStats, setRatingStats] = useState(null);
+
+  useEffect(() => {
+    fetchRatingStats();
+  }, []);
+
+  const fetchRatingStats = async () => {
+    try {
+      const res = await axios.get(`${API}/ratings/my-stats`);
+      setRatingStats(res.data);
+    } catch (error) {
+      // Silently fail - ratings not critical for layout
+    }
+  };
 
   const handleLogout = () => {
     logout();
