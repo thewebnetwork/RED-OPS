@@ -1109,6 +1109,97 @@ async def delete_role(role_id: str, current_user: dict = Depends(require_roles([
     await db.roles.update_one({"id": role_id}, {"$set": {"active": False}})
     return {"message": "Role deactivated"}
 
+# ============== TEAM ROUTES ==============
+
+@api_router.post("/teams", response_model=TeamResponse)
+async def create_team(team_data: TeamCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new team"""
+    existing = await db.teams.find_one({"name": team_data.name, "active": True})
+    if existing:
+        raise HTTPException(status_code=400, detail="Team with this name already exists")
+    
+    team = {
+        "id": str(uuid.uuid4()),
+        "name": team_data.name,
+        "description": team_data.description,
+        "color": team_data.color or "#3B82F6",
+        "active": True,
+        "created_at": get_utc_now()
+    }
+    await db.teams.insert_one(team)
+    
+    return TeamResponse(**team, member_count=0)
+
+@api_router.get("/teams", response_model=List[TeamResponse])
+async def list_teams(active_only: bool = True, current_user: dict = Depends(get_current_user)):
+    """List all teams"""
+    query = {"active": True} if active_only else {}
+    teams = await db.teams.find(query, {"_id": 0}).sort("name", 1).to_list(1000)
+    
+    # Get member counts
+    result = []
+    for team in teams:
+        member_count = await db.users.count_documents({"team_id": team["id"], "active": True})
+        result.append(TeamResponse(**team, member_count=member_count))
+    
+    return result
+
+@api_router.get("/teams/{team_id}", response_model=TeamResponse)
+async def get_team(team_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific team"""
+    team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    member_count = await db.users.count_documents({"team_id": team_id, "active": True})
+    return TeamResponse(**team, member_count=member_count)
+
+@api_router.get("/teams/{team_id}/members", response_model=List[UserResponse])
+async def get_team_members(team_id: str, current_user: dict = Depends(get_current_user)):
+    """Get members of a team"""
+    team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    users = await db.users.find({"team_id": team_id, "active": True}, {"_id": 0, "password": 0}).to_list(1000)
+    
+    result = []
+    for u in users:
+        result.append(UserResponse(
+            **u,
+            team_name=team["name"]
+        ))
+    
+    return result
+
+@api_router.patch("/teams/{team_id}", response_model=TeamResponse)
+async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update a team"""
+    team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    update_dict = {k: v for k, v in team_data.model_dump().items() if v is not None}
+    if update_dict:
+        await db.teams.update_one({"id": team_id}, {"$set": update_dict})
+    
+    updated = await db.teams.find_one({"id": team_id}, {"_id": 0})
+    member_count = await db.users.count_documents({"team_id": team_id, "active": True})
+    return TeamResponse(**updated, member_count=member_count)
+
+@api_router.delete("/teams/{team_id}")
+async def delete_team(team_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Deactivate a team (soft delete)"""
+    team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    # Remove team assignment from users
+    await db.users.update_many({"team_id": team_id}, {"$set": {"team_id": None}})
+    await db.teams.update_one({"id": team_id}, {"$set": {"active": False}})
+    
+    return {"message": "Team deactivated"}
+
 # ============== EDITING ORDER ROUTES (existing workflow) ==============
 
 @api_router.post("/orders", response_model=OrderResponse)
