@@ -496,6 +496,51 @@ async def send_email_notification(to_email: str, subject: str, body: str):
         logging.error(f"Failed to send email: {e}")
         return False
 
+async def send_password_reset_email(to_email: str, user_name: str, reset_link: str):
+    """Send password reset email"""
+    subject = "Reset Your Password - Red Ribbon Ops Portal"
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: #DC2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .button {{ display: inline-block; background: #DC2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }}
+            .footer {{ margin-top: 20px; font-size: 12px; color: #6b7280; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 style="margin: 0;">Red Ribbon Ops Portal</h1>
+            </div>
+            <div class="content">
+                <h2>Password Reset Request</h2>
+                <p>Hi {user_name},</p>
+                <p>We received a request to reset your password. Click the button below to create a new password:</p>
+                <p style="text-align: center;">
+                    <a href="{reset_link}" class="button" style="color: white;">Reset Password</a>
+                </p>
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="word-break: break-all; background: #e5e7eb; padding: 10px; border-radius: 4px; font-size: 14px;">
+                    {reset_link}
+                </p>
+                <p><strong>This link will expire in 1 hour.</strong></p>
+                <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+                <div class="footer">
+                    <p>This is an automated message from Red Ribbon Ops Portal. Please do not reply to this email.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    await send_email_notification(to_email, subject, body)
+
 async def notify_status_change(order: dict, old_status: str, new_status: str, changed_by: dict):
     """Send notifications when order status changes"""
     order_code = order['order_code']
