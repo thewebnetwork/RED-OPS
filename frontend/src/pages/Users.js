@@ -262,6 +262,28 @@ export default function Users() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Team</Label>
+                <Select 
+                  value={formData.team_id || "none"} 
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, team_id: v === "none" ? "" : v }))}
+                >
+                  <SelectTrigger className="mt-1.5" data-testid="user-team-select">
+                    <SelectValue placeholder="Select a team (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Team</SelectItem>
+                    {teams.map(t => (
+                      <SelectItem key={t.id} value={t.id}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color }} />
+                          {t.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
                 {editingUser ? 'Update User' : 'Add User'}
               </Button>
