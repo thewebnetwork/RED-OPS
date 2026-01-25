@@ -592,7 +592,17 @@ export default function OrderDetail() {
                 <div className="flex items-center gap-2 mt-1.5">
                   <Clock size={16} className="text-slate-400" />
                   <span className="font-medium">
-                    {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                    {format(new Date(order.created_at), 'MMM d, yyyy • h:mm a')}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs text-slate-500">Last Updated</Label>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Clock size={16} className="text-slate-400" />
+                  <span className="font-medium">
+                    {format(new Date(order.updated_at || order.created_at), 'MMM d, yyyy • h:mm a')}
                   </span>
                 </div>
               </div>
