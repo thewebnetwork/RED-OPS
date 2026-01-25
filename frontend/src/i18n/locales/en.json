@@ -110,7 +110,7 @@
   },
   "commandCenter": {
     "title": "Command Center",
-    "subtitle": "What would you like to do?",
+    "subtitle": "Place requests, report issues, or request new features",
     "selectCategory": "Select Category",
     "selectSubCategory": "Select Sub Category",
     "requestTitle": "Request Title",
@@ -118,7 +118,22 @@
     "submitRequest": "Submit Request",
     "featureRequest": "Feature Request",
     "bugReport": "Bug Report",
-    "newTicket": "New Ticket"
+    "newTicket": "Create New Request",
+    "myRequests": "My Requests",
+    "noRequests": "You haven't submitted any requests yet",
+    "describeIssue": "Describe your Issue/Request",
+    "describeIssuePlaceholder": "Please describe your request or issue in detail. The more information you provide, the better we can assist you...",
+    "attachments": "Attachments",
+    "attachmentsHelp": "Upload screenshots, documents, or files (max 50 MB total). Supported: images, PDFs, documents, videos, audio.",
+    "clickToUpload": "Click to upload or drag and drop",
+    "maxSize": "Max 50 MB",
+    "noExecutable": "No executable files",
+    "securityNotice": "For security, executable files (.exe, .bat, .js, etc.) are blocked. If you need to share code or scripts, please use a .txt or .zip file.",
+    "requestType": "Request Type",
+    "request": "Request",
+    "incident": "Incident / Issues",
+    "total": "Total",
+    "searchCategories": "Type to find a category faster..."
   },
   "workflows": {
     "title": "Workflow Builder",
