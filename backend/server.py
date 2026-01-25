@@ -149,6 +149,9 @@ class UserResponse(BaseModel):
     team_name: Optional[str] = None
     active: bool
     avatar: Optional[str] = None
+    force_password_change: bool = False
+    force_otp_setup: bool = False
+    otp_verified: bool = False
     created_at: str
 
 class LoginRequest(BaseModel):
