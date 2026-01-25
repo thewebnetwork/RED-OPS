@@ -607,6 +607,30 @@ export default function Categories() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Unsaved Changes Warning Dialog */}
+      <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+        <AlertDialogContent data-testid="unsaved-changes-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowUnsavedWarning(false)} data-testid="stay-btn">
+              Stay
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCloseDialog}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="leave-btn"
+            >
+              Leave without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
