@@ -212,7 +212,7 @@ class TestMessageNotifications:
     def test_04_requester_message_notifies_resolver_when_assigned(self):
         """P0-1: When requester sends message on assigned ticket, resolver gets notified"""
         requester_token = self.get_requester_token()
-        admin_token = self.get_admin_token()
+        editor_token = self.get_editor_token()
         
         # Create a new order
         order = self.create_test_order(requester_token)
@@ -220,16 +220,16 @@ class TestMessageNotifications:
         order_code = order["order_code"]
         print(f"Created test order: {order_code}")
         
-        # Admin picks the order (becomes resolver)
+        # Editor picks the order (becomes resolver)
         pick_response = requests.post(
             f"{BASE_URL}/api/orders/{order_id}/pick",
-            headers={"Authorization": f"Bearer {admin_token}"}
+            headers={"Authorization": f"Bearer {editor_token}"}
         )
         assert pick_response.status_code == 200, f"Failed to pick order: {pick_response.text}"
-        print(f"Admin picked the order (now resolver)")
+        print(f"Editor picked the order (now resolver)")
         
-        # Get admin's notification count before message
-        initial_count = self.get_unread_count(admin_token)
+        # Get editor's notification count before message
+        initial_count = self.get_unread_count(editor_token)
         print(f"Resolver initial unread count: {initial_count}")
         
         # Requester sends a message
@@ -242,13 +242,13 @@ class TestMessageNotifications:
         assert response.status_code in [200, 201], f"Failed to send message: {response.text}"
         print(f"Requester sent message on assigned ticket")
         
-        # Check resolver (admin) got notification
+        # Check resolver (editor) got notification
         time.sleep(0.5)
-        new_count = self.get_unread_count(admin_token)
+        new_count = self.get_unread_count(editor_token)
         print(f"Resolver new unread count: {new_count}")
         
         # Get notifications and verify
-        notifications = self.get_notifications(admin_token)
+        notifications = self.get_notifications(editor_token)
         order_notifications = [n for n in notifications if n.get("related_order_id") == order_id and n["type"] == "new_message"]
         
         assert len(order_notifications) > 0, "Resolver should have received notification for message"
