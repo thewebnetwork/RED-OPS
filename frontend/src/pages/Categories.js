@@ -414,40 +414,78 @@ export default function Categories() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? 'Edit' : 'Add'} {dialogType === 'l1' ? 'Category' : 'Subcategory'}
+              {editingCategory ? t('common.edit') : t('common.create')} {dialogType === 'l1' ? t('categories.title') : t('categories.subcategory')}
             </DialogTitle>
             <DialogDescription>
               {dialogType === 'l1' 
-                ? 'Categories are the top level grouping for requests' 
-                : 'Subcategories provide specific types under a category'
+                ? t('categories.level1Description') 
+                : t('categories.level2Description')
               }
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Name *</Label>
+              <Label>{t('common.name')} * ({t('categories.defaultName')})</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Category name"
+                placeholder={t('categories.categoryName')}
                 className="mt-1.5"
                 data-testid="category-name-input"
               />
             </div>
             
+            {/* Multi-language name fields */}
+            <div className="border rounded-lg p-3 space-y-3 bg-slate-50">
+              <p className="text-xs font-semibold text-slate-600 uppercase">{t('categories.translations')}</p>
+              <div>
+                <Label className="flex items-center gap-2">
+                  <span>🇺🇸</span> English
+                </Label>
+                <Input
+                  value={formData.name_en}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
+                  placeholder="English name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="flex items-center gap-2">
+                  <span>🇧🇷</span> Português
+                </Label>
+                <Input
+                  value={formData.name_pt}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name_pt: e.target.value }))}
+                  placeholder="Nome em português"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="flex items-center gap-2">
+                  <span>🇪🇸</span> Español
+                </Label>
+                <Input
+                  value={formData.name_es}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name_es: e.target.value }))}
+                  placeholder="Nombre en español"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            
             <div>
-              <Label>Description</Label>
+              <Label>{t('common.description')}</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Optional description"
+                placeholder={t('common.optional')}
                 className="mt-1.5"
               />
             </div>
 
             {dialogType === 'l1' && (
               <div>
-                <Label>Icon</Label>
+                <Label>{t('categories.icon')}</Label>
                 <Select 
                   value={formData.icon} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, icon: v }))}
@@ -475,17 +513,17 @@ export default function Categories() {
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>Parent Category</Label>
+                  <Label>{t('categories.parentCategory')}</Label>
                   <Select 
                     value={formData.category_l1_id} 
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}
                   >
                     <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder="Select parent" />
+                      <SelectValue placeholder={t('categories.selectParent')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categoriesL1.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.id}>{getCategoryName(cat)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -493,8 +531,8 @@ export default function Categories() {
 
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-sm">Enable Editor Workflow</p>
-                    <p className="text-xs text-slate-500">Requests will go through the editor assignment process</p>
+                    <p className="font-medium text-sm">{t('categories.enableWorkflow')}</p>
+                    <p className="text-xs text-slate-500">{t('categories.workflowDescription')}</p>
                   </div>
                   <Switch
                     checked={formData.triggers_editor_workflow}
@@ -505,7 +543,7 @@ export default function Categories() {
             )}
 
             <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-category-btn">
-              {editingCategory ? 'Update' : 'Create'} {dialogType === 'l1' ? 'Category' : 'Subcategory'}
+              {editingCategory ? t('common.save') : t('common.create')}
             </Button>
           </form>
         </DialogContent>
