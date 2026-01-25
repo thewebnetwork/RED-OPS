@@ -278,10 +278,10 @@ export default function Teams() {
               {/* Team Header */}
               <Card className="border-slate-200">
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div 
-                        className="w-14 h-14 rounded-xl flex items-center justify-center"
+                        className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
                         style={{ backgroundColor: `${selectedTeam.color}20` }}
                       >
                         <UsersRound size={28} style={{ color: selectedTeam.color }} />
@@ -292,7 +292,7 @@ export default function Teams() {
                           <p className="text-sm text-slate-500 mt-1">{selectedTeam.description}</p>
                         )}
                         <p className="text-sm text-slate-600 mt-2">
-                          <strong>{selectedTeam.member_count}</strong> team members
+                          <strong>{selectedTeam.member_count}</strong> {t('teams.members')}
                         </p>
                       </div>
                     </div>
@@ -303,7 +303,7 @@ export default function Teams() {
                         onClick={() => openDialog(selectedTeam)}
                       >
                         <Edit size={14} className="mr-1" />
-                        Edit
+                        {t('common.edit')}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -312,7 +312,7 @@ export default function Teams() {
                         onClick={() => handleDelete(selectedTeam.id)}
                       >
                         <Trash2 size={14} className="mr-1" />
-                        Delete
+                        {t('common.delete')}
                       </Button>
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export default function Teams() {
                 <CardHeader className="border-b border-slate-100 pb-4">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Users size={18} className="text-rose-600" />
-                    Team Members
+                    {t('teams.members')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -335,8 +335,7 @@ export default function Teams() {
                   ) : teamMembers.length === 0 ? (
                     <div className="p-8 text-center text-slate-500">
                       <Users size={32} className="mx-auto mb-2 text-slate-300" />
-                      <p>No members in this team yet</p>
-                      <p className="text-xs mt-1">Assign users to this team from the Users page</p>
+                      <p>{t('teams.noMembers')}</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-100">
