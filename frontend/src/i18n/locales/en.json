@@ -256,7 +256,16 @@
     "newCategory": "New Category",
     "editCategory": "Edit Category",
     "categoryName": "Category Name",
-    "parentCategory": "Parent Category"
+    "parentCategory": "Parent Category",
+    "subcategory": "Subcategory",
+    "level1Description": "Categories are the top level grouping for requests",
+    "level2Description": "Subcategories provide specific types under a category",
+    "defaultName": "default name",
+    "translations": "Translations",
+    "icon": "Icon",
+    "selectParent": "Select parent",
+    "enableWorkflow": "Enable Editor Workflow",
+    "workflowDescription": "Requests will go through the editor assignment process"
   },
   "profile": {
     "title": "Profile",
