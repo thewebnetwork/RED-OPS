@@ -74,6 +74,10 @@ export default function Layout({ children }) {
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Admin'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Admin'] },
     { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Admin'] },
+    { path: '/sla', icon: Clock, labelKey: 'nav.sla', roles: ['Admin'] },
+    { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Admin'] },
+    { path: '/integrations', icon: Plug, labelKey: 'nav.integrations', roles: ['Admin'] },
+    { path: '/announcements', icon: Megaphone, labelKey: 'nav.announcements', roles: ['Admin'] },
     { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Admin'] },
   ];
 
