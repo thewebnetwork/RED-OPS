@@ -173,8 +173,9 @@ export default function Categories() {
     setDialogType(type);
     setEditingCategory(category);
     
+    let initialData;
     if (category) {
-      setFormData({
+      initialData = {
         name: category.name,
         name_en: category.name_en || '',
         name_pt: category.name_pt || '',
@@ -183,9 +184,9 @@ export default function Categories() {
         icon: category.icon || 'file',
         category_l1_id: category.category_l1_id || '',
         triggers_editor_workflow: category.triggers_editor_workflow || false
-      });
+      };
     } else {
-      setFormData({
+      initialData = {
         name: '',
         name_en: '',
         name_pt: '',
@@ -194,8 +195,11 @@ export default function Categories() {
         icon: 'file',
         category_l1_id: selectedL1 || '',
         triggers_editor_workflow: false
-      });
+      };
     }
+    setFormData(initialData);
+    initialFormRef.current = initialData;
+    setHasFormChanges(false);
     setDialogOpen(true);
   };
 
