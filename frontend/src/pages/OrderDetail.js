@@ -313,6 +313,59 @@ export default function OrderDetail() {
             Mark as Delivered
           </Button>
         )}
+        {canClose && (
+          <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-slate-300 text-slate-700 hover:bg-slate-100"
+                data-testid="close-ticket-btn"
+              >
+                <XCircle size={18} className="mr-2" />
+                Close Ticket
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Close Ticket</DialogTitle>
+                <DialogDescription>
+                  Please provide a reason for closing this ticket. This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Reason for closing *</Label>
+                  <Textarea
+                    value={closeReason}
+                    onChange={(e) => setCloseReason(e.target.value)}
+                    placeholder="e.g., Issue resolved, No longer needed, Duplicate request..."
+                    className="mt-1.5 min-h-[100px]"
+                    data-testid="close-reason-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setCloseDialogOpen(false);
+                      setCloseReason('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-slate-700 hover:bg-slate-800"
+                    onClick={handleCloseOrder}
+                    disabled={closingOrder || !closeReason.trim()}
+                    data-testid="confirm-close-btn"
+                  >
+                    {closingOrder ? 'Closing...' : 'Close Ticket'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
