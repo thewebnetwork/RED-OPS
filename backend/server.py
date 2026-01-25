@@ -1999,7 +1999,7 @@ async def create_message(order_id: str, message_data: MessageCreate, current_use
                     admin["id"], 
                     "new_message", 
                     "New message on unassigned ticket", 
-                    f"{current_user['name']} sent a message on unassigned ticket {order['order_code']}", 
+                    f"{current_user['name']} sent a message on unassigned ticket {order['order_code']}: \"{message_data.message_body[:50]}{'...' if len(message_data.message_body) > 50 else ''}\"", 
                     order_id
                 )
     else:
