@@ -329,5 +329,6 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - `/app/test_reports/iteration_7.json` - Branding & Internationalization (100% pass)
 - `/app/test_reports/iteration_8.json` - Full i18n translations (100% pass)
 - `/app/test_reports/iteration_9.json` - Mobile responsiveness & Categories multilang (95% pass)
-- `/app/test_reports/iteration_10.json` - P0 Requirements (100% pass)
+- `/app/test_reports/iteration_10.json` - P0 Ticket features (100% pass)
 - `/app/test_reports/iteration_11.json` - P1 Requirements (100% pass)
+- `/app/test_reports/iteration_12.json` - P0 Message Notifications & Unsaved Changes (100% pass)
