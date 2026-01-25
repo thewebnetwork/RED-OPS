@@ -86,6 +86,7 @@ const priorityColors = {
 };
 
 export default function CommandCenter() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const preselectedCategory = searchParams.get('category');
