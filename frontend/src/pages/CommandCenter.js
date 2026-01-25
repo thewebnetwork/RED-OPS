@@ -259,15 +259,15 @@ export default function CommandCenter() {
     <div className="space-y-6 animate-fade-in" data-testid="command-center-page">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Command Center</h1>
-        <p className="text-slate-500 mt-1">Place requests, report issues, or request new features</p>
+        <h1 className="text-2xl font-bold text-slate-900">{t('commandCenter.title')}</h1>
+        <p className="text-slate-500 mt-1">{t('commandCenter.subtitle')}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="create" className="data-[state=active]:bg-rose-600 data-[state=active]:text-white" data-testid="create-tab">
             <Plus size={16} className="mr-2" />
-            Create New Request
+            {t('commandCenter.newTicket')}
           </TabsTrigger>
           <TabsTrigger value="my-requests" data-testid="my-requests-tab">
             <FileText size={16} className="mr-2" />
