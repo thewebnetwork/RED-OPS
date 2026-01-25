@@ -299,6 +299,21 @@ class UISettingResponse(BaseModel):
     category: str
     description: Optional[str] = None
 
+# Announcement Ticker
+class AnnouncementTickerUpdate(BaseModel):
+    message: str
+    is_active: bool = True
+    background_color: Optional[str] = "#A2182C"
+    text_color: Optional[str] = "#FFFFFF"
+
+class AnnouncementTickerResponse(BaseModel):
+    message: str
+    is_active: bool
+    background_color: str
+    text_color: str
+    updated_at: str
+    updated_by_name: Optional[str] = None
+
 # Satisfaction Ratings
 class RatingCreate(BaseModel):
     token: str
