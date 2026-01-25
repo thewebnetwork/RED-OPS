@@ -77,6 +77,9 @@ export default function OrderDetail() {
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
   const [addFileOpen, setAddFileOpen] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [closeReason, setCloseReason] = useState('');
+  const [closingOrder, setClosingOrder] = useState(false);
   const [newFile, setNewFile] = useState({
     file_type: 'Export',
     label: '',
