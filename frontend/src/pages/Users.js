@@ -141,10 +141,21 @@ export default function Users() {
       } else {
         await axios.post(`${API}/users`, submitData);
         toast.success(t('success.created'));
+        if (submitData.force_otp_setup) {
+          toast.info('OTP code has been sent to the user\'s email (simulated)');
+        }
       }
       setDialogOpen(false);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
-      setFormData({ name: '', email: '', password: '', role: defaultRole, team_id: '' });
+      setFormData({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        role: defaultRole, 
+        team_id: '',
+        force_password_change: false,
+        force_otp_setup: false
+      });
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || t('errors.generic'));
