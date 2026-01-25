@@ -207,6 +207,7 @@ function KPICard({ label, value, icon: Icon, color, onClick }) {
 
 // Admin Dashboard
 function AdminDashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     open_count: 0,
     in_progress_count: 0,
@@ -233,7 +234,7 @@ function AdminDashboard() {
       setRecentOrders(ordersRes.data.slice(0, 10));
       setRatingStats(ratingsRes.data);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -247,43 +248,43 @@ function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-          <p className="text-slate-500 mt-1">Overview of all orders</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - Admin</h1>
+          <p className="text-slate-500 mt-1">{t('dashboard.overview')}</p>
         </div>
         <Link to="/users">
-          <Button variant="outline">Manage Users</Button>
+          <Button variant="outline">{t('users.manageUsers')}</Button>
         </Link>
       </div>
 
       {/* Rating Stats for Admin (if they have any) */}
       {ratingStats && ratingStats.total_delivered > 0 && (
-        <RatingStatsCard stats={ratingStats} title="Your Ratings" />
+        <RatingStatsCard stats={ratingStats} title={t('ratings.yourRatings')} t={t} />
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <KPICard label="Open" value={stats.open_count} icon={Inbox} color="bg-blue-500" />
-        <KPICard label="In Progress" value={stats.in_progress_count} icon={Clock} color="bg-amber-500" />
-        <KPICard label="Pending Review" value={stats.pending_count} icon={AlertCircle} color="bg-purple-500" />
-        <KPICard label="Delivered" value={stats.delivered_count} icon={CheckCircle2} color="bg-green-500" />
-        <KPICard label="SLA Breaching" value={stats.sla_breaching_count} icon={AlertTriangle} color="bg-red-500" />
+        <KPICard label={t('orders.status.open')} value={stats.open_count} icon={Inbox} color="bg-blue-500" />
+        <KPICard label={t('orders.status.inProgress')} value={stats.in_progress_count} icon={Clock} color="bg-amber-500" />
+        <KPICard label={t('dashboard.pendingReview')} value={stats.pending_count} icon={AlertCircle} color="bg-purple-500" />
+        <KPICard label={t('orders.status.delivered')} value={stats.delivered_count} icon={CheckCircle2} color="bg-green-500" />
+        <KPICard label={t('dashboard.slaBreach')} value={stats.sla_breaching_count} icon={AlertTriangle} color="bg-red-500" />
       </div>
 
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle>Recent Orders</CardTitle>
+            <CardTitle>{t('dashboard.recentOrders')}</CardTitle>
             <Link to="/orders" className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
-              View all <ArrowRight size={14} />
+              {t('dashboard.viewAll')} <ArrowRight size={14} />
             </Link>
           </div>
         </CardHeader>
         <CardContent className="p-4">
           <div className="space-y-3">
             {recentOrders.map(order => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} t={t} />
             ))}
             {recentOrders.length === 0 && (
-              <p className="text-center text-slate-500 py-8">No orders yet</p>
+              <p className="text-center text-slate-500 py-8">{t('common.noResults')}</p>
             )}
           </div>
         </CardContent>
