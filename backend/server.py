@@ -415,12 +415,18 @@ class OrderResponse(BaseModel):
     music_preference: Optional[str] = None
     delivery_format: Optional[str] = None
     special_instructions: Optional[str] = None
+    close_reason: Optional[str] = None  # Reason for closing by requester
+    closed_at: Optional[str] = None  # When the ticket was closed
     sla_deadline: str
     is_sla_breached: bool
     created_at: str
     updated_at: str
     picked_at: Optional[str] = None
     delivered_at: Optional[str] = None
+
+# Close Order Request
+class CloseOrderRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=500)
 
 # Feature Request
 class FeatureRequestCreate(BaseModel):
