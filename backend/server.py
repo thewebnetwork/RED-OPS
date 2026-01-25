@@ -1626,6 +1626,60 @@ async def deliver_order(order_id: str, background_tasks: BackgroundTasks, curren
     
     return {"message": "Order delivered successfully"}
 
+@api_router.post("/orders/{order_id}/close")
+async def close_order(order_id: str, close_data: CloseOrderRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
+    """Allow requesters to close their own tickets with a reason"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only the requester or admin can close the order
+    if order["requester_id"] != current_user["id"] and current_user["role"] != "Admin":
+        raise HTTPException(status_code=403, detail="Only the requester can close this order")
+    
+    # Cannot close already closed orders
+    if order["status"] == "Closed":
+        raise HTTPException(status_code=400, detail="Order is already closed")
+    
+    old_status = order["status"]
+    now = get_utc_now()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "status": "Closed",
+            "close_reason": close_data.reason,
+            "closed_at": now,
+            "updated_at": now
+        }}
+    )
+    
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    
+    # Notify the assigned editor if there is one
+    if order.get("editor_id"):
+        await create_notification(
+            order["editor_id"],
+            "order_closed",
+            "Order closed by requester",
+            f"Order {order['order_code']} '{order['title']}' was closed by the requester. Reason: {close_data.reason}",
+            order['id']
+        )
+    
+    # Notify admins
+    admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+    for admin in admins:
+        if admin['id'] != current_user['id']:
+            await create_notification(
+                admin['id'],
+                "order_closed",
+                f"Order closed",
+                f"Order {order['order_code']} was closed by {current_user['name']}. Reason: {close_data.reason}",
+                order['id']
+            )
+    
+    return {"message": "Order closed successfully"}
+
 # ============== FEATURE REQUEST ROUTES ==============
 
 @api_router.post("/feature-requests", response_model=FeatureRequestResponse)
