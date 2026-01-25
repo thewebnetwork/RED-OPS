@@ -32,6 +32,7 @@ import {
 } from './ui/dropdown-menu';
 import NotificationDropdown from './NotificationDropdown';
 import LanguageSwitcher from './LanguageSwitcher';
+import AnnouncementTicker from './AnnouncementTicker';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
