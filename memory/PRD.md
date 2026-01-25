@@ -31,6 +31,57 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 5: Full i18n & Mobile Responsiveness ✅ (January 25, 2026)
+Complete internationalization of all pages and mobile-responsive design:
+
+- **Full-App Translations**:
+  - Dashboard page with all KPI cards, sections, and buttons translated
+  - Users page with table headers, buttons, and dialogs translated
+  - Teams page with titles, stats, and dialogs translated
+  - Categories page with dialog and labels translated
+  - Sidebar navigation fully translated
+  - Language switcher persists preference in localStorage
+
+- **Mobile Responsiveness**:
+  - Dashboard: KPI cards display in 2-column grid on mobile
+  - Users page: Shows card-based layout instead of table on mobile (md:hidden)
+  - Teams page: Stats stack vertically on mobile
+  - Command Center: Form fields stack properly on mobile
+  - All dialogs are responsive
+
+- **Dynamic Database Content Translation**:
+  - Categories now support multi-language names (name_en, name_pt, name_es)
+  - Backend models updated: CategoryL1Create, CategoryL2Create include language fields
+  - Frontend Categories dialog shows translation inputs with country flags
+  - getCategoryName helper function displays correct translation based on current language
+
+### Phase 4: UI Customization Module ✅ (January 25, 2026)
+Admin-controllable UI text customization:
+
+- **Backend**:
+  - UI Settings CRUD API (`/api/ui-settings`)
+  - 28 default UI settings organized by category (branding, navigation, buttons, labels, statuses, messages)
+  - Auto-seed on startup if no settings exist
+
+- **Frontend**:
+  - UI Settings page (`/settings`) with search and category tabs
+  - Editable text fields grouped by category
+  - Reset to Defaults and Save Changes buttons
+  - Settings linked from sidebar for Admin users
+
+### Phase 3: Branding & i18n Foundation ✅ (January 24, 2026)
+Custom branding and language switching:
+
+- **Branding**:
+  - Custom login page with background image and company logos
+  - Sidebar with brand colors (Pantone 187 C red)
+  - Circular logo on login form
+
+- **i18n Foundation**:
+  - react-i18next library integration
+  - Language switcher component (compact and default variants)
+  - Translation files for English, Portuguese, Spanish
+
 ### Phase 2: Visual Workflow Builder ✅ (January 24, 2026)
 A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Visio:
 
