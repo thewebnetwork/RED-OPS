@@ -131,20 +131,20 @@ export default function Teams() {
     try {
       if (editingTeam) {
         await axios.patch(`${API}/teams/${editingTeam.id}`, formData);
-        toast.success('Team updated');
+        toast.success(t('success.updated'));
       } else {
         await axios.post(`${API}/teams`, formData);
-        toast.success('Team created');
+        toast.success(t('success.created'));
       }
       fetchTeams();
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Operation failed');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     }
   };
 
   const handleDelete = async (teamId) => {
-    if (!window.confirm('Are you sure you want to delete this team? Members will be unassigned.')) return;
+    if (!window.confirm(t('common.confirm'))) return;
     
     try {
       await axios.delete(`${API}/teams/${teamId}`);
@@ -152,9 +152,9 @@ export default function Teams() {
         setSelectedTeam(null);
       }
       fetchTeams();
-      toast.success('Team deleted');
+      toast.success(t('success.deleted'));
     } catch (error) {
-      toast.error('Failed to delete team');
+      toast.error(t('errors.generic'));
     }
   };
 
@@ -168,10 +168,10 @@ export default function Teams() {
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="teams-page">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Teams</h1>
-          <p className="text-slate-500 mt-1">Organize team members into groups</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('teams.title')}</h1>
+          <p className="text-slate-500 mt-1">{t('teams.subtitle')}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -179,7 +179,7 @@ export default function Teams() {
           data-testid="add-team-btn"
         >
           <Plus size={18} className="mr-2" />
-          Add Team
+          {t('teams.addTeam')}
         </Button>
       </div>
 
@@ -193,7 +193,7 @@ export default function Teams() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{teams.length}</p>
-                <p className="text-sm text-slate-500">Total Teams</p>
+                <p className="text-sm text-slate-500">{t('teams.totalTeams')}</p>
               </div>
             </div>
           </CardContent>
