@@ -211,7 +211,14 @@
     "inactive": "Inactivo",
     "selectRole": "Seleccione Rol",
     "selectTeam": "Seleccione Equipo",
-    "noTeam": "Sin Equipo"
+    "noTeam": "Sin Equipo",
+    "manageUsers": "Gestionar Usuarios",
+    "addUser": "Agregar Usuario",
+    "searchUsers": "Buscar usuarios...",
+    "noUsers": "Aún no hay usuarios",
+    "noMatch": "Ningún usuario coincide con su búsqueda",
+    "user": "Usuario",
+    "created": "Creado"
   },
   "teams": {
     "title": "Equipos",
