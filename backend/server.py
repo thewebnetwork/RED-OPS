@@ -1804,6 +1804,7 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
             category_l2_name=o.get("category_l2_name"),
             status=o["status"],
             priority_or_severity=o["priority"],
+            assigned_to_name=o.get("editor_name"),  # Include assigned editor
             created_at=o["created_at"],
             updated_at=o["updated_at"]
         ))
@@ -1820,6 +1821,7 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
             category_l2_name=f.get("category_l2_name"),
             status=f["status"],
             priority_or_severity=f["priority"],
+            assigned_to_name=None,  # Feature requests don't have assignments yet
             created_at=f["created_at"],
             updated_at=f["updated_at"]
         ))
@@ -1836,6 +1838,7 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
             category_l2_name=b.get("category_l2_name"),
             status=b["status"],
             priority_or_severity=b["severity"],
+            assigned_to_name=None,  # Bug reports don't have assignments yet
             created_at=b["created_at"],
             updated_at=b["updated_at"]
         ))
