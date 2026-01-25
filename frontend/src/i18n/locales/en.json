@@ -363,7 +363,8 @@
     "saved": "Saved successfully",
     "created": "Created successfully",
     "updated": "Updated successfully",
-    "deleted": "Deleted successfully"
+    "deleted": "Deleted successfully",
+    "orderPicked": "Order picked successfully!"
   },
   "language": {
     "title": "Language",
