@@ -264,7 +264,7 @@ class TestMessageNotifications:
     def test_05_resolver_message_notifies_requester(self):
         """P0-1: When resolver sends message, requester gets notified"""
         requester_token = self.get_requester_token()
-        admin_token = self.get_admin_token()
+        editor_token = self.get_editor_token()
         
         # Create a new order
         order = self.create_test_order(requester_token)
@@ -272,24 +272,24 @@ class TestMessageNotifications:
         order_code = order["order_code"]
         print(f"Created test order: {order_code}")
         
-        # Admin picks the order
+        # Editor picks the order
         pick_response = requests.post(
             f"{BASE_URL}/api/orders/{order_id}/pick",
-            headers={"Authorization": f"Bearer {admin_token}"}
+            headers={"Authorization": f"Bearer {editor_token}"}
         )
         assert pick_response.status_code == 200, f"Failed to pick order: {pick_response.text}"
-        print(f"Admin picked the order")
+        print(f"Editor picked the order")
         
         # Get requester's notification count before message
         initial_count = self.get_unread_count(requester_token)
         print(f"Requester initial unread count: {initial_count}")
         
-        # Resolver (admin) sends a message
+        # Resolver (editor) sends a message
         message_text = "TEST_P0_Message: I'm working on your request now!"
         response = requests.post(
             f"{BASE_URL}/api/orders/{order_id}/messages",
             json={"message_body": message_text},
-            headers={"Authorization": f"Bearer {admin_token}"}
+            headers={"Authorization": f"Bearer {editor_token}"}
         )
         assert response.status_code in [200, 201], f"Failed to send message: {response.text}"
         print(f"Resolver sent message to requester")
