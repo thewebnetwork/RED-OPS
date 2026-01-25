@@ -199,22 +199,28 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 
 ## Next Phases (Roadmap)
 
-### Phase 3: Full Form Builder 🟢
-- Connect workflow forms to ticket creation
-- Field validation rules
-- Conditional field visibility
-- Form preview mode
+### P1: Verify User Role Assignment Bug 🔴
+- Re-test user creation to ensure correct role is assigned
+- Check handleSaveUser function in Users.js
+- Fix if still broken
 
-### Phase 4: UI Customization Engine 🔵
-- All text/labels stored in database
-- Admin "Customize UI" page
-- Live preview of changes
+### P2: Integrate Real SMTP 🟠
+- User provides SMTP credentials
+- Enable actual email sending for password resets and notifications
 
-### Phase 5: Workflow Execution Engine 🟣
+### P2: GHL/Marketplace Webhooks 🟠
+- External integration webhooks
+- Marketplace connectivity
+
+### P3: Workflow Execution Engine 🟣
 - Execute workflows when tickets are created
 - Automatic role assignment based on workflow rules
 - Email notifications using workflow actions
 - Status updates based on workflow conditions
+
+### P3: Refactor Backend 🟤
+- Split monolithic server.py into modules
+- Organize routes, models, and services
 
 ## Test Reports
 - `/app/test_reports/iteration_1.json` - V1 MVP
@@ -224,3 +230,5 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - `/app/test_reports/iteration_5.json` - Phase 2 Visual Workflow Builder (100% pass)
 - `/app/test_reports/iteration_6.json` - Workflow Builder Enhancements (100% pass)
 - `/app/test_reports/iteration_7.json` - Branding & Internationalization (100% pass)
+- `/app/test_reports/iteration_8.json` - Full i18n translations (100% pass)
+- `/app/test_reports/iteration_9.json` - Mobile responsiveness & Categories multilang (95% pass)
