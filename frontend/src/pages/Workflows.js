@@ -64,7 +64,9 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function Workflows() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('workflows');
   const [workflows, setWorkflows] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -76,6 +78,7 @@ export default function Workflows() {
 
   useEffect(() => {
     fetchWorkflows();
+    fetchCategories();
   }, []);
 
   const fetchWorkflows = async () => {
@@ -86,6 +89,27 @@ export default function Workflows() {
       toast.error('Failed to load workflows');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(`${API}/categories/l2`);
+      setCategories(res.data || []);
+    } catch (error) {
+      console.error('Failed to load categories');
+    }
+  };
+
+  const handleToggleWorkflowTrigger = async (categoryId, currentValue) => {
+    try {
+      await axios.patch(`${API}/categories/l2/${categoryId}`, {
+        triggers_editor_workflow: !currentValue
+      });
+      toast.success('Workflow trigger updated');
+      fetchCategories();
+    } catch (error) {
+      toast.error('Failed to update workflow trigger');
     }
   };
 
