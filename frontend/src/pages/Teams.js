@@ -205,8 +205,8 @@ export default function Teams() {
                 <Users size={20} className="text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{teams.reduce((acc, t) => acc + t.member_count, 0)}</p>
-                <p className="text-sm text-slate-500">Total Members</p>
+                <p className="text-2xl font-bold">{teams.reduce((acc, team) => acc + team.member_count, 0)}</p>
+                <p className="text-sm text-slate-500">{t('teams.totalMembers')}</p>
               </div>
             </div>
           </CardContent>
@@ -219,9 +219,9 @@ export default function Teams() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {teams.length > 0 ? Math.round(teams.reduce((acc, t) => acc + t.member_count, 0) / teams.length) : 0}
+                  {teams.length > 0 ? Math.round(teams.reduce((acc, team) => acc + team.member_count, 0) / teams.length) : 0}
                 </p>
-                <p className="text-sm text-slate-500">Avg Team Size</p>
+                <p className="text-sm text-slate-500">{t('teams.avgTeamSize')}</p>
               </div>
             </div>
           </CardContent>
@@ -234,13 +234,13 @@ export default function Teams() {
           <CardHeader className="border-b border-slate-100 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <UsersRound size={18} className="text-rose-600" />
-              Teams
+              {t('teams.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {teams.length === 0 ? (
               <div className="p-6 text-center text-slate-500">
-                No teams yet. Create your first team!
+                {t('common.noResults')}
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -261,7 +261,7 @@ export default function Teams() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-900">{team.name}</p>
-                      <p className="text-xs text-slate-500">{team.member_count} members</p>
+                      <p className="text-xs text-slate-500">{team.member_count} {t('teams.members')}</p>
                     </div>
                     <ChevronRight size={16} className="text-slate-400" />
                   </div>
