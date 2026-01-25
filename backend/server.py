@@ -2497,6 +2497,46 @@ def get_default_ui_settings():
         {"key": "msg_no_data", "value": "No data found", "default_value": "No data found", "category": "messages", "description": "Empty state message"},
     ]
 
+# ============== ANNOUNCEMENT TICKER ROUTES ==============
+
+@api_router.get("/announcement-ticker", response_model=AnnouncementTickerResponse)
+async def get_announcement_ticker():
+    """Get current announcement ticker (public - no auth required for display)"""
+    ticker = await db.announcement_ticker.find_one({}, {"_id": 0})
+    if not ticker:
+        # Return default inactive ticker
+        return AnnouncementTickerResponse(
+            message="",
+            is_active=False,
+            background_color="#A2182C",
+            text_color="#FFFFFF",
+            updated_at=get_utc_now(),
+            updated_by_name=None
+        )
+    return AnnouncementTickerResponse(**ticker)
+
+@api_router.put("/announcement-ticker", response_model=AnnouncementTickerResponse)
+async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update announcement ticker (Admin only)"""
+    ticker = {
+        "message": ticker_data.message,
+        "is_active": ticker_data.is_active,
+        "background_color": ticker_data.background_color or "#A2182C",
+        "text_color": ticker_data.text_color or "#FFFFFF",
+        "updated_at": get_utc_now(),
+        "updated_by_id": current_user["id"],
+        "updated_by_name": current_user["name"]
+    }
+    
+    # Upsert - only one ticker document exists
+    await db.announcement_ticker.update_one(
+        {},
+        {"$set": ticker},
+        upsert=True
+    )
+    
+    return AnnouncementTickerResponse(**ticker)
+
 # ============== SATISFACTION RATING ROUTES ==============
 
 @api_router.get("/ratings/verify-token")
