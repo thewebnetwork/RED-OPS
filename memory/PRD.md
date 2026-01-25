@@ -32,6 +32,23 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 8: New P0 Requirements ✅ (January 25, 2026)
+Two critical P0 features implemented:
+
+- **P0-1: Message Notifications (Resolver Alert)**:
+  - When requester sends message on ticket, resolver gets notification via bell icon
+  - If no resolver assigned, admins get notified instead
+  - Notification includes ticket reference (order_code) and message preview (first 50 chars)
+  - Long messages truncated with ellipsis
+  - Works both ways: resolver messages notify requester
+
+- **P0-2: Unsaved Changes Guard**:
+  - Users page: Add/Edit User dialog shows "Unsaved changes" warning
+  - Categories page: Create/Edit Category dialog shows warning
+  - Announcements page: Shows "You have unsaved changes" text, beforeunload handler
+  - Warning dialog has "Stay" and "Leave without saving" options
+  - Browser refresh/close triggers beforeunload confirmation
+
 ### Phase 7: P1 Requirements ✅ (January 25, 2026)
 All 8 P1 features implemented:
 
