@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import { 
   Plus, 
   Search,
@@ -48,6 +58,9 @@ export default function Users() {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const initialFormRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,6 +74,46 @@ export default function Users() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Track form changes
+  useEffect(() => {
+    if (initialFormRef.current) {
+      const changed = JSON.stringify(formData) !== JSON.stringify(initialFormRef.current);
+      setHasFormChanges(changed);
+    }
+  }, [formData]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasFormChanges && dialogOpen) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasFormChanges, dialogOpen]);
+
+  const handleDialogClose = (open) => {
+    if (!open && hasFormChanges) {
+      setShowUnsavedWarning(true);
+      return;
+    }
+    setDialogOpen(open);
+    if (!open) {
+      setHasFormChanges(false);
+      initialFormRef.current = null;
+    }
+  };
+
+  const confirmCloseDialog = () => {
+    setShowUnsavedWarning(false);
+    setDialogOpen(false);
+    setHasFormChanges(false);
+    initialFormRef.current = null;
+  };
 
   const fetchData = async () => {
     try {
