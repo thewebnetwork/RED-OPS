@@ -690,6 +690,9 @@ async def build_user_response(user: dict) -> UserResponse:
         team_name=team_name,
         active=user.get("active", True),
         avatar=user.get("avatar"),
+        force_password_change=user.get("force_password_change", False),
+        force_otp_setup=user.get("force_otp_setup", False),
+        otp_verified=user.get("otp_verified", False),
         created_at=user["created_at"]
     )
 
