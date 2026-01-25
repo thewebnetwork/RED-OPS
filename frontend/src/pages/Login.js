@@ -146,7 +146,7 @@ export default function Login() {
         
         {/* Powered by text */}
         <p className="text-center text-xs text-white/60 mt-4">
-          Red Ribbon Operations Portal
+          Red Ops Portal
         </p>
       </div>
     </div>
