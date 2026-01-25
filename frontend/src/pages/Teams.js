@@ -124,7 +124,7 @@ export default function Teams() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error('Team name is required');
+      toast.error(t('errors.validation'));
       return;
     }
 
