@@ -181,6 +181,9 @@ export default function Layout({ children }) {
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64">
+        {/* Announcement Ticker */}
+        <AnnouncementTicker />
+
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center px-4 lg:px-8">
           <button 
