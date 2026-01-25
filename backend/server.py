@@ -48,7 +48,7 @@ api_router = APIRouter(prefix="/api")
 
 # ============== ENUMS ==============
 SYSTEM_ROLES = ["Admin", "Requester"]  # Base roles that always exist
-ORDER_STATUSES = ["Open", "In Progress", "Pending", "Delivered"]
+ORDER_STATUSES = ["Open", "In Progress", "Pending", "Delivered", "Closed"]
 REQUEST_TYPES = ["Request", "Bug"]
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
 BUG_SEVERITIES = ["Low", "Normal", "High", "Urgent"]
@@ -500,6 +500,7 @@ class UnifiedRequestResponse(BaseModel):
     category_l2_name: Optional[str] = None
     status: str
     priority_or_severity: str
+    assigned_to_name: Optional[str] = None  # Who the ticket is assigned to
     created_at: str
     updated_at: str
 
