@@ -367,7 +367,7 @@ export default function Teams() {
             <Card className="border-slate-200">
               <CardContent className="p-12 text-center text-slate-500">
                 <UsersRound size={48} className="mx-auto mb-4 text-slate-300" />
-                <p>Select a team to view details</p>
+                <p>{t('teams.selectTeam')}</p>
               </CardContent>
             </Card>
           )}
@@ -378,38 +378,38 @@ export default function Teams() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTeam ? 'Edit Team' : 'Create Team'}</DialogTitle>
+            <DialogTitle>{editingTeam ? t('teams.editTeam') : t('teams.newTeam')}</DialogTitle>
             <DialogDescription>
               {editingTeam 
-                ? 'Update team details' 
-                : 'Create a new team to organize your members'
+                ? t('teams.editTeam') 
+                : t('teams.subtitle')
               }
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Team Name *</Label>
+              <Label>{t('teams.teamName')} *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Marketing Team"
+                placeholder={t('teams.teamName')}
                 className="mt-1.5"
                 data-testid="team-name-input"
               />
             </div>
             
             <div>
-              <Label>Description</Label>
+              <Label>{t('common.description')}</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Brief description of this team"
+                placeholder={t('common.description')}
                 className="mt-1.5"
               />
             </div>
 
             <div>
-              <Label>Color</Label>
+              <Label>{t('teams.color')}</Label>
               <Select 
                 value={formData.color} 
                 onValueChange={(v) => setFormData(prev => ({ ...prev, color: v }))}
@@ -434,7 +434,7 @@ export default function Teams() {
             </div>
 
             <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-team-btn">
-              {editingTeam ? 'Update Team' : 'Create Team'}
+              {editingTeam ? t('common.save') : t('common.create')}
             </Button>
           </form>
         </DialogContent>
