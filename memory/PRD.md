@@ -1,4 +1,4 @@
-# RED RIBBON OPS PORTAL - Product Requirements Document
+# RED OPS PORTAL - Product Requirements Document
 
 ## Original Problem Statement
 Build a simplified ticketing/order management system for video editing services. Replace WhatsApp + folder chaos with a single place to manage orders, communicate, and track deliverables.
@@ -31,6 +31,60 @@ Real estate and marketing professionals who can pick orders from the pool:
 5. **Closed** - Requester closed the ticket (with reason)
 
 ## What's Been Implemented
+
+### Phase 7: P1 Requirements ✅ (January 25, 2026)
+All 8 P1 features implemented:
+
+- **P1-1: Branding Update**:
+  - Changed "Red Ribbon" to "Red Ops" throughout the app
+  - Sidebar header shows "Red Ops" with pulse animation on logo
+  - Login page footer updated to "Red Ops Portal"
+
+- **P1-2: Announcement Ticker**:
+  - `/announcements` page for admin-controlled ticker management
+  - Enable/disable toggle, message input, color pickers
+  - Live preview shows ticker appearance
+  - Ticker scrolls across top of all pages when active
+  - Users can dismiss ticker for their session
+
+- **P1-3: Workflow Location Fix**:
+  - Added "Triggers" tab to `/workflows` page
+  - Lists all L2 categories with workflow trigger toggles
+  - Moved workflow trigger configuration from Categories to Workflows module
+
+- **P1-4: Logs Module**:
+  - New `/logs` page with System, API, UI, User tabs
+  - Search input for filtering logs by message
+  - Level filter dropdown (All, Error, Warning, Info, Success, Debug)
+  - Auto-refresh toggle for live updates
+  - Download button to export logs as text file
+  - Backend: `/api/logs/{log_type}` endpoint
+
+- **P1-5: Integrations Module**:
+  - New `/integrations` page with API Keys and Webhooks tabs
+  - API Keys: Create, view, revoke keys with permissions
+  - Webhooks: Create, enable/disable, delete webhooks
+  - Events selection for outgoing webhooks
+  - Backend: `/api/api-keys`, `/api/webhooks` endpoints
+
+- **P1-6: User Provisioning**:
+  - "Force Password Change" toggle in Add/Edit User form
+  - "Force OTP Setup" toggle in Add/Edit User form
+  - OTP code (6 digits) logged to console (MOCKED email)
+  - Backend: `force_password_change`, `force_otp_setup` fields on User model
+
+- **P1-7: Edit User Enhancements**:
+  - Team assignment dropdown in user form
+  - Can re-trigger security flags when editing existing users
+  - Security Options section with clear descriptions
+
+- **P1-8: SLA Module**:
+  - New `/sla` page for SLA management
+  - Create SLA with name, description, priority
+  - Response time and resolution time in hours
+  - Assign SLA to role or team
+  - Enable/disable, edit, delete SLAs
+  - Backend: `/api/sla` CRUD endpoints
 
 ### Phase 6: P0 Requirements ✅ (January 25, 2026)
 Core P0 requirements for ticket management:
