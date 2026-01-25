@@ -234,7 +234,7 @@ export default function Orders() {
                   <th>Type</th>
                   <th>Status</th>
                   <th>Priority</th>
-                  <th>Editor</th>
+                  <th>Assigned to</th>
                   <th>Due Date</th>
                 </tr>
               </thead>
