@@ -107,11 +107,11 @@ export default function Users() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email) {
-      toast.error('Name and email are required');
+      toast.error(t('errors.validation'));
       return;
     }
     if (!editingUser && !formData.password) {
-      toast.error('Password is required for new users');
+      toast.error(t('errors.validation'));
       return;
     }
 
@@ -122,17 +122,17 @@ export default function Users() {
       if (editingUser) {
         if (!submitData.password) delete submitData.password;
         await axios.patch(`${API}/users/${editingUser.id}`, submitData);
-        toast.success('User updated');
+        toast.success(t('success.updated'));
       } else {
         await axios.post(`${API}/users`, submitData);
-        toast.success('User created');
+        toast.success(t('success.created'));
       }
       setDialogOpen(false);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
       setFormData({ name: '', email: '', password: '', role: defaultRole, team_id: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Operation failed');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     }
   };
 
