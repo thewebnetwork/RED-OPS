@@ -332,7 +332,11 @@
     "basedOn": "Basado en {{count}} reseñas",
     "leaveReview": "Dejar una Reseña",
     "yourRating": "Su Calificación",
-    "comment": "Comentario (opcional)"
+    "yourRatings": "Sus Calificaciones",
+    "comment": "Comentario (opcional)",
+    "review": "reseña",
+    "reviews": "reseñas",
+    "responseRate": "Tasa de Respuesta"
   },
   "notifications": {
     "title": "Notificaciones",
