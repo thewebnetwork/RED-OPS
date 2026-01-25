@@ -341,14 +341,14 @@ export default function CommandCenter() {
 
                   {/* File Attachments */}
                   <div>
-                    <Label>Attachments</Label>
+                    <Label>{t('commandCenter.attachments')}</Label>
                     <p className="text-xs text-slate-500 mt-1 mb-2">
-                      Upload screenshots, documents, or files (max 50 MB total). Supported: images, PDFs, documents, videos, audio.
+                      {t('commandCenter.attachmentsHelp')}
                     </p>
                     
                     {/* Upload Area */}
                     <div 
-                      className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
+                      className="border-2 border-dashed border-slate-300 rounded-lg p-4 sm:p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <input
@@ -361,8 +361,8 @@ export default function CommandCenter() {
                         data-testid="file-upload-input"
                       />
                       <Upload size={32} className="mx-auto text-slate-400 mb-2" />
-                      <p className="text-sm text-slate-600">Click to upload or drag and drop</p>
-                      <p className="text-xs text-slate-400 mt-1">Max 50 MB • No executable files</p>
+                      <p className="text-sm text-slate-600">{t('commandCenter.clickToUpload')}</p>
+                      <p className="text-xs text-slate-400 mt-1">{t('commandCenter.maxSize')} • {t('commandCenter.noExecutable')}</p>
                     </div>
 
                     {/* Attached Files List */}
@@ -372,7 +372,7 @@ export default function CommandCenter() {
                           const FileIcon = getFileIcon(file.name);
                           return (
                             <div key={index} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
-                              <FileIcon size={18} className="text-slate-500" />
+                              <FileIcon size={18} className="text-slate-500 shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
                                 <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
@@ -380,7 +380,7 @@ export default function CommandCenter() {
                               <button
                                 type="button"
                                 onClick={() => removeAttachment(index)}
-                                className="p-1 hover:bg-slate-200 rounded"
+                                className="p-1 hover:bg-slate-200 rounded shrink-0"
                               >
                                 <X size={16} className="text-slate-500" />
                               </button>
@@ -388,7 +388,7 @@ export default function CommandCenter() {
                           );
                         })}
                         <p className="text-xs text-slate-500">
-                          Total: {formatFileSize(attachments.reduce((sum, f) => sum + f.size, 0))} / 50 MB
+                          {t('commandCenter.total')}: {formatFileSize(attachments.reduce((sum, f) => sum + f.size, 0))} / 50 MB
                         </p>
                       </div>
                     )}
@@ -397,7 +397,7 @@ export default function CommandCenter() {
                     <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
                       <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
                       <p className="text-xs text-amber-700">
-                        For security, executable files (.exe, .bat, .js, etc.) are blocked. If you need to share code or scripts, please use a .txt or .zip file.
+                        {t('commandCenter.securityNotice')}
                       </p>
                     </div>
                   </div>
