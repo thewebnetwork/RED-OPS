@@ -187,10 +187,10 @@ export default function Orders() {
               {hasRole('Admin', 'Manager') && (
                 <Select value={filters.assigned_editor_id} onValueChange={(v) => setFilters(prev => ({ ...prev, assigned_editor_id: v }))}>
                   <SelectTrigger className="w-full sm:w-40" data-testid="editor-filter">
-                    <SelectValue placeholder="Editor" />
+                    <SelectValue placeholder="Assigned to" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Editors</SelectItem>
+                    <SelectItem value="all">All Assignees</SelectItem>
                     {editors.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
