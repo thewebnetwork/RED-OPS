@@ -190,6 +190,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/settings" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <UISettings />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/profile" 
         element={
           <PrivateRoute>
