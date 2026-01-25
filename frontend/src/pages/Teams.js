@@ -84,7 +84,7 @@ export default function Teams() {
         setSelectedTeam(res.data[0]);
       }
     } catch (error) {
-      toast.error('Failed to load teams');
+      toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
     }
