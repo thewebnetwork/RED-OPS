@@ -270,9 +270,7 @@ export default function Users() {
           <Plus size={18} className="mr-2" />
           {t('users.addUser')}
         </Button>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          if (!open) setDialogOpen(false);
-        }}>
+        <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingUser ? t('users.editUser') : t('users.addUser')}</DialogTitle>
