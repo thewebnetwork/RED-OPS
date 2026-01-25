@@ -212,37 +212,53 @@ export default function Workflows() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <Input
-          placeholder="Search workflows..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-          data-testid="search-workflows"
-        />
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 w-full max-w-sm">
+          <TabsTrigger value="workflows" className="flex items-center gap-2">
+            <GitBranch size={14} />
+            Workflows
+          </TabsTrigger>
+          <TabsTrigger value="triggers" className="flex items-center gap-2" data-testid="workflow-triggers-tab">
+            <Zap size={14} />
+            Triggers
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Workflows Grid */}
-      {filteredWorkflows.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-              <GitBranch size={32} className="text-slate-400" />
-            </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No workflows yet</h3>
-            <p className="text-slate-500 text-center max-w-md mb-4">
-              Create your first workflow to automate processes like ticket routing, 
-              notifications, and more.
-            </p>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="bg-rose-600 hover:bg-rose-700"
-            >
-              <Plus size={18} className="mr-2" />
-              Create First Workflow
-            </Button>
+        <TabsContent value="workflows" className="mt-6 space-y-6">
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search workflows..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+              data-testid="search-workflows"
+            />
+          </div>
+
+          {/* Workflows Grid */}
+          {filteredWorkflows.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <GitBranch size={32} className="text-slate-400" />
+                </div>
+                <h3 className="text-lg font-medium text-slate-900 mb-2">No workflows yet</h3>
+                <p className="text-slate-500 text-center max-w-md mb-4">
+                  Create your first workflow to automate processes like ticket routing, 
+                  notifications, and more.
+                </p>
+                <Button
+                  onClick={() => setShowCreateDialog(true)}
+                  className="bg-rose-600 hover:bg-rose-700"
+                >
+                  <Plus size={18} className="mr-2" />
+                  Create First Workflow
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
           </CardContent>
         </Card>
       ) : (
