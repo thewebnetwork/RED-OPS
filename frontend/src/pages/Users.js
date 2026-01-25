@@ -72,7 +72,7 @@ export default function Users() {
         setFormData(prev => ({ ...prev, role: rolesRes.data[0].name }));
       }
     } catch (error) {
-      toast.error('Failed to load data');
+      toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
     }
