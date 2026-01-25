@@ -68,6 +68,7 @@ export default function Layout({ children }) {
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Admin'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Admin'] },
     { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Admin'] },
+    { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Admin'] },
   ];
 
   const quickLinks = [
