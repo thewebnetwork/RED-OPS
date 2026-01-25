@@ -310,8 +310,91 @@ export default function Users() {
         </CardContent>
       </Card>
 
-      {/* Users Table */}
-      <Card className="border-slate-200 overflow-hidden">
+      {/* Users - Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <Card className="border-slate-200">
+            <CardContent className="p-12 text-center text-slate-500">
+              {search ? t('users.noMatch') : t('users.noUsers')}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredUsers.map(user => (
+            <Card key={user.id} className="border-slate-200" data-testid={`user-card-${user.id}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-medium text-slate-600 text-lg">{user.name.charAt(0)}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-slate-900 truncate">{user.name}</p>
+                      <p className="text-sm text-slate-500 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <Badge className={user.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+                    {user.active ? t('users.active') : t('users.inactive')}
+                  </Badge>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge style={getRoleColor(user.role)}>
+                    {roles.find(r => r.name === user.role)?.display_name || user.role}
+                  </Badge>
+                  {user.team_name && (
+                    <Badge variant="outline" className="text-slate-600">
+                      {user.team_name}
+                    </Badge>
+                  )}
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-400">
+                    {t('users.created')}: {format(new Date(user.created_at), 'MMM d, yyyy')}
+                  </span>
+                  {user.id !== currentUser.id && (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleToggleActive(user.id, user.active)}
+                      >
+                        {user.active ? <UserX size={16} /> : <UserCheck size={16} />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleOpenDialog(user)}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Users Table - Desktop Only */}
+      <Card className="border-slate-200 overflow-hidden hidden md:block">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
