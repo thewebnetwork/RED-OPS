@@ -586,12 +586,20 @@ export default function CommandCenter() {
                           <Badge className={statusColors[request.status]}>{request.status}</Badge>
                         </div>
                         <p className="font-medium text-slate-900 mt-1 truncate">{request.title}</p>
-                        <p className="text-sm text-slate-500">
-                          {request.category_l1_name && request.category_l2_name 
-                            ? `${request.category_l1_name} → ${request.category_l2_name}`
-                            : request.category_l1_name || 'Uncategorized'
-                          }
-                        </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500 mt-1">
+                          <span>
+                            {request.category_l1_name && request.category_l2_name 
+                              ? `${request.category_l1_name} → ${request.category_l2_name}`
+                              : request.category_l1_name || 'Uncategorized'
+                            }
+                          </span>
+                          {request.assigned_to_name && (
+                            <span className="flex items-center gap-1">
+                              <span className="text-slate-400">Assigned to:</span>
+                              <span className="font-medium text-slate-700">{request.assigned_to_name}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right shrink-0">
                         <Badge className={priorityColors[request.priority_or_severity]}>{request.priority_or_severity}</Badge>
