@@ -110,7 +110,7 @@
   },
   "commandCenter": {
     "title": "Central de Comando",
-    "subtitle": "O que você gostaria de fazer?",
+    "subtitle": "Faça solicitações, reporte problemas ou solicite novos recursos",
     "selectCategory": "Selecione a Categoria",
     "selectSubCategory": "Selecione a Subcategoria",
     "requestTitle": "Título da Solicitação",
@@ -118,7 +118,22 @@
     "submitRequest": "Enviar Solicitação",
     "featureRequest": "Solicitação de Recurso",
     "bugReport": "Relatório de Bug",
-    "newTicket": "Novo Chamado"
+    "newTicket": "Criar Nova Solicitação",
+    "myRequests": "Minhas Solicitações",
+    "noRequests": "Você ainda não enviou nenhuma solicitação",
+    "describeIssue": "Descreva seu Problema/Solicitação",
+    "describeIssuePlaceholder": "Por favor, descreva sua solicitação ou problema em detalhes. Quanto mais informações você fornecer, melhor poderemos ajudá-lo...",
+    "attachments": "Anexos",
+    "attachmentsHelp": "Envie capturas de tela, documentos ou arquivos (máx. 50 MB no total). Suportados: imagens, PDFs, documentos, vídeos, áudio.",
+    "clickToUpload": "Clique para enviar ou arraste e solte",
+    "maxSize": "Máx. 50 MB",
+    "noExecutable": "Sem arquivos executáveis",
+    "securityNotice": "Por segurança, arquivos executáveis (.exe, .bat, .js, etc.) são bloqueados. Se precisar compartilhar código ou scripts, use um arquivo .txt ou .zip.",
+    "requestType": "Tipo de Solicitação",
+    "request": "Solicitação",
+    "incident": "Incidente / Problemas",
+    "total": "Total",
+    "searchCategories": "Digite para encontrar uma categoria mais rápido..."
   },
   "workflows": {
     "title": "Construtor de Fluxos",
