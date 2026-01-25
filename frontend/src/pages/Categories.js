@@ -49,10 +49,22 @@ const getIcon = (iconName) => {
 };
 
 export default function Categories() {
+  const { t, i18n } = useTranslation();
   const [categoriesL1, setCategoriesL1] = useState([]);
   const [categoriesL2, setCategoriesL2] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedL1, setSelectedL1] = useState(null);
+  
+  // Helper function to get translated category name
+  const getCategoryName = (category) => {
+    const lang = i18n.language || 'en';
+    // Check if category has language-specific name
+    if (category[`name_${lang}`]) {
+      return category[`name_${lang}`];
+    }
+    // Fallback to default name
+    return category.name;
+  };
   
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
