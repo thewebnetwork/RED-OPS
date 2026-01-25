@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -35,6 +36,7 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function Users() {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
