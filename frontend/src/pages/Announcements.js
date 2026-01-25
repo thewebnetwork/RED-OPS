@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -6,6 +6,16 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Switch } from '../components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import { Megaphone, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,15 +30,39 @@ export default function Announcements() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const initialDataRef = useRef(null);
 
   useEffect(() => {
     fetchTicker();
   }, []);
 
+  // Track changes
+  useEffect(() => {
+    if (initialDataRef.current) {
+      const changed = JSON.stringify(ticker) !== JSON.stringify(initialDataRef.current);
+      setHasChanges(changed);
+    }
+  }, [ticker]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
+
   const fetchTicker = async () => {
     try {
       const res = await axios.get(`${API}/announcement-ticker`);
       setTicker(res.data);
+      initialDataRef.current = res.data;
     } catch (error) {
       console.error('Failed to fetch ticker');
     } finally {
@@ -41,6 +75,8 @@ export default function Announcements() {
     try {
       await axios.put(`${API}/announcement-ticker`, ticker);
       toast.success('Announcement ticker updated');
+      initialDataRef.current = ticker;
+      setHasChanges(false);
       // Trigger a page refresh for the ticker component
       window.dispatchEvent(new Event('ticker-updated'));
     } catch (error) {
