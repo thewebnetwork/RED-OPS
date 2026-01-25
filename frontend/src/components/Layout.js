@@ -19,7 +19,8 @@ import {
   Shield,
   UsersRound,
   Star,
-  GitBranch
+  GitBranch,
+  Settings
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
