@@ -20,7 +20,11 @@ import {
   UsersRound,
   Star,
   GitBranch,
-  Settings
+  Settings,
+  FileText,
+  Plug,
+  Clock,
+  Megaphone
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
