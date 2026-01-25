@@ -64,6 +64,9 @@ export default function Categories() {
   const [categoriesL2, setCategoriesL2] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedL1, setSelectedL1] = useState(null);
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const initialFormRef = useRef(null);
   
   // Helper function to get translated category name
   const getCategoryName = (category) => {
@@ -94,6 +97,46 @@ export default function Categories() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Track form changes
+  useEffect(() => {
+    if (initialFormRef.current) {
+      const changed = JSON.stringify(formData) !== JSON.stringify(initialFormRef.current);
+      setHasFormChanges(changed);
+    }
+  }, [formData]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasFormChanges && dialogOpen) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasFormChanges, dialogOpen]);
+
+  const handleDialogClose = (open) => {
+    if (!open && hasFormChanges) {
+      setShowUnsavedWarning(true);
+      return;
+    }
+    setDialogOpen(open);
+    if (!open) {
+      setHasFormChanges(false);
+      initialFormRef.current = null;
+    }
+  };
+
+  const confirmCloseDialog = () => {
+    setShowUnsavedWarning(false);
+    setDialogOpen(false);
+    setHasFormChanges(false);
+    initialFormRef.current = null;
+  };
 
   useEffect(() => {
     if (selectedL1) {
