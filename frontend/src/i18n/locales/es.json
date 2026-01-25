@@ -227,7 +227,15 @@
     "teamName": "Nombre del Equipo",
     "teamDescription": "Descripción",
     "members": "Miembros",
-    "noMembers": "Sin miembros"
+    "noMembers": "Sin miembros",
+    "addTeam": "Agregar Equipo",
+    "subtitle": "Organiza los miembros en grupos",
+    "totalTeams": "Total de Equipos",
+    "totalMembers": "Total de Miembros",
+    "avgTeamSize": "Tamaño Promedio",
+    "selectTeam": "Seleccione un equipo",
+    "color": "Color",
+    "viewMembers": "Ver Miembros"
   },
   "roles": {
     "title": "Roles",
