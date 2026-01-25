@@ -312,6 +312,45 @@ export default function Users() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* Security Options Section */}
+              <div className="border-t border-slate-200 pt-4 mt-4">
+                <Label className="text-sm font-medium flex items-center gap-2 mb-3">
+                  <Shield size={16} className="text-slate-500" />
+                  Security Options
+                </Label>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <KeyRound size={18} className="text-amber-500" />
+                      <div>
+                        <p className="text-sm font-medium">Force Password Change</p>
+                        <p className="text-xs text-slate-500">User must change password on next login</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={formData.force_password_change}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, force_password_change: checked }))}
+                      data-testid="force-password-change-switch"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Shield size={18} className="text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium">Force OTP Setup</p>
+                        <p className="text-xs text-slate-500">User must verify OTP code (6 digits) via email</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={formData.force_otp_setup}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, force_otp_setup: checked }))}
+                      data-testid="force-otp-setup-switch"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
                 {editingUser ? t('common.save') : t('users.addUser')}
               </Button>
