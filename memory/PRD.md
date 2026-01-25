@@ -23,13 +23,40 @@ Real estate and marketing professionals who can pick orders from the pool:
 - **Trades**: General Contractor, Electrician, Plumber, HVAC Technician, Roofer, Painter, Landscaper, Cleaner, Pest Control, Locksmith
 - **Marketing**: Graphic Designer, Social Media Manager, Copywriter, SEO Specialist, Web Developer, Print Specialist, Sign Installer
 
-## Current Order Workflow (4 Statuses)
+## Current Order Workflow (5 Statuses)
 1. **Open** - New order created by Requester, visible in Service Provider pool
 2. **In Progress** - Service Provider picked the order and is working on it
 3. **Pending** - Service Provider submitted for review, waiting on Requester feedback
 4. **Delivered** - Order completed
+5. **Closed** - Requester closed the ticket (with reason)
 
 ## What's Been Implemented
+
+### Phase 6: P0 Requirements ✅ (January 25, 2026)
+Core P0 requirements for ticket management:
+
+- **P0-1: Requester Visibility**:
+  - "Assigned to" field now visible in My Requests list (CommandCenter.js)
+  - "Assigned to" field visible in Order Detail sidebar
+  - Backend `/api/my-requests` includes `assigned_to_name` field
+
+- **P0-2: Ticket Timestamps**:
+  - "Created" timestamp with date and time visible in Order Detail
+  - "Last Updated" timestamp visible in Order Detail
+  - "Closed At" timestamp appears when ticket is closed
+
+- **P0-3: Requester-side Close**:
+  - "Close Ticket" button visible for requesters on their own open tickets
+  - Close dialog requires reason (1-500 characters)
+  - Backend `/api/orders/{order_id}/close` endpoint
+  - New "Closed" status added to ORDER_STATUSES
+  - "Close Reason" displayed in Order Info sidebar after closing
+
+- **P0-4: Label Change**:
+  - Changed "Editor" to "Assigned to" throughout the application
+  - Orders.js filter dropdown: "Editor" → "Assigned to"
+  - Orders.js table header: Shows "Assigned to"
+  - OrderDetail.js sidebar: Shows "Assigned to" label
 
 ### Phase 5: Full i18n & Mobile Responsiveness ✅ (January 25, 2026)
 Complete internationalization of all pages and mobile-responsive design:
