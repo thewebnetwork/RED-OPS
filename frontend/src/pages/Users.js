@@ -145,9 +145,10 @@ export default function Users() {
   };
 
   const handleOpenDialog = (user = null) => {
+    let initialData;
     if (user) {
       setEditingUser(user);
-      setFormData({
+      initialData = {
         name: user.name,
         email: user.email,
         password: '',
@@ -155,11 +156,12 @@ export default function Users() {
         team_id: user.team_id || '',
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false
-      });
+      };
+      setFormData(initialData);
     } else {
       setEditingUser(null);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
-      setFormData({ 
+      initialData = { 
         name: '', 
         email: '', 
         password: '', 
@@ -167,8 +169,11 @@ export default function Users() {
         team_id: '',
         force_password_change: false,
         force_otp_setup: false 
-      });
+      };
+      setFormData(initialData);
     }
+    initialFormRef.current = initialData;
+    setHasFormChanges(false);
     setDialogOpen(true);
   };
 
