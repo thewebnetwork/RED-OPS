@@ -61,7 +61,7 @@ export default function Login() {
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#A2182C] shadow-lg mb-4">
               <img 
                 src="/assets/logos/logo-realty.jpg" 
-                alt="Red Ribbon Realty" 
+                alt="Red Ops" 
                 className="w-full h-full object-cover object-center scale-150"
               />
             </div>
