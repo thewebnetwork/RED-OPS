@@ -254,6 +254,8 @@ export default function Categories() {
         }
         fetchCategoriesL2(selectedL1);
       }
+      setHasFormChanges(false);
+      initialFormRef.current = null;
       setDialogOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('errors.generic'));
