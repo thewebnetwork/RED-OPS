@@ -332,7 +332,11 @@
     "basedOn": "Based on {{count}} reviews",
     "leaveReview": "Leave a Review",
     "yourRating": "Your Rating",
-    "comment": "Comment (optional)"
+    "yourRatings": "Your Ratings",
+    "comment": "Comment (optional)",
+    "review": "review",
+    "reviews": "reviews",
+    "responseRate": "Response Rate"
   },
   "notifications": {
     "title": "Notifications",
