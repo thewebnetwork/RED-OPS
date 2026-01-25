@@ -256,7 +256,16 @@
     "newCategory": "Nueva Categoría",
     "editCategory": "Editar Categoría",
     "categoryName": "Nombre de la Categoría",
-    "parentCategory": "Categoría Padre"
+    "parentCategory": "Categoría Padre",
+    "subcategory": "Subcategoría",
+    "level1Description": "Las categorías son la agrupación de nivel superior para solicitudes",
+    "level2Description": "Las subcategorías proporcionan tipos específicos dentro de una categoría",
+    "defaultName": "nombre predeterminado",
+    "translations": "Traducciones",
+    "icon": "Icono",
+    "selectParent": "Seleccionar padre",
+    "enableWorkflow": "Activar Flujo de Editor",
+    "workflowDescription": "Las solicitudes pasarán por el proceso de asignación de editor"
   },
   "profile": {
     "title": "Perfil",
