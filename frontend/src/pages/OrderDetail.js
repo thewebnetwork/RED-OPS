@@ -707,6 +707,24 @@ export default function OrderDetail() {
                   </p>
                 </div>
               )}
+
+              {order.closed_at && (
+                <div>
+                  <Label className="text-xs text-slate-500">Closed At</Label>
+                  <p className="font-medium mt-1.5">
+                    {format(new Date(order.closed_at), 'MMM d, yyyy h:mm a')}
+                  </p>
+                </div>
+              )}
+
+              {order.close_reason && (
+                <div>
+                  <Label className="text-xs text-slate-500">Close Reason</Label>
+                  <p className="mt-1.5 text-slate-700 text-sm bg-slate-50 p-2 rounded">
+                    {order.close_reason}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
