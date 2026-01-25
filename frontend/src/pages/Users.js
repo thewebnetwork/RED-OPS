@@ -139,22 +139,22 @@ export default function Users() {
   const handleToggleActive = async (userId, currentActive) => {
     try {
       await axios.patch(`${API}/users/${userId}`, { active: !currentActive });
-      toast.success(`User ${currentActive ? 'deactivated' : 'activated'}`);
+      toast.success(t('success.updated'));
       fetchData();
     } catch (error) {
-      toast.error('Failed to update user');
+      toast.error(t('errors.generic'));
     }
   };
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm(t('common.confirm'))) return;
     
     try {
       await axios.delete(`${API}/users/${userId}`);
-      toast.success('User deleted');
+      toast.success(t('success.deleted'));
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to delete user');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     }
   };
 
