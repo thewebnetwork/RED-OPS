@@ -1959,9 +1959,14 @@ async def create_message(order_id: str, message_data: MessageCreate, current_use
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if current_user["role"] == "Requester" and order["requester_id"] != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
-    if current_user["role"] == "Editor" and order.get("editor_id") != current_user["id"]:
+    # Check access - requester can only message on their own orders
+    # Resolver (editor) can only message on orders they're assigned to
+    # Admin can message on any order
+    is_requester = order["requester_id"] == current_user["id"]
+    is_resolver = order.get("editor_id") == current_user["id"]
+    is_admin = current_user["role"] == "Admin"
+    
+    if not (is_requester or is_resolver or is_admin):
         raise HTTPException(status_code=403, detail="Access denied")
     
     message = {
@@ -1975,10 +1980,39 @@ async def create_message(order_id: str, message_data: MessageCreate, current_use
     }
     await db.order_messages.insert_one(message)
     
-    if current_user["role"] == "Editor" and order.get("requester_id"):
-        await create_notification(order["requester_id"], "new_message", "New message on your request", f"Editor sent a message on request {order['order_code']}", order_id)
-    elif current_user["role"] == "Requester" and order.get("editor_id"):
-        await create_notification(order["editor_id"], "new_message", "New message on request", f"Requester sent a message on request {order['order_code']}", order_id)
+    # Send notifications based on who sent the message
+    if is_requester:
+        # Requester sent message - notify the resolver if assigned
+        if order.get("editor_id"):
+            await create_notification(
+                order["editor_id"], 
+                "new_message", 
+                "New message on your ticket", 
+                f"{current_user['name']} sent a message on ticket {order['order_code']}: \"{message_data.message_body[:50]}{'...' if len(message_data.message_body) > 50 else ''}\"", 
+                order_id
+            )
+        else:
+            # No resolver assigned - notify admins
+            admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+            for admin in admins:
+                await create_notification(
+                    admin["id"], 
+                    "new_message", 
+                    "New message on unassigned ticket", 
+                    f"{current_user['name']} sent a message on unassigned ticket {order['order_code']}", 
+                    order_id
+                )
+    else:
+        # Resolver or Admin sent message - notify the requester
+        if order.get("requester_id"):
+            sender_label = "Your resolver" if is_resolver else "Admin"
+            await create_notification(
+                order["requester_id"], 
+                "new_message", 
+                "New message on your request", 
+                f"{sender_label} sent a message on request {order['order_code']}: \"{message_data.message_body[:50]}{'...' if len(message_data.message_body) > 50 else ''}\"", 
+                order_id
+            )
     
     return MessageResponse(**message)
 
