@@ -21,6 +21,10 @@ import Teams from "./pages/Teams";
 import Workflows from "./pages/Workflows";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import UISettings from "./pages/UISettings";
+import Announcements from "./pages/Announcements";
+import Logs from "./pages/Logs";
+import Integrations from "./pages/Integrations";
+import SLA from "./pages/SLA";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
