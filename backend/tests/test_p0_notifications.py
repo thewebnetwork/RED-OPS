@@ -19,6 +19,8 @@ ADMIN_EMAIL = "admin@redribbonops.com"
 ADMIN_PASSWORD = "Fmtvvl171**"
 REQUESTER_EMAIL = "testrequester@test.com"
 REQUESTER_PASSWORD = "Test123!"
+EDITOR_EMAIL = "editor@test.com"
+EDITOR_PASSWORD = "Test123!"
 
 
 class TestMessageNotifications:
