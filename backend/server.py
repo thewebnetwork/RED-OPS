@@ -118,6 +118,8 @@ class UserCreate(BaseModel):
     password: str
     role: str  # Now dynamic - any role name
     team_id: Optional[str] = None  # Team assignment
+    force_password_change: bool = False  # Force password change on next login
+    force_otp_setup: bool = False  # Force OTP/2FA setup on next login
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
@@ -126,6 +128,8 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None  # Now dynamic
     team_id: Optional[str] = None  # Team assignment
     active: Optional[bool] = None
+    force_password_change: Optional[bool] = None  # Re-trigger password change
+    force_otp_setup: Optional[bool] = None  # Re-trigger OTP setup
 
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
