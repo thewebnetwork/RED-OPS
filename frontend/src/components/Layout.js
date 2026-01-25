@@ -102,10 +102,10 @@ export default function Layout({ children }) {
           <div className="flex items-center gap-3">
             <img 
               src="/assets/logos/logo-icon.jpg" 
-              alt="Red Ribbon" 
-              className="w-10 h-10 rounded-lg object-cover"
+              alt="Red Ops" 
+              className="w-10 h-10 rounded-lg object-cover animate-pulse-slow"
             />
-            <span className="font-semibold text-lg tracking-tight">Red Ribbon</span>
+            <span className="font-semibold text-lg tracking-tight">Red Ops</span>
           </div>
           <button 
             className="ml-auto lg:hidden text-white/70 hover:text-white"
