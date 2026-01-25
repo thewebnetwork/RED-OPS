@@ -227,7 +227,15 @@
     "teamName": "Team Name",
     "teamDescription": "Description",
     "members": "Members",
-    "noMembers": "No members"
+    "noMembers": "No members",
+    "addTeam": "Add Team",
+    "subtitle": "Organize team members into groups",
+    "totalTeams": "Total Teams",
+    "totalMembers": "Total Members",
+    "avgTeamSize": "Avg. Team Size",
+    "selectTeam": "Select a team",
+    "color": "Color",
+    "viewMembers": "View Members"
   },
   "roles": {
     "title": "Roles",
