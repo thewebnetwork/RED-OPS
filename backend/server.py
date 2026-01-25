@@ -1094,6 +1094,9 @@ async def create_category_l1(category_data: CategoryL1Create, current_user: dict
     category = {
         "id": str(uuid.uuid4()),
         "name": category_data.name,
+        "name_en": category_data.name_en,
+        "name_pt": category_data.name_pt,
+        "name_es": category_data.name_es,
         "description": category_data.description,
         "icon": category_data.icon,
         "active": True,
