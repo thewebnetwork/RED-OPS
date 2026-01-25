@@ -259,9 +259,6 @@ export default function Workflows() {
               </CardContent>
             </Card>
           ) : (
-          </CardContent>
-        </Card>
-      ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredWorkflows.map((workflow) => (
             <Card
