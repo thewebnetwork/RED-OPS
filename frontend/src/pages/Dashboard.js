@@ -137,6 +137,12 @@ const priorityConfig = {
 function OrderCard({ order, showPickButton, onPick, t }) {
   const isBreaching = order.is_sla_breached;
   
+  // Get translated status and priority
+  const statusKey = order.status.toLowerCase().replace(/\s+/g, '');
+  const priorityKey = order.priority.toLowerCase();
+  const translatedStatus = t(`orders.status.${statusKey}`);
+  const translatedPriority = t(`orders.priority_levels.${priorityKey}`);
+  
   return (
     <Link 
       to={`/orders/${order.id}`}
@@ -149,8 +155,8 @@ function OrderCard({ order, showPickButton, onPick, t }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono text-xs text-slate-500">{order.order_code}</span>
-            <Badge className={statusConfig[order.status]?.class}>{t(`orders.status.${order.status.toLowerCase().replace(' ', '')}`) || order.status}</Badge>
-            <Badge className={priorityConfig[order.priority]}>{t(`orders.priority_levels.${order.priority.toLowerCase()}`) || order.priority}</Badge>
+            <Badge className={statusConfig[order.status]?.class}>{translatedStatus !== `orders.status.${statusKey}` ? translatedStatus : order.status}</Badge>
+            <Badge className={priorityConfig[order.priority]}>{translatedPriority !== `orders.priority_levels.${priorityKey}` ? translatedPriority : order.priority}</Badge>
             {isBreaching && (
               <Badge className="bg-red-100 text-red-700">
                 <AlertTriangle size={12} className="mr-1" />
