@@ -211,7 +211,14 @@
     "inactive": "Inactive",
     "selectRole": "Select Role",
     "selectTeam": "Select Team",
-    "noTeam": "No Team"
+    "noTeam": "No Team",
+    "manageUsers": "Manage Users",
+    "addUser": "Add User",
+    "searchUsers": "Search users...",
+    "noUsers": "No users yet",
+    "noMatch": "No users match your search",
+    "user": "User",
+    "created": "Created"
   },
   "teams": {
     "title": "Teams",
