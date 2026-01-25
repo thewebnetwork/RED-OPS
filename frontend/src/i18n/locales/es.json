@@ -110,7 +110,7 @@
   },
   "commandCenter": {
     "title": "Centro de Comando",
-    "subtitle": "¿Qué le gustaría hacer?",
+    "subtitle": "Haga solicitudes, reporte problemas o solicite nuevas funciones",
     "selectCategory": "Seleccione Categoría",
     "selectSubCategory": "Seleccione Subcategoría",
     "requestTitle": "Título de la Solicitud",
@@ -118,7 +118,22 @@
     "submitRequest": "Enviar Solicitud",
     "featureRequest": "Solicitud de Función",
     "bugReport": "Reporte de Error",
-    "newTicket": "Nuevo Ticket"
+    "newTicket": "Crear Nueva Solicitud",
+    "myRequests": "Mis Solicitudes",
+    "noRequests": "Aún no ha enviado ninguna solicitud",
+    "describeIssue": "Describa su Problema/Solicitud",
+    "describeIssuePlaceholder": "Por favor, describa su solicitud o problema en detalle. Cuanta más información proporcione, mejor podremos ayudarle...",
+    "attachments": "Adjuntos",
+    "attachmentsHelp": "Suba capturas de pantalla, documentos o archivos (máx. 50 MB en total). Soportados: imágenes, PDFs, documentos, videos, audio.",
+    "clickToUpload": "Haga clic para subir o arrastre y suelte",
+    "maxSize": "Máx. 50 MB",
+    "noExecutable": "Sin archivos ejecutables",
+    "securityNotice": "Por seguridad, los archivos ejecutables (.exe, .bat, .js, etc.) están bloqueados. Si necesita compartir código o scripts, use un archivo .txt o .zip.",
+    "requestType": "Tipo de Solicitud",
+    "request": "Solicitud",
+    "incident": "Incidente / Problemas",
+    "total": "Total",
+    "searchCategories": "Escriba para encontrar una categoría más rápido..."
   },
   "workflows": {
     "title": "Constructor de Flujos",
