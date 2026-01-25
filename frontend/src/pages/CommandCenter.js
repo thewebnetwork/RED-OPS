@@ -271,7 +271,7 @@ export default function CommandCenter() {
           </TabsTrigger>
           <TabsTrigger value="my-requests" data-testid="my-requests-tab">
             <FileText size={16} className="mr-2" />
-            My Requests ({myRequests.length})
+            {t('commandCenter.myRequests')} ({myRequests.length})
           </TabsTrigger>
         </TabsList>
 
@@ -281,16 +281,16 @@ export default function CommandCenter() {
             <div className="lg:col-span-2">
               <Card className="border-slate-200">
                 <CardHeader className="border-b border-slate-100 pb-4">
-                  <CardTitle>Create New Request</CardTitle>
+                  <CardTitle>{t('commandCenter.newTicket')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {/* Title */}
                   <div>
-                    <Label>Title</Label>
+                    <Label>{t('commandCenter.requestTitle')}</Label>
                     <Input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Put the title of your request, order, or issue..."
+                      placeholder={t('commandCenter.requestTitle')}
                       className="mt-1.5"
                       data-testid="request-title-input"
                     />
@@ -298,8 +298,8 @@ export default function CommandCenter() {
 
                   {/* Request Type */}
                   <div>
-                    <Label>Request Type</Label>
-                    <div className="flex gap-4 mt-2">
+                    <Label>{t('commandCenter.requestType')}</Label>
+                    <div className="flex flex-wrap gap-4 mt-2">
                       <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${requestType === 'Request' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 hover:border-slate-300'}`}>
                         <input
                           type="radio"
@@ -310,7 +310,7 @@ export default function CommandCenter() {
                           className="sr-only"
                         />
                         <Lightbulb size={18} className={requestType === 'Request' ? 'text-rose-600' : 'text-slate-400'} />
-                        <span className={requestType === 'Request' ? 'text-rose-700 font-medium' : 'text-slate-600'}>Request</span>
+                        <span className={requestType === 'Request' ? 'text-rose-700 font-medium' : 'text-slate-600'}>{t('commandCenter.request')}</span>
                       </label>
                       <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${requestType === 'Bug' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 hover:border-slate-300'}`}>
                         <input
@@ -322,18 +322,18 @@ export default function CommandCenter() {
                           className="sr-only"
                         />
                         <Bug size={18} className={requestType === 'Bug' ? 'text-rose-600' : 'text-slate-400'} />
-                        <span className={requestType === 'Bug' ? 'text-rose-700 font-medium' : 'text-slate-600'}>Incident / Issues</span>
+                        <span className={requestType === 'Bug' ? 'text-rose-700 font-medium' : 'text-slate-600'}>{t('commandCenter.incident')}</span>
                       </label>
                     </div>
                   </div>
 
                   {/* Description */}
                   <div>
-                    <Label>Describe your Issue/Request *</Label>
+                    <Label>{t('commandCenter.describeIssue')} *</Label>
                     <Textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Please describe your request or issue in detail. The more information you provide, the better we can assist you..."
+                      placeholder={t('commandCenter.describeIssuePlaceholder')}
                       className="mt-1.5 min-h-[120px]"
                       data-testid="request-description-input"
                     />
