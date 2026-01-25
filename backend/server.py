@@ -1133,6 +1133,9 @@ async def create_category_l2(category_data: CategoryL2Create, current_user: dict
     category = {
         "id": str(uuid.uuid4()),
         "name": category_data.name,
+        "name_en": category_data.name_en,
+        "name_pt": category_data.name_pt,
+        "name_es": category_data.name_es,
         "category_l1_id": category_data.category_l1_id,
         "description": category_data.description,
         "triggers_editor_workflow": category_data.triggers_editor_workflow,
