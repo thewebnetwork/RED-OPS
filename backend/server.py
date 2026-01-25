@@ -603,6 +603,8 @@ def normalize_order(order: dict) -> dict:
         "music_preference": None,
         "delivery_format": None,
         "special_instructions": None,
+        "close_reason": None,
+        "closed_at": None,
         "picked_at": None,
         "delivered_at": None,
     }
