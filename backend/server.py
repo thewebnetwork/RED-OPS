@@ -2642,6 +2642,15 @@ async def seed_data():
     await db.counters.update_one({"_id": "feature_request_code"}, {"$setOnInsert": {"seq": 0}}, upsert=True)
     await db.counters.update_one({"_id": "bug_report_code"}, {"$setOnInsert": {"seq": 0}}, upsert=True)
     
+    # ========== SEED UI SETTINGS ==========
+    ui_settings_count = await db.ui_settings.count_documents({})
+    if ui_settings_count == 0:
+        default_settings = get_default_ui_settings()
+        for setting in default_settings:
+            setting["id"] = str(uuid.uuid4())
+            setting["created_at"] = get_utc_now()
+            await db.ui_settings.insert_one(setting)
+    
     # Count total roles
     total_roles = await db.roles.count_documents({"active": True})
     
