@@ -179,13 +179,16 @@ export default function Announcements() {
             {/* Save Button */}
             <Button 
               onClick={handleSave} 
-              className="w-full bg-rose-600 hover:bg-rose-700"
-              disabled={saving}
+              className={`w-full ${hasChanges ? 'bg-rose-600 hover:bg-rose-700' : 'bg-slate-400 hover:bg-slate-500'}`}
+              disabled={saving || !hasChanges}
               data-testid="save-ticker-btn"
             >
               <Save size={18} className="mr-2" />
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'}
             </Button>
+            {hasChanges && (
+              <p className="text-xs text-amber-600 text-center mt-2">You have unsaved changes</p>
+            )}
           </CardContent>
         </Card>
 
