@@ -564,15 +564,15 @@ export default function OrderDetail() {
                 <p className="text-xs text-slate-500 ml-6">{order.requester_email}</p>
               </div>
 
-              {order.editor_name && (
-                <div>
-                  <Label className="text-xs text-slate-500">Editor</Label>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <User size={16} className="text-slate-400" />
-                    <span className="font-medium">{order.editor_name}</span>
-                  </div>
+              <div>
+                <Label className="text-xs text-slate-500">Assigned to</Label>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <User size={16} className="text-slate-400" />
+                  <span className={`font-medium ${order.editor_name ? '' : 'text-slate-400 italic'}`}>
+                    {order.editor_name || 'Unassigned'}
+                  </span>
                 </div>
-              )}
+              </div>
 
               <div>
                 <Label className="text-xs text-slate-500">SLA Deadline</Label>
