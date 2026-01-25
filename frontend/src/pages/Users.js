@@ -99,12 +99,22 @@ export default function Users() {
         email: user.email,
         password: '',
         role: user.role,
-        team_id: user.team_id || ''
+        team_id: user.team_id || '',
+        force_password_change: user.force_password_change || false,
+        force_otp_setup: user.force_otp_setup || false
       });
     } else {
       setEditingUser(null);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
-      setFormData({ name: '', email: '', password: '', role: defaultRole, team_id: '' });
+      setFormData({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        role: defaultRole, 
+        team_id: '',
+        force_password_change: false,
+        force_otp_setup: false 
+      });
     }
     setDialogOpen(true);
   };
