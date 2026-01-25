@@ -72,6 +72,9 @@ export default function Categories() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
+    name_en: '',
+    name_pt: '',
+    name_es: '',
     description: '',
     icon: 'file',
     category_l1_id: '',
@@ -98,7 +101,7 @@ export default function Categories() {
         setSelectedL1(res.data[0].id);
       }
     } catch (error) {
-      toast.error('Failed to load categories');
+      toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -120,6 +123,9 @@ export default function Categories() {
     if (category) {
       setFormData({
         name: category.name,
+        name_en: category.name_en || '',
+        name_pt: category.name_pt || '',
+        name_es: category.name_es || '',
         description: category.description || '',
         icon: category.icon || 'file',
         category_l1_id: category.category_l1_id || '',
@@ -128,6 +134,9 @@ export default function Categories() {
     } else {
       setFormData({
         name: '',
+        name_en: '',
+        name_pt: '',
+        name_es: '',
         description: '',
         icon: 'file',
         category_l1_id: selectedL1 || '',
