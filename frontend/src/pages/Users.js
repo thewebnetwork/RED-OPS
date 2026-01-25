@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Switch } from '../components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -28,7 +29,9 @@ import {
   Edit,
   Trash2,
   UserCheck,
-  UserX
+  UserX,
+  KeyRound,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -50,7 +53,9 @@ export default function Users() {
     email: '',
     password: '',
     role: '',
-    team_id: ''
+    team_id: '',
+    force_password_change: false,
+    force_otp_setup: false
   });
 
   useEffect(() => {
