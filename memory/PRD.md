@@ -226,28 +226,28 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 
 ## Next Phases (Roadmap)
 
-### P1: Verify User Role Assignment Bug 🔴
-- Re-test user creation to ensure correct role is assigned
-- Check handleSaveUser function in Users.js
-- Fix if still broken
+### P1: Ship After P0 🟡
+1. **Branding Update**: Change top-left brand from "Red Ribbon" to "Red Ops" with animated logo
+2. **Announcement Ticker**: Add global admin-controlled scrolling ticker message
+3. **Workflow Location Fix**: Move "Editor workflow" from Categories to Workflows module
+4. **Logs Module**: New module for viewing/exporting system, API, UI, and user activity logs
+5. **Integrations Module**: New module for managing API Keys and Webhooks (incoming/outgoing)
+6. **User Provisioning**: Add admin options for "force password change" and "force OTP setup" on next login
+7. **Edit User Enhancements**: Allow team assignment and re-trigger security flags when editing users
+8. **SLA Module**: New module for creating and assigning SLA resolution times to roles or teams
 
-### P2: Integrate Real SMTP 🟠
-- User provides SMTP credentials
-- Enable actual email sending for password resets and notifications
+### P2: Known Issues 🟠
+- **User Role Assignment Bug**: New users always get 'Editor' role regardless of selection
+  - Check handleSaveUser function in Users.js
+  - Verify POST/PUT /api/users endpoints in server.py
 
-### P2: GHL/Marketplace Webhooks 🟠
-- External integration webhooks
-- Marketplace connectivity
+### P2: Integrations 🟠
+- Integrate Real SMTP (user provides credentials)
+- GHL/Marketplace Webhooks
 
-### P3: Workflow Execution Engine 🟣
-- Execute workflows when tickets are created
-- Automatic role assignment based on workflow rules
-- Email notifications using workflow actions
-- Status updates based on workflow conditions
-
-### P3: Refactor Backend 🟤
-- Split monolithic server.py into modules
-- Organize routes, models, and services
+### P3: Backend Improvements 🟣
+- Workflow Execution Engine (execute workflows on ticket creation)
+- Refactor monolithic server.py into modular structure
 
 ## Test Reports
 - `/app/test_reports/iteration_1.json` - V1 MVP
@@ -259,3 +259,4 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - `/app/test_reports/iteration_7.json` - Branding & Internationalization (100% pass)
 - `/app/test_reports/iteration_8.json` - Full i18n translations (100% pass)
 - `/app/test_reports/iteration_9.json` - Mobile responsiveness & Categories multilang (95% pass)
+- `/app/test_reports/iteration_10.json` - P0 Requirements (100% pass)
