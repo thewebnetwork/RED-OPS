@@ -363,7 +363,8 @@
     "saved": "Salvo com sucesso",
     "created": "Criado com sucesso",
     "updated": "Atualizado com sucesso",
-    "deleted": "Excluído com sucesso"
+    "deleted": "Excluído com sucesso",
+    "orderPicked": "Pedido pego com sucesso!"
   },
   "language": {
     "title": "Idioma",
