@@ -149,7 +149,7 @@ export default function Categories() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error('Name is required');
+      toast.error(t('errors.validation'));
       return;
     }
 
@@ -157,26 +157,32 @@ export default function Categories() {
       if (dialogType === 'l1') {
         const payload = {
           name: formData.name,
+          name_en: formData.name_en || null,
+          name_pt: formData.name_pt || null,
+          name_es: formData.name_es || null,
           description: formData.description || null,
           icon: formData.icon
         };
         
         if (editingCategory) {
           await axios.patch(`${API}/categories/l1/${editingCategory.id}`, payload);
-          toast.success('Category updated');
+          toast.success(t('success.updated'));
         } else {
           await axios.post(`${API}/categories/l1`, payload);
-          toast.success('Category created');
+          toast.success(t('success.created'));
         }
         fetchCategories();
       } else {
         if (!formData.category_l1_id) {
-          toast.error('Please select a parent category');
+          toast.error(t('errors.validation'));
           return;
         }
         
         const payload = {
           name: formData.name,
+          name_en: formData.name_en || null,
+          name_pt: formData.name_pt || null,
+          name_es: formData.name_es || null,
           category_l1_id: formData.category_l1_id,
           description: formData.description || null,
           triggers_editor_workflow: formData.triggers_editor_workflow
@@ -184,16 +190,16 @@ export default function Categories() {
         
         if (editingCategory) {
           await axios.patch(`${API}/categories/l2/${editingCategory.id}`, payload);
-          toast.success('Subcategory updated');
+          toast.success(t('success.updated'));
         } else {
           await axios.post(`${API}/categories/l2`, payload);
-          toast.success('Subcategory created');
+          toast.success(t('success.created'));
         }
         fetchCategoriesL2(selectedL1);
       }
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Operation failed');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     }
   };
 
