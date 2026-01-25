@@ -39,7 +39,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Play,
-  RotateCcw
+  RotateCcw,
+  XCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -51,6 +52,7 @@ const statusConfig = {
   'In Progress': { class: 'bg-amber-100 text-amber-700', color: 'bg-amber-500' },
   'Pending': { class: 'bg-purple-100 text-purple-700', color: 'bg-purple-500' },
   'Delivered': { class: 'bg-green-100 text-green-700', color: 'bg-green-500' },
+  'Closed': { class: 'bg-slate-100 text-slate-500', color: 'bg-slate-500' },
 };
 
 const priorityConfig = {
