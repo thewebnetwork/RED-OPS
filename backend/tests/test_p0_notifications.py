@@ -31,8 +31,10 @@ class TestMessageNotifications:
         """Setup test data"""
         self.admin_token = None
         self.requester_token = None
+        self.editor_token = None
         self.admin_user = None
         self.requester_user = None
+        self.editor_user = None
         self.test_order_id = None
         
     def get_admin_token(self):
@@ -48,6 +50,41 @@ class TestMessageNotifications:
         self.admin_token = data["token"]
         self.admin_user = data["user"]
         return self.admin_token
+    
+    def get_editor_token(self):
+        """Login as editor and get token"""
+        if self.editor_token:
+            return self.editor_token
+        response = requests.post(f"{BASE_URL}/api/auth/login", json={
+            "email": EDITOR_EMAIL,
+            "password": EDITOR_PASSWORD
+        })
+        if response.status_code != 200:
+            # Create editor if doesn't exist
+            admin_token = self.get_admin_token()
+            create_resp = requests.post(
+                f"{BASE_URL}/api/users",
+                json={
+                    "name": "Test Editor",
+                    "email": EDITOR_EMAIL,
+                    "password": EDITOR_PASSWORD,
+                    "role": "Editor"
+                },
+                headers={"Authorization": f"Bearer {admin_token}"}
+            )
+            if create_resp.status_code not in [200, 201, 400]:
+                pytest.fail(f"Failed to create editor: {create_resp.text}")
+            
+            response = requests.post(f"{BASE_URL}/api/auth/login", json={
+                "email": EDITOR_EMAIL,
+                "password": EDITOR_PASSWORD
+            })
+        
+        assert response.status_code == 200, f"Editor login failed: {response.text}"
+        data = response.json()
+        self.editor_token = data["token"]
+        self.editor_user = data["user"]
+        return self.editor_token
     
     def get_requester_token(self):
         """Login as requester and get token"""
