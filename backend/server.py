@@ -582,7 +582,7 @@ def calculate_sla_deadline(created_at: datetime) -> datetime:
     return created_at + timedelta(days=SLA_DAYS)
 
 def is_sla_breached(sla_deadline: str, status: str) -> bool:
-    if status == "Delivered":
+    if status in ["Delivered", "Closed"]:
         return False
     deadline = datetime.fromisoformat(sla_deadline.replace('Z', '+00:00'))
     return datetime.now(timezone.utc) > deadline
