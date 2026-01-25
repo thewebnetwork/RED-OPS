@@ -203,6 +203,8 @@ export default function Users() {
           toast.info('OTP code has been sent to the user\'s email (simulated)');
         }
       }
+      setHasFormChanges(false);
+      initialFormRef.current = null;
       setDialogOpen(false);
       const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
       setFormData({ 
