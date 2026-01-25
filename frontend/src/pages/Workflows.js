@@ -357,7 +357,74 @@ export default function Workflows() {
             </Card>
           ))}
         </div>
-      )}
+          )}
+        </TabsContent>
+
+        {/* Workflow Triggers Tab */}
+        <TabsContent value="triggers" className="mt-6">
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Zap size={20} />
+                Category Workflow Triggers
+              </CardTitle>
+              <CardDescription>
+                Configure which categories automatically trigger the editor workflow when orders are created
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {categories.length === 0 ? (
+                <div className="p-12 text-center text-slate-500">
+                  <FolderTree size={48} className="mx-auto text-slate-300 mb-3" />
+                  <p>No categories configured</p>
+                  <p className="text-sm mt-1">Create categories first to set up workflow triggers</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {categories.map(category => (
+                    <div 
+                      key={category.id} 
+                      className="flex items-center justify-between p-4 hover:bg-slate-50"
+                      data-testid={`trigger-${category.id}`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-900">{category.name}</span>
+                          {category.parent_name && (
+                            <Badge className="bg-slate-100 text-slate-600 text-xs">
+                              {category.parent_name}
+                            </Badge>
+                          )}
+                          {category.triggers_editor_workflow && (
+                            <Badge className="bg-green-100 text-green-700 text-xs">
+                              <Zap size={10} className="mr-1" />
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                        {category.description && (
+                          <p className="text-sm text-slate-500 mt-1">{category.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-xs text-slate-500">Trigger workflow</p>
+                          <p className="text-xs text-slate-400">on order creation</p>
+                        </div>
+                        <Switch
+                          checked={category.triggers_editor_workflow}
+                          onCheckedChange={() => handleToggleWorkflowTrigger(category.id, category.triggers_editor_workflow)}
+                          data-testid={`trigger-switch-${category.id}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Create Workflow Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
