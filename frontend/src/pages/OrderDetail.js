@@ -203,6 +203,28 @@ export default function OrderDetail() {
     }
   };
 
+  const handleCloseOrder = async () => {
+    if (!closeReason.trim()) {
+      toast.error('Please provide a reason for closing the ticket');
+      return;
+    }
+
+    setClosingOrder(true);
+    try {
+      await axios.post(`${API}/orders/${orderId}/close`, {
+        reason: closeReason.trim()
+      });
+      toast.success('Ticket closed successfully');
+      setCloseDialogOpen(false);
+      setCloseReason('');
+      fetchOrderData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to close ticket');
+    } finally {
+      setClosingOrder(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -221,6 +243,9 @@ export default function OrderDetail() {
   const canAddFile = (user?.role === 'Editor' && order.editor_id === user?.id) || 
                      (user?.role === 'Requester' && order.requester_id === user?.id) ||
                      user?.role === 'Admin';
+  // Requester can close their own ticket if it's not already closed or delivered
+  const canClose = (user?.role === 'Requester' && order.requester_id === user?.id && !['Closed', 'Delivered'].includes(order.status)) ||
+                   (user?.role === 'Admin' && !['Closed', 'Delivered'].includes(order.status));
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
