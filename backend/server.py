@@ -2827,6 +2827,252 @@ async def seed_data():
         "total_roles": total_roles
     }
 
+# ============== LOGS ROUTES ==============
+
+class LogEntry(BaseModel):
+    id: str
+    timestamp: str
+    level: str
+    message: str
+    source: str
+    details: Optional[dict] = None
+
+class LogsResponse(BaseModel):
+    logs: List[LogEntry]
+    total: int
+
+@api_router.get("/logs/{log_type}", response_model=LogsResponse)
+async def get_logs(log_type: str, limit: int = 500, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get logs by type (system, api, ui, user). Returns simulated logs for demo."""
+    if log_type not in ['system', 'api', 'ui', 'user']:
+        raise HTTPException(status_code=400, detail="Invalid log type")
+    
+    # Get logs from database (or generate sample for demo)
+    logs = await db.activity_logs.find(
+        {"source": log_type},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    # If no logs exist, return empty list
+    return LogsResponse(logs=logs, total=len(logs))
+
+@api_router.post("/logs")
+async def create_log(log_data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new log entry (internal use)"""
+    log_entry = {
+        "id": str(uuid.uuid4()),
+        "timestamp": get_utc_now(),
+        "level": log_data.get("level", "INFO"),
+        "message": log_data.get("message", ""),
+        "source": log_data.get("source", "system"),
+        "details": log_data.get("details"),
+        "user_id": current_user.get("id"),
+        "user_name": current_user.get("name")
+    }
+    await db.activity_logs.insert_one(log_entry)
+    return {"message": "Log created", "id": log_entry["id"]}
+
+# ============== API KEYS & WEBHOOKS ROUTES ==============
+
+class ApiKeyCreate(BaseModel):
+    name: str
+    permissions: str = "read"
+
+class ApiKeyResponse(BaseModel):
+    id: str
+    name: str
+    key_preview: str
+    permissions: str
+    created_at: str
+    last_used: Optional[str] = None
+    is_active: bool = True
+
+class WebhookCreate(BaseModel):
+    name: str
+    url: str
+    direction: str = "outgoing"
+    events: List[str] = []
+    is_active: bool = True
+
+class WebhookResponse(BaseModel):
+    id: str
+    name: str
+    url: str
+    direction: str
+    events: List[str]
+    is_active: bool
+    created_at: str
+    last_triggered: Optional[str] = None
+    success_rate: Optional[int] = None
+
+@api_router.get("/api-keys", response_model=List[ApiKeyResponse])
+async def list_api_keys(current_user: dict = Depends(require_roles(["Admin"]))):
+    """List all API keys"""
+    keys = await db.api_keys.find({}, {"_id": 0, "key": 0}).to_list(100)
+    return keys
+
+@api_router.post("/api-keys", response_model=dict)
+async def create_api_key(key_data: ApiKeyCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new API key"""
+    key_prefix = "rr_live_" if key_data.permissions == "read_write" else "rr_read_"
+    full_key = key_prefix + str(uuid.uuid4()).replace("-", "")[:24]
+    
+    api_key = {
+        "id": str(uuid.uuid4()),
+        "name": key_data.name,
+        "key": full_key,  # Store full key (hashed in production)
+        "key_preview": key_prefix + "****" + full_key[-4:],
+        "permissions": key_data.permissions,
+        "created_at": get_utc_now(),
+        "last_used": None,
+        "is_active": True,
+        "created_by_id": current_user["id"]
+    }
+    await db.api_keys.insert_one(api_key)
+    
+    return {"id": api_key["id"], "key": full_key, "message": "API key created"}
+
+@api_router.delete("/api-keys/{key_id}")
+async def revoke_api_key(key_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Revoke an API key"""
+    result = await db.api_keys.delete_one({"id": key_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="API key not found")
+    return {"message": "API key revoked"}
+
+@api_router.get("/webhooks", response_model=List[WebhookResponse])
+async def list_webhooks(current_user: dict = Depends(require_roles(["Admin"]))):
+    """List all webhooks"""
+    webhooks = await db.webhooks.find({}, {"_id": 0}).to_list(100)
+    return webhooks
+
+@api_router.post("/webhooks", response_model=WebhookResponse)
+async def create_webhook(webhook_data: WebhookCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new webhook"""
+    webhook = {
+        "id": str(uuid.uuid4()),
+        "name": webhook_data.name,
+        "url": webhook_data.url,
+        "direction": webhook_data.direction,
+        "events": webhook_data.events,
+        "is_active": webhook_data.is_active,
+        "created_at": get_utc_now(),
+        "last_triggered": None,
+        "success_rate": 100,
+        "created_by_id": current_user["id"]
+    }
+    await db.webhooks.insert_one(webhook)
+    return WebhookResponse(**webhook)
+
+@api_router.patch("/webhooks/{webhook_id}")
+async def update_webhook(webhook_id: str, updates: dict, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update a webhook"""
+    allowed_fields = ["name", "url", "events", "is_active"]
+    update_dict = {k: v for k, v in updates.items() if k in allowed_fields}
+    
+    result = await db.webhooks.update_one(
+        {"id": webhook_id},
+        {"$set": update_dict}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Webhook not found")
+    return {"message": "Webhook updated"}
+
+@api_router.delete("/webhooks/{webhook_id}")
+async def delete_webhook(webhook_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Delete a webhook"""
+    result = await db.webhooks.delete_one({"id": webhook_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Webhook not found")
+    return {"message": "Webhook deleted"}
+
+# ============== SLA ROUTES ==============
+
+class SLACreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    response_time_hours: int
+    resolution_time_hours: int
+    priority: str = "Normal"
+    applies_to_type: str  # "role" or "team"
+    applies_to_id: str
+
+class SLAResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    response_time_hours: int
+    resolution_time_hours: int
+    priority: str
+    applies_to_type: str
+    applies_to_id: str
+    applies_to_name: Optional[str] = None
+    is_active: bool = True
+    created_at: str
+
+@api_router.get("/sla", response_model=List[SLAResponse])
+async def list_slas(current_user: dict = Depends(require_roles(["Admin"]))):
+    """List all SLA definitions"""
+    slas = await db.sla_definitions.find({}, {"_id": 0}).to_list(100)
+    
+    # Enrich with applies_to_name
+    for sla in slas:
+        if sla.get("applies_to_type") == "role":
+            role = await db.roles.find_one({"id": sla["applies_to_id"]}, {"_id": 0, "name": 1})
+            sla["applies_to_name"] = role["name"] if role else "Unknown"
+        elif sla.get("applies_to_type") == "team":
+            team = await db.teams.find_one({"id": sla["applies_to_id"]}, {"_id": 0, "name": 1})
+            sla["applies_to_name"] = team["name"] if team else "Unknown"
+    
+    return slas
+
+@api_router.post("/sla", response_model=SLAResponse)
+async def create_sla(sla_data: SLACreate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new SLA definition"""
+    # Get applies_to_name
+    applies_to_name = None
+    if sla_data.applies_to_type == "role":
+        role = await db.roles.find_one({"id": sla_data.applies_to_id}, {"_id": 0, "name": 1})
+        applies_to_name = role["name"] if role else "Unknown"
+    elif sla_data.applies_to_type == "team":
+        team = await db.teams.find_one({"id": sla_data.applies_to_id}, {"_id": 0, "name": 1})
+        applies_to_name = team["name"] if team else "Unknown"
+    
+    sla = {
+        "id": str(uuid.uuid4()),
+        "name": sla_data.name,
+        "description": sla_data.description,
+        "response_time_hours": sla_data.response_time_hours,
+        "resolution_time_hours": sla_data.resolution_time_hours,
+        "priority": sla_data.priority,
+        "applies_to_type": sla_data.applies_to_type,
+        "applies_to_id": sla_data.applies_to_id,
+        "applies_to_name": applies_to_name,
+        "is_active": True,
+        "created_at": get_utc_now()
+    }
+    await db.sla_definitions.insert_one(sla)
+    return SLAResponse(**sla)
+
+@api_router.patch("/sla/{sla_id}")
+async def update_sla(sla_id: str, updates: dict, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update an SLA definition"""
+    result = await db.sla_definitions.update_one(
+        {"id": sla_id},
+        {"$set": updates}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="SLA not found")
+    return {"message": "SLA updated"}
+
+@api_router.delete("/sla/{sla_id}")
+async def delete_sla(sla_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Delete an SLA definition"""
+    result = await db.sla_definitions.delete_one({"id": sla_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="SLA not found")
+    return {"message": "SLA deleted"}
+
 # Include router
 app.include_router(api_router)
 
