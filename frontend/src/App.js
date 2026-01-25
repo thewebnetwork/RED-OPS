@@ -202,6 +202,38 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/announcements" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Announcements />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/logs" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Logs />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/integrations" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <Integrations />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/sla" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <SLA />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/profile" 
         element={
           <PrivateRoute>
