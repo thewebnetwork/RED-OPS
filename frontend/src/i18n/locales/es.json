@@ -61,7 +61,11 @@
     "roles": "Roles",
     "categories": "Categorías",
     "profile": "Perfil",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "sla": "SLA",
+    "logs": "Registros",
+    "integrations": "Integraciones",
+    "announcements": "Anuncios"
   },
   "dashboard": {
     "title": "Panel",
