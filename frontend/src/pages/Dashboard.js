@@ -134,7 +134,7 @@ const priorityConfig = {
   'Urgent': 'bg-red-100 text-red-600',
 };
 
-function OrderCard({ order, showPickButton, onPick }) {
+function OrderCard({ order, showPickButton, onPick, t }) {
   const isBreaching = order.is_sla_breached;
   
   return (
@@ -149,20 +149,20 @@ function OrderCard({ order, showPickButton, onPick }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono text-xs text-slate-500">{order.order_code}</span>
-            <Badge className={statusConfig[order.status]?.class}>{order.status}</Badge>
-            <Badge className={priorityConfig[order.priority]}>{order.priority}</Badge>
+            <Badge className={statusConfig[order.status]?.class}>{t(`orders.status.${order.status.toLowerCase().replace(' ', '')}`) || order.status}</Badge>
+            <Badge className={priorityConfig[order.priority]}>{t(`orders.priority_levels.${order.priority.toLowerCase()}`) || order.priority}</Badge>
             {isBreaching && (
               <Badge className="bg-red-100 text-red-700">
                 <AlertTriangle size={12} className="mr-1" />
-                SLA Breach
+                {t('dashboard.slaBreach')}
               </Badge>
             )}
           </div>
           <h3 className="font-medium text-slate-900 mt-2 truncate">{order.title}</h3>
           <p className="text-sm text-slate-500 mt-1">{order.category}</p>
           <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-            <span>By: {order.requester_name}</span>
-            <span>Due: {format(new Date(order.sla_deadline), 'MMM d, yyyy')}</span>
+            <span>{t('orders.requester')}: {order.requester_name}</span>
+            <span>{t('orders.dueDate')}: {format(new Date(order.sla_deadline), 'MMM d, yyyy')}</span>
           </div>
         </div>
         {showPickButton && (
@@ -175,7 +175,7 @@ function OrderCard({ order, showPickButton, onPick }) {
             }}
             data-testid={`pick-order-${order.order_code}`}
           >
-            Pick Order
+            {t('orders.pickOrder')}
           </Button>
         )}
       </div>
