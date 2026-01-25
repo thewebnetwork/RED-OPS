@@ -477,6 +477,7 @@ function EditorDashboard() {
 
 // Requester Dashboard
 function RequesterDashboard() {
+  const { t } = useTranslation();
   const [dashboard, setDashboard] = useState({
     open_orders: [],
     in_progress: [],
@@ -499,7 +500,7 @@ function RequesterDashboard() {
       setDashboard(dashboardRes.data);
       setRatingStats(ratingsRes.data);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -513,28 +514,28 @@ function RequesterDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Orders</h1>
-          <p className="text-slate-500 mt-1">Track your video editing requests</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.myOrders')}</h1>
+          <p className="text-slate-500 mt-1">{t('dashboard.trackRequests')}</p>
         </div>
         <Link to="/orders/new">
           <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-order-btn">
             <Plus size={18} className="mr-2" />
-            New Request
+            {t('dashboard.newRequest')}
           </Button>
         </Link>
       </div>
 
       {/* Rating Stats for Requester (if they also resolve orders) */}
       {ratingStats && ratingStats.total_delivered > 0 && (
-        <RatingStatsCard stats={ratingStats} title="Your Ratings (as Resolver)" />
+        <RatingStatsCard stats={ratingStats} title={t('ratings.yourRatings')} t={t} />
       )}
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPICard label="Open" value={dashboard.open_orders.length} icon={Inbox} color="bg-blue-500" />
-        <KPICard label="In Progress" value={dashboard.in_progress.length} icon={Clock} color="bg-amber-500" />
-        <KPICard label="Needs My Review" value={dashboard.needs_review.length} icon={AlertCircle} color="bg-purple-500" />
-        <KPICard label="Delivered" value={dashboard.delivered.length} icon={CheckCircle2} color="bg-green-500" />
+        <KPICard label={t('orders.status.open')} value={dashboard.open_orders.length} icon={Inbox} color="bg-blue-500" />
+        <KPICard label={t('orders.status.inProgress')} value={dashboard.in_progress.length} icon={Clock} color="bg-amber-500" />
+        <KPICard label={t('dashboard.needsReview')} value={dashboard.needs_review.length} icon={AlertCircle} color="bg-purple-500" />
+        <KPICard label={t('orders.status.delivered')} value={dashboard.delivered.length} icon={CheckCircle2} color="bg-green-500" />
       </div>
 
       {/* Needs Review Alert */}
@@ -543,12 +544,12 @@ function RequesterDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-purple-700 flex items-center gap-2">
               <AlertCircle size={20} />
-              Needs Your Review ({dashboard.needs_review.length})
+              {t('dashboard.needsReview')} ({dashboard.needs_review.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {dashboard.needs_review.map(order => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} t={t} />
             ))}
           </CardContent>
         </Card>
@@ -559,15 +560,15 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Inbox size={20} className="text-blue-500" />
-            Open Orders ({dashboard.open_orders.length})
+            {t('dashboard.openOrders')} ({dashboard.open_orders.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
           {dashboard.open_orders.map(order => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard key={order.id} order={order} t={t} />
           ))}
           {dashboard.open_orders.length === 0 && (
-            <p className="text-center text-slate-500 py-8">No open orders</p>
+            <p className="text-center text-slate-500 py-8">{t('dashboard.noOpenOrders')}</p>
           )}
         </CardContent>
       </Card>
@@ -577,15 +578,15 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            In Progress ({dashboard.in_progress.length})
+            {t('orders.status.inProgress')} ({dashboard.in_progress.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
           {dashboard.in_progress.map(order => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard key={order.id} order={order} t={t} />
           ))}
           {dashboard.in_progress.length === 0 && (
-            <p className="text-center text-slate-500 py-8">No orders in progress</p>
+            <p className="text-center text-slate-500 py-8">{t('dashboard.noOrdersInProgress')}</p>
           )}
         </CardContent>
       </Card>
@@ -595,15 +596,15 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 size={20} className="text-green-500" />
-            Delivered ({dashboard.delivered.length})
+            {t('orders.status.delivered')} ({dashboard.delivered.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
           {dashboard.delivered.slice(0, 5).map(order => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard key={order.id} order={order} t={t} />
           ))}
           {dashboard.delivered.length === 0 && (
-            <p className="text-center text-slate-500 py-8">No delivered orders yet</p>
+            <p className="text-center text-slate-500 py-8">{t('dashboard.noDelivered')}</p>
           )}
         </CardContent>
       </Card>
