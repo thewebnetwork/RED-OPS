@@ -11,10 +11,14 @@ import {
   Copy,
   Trash2,
   Eye,
-  Play
+  Play,
+  Zap,
+  FolderTree
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Switch } from '../components/ui/switch';
+import { Badge } from '../components/ui/badge';
 import {
   Card,
   CardContent,
@@ -37,6 +41,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '../components/ui/tabs';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import {
