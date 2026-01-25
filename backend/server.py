@@ -1066,9 +1066,24 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "team_id": user_data.team_id,
         "active": True,
         "avatar": None,
+        "force_password_change": user_data.force_password_change,
+        "force_otp_setup": user_data.force_otp_setup,
+        "otp_verified": False,
+        "otp_secret": None,
         "created_at": get_utc_now()
     }
     await db.users.insert_one(user)
+    
+    # If force_otp_setup is enabled, generate and "send" OTP code
+    if user_data.force_otp_setup:
+        otp_code = str(random.randint(100000, 999999))
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"pending_otp_code": otp_code, "otp_code_expires": get_utc_now()}}
+        )
+        # MOCKED: In production, send email with OTP code
+        print(f"[MOCKED EMAIL] OTP Code for {user['email']}: {otp_code}")
+    
     return await build_user_response(user)
 
 @api_router.get("/users", response_model=List[UserResponse])
