@@ -173,8 +173,8 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-          <p className="text-slate-500 mt-1">{users.length} users</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('users.title')}</h1>
+          <p className="text-slate-500 mt-1">{users.length} {t('users.title').toLowerCase()}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -182,31 +182,31 @@ export default function Users() {
           data-testid="add-user-btn"
         >
           <Plus size={18} className="mr-2" />
-          Add User
+          {t('users.addUser')}
         </Button>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           if (!open) setDialogOpen(false);
         }}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
+              <DialogTitle>{editingUser ? t('users.editUser') : t('users.addUser')}</DialogTitle>
               <DialogDescription>
-                {editingUser ? 'Update user details' : 'Create a new user account'}
+                {editingUser ? t('users.editUser') : t('users.newUser')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Name *</Label>
+                <Label>{t('common.name')} *</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Full name"
+                  placeholder={t('common.name')}
                   className="mt-1.5"
                   data-testid="user-name-input"
                 />
               </div>
               <div>
-                <Label>Email *</Label>
+                <Label>{t('common.email')} *</Label>
                 <Input
                   type="email"
                   value={formData.email}
@@ -217,7 +217,7 @@ export default function Users() {
                 />
               </div>
               <div>
-                <Label>{editingUser ? 'New Password (leave blank to keep)' : 'Password *'}</Label>
+                <Label>{editingUser ? t('auth.newPassword') : t('auth.password')} {editingUser ? '' : '*'}</Label>
                 <Input
                   type="password"
                   value={formData.password}
@@ -228,18 +228,18 @@ export default function Users() {
                 />
               </div>
               <div>
-                <Label>Role</Label>
+                <Label>{t('users.userRole')}</Label>
                 <Select 
                   value={formData.role} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, role: v }))}
                 >
                   <SelectTrigger className="mt-1.5" data-testid="user-role-select">
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder={t('users.selectRole')} />
                   </SelectTrigger>
                   <SelectContent className="max-h-64">
                     {systemRoles.length > 0 && (
                       <>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">System Roles</div>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">{t('roles.systemRole')}</div>
                         {systemRoles.map(r => (
                           <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
                         ))}
@@ -247,7 +247,7 @@ export default function Users() {
                     )}
                     {serviceProviderRoles.length > 0 && (
                       <>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">Service Providers</div>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">{t('roles.serviceProvider')}</div>
                         {serviceProviderRoles.map(r => (
                           <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
                         ))}
@@ -255,7 +255,7 @@ export default function Users() {
                     )}
                     {customRoles.length > 0 && (
                       <>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">Custom Roles</div>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 mt-2">{t('roles.title')}</div>
                         {customRoles.map(r => (
                           <SelectItem key={r.id} value={r.name}>{r.display_name}</SelectItem>
                         ))}
@@ -265,16 +265,16 @@ export default function Users() {
                 </Select>
               </div>
               <div>
-                <Label>Team</Label>
+                <Label>{t('users.userTeam')}</Label>
                 <Select 
                   value={formData.team_id || "none"} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, team_id: v === "none" ? "" : v }))}
                 >
                   <SelectTrigger className="mt-1.5" data-testid="user-team-select">
-                    <SelectValue placeholder="Select a team (optional)" />
+                    <SelectValue placeholder={t('users.selectTeam')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No Team</SelectItem>
+                    <SelectItem value="none">{t('users.noTeam')}</SelectItem>
                     {teams.map(t => (
                       <SelectItem key={t.id} value={t.id}>
                         <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function Users() {
                 </Select>
               </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
-                {editingUser ? 'Update User' : 'Add User'}
+                {editingUser ? t('common.save') : t('users.addUser')}
               </Button>
             </form>
           </DialogContent>
@@ -300,7 +300,7 @@ export default function Users() {
           <div className="relative">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <Input
-              placeholder="Search users..."
+              placeholder={t('users.searchUsers')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -318,19 +318,19 @@ export default function Users() {
           </div>
         ) : filteredUsers.length === 0 ? (
           <CardContent className="p-12 text-center text-slate-500">
-            {search ? 'No users match your search' : 'No users yet'}
+            {search ? t('users.noMatch') : t('users.noUsers')}
           </CardContent>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Created</th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('users.user')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('users.userRole')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('users.userTeam')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('common.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('users.created')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -365,7 +365,7 @@ export default function Users() {
                     </td>
                     <td className="px-6 py-4">
                       <Badge className={user.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
-                        {user.active ? 'Active' : 'Inactive'}
+                        {user.active ? t('users.active') : t('users.inactive')}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">
@@ -380,7 +380,7 @@ export default function Users() {
                               size="icon"
                               className="h-8 w-8"
                               onClick={() => handleToggleActive(user.id, user.active)}
-                              title={user.active ? 'Deactivate' : 'Activate'}
+                              title={user.active ? t('users.inactive') : t('users.active')}
                             >
                               {user.active ? <UserX size={16} /> : <UserCheck size={16} />}
                             </Button>
