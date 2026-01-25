@@ -25,7 +25,9 @@ import { format, formatDistanceToNow } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Reusable Rating Stats Card Component (Google Review Style)
-function RatingStatsCard({ stats, title = "Your Ratings" }) {
+function RatingStatsCard({ stats, title, t }) {
+  const displayTitle = title || t('ratings.title');
+  
   if (!stats || stats.total_ratings === 0) {
     return (
       <Card className="border-slate-200">
@@ -35,8 +37,7 @@ function RatingStatsCard({ stats, title = "Your Ratings" }) {
               <Star key={star} size={24} className="fill-gray-200 text-gray-200" />
             ))}
           </div>
-          <p className="text-slate-500">No ratings yet</p>
-          <p className="text-xs text-slate-400 mt-1">Complete orders to receive ratings</p>
+          <p className="text-slate-500">{t('common.noResults')}</p>
         </CardContent>
       </Card>
     );
@@ -47,7 +48,7 @@ function RatingStatsCard({ stats, title = "Your Ratings" }) {
       <CardHeader className="border-b border-slate-100 pb-4">
         <CardTitle className="flex items-center gap-2 text-base">
           <Star size={18} className="text-yellow-500 fill-yellow-500" />
-          {title}
+          {displayTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -69,7 +70,7 @@ function RatingStatsCard({ stats, title = "Your Ratings" }) {
               ))}
             </div>
             <div className="text-sm text-slate-500 mt-1">
-              {stats.total_ratings} {stats.total_ratings === 1 ? 'review' : 'reviews'}
+              {stats.total_ratings} {stats.total_ratings === 1 ? t('ratings.review') : t('ratings.reviews')}
             </div>
           </div>
 
@@ -101,17 +102,17 @@ function RatingStatsCard({ stats, title = "Your Ratings" }) {
         <div className="mt-6 pt-4 border-t border-slate-100 flex justify-center gap-8">
           <div className="text-center">
             <div className="text-2xl font-bold text-slate-900">{stats.total_delivered}</div>
-            <div className="text-xs text-slate-500">Orders Delivered</div>
+            <div className="text-xs text-slate-500">{t('dashboard.delivered')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-slate-900">{stats.total_ratings}</div>
-            <div className="text-xs text-slate-500">Ratings Received</div>
+            <div className="text-xs text-slate-500">{t('dashboard.totalReviews')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-slate-900">
               {stats.total_delivered > 0 ? Math.round((stats.total_ratings / stats.total_delivered) * 100) : 0}%
             </div>
-            <div className="text-xs text-slate-500">Response Rate</div>
+            <div className="text-xs text-slate-500">{t('ratings.responseRate')}</div>
           </div>
         </div>
       </CardContent>
