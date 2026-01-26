@@ -157,7 +157,11 @@ export default function Users() {
       setFormData(initialData);
     } else {
       setEditingUser(null);
-      const defaultRole = roles.find(r => r.role_type === 'service_provider')?.name || roles[0]?.name || 'Requester';
+      // Default to "Requester" for new users, which is the most common case
+      // If Requester doesn't exist, fall back to first system role, then first available
+      const requesterRole = roles.find(r => r.name === 'Requester');
+      const systemRole = roles.find(r => r.role_type === 'system');
+      const defaultRole = requesterRole?.name || systemRole?.name || roles[0]?.name || 'Requester';
       initialData = { 
         name: '', 
         email: '', 
