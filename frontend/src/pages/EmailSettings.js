@@ -114,6 +114,9 @@ export default function EmailSettings() {
         last_test_status: res.data.last_test_status,
         last_test_at: res.data.last_test_at
       });
+      // Reset change tracking after successful save
+      initialConfigRef.current = { ...config };
+      setHasFormChanges(false);
       toast.success('SMTP configuration saved');
     } catch (error) {
       toast.error('Failed to save configuration');
