@@ -506,11 +506,25 @@ async def submit_for_review(
     
     await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"status": "Pending", "updated_at": now}}
+        {"$set": {
+            "status": "Pending", 
+            "updated_at": now,
+            "review_started_at": now  # Track when review started for auto-close logic
+        }}
     )
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Pending", current_user)
+    
+    # Trigger workflows for pending_review event
+    async def run_pending_workflows():
+        workflows = await get_workflows_for_trigger(db, "order.pending_review", order.get("category_l2_id"))
+        for workflow in workflows:
+            await execute_workflow(db, workflow["id"], "order.pending_review", {
+                "order": {**order, "status": "Pending", "review_started_at": now},
+                "user": current_user
+            })
+    background_tasks.add_task(run_pending_workflows)
     
     return {"message": "Order submitted for review"}
 
