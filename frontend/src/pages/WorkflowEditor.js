@@ -358,6 +358,10 @@ export default function WorkflowEditor() {
         edges: workflowEdges,
       });
 
+      // Update initial state to current state after save
+      initialStateRef.current = { nodes, edges };
+      setHasChanges(false);
+      
       toast.success('Workflow saved!');
     } catch (error) {
       toast.error('Failed to save workflow');
