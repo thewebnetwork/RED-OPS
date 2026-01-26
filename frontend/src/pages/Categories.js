@@ -413,11 +413,6 @@ export default function Categories() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-slate-900">{cat.name}</p>
-                          {cat.triggers_editor_workflow && (
-                            <Badge className="bg-rose-100 text-rose-700 text-xs">
-                              Editor Workflow
-                            </Badge>
-                          )}
                         </div>
                         {cat.description && (
                           <p className="text-sm text-slate-500 mt-1">{cat.description}</p>
