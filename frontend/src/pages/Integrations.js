@@ -59,6 +59,7 @@ export default function Integrations() {
   const [activeTab, setActiveTab] = useState('api-keys');
   const [apiKeys, setApiKeys] = useState([]);
   const [webhooks, setWebhooks] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // API Key dialog
