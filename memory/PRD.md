@@ -32,6 +32,44 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 17: Backend Refactor Complete ✅ (January 26, 2026)
+
+**COMPLETED: Full Backend Modularization**
+The monolithic `server.py` (4,255 lines) has been fully refactored into a modular structure:
+
+**All 15 Route Modules Extracted (121+ endpoints):**
+| Module | Routes | Description |
+|--------|--------|-------------|
+| `auth.py` | 7 | Login, profile, password management |
+| `users.py` | 5 | User CRUD operations |
+| `roles.py` | 6 | Role management |
+| `teams.py` | 7 | Team CRUD + members |
+| `categories.py` | 11 | Category L1/L2 CRUD |
+| `dashboard.py` | 3 | Stats endpoints |
+| `notifications.py` | 6 | User notifications |
+| `sla.py` | 7 | SLA management and alerts |
+| `api_keys.py` | 5 | API key management |
+| `webhooks.py` | 8 | Outgoing webhooks |
+| `ratings.py` | 5 | Satisfaction ratings |
+| `orders.py` | 14 | Order CRUD + messages + files |
+| `workflows.py` | 18 | Workflow builder + templates |
+| `settings.py` | 11 | UI settings, SMTP, announcements, logs |
+| `feedback.py` | 8 | Feature requests, bug reports |
+
+**Architecture:**
+- `server.py` - Entry point (imports from server_v2)
+- `server_v2.py` - Main FastAPI app with all routers included
+- `server_legacy.py` - Backup of original monolithic server
+- `routes/__init__.py` - Re-exports all routers
+- `models/` - All Pydantic models (11 files)
+- `services/` - Business logic modules
+- `utils/` - Helper utilities
+
+**Key Changes:**
+- Fixed `normalize_order()` to include `request_type` field
+- Updated `REFACTORING_GUIDE.md` with completion status
+- All API endpoints tested and working
+
 ### Phase 16: Bug Fixes + Extended Route Extraction ✅ (January 26, 2026)
 
 **Bug Fixes:**
@@ -45,12 +83,6 @@ Real estate and marketing professionals who can pick orders from the pool:
 - `routes/api_keys.py` - 5 routes (CRUD, usage analytics)
 - `routes/webhooks.py` - 8 routes (CRUD, test, logs)
 - `routes/ratings.py` - 5 routes (submit, list, stats, resolver stats)
-
-**Remaining Routes (4 complex modules)**
-- `orders.py` - Order CRUD, messages, files (largest)
-- `workflows.py` - Workflow builder and execution
-- `settings.py` - UI settings, SMTP, announcements
-- `feedback.py` - Feature requests, bug reports
 
 ### Phase 15: Backend Refactor Phase 2 (Routes Extraction) ✅ (January 26, 2026)
 
