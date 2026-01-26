@@ -201,8 +201,8 @@ export default function Announcements() {
                 <Label>Start Date/Time (optional)</Label>
                 <Input
                   type="datetime-local"
-                  value={ticker.start_at ? ticker.start_at.slice(0, 16) : ''}
-                  onChange={(e) => setTicker(prev => ({ ...prev, start_at: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+                  value={ticker.start_at ? formatDateTimeLocal(ticker.start_at) : ''}
+                  onChange={(e) => setTicker(prev => ({ ...prev, start_at: e.target.value || '' }))}
                   className="mt-1.5"
                 />
               </div>
@@ -210,8 +210,8 @@ export default function Announcements() {
                 <Label>End Date/Time (optional)</Label>
                 <Input
                   type="datetime-local"
-                  value={ticker.end_at ? ticker.end_at.slice(0, 16) : ''}
-                  onChange={(e) => setTicker(prev => ({ ...prev, end_at: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+                  value={ticker.end_at ? formatDateTimeLocal(ticker.end_at) : ''}
+                  onChange={(e) => setTicker(prev => ({ ...prev, end_at: e.target.value || '' }))}
                   className="mt-1.5"
                 />
               </div>
