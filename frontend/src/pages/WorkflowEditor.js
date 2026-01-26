@@ -1464,83 +1464,30 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
                 </div>
               )}
 
-              {action.action_type === 'auto_escalate' && (
-                <div className="space-y-3">
-                  <div className="p-2 bg-amber-50 rounded border border-amber-200">
-                    <p className="text-xs text-amber-700">
-                      Escalates to managers/admins if ticket remains breached beyond the configured time.
+              {action.action_type === 'apply_sla_policy' && (
+                <div className="space-y-2">
+                  <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                    <p className="text-xs text-blue-700">
+                      Apply an SLA & Escalation policy to this ticket. The policy defines SLA duration and escalation rules.
                     </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Escalate after (minutes)</Label>
-                    <Input
-                      type="number"
-                      placeholder="60"
-                      value={action.config?.escalate_after_minutes || ''}
-                      onChange={(e) => updateAction(action.id, { escalate_after_minutes: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Escalate to</Label>
-                    <Select
-                      value={action.config?.escalate_to_type || 'role'}
-                      onValueChange={(val) => updateAction(action.id, { escalate_to_type: val, escalate_to_id: '' })}
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="role">Role</SelectItem>
-                        <SelectItem value="team">Team</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {action.config?.escalate_to_type === 'role' && (
-                    <Select
-                      value={action.config?.escalate_to_id || ''}
-                      onValueChange={(val) => updateAction(action.id, { escalate_to_id: val })}
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.id} value={role.id}>
-                            {role.display_name || role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {action.config?.escalate_to_type === 'team' && (
-                    <Select
-                      value={action.config?.escalate_to_id || ''}
-                      onValueChange={(val) => updateAction(action.id, { escalate_to_id: val })}
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue placeholder="Select team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teams.map((team) => (
-                          <SelectItem key={team.id} value={team.id}>
-                            {team.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  <div className="space-y-2">
-                    <Label className="text-xs">Escalation message</Label>
-                    <Textarea
-                      placeholder="Ticket {order_code}: {title} has been escalated due to extended SLA breach."
-                      value={action.config?.escalation_message || ''}
-                      onChange={(e) => updateAction(action.id, { escalation_message: e.target.value })}
-                      className="text-sm"
-                      rows={2}
-                    />
-                    <p className="text-xs text-slate-400">Variables: {'{order_code}'}, {'{title}'}, {'{status}'}</p>
-                  </div>
+                  <Select
+                    value={action.config?.policy_id || ''}
+                    onValueChange={(val) => updateAction(action.id, { policy_id: val })}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select SLA Policy (or auto-detect)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Auto-detect based on scope</SelectItem>
+                      {slaPolicies.map((policy) => (
+                        <SelectItem key={policy.id} value={policy.id}>
+                          {policy.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-400">Leave empty to auto-apply the best matching policy based on role/team/specialty</p>
                 </div>
               )}
             </div>
