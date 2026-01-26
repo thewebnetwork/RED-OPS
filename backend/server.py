@@ -2883,6 +2883,144 @@ async def seed_data():
         "total_roles": total_roles
     }
 
+# ============== SMTP/EMAIL ROUTES ==============
+
+@api_router.get("/smtp-config", response_model=SMTPConfigResponse)
+async def get_smtp_config(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get current SMTP configuration (password hidden)"""
+    config = await db.smtp_config.find_one({}, {"_id": 0})
+    if not config:
+        return SMTPConfigResponse(
+            smtp_host="",
+            smtp_port=587,
+            smtp_user="",
+            smtp_from="",
+            smtp_use_tls=True,
+            is_configured=False,
+            last_test_status=None,
+            last_test_at=None
+        )
+    return SMTPConfigResponse(
+        smtp_host=config.get("smtp_host", ""),
+        smtp_port=config.get("smtp_port", 587),
+        smtp_user=config.get("smtp_user", ""),
+        smtp_from=config.get("smtp_from", ""),
+        smtp_use_tls=config.get("smtp_use_tls", True),
+        is_configured=bool(config.get("smtp_host") and config.get("smtp_user")),
+        last_test_status=config.get("last_test_status"),
+        last_test_at=config.get("last_test_at")
+    )
+
+@api_router.put("/smtp-config", response_model=SMTPConfigResponse)
+async def update_smtp_config(config_data: SMTPConfigUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update SMTP configuration"""
+    config = {
+        "smtp_host": config_data.smtp_host,
+        "smtp_port": config_data.smtp_port,
+        "smtp_user": config_data.smtp_user,
+        "smtp_from": config_data.smtp_from,
+        "smtp_use_tls": config_data.smtp_use_tls,
+        "updated_at": get_utc_now(),
+        "updated_by_id": current_user["id"]
+    }
+    
+    # Only update password if provided
+    if config_data.smtp_password:
+        config["smtp_password"] = config_data.smtp_password
+    
+    # Upsert config
+    existing = await db.smtp_config.find_one({})
+    if existing:
+        await db.smtp_config.update_one({}, {"$set": config})
+    else:
+        await db.smtp_config.insert_one(config)
+    
+    return SMTPConfigResponse(
+        smtp_host=config["smtp_host"],
+        smtp_port=config["smtp_port"],
+        smtp_user=config["smtp_user"],
+        smtp_from=config["smtp_from"],
+        smtp_use_tls=config["smtp_use_tls"],
+        is_configured=bool(config["smtp_host"] and config["smtp_user"]),
+        last_test_status=existing.get("last_test_status") if existing else None,
+        last_test_at=existing.get("last_test_at") if existing else None
+    )
+
+@api_router.post("/smtp-config/test")
+async def test_smtp_config(test_data: EmailTestRequest, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Test SMTP configuration by sending a test email"""
+    config = await db.smtp_config.find_one({}, {"_id": 0})
+    if not config or not config.get("smtp_host") or not config.get("smtp_user"):
+        raise HTTPException(status_code=400, detail="SMTP not configured. Please save configuration first.")
+    
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = config.get("smtp_from", config["smtp_user"])
+        msg['To'] = test_data.to_email
+        msg['Subject'] = "Red Ops - SMTP Test Email"
+        
+        body = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+            <h2 style="color: #DC2626;">SMTP Configuration Test</h2>
+            <p>This is a test email from Red Ops Portal.</p>
+            <p>If you received this email, your SMTP configuration is working correctly!</p>
+            <hr>
+            <p style="color: #6b7280; font-size: 12px;">
+                Sent at: {get_utc_now()}<br>
+                Server: {config["smtp_host"]}:{config["smtp_port"]}
+            </p>
+        </body>
+        </html>
+        """
+        msg.attach(MIMEText(body, 'html'))
+        
+        with smtplib.SMTP(config["smtp_host"], int(config["smtp_port"])) as server:
+            if config.get("smtp_use_tls", True):
+                server.starttls()
+            server.login(config["smtp_user"], config.get("smtp_password", ""))
+            server.send_message(msg)
+        
+        # Update test status
+        await db.smtp_config.update_one({}, {"$set": {
+            "last_test_status": "success",
+            "last_test_at": get_utc_now()
+        }})
+        
+        return {"message": f"Test email sent successfully to {test_data.to_email}", "status": "success"}
+        
+    except Exception as e:
+        # Update test status
+        await db.smtp_config.update_one({}, {"$set": {
+            "last_test_status": f"failed: {str(e)}",
+            "last_test_at": get_utc_now()
+        }})
+        raise HTTPException(status_code=500, detail=f"Failed to send test email: {str(e)}")
+
+# Helper function to get SMTP config from database (for use in email sending)
+async def get_smtp_settings():
+    """Get SMTP settings from database, fallback to env vars"""
+    config = await db.smtp_config.find_one({}, {"_id": 0})
+    if config and config.get("smtp_host") and config.get("smtp_user"):
+        return {
+            "host": config["smtp_host"],
+            "port": config.get("smtp_port", 587),
+            "user": config["smtp_user"],
+            "password": config.get("smtp_password", ""),
+            "from_email": config.get("smtp_from", config["smtp_user"]),
+            "use_tls": config.get("smtp_use_tls", True)
+        }
+    # Fallback to environment variables
+    return {
+        "host": os.environ.get('SMTP_HOST', ''),
+        "port": int(os.environ.get('SMTP_PORT', '587')),
+        "user": os.environ.get('SMTP_USER', ''),
+        "password": os.environ.get('SMTP_PASSWORD', ''),
+        "from_email": os.environ.get('SMTP_FROM', 'info@redribbonrealty.ca'),
+        "use_tls": True
+    }
+
 # ============== LOGS ROUTES ==============
 
 class LogEntry(BaseModel):
