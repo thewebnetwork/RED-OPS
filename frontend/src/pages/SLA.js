@@ -254,6 +254,8 @@ export default function SLA() {
         toast.success('SLA created');
       }
       
+      setHasFormChanges(false);
+      initialFormRef.current = null;
       setDialogOpen(false);
       resetForm();
     } catch (error) {
