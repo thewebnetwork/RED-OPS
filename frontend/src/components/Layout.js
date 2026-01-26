@@ -72,6 +72,7 @@ export default function Layout({ children }) {
     { path: '/command-center', icon: Command, labelKey: 'nav.commandCenter', roles: ['Admin', 'Requester'] },
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Admin'] },
     { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Admin'] },
+    { path: '/escalation', icon: AlertTriangle, labelKey: 'nav.escalation', roles: ['Admin'] },
     { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Admin'] },
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Admin'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Admin'] },
