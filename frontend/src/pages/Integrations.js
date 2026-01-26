@@ -45,7 +45,10 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Clock,
-  Send
+  Send,
+  BarChart3,
+  TrendingUp,
+  Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
