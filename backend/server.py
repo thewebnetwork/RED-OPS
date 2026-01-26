@@ -2081,6 +2081,17 @@ async def create_message(order_id: str, message_data: MessageCreate, current_use
                 order_id
             )
     
+    # Trigger webhooks for message.sent event
+    await trigger_webhooks("message.sent", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "message_id": message["id"],
+        "author_name": current_user["name"],
+        "author_email": current_user["email"],
+        "author_role": current_user["role"],
+        "message_preview": message_data.message_body[:100] + ("..." if len(message_data.message_body) > 100 else "")
+    })
+    
     return MessageResponse(**message)
 
 @api_router.get("/orders/{order_id}/messages", response_model=List[MessageResponse])
