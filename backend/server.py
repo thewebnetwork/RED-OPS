@@ -1599,6 +1599,17 @@ async def pick_order(order_id: str, background_tasks: BackgroundTasks, current_u
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "In Progress", current_user)
     
+    # Trigger webhooks for order.updated event
+    background_tasks.add_task(trigger_webhooks, "order.updated", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "old_status": old_status,
+        "new_status": "In Progress",
+        "assigned_to": current_user["name"],
+        "assigned_to_email": current_user["email"]
+    })
+    
     return {"message": "Order picked successfully", "order_code": order["order_code"]}
 
 @api_router.post("/orders/{order_id}/submit-for-review")
