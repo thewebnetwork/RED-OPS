@@ -257,6 +257,28 @@ async def get_workflows_by_category(category_id: str, current_user: dict = Depen
     return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
 
 
+@router.get("/workflows/by-specialty/{specialty_id}")
+async def get_workflows_by_specialty(specialty_id: str, current_user: dict = Depends(get_current_user)):
+    """Get workflows assigned to a specific specialty"""
+    workflows = await db.workflows.find({
+        "assigned_specialties": specialty_id,
+        "active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
+
+
+@router.get("/workflows/by-access-tier/{tier_id}")
+async def get_workflows_by_access_tier(tier_id: str, current_user: dict = Depends(get_current_user)):
+    """Get workflows assigned to a specific access tier"""
+    workflows = await db.workflows.find({
+        "assigned_access_tiers": tier_id,
+        "active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
+
+
 @router.put("/workflows/{workflow_id}", response_model=WorkflowResponse)
 async def update_workflow_full(workflow_id: str, workflow_data: WorkflowUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
     """Full update of workflow including nodes and edges"""
