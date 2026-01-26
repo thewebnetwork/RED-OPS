@@ -287,6 +287,8 @@ export default function Integrations() {
       setWebhooks(prev => [webhook, ...prev]);
       setWebhookDialogOpen(false);
       setNewWebhook({ name: '', url: '', direction: 'outgoing', events: [], is_active: true });
+      setHasWebhookChanges(false);
+      initialWebhookRef.current = null;
       toast.success('Webhook created');
     } catch (error) {
       toast.error('Failed to create webhook');
