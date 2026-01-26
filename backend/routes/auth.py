@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, Dict
 
 from database import db
 from config import RESET_TOKEN_EXPIRE_HOURS, FRONTEND_URL
@@ -12,6 +12,7 @@ from utils.helpers import (
     hash_password, verify_password, create_access_token, get_utc_now
 )
 from services.email import send_email_notification
+from models.identity import DEFAULT_PERMISSIONS
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -30,6 +31,11 @@ class UserResponse(BaseModel):
     role: str
     team_id: Optional[str] = None
     team_name: Optional[str] = None
+    specialty_id: Optional[str] = None
+    specialty_name: Optional[str] = None
+    access_tier_id: Optional[str] = None
+    access_tier_name: Optional[str] = None
+    permissions: Dict[str, Dict[str, bool]] = {}
     active: bool
     avatar: Optional[str] = None
     force_password_change: bool = False
@@ -65,12 +71,36 @@ class ResetPasswordRequest(BaseModel):
 
 # ============== HELPERS ==============
 
+def get_effective_permissions(role: str, overrides: Optional[Dict] = None) -> Dict[str, Dict[str, bool]]:
+    """Calculate effective permissions from role defaults + overrides"""
+    base_permissions = DEFAULT_PERMISSIONS.get(role, DEFAULT_PERMISSIONS.get("Standard User", {})).copy()
+    
+    effective = {}
+    for module, actions in base_permissions.items():
+        effective[module] = actions.copy() if isinstance(actions, dict) else {}
+    
+    if overrides:
+        for module, actions in overrides.items():
+            if module in effective:
+                for action, value in actions.items():
+                    if action in effective[module]:
+                        effective[module][action] = value
+    
+    return effective
+
+
 async def build_user_response(user: dict) -> UserResponse:
     """Build UserResponse with team info"""
     team_name = None
     if user.get("team_id"):
         team = await db.teams.find_one({"id": user["team_id"]}, {"_id": 0, "name": 1})
         team_name = team["name"] if team else None
+    
+    # Calculate effective permissions
+    permissions = get_effective_permissions(
+        user.get("role", "Standard User"),
+        user.get("permission_overrides")
+    )
     
     return UserResponse(
         id=user["id"],
@@ -79,6 +109,11 @@ async def build_user_response(user: dict) -> UserResponse:
         role=user["role"],
         team_id=user.get("team_id"),
         team_name=team_name,
+        specialty_id=user.get("specialty_id"),
+        specialty_name=user.get("specialty_name"),
+        access_tier_id=user.get("access_tier_id"),
+        access_tier_name=user.get("access_tier_name"),
+        permissions=permissions,
         active=user.get("active", True),
         avatar=user.get("avatar"),
         force_password_change=user.get("force_password_change", False),
