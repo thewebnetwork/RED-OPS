@@ -3310,6 +3310,93 @@ async def delete_webhook(webhook_id: str, current_user: dict = Depends(require_r
         raise HTTPException(status_code=404, detail="Webhook not found")
     return {"message": "Webhook deleted"}
 
+class WebhookLogResponse(BaseModel):
+    id: str
+    webhook_id: str
+    webhook_name: str
+    event: str
+    url: str
+    status_code: Optional[int] = None
+    success: bool
+    error: Optional[str] = None
+    response_body: Optional[str] = None
+    timestamp: str
+
+@api_router.get("/webhooks/{webhook_id}/logs", response_model=List[WebhookLogResponse])
+async def get_webhook_logs(webhook_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get delivery logs for a specific webhook"""
+    logs = await db.webhook_logs.find(
+        {"webhook_id": webhook_id}, 
+        {"_id": 0}
+    ).sort("timestamp", -1).to_list(100)
+    return [WebhookLogResponse(**log) for log in logs]
+
+@api_router.get("/webhook-logs", response_model=List[WebhookLogResponse])
+async def list_all_webhook_logs(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get all webhook delivery logs"""
+    logs = await db.webhook_logs.find({}, {"_id": 0}).sort("timestamp", -1).to_list(200)
+    return [WebhookLogResponse(**log) for log in logs]
+
+@api_router.post("/webhooks/{webhook_id}/test")
+async def test_webhook(webhook_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Send a test payload to a webhook"""
+    webhook = await db.webhooks.find_one({"id": webhook_id}, {"_id": 0})
+    if not webhook:
+        raise HTTPException(status_code=404, detail="Webhook not found")
+    
+    test_payload = {
+        "event": "test",
+        "timestamp": get_utc_now(),
+        "data": {
+            "message": "This is a test webhook delivery from Red Ops",
+            "webhook_name": webhook["name"],
+            "triggered_by": current_user["name"]
+        }
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                webhook["url"],
+                json=test_payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Webhook-Event": "test",
+                    "X-Webhook-Source": "red-ops"
+                }
+            )
+            
+            await db.webhook_logs.insert_one({
+                "id": str(uuid.uuid4()),
+                "webhook_id": webhook_id,
+                "webhook_name": webhook["name"],
+                "event": "test",
+                "url": webhook["url"],
+                "status_code": response.status_code,
+                "success": 200 <= response.status_code < 300,
+                "response_body": response.text[:500] if response.text else None,
+                "timestamp": get_utc_now()
+            })
+            
+            return {
+                "success": 200 <= response.status_code < 300,
+                "status_code": response.status_code,
+                "message": "Test webhook sent"
+            }
+    except Exception as e:
+        await db.webhook_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "webhook_id": webhook_id,
+            "webhook_name": webhook["name"],
+            "event": "test",
+            "url": webhook["url"],
+            "status_code": None,
+            "success": False,
+            "error": str(e),
+            "timestamp": get_utc_now()
+        })
+        return {"success": False, "error": str(e), "message": "Test webhook failed"}
+
 # ============== SLA ROUTES ==============
 
 class SLACreate(BaseModel):
