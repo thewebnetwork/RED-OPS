@@ -1273,6 +1273,7 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
     { type: 'update_status', label: 'Update Status', icon: RefreshCw },
     { type: 'notify', label: 'Send Notification', icon: Bell },
     { type: 'webhook', label: 'Trigger Webhook', icon: Webhook },
+    { type: 'auto_escalate', label: 'Auto-Escalate on Breach', icon: AlertTriangle },
   ];
 
   const addAction = (type) => {
