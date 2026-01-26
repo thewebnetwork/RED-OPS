@@ -1,0 +1,216 @@
+[
+  {
+    "id": "094af4d6-c7b7-491c-beb9-da9f35b2f522",
+    "name": "TEST_Policy_f5a07fd9",
+    "description": "Test policy for automated testing",
+    "trigger": "both",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Initial Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": "Order {order_code} requires attention"
+      }
+    ],
+    "cooldown_minutes": 30,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:54.481490+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.221085+00:00"
+  },
+  {
+    "id": "5a5c3993-b5e7-4e58-9d93-61a18507a8fd",
+    "name": "TEST_Policy_Actions_dffd494d",
+    "description": "Test policy with multiple levels and actions",
+    "trigger": "sla_breach",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [
+      "High",
+      "Urgent"
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Initial Alert",
+        "time_threshold_minutes": 0,
+        "actions": [
+          {
+            "type": "notify_role",
+            "target_user_id": null,
+            "target_user_name": null,
+            "target_role_id": "",
+            "target_role_name": "Admin",
+            "target_team_id": null,
+            "target_team_name": null,
+            "new_priority": null,
+            "email_subject": null,
+            "email_body": null,
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ],
+        "notify_message": "Order {order_code} escalated to Level 1"
+      },
+      {
+        "level": 2,
+        "name": "Manager Escalation",
+        "time_threshold_minutes": 60,
+        "actions": [
+          {
+            "type": "change_priority",
+            "target_user_id": null,
+            "target_user_name": null,
+            "target_role_id": null,
+            "target_role_name": null,
+            "target_team_id": null,
+            "target_team_name": null,
+            "new_priority": "Urgent",
+            "email_subject": null,
+            "email_body": null,
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ],
+        "notify_message": "Order {order_code} escalated to Level 2"
+      }
+    ],
+    "cooldown_minutes": 15,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:54.541549+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.183640+00:00"
+  },
+  {
+    "id": "0393cbbd-2d5b-41e1-8a6b-2c4f23db4883",
+    "name": "TEST_Duplicate_7de6b3d8",
+    "description": null,
+    "trigger": "both",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": null
+      }
+    ],
+    "cooldown_minutes": 30,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:54.591822+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.108914+00:00"
+  },
+  {
+    "id": "5bebe4aa-261a-44f7-82a1-1bcb343ba780",
+    "name": "TEST_GetById_b6eb8931",
+    "description": null,
+    "trigger": "sla_warning",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": null
+      }
+    ],
+    "cooldown_minutes": 30,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:54.756377+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.144356+00:00"
+  },
+  {
+    "id": "9535e09f-143e-46bb-bed5-ca86690b1ccc",
+    "name": "TEST_Update_bbdc9429",
+    "description": "Updated description",
+    "trigger": "both",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": null
+      }
+    ],
+    "cooldown_minutes": 45,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:54.959727+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.337515+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "09a3dc0b-f317-4d52-b107-b3e54604f00f",
+    "name": "TEST_Delete_e2a93249",
+    "description": null,
+    "trigger": "both",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": null
+      }
+    ],
+    "cooldown_minutes": 30,
+    "is_active": false,
+    "created_at": "2026-01-26T05:38:55.194263+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.071898+00:00"
+  },
+  {
+    "id": "aadc6420-58ca-40db-b2d2-1b68671eb6a9",
+    "name": "TEST_UI_Policy_5",
+    "description": "Test policy created via UI testing",
+    "trigger": "both",
+    "category_l1_ids": [],
+    "category_l2_ids": [],
+    "priorities": [],
+    "levels": [
+      {
+        "level": 1,
+        "name": "Initial Alert",
+        "time_threshold_minutes": 0,
+        "actions": [],
+        "notify_message": "Order {order_code} requires attention: {title}"
+      }
+    ],
+    "cooldown_minutes": 30,
+    "is_active": false,
+    "created_at": "2026-01-26T05:42:09.810738+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T05:44:00.300217+00:00"
+  }
+]

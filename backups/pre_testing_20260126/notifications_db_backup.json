@@ -1,0 +1,3432 @@
+[
+  {
+    "id": "8e9d359c-d035-4258-9860-3a1c26aa2165",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000003 'Test Video Editing Order' is available for pickup",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.367408+00:00"
+  },
+  {
+    "id": "5330c389-b0f2-4ee3-853a-65e23990367e",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000003 'Test Video Editing Order' is available for pickup",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.367841+00:00"
+  },
+  {
+    "id": "15766b48-3397-4e10-9900-c7d00c9932e8",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000003 'Test Video Editing Order' is available for pickup",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.368242+00:00"
+  },
+  {
+    "id": "1624e061-36e1-414b-b834-1f28df1b661d",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "order_picked",
+    "title": "Your order has been picked up",
+    "message": "Order RRG-000003 'Test Video Editing Order' is now being worked on by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.443179+00:00"
+  },
+  {
+    "id": "2f419e55-2937-475f-9eb5-ad5d00e3c810",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from Open to In Progress by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.444162+00:00"
+  },
+  {
+    "id": "3e7741a7-0480-4254-9c5a-7474f70b9ca4",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from Open to In Progress by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.444552+00:00"
+  },
+  {
+    "id": "b55eb1f4-997f-4ef7-ae7f-b3a63157e14b",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "new_message",
+    "title": "New message on your order",
+    "message": "Editor sent a message on order RRG-000003",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.520286+00:00"
+  },
+  {
+    "id": "48859aad-a15f-40ab-9d40-566cd0d351e6",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "review_needed",
+    "title": "Order needs your review",
+    "message": "Order RRG-000003 'Test Video Editing Order' is pending your review",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.668502+00:00"
+  },
+  {
+    "id": "09528795-ab8b-466a-a616-41272148d9be",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.669230+00:00"
+  },
+  {
+    "id": "1719d0c9-b3d3-40fa-85c4-6592efe80d79",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.669691+00:00"
+  },
+  {
+    "id": "a381361d-a057-44bb-a9b0-0b5eefca2fef",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "order_responded",
+    "title": "Requester has responded",
+    "message": "Order RRG-000003 'Test Video Editing Order' has been responded to by the requester",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.705001+00:00"
+  },
+  {
+    "id": "555e0b14-1b87-4fa1-8fd9-167027941b2c",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from Pending to In Progress by Test Requester",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.705875+00:00"
+  },
+  {
+    "id": "913561d3-193c-4b63-a192-b08a7e18767d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from Pending to In Progress by Test Requester",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.706390+00:00"
+  },
+  {
+    "id": "478c3db0-6f77-4239-8ff4-25ee17181cc2",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "order_delivered",
+    "title": "Order delivered!",
+    "message": "Order RRG-000003 'Test Video Editing Order' has been delivered",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": false,
+    "created_at": "2026-01-23T20:31:52.742132+00:00"
+  },
+  {
+    "id": "dcba8bc1-8057-413c-bf05-cff61e90b68a",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from In Progress to Delivered by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.743110+00:00"
+  },
+  {
+    "id": "6b6710e8-674d-48f2-9170-97e0498e718d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000003 changed from In Progress to Delivered by Test Editor",
+    "related_order_id": "e8d0ae37-3231-4da5-bd21-5bfcf69f6f5b",
+    "is_read": true,
+    "created_at": "2026-01-23T20:31:52.743511+00:00"
+  },
+  {
+    "id": "75855aa1-1b57-47d5-82a1-cfe51615111a",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000004 '243 edit' is available for pickup",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:06:45.395887+00:00"
+  },
+  {
+    "id": "7d72c756-de03-4542-8d5f-9bae728bf9d5",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000004 '243 edit' is available for pickup",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:06:45.396381+00:00"
+  },
+  {
+    "id": "fdbee120-610a-4372-85e9-7ccbdb7fce5a",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000004 '243 edit' is available for pickup",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:06:45.396818+00:00"
+  },
+  {
+    "id": "bf27fcd1-b02d-4274-b91d-56a298b85304",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000004 '243 edit' is available for pickup",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:06:45.397308+00:00"
+  },
+  {
+    "id": "393eec8b-7f93-49cf-bc29-c50c075038d4",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New order available",
+    "message": "New order RRG-000004 '243 edit' is available for pickup",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:06:45.397853+00:00"
+  },
+  {
+    "id": "57c79f28-827d-453a-b732-f076c78ba2ad",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "order_picked",
+    "title": "Your order has been picked up",
+    "message": "Order RRG-000004 '243 edit' is now being worked on by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:08:13.216186+00:00"
+  },
+  {
+    "id": "5035e809-1feb-4086-8b2b-5cfbe0d1fffe",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from Open to In Progress by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:08:13.218895+00:00"
+  },
+  {
+    "id": "d9480895-8e0f-474b-a610-491b26f0092d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from Open to In Progress by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:08:13.220199+00:00"
+  },
+  {
+    "id": "78320f96-6db9-4351-b41e-7991695470ef",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "new_message",
+    "title": "New message on your order",
+    "message": "Editor sent a message on order RRG-000004",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:08:45.606674+00:00"
+  },
+  {
+    "id": "334c69ff-c2a4-4c1b-bdeb-ea980c5cb01c",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "review_needed",
+    "title": "Order needs your review",
+    "message": "Order RRG-000004 '243 edit' is pending your review",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:08:48.154588+00:00"
+  },
+  {
+    "id": "4d856ac7-56ab-4b85-b288-49c573aa52c7",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:08:48.155558+00:00"
+  },
+  {
+    "id": "933d7f84-33e0-4fa3-ad78-e589e7303c91",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:08:48.155911+00:00"
+  },
+  {
+    "id": "9ab707cc-0a16-46a0-916f-af1c5c9bbd1b",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_message",
+    "title": "New message on order",
+    "message": "Requester sent a message on order RRG-000004",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:11:22.028340+00:00"
+  },
+  {
+    "id": "f77abb35-e7a6-41e1-aa66-a81a59763b7e",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "order_responded",
+    "title": "Requester has responded",
+    "message": "Order RRG-000004 '243 edit' has been responded to by the requester",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:12:33.603219+00:00"
+  },
+  {
+    "id": "9dc33eb9-57d8-4718-8dd1-cc0b99a0d8f7",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from Pending to In Progress by Test Requester",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:12:33.604172+00:00"
+  },
+  {
+    "id": "0c728fbb-d6b0-4ade-b41c-0e389773c4ad",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from Pending to In Progress by Test Requester",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:12:33.604561+00:00"
+  },
+  {
+    "id": "9d606e77-239c-490d-a275-334f29c4ce07",
+    "user_id": "68bd87f4-5880-4309-a980-92c18de81820",
+    "type": "review_needed",
+    "title": "Order needs your review",
+    "message": "Order RRG-000004 '243 edit' is pending your review",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": false,
+    "created_at": "2026-01-23T21:13:44.876396+00:00"
+  },
+  {
+    "id": "5d9299df-5f35-42d8-ad1a-ddea4d12c128",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:13:44.877516+00:00"
+  },
+  {
+    "id": "e27865f5-a542-425a-a82c-ace46c554803",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Order status changed",
+    "message": "Order RRG-000004 changed from In Progress to Pending by Test Editor",
+    "related_order_id": "2b11c82c-c6c7-46e6-b485-0ac756387ad4",
+    "is_read": true,
+    "created_at": "2026-01-23T21:13:44.877923+00:00"
+  },
+  {
+    "id": "ed7ac71c-ed17-4e4f-a8b4-cfac08086f99",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_feature_request",
+    "title": "New feature request",
+    "message": "New feature request FR-000001: TEST_New Feature Request",
+    "related_order_id": "77225559-7487-4345-837d-b53e1dcee8bb",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:33.991440+00:00"
+  },
+  {
+    "id": "4ecc7fba-c20b-4b3d-afe3-ad211d6159e3",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_feature_request",
+    "title": "New feature request",
+    "message": "New feature request FR-000001: TEST_New Feature Request",
+    "related_order_id": "77225559-7487-4345-837d-b53e1dcee8bb",
+    "is_read": true,
+    "created_at": "2026-01-24T05:05:33.994737+00:00"
+  },
+  {
+    "id": "4bcdd622-b9f3-4b43-a8d0-e50be95b87ab",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_bug_report",
+    "title": "New bug report",
+    "message": "New bug report BUG-000001: TEST_Bug Report (Severity: High)",
+    "related_order_id": "ca0b76b9-291c-4ad8-bb49-bb330e508e98",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:34.449718+00:00"
+  },
+  {
+    "id": "63eceaf4-96d1-46de-8c7f-8980911e8d06",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_bug_report",
+    "title": "New bug report",
+    "message": "New bug report BUG-000001: TEST_Bug Report (Severity: High)",
+    "related_order_id": "ca0b76b9-291c-4ad8-bb49-bb330e508e98",
+    "is_read": true,
+    "created_at": "2026-01-24T05:05:34.450263+00:00"
+  },
+  {
+    "id": "8d986386-964b-432c-bada-1b046d9895e0",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000005 'TEST_Editing Order' is available for pickup",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": true,
+    "created_at": "2026-01-24T05:05:36.160488+00:00"
+  },
+  {
+    "id": "b32cc946-50fe-4e17-af40-ca97eb22cc09",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000005 'TEST_Editing Order' is available for pickup",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:36.160883+00:00"
+  },
+  {
+    "id": "41d198fc-cccb-460d-8bc3-814cbde712b5",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000005 'TEST_Editing Order' is available for pickup",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:36.161303+00:00"
+  },
+  {
+    "id": "219a5014-09c2-462e-b8af-07d0f512b739",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000005 'TEST_Editing Order' is available for pickup",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:36.161723+00:00"
+  },
+  {
+    "id": "b8a6254c-0e4c-442e-b321-921aafb0dc36",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000005 'TEST_Editing Order' is available for pickup",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": false,
+    "created_at": "2026-01-24T05:05:36.162089+00:00"
+  },
+  {
+    "id": "b60fa9bc-606f-468a-9afb-ef9512263a13",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000005 'TEST_Editing Order' is now being worked on by Test Editor",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": true,
+    "created_at": "2026-01-25T20:21:42.228967+00:00"
+  },
+  {
+    "id": "edba7dde-a0d8-4279-b49c-5258356e539a",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000005 changed from Open to In Progress by Test Editor",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": false,
+    "created_at": "2026-01-25T20:21:42.232666+00:00"
+  },
+  {
+    "id": "3a4bfb27-dc7e-4fbe-9892-c0548b280731",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000005 changed from Open to In Progress by Test Editor",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": true,
+    "created_at": "2026-01-25T20:21:42.233151+00:00"
+  },
+  {
+    "id": "96a6b5ea-40ef-4662-b211-108d6ae52f3f",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on your request",
+    "message": "Editor sent a message on request RRG-000005",
+    "related_order_id": "be7d1e58-4b07-444e-b21a-774615e5a3db",
+    "is_read": true,
+    "created_at": "2026-01-25T20:21:52.232056+00:00"
+  },
+  {
+    "id": "3b636fd9-316f-464d-9add-cf11a9681f31",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000006 'Test Close Functionality' is available for pickup",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:32:17.663514+00:00"
+  },
+  {
+    "id": "a9923c9a-eb4e-4afb-9ae8-58c778574e2e",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000006 'Test Close Functionality' is available for pickup",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:32:17.663984+00:00"
+  },
+  {
+    "id": "705db13a-73bf-433a-bc80-387b6ed1dccb",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000006 'Test Close Functionality' is available for pickup",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:32:17.664420+00:00"
+  },
+  {
+    "id": "69b1eb94-bbef-4e81-bb67-9b2bb0694f28",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000006 'Test Close Functionality' is available for pickup",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:32:17.664820+00:00"
+  },
+  {
+    "id": "fa8befc9-cc23-4822-b0da-4da0a13d1d16",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000006 'Test Close Functionality' is available for pickup",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:32:17.665225+00:00"
+  },
+  {
+    "id": "84638c60-3635-47c4-9093-2c7a9e6f1472",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000006 was closed by Test Requester. Reason: Issue resolved - no longer needed",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": false,
+    "created_at": "2026-01-25T20:33:09.812997+00:00"
+  },
+  {
+    "id": "b3a21f9a-46f6-4826-93de-7ad29b2196d8",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000006 was closed by Test Requester. Reason: Issue resolved - no longer needed",
+    "related_order_id": "a53513f9-980a-4b4f-babd-2be40252674d",
+    "is_read": true,
+    "created_at": "2026-01-25T20:33:09.813537+00:00"
+  },
+  {
+    "id": "80a4ffe9-e2c3-475a-b983-7c338b052d0d",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000007 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.154462+00:00"
+  },
+  {
+    "id": "fc1b7e5b-faec-42bc-afc8-29f2b46d4bf2",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000007 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.154725+00:00"
+  },
+  {
+    "id": "51406694-ab88-45be-b6d1-391d10c81bde",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000007 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.154938+00:00"
+  },
+  {
+    "id": "b78e2a23-8413-4549-a892-0524b92a0790",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000007 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.155148+00:00"
+  },
+  {
+    "id": "869daf8b-91c2-47f4-860d-b23816dc891c",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000007 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.155346+00:00"
+  },
+  {
+    "id": "7b51a2b8-19e3-4133-af90-6bec48bad1d5",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000007 was closed by Test Requester. Reason: TEST_P0_CLOSE - Testing close functionality from pytest",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": false,
+    "created_at": "2026-01-25T20:35:10.170671+00:00"
+  },
+  {
+    "id": "f1dfefd7-01b4-4116-b889-78b5b1f3ca20",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000007 was closed by Test Requester. Reason: TEST_P0_CLOSE - Testing close functionality from pytest",
+    "related_order_id": "3aa469a5-c3f9-4dbb-acb7-f02a1dffac7e",
+    "is_read": true,
+    "created_at": "2026-01-25T20:35:10.171107+00:00"
+  },
+  {
+    "id": "863309ec-6986-4259-be55-c181c3243b51",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000008 'TEST_P0_UI_Close_Test_2' is available for pickup",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:38:05.996204+00:00"
+  },
+  {
+    "id": "68f24ad2-3f6a-4e65-947c-98ecbaf2adfc",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000008 'TEST_P0_UI_Close_Test_2' is available for pickup",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:38:05.996656+00:00"
+  },
+  {
+    "id": "724b648c-c31f-4e62-8967-a7fef9df98f7",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000008 'TEST_P0_UI_Close_Test_2' is available for pickup",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:38:05.996995+00:00"
+  },
+  {
+    "id": "1e174262-4675-4d21-a398-e4c9fb9be958",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000008 'TEST_P0_UI_Close_Test_2' is available for pickup",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:38:05.998241+00:00"
+  },
+  {
+    "id": "108911d0-5c87-4081-a553-54ff2b438142",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000008 'TEST_P0_UI_Close_Test_2' is available for pickup",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:38:05.998881+00:00"
+  },
+  {
+    "id": "4541a196-71ff-4563-a3f8-62692d23c943",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000008 was closed by Test Requester. Reason: Testing close functionality - P0 final test",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": false,
+    "created_at": "2026-01-25T20:40:13.062621+00:00"
+  },
+  {
+    "id": "e670e343-299b-4102-b6f3-2eb2e00e207d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000008 was closed by Test Requester. Reason: Testing close functionality - P0 final test",
+    "related_order_id": "4c560efd-3188-4c85-8a12-849b41c4bb5b",
+    "is_read": true,
+    "created_at": "2026-01-25T20:40:13.064557+00:00"
+  },
+  {
+    "id": "320aceea-703e-46a3-be1a-a7f181b350a4",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000009 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.312858+00:00"
+  },
+  {
+    "id": "70ceff16-9f56-4719-846c-195b92544552",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000009 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.313451+00:00"
+  },
+  {
+    "id": "517e8f99-0333-4cf8-9ca4-2025d54deb4e",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000009 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.313754+00:00"
+  },
+  {
+    "id": "f7b5b5d7-9123-4bb8-95ee-0bab64cc30d8",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000009 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.313978+00:00"
+  },
+  {
+    "id": "27b29774-64f8-46c9-9b44-355088d64f69",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000009 'TEST_P0_Close_Test_Order' is available for pickup",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.314468+00:00"
+  },
+  {
+    "id": "6d8b83b1-6130-4906-948b-da29e2e32238",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000009 was closed by Test Requester. Reason: TEST_P0_CLOSE - Testing close functionality from pytest",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": false,
+    "created_at": "2026-01-25T20:42:31.326003+00:00"
+  },
+  {
+    "id": "1ddc1b36-1e16-474d-8dfe-3a83c6c71c57",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "order_closed",
+    "title": "Order closed",
+    "message": "Order RRG-000009 was closed by Test Requester. Reason: TEST_P0_CLOSE - Testing close functionality from pytest",
+    "related_order_id": "092999c8-19ad-41ba-94f5-86af408b5d36",
+    "is_read": true,
+    "created_at": "2026-01-25T20:42:31.326437+00:00"
+  },
+  {
+    "id": "7aceac65-6967-496d-a665-fdcc36fb676b",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000010 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.782653+00:00"
+  },
+  {
+    "id": "3c3dd490-1af1-4aa9-9f38-add932ac6f36",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000010 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.784657+00:00"
+  },
+  {
+    "id": "5901e48b-ef42-4c76-9ff6-992484deb11a",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000010 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.785112+00:00"
+  },
+  {
+    "id": "25239353-af8f-4073-9368-fb3bcbb2b668",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000010 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.785554+00:00"
+  },
+  {
+    "id": "f8839748-d448-4e87-a92c-d888364c0700",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000010 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.785890+00:00"
+  },
+  {
+    "id": "070fd30f-8653-4734-9ab5-3f29862255c4",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000010",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:04.839375+00:00"
+  },
+  {
+    "id": "95b85bf3-ab59-4bd9-b6c8-b8900490fb94",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000010",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": true,
+    "created_at": "2026-01-25T22:56:04.839727+00:00"
+  },
+  {
+    "id": "8f524241-2b71-42df-b9f8-929c818dcbce",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000011 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:05.979283+00:00"
+  },
+  {
+    "id": "0f501185-0207-4fd5-8cd5-0d082ee34547",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000011 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:05.979647+00:00"
+  },
+  {
+    "id": "8d73f6b7-9a74-44b9-bd72-937fdab70359",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000011 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:05.979950+00:00"
+  },
+  {
+    "id": "bbad04eb-4393-42a9-8590-6482d8f300af",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000011 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:05.980247+00:00"
+  },
+  {
+    "id": "722dcc5a-bbc4-4874-8d42-6eb578bd2259",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000011 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:05.980532+00:00"
+  },
+  {
+    "id": "f5aed9eb-c86d-4d63-9e5d-510a8f93f0f7",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000012 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:06.607807+00:00"
+  },
+  {
+    "id": "b771eabe-6f58-4ac0-b7ad-553290f3e4f2",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000012 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:06.608207+00:00"
+  },
+  {
+    "id": "8a74f136-4809-42c3-b47f-001c6c9ad364",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000012 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:06.608533+00:00"
+  },
+  {
+    "id": "cd3496c6-a23f-46f1-b39a-21dbb40b5fc8",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000012 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:06.608826+00:00"
+  },
+  {
+    "id": "84449dfc-723f-45b6-8bd0-37043d5e7ded",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000012 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:06.609127+00:00"
+  },
+  {
+    "id": "f9f098fd-5e92-49a6-8556-b5acc5965411",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000013 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.207317+00:00"
+  },
+  {
+    "id": "6dfca61b-9d50-4944-ba89-42c743f2ec78",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000013 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.207667+00:00"
+  },
+  {
+    "id": "9acbd25c-c7e0-4a83-a9a8-c70b6090931e",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000013 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.207970+00:00"
+  },
+  {
+    "id": "e61bbb0a-2d36-4178-a0ae-a53dc49fdd27",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000013 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.208452+00:00"
+  },
+  {
+    "id": "52c61e1e-fe81-4529-95cd-a8cce6424311",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000013 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.208785+00:00"
+  },
+  {
+    "id": "daea6613-7e89-446c-a405-60566c8a71d8",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000013",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:07.255600+00:00"
+  },
+  {
+    "id": "b3e607f1-909a-449e-9a10-778c3f05a3e9",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000013",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": true,
+    "created_at": "2026-01-25T22:56:07.255947+00:00"
+  },
+  {
+    "id": "70fecfb7-3ad0-4031-87f0-ee750020f7cf",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000014 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.356362+00:00"
+  },
+  {
+    "id": "7618e59b-54a7-43a8-923a-831563455997",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000014 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.356613+00:00"
+  },
+  {
+    "id": "9b317e07-c64e-4ee1-ae2d-ab960d75c999",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000014 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.356803+00:00"
+  },
+  {
+    "id": "81434f3c-640e-4cb3-ae50-4a5a36331683",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000014 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.356980+00:00"
+  },
+  {
+    "id": "34dc5c7f-142e-432f-bf63-962b65d26d34",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000014 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.357152+00:00"
+  },
+  {
+    "id": "c318e101-2b51-45f2-94f6-16f8e171da4e",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000014",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:08.396640+00:00"
+  },
+  {
+    "id": "945266c0-f54e-4584-917f-0748d8b88eaa",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000014",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": true,
+    "created_at": "2026-01-25T22:56:08.396873+00:00"
+  },
+  {
+    "id": "13b90da3-6765-4e36-b259-9d4bde2fb277",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000015 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.532575+00:00"
+  },
+  {
+    "id": "cf1086a2-f540-4bbe-9d5e-a4f204a677b8",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000015 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.532819+00:00"
+  },
+  {
+    "id": "bb80e539-29e6-4d00-9ff4-1706f29dab0e",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000015 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.533021+00:00"
+  },
+  {
+    "id": "6dee9855-8e16-4ed6-b370-69b44b7f977e",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000015 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.533201+00:00"
+  },
+  {
+    "id": "ab376556-6f89-4304-a86e-2028a08c3db8",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000015 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.533376+00:00"
+  },
+  {
+    "id": "f435b0e7-4428-4edf-a347-4d9b168d73de",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000015",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:56:09.574324+00:00"
+  },
+  {
+    "id": "3a67f717-d10e-44f7-b92f-23137ae0cede",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000015",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": true,
+    "created_at": "2026-01-25T22:56:09.574713+00:00"
+  },
+  {
+    "id": "11778f88-1447-4a0a-8771-361dad725f31",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000016 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:57:59.982263+00:00"
+  },
+  {
+    "id": "99775d46-224a-41bb-bfb7-bb929aa63391",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000016 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:57:59.982587+00:00"
+  },
+  {
+    "id": "13a818b2-0095-4ede-aca8-9599a4686076",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000016 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:57:59.982837+00:00"
+  },
+  {
+    "id": "48d444b9-32b9-41af-8e28-e88eb3b04a9c",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000016 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:57:59.983043+00:00"
+  },
+  {
+    "id": "5004388c-381f-4618-a6e0-5a0939d37949",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000016 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:57:59.983225+00:00"
+  },
+  {
+    "id": "40e92ad9-f482-4e7a-8bbe-5d1e5d231c87",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000016: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:00.041169+00:00"
+  },
+  {
+    "id": "3b0acf7f-4cfc-4020-82de-4bc6f10450c8",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000016: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:00.041630+00:00"
+  },
+  {
+    "id": "3e440917-57ca-4a6f-9c2c-84672add59e5",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000017 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.396311+00:00"
+  },
+  {
+    "id": "66d71e59-eacd-4729-821b-85567183ee26",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000017 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.396639+00:00"
+  },
+  {
+    "id": "0977ed49-69ed-4674-b3ce-2864e2a0ca57",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000017 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.396851+00:00"
+  },
+  {
+    "id": "83c14d01-78fd-43b0-94f8-cecb4811ce0e",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000017 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.397044+00:00"
+  },
+  {
+    "id": "fab63142-0f2f-477e-9bbe-75c20dd888cb",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000017 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.397242+00:00"
+  },
+  {
+    "id": "f2fb60da-38d5-4f81-8068-ee94655f31e3",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000017: \"Test message for ticket reference check\"",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:03.439740+00:00"
+  },
+  {
+    "id": "333478d4-aebf-47de-8ddd-956023fb566d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000017: \"Test message for ticket reference check\"",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:03.439988+00:00"
+  },
+  {
+    "id": "ba6981c3-893b-4e22-8f4b-faeb8a71ee4b",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000018 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.558282+00:00"
+  },
+  {
+    "id": "7ae453bf-874a-4e4e-9572-0f3d602a16c9",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000018 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.558709+00:00"
+  },
+  {
+    "id": "eb4d7ea0-7f8d-40c2-acd6-73dfd9b3ba9c",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000018 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.559031+00:00"
+  },
+  {
+    "id": "467287e8-98d2-4a02-94b5-d25c0c33358e",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000018 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.559318+00:00"
+  },
+  {
+    "id": "b6a798d3-910d-47fc-9798-b345606db579",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000018 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.559660+00:00"
+  },
+  {
+    "id": "3bfc17b3-1d41-4690-a64d-fe28809fb1c5",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000018: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:04.603305+00:00"
+  },
+  {
+    "id": "2654091c-fa59-49dd-a0de-fa2bf39ec77f",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000018: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:04.603650+00:00"
+  },
+  {
+    "id": "9f1be3c8-5d7f-4b7e-9e09-7d7c1cad1c76",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000019 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.694811+00:00"
+  },
+  {
+    "id": "07e2dd61-328b-452a-a834-3c2358274588",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000019 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.695139+00:00"
+  },
+  {
+    "id": "26a7fe59-350c-4430-b8c0-5768a3e00113",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000019 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.695420+00:00"
+  },
+  {
+    "id": "13130f1d-d130-49bc-aac5-b6214ac16436",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000019 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.695708+00:00"
+  },
+  {
+    "id": "42bd51af-b1a4-4413-843c-368e49eb52fd",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000019 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.695976+00:00"
+  },
+  {
+    "id": "8569fbdf-5355-41fe-b55e-485217f05464",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000019: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:05.736081+00:00"
+  },
+  {
+    "id": "f1b24b23-bcec-4ff9-94c9-83f1f6732646",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000019: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:05.736406+00:00"
+  },
+  {
+    "id": "a59fe16a-bc8b-45c9-80a2-9879eaacd7ed",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.699946+00:00"
+  },
+  {
+    "id": "60840f9e-2d1e-408e-9e4f-635b17a03192",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.700222+00:00"
+  },
+  {
+    "id": "8ccbaa15-9cb1-4f2c-be96-0e00c8952f91",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.700442+00:00"
+  },
+  {
+    "id": "77981427-a768-4c03-b40d-8e3b58c5443f",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.700634+00:00"
+  },
+  {
+    "id": "9213469c-a6ef-4c91-8226-6faf70f7909e",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.700819+00:00"
+  },
+  {
+    "id": "8320047a-a5f2-4baa-91fb-0935c710119f",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000020 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.701011+00:00"
+  },
+  {
+    "id": "6772c1f0-19a6-47ed-b3cb-5834b37d664e",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000020: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:26.781862+00:00"
+  },
+  {
+    "id": "9d7ce492-7c02-4ebd-83a4-cbd7232cdbf3",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000020: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:26.782100+00:00"
+  },
+  {
+    "id": "a916c9f4-92a5-4195-9bb1-4d570aa9d69b",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.914690+00:00"
+  },
+  {
+    "id": "390f6fa8-6081-42f5-9acb-30d68db6170d",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.914952+00:00"
+  },
+  {
+    "id": "1ee6a8f6-3acb-4508-a099-e92700287aa9",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.915159+00:00"
+  },
+  {
+    "id": "7f18d732-be99-46e9-b25c-1164e423562d",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.915341+00:00"
+  },
+  {
+    "id": "7f6c30c4-c3f5-4b76-94b4-07bbcf1bd55d",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.915531+00:00"
+  },
+  {
+    "id": "0d54356a-0f24-483f-91a6-434a43adbb80",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000021 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.915704+00:00"
+  },
+  {
+    "id": "0d33d157-0c14-4a7f-ba36-39f2cf5aa42a",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000021 'TEST_P0_Notification_Order' is now being worked on by Test Editor P0",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.963288+00:00"
+  },
+  {
+    "id": "9a684f76-3724-488b-a6b1-c6944549517b",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000021 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:27.963950+00:00"
+  },
+  {
+    "id": "41be3fbe-dc2d-492e-b6fc-913ca6c517d9",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000021 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:27.964278+00:00"
+  },
+  {
+    "id": "b03014f6-9f72-4ff3-be51-5985aef3356b",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_message",
+    "title": "New message on your ticket",
+    "message": "Test Requester sent a message on ticket RRG-000021: \"TEST_P0_Message: Thanks for picking up my request!\"",
+    "related_order_id": "49263437-67db-4cb1-ad6c-96c95281bd22",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:28.036208+00:00"
+  },
+  {
+    "id": "3e779021-9d9a-41e4-8f73-994212849cb8",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.189522+00:00"
+  },
+  {
+    "id": "7231e64d-8580-436f-bc63-8a7ce10a8010",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.189787+00:00"
+  },
+  {
+    "id": "51ff9d6f-3a8e-46a9-ad22-6e22b0f84b09",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.189988+00:00"
+  },
+  {
+    "id": "5cceb35f-d287-4983-af61-41c7fe9682e2",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.190178+00:00"
+  },
+  {
+    "id": "54b8081b-4471-4edb-8e6b-c656ccc91364",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.190365+00:00"
+  },
+  {
+    "id": "6bff9a82-7fa6-4f7e-b421-b398292b6d39",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000022 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.190548+00:00"
+  },
+  {
+    "id": "74e80bc3-a3b1-4f6c-b4d8-c58cc10aa4b5",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000022 'TEST_P0_Notification_Order' is now being worked on by Test Editor P0",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.230553+00:00"
+  },
+  {
+    "id": "1d52c84f-1cfe-4782-b6c6-72891f332174",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000022 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.231176+00:00"
+  },
+  {
+    "id": "eff6a3c9-9721-4ac0-90b0-98fdad17586e",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000022 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:29.231392+00:00"
+  },
+  {
+    "id": "6ea03235-c897-4de1-b48c-7e22f9545335",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "new_message",
+    "title": "New message on your request",
+    "message": "Your resolver sent a message on request RRG-000022: \"TEST_P0_Message: I'm working on your request now!\"",
+    "related_order_id": "0a5dbbb3-a939-41ca-bb00-6fe62faaba0f",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:29.305345+00:00"
+  },
+  {
+    "id": "eb418c34-e931-472e-89e1-681c2d278b62",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.438956+00:00"
+  },
+  {
+    "id": "0a23cd62-1e26-410f-b731-57f050fca96c",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.439192+00:00"
+  },
+  {
+    "id": "bb8e67e5-5bc7-435c-85b6-d14588478336",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.439397+00:00"
+  },
+  {
+    "id": "384b0ff2-faff-4137-9dba-beab4287fc50",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.439600+00:00"
+  },
+  {
+    "id": "5e9904de-5071-4ee7-977c-4fa75b476a5f",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.439773+00:00"
+  },
+  {
+    "id": "5c692f4d-5ae3-44d8-8b32-938669abbe2c",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000023 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.439940+00:00"
+  },
+  {
+    "id": "b16ec6ab-e9ca-4870-8e9a-18d0d8f99095",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000023: \"Test message for ticket reference check\"",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:30.478391+00:00"
+  },
+  {
+    "id": "7968a8e7-8aad-4ac6-97c9-2c688e29dae5",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000023: \"Test message for ticket reference check\"",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:30.478632+00:00"
+  },
+  {
+    "id": "6d146dfb-a259-4266-941a-73799173772f",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.596937+00:00"
+  },
+  {
+    "id": "4e1882f2-3aa0-4b2d-ab38-887bf731672d",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.597293+00:00"
+  },
+  {
+    "id": "fc2a1941-18e7-4100-a702-5d6f8f45c7e6",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.597535+00:00"
+  },
+  {
+    "id": "17f7610f-c5f9-4d7d-a645-f09890350f81",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.597719+00:00"
+  },
+  {
+    "id": "ac2cdadc-e0ca-46ff-b9f1-654d8fe8baf8",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.597893+00:00"
+  },
+  {
+    "id": "b5db80a3-e022-4572-8711-12b3e28fb35b",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000024 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.598076+00:00"
+  },
+  {
+    "id": "77c71b59-898e-482d-a781-fabf53a71c9f",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000024: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:31.636728+00:00"
+  },
+  {
+    "id": "4f1c8be0-3750-4fa0-af53-b83b14ad350e",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000024: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:31.637073+00:00"
+  },
+  {
+    "id": "84e4e09b-0979-4db8-8887-d4c72e490a7c",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.817611+00:00"
+  },
+  {
+    "id": "62aecbbd-9366-4b16-8d7e-413d856b0237",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.817865+00:00"
+  },
+  {
+    "id": "f0c6d1d8-1cc9-4b2e-8157-fb3e34062ce4",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.818371+00:00"
+  },
+  {
+    "id": "73b9bd5d-fcca-4778-b6ae-e1521b252535",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.818709+00:00"
+  },
+  {
+    "id": "585433ff-28e3-4bb3-80cf-0bc86c30b400",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.819002+00:00"
+  },
+  {
+    "id": "95de8da7-1246-4ce9-a6f3-b68c5a45efcb",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000025 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.819291+00:00"
+  },
+  {
+    "id": "832c85a7-e202-4f92-8270-fcecb39abdf3",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000025: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-25T22:58:32.858848+00:00"
+  },
+  {
+    "id": "fe459705-19cd-44cd-8e00-a270c0a2d4b6",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000025: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": true,
+    "created_at": "2026-01-25T22:58:32.859449+00:00"
+  },
+  {
+    "id": "4cb6ed31-bcfe-454f-a4ab-da58f60673ae",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.195436+00:00"
+  },
+  {
+    "id": "6da510a5-26e6-4148-af81-4133e323cb37",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.195725+00:00"
+  },
+  {
+    "id": "7969baef-0d0c-469d-a757-dc4649c583ca",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.196159+00:00"
+  },
+  {
+    "id": "14fd3249-a35d-41ea-b9d2-6f25a560bc81",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.196555+00:00"
+  },
+  {
+    "id": "7a05f9ec-7c3a-4453-843a-867a92a15a70",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.196788+00:00"
+  },
+  {
+    "id": "5962b75a-4205-49fa-888e-43901c9112b4",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000026 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.197167+00:00"
+  },
+  {
+    "id": "ffe319e6-e3f3-4392-8a71-781205bb6461",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000026: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:40.235445+00:00"
+  },
+  {
+    "id": "7afb8cd2-ae2d-40fe-a8bb-a54e525a6eb0",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000026: \"TEST_P0_Message: Hello, I need help with this requ...\"",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:40.235897+00:00"
+  },
+  {
+    "id": "04ad71c9-20f8-4e4b-9dea-ef6dda33e306",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.465766+00:00"
+  },
+  {
+    "id": "bb15afa6-a571-4e22-8086-acebf62141ef",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.466222+00:00"
+  },
+  {
+    "id": "216396b9-f18f-41a5-8804-c553d9e68e6e",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.466620+00:00"
+  },
+  {
+    "id": "76abb503-1f23-480d-977b-1332e630fcf3",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.466970+00:00"
+  },
+  {
+    "id": "6f1c7dbb-14f1-4319-906c-7ada0f7bf422",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.467305+00:00"
+  },
+  {
+    "id": "b63fdfa2-d50e-48cb-8abb-fc24ba28ffbb",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000027 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.467638+00:00"
+  },
+  {
+    "id": "00a165b2-e016-4774-af9a-10b60b3c2d0b",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000027 'TEST_P0_Notification_Order' is now being worked on by Test Editor P0",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.511773+00:00"
+  },
+  {
+    "id": "2961eb6a-bbd6-48a8-af68-bbcf68254405",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000027 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.512620+00:00"
+  },
+  {
+    "id": "214332e7-ca2b-47fc-a04f-bf9cd9e4d3d1",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000027 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:41.512977+00:00"
+  },
+  {
+    "id": "ed9f44b5-476c-4771-8219-c4bb17ab4e95",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_message",
+    "title": "New message on your ticket",
+    "message": "Test Requester sent a message on ticket RRG-000027: \"TEST_P0_Message: Thanks for picking up my request!\"",
+    "related_order_id": "420c74b8-de36-4c18-8f3c-59190e163b52",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:41.634889+00:00"
+  },
+  {
+    "id": "f3ed53bc-28ee-4d35-829d-02766f79e2eb",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.810736+00:00"
+  },
+  {
+    "id": "e25ce0fd-2679-469d-9652-7f6b82d40779",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.811242+00:00"
+  },
+  {
+    "id": "7f47b9c3-a0e2-4fc6-bd49-91d0ce7c81bb",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.814008+00:00"
+  },
+  {
+    "id": "c8601df6-d8a2-4ea4-91c2-02f2d8cbcaf1",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.816081+00:00"
+  },
+  {
+    "id": "5b060c8d-dbe8-4e74-b209-4b668ed064c5",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.816571+00:00"
+  },
+  {
+    "id": "d33e97ae-5ac7-4ce8-b2b5-4508d6f1a0ea",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000028 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.816993+00:00"
+  },
+  {
+    "id": "76b7a139-4e23-4b9f-88a5-d6e1933b3858",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000028 'TEST_P0_Notification_Order' is now being worked on by Test Editor P0",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.872042+00:00"
+  },
+  {
+    "id": "7d469775-47cb-47fe-9609-08019fb1d146",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000028 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.874366+00:00"
+  },
+  {
+    "id": "57fb72e9-cd52-4aa2-a809-0b9ee64b9b14",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000028 changed from Open to In Progress by Test Editor P0",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:42.878977+00:00"
+  },
+  {
+    "id": "d13295d7-2a16-430c-873b-78a9b6cbca01",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "new_message",
+    "title": "New message on your request",
+    "message": "Your resolver sent a message on request RRG-000028: \"TEST_P0_Message: I'm working on your request now!\"",
+    "related_order_id": "505d9c03-7ecc-43c1-89b7-4688e4fb0321",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:42.941661+00:00"
+  },
+  {
+    "id": "574926b2-293a-43bc-a5de-d25cf74f9213",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.121278+00:00"
+  },
+  {
+    "id": "891822bf-f5fd-4348-8b36-996a17a62ff1",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.121862+00:00"
+  },
+  {
+    "id": "b5085f77-331e-4154-8663-3d4c5afb3a3d",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.122268+00:00"
+  },
+  {
+    "id": "8b36fccd-e983-41dc-b1f5-b7cf3ed621f4",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.122633+00:00"
+  },
+  {
+    "id": "ace536f1-e3fa-4d28-8904-a1a75f19b696",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.123022+00:00"
+  },
+  {
+    "id": "eb3adb4d-fa67-4dab-ae62-cd24f7515100",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000029 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.123396+00:00"
+  },
+  {
+    "id": "6b8e68c7-f66c-4398-bc84-36c88ee1fcd0",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000029: \"Test message for ticket reference check\"",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:44.163351+00:00"
+  },
+  {
+    "id": "25dd7456-b5c9-4d2b-a201-398f41fe65f5",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000029: \"Test message for ticket reference check\"",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:44.163807+00:00"
+  },
+  {
+    "id": "203552e5-9fcf-4225-a1e4-d14190890933",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.297670+00:00"
+  },
+  {
+    "id": "5d1e8daa-3a50-4dab-a84d-cbc62691627f",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.298185+00:00"
+  },
+  {
+    "id": "075db88b-b0a1-49d7-b1dd-f213f53ea218",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.298579+00:00"
+  },
+  {
+    "id": "12bb11c7-fb42-4f24-a834-0b2a53949c51",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.299012+00:00"
+  },
+  {
+    "id": "6e641f47-4e89-4c5f-b75e-0265dc3d67e4",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.299463+00:00"
+  },
+  {
+    "id": "49df132a-5e81-45ed-a2ca-0ae7ae6c12fe",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000030 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.299807+00:00"
+  },
+  {
+    "id": "38a47431-cc59-4bdd-85bd-39d75732fb9d",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000030: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:45.347765+00:00"
+  },
+  {
+    "id": "5051a73e-74cb-4f80-8a61-76aee6dba39f",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000030: \"This is a unique test message for preview verifica...\"",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:45.348269+00:00"
+  },
+  {
+    "id": "35397923-811e-454c-8b93-dd56b9e65e4b",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.465104+00:00"
+  },
+  {
+    "id": "41e93b8f-b599-428f-8ba7-5245a8d9fd53",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.466065+00:00"
+  },
+  {
+    "id": "5f04b9f1-04f9-49dd-912c-b7faece54912",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.466607+00:00"
+  },
+  {
+    "id": "4a9abd4d-e17f-488d-81fc-f0b02ba3b5cd",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.470245+00:00"
+  },
+  {
+    "id": "372e274c-9784-483b-b57a-fda1db3cf043",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.470980+00:00"
+  },
+  {
+    "id": "ea047d07-d233-42d3-9bf6-7410d6754241",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000031 'TEST_P0_Notification_Order' is available for pickup",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.471495+00:00"
+  },
+  {
+    "id": "14d57122-746d-4f71-a3db-02c6a8946cdd",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000031: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-25T23:00:46.516160+00:00"
+  },
+  {
+    "id": "0eba8327-15ff-48cd-868e-8f3a9681e16c",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "new_message",
+    "title": "New message on unassigned ticket",
+    "message": "Test Requester sent a message on unassigned ticket RRG-000031: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\"",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": true,
+    "created_at": "2026-01-25T23:00:46.516541+00:00"
+  },
+  {
+    "id": "e28b9e38-349e-4646-8458-15047f918c9b",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000010 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:36.633227+00:00"
+  },
+  {
+    "id": "3f5d245b-0676-44ae-9862-fa7cf879cd8f",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000010 changed from Open to In Progress by Test Editor",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:36.637713+00:00"
+  },
+  {
+    "id": "06f922f2-2d9f-421d-9629-99d3b876e79e",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000010 changed from Open to In Progress by Test Editor",
+    "related_order_id": "77d79f10-db2e-4efa-9488-681c70e49817",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:36.638237+00:00"
+  },
+  {
+    "id": "6da8bd9a-ba65-4fe3-b24f-562c3031f326",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000011 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:41.183543+00:00"
+  },
+  {
+    "id": "af4b73c3-6aa3-458f-9e0a-9c755e2b8c68",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000011 changed from Open to In Progress by Test Editor",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:41.184775+00:00"
+  },
+  {
+    "id": "4ff68c7f-7cec-4e0e-bc54-76ec372d0c74",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000011 changed from Open to In Progress by Test Editor",
+    "related_order_id": "50e537ae-0216-4fec-a2f9-4c55eadc2a62",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:41.185196+00:00"
+  },
+  {
+    "id": "42d9e7cc-894c-415a-9588-c2a9de6f54eb",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000012 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.265830+00:00"
+  },
+  {
+    "id": "b33bc1c8-8902-4bbe-8ed0-f6269cd29bde",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000012 changed from Open to In Progress by Test Editor",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.267112+00:00"
+  },
+  {
+    "id": "e44620e5-f001-4d7e-aa25-dd1ef91e4187",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000012 changed from Open to In Progress by Test Editor",
+    "related_order_id": "923b4983-b0c0-4d67-8e09-cfb9770947b7",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.267720+00:00"
+  },
+  {
+    "id": "7097a90d-0572-4f34-a2ef-2fddd9c1bd20",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000013 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.597327+00:00"
+  },
+  {
+    "id": "4519aba4-f9ba-408f-abe1-db0d8e1cd2c1",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000013 changed from Open to In Progress by Test Editor",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.598598+00:00"
+  },
+  {
+    "id": "c31bdb61-49fa-4835-983c-f470de08fc10",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000013 changed from Open to In Progress by Test Editor",
+    "related_order_id": "0e6def49-1256-4e89-92f1-5ee6b089c157",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:44.599126+00:00"
+  },
+  {
+    "id": "7d0c4c96-892f-4ac0-b203-c4e06f82dfea",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000014 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:45.826867+00:00"
+  },
+  {
+    "id": "5d0b0635-6e47-48bf-89d7-31d852b41f9c",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000014 changed from Open to In Progress by Test Editor",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:45.827864+00:00"
+  },
+  {
+    "id": "ec5583aa-d3e6-46c5-9efc-b52b205a296c",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000014 changed from Open to In Progress by Test Editor",
+    "related_order_id": "50a89563-3c00-4d11-a24f-5921e9c24a11",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:45.828269+00:00"
+  },
+  {
+    "id": "2ac1b161-9ebd-46eb-a27e-902d9f65510c",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000015 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:46.743562+00:00"
+  },
+  {
+    "id": "84a88ea5-5285-4daa-9f55-df8a5b204be9",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000015 changed from Open to In Progress by Test Editor",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:46.745021+00:00"
+  },
+  {
+    "id": "6f4ff5f3-bd9f-41fd-bc5f-b7a149d6a3a8",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000015 changed from Open to In Progress by Test Editor",
+    "related_order_id": "1d5bf689-4387-4ea2-9347-7efc280a834f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:46.745445+00:00"
+  },
+  {
+    "id": "0f954fdf-d2ea-4a2d-adbf-79ddfe09413d",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000016 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:47.549408+00:00"
+  },
+  {
+    "id": "ee6d5f71-6875-47da-a6b0-be4bdbcbe94e",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000016 changed from Open to In Progress by Test Editor",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:47.550726+00:00"
+  },
+  {
+    "id": "d9d528b7-23c5-46f7-ba5c-167fe7d70221",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000016 changed from Open to In Progress by Test Editor",
+    "related_order_id": "1a5fa735-20fd-4edd-b134-c57b6e3883b4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:47.551225+00:00"
+  },
+  {
+    "id": "36184564-b2de-480f-908d-14f2b35d0f2c",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000017 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:48.405950+00:00"
+  },
+  {
+    "id": "357f5619-58d3-4590-b702-857979431ace",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000017 changed from Open to In Progress by Test Editor",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:48.407047+00:00"
+  },
+  {
+    "id": "d60a672e-7539-4f87-9d78-60311f064ac0",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000017 changed from Open to In Progress by Test Editor",
+    "related_order_id": "b44aa594-2508-4515-a58a-f7a6e8e4e8c2",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:48.407547+00:00"
+  },
+  {
+    "id": "5fa70675-92cd-4094-aa44-a3a89f8d9a61",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000018 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.391554+00:00"
+  },
+  {
+    "id": "18fd4103-6a0e-4c42-9311-c5d04e86a064",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000018 changed from Open to In Progress by Test Editor",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.392750+00:00"
+  },
+  {
+    "id": "289e5609-ea6b-4f9c-85b2-8b0702711436",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000018 changed from Open to In Progress by Test Editor",
+    "related_order_id": "b928b0d0-0cef-43bd-a8e0-ad0e5a965b1f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.393250+00:00"
+  },
+  {
+    "id": "19287eea-0b3f-4229-9a97-a40506c87592",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000019 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.929574+00:00"
+  },
+  {
+    "id": "299a6945-a90b-4f94-888b-3c44599aaf9d",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000019 changed from Open to In Progress by Test Editor",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.930597+00:00"
+  },
+  {
+    "id": "bc16ad2a-3132-41b4-bd64-77e696ca333d",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000019 changed from Open to In Progress by Test Editor",
+    "related_order_id": "5410f610-2106-4bfc-88f4-d6e0c77d86be",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:49.931186+00:00"
+  },
+  {
+    "id": "f8adb989-99aa-496f-a362-762df4069883",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000020 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.555050+00:00"
+  },
+  {
+    "id": "0409de46-c862-475b-b0ed-dd827bbcecc1",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000020 changed from Open to In Progress by Test Editor",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.556142+00:00"
+  },
+  {
+    "id": "ffd5b165-9a59-4b3f-8b6c-2cd295ff5c85",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000020 changed from Open to In Progress by Test Editor",
+    "related_order_id": "6cb5aff4-c5e8-4d2e-8d7f-b13670a5e6a4",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.556667+00:00"
+  },
+  {
+    "id": "2a7bfa75-ed7c-4651-9602-6d7cf46f0a5b",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000023 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.982307+00:00"
+  },
+  {
+    "id": "a3ade9fc-2b65-41f5-8039-11fa696b4281",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000023 changed from Open to In Progress by Test Editor",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.983398+00:00"
+  },
+  {
+    "id": "7ac59259-3152-4923-aa6a-1c11c1900ee3",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000023 changed from Open to In Progress by Test Editor",
+    "related_order_id": "3a325d68-b961-4c6c-8bfb-2f4f76958db9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:50.983944+00:00"
+  },
+  {
+    "id": "bb0d433a-f53d-4f62-b0f2-9dc79aefb5b4",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000024 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.390704+00:00"
+  },
+  {
+    "id": "a04e0ef5-d4ca-42d4-ad39-9f9336a77833",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000024 changed from Open to In Progress by Test Editor",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.392181+00:00"
+  },
+  {
+    "id": "a737d59f-51ee-4d8c-a19f-09c5f6e207da",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000024 changed from Open to In Progress by Test Editor",
+    "related_order_id": "29c0e5d1-b4fc-4d44-975f-a95943ac0221",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.392632+00:00"
+  },
+  {
+    "id": "b0daf277-cb2a-4eb1-9db7-960036f2bada",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000025 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.909902+00:00"
+  },
+  {
+    "id": "4f0a9d37-2188-4090-afdd-3f6d53aa3b45",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000025 changed from Open to In Progress by Test Editor",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.910861+00:00"
+  },
+  {
+    "id": "d1c49e1b-baf0-4d77-890f-c00f4212bcab",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000025 changed from Open to In Progress by Test Editor",
+    "related_order_id": "adfed1c8-a49b-420a-a2c3-f44377a935e9",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:51.911392+00:00"
+  },
+  {
+    "id": "16823268-0dbd-4efd-8611-8f9932cfe380",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000026 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:52.500932+00:00"
+  },
+  {
+    "id": "951d19fb-9eab-4a19-9c6a-02222b890d2e",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000026 changed from Open to In Progress by Test Editor",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:52.501826+00:00"
+  },
+  {
+    "id": "e821458c-b33b-47a7-af56-d9d74438cc1f",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000026 changed from Open to In Progress by Test Editor",
+    "related_order_id": "48cd1b7f-155a-44cd-bb5e-320e38538d9d",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:52.502255+00:00"
+  },
+  {
+    "id": "413eb629-ccda-451b-97c0-df6bfb7acd31",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000029 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.149118+00:00"
+  },
+  {
+    "id": "a9cc72d5-c199-4e33-b2a5-ca921dad635b",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000029 changed from Open to In Progress by Test Editor",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.150256+00:00"
+  },
+  {
+    "id": "22b56ff0-7f98-455f-b23d-baa427186c28",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000029 changed from Open to In Progress by Test Editor",
+    "related_order_id": "69573389-49a9-437b-8da4-044e481c720f",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.150694+00:00"
+  },
+  {
+    "id": "92cf8cb5-43f7-4cce-99a9-8483a6997130",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000030 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.675412+00:00"
+  },
+  {
+    "id": "9854177b-036d-431b-b0cf-543db34749ca",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000030 changed from Open to In Progress by Test Editor",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.678382+00:00"
+  },
+  {
+    "id": "ba0e2840-5f5d-4d42-b447-a2a40cf9898a",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000030 changed from Open to In Progress by Test Editor",
+    "related_order_id": "26429773-4a71-4311-b61a-eeee27150b48",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:53.678854+00:00"
+  },
+  {
+    "id": "1c8fa4bf-eb8a-412f-ba67-cf421aa96091",
+    "user_id": "0e8d2a2e-7732-4176-a611-ba0324f3182a",
+    "type": "order_picked",
+    "title": "Your request has been picked up",
+    "message": "Request RRG-000031 'TEST_P0_Notification_Order' is now being worked on by Test Editor",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:54.220624+00:00"
+  },
+  {
+    "id": "4c10443f-2921-4080-8fd8-096b4c42a6bc",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000031 changed from Open to In Progress by Test Editor",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:54.221964+00:00"
+  },
+  {
+    "id": "426dfbfc-ef02-4f0c-929b-690f0d8f9836",
+    "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "type": "status_change",
+    "title": "Request status changed",
+    "message": "Request RRG-000031 changed from Open to In Progress by Test Editor",
+    "related_order_id": "70f66016-611e-445e-b740-2c42a40aba13",
+    "is_read": false,
+    "created_at": "2026-01-26T00:23:54.222410+00:00"
+  },
+  {
+    "id": "023c6525-51e7-4d4e-8b0a-d606b6513b38",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.833714+00:00"
+  },
+  {
+    "id": "a7d7e0b7-8c12-4518-82ed-71ccf0ce3e48",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.836870+00:00"
+  },
+  {
+    "id": "99aa8821-7bc3-42eb-87ec-8419f0530d68",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.837246+00:00"
+  },
+  {
+    "id": "6e927582-c9f4-4a4e-aef6-185d2e66bd58",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.837548+00:00"
+  },
+  {
+    "id": "54e5931f-faf3-4708-a0bb-233d0d26e417",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.837860+00:00"
+  },
+  {
+    "id": "c9a358a8-7e8e-4408-a31c-4eac93cbbd8a",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.838145+00:00"
+  },
+  {
+    "id": "be11ce02-776a-44db-9877-b570ff93e97a",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000032 'Webhook Test Order' is available for pickup",
+    "related_order_id": "7c45348a-f624-4d96-ad7d-b7637effcf79",
+    "is_read": false,
+    "created_at": "2026-01-26T01:26:29.838414+00:00"
+  },
+  {
+    "id": "9ed197b5-b9d3-4c96-a827-3f10acd08599",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.051075+00:00"
+  },
+  {
+    "id": "fa1ffd1d-57f5-4195-bb47-f18a238386dc",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.051424+00:00"
+  },
+  {
+    "id": "b0938329-2d75-4dd0-887a-8b6ed397875e",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.051769+00:00"
+  },
+  {
+    "id": "44fcc10c-ebbe-4bd0-9609-f672dba460e0",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.052086+00:00"
+  },
+  {
+    "id": "90719a93-4ff8-454a-ac97-25d2c9632c9c",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.052402+00:00"
+  },
+  {
+    "id": "38e5bf87-d2b3-4819-8692-797f179d7875",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.052717+00:00"
+  },
+  {
+    "id": "27a7777a-0299-4eee-91ff-fa2698a0c434",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000033 'TEST_WebhookTriggerOrder' is available for pickup",
+    "related_order_id": "b3bf21cd-4afb-4543-a97d-52d651d76d21",
+    "is_read": false,
+    "created_at": "2026-01-26T01:28:51.053026+00:00"
+  },
+  {
+    "id": "9aaa5505-1f7e-403b-8438-ee40cc6c45e8",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.560823+00:00"
+  },
+  {
+    "id": "c0e4a372-074e-4ff8-ae26-45d94dbb2a2c",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.561172+00:00"
+  },
+  {
+    "id": "f3e0d334-603f-412a-9e6f-dd1a40838056",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.561547+00:00"
+  },
+  {
+    "id": "ba85c790-f936-467a-9c21-2a8d5fe035b8",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.561933+00:00"
+  },
+  {
+    "id": "0102df91-efe1-442f-89b4-51439b7d1d6a",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.562156+00:00"
+  },
+  {
+    "id": "485c7fa5-ed98-4872-805a-6f4af5571043",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.562344+00:00"
+  },
+  {
+    "id": "e7e565ed-e2f9-4ee5-b943-84f3b9812def",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000034 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "b815a6e1-e8de-4b54-baea-6098b17c6ff6",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:43.562533+00:00"
+  },
+  {
+    "id": "8c958388-7afb-4528-93b9-d147b4c7837c",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.584955+00:00"
+  },
+  {
+    "id": "95bd4793-9854-4fbb-90f7-a500d09ff6a2",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.585177+00:00"
+  },
+  {
+    "id": "d03fca3e-316d-44a0-aeb8-333ad4992fbf",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.585365+00:00"
+  },
+  {
+    "id": "aed4459a-2fbb-42af-ad95-2652f9801d6f",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.585552+00:00"
+  },
+  {
+    "id": "f069f764-4d2a-45f5-b708-6fc2c8a4ac96",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.585740+00:00"
+  },
+  {
+    "id": "41e48628-4fd4-4772-8ad8-b101598b5929",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.585910+00:00"
+  },
+  {
+    "id": "ff11f01f-5209-49f7-8b58-493aea02a486",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000035 'TEST_Workflow_Trigger_Order' is available for pickup",
+    "related_order_id": "6cba859a-2b9d-41eb-aff9-d16b0e566535",
+    "is_read": false,
+    "created_at": "2026-01-26T01:58:58.586083+00:00"
+  },
+  {
+    "id": "e38d84a9-cf70-4aa9-a6a4-327581a4733c",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.463081+00:00"
+  },
+  {
+    "id": "f8cef82c-a7e8-47ae-b7ec-06633cbc59c9",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.466682+00:00"
+  },
+  {
+    "id": "213c9652-7bd7-4d9c-882b-a31e8fb1f508",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.467015+00:00"
+  },
+  {
+    "id": "c734ecb8-30ee-460d-b32c-f15f200d7394",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.467254+00:00"
+  },
+  {
+    "id": "bc293de7-496e-4579-86b6-c67c824eb2d6",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.467486+00:00"
+  },
+  {
+    "id": "3402c3a3-14db-42d5-89b9-1105c622c5c8",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.467725+00:00"
+  },
+  {
+    "id": "1eef510e-e9e3-4119-8813-d605fada1dbc",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000036 'Workflow Test Request - Please Validate' is available for pickup",
+    "related_order_id": "aec4cec7-0f11-41aa-be2d-1ccb5cd8bc26",
+    "is_read": false,
+    "created_at": "2026-01-26T03:20:23.467940+00:00"
+  },
+  {
+    "id": "03360eb9-c924-4e4b-830e-ca67f715972f",
+    "user_id": "ca7bb856-d53c-40ab-8635-e2f1cd35e000",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.568360+00:00"
+  },
+  {
+    "id": "4813d05f-aa27-444a-97aa-11dfe92dd123",
+    "user_id": "f4593709-d738-4992-ad3c-d86f070c6085",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.574492+00:00"
+  },
+  {
+    "id": "40de18ee-ff8c-4f54-8288-28f9cd7be3da",
+    "user_id": "c0e94a28-2ae6-43dd-ba75-349395d830d1",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.574847+00:00"
+  },
+  {
+    "id": "8f886660-540f-4f6e-a61a-b777cbbd17ee",
+    "user_id": "bdf48d36-a7bf-43ce-8f37-98ec9eba0a8d",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.575293+00:00"
+  },
+  {
+    "id": "21b7c672-3e6d-4f56-b52c-9e993c12b163",
+    "user_id": "25708f8f-b004-401b-9689-d2cc1872af38",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.575653+00:00"
+  },
+  {
+    "id": "de908973-5ef0-4c9e-ade0-38ffd5d87b76",
+    "user_id": "1d2996ba-540b-41e7-89ff-9a28bcf3434b",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.575873+00:00"
+  },
+  {
+    "id": "e96ff067-82c8-40ea-96d9-7bed38f35a9c",
+    "user_id": "a32d72d2-e07c-42e2-afbd-eae3306681b0",
+    "type": "new_order",
+    "title": "New request available",
+    "message": "New editing request RRG-000037 'Test Workflow Validation Order' is available for pickup",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "is_read": false,
+    "created_at": "2026-01-26T03:28:14.576082+00:00"
+  },
+  {
+    "id": "772a7ebe-d066-4a32-8dcc-179aa7607691",
+    "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73",
+    "type": "workflow_notification",
+    "title": "Workflow Notification",
+    "message": "New request RRG-000037: Test Workflow Validation Order",
+    "related_order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+    "read": false,
+    "created_at": "2026-01-26T03:28:14.880029+00:00"
+  }
+]

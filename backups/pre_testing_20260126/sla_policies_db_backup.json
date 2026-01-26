@@ -1,0 +1,689 @@
+[
+  {
+    "id": "5aeb0545-4286-4a2e-a8f4-564af1fe56ae",
+    "name": "TEST_Updated_Policy_3d3366fa",
+    "description": "Updated description",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 720,
+      "business_hours_only": true,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 180,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "First Alert",
+        "trigger": "at_risk",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "notify_role",
+            "target_role_id": null,
+            "target_role_name": "Administrator",
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": null,
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": "Order {order_code} is at risk",
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Breach Alert",
+        "trigger": "breach",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "change_priority",
+            "target_role_id": null,
+            "target_role_name": null,
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": "Critical",
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": null,
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:06:05.496998+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.566914+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "48756401-9b0c-46d0-a05a-e2626fe36d20",
+    "name": "TEST_Scoped_Policy_6786138e",
+    "description": "Policy with scope configuration",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 240,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 60,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:06:05.808497+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.381489+00:00"
+  },
+  {
+    "id": "3da92c0c-4885-42ae-9b87-d70cebfd6259",
+    "name": "TEST_UI_Policy_550723",
+    "description": "",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 1440,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 240,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "Level 1",
+        "trigger": "breach",
+        "delay_minutes": 0,
+        "actions": []
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:07:46.476540+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.431939+00:00"
+  },
+  {
+    "id": "e62832fe-43d7-4882-a497-cd2dcc3ee2ff",
+    "name": "TEST_Updated_Policy_7abc840d",
+    "description": "Updated description",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 720,
+      "business_hours_only": true,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 180,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "First Alert",
+        "trigger": "at_risk",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "notify_role",
+            "target_role_id": null,
+            "target_role_name": "Administrator",
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": null,
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": "Order {order_code} is at risk",
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Breach Alert",
+        "trigger": "breach",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "change_priority",
+            "target_role_id": null,
+            "target_role_name": null,
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": "Critical",
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": null,
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:08:01.361918+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.579742+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "a34ae403-863f-4877-838d-e43172608e38",
+    "name": "TEST_Scoped_Policy_4db4b392",
+    "description": "Policy with scope configuration",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 240,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 60,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:08:01.734527+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.308906+00:00"
+  },
+  {
+    "id": "1e9e87a7-c960-42c1-8c1d-7b44acc9aa4f",
+    "name": "TEST_Updated_Policy_2e1cae3a",
+    "description": "Updated description",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 720,
+      "business_hours_only": true,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 180,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "First Alert",
+        "trigger": "at_risk",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "notify_role",
+            "target_role_id": null,
+            "target_role_name": "Administrator",
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": null,
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": "Order {order_code} is at risk",
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Breach Alert",
+        "trigger": "breach",
+        "delay_minutes": 0,
+        "actions": [
+          {
+            "type": "change_priority",
+            "target_role_id": null,
+            "target_role_name": null,
+            "target_team_id": null,
+            "target_team_name": null,
+            "target_user_ids": [],
+            "target_user_names": [],
+            "new_priority": "Critical",
+            "email_subject": null,
+            "email_body": null,
+            "notification_message": null,
+            "webhook_url": null,
+            "webhook_method": "POST",
+            "webhook_headers": null,
+            "webhook_body_template": null
+          }
+        ]
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:13:15.693183+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.555697+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "e2782486-083b-41e6-a556-91fd5aafcbbb",
+    "name": "TEST_Scoped_Policy_57e2b394",
+    "description": "Policy with scope configuration",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 240,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 60,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:13:16.004756+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.363698+00:00"
+  },
+  {
+    "id": "4ae0b1e7-8404-4adb-a324-f374e23b3606",
+    "name": "TEST_AccessTier_Policy_79faf845",
+    "description": "Test policy with access tier scope",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:37:42.919563+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.118571+00:00"
+  },
+  {
+    "id": "4dc2ca4d-73f8-436e-9369-4145f457f6a0",
+    "name": "TEST_UpdateAccessTier_26c94f50",
+    "description": "Test policy for update",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:37:43.596614+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.502239+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "cc842f20-50c8-49ce-b13d-9a37c81459af",
+    "name": "TEST_AllScopes_26f32421",
+    "description": "Test policy with all scope types",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [
+        "0fe48e6d-ed20-412d-9b26-586659fc18e0"
+      ],
+      "team_names": [
+        "TEST"
+      ],
+      "specialty_ids": [
+        "88eee37f-b729-4dc7-97ea-39518f4c4eae"
+      ],
+      "specialty_names": [
+        "3D Artist"
+      ],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:37:44.294907+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.182707+00:00"
+  },
+  {
+    "id": "f46b25ce-6734-4540-97e6-80de4f34c14e",
+    "name": "TEST_FullFields_d0d4385b",
+    "description": "Test policy with all fields",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [],
+      "access_tier_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": true,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": 80
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "First Alert",
+        "trigger": "at_risk",
+        "delay_minutes": 0,
+        "actions": []
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:37:47.406192+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.256247+00:00"
+  },
+  {
+    "id": "12ae6c00-c132-4fdc-bb68-8ab078ec9bff",
+    "name": "TEST_AccessTier_Policy_ddfcf5fc",
+    "description": "Test policy with access tier scope",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:40:23.585493+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.170140+00:00"
+  },
+  {
+    "id": "652a50be-8b34-413b-a049-3a694896c3a0",
+    "name": "TEST_UpdateAccessTier_2639b982",
+    "description": "Test policy for update",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:40:24.545781+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.489994+00:00",
+    "updated_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "updated_by_name": "Admin"
+  },
+  {
+    "id": "7076381a-57f6-4efd-94dd-73ab5c6317a5",
+    "name": "TEST_AllScopes_8624c3b5",
+    "description": "Test policy with all scope types",
+    "scope": {
+      "role_ids": [
+        "ea320903-a199-44d6-aa33-9db311d8aebd"
+      ],
+      "role_names": [
+        "Administrator"
+      ],
+      "team_ids": [
+        "0fe48e6d-ed20-412d-9b26-586659fc18e0"
+      ],
+      "team_names": [
+        "TEST"
+      ],
+      "specialty_ids": [
+        "88eee37f-b729-4dc7-97ea-39518f4c4eae"
+      ],
+      "specialty_names": [
+        "3D Artist"
+      ],
+      "access_tier_ids": [
+        "534765a6-c006-4f40-ab4c-06519035692b"
+      ],
+      "access_tier_names": [
+        "Free"
+      ]
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": false,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": null
+    },
+    "escalation_levels": [],
+    "is_active": false,
+    "created_at": "2026-01-26T20:40:25.375878+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.194341+00:00"
+  },
+  {
+    "id": "c23f702b-c2fa-4094-af33-adef3c238f69",
+    "name": "TEST_FullFields_ac3cae13",
+    "description": "Test policy with all fields",
+    "scope": {
+      "role_ids": [],
+      "role_names": [],
+      "team_ids": [],
+      "team_names": [],
+      "specialty_ids": [],
+      "specialty_names": [],
+      "access_tier_ids": [],
+      "access_tier_names": []
+    },
+    "sla_rules": {
+      "duration_minutes": 480,
+      "business_hours_only": true,
+      "timezone": "UTC"
+    },
+    "thresholds": {
+      "at_risk_minutes": 120,
+      "at_risk_percentage": 80
+    },
+    "escalation_levels": [
+      {
+        "level": 1,
+        "name": "First Alert",
+        "trigger": "at_risk",
+        "delay_minutes": 0,
+        "actions": []
+      }
+    ],
+    "is_active": false,
+    "created_at": "2026-01-26T20:40:29.034346+00:00",
+    "created_by_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "created_by_name": "Admin",
+    "updated_at": "2026-01-26T20:40:29.245889+00:00"
+  }
+]

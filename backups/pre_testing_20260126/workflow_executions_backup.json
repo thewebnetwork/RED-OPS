@@ -1,0 +1,247 @@
+[
+  {
+    "id": "34fd4b42-28c6-4cbf-a898-f5ab82c8f5c7",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-5c8b160a",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T01:50:14.357667+00:00",
+        "completed_at": "2026-01-26T01:50:14.357679+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T01:50:14.346880+00:00",
+    "completed_at": "2026-01-26T01:50:14.358360+00:00",
+    "error": null
+  },
+  {
+    "id": "d35d2e34-5413-4d51-88e2-0d9b41dc3380",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-e5050141",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T01:50:22.548651+00:00",
+        "completed_at": "2026-01-26T01:50:22.548655+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T01:50:22.548153+00:00",
+    "completed_at": "2026-01-26T01:50:22.549169+00:00",
+    "error": null
+  },
+  {
+    "id": "1a69eefb-f92d-4bb2-9957-8a11422ab27a",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-62e38467",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T01:50:54.307002+00:00",
+        "completed_at": "2026-01-26T01:50:54.307011+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T01:50:54.305601+00:00",
+    "completed_at": "2026-01-26T01:50:54.307663+00:00",
+    "error": null
+  },
+  {
+    "id": "708b5fbe-630e-4660-bd70-9b16099d0133",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-e180dcde",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T01:58:43.159931+00:00",
+        "completed_at": "2026-01-26T01:58:43.159935+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T01:58:43.159539+00:00",
+    "completed_at": "2026-01-26T01:58:43.160268+00:00",
+    "error": null
+  },
+  {
+    "id": "c9fb1a2d-0ed3-466b-9d35-e700bf425759",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-ae6c0ddf",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T01:58:58.227660+00:00",
+        "completed_at": "2026-01-26T01:58:58.227668+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T01:58:58.227163+00:00",
+    "completed_at": "2026-01-26T01:58:58.228118+00:00",
+    "error": null
+  },
+  {
+    "id": "cc631a9f-d5c3-48b4-9495-271878313fd6",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-9dbd8a27",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T02:00:49.963837+00:00",
+        "completed_at": "2026-01-26T02:00:49.963846+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T02:00:49.963257+00:00",
+    "completed_at": "2026-01-26T02:00:49.964406+00:00",
+    "error": null
+  },
+  {
+    "id": "9bfb42fe-df15-4115-9cd2-172834bc8342",
+    "workflow_id": "403b7683-d4f0-417f-82bb-84f3cf467745",
+    "workflow_name": "Duplicated Test Workflow",
+    "trigger_event": "test",
+    "context": {
+      "order_id": "test-order-ef961fed",
+      "order_code": "TEST-001",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Start",
+        "started_at": "2026-01-26T03:21:53.008761+00:00",
+        "completed_at": "2026-01-26T03:21:53.008770+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T03:21:53.006609+00:00",
+    "completed_at": "2026-01-26T03:21:53.009325+00:00",
+    "error": null
+  },
+  {
+    "id": "c72d4de8-6a10-4570-94a8-069764eae3eb",
+    "workflow_id": "88a5a3f3-3d42-42cc-9265-63246d86f93c",
+    "workflow_name": "New Request Notification Workflow",
+    "trigger_event": "order.created",
+    "context": {
+      "order_id": "1cb0a6b4-47ac-49c3-9769-7a8a402bd1e1",
+      "order_code": "RRG-000037",
+      "user_id": "10f6c063-cd73-41ff-a5fd-99d571016a71"
+    },
+    "status": "completed",
+    "steps": [
+      {
+        "node_id": "trigger-1",
+        "node_type": "trigger",
+        "node_label": "Order Created",
+        "started_at": "2026-01-26T03:28:14.879136+00:00",
+        "completed_at": "2026-01-26T03:28:14.879144+00:00",
+        "success": true,
+        "output": {
+          "message": "Workflow triggered"
+        },
+        "error": null
+      },
+      {
+        "node_id": "action-1",
+        "node_type": "action",
+        "node_label": "Notify Admin",
+        "started_at": "2026-01-26T03:28:14.879614+00:00",
+        "completed_at": "2026-01-26T03:28:14.880369+00:00",
+        "success": true,
+        "output": {
+          "notified": "admin",
+          "user_id": "7e67c2fc-fce6-4eba-b146-dcf45a81ac73"
+        },
+        "error": null
+      }
+    ],
+    "started_at": "2026-01-26T03:28:14.878664+00:00",
+    "completed_at": "2026-01-26T03:28:14.880767+00:00",
+    "error": null
+  }
+]
