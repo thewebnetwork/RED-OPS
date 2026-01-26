@@ -218,8 +218,13 @@ function AdminDashboard() {
     open_count: 0,
     in_progress_count: 0,
     pending_count: 0,
-    delivered_count: 0,
-    sla_breaching_count: 0
+    delivered_count: 0
+  });
+  const [slaStats, setSlaStats] = useState({
+    on_track: 0,
+    at_risk: 0,
+    breached: 0,
+    unacknowledged: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [ratingStats, setRatingStats] = useState(null);
@@ -231,14 +236,21 @@ function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, ordersRes, ratingsRes] = await Promise.all([
+      const [statsRes, ordersRes, ratingsRes, slaStatsRes] = await Promise.all([
         axios.get(`${API}/dashboard/stats`),
         axios.get(`${API}/orders`),
-        axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
+        axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null })),
+        axios.get(`${API}/sla-policies/monitoring/stats`).catch(() => ({ data: { orders: {}, escalations: {} } }))
       ]);
       setStats(statsRes.data);
       setRecentOrders(ordersRes.data.slice(0, 10));
       setRatingStats(ratingsRes.data);
+      setSlaStats({
+        on_track: slaStatsRes.data?.orders?.on_track || 0,
+        at_risk: slaStatsRes.data?.orders?.at_risk || 0,
+        breached: slaStatsRes.data?.orders?.breached || 0,
+        unacknowledged: slaStatsRes.data?.escalations?.unacknowledged || 0
+      });
     } catch (error) {
       toast.error(t('errors.generic'));
     } finally {
@@ -267,12 +279,56 @@ function AdminDashboard() {
         <RatingStatsCard stats={ratingStats} title={t('ratings.yourRatings')} t={t} />
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Order Status KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPICard label={t('orders.status.open')} value={stats.open_count} icon={Inbox} color="bg-blue-500" />
         <KPICard label={t('orders.status.inProgress')} value={stats.in_progress_count} icon={Clock} color="bg-amber-500" />
         <KPICard label={t('dashboard.pendingReview')} value={stats.pending_count} icon={AlertCircle} color="bg-purple-500" />
         <KPICard label={t('orders.status.delivered')} value={stats.delivered_count} icon={CheckCircle2} color="bg-green-500" />
-        <KPICard label={t('dashboard.slaBreach')} value={stats.sla_breaching_count} icon={AlertTriangle} color="bg-red-500" />
+      </div>
+
+      {/* SLA Status KPIs - Linked to SLA Module */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-slate-900">SLA Status</h2>
+          <Link to="/sla-policies" className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
+            View Details <ArrowRight size={14} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link to="/sla-policies?tab=monitoring&status=on_track">
+            <KPICard 
+              label="On Track" 
+              value={slaStats.on_track} 
+              icon={CheckCircle2} 
+              color="bg-emerald-500" 
+            />
+          </Link>
+          <Link to="/sla-policies?tab=monitoring&status=at_risk">
+            <KPICard 
+              label="At Risk" 
+              value={slaStats.at_risk} 
+              icon={Clock} 
+              color="bg-amber-500" 
+            />
+          </Link>
+          <Link to="/sla-policies?tab=monitoring&status=breached">
+            <KPICard 
+              label="Breached" 
+              value={slaStats.breached} 
+              icon={AlertTriangle} 
+              color="bg-red-500" 
+            />
+          </Link>
+          <Link to="/sla-policies?tab=history">
+            <KPICard 
+              label="Unacknowledged" 
+              value={slaStats.unacknowledged} 
+              icon={AlertCircle} 
+              color="bg-orange-500" 
+            />
+          </Link>
+        </div>
       </div>
 
       <Card className="border-slate-200">
