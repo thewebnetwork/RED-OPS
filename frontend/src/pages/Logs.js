@@ -226,8 +226,8 @@ export default function Logs() {
     toast.success('Logs downloaded');
   };
 
-  const filteredLogs = logs.filter(log => {
-    const matchesSearch = log.message.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredLogs = [...(isStreaming ? streamingLogs : logs)].filter(log => {
+    const matchesSearch = log.message?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLevel = levelFilter === 'all' || log.level === levelFilter;
     return matchesSearch && matchesLevel;
   });
