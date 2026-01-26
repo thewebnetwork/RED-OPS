@@ -19,7 +19,15 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  RefreshCw
+  RefreshCw,
+  LayoutTemplate,
+  Download,
+  UserPlus,
+  AlertTriangle,
+  Star,
+  Link,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
