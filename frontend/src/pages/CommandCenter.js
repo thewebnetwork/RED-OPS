@@ -937,8 +937,9 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
 }
 
 // Bug Report Form
-function BugReportForm({ title, description, attachments, categoryL1Id, categoryL2Id, bugType, onSuccess }) {
+function BugReportForm({ title, description, attachments, categoryL1Id, categoryL2Id, bugType, onSuccess, onDraftSaved }) {
   const [loading, setLoading] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
     bug_type: bugType,
     steps_to_reproduce: '',
@@ -950,37 +951,57 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
     severity: 'Normal'
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title) {
-      toast.error('Please enter a title');
-      return;
-    }
-    if (!description) {
-      toast.error('Please describe the issue');
-      return;
+  const handleSubmit = async (e, isDraft = false) => {
+    e?.preventDefault();
+    
+    if (!isDraft) {
+      if (!title) {
+        toast.error('Please enter a title');
+        return;
+      }
+      if (!description) {
+        toast.error('Please describe the issue');
+        return;
+      }
+    } else {
+      if (!title) {
+        toast.error('Please enter at least a title to save as draft');
+        return;
+      }
     }
 
-    setLoading(true);
+    if (isDraft) {
+      setSavingDraft(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
       await axios.post(`${API}/bug-reports`, {
         title,
-        description,
+        description: description || '',
         category_l1_id: categoryL1Id,
         category_l2_id: categoryL2Id,
         attachment_count: attachments?.length || 0,
+        is_draft: isDraft,
         ...formData
       });
-      onSuccess();
+      
+      if (isDraft) {
+        onDraftSaved?.();
+      } else {
+        onSuccess();
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to submit bug report');
     } finally {
       setLoading(false);
+      setSavingDraft(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
         <p className="text-sm text-red-700 font-medium">Bug Report</p>
         <p className="text-xs text-red-600">Help us fix this issue by providing details.</p>
@@ -1094,9 +1115,29 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
         </p>
       </div>
 
-      <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={loading}>
-        {loading ? 'Submitting...' : 'Submit Bug Report'}
-      </Button>
+      {/* Sticky Action Buttons */}
+      <div className="sticky bottom-0 pt-4 pb-2 bg-white border-t border-slate-100 -mx-6 px-6 flex gap-3">
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="flex-1"
+          onClick={(e) => handleSubmit(e, true)}
+          disabled={savingDraft || loading}
+          data-testid="save-draft-btn"
+        >
+          <Save size={16} className="mr-2" />
+          {savingDraft ? 'Saving...' : 'Save Draft'}
+        </Button>
+        <Button 
+          type="submit" 
+          className="flex-1 bg-red-600 hover:bg-red-700" 
+          disabled={loading || savingDraft}
+          data-testid="submit-request-btn"
+        >
+          <Send size={16} className="mr-2" />
+          {loading ? 'Submitting...' : 'Submit Bug Report'}
+        </Button>
+      </div>
     </form>
   );
 }
