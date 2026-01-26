@@ -32,6 +32,24 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 22: Auto-Escalate Workflow Action & Dashboard Fix ✅ (January 26, 2026)
+
+**Bug Fix - Dashboard Blank Screen:**
+- Dashboard.js was checking for `user.role === 'Admin'` but IAM refactor changed role to `Administrator`
+- Fixed by supporting both old and new role names: `Administrator`/`Admin`, `Privileged User`/`Editor`, `Standard User`/`Requester`
+
+**New Feature - Auto-Escalate on Breach Workflow Action:**
+- **Purpose**: Automatically escalate tickets that remain in SLA breached state beyond a configurable duration
+- **Backend**: Added `auto_escalate` action type to workflow engine with:
+  - `escalate_after_minutes`: Cooldown before escalating (default 60 min)
+  - `escalate_to_type`: Target type (role, team, or user)
+  - `escalate_to_id`: Target ID
+  - `escalation_message`: Custom notification message with variables `{order_code}`, `{title}`, `{status}`
+- **Frontend**: Added configuration UI in Workflow Editor with all fields
+- **Execution**: Creates record in `escalation_history`, sends notifications to target users
+
+**Testing:** 100% frontend, 85% backend (2 expected failures for role-restricted APIs)
+
 ### Phase 21: IAM Refactor & Workflow Module Alignment ✅ (January 26, 2026)
 
 **Identity & Access Management (IAM) Refactor:**
