@@ -203,6 +203,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/email-settings" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <EmailSettings />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/announcements" 
         element={
           <PrivateRoute roles={["Admin"]}>
