@@ -32,6 +32,26 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 16: Bug Fixes + Extended Route Extraction ✅ (January 26, 2026)
+
+**Bug Fixes:**
+1. **Announcement Banner Animation** - Fixed: Banner now scrolls/moves with marquee animation
+2. **Date Picker Timezone** - Fixed: Date selection no longer shows wrong day
+3. **Workflow Editor Unsaved Changes** - Fixed: Now prompts before leaving with unsaved work (dialog with Cancel/Discard/Save options)
+
+**Extended Route Extraction (11 modules, 70 endpoints)**
+- `routes/categories.py` - 11 routes (L1/L2 CRUD, tree view)
+- `routes/sla.py` - 7 routes (stats, alerts, breached/at-risk orders)
+- `routes/api_keys.py` - 5 routes (CRUD, usage analytics)
+- `routes/webhooks.py` - 8 routes (CRUD, test, logs)
+- `routes/ratings.py` - 5 routes (submit, list, stats, resolver stats)
+
+**Remaining Routes (4 complex modules)**
+- `orders.py` - Order CRUD, messages, files (largest)
+- `workflows.py` - Workflow builder and execution
+- `settings.py` - UI settings, SMTP, announcements
+- `feedback.py` - Feature requests, bug reports
+
 ### Phase 15: Backend Refactor Phase 2 (Routes Extraction) ✅ (January 26, 2026)
 
 **Routes Extracted (6 modules, 34 endpoints)**
