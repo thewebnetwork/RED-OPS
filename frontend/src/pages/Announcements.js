@@ -99,10 +99,11 @@ export default function Announcements() {
 
   const fetchData = async () => {
     try {
-      const [tickerRes, teamsRes, rolesRes] = await Promise.all([
+      const [tickerRes, teamsRes, rolesRes, specialtiesRes] = await Promise.all([
         axios.get(`${API}/announcement-ticker/admin`),
         axios.get(`${API}/teams`),
-        axios.get(`${API}/roles`)
+        axios.get(`${API}/roles`),
+        axios.get(`${API}/specialties`)
       ]);
       
       const tickerData = {
@@ -111,6 +112,7 @@ export default function Announcements() {
         send_to_all: tickerRes.data.send_to_all ?? true,
         target_teams: tickerRes.data.target_teams || [],
         target_roles: tickerRes.data.target_roles || [],
+        target_specialties: tickerRes.data.target_specialties || [],
         start_at: tickerRes.data.start_at || '',
         end_at: tickerRes.data.end_at || '',
         priority: tickerRes.data.priority || '',
@@ -122,6 +124,7 @@ export default function Announcements() {
       initialDataRef.current = tickerData;
       setTeams(teamsRes.data || []);
       setRoles(rolesRes.data || []);
+      setSpecialties(specialtiesRes.data || []);
     } catch (error) {
       console.error('Failed to fetch data');
     } finally {
