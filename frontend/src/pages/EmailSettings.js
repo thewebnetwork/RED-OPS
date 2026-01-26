@@ -83,15 +83,16 @@ export default function EmailSettings() {
   const fetchConfig = async () => {
     try {
       const res = await axios.get(`${API}/smtp-config`);
-      setConfig(prev => ({
-        ...prev,
+      const loadedConfig = {
         smtp_host: res.data.smtp_host || '',
         smtp_port: res.data.smtp_port || 587,
         smtp_user: res.data.smtp_user || '',
         smtp_from: res.data.smtp_from || '',
         smtp_use_tls: res.data.smtp_use_tls ?? true,
         smtp_password: '' // Never pre-fill password
-      }));
+      };
+      setConfig(loadedConfig);
+      initialConfigRef.current = loadedConfig;
       setStatus({
         is_configured: res.data.is_configured,
         last_test_status: res.data.last_test_status,
