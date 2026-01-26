@@ -3048,7 +3048,7 @@ async def test_smtp_config(test_data: EmailTestRequest, current_user: dict = Dep
         msg = MIMEMultipart()
         msg['From'] = config.get("smtp_from", config["smtp_user"])
         msg['To'] = test_data.to_email
-        msg['Subject'] = "Red Ops - SMTP Test Email"
+        msg['Subject'] = "email coming from emergent test platform"
         
         body = f"""
         <!DOCTYPE html>
