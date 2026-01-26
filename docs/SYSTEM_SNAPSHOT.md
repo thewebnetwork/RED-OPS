@@ -244,7 +244,6 @@ All escalation actions are logged to `escalation_history` collection with:
 ### Outstanding Items
 | Priority | Issue | Notes |
 |----------|-------|-------|
-| P2 | SMTP not production-ready | Email delivery logs to console |
 | P3 | Business hours SLA calculation | Flag exists but not fully implemented |
 | P3 | Timezone handling | Uses UTC, user timezone not applied |
 
