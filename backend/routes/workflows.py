@@ -187,7 +187,7 @@ async def get_workflow_actions(current_user: dict = Depends(get_current_user)):
             {"type": "notify", "label": "Send Notification", "description": "Send in-app notification", "icon": "Bell", "config_fields": ["message", "recipients"]},
             {"type": "webhook", "label": "Trigger Webhook", "description": "Call external API", "icon": "Webhook", "config_fields": ["url", "method", "headers", "body"]},
             {"type": "delay", "label": "Add Delay", "description": "Wait before next action", "icon": "Clock", "config_fields": ["delay_value", "delay_unit"]},
-            {"type": "auto_escalate", "label": "Auto-Escalate on Breach", "description": "Escalate to manager if ticket remains breached", "icon": "AlertTriangle", "config_fields": ["escalate_after_minutes", "escalate_to_type", "escalate_to_id", "escalation_message"]},
+            {"type": "apply_sla_policy", "label": "Apply SLA Policy", "description": "Apply a specific SLA & Escalation policy to this ticket", "icon": "Shield", "config_fields": ["policy_id"]},
         ]
     }
 
