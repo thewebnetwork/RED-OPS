@@ -32,6 +32,23 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 9: P0-2 Completion & P2-1 Bug Fix ✅ (January 26, 2026)
+Completed P0-2 unsaved changes guard on all remaining pages and fixed P2-1 user role assignment bug:
+
+- **P0-2: Unsaved Changes Guard (COMPLETE)**:
+  - Integrations page: API Key and Webhook dialogs show warning AlertDialog
+  - SLA page: Create/Edit SLA dialog shows warning AlertDialog
+  - EmailSettings page: Shows yellow "You have unsaved changes" text above Save button
+  - Workflows page: Create and Duplicate workflow dialogs show warning AlertDialog
+  - All warning dialogs have "Stay" and "Leave without saving" buttons
+  - z-index set to 100 to ensure warnings appear above main dialogs
+  - Browser refresh/close triggers beforeunload confirmation
+
+- **P2-1: User Role Assignment Bug (FIXED)**:
+  - Fixed default role logic in Users.js handleOpenDialog
+  - New users now default to "Requester" role (not "Editor")
+  - Users can select any role and are created with that role correctly
+
 ### Phase 8: New P0 Requirements ✅ (January 25, 2026)
 Two critical P0 features implemented:
 
@@ -42,7 +59,7 @@ Two critical P0 features implemented:
   - Long messages truncated with ellipsis
   - Works both ways: resolver messages notify requester
 
-- **P0-2: Unsaved Changes Guard**:
+- **P0-2: Unsaved Changes Guard (Partial - Users, Categories, Announcements)**:
   - Users page: Add/Edit User dialog shows "Unsaved changes" warning
   - Categories page: Create/Edit Category dialog shows warning
   - Announcements page: Shows "You have unsaved changes" text, beforeunload handler
