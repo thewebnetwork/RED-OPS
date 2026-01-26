@@ -625,8 +625,9 @@ export default function CommandCenter() {
 }
 
 // Editing Request Form (reuses existing workflow)
-function EditingRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess }) {
+function EditingRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess, onDraftSaved }) {
   const [loading, setLoading] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
     priority: 'Normal',
     video_script: '',
@@ -637,37 +638,58 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
     special_instructions: ''
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title) {
-      toast.error('Please enter a title');
-      return;
-    }
-    if (!description) {
-      toast.error('Please enter a description');
-      return;
+  const handleSubmit = async (e, isDraft = false) => {
+    e?.preventDefault();
+    
+    if (!isDraft) {
+      if (!title) {
+        toast.error('Please enter a title');
+        return;
+      }
+      if (!description) {
+        toast.error('Please enter a description');
+        return;
+      }
+    } else {
+      // For drafts, at least title is needed
+      if (!title) {
+        toast.error('Please enter at least a title to save as draft');
+        return;
+      }
     }
 
-    setLoading(true);
+    if (isDraft) {
+      setSavingDraft(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
       await axios.post(`${API}/orders`, {
         title,
-        description,
+        description: description || '',
         category_l1_id: categoryL1Id,
         category_l2_id: categoryL2Id,
         attachment_count: attachments?.length || 0,
+        is_draft: isDraft,
         ...formData
       });
-      onSuccess();
+      
+      if (isDraft) {
+        onDraftSaved?.();
+      } else {
+        onSuccess();
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to submit request');
     } finally {
       setLoading(false);
+      setSavingDraft(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
         <p className="text-sm text-rose-700 font-medium">Editing Services Request</p>
         <p className="text-xs text-rose-600">This will create an editing order that editors can pick up.</p>
@@ -749,9 +771,29 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
         />
       </div>
 
-      <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" disabled={loading}>
-        {loading ? 'Submitting...' : 'Submit Editing Request'}
-      </Button>
+      {/* Sticky Action Buttons */}
+      <div className="sticky bottom-0 pt-4 pb-2 bg-white border-t border-slate-100 -mx-6 px-6 flex gap-3">
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="flex-1"
+          onClick={(e) => handleSubmit(e, true)}
+          disabled={savingDraft || loading}
+          data-testid="save-draft-btn"
+        >
+          <Save size={16} className="mr-2" />
+          {savingDraft ? 'Saving...' : 'Save Draft'}
+        </Button>
+        <Button 
+          type="submit" 
+          className="flex-1 bg-rose-600 hover:bg-rose-700" 
+          disabled={loading || savingDraft}
+          data-testid="submit-request-btn"
+        >
+          <Send size={16} className="mr-2" />
+          {loading ? 'Submitting...' : 'Submit Request'}
+        </Button>
+      </div>
     </form>
   );
 }
