@@ -216,6 +216,7 @@ export default function Workflows() {
       setShowCreateDialog(false);
       setNewWorkflowName('');
       setNewWorkflowDescription('');
+      setHasCreateChanges(false);
       navigate(`/workflows/${res.data.id}`);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create workflow');
