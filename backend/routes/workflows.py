@@ -122,6 +122,8 @@ async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = De
     # Get names for assigned entities
     assigned_role_names = await get_role_names_by_ids(workflow_data.assigned_roles)
     assigned_team_names = await get_team_names_by_ids(workflow_data.assigned_teams)
+    assigned_specialty_names = await get_specialty_names_by_ids(workflow_data.assigned_specialties)
+    assigned_access_tier_names = await get_access_tier_names_by_ids(workflow_data.assigned_access_tiers)
     trigger_category_names = await get_category_names_by_ids(workflow_data.trigger_categories)
     
     now = get_utc_now()
@@ -133,6 +135,10 @@ async def create_workflow(workflow_data: WorkflowCreate, current_user: dict = De
         "assigned_role_names": assigned_role_names,
         "assigned_teams": workflow_data.assigned_teams,
         "assigned_team_names": assigned_team_names,
+        "assigned_specialties": workflow_data.assigned_specialties,
+        "assigned_specialty_names": assigned_specialty_names,
+        "assigned_access_tiers": workflow_data.assigned_access_tiers,
+        "assigned_access_tier_names": assigned_access_tier_names,
         "trigger_categories": workflow_data.trigger_categories,
         "trigger_category_names": trigger_category_names,
         "trigger_event": workflow_data.trigger_event,
