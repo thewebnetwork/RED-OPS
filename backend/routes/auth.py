@@ -11,7 +11,7 @@ from utils.auth import get_current_user
 from utils.helpers import (
     hash_password, verify_password, create_access_token, get_utc_now
 )
-from services.email import send_password_reset_email as svc_send_password_reset_email
+from services.email import send_email_notification
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
