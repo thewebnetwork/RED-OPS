@@ -537,6 +537,126 @@ export default function Workflows() {
           )}
         </TabsContent>
 
+        {/* Templates Gallery Tab */}
+        <TabsContent value="templates" className="mt-6 space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <Sparkles size={20} className="text-amber-500" />
+                Workflow Templates Gallery
+              </h2>
+              <p className="text-slate-500 text-sm mt-1">
+                Pre-built workflows you can install with one click
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedTemplateCategory === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTemplateCategory('all')}
+                className={selectedTemplateCategory === 'all' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+              >
+                All
+              </Button>
+              {templateCategories.map(cat => (
+                <Button
+                  key={cat}
+                  variant={selectedTemplateCategory === cat ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedTemplateCategory(cat)}
+                  className={selectedTemplateCategory === cat ? 'bg-rose-600 hover:bg-rose-700' : ''}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTemplates.map((template) => {
+              const IconComponent = getTemplateIcon(template.icon);
+              return (
+                <Card
+                  key={template.id}
+                  className="group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-slate-300"
+                  data-testid={`template-card-${template.id}`}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
+                        style={{ backgroundColor: template.color || '#3B82F6' }}
+                      >
+                        <IconComponent size={24} className="text-white" />
+                      </div>
+                      <Badge className="bg-slate-100 text-slate-600 text-xs">
+                        {template.category}
+                      </Badge>
+                    </div>
+                    <CardTitle className="mt-4 text-lg">
+                      {template.name}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 text-sm">
+                      {template.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-sm text-slate-500">
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          {template.nodes?.length || 0} nodes
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          {template.edges?.length || 0} edges
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-amber-600">
+                        <Star size={12} fill="currentColor" />
+                        {template.popularity}%
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleInstallTemplate(template.id)}
+                      disabled={installingTemplate === template.id}
+                      className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white group"
+                      data-testid={`install-template-${template.id}`}
+                    >
+                      {installingTemplate === template.id ? (
+                        <>
+                          <RefreshCw size={16} className="mr-2 animate-spin" />
+                          Installing...
+                        </>
+                      ) : (
+                        <>
+                          <Download size={16} className="mr-2" />
+                          Install Template
+                          <ArrowRight size={16} className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {filteredTemplates.length === 0 && (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <LayoutTemplate size={32} className="text-slate-400" />
+                </div>
+                <h3 className="text-lg font-medium text-slate-900 mb-2">No templates in this category</h3>
+                <p className="text-slate-500 text-center max-w-md">
+                  Try selecting a different category or view all templates.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         {/* Workflow Triggers Tab */}
         <TabsContent value="triggers" className="mt-6">
           <Card className="border-slate-200">
