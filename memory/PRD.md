@@ -32,6 +32,40 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 12: UI Fixes & Enhanced Announcements ✅ (January 26, 2026)
+Three fixes and one major feature enhancement:
+
+**1. Banner/Announcement UI Redesign**
+- Moved banner inline to header row (same line as ratings and profile)
+- Black megaphone icon, black bold text, white background
+- No close/dismiss button - always visible when active
+- Sticky/static with header as page scrolls
+
+**2. SMTP Configuration**
+- Configured Gmail SMTP with fmtvvlb@gmail.com
+- Sends FROM admin@redribbongroup.ca
+- Test email sent successfully with subject "email coming from emergent test platform"
+
+**3. Categories Module Cleanup**
+- Removed "About Editor Workflow" info card
+- Removed "Editor Workflow" badges from subcategories
+- Removed "Enable Editor Workflow" toggle from subcategory form
+- Categories now only manages L1/L2 categories (workflow logic moved to Workflows module)
+
+**4. Enhanced Announcement Targeting System**
+- New data model with audience targeting fields:
+  - `send_to_all` (boolean) - show to everyone
+  - `target_teams` (array of team_ids)
+  - `target_roles` (array of role_ids)
+  - `start_at` / `end_at` (optional schedule)
+- UI changes:
+  - "Send to All" toggle - when ON, hides selectors, shows "This will be shown to everyone"
+  - When OFF, shows team/role multi-select checkboxes with badges
+  - Helper text: "Users who match ANY selected team or role will see this"
+  - Validation: requires at least one team/role if send_to_all is OFF
+- Delivery logic: OR-based matching (user in ANY target team OR has ANY target role)
+- Admin preview shows how banner looks in header
+
 ### Phase 11: P2/P3 Complete Implementation ✅ (January 26, 2026)
 Major backend refactoring and new features:
 
