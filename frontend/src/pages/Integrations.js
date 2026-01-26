@@ -686,7 +686,7 @@ export default function Integrations() {
 
       {/* API Key Unsaved Changes Warning Dialog */}
       <AlertDialog open={showApiKeyUnsavedWarning} onOpenChange={setShowApiKeyUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog">
+        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
             <AlertDialogDescription>
@@ -710,7 +710,7 @@ export default function Integrations() {
 
       {/* Webhook Unsaved Changes Warning Dialog */}
       <AlertDialog open={showWebhookUnsavedWarning} onOpenChange={setShowWebhookUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog">
+        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
             <AlertDialogDescription>
