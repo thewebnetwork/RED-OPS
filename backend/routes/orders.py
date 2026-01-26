@@ -704,6 +704,7 @@ async def create_message(
     if not (is_requester or is_resolver or is_admin):
         raise HTTPException(status_code=403, detail="Access denied")
     
+    now = get_utc_now()
     message = {
         "id": str(uuid.uuid4()),
         "order_id": order_id,
@@ -711,9 +712,17 @@ async def create_message(
         "author_name": current_user["name"],
         "author_role": current_user["role"],
         "message_body": message_data.message_body,
-        "created_at": get_utc_now()
+        "created_at": now
     }
     await db.order_messages.insert_one(message)
+    
+    # If requester sends a message while order is Pending, update last_requester_message_at
+    # This is used by the review reminder workflow to check if requester has responded
+    if is_requester and order["status"] == "Pending":
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"last_requester_message_at": now}}
+        )
     
     # Send notifications
     preview = message_data.message_body[:50] + ('...' if len(message_data.message_body) > 50 else '')
