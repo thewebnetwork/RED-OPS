@@ -502,7 +502,7 @@ export default function Workflows() {
       </Tabs>
 
       {/* Create Workflow Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={handleCreateDialogClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Workflow</DialogTitle>
