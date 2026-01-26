@@ -3628,6 +3628,18 @@ class ApiKeyResponse(BaseModel):
     created_at: str
     last_used: Optional[str] = None
     is_active: bool = True
+    total_requests: int = 0
+    requests_today: int = 0
+    requests_this_week: int = 0
+
+class ApiKeyUsageResponse(BaseModel):
+    key_id: str
+    key_name: str
+    total_requests: int
+    requests_by_day: List[dict] = []
+    requests_by_endpoint: List[dict] = []
+    avg_response_time_ms: float = 0
+    error_rate: float = 0
 
 class WebhookCreate(BaseModel):
     name: str
