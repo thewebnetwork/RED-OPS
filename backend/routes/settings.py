@@ -182,7 +182,7 @@ async def get_announcement_ticker(current_user: dict = Depends(get_current_user)
             start_dt = datetime.fromisoformat(ticker["start_at"].replace('Z', '+00:00'))
             if now < start_dt:
                 return default_response
-        except:
+        except (ValueError, TypeError):
             pass
     
     if ticker.get("end_at"):
@@ -190,7 +190,7 @@ async def get_announcement_ticker(current_user: dict = Depends(get_current_user)
             end_dt = datetime.fromisoformat(ticker["end_at"].replace('Z', '+00:00'))
             if now > end_dt:
                 return default_response
-        except:
+        except (ValueError, TypeError):
             pass
     
     # Check targeting
