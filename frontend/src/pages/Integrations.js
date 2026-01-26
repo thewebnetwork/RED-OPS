@@ -495,6 +495,126 @@ export default function Integrations() {
           </Card>
         </TabsContent>
 
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="mt-6 space-y-6">
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card className="border-slate-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">Total API Keys</p>
+                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_keys || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Key size={20} className="text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">Requests Today</p>
+                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_today || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                    <Activity size={20} className="text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">This Week</p>
+                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_week || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <TrendingUp size={20} className="text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">All Time</p>
+                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_all_time || 0}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                    <BarChart3 size={20} className="text-amber-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Per-Key Usage Table */}
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 size={20} />
+                API Key Usage
+              </CardTitle>
+              <p className="text-sm text-slate-500 mt-1">Request counts per API key</p>
+            </CardHeader>
+            <CardContent className="p-0">
+              {(!analytics?.keys || analytics.keys.length === 0) ? (
+                <div className="p-12 text-center text-slate-500">
+                  <BarChart3 size={48} className="mx-auto text-slate-300 mb-3" />
+                  <p>No API key usage data yet</p>
+                  <p className="text-sm mt-1">Usage statistics will appear here once API keys are used</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {analytics.keys.map(key => (
+                    <div key={key.id} className="p-4 hover:bg-slate-50" data-testid={`analytics-key-${key.id}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-900">{key.name}</span>
+                            <Badge className={key.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+                              {key.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                            <Badge className="bg-slate-100 text-slate-600">
+                              {key.permissions === 'read' ? 'Read' : 'Read/Write'}
+                            </Badge>
+                          </div>
+                          <code className="text-sm text-slate-500 font-mono">{key.key_preview}</code>
+                        </div>
+                        <div className="flex items-center gap-6 text-right">
+                          <div>
+                            <p className="text-xs text-slate-500">Today</p>
+                            <p className="text-lg font-semibold text-slate-900">{key.requests_today}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500">This Week</p>
+                            <p className="text-lg font-semibold text-slate-900">{key.requests_this_week}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500">Total</p>
+                            <p className="text-lg font-semibold text-slate-900">{key.total_requests}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {key.last_used && (
+                        <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                          <Clock size={10} />
+                          Last used: {format(new Date(key.last_used), 'MMM d, yyyy h:mm a')}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Webhooks Tab */}
         <TabsContent value="webhooks" className="mt-6">
           <Card className="border-slate-200">
