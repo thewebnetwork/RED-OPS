@@ -525,14 +525,14 @@ export default function Users() {
                   <div className="space-y-2">
                     <Label htmlFor="team">Team</Label>
                     <Select
-                      value={formData.team_id}
-                      onValueChange={(v) => setFormData({ ...formData, team_id: v })}
+                      value={formData.team_id || '__none__'}
+                      onValueChange={(v) => setFormData({ ...formData, team_id: v === '__none__' ? '' : v })}
                     >
                       <SelectTrigger data-testid="user-team-select">
                         <SelectValue placeholder="Select team (optional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No team</SelectItem>
+                        <SelectItem value="__none__">No team</SelectItem>
                         {teams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
                         ))}
@@ -556,12 +556,12 @@ export default function Users() {
                       </div>
                     ) : (
                       <Select
-                        value={formData.specialty_id}
+                        value={formData.specialty_id || '__none__'}
                         onValueChange={(v) => {
                           if (v === '__new__') {
                             setShowNewSpecialty(true);
                           } else {
-                            setFormData({ ...formData, specialty_id: v });
+                            setFormData({ ...formData, specialty_id: v === '__none__' ? '' : v });
                           }
                         }}
                       >
@@ -569,7 +569,7 @@ export default function Users() {
                           <SelectValue placeholder="Select specialty (optional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No specialty</SelectItem>
+                          <SelectItem value="__none__">No specialty</SelectItem>
                           {specialties.map((s) => (
                             <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                           ))}
@@ -598,12 +598,12 @@ export default function Users() {
                     </div>
                   ) : (
                     <Select
-                      value={formData.access_tier_id}
+                      value={formData.access_tier_id || '__none__'}
                       onValueChange={(v) => {
                         if (v === '__new__') {
                           setShowNewAccessTier(true);
                         } else {
-                          setFormData({ ...formData, access_tier_id: v });
+                          setFormData({ ...formData, access_tier_id: v === '__none__' ? '' : v });
                         }
                       }}
                     >
@@ -611,7 +611,7 @@ export default function Users() {
                         <SelectValue placeholder="Select access tier" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No tier</SelectItem>
+                        <SelectItem value="__none__">No tier</SelectItem>
                         {accessTiers.map((t) => (
                           <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
                         ))}
