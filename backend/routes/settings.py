@@ -272,40 +272,49 @@ async def get_announcement_ticker_admin(current_user: dict = Depends(require_rol
 @router.put("/announcement-ticker", response_model=AnnouncementTickerResponse)
 async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
     """Update announcement ticker (Admin only)"""
-    # Validation: If send_to_all is OFF, require at least one team or role
+    # Validation: If send_to_all is OFF, require at least one team, role, or specialty
     if not ticker_data.send_to_all:
-        if not ticker_data.target_teams and not ticker_data.target_roles:
+        has_targets = (ticker_data.target_teams or ticker_data.target_roles or ticker_data.target_specialties)
+        if not has_targets:
             raise HTTPException(
                 status_code=400, 
-                detail="Select at least one team or role, or turn on 'Send to all'"
+                detail="Select at least one role, team, or specialty, or turn on 'Send to all'"
             )
     
     now = get_utc_now()
     
     existing = await db.announcement_ticker.find_one({}, {"_id": 0})
     
-    # Resolve team and role names
+    # Resolve team, role, and specialty names
     target_team_names = []
-    for team_id in ticker_data.target_teams:
+    for team_id in (ticker_data.target_teams or []):
         team = await db.teams.find_one({"id": team_id}, {"_id": 0})
         if team:
             target_team_names.append(team.get("name", "Unknown"))
     
     target_role_names = []
-    for role_id in ticker_data.target_roles:
+    for role_id in (ticker_data.target_roles or []):
         role = await db.roles.find_one({"id": role_id}, {"_id": 0})
         if role:
             target_role_names.append(role.get("name", "Unknown"))
+    
+    target_specialty_names = []
+    for specialty_id in (ticker_data.target_specialties or []):
+        specialty = await db.specialties.find_one({"id": specialty_id}, {"_id": 0})
+        if specialty:
+            target_specialty_names.append(specialty.get("name", "Unknown"))
     
     ticker = {
         "id": existing.get("id") if existing else str(uuid.uuid4()),
         "message": ticker_data.message,
         "is_active": ticker_data.is_active,
         "send_to_all": ticker_data.send_to_all,
-        "target_teams": ticker_data.target_teams,
-        "target_roles": ticker_data.target_roles,
+        "target_teams": ticker_data.target_teams or [],
+        "target_roles": ticker_data.target_roles or [],
+        "target_specialties": ticker_data.target_specialties or [],
         "target_team_names": target_team_names,
         "target_role_names": target_role_names,
+        "target_specialty_names": target_specialty_names,
         "start_at": ticker_data.start_at,
         "end_at": ticker_data.end_at,
         "priority": ticker_data.priority,
