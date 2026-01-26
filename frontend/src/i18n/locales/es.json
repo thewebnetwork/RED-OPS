@@ -65,7 +65,8 @@
     "sla": "SLA",
     "logs": "Registros",
     "integrations": "Integraciones",
-    "announcements": "Anuncios"
+    "announcements": "Anuncios",
+    "emailSettings": "Config. de Email"
   },
   "dashboard": {
     "title": "Panel",
