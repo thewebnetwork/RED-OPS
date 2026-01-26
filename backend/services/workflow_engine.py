@@ -258,95 +258,56 @@ async def execute_action(db, action_type: str, node_data: dict, context: dict) -
         return {"message": "No forwarding done"}
     
     elif action_type == "auto_escalate":
-        # Auto-escalate if ticket is breached for a certain duration
+        # Legacy action - redirect to apply_sla_policy logic
+        # For backward compatibility, try to auto-apply a policy
+        if order.get("id"):
+            from services.sla_policy_engine import auto_apply_policy_to_order
+            policy = await auto_apply_policy_to_order(order["id"], order)
+            if policy:
+                return {"applied_policy": policy["name"]}
+        return {"message": "No matching policy found"}
+    
+    elif action_type == "apply_sla_policy":
+        # Apply a specific SLA policy to the order
         config = node_data.get("config", {})
-        escalate_after_minutes = int(config.get("escalate_after_minutes", 60))
-        escalate_to_type = config.get("escalate_to_type", "role")  # role, team, or user
-        escalate_to_id = config.get("escalate_to_id")
-        escalation_message = config.get("escalation_message", "This ticket has been escalated due to extended SLA breach.")
+        policy_id = config.get("policy_id")
         
         if not order.get("id"):
             return {"message": "No order in context"}
         
-        # Check if order is breached
-        is_breached = order.get("is_sla_breached", False)
-        if not is_breached:
-            return {"message": "Order not in breach status, skipping escalation"}
+        if not policy_id:
+            # Auto-apply best matching policy
+            from services.sla_policy_engine import auto_apply_policy_to_order
+            policy = await auto_apply_policy_to_order(order["id"], order)
+            if policy:
+                return {"applied_policy": policy["name"], "auto_selected": True}
+            return {"message": "No matching policy found"}
         
-        # Check if already escalated recently (cooldown check)
-        existing_escalation = await db.escalation_history.find_one({
-            "order_id": order["id"],
-            "source": "workflow_auto_escalate",
-            "created_at": {"$gte": (datetime.now(timezone.utc) - timedelta(minutes=escalate_after_minutes)).isoformat()}
-        })
+        # Apply specific policy
+        policy = await db.sla_policies.find_one({"id": policy_id, "is_active": True}, {"_id": 0})
+        if not policy:
+            return {"message": "Policy not found or inactive"}
         
-        if existing_escalation:
-            return {"message": "Already escalated recently, cooldown active"}
+        # Calculate deadline based on policy SLA rules
+        sla_minutes = policy.get("sla_rules", {}).get("duration_minutes", 1440)
+        now = datetime.now(timezone.utc)
+        deadline = now + timedelta(minutes=sla_minutes)
         
-        # Determine escalation target
-        target_users = []
-        if escalate_to_type == "role" and escalate_to_id:
-            # Find users with this role
-            role = await db.roles.find_one({"id": escalate_to_id}, {"_id": 0})
-            if role:
-                users = await db.users.find({"role": role.get("name"), "active": True}, {"_id": 0}).to_list(100)
-                target_users = users
-        elif escalate_to_type == "team" and escalate_to_id:
-            # Find users in this team
-            team = await db.teams.find_one({"id": escalate_to_id}, {"_id": 0})
-            if team:
-                member_ids = team.get("members", [])
-                users = await db.users.find({"id": {"$in": member_ids}, "active": True}, {"_id": 0}).to_list(100)
-                target_users = users
-        elif escalate_to_type == "user" and escalate_to_id:
-            # Specific user
-            user = await db.users.find_one({"id": escalate_to_id, "active": True}, {"_id": 0})
-            if user:
-                target_users = [user]
-        
-        if not target_users:
-            # Fall back to all admins
-            admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
-            target_users = admins
-        
-        # Create escalation record
-        escalation_record = {
-            "id": str(uuid.uuid4()),
-            "order_id": order["id"],
-            "order_code": order.get("order_code"),
-            "source": "workflow_auto_escalate",
-            "reason": f"SLA breached for extended period",
-            "message": escalation_message.format(
-                order_code=order.get("order_code", ""),
-                title=order.get("title", ""),
-                status=order.get("status", "")
-            ),
-            "escalated_to": [u["id"] for u in target_users],
-            "escalated_to_names": [u["name"] for u in target_users],
-            "acknowledged": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.escalation_history.insert_one(escalation_record)
-        
-        # Send notifications to all targets
-        for target_user in target_users:
-            await create_notification(
-                db,
-                target_user["id"],
-                "escalation",
-                f"Escalation: {order.get('order_code')}",
-                escalation_message.format(
-                    order_code=order.get("order_code", ""),
-                    title=order.get("title", ""),
-                    status=order.get("status", "")
-                ),
-                order.get("id")
-            )
+        await db.orders.update_one(
+            {"id": order["id"]},
+            {"$set": {
+                "sla_policy_id": policy_id,
+                "sla_policy_name": policy["name"],
+                "sla_deadline": deadline.isoformat(),
+                "is_sla_breached": False,
+                "current_escalation_level": 0
+            }}
+        )
         
         return {
-            "escalated": True,
-            "escalated_to": [u["name"] for u in target_users],
-            "escalation_id": escalation_record["id"]
+            "applied_policy": policy["name"],
+            "sla_deadline": deadline.isoformat(),
+            "sla_duration_minutes": sla_minutes
         }
     
     return {"message": f"Unknown action type: {action_type}"}
