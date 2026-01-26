@@ -40,6 +40,7 @@ from routes import (
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
+from services.sla_policy_engine import check_and_process_policies
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
