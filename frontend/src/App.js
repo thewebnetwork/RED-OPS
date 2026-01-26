@@ -110,7 +110,7 @@ function AppRoutes() {
       <Route 
         path="/orders" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <Orders />
           </PrivateRoute>
         } 
@@ -118,7 +118,7 @@ function AppRoutes() {
       <Route 
         path="/orders/new" 
         element={
-          <PrivateRoute roles={["Requester", "Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User", "Standard User"]}>
             <CreateOrder />
           </PrivateRoute>
         } 
@@ -134,7 +134,7 @@ function AppRoutes() {
       <Route 
         path="/users" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <Users />
           </PrivateRoute>
         } 
@@ -158,7 +158,7 @@ function AppRoutes() {
       <Route 
         path="/categories" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <Categories />
           </PrivateRoute>
         } 
@@ -166,7 +166,7 @@ function AppRoutes() {
       <Route 
         path="/roles" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <Roles />
           </PrivateRoute>
         } 
@@ -174,7 +174,7 @@ function AppRoutes() {
       <Route 
         path="/teams" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <Teams />
           </PrivateRoute>
         } 
@@ -182,7 +182,7 @@ function AppRoutes() {
       <Route 
         path="/workflows" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <Workflows />
           </PrivateRoute>
         } 
@@ -190,7 +190,7 @@ function AppRoutes() {
       <Route 
         path="/workflows/:workflowId" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <WorkflowEditor />
           </PrivateRoute>
         } 
@@ -198,7 +198,7 @@ function AppRoutes() {
       <Route 
         path="/settings" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <UISettings />
           </PrivateRoute>
         } 
@@ -206,7 +206,7 @@ function AppRoutes() {
       <Route 
         path="/email-settings" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <EmailSettings />
           </PrivateRoute>
         } 
@@ -214,7 +214,7 @@ function AppRoutes() {
       <Route 
         path="/announcements" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <Announcements />
           </PrivateRoute>
         } 
@@ -222,7 +222,7 @@ function AppRoutes() {
       <Route 
         path="/logs" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator", "Privileged User"]}>
             <Logs />
           </PrivateRoute>
         } 
@@ -230,7 +230,7 @@ function AppRoutes() {
       <Route 
         path="/integrations" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <Integrations />
           </PrivateRoute>
         } 
@@ -238,7 +238,7 @@ function AppRoutes() {
       <Route 
         path="/sla" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <SLA />
           </PrivateRoute>
         } 
@@ -246,7 +246,7 @@ function AppRoutes() {
       <Route 
         path="/escalation" 
         element={
-          <PrivateRoute roles={["Admin"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <EscalationPolicies />
           </PrivateRoute>
         } 
