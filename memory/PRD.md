@@ -23,14 +23,60 @@ Real estate and marketing professionals who can pick orders from the pool:
 - **Trades**: General Contractor, Electrician, Plumber, HVAC Technician, Roofer, Painter, Landscaper, Cleaner, Pest Control, Locksmith
 - **Marketing**: Graphic Designer, Social Media Manager, Copywriter, SEO Specialist, Web Developer, Print Specialist, Sign Installer
 
-## Current Order Workflow (5 Statuses)
-1. **Open** - New order created by Requester, visible in Service Provider pool
-2. **In Progress** - Service Provider picked the order and is working on it
-3. **Pending** - Service Provider submitted for review, waiting on Requester feedback
-4. **Delivered** - Order completed
-5. **Closed** - Requester closed the ticket (with reason)
+## Current Order Workflow (6 Statuses)
+1. **Draft** - Partially completed request saved for later (no SLA, no notifications)
+2. **Open** - New order created by Requester, visible in Service Provider pool
+3. **In Progress** - Service Provider picked the order and is working on it
+4. **Pending** - Service Provider submitted for review, waiting on Requester feedback
+5. **Delivered** - Order completed
+6. **Closed** - Requester closed the ticket (with reason)
 
 ## What's Been Implemented
+
+### Phase 24: Command Center UX + Review Reminder Workflow ✅ (January 26, 2026)
+
+**Part A: Save Draft + Submit Request UX**
+1. **Draft Status Support**:
+   - Added "Draft" status to all request types (Orders, Feature Requests, Bug Reports)
+   - Drafts don't trigger SLA timers, notifications, or workflows
+   - Drafts visible only to the requester who created them
+   
+2. **Command Center Form Improvements**:
+   - Added sticky "Save Draft" + "Submit Request" buttons to all forms
+   - Draft saves redirect to My Requests tab with success toast
+   - My Requests tab shows Draft badge with "Click to continue editing" hint
+   
+3. **Draft Editor Page** (`/drafts/:type/:draftId`):
+   - Allows editing and submitting drafts
+   - Submit converts Draft → Open and triggers normal workflows
+
+4. **Backend Endpoints**:
+   - `POST /api/orders` with `is_draft=true`
+   - `PUT /api/orders/{id}/draft` - Update draft
+   - `POST /api/orders/{id}/submit` - Submit draft
+   - Same pattern for `/feature-requests` and `/bug-reports`
+
+**Part B: Review Reminder Workflow (24h Email + 5-Day Auto-Close)**
+1. **Tracking Fields Added**:
+   - `review_started_at` - Set when ticket enters "Pending" status
+   - `last_requester_message_at` - Updated when requester sends a message
+   
+2. **Review Reminder Service** (`/backend/services/review_reminder.py`):
+   - Runs in background loop (every 5 minutes)
+   - 24h after Pending: Sends email reminder if no requester response
+   - 5 days after Pending: Auto-closes ticket with reason + system message
+   - Both in-app and email notifications on auto-close
+   
+3. **Auto-Close Behavior**:
+   - Status → Closed
+   - Close reason: "No requester response after 5 days (auto-closed by system)"
+   - System message added to ticket timeline
+   - Email sent to requester with ticket details
+
+4. **Configuration** (`config.py`):
+   - `REVIEW_REMINDER_HOURS = 24`
+   - `REVIEW_AUTO_CLOSE_DAYS = 5`
+   - New trigger events: `order.submitted`, `order.pending_review`
 
 ### Phase 23.1: Dashboard SLA Integration & Access Tier Scope ✅ (January 26, 2026)
 
