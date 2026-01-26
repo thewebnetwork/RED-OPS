@@ -244,6 +244,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/escalation" 
+        element={
+          <PrivateRoute roles={["Admin"]}>
+            <EscalationPolicies />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/profile" 
         element={
           <PrivateRoute>
