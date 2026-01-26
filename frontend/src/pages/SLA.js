@@ -180,10 +180,6 @@ export default function SLA() {
       toast.error('Failed to trigger SLA check');
     }
   };
-      is_active: false,
-      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ];
 
   const resetForm = () => {
     setFormData({
