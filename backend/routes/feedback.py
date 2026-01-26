@@ -281,9 +281,12 @@ async def update_feature_request_status(
 
 @router.post("/bug-reports", response_model=BugReportResponse)
 async def create_bug_report(report_data: BugReportCreate, current_user: dict = Depends(get_current_user)):
-    """Create a new bug report"""
+    """Create a new bug report (or save as draft)"""
     report_code = await get_next_code(db, "bug_report_code", "BUG")
     now = get_utc_now()
+    
+    is_draft = getattr(report_data, 'is_draft', False)
+    initial_status = "Draft" if is_draft else "Open"
     
     cat_l1_name = None
     cat_l2_name = None
@@ -306,20 +309,102 @@ async def create_bug_report(report_data: BugReportCreate, current_user: dict = D
         "category_l2_id": report_data.category_l2_id,
         "category_l2_name": cat_l2_name,
         "bug_type": report_data.bug_type,
-        "steps_to_reproduce": report_data.steps_to_reproduce,
-        "expected_behavior": report_data.expected_behavior,
-        "actual_behavior": report_data.actual_behavior,
+        "steps_to_reproduce": report_data.steps_to_reproduce or "",
+        "expected_behavior": report_data.expected_behavior or "",
+        "actual_behavior": report_data.actual_behavior or "",
         "browser": report_data.browser,
         "device": report_data.device,
         "url_page": report_data.url_page,
         "severity": report_data.severity,
-        "status": "Open",
+        "status": initial_status,
         "created_at": now,
         "updated_at": now
     }
     await db.bug_reports.insert_one(bug_report)
     
-    # Notify admins
+    # Only notify admins for non-draft reports
+    if not is_draft:
+        admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+        for admin in admins:
+            await create_notification(
+                db,
+                admin['id'],
+                "new_bug_report",
+                "New bug report",
+                f"New bug report {report_code}: {report_data.title} (Severity: {report_data.severity})",
+                bug_report['id']
+            )
+    
+    return BugReportResponse(**bug_report)
+
+
+@router.put("/bug-reports/{report_id}/draft", response_model=BugReportResponse)
+async def update_bug_report_draft(report_id: str, report_data: BugReportCreate, current_user: dict = Depends(get_current_user)):
+    """Update a draft bug report"""
+    report = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
+    if not report:
+        raise HTTPException(status_code=404, detail="Bug report not found")
+    
+    if report["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own drafts")
+    
+    if report["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft reports can be updated this way")
+    
+    cat_l1_name = None
+    cat_l2_name = None
+    if report_data.category_l1_id:
+        l1 = await db.categories_l1.find_one({"id": report_data.category_l1_id}, {"_id": 0})
+        cat_l1_name = l1["name"] if l1 else None
+    if report_data.category_l2_id:
+        l2 = await db.categories_l2.find_one({"id": report_data.category_l2_id}, {"_id": 0})
+        cat_l2_name = l2["name"] if l2 else None
+    
+    now = get_utc_now()
+    await db.bug_reports.update_one(
+        {"id": report_id},
+        {"$set": {
+            "title": report_data.title,
+            "category_l1_id": report_data.category_l1_id,
+            "category_l1_name": cat_l1_name,
+            "category_l2_id": report_data.category_l2_id,
+            "category_l2_name": cat_l2_name,
+            "bug_type": report_data.bug_type,
+            "steps_to_reproduce": report_data.steps_to_reproduce or "",
+            "expected_behavior": report_data.expected_behavior or "",
+            "actual_behavior": report_data.actual_behavior or "",
+            "browser": report_data.browser,
+            "device": report_data.device,
+            "url_page": report_data.url_page,
+            "severity": report_data.severity,
+            "updated_at": now
+        }}
+    )
+    
+    updated = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
+    return BugReportResponse(**updated)
+
+
+@router.post("/bug-reports/{report_id}/submit", response_model=BugReportResponse)
+async def submit_bug_report_draft(report_id: str, current_user: dict = Depends(get_current_user)):
+    """Submit a draft bug report - converts Draft to Open status"""
+    report = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
+    if not report:
+        raise HTTPException(status_code=404, detail="Bug report not found")
+    
+    if report["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only submit your own drafts")
+    
+    if report["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft reports can be submitted")
+    
+    now = get_utc_now()
+    await db.bug_reports.update_one(
+        {"id": report_id},
+        {"$set": {"status": "Open", "updated_at": now}}
+    )
+    
+    # Now notify admins
     admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
     for admin in admins:
         await create_notification(
@@ -327,11 +412,12 @@ async def create_bug_report(report_data: BugReportCreate, current_user: dict = D
             admin['id'],
             "new_bug_report",
             "New bug report",
-            f"New bug report {report_code}: {report_data.title} (Severity: {report_data.severity})",
-            bug_report['id']
+            f"New bug report {report['report_code']}: {report['title']} (Severity: {report['severity']})",
+            report['id']
         )
     
-    return BugReportResponse(**bug_report)
+    updated = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
+    return BugReportResponse(**updated)
 
 
 @router.get("/bug-reports", response_model=List[BugReportResponse])
@@ -351,6 +437,10 @@ async def get_bug_report(report_id: str, current_user: dict = Depends(get_curren
     report = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
     if not report:
         raise HTTPException(status_code=404, detail="Bug report not found")
+    
+    # Drafts only visible to owner
+    if report["status"] == "Draft" and report["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
     
     if current_user["role"] == "Requester" and report["requester_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
