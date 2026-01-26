@@ -181,12 +181,15 @@ export default function SLA() {
       applies_to_id: ''
     });
     setEditingSla(null);
+    initialFormRef.current = null;
+    setHasFormChanges(false);
   };
 
   const handleOpenDialog = (sla = null) => {
+    let initialData;
     if (sla) {
       setEditingSla(sla);
-      setFormData({
+      initialData = {
         name: sla.name,
         description: sla.description || '',
         response_time_hours: sla.response_time_hours,
@@ -194,10 +197,23 @@ export default function SLA() {
         priority: sla.priority,
         applies_to_type: sla.applies_to_type,
         applies_to_id: sla.applies_to_id
-      });
+      };
+      setFormData(initialData);
     } else {
-      resetForm();
+      initialData = {
+        name: '',
+        description: '',
+        response_time_hours: 4,
+        resolution_time_hours: 24,
+        priority: 'Normal',
+        applies_to_type: 'role',
+        applies_to_id: ''
+      };
+      setEditingSla(null);
+      setFormData(initialData);
     }
+    initialFormRef.current = initialData;
+    setHasFormChanges(false);
     setDialogOpen(true);
   };
 
