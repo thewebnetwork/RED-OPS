@@ -32,7 +32,8 @@ import {
   Bell,
   Webhook,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
