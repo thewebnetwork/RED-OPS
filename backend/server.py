@@ -1777,6 +1777,17 @@ async def close_order(order_id: str, close_data: CloseOrderRequest, background_t
                 order['id']
             )
     
+    # Trigger webhooks for order.closed event
+    background_tasks.add_task(trigger_webhooks, "order.closed", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "old_status": old_status,
+        "close_reason": close_data.reason,
+        "closed_by": current_user["name"],
+        "closed_by_email": current_user["email"]
+    })
+    
     return {"message": "Order closed successfully"}
 
 # ============== FEATURE REQUEST ROUTES ==============
