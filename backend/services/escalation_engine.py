@@ -7,10 +7,27 @@ from typing import Optional, List, Dict, Any
 import httpx
 
 from database import db
-from utils.helpers import get_utc_now, create_notification
+from utils.helpers import get_utc_now
 from services.email import send_email_notification
 
 logger = logging.getLogger(__name__)
+
+
+async def create_notification(user_id: str, type: str, title: str, message: str, related_order_id: str = None):
+    """Create a notification for a user"""
+    import uuid
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "type": type,
+        "title": title,
+        "message": message,
+        "related_order_id": related_order_id,
+        "is_read": False,
+        "created_at": get_utc_now()
+    }
+    await db.notifications.insert_one(notification)
+    return notification
 
 
 async def get_applicable_policies(order: dict) -> List[dict]:
