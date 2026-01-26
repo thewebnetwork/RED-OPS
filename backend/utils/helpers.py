@@ -50,6 +50,8 @@ def normalize_order(order: dict) -> dict:
         'closed_at': order.get('closed_at'),
         'closed_by_id': order.get('closed_by_id'),
         'close_reason': order.get('close_reason'),
+        'review_started_at': order.get('review_started_at'),
+        'last_requester_message_at': order.get('last_requester_message_at'),
     }
     return {**order, **defaults}
 
