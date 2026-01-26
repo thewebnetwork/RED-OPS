@@ -255,6 +255,8 @@ export default function Integrations() {
       
       setGeneratedKey(newKey.key);
       setApiKeys(prev => [newKey, ...prev]);
+      setHasApiKeyChanges(false);
+      initialApiKeyRef.current = null;
       toast.success('API key created');
     } catch (error) {
       toast.error('Failed to create API key');
