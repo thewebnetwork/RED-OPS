@@ -548,7 +548,7 @@ export default function Workflows() {
       </Dialog>
 
       {/* Duplicate Workflow Dialog */}
-      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+      <Dialog open={showDuplicateDialog} onOpenChange={handleDuplicateDialogClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Duplicate Workflow</DialogTitle>
