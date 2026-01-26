@@ -51,3 +51,28 @@ def normalize_order(order: dict) -> dict:
         'close_reason': order.get('close_reason'),
     }
     return {**order, **defaults}
+
+async def get_next_code(db, counter_name: str, prefix: str) -> str:
+    """Generate next sequential code (e.g., RRG-000001)"""
+    counter = await db.counters.find_one_and_update(
+        {"_id": counter_name},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    return f"{prefix}-{str(counter['seq']).zfill(6)}"
+
+async def create_notification(db, user_id: str, type: str, title: str, message: str, related_order_id: str = None):
+    """Create a notification for a user"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "type": type,
+        "title": title,
+        "message": message,
+        "related_order_id": related_order_id,
+        "is_read": False,
+        "created_at": get_utc_now()
+    }
+    await db.notifications.insert_one(notification)
+    return notification
