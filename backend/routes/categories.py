@@ -52,7 +52,7 @@ class CategoryL2Update(BaseModel):
 
 # ============== L1 CATEGORY ROUTES ==============
 
-@router.post("")
+@router.post("/l1")
 async def create_category_l1(cat_data: CategoryL1Create, current_user: dict = Depends(require_roles(["Admin"]))):
     """Create a new L1 category (Admin only)"""
     existing = await db.categories_l1.find_one({"name": cat_data.name, "active": True})
@@ -75,21 +75,21 @@ async def create_category_l1(cat_data: CategoryL1Create, current_user: dict = De
     return {k: v for k, v in category.items() if k != "_id"}
 
 
-@router.get("")
+@router.get("/l1")
 async def list_categories_l1(current_user: dict = Depends(get_current_user)):
     """List all active L1 categories"""
     categories = await db.categories_l1.find({"active": True}, {"_id": 0}).to_list(100)
     return categories
 
 
-@router.get("/all")
+@router.get("/l1/all")
 async def list_all_categories_l1(current_user: dict = Depends(require_roles(["Admin"]))):
     """List all L1 categories including inactive (Admin only)"""
     categories = await db.categories_l1.find({}, {"_id": 0}).to_list(100)
     return categories
 
 
-@router.get("/{category_id}")
+@router.get("/l1/{category_id}")
 async def get_category_l1(category_id: str, current_user: dict = Depends(get_current_user)):
     """Get a specific L1 category"""
     category = await db.categories_l1.find_one({"id": category_id}, {"_id": 0})
@@ -98,7 +98,7 @@ async def get_category_l1(category_id: str, current_user: dict = Depends(get_cur
     return category
 
 
-@router.patch("/{category_id}")
+@router.patch("/l1/{category_id}")
 async def update_category_l1(category_id: str, cat_data: CategoryL1Update, current_user: dict = Depends(require_roles(["Admin"]))):
     """Update an L1 category (Admin only)"""
     category = await db.categories_l1.find_one({"id": category_id}, {"_id": 0})
