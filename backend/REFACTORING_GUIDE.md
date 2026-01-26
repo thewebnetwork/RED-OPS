@@ -2,11 +2,31 @@
 
 ## Current State (January 2026)
 
-The backend is currently functional with a monolithic `server.py` file (~3800 lines) that contains:
-- All Pydantic models
-- All API routes
-- Helper functions
-- Database initialization
+The backend is in the process of being refactored from a monolithic `server.py` to a modular structure.
+
+### Progress Summary
+- **Phase 1 (Models)**: ✅ COMPLETED - All Pydantic models extracted to `/app/backend/models/`
+- **Phase 2 (Routes)**: 🔄 IN PROGRESS - 6 route modules extracted
+
+## Extracted Route Modules (6/15)
+
+| Module | Routes | Status |
+|--------|--------|--------|
+| `auth.py` | 7 | ✅ Done |
+| `users.py` | 5 | ✅ Done |
+| `roles.py` | 6 | ✅ Done |
+| `teams.py` | 7 | ✅ Done |
+| `dashboard.py` | 3 | ✅ Done |
+| `notifications.py` | 6 | ✅ Done |
+| `categories.py` | 8 | ⏳ Pending |
+| `orders.py` | 14 | ⏳ Pending |
+| `workflows.py` | 18 | ⏳ Pending |
+| `settings.py` | 11 | ⏳ Pending |
+| `feedback.py` | - | ⏳ Pending |
+| `webhooks.py` | - | ⏳ Pending |
+| `sla.py` | - | ⏳ Pending |
+| `api_keys.py` | - | ⏳ Pending |
+| `ratings.py` | - | ⏳ Pending |
 
 ## New Modular Structure
 
