@@ -44,7 +44,8 @@ async def execute_workflow(db, workflow_id: str, trigger_event: str, context: di
         "error": None
     }
     
-    await db.workflow_executions.insert_one(execution_log)
+    # Insert a copy to avoid MongoDB adding _id to our dict
+    await db.workflow_executions.insert_one(dict(execution_log))
     
     try:
         nodes = workflow.get("nodes", [])
