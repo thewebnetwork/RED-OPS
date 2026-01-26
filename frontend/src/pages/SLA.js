@@ -441,7 +441,7 @@ export default function SLA() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
+                <Button variant="outline" onClick={() => handleDialogClose(false)} className="flex-1">
                   Cancel
                 </Button>
                 <Button 
