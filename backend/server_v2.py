@@ -32,6 +32,7 @@ from routes import (
     feedback_router,
     settings_router,
     workflows_router,
+    escalation_router,
 )
 
 # Import SLA monitor service
