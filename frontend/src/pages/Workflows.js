@@ -546,6 +546,94 @@ export default function Workflows() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Workflow Executions Tab */}
+        <TabsContent value="executions" className="mt-6">
+          <Card className="border-slate-200">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <History size={20} />
+                Workflow Execution Logs
+              </CardTitle>
+              <CardDescription>
+                View recent workflow executions and their status
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {executions.length === 0 ? (
+                <div className="p-12 text-center text-slate-500">
+                  <History size={48} className="mx-auto text-slate-300 mb-3" />
+                  <p>No executions yet</p>
+                  <p className="text-sm mt-1">Workflow executions will appear here once workflows are triggered</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {executions.map(execution => (
+                    <div 
+                      key={execution.id} 
+                      className="flex items-center justify-between p-4 hover:bg-slate-50"
+                      data-testid={`execution-${execution.id}`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-900">{execution.workflow_name}</span>
+                          <Badge 
+                            className={`text-xs ${
+                              execution.status === 'completed' 
+                                ? 'bg-green-100 text-green-700' 
+                                : execution.status === 'failed'
+                                ? 'bg-red-100 text-red-700'
+                                : execution.status === 'running'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {execution.status === 'completed' && <CheckCircle size={10} className="mr-1" />}
+                            {execution.status === 'failed' && <XCircle size={10} className="mr-1" />}
+                            {execution.status === 'running' && <RefreshCw size={10} className="mr-1 animate-spin" />}
+                            {execution.status === 'pending' && <Clock size={10} className="mr-1" />}
+                            {execution.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+                          <span>Started: {format(new Date(execution.created_at), 'MMM d, yyyy HH:mm')}</span>
+                          {execution.completed_at && (
+                            <span>Completed: {format(new Date(execution.completed_at), 'MMM d, yyyy HH:mm')}</span>
+                          )}
+                        </div>
+                        {execution.error_message && (
+                          <p className="text-sm text-red-600 mt-1">{execution.error_message}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/workflows/${execution.workflow_id}`)}
+                          data-testid={`view-workflow-${execution.id}`}
+                        >
+                          <Eye size={14} className="mr-1" />
+                          View Workflow
+                        </Button>
+                        {execution.status === 'completed' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleTestWorkflow(execution.workflow_id)}
+                            data-testid={`rerun-workflow-${execution.id}`}
+                          >
+                            <Play size={14} className="mr-1" />
+                            Run Again
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Create Workflow Dialog */}
