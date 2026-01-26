@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import {
   GitBranch,
   Plus,
@@ -13,12 +14,18 @@ import {
   Eye,
   Play,
   Zap,
-  FolderTree
+  FolderTree,
+  History,
+  CheckCircle,
+  XCircle,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Switch } from '../components/ui/switch';
 import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Card,
   CardContent,
