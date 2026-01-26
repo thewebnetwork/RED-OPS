@@ -236,6 +236,8 @@ export default function WorkflowEditor() {
     fetchRoles();
     fetchTeams();
     fetchCategories();
+    fetchSpecialties();
+    fetchAccessTiers();
   }, [workflowId, navigate, setNodes, setEdges]);
 
   const fetchRoles = async () => {
@@ -268,6 +270,24 @@ export default function WorkflowEditor() {
       ]);
     } catch (error) {
       console.error('Failed to fetch categories');
+    }
+  };
+
+  const fetchSpecialties = async () => {
+    try {
+      const res = await axios.get(`${API}/specialties`);
+      setSpecialties(res.data);
+    } catch (error) {
+      console.error('Failed to fetch specialties');
+    }
+  };
+
+  const fetchAccessTiers = async () => {
+    try {
+      const res = await axios.get(`${API}/access-tiers`);
+      setAccessTiers(res.data);
+    } catch (error) {
+      console.error('Failed to fetch access tiers');
     }
   };
 
