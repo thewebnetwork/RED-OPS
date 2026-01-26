@@ -324,30 +324,95 @@ export default function SLA() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">SLA Management</h1>
-          <p className="text-slate-500 mt-1">Define and assign Service Level Agreements</p>
+          <p className="text-slate-500 mt-1">Define, monitor, and manage Service Level Agreements</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => handleOpenDialog()} data-testid="create-sla-btn">
-              <Plus size={16} className="mr-2" />
-              Create SLA
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{editingSla ? 'Edit SLA' : 'Create SLA'}</DialogTitle>
-              <DialogDescription>
-                Define response and resolution time targets
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <Label>SLA Name *</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Premium Support SLA"
-                  className="mt-1.5"
+      </div>
+
+      {/* Stats Cards */}
+      {slaStats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">On Track</p>
+                  <p className="text-2xl font-bold text-green-600">{slaStats.orders?.on_track || 0}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">At Risk</p>
+                  <p className="text-2xl font-bold text-amber-600">{slaStats.orders?.at_risk || 0}</p>
+                </div>
+                <Clock className="h-8 w-8 text-amber-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Breached</p>
+                  <p className="text-2xl font-bold text-red-600">{slaStats.orders?.breached || 0}</p>
+                </div>
+                <XCircle className="h-8 w-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Unacknowledged Alerts</p>
+                  <p className="text-2xl font-bold text-slate-700">{slaStats.alerts?.unacknowledged || 0}</p>
+                </div>
+                <Bell className="h-8 w-8 text-slate-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="definitions">SLA Definitions</TabsTrigger>
+          <TabsTrigger value="alerts">
+            Alerts
+            {slaAlerts.filter(a => !a.acknowledged).length > 0 && (
+              <Badge className="ml-2 bg-red-500 text-white">{slaAlerts.filter(a => !a.acknowledged).length}</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="definitions" className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => handleOpenDialog()} data-testid="create-sla-btn">
+                  <Plus size={16} className="mr-2" />
+                  Create SLA
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>{editingSla ? 'Edit SLA' : 'Create SLA'}</DialogTitle>
+                  <DialogDescription>
+                    Define response and resolution time targets
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div>
+                    <Label>SLA Name *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., Premium Support SLA"
+                      className="mt-1.5"
                   data-testid="sla-name-input"
                 />
               </div>
