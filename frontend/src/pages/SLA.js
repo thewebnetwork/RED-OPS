@@ -626,6 +626,85 @@ export default function SLA() {
           ))
         )}
       </div>
+        </TabsContent>
+
+        <TabsContent value="alerts" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">SLA Alerts</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleRefreshAlerts}>
+                  <RefreshCw size={16} className="mr-2" />
+                  Refresh
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleTriggerSlaCheck}>
+                  <Clock size={16} className="mr-2" />
+                  Check Now
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {slaAlerts.length === 0 ? (
+                <div className="p-12 text-center text-slate-500">
+                  <Bell size={48} className="mx-auto text-slate-300 mb-3" />
+                  <p>No SLA alerts</p>
+                  <p className="text-sm mt-1">All orders are within SLA targets</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {slaAlerts.map(alert => (
+                    <div 
+                      key={alert.id} 
+                      className={`p-4 rounded-lg border ${
+                        alert.alert_type === 'breach' 
+                          ? 'bg-red-50 border-red-200' 
+                          : 'bg-amber-50 border-amber-200'
+                      } ${alert.acknowledged ? 'opacity-60' : ''}`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          {alert.alert_type === 'breach' ? (
+                            <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                          ) : (
+                            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                          )}
+                          <div>
+                            <p className="font-medium text-slate-900">
+                              {alert.alert_type === 'breach' ? 'SLA Breached' : 'SLA Warning'} - {alert.order_code}
+                            </p>
+                            <p className="text-sm text-slate-600 mt-1">
+                              Deadline: {format(new Date(alert.sla_deadline), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              Triggered: {format(new Date(alert.triggered_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {alert.acknowledged ? (
+                            <Badge className="bg-slate-100 text-slate-600">
+                              <CheckCheck size={12} className="mr-1" />
+                              Acknowledged
+                            </Badge>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleAcknowledgeAlert(alert.id)}
+                            >
+                              Acknowledge
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Unsaved Changes Warning Dialog */}
       <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
