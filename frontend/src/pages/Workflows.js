@@ -197,6 +197,29 @@ export default function Workflows() {
     }
   };
 
+  const fetchExecutions = async () => {
+    try {
+      const res = await axios.get(`${API}/workflow-executions`);
+      setExecutions(res.data || []);
+    } catch (error) {
+      console.error('Failed to load executions');
+    }
+  };
+
+  const handleTestWorkflow = async (workflowId) => {
+    try {
+      const res = await axios.post(`${API}/workflows/${workflowId}/test`);
+      if (res.data) {
+        toast.success(`Workflow test completed: ${res.data.status}`);
+        fetchExecutions();
+      } else {
+        toast.error('Workflow not active or not found');
+      }
+    } catch (error) {
+      toast.error('Failed to test workflow');
+    }
+  };
+
   const handleToggleWorkflowTrigger = async (categoryId, currentValue) => {
     try {
       await axios.patch(`${API}/categories/l2/${categoryId}`, {
