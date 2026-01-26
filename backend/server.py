@@ -307,6 +307,28 @@ class UISettingResponse(BaseModel):
     category: str
     description: Optional[str] = None
 
+# SMTP/Email Settings
+class SMTPConfigUpdate(BaseModel):
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_use_tls: bool = True
+
+class SMTPConfigResponse(BaseModel):
+    smtp_host: str
+    smtp_port: int
+    smtp_user: str
+    smtp_from: str
+    smtp_use_tls: bool
+    is_configured: bool
+    last_test_status: Optional[str] = None
+    last_test_at: Optional[str] = None
+
+class EmailTestRequest(BaseModel):
+    to_email: str
+
 # Announcement Ticker
 class AnnouncementTickerUpdate(BaseModel):
     message: str
