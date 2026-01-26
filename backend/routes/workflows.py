@@ -279,6 +279,10 @@ async def update_workflow_full(workflow_id: str, workflow_data: WorkflowUpdate, 
         update_dict["assigned_role_names"] = await get_role_names_by_ids(update_dict["assigned_roles"])
     if "assigned_teams" in update_dict:
         update_dict["assigned_team_names"] = await get_team_names_by_ids(update_dict["assigned_teams"])
+    if "assigned_specialties" in update_dict:
+        update_dict["assigned_specialty_names"] = await get_specialty_names_by_ids(update_dict["assigned_specialties"])
+    if "assigned_access_tiers" in update_dict:
+        update_dict["assigned_access_tier_names"] = await get_access_tier_names_by_ids(update_dict["assigned_access_tiers"])
     if "trigger_categories" in update_dict:
         update_dict["trigger_category_names"] = await get_category_names_by_ids(update_dict["trigger_categories"])
     
