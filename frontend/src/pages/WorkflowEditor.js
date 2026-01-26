@@ -734,6 +734,82 @@ export default function WorkflowEditor() {
 
               <Separator />
 
+              {/* Target by Specialty */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Target by Specialty</Label>
+                <p className="text-xs text-slate-500">Apply this workflow to users with these specialties</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                  {specialties.map((specialty) => (
+                    <div key={specialty.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`specialty-${specialty.id}`}
+                        checked={workflow?.assigned_specialties?.includes(specialty.id)}
+                        onCheckedChange={(checked) => {
+                          const current = workflow?.assigned_specialties || [];
+                          const updated = checked
+                            ? [...current, specialty.id]
+                            : current.filter(id => id !== specialty.id);
+                          updateWorkflowSettings('assigned_specialties', updated);
+                        }}
+                      />
+                      <Label htmlFor={`specialty-${specialty.id}`} className="text-sm cursor-pointer">
+                        {specialty.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {specialties.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2">No specialties available</p>
+                  )}
+                </div>
+                {workflow?.assigned_specialty_names?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {workflow.assigned_specialty_names.map((name, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs bg-purple-100 text-purple-700">{name}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Target by Access Tier */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Target by Access Tier</Label>
+                <p className="text-xs text-slate-500">Apply this workflow to users with these access tiers</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                  {accessTiers.map((tier) => (
+                    <div key={tier.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`tier-${tier.id}`}
+                        checked={workflow?.assigned_access_tiers?.includes(tier.id)}
+                        onCheckedChange={(checked) => {
+                          const current = workflow?.assigned_access_tiers || [];
+                          const updated = checked
+                            ? [...current, tier.id]
+                            : current.filter(id => id !== tier.id);
+                          updateWorkflowSettings('assigned_access_tiers', updated);
+                        }}
+                      />
+                      <Label htmlFor={`tier-${tier.id}`} className="text-sm cursor-pointer">
+                        {tier.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {accessTiers.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2">No access tiers available</p>
+                  )}
+                </div>
+                {workflow?.assigned_access_tier_names?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {workflow.assigned_access_tier_names.map((name, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs bg-emerald-100 text-emerald-700">{name}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
               {/* Trigger by Category */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Trigger by Category</Label>
