@@ -372,7 +372,7 @@ def format_message(template: str, order: dict) -> str:
 async def auto_apply_policy_to_order(order_id: str, order: dict = None):
     """
     Automatically apply the most relevant SLA policy to an order
-    based on the order's role, team, or specialty.
+    based on the order's role, team, specialty, or access tier.
     """
     if not order:
         order = await db.orders.find_one({"id": order_id}, {"_id": 0})
@@ -392,11 +392,11 @@ async def auto_apply_policy_to_order(order_id: str, order: dict = None):
         
         # Check role match
         if scope.get("role_ids") and order.get("editor_role_id") in scope["role_ids"]:
-            score += 3
+            score += 4
         
         # Check team match
         if scope.get("team_ids") and order.get("team_id") in scope["team_ids"]:
-            score += 2
+            score += 3
         
         # Check specialty match (via user's specialty)
         if scope.get("specialty_ids"):
@@ -404,10 +404,18 @@ async def auto_apply_policy_to_order(order_id: str, order: dict = None):
             if editor_id:
                 editor = await db.users.find_one({"id": editor_id}, {"_id": 0, "specialty_id": 1})
                 if editor and editor.get("specialty_id") in scope["specialty_ids"]:
+                    score += 2
+        
+        # Check access tier match (via user's access tier)
+        if scope.get("access_tier_ids"):
+            editor_id = order.get("editor_id")
+            if editor_id:
+                editor = await db.users.find_one({"id": editor_id}, {"_id": 0, "access_tier_id": 1})
+                if editor and editor.get("access_tier_id") in scope["access_tier_ids"]:
                     score += 1
         
         # Empty scope = applies to all
-        if not scope.get("role_ids") and not scope.get("team_ids") and not scope.get("specialty_ids"):
+        if not scope.get("role_ids") and not scope.get("team_ids") and not scope.get("specialty_ids") and not scope.get("access_tier_ids"):
             if not best_policy:  # Use as fallback
                 score = 0.5
         
