@@ -58,6 +58,8 @@ class SLAPolicyScope(BaseModel):
     team_names: List[str] = []
     specialty_ids: List[str] = []
     specialty_names: List[str] = []
+    access_tier_ids: List[str] = []
+    access_tier_names: List[str] = []
 
 
 class SLARules(BaseModel):
