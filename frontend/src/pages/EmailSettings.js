@@ -249,6 +249,12 @@ export default function EmailSettings() {
                 />
               </div>
 
+              {hasFormChanges && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                  You have unsaved changes.
+                </div>
+              )}
+
               <Button 
                 onClick={handleSave} 
                 className="w-full bg-rose-600 hover:bg-rose-700"
