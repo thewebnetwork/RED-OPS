@@ -27,6 +27,7 @@ import Integrations from "./pages/Integrations";
 import SLAPolicies from "./pages/SLAPolicies";
 import EmailSettings from "./pages/EmailSettings";
 import DraftEditor from "./pages/DraftEditor";
+import Reports from "./pages/Reports";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
