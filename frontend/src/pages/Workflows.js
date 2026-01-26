@@ -74,6 +74,7 @@ export default function Workflows() {
   const [activeTab, setActiveTab] = useState('workflows');
   const [workflows, setWorkflows] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [executions, setExecutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -92,6 +93,7 @@ export default function Workflows() {
   useEffect(() => {
     fetchWorkflows();
     fetchCategories();
+    fetchExecutions();
   }, []);
 
   // Track create dialog changes
