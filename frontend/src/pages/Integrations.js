@@ -193,83 +193,31 @@ export default function Integrations() {
         axios.get(`${API}/api-keys`).catch(() => ({ data: [] })),
         axios.get(`${API}/webhooks`).catch(() => ({ data: [] }))
       ]);
-      setApiKeys(keysRes.data || getSampleApiKeys());
-      setWebhooks(webhooksRes.data || getSampleWebhooks());
+      setApiKeys(keysRes.data || []);
+      setWebhooks(webhooksRes.data || []);
     } catch (error) {
-      setApiKeys(getSampleApiKeys());
-      setWebhooks(getSampleWebhooks());
+      setApiKeys([]);
+      setWebhooks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getSampleApiKeys = () => [
-    {
-      id: 'key-1',
-      name: 'Production API Key',
-      key_preview: 'rr_live_****1234',
-      permissions: 'read_write',
-      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      last_used: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      is_active: true
-    },
-    {
-      id: 'key-2',
-      name: 'Development Key',
-      key_preview: 'rr_test_****5678',
-      permissions: 'read',
-      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      last_used: null,
-      is_active: true
-    }
-  ];
-
-  const getSampleWebhooks = () => [
-    {
-      id: 'wh-1',
-      name: 'Order Updates',
-      url: 'https://api.example.com/webhooks/orders',
-      direction: 'outgoing',
-      events: ['order.created', 'order.updated', 'order.delivered'],
-      is_active: true,
-      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-      last_triggered: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      success_rate: 98
-    },
-    {
-      id: 'wh-2',
-      name: 'CRM Sync',
-      url: 'https://crm.example.com/api/sync',
-      direction: 'outgoing',
-      events: ['user.created', 'user.updated'],
-      is_active: false,
-      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-      last_triggered: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      success_rate: 85
-    }
-  ];
-
   const handleCreateApiKey = async () => {
     try {
-      // Simulate API key generation
-      const newKey = {
-        id: `key-${Date.now()}`,
+      const res = await axios.post(`${API}/api-keys`, {
         name: newApiKey.name,
-        key: `rr_${newApiKey.permissions === 'read' ? 'read' : 'live'}_${Math.random().toString(36).substring(2, 15)}`,
-        key_preview: `rr_${newApiKey.permissions === 'read' ? 'read' : 'live'}_****${Math.random().toString(36).substring(2, 6)}`,
-        permissions: newApiKey.permissions,
-        created_at: new Date().toISOString(),
-        last_used: null,
-        is_active: true
-      };
-      
-      setGeneratedKey(newKey.key);
-      setApiKeys(prev => [newKey, ...prev]);
+        permissions: newApiKey.permissions
+      });
+      setGeneratedKey(res.data.key);
+      // Refresh list to get the new key
+      const keysRes = await axios.get(`${API}/api-keys`);
+      setApiKeys(keysRes.data || []);
       setHasApiKeyChanges(false);
       initialApiKeyRef.current = null;
       toast.success('API key created');
     } catch (error) {
-      toast.error('Failed to create API key');
+      toast.error(error.response?.data?.detail || 'Failed to create API key');
     }
   };
 
@@ -277,31 +225,31 @@ export default function Integrations() {
     if (!window.confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) return;
     
     try {
+      await axios.delete(`${API}/api-keys/${keyId}`);
       setApiKeys(prev => prev.filter(k => k.id !== keyId));
       toast.success('API key revoked');
     } catch (error) {
-      toast.error('Failed to revoke API key');
+      toast.error(error.response?.data?.detail || 'Failed to revoke API key');
     }
   };
 
   const handleCreateWebhook = async () => {
     try {
-      const webhook = {
-        id: `wh-${Date.now()}`,
-        ...newWebhook,
-        created_at: new Date().toISOString(),
-        last_triggered: null,
-        success_rate: 100
-      };
-      
-      setWebhooks(prev => [webhook, ...prev]);
+      const res = await axios.post(`${API}/webhooks`, {
+        name: newWebhook.name,
+        url: newWebhook.url,
+        direction: newWebhook.direction,
+        events: newWebhook.events,
+        is_active: newWebhook.is_active
+      });
+      setWebhooks(prev => [res.data, ...prev]);
       setWebhookDialogOpen(false);
       setNewWebhook({ name: '', url: '', direction: 'outgoing', events: [], is_active: true });
       setHasWebhookChanges(false);
       initialWebhookRef.current = null;
       toast.success('Webhook created');
     } catch (error) {
-      toast.error('Failed to create webhook');
+      toast.error(error.response?.data?.detail || 'Failed to create webhook');
     }
   };
 
@@ -309,18 +257,42 @@ export default function Integrations() {
     if (!window.confirm('Are you sure you want to delete this webhook?')) return;
     
     try {
+      await axios.delete(`${API}/webhooks/${webhookId}`);
       setWebhooks(prev => prev.filter(w => w.id !== webhookId));
       toast.success('Webhook deleted');
     } catch (error) {
-      toast.error('Failed to delete webhook');
+      toast.error(error.response?.data?.detail || 'Failed to delete webhook');
     }
   };
 
   const handleToggleWebhook = async (webhookId) => {
-    setWebhooks(prev => prev.map(w => 
-      w.id === webhookId ? { ...w, is_active: !w.is_active } : w
-    ));
-    toast.success('Webhook status updated');
+    const webhook = webhooks.find(w => w.id === webhookId);
+    if (!webhook) return;
+    
+    try {
+      await axios.patch(`${API}/webhooks/${webhookId}`, {
+        is_active: !webhook.is_active
+      });
+      setWebhooks(prev => prev.map(w => 
+        w.id === webhookId ? { ...w, is_active: !w.is_active } : w
+      ));
+      toast.success('Webhook status updated');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update webhook');
+    }
+  };
+
+  const handleTestWebhook = async (webhookId) => {
+    try {
+      const res = await axios.post(`${API}/webhooks/${webhookId}/test`);
+      if (res.data.success) {
+        toast.success(`Test webhook sent successfully (Status: ${res.data.status_code})`);
+      } else {
+        toast.error(`Test failed: ${res.data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to send test webhook');
+    }
   };
 
   const copyToClipboard = (text) => {
