@@ -114,9 +114,10 @@ export default function Layout({ children }) {
             <img 
               src="/assets/logos/logo-icon.jpg" 
               alt="Red Ops" 
-              className="w-10 h-10 rounded-lg object-cover animate-pulse-slow"
+              className="w-10 h-10 rounded-lg object-cover animate-pulse"
+              style={{ animationDuration: '3s' }}
             />
-            <span className="font-semibold text-lg tracking-tight">Red Ops</span>
+            <span className="font-bold text-lg tracking-tight">RED OPS</span>
           </div>
           <button 
             className="ml-auto lg:hidden text-white/70 hover:text-white"
