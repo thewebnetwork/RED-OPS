@@ -18,7 +18,10 @@ async def execute_workflow(db, workflow_id: str, trigger_event: str, context: di
         trigger_event: The event that triggered this workflow (e.g., 'order.created')
         context: Context data containing order, user, and other relevant info
     """
-    workflow = await db.workflows.find_one({"id": workflow_id, "is_active": True}, {"_id": 0})
+    workflow = await db.workflows.find_one({
+        "id": workflow_id,
+        "$or": [{"is_active": True}, {"active": True}]
+    }, {"_id": 0})
     if not workflow:
         logging.warning(f"Workflow {workflow_id} not found or inactive")
         return None
