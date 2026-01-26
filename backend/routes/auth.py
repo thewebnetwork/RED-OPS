@@ -131,7 +131,7 @@ async def send_password_reset_email(to_email: str, user_name: str, reset_link: s
     </html>
     """
     
-    await svc_send_password_reset_email(to_email, subject, body)
+    await send_email_notification(to_email, subject, body)
 
 
 # ============== ROUTES ==============
