@@ -74,6 +74,8 @@ class WorkflowCreate(BaseModel):
     description: Optional[str] = None
     assigned_roles: List[str] = []  # Role IDs that can use this workflow
     assigned_teams: List[str] = []  # Team IDs that can use this workflow
+    assigned_specialties: List[str] = []  # Specialty IDs for targeting
+    assigned_access_tiers: List[str] = []  # Access Tier IDs for targeting
     trigger_categories: List[str] = []  # Category IDs that trigger this workflow
     trigger_event: Optional[str] = None  # Event that triggers this workflow (order.created, etc.)
     trigger_category_id: Optional[str] = None  # Specific category that triggers this workflow
@@ -89,6 +91,8 @@ class WorkflowUpdate(BaseModel):
     description: Optional[str] = None
     assigned_roles: Optional[List[str]] = None
     assigned_teams: Optional[List[str]] = None
+    assigned_specialties: Optional[List[str]] = None
+    assigned_access_tiers: Optional[List[str]] = None
     trigger_categories: Optional[List[str]] = None
     trigger_event: Optional[str] = None
     trigger_category_id: Optional[str] = None
@@ -107,6 +111,10 @@ class WorkflowResponse(BaseModel):
     assigned_role_names: List[str] = []
     assigned_teams: List[str] = []
     assigned_team_names: List[str] = []
+    assigned_specialties: List[str] = []
+    assigned_specialty_names: List[str] = []
+    assigned_access_tiers: List[str] = []
+    assigned_access_tier_names: List[str] = []
     trigger_categories: List[str] = []
     trigger_category_names: List[str] = []
     trigger_event: Optional[str] = None
