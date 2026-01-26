@@ -248,13 +248,36 @@ export default function Logs() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant={autoRefresh ? "default" : "outline"}
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={autoRefresh ? "bg-green-600 hover:bg-green-700" : ""}
+            variant={isStreaming ? "default" : "outline"}
+            onClick={toggleStreaming}
+            className={isStreaming ? "bg-rose-600 hover:bg-rose-700" : ""}
+            data-testid="stream-logs-btn"
+          >
+            {isStreaming ? (
+              <>
+                <Pause size={16} className="mr-2" />
+                Stop Streaming
+              </>
+            ) : (
+              <>
+                <Radio size={16} className="mr-2" />
+                Live Stream
+              </>
+            )}
+          </Button>
+          <Button
+            variant={autoRefresh && !isStreaming ? "default" : "outline"}
+            onClick={() => {
+              if (!isStreaming) {
+                setAutoRefresh(!autoRefresh);
+              }
+            }}
+            className={autoRefresh && !isStreaming ? "bg-green-600 hover:bg-green-700" : ""}
+            disabled={isStreaming}
             data-testid="auto-refresh-btn"
           >
-            <RefreshCw size={16} className={`mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-            {autoRefresh ? 'Auto-Refresh ON' : 'Auto-Refresh'}
+            <RefreshCw size={16} className={`mr-2 ${autoRefresh && !isStreaming ? 'animate-spin' : ''}`} />
+            {autoRefresh && !isStreaming ? 'Polling ON' : 'Poll (5s)'}
           </Button>
           <Button variant="outline" onClick={handleDownload} data-testid="download-logs-btn">
             <Download size={16} className="mr-2" />
