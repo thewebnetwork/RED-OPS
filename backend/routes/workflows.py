@@ -40,6 +40,30 @@ async def get_team_names_by_ids(team_ids: List[str]) -> List[str]:
     return names
 
 
+async def get_specialty_names_by_ids(specialty_ids: List[str]) -> List[str]:
+    """Helper to get specialty names from IDs"""
+    if not specialty_ids:
+        return []
+    names = []
+    for specialty_id in specialty_ids:
+        specialty = await db.specialties.find_one({"id": specialty_id}, {"_id": 0, "name": 1})
+        if specialty:
+            names.append(specialty["name"])
+    return names
+
+
+async def get_access_tier_names_by_ids(tier_ids: List[str]) -> List[str]:
+    """Helper to get access tier names from IDs"""
+    if not tier_ids:
+        return []
+    names = []
+    for tier_id in tier_ids:
+        tier = await db.access_tiers.find_one({"id": tier_id}, {"_id": 0, "name": 1})
+        if tier:
+            names.append(tier["name"])
+    return names
+
+
 async def get_category_names_by_ids(category_ids: List[str]) -> List[str]:
     """Helper to get category names from IDs (L1 or L2)"""
     if not category_ids:
