@@ -1686,6 +1686,17 @@ async def deliver_order(order_id: str, background_tasks: BackgroundTasks, curren
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Delivered", current_user)
     
+    # Trigger webhooks for order.delivered event
+    background_tasks.add_task(trigger_webhooks, "order.delivered", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "requester_name": order.get("requester_name"),
+        "requester_email": order.get("requester_email"),
+        "delivered_by": current_user["name"],
+        "delivered_by_email": current_user["email"]
+    })
+    
     # Create satisfaction survey and send email
     requester = await db.users.find_one({"id": order["requester_id"]}, {"_id": 0})
     if requester:
