@@ -32,6 +32,34 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 20: Full Escalation Matrix ✅ (January 26, 2026)
+
+**Implemented Auto-Escalation System (Option C):**
+
+**Backend:**
+- New `/api/escalation/` routes with full CRUD for policies
+- `EscalationPolicy` model with multi-level support
+- `EscalationLevel` with time thresholds and actions
+- 7 action types: notify_user, notify_role, reassign_user, reassign_team, change_priority, send_email, webhook
+- Escalation history tracking per order
+- Cooldown periods to prevent notification spam
+- Integration with SLA monitor for automatic processing
+
+**Frontend:**
+- New "Escalation" page accessible from sidebar
+- Stats cards: Escalated Orders, Unacknowledged, Today, Active Policies
+- Policy list with edit/delete actions
+- Create/Edit Policy dialog with:
+  - Trigger selection (Warning, Breach, Both)
+  - Priority and Category filters
+  - Multi-level configuration (expandable/collapsible)
+  - Action builder for each level
+- "Escalated Orders" tab showing active escalations
+- "Run Check" button for manual escalation trigger
+- Mobile responsive design
+
+**Testing:** 100% pass rate (18/18 backend, all frontend flows)
+
 ### Phase 19: Iframe Embedding & Mobile Responsiveness ✅ (January 26, 2026)
 
 **Iframe Embedding Support:**
