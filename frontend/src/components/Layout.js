@@ -24,7 +24,8 @@ import {
   FileText,
   Plug,
   Clock,
-  Megaphone
+  Megaphone,
+  Mail
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
