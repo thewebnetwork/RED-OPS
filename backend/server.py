@@ -22,7 +22,7 @@ import asyncio
 # Import modular services
 from services.notifications import create_notification as svc_create_notification, notify_status_change as svc_notify_status_change
 from services.webhooks import trigger_webhooks as svc_trigger_webhooks
-from services.email import send_email_notification as svc_send_email, send_password_reset_email as svc_send_password_reset_email, send_satisfaction_survey_email as svc_send_satisfaction_survey_email
+from services.email import send_email_notification as svc_send_email, send_password_reset_email as svc_send_password_reset_email, send_satisfaction_survey_email as svc_send_satisfaction_survey_email, send_test_email as svc_send_test_email
 from services.workflow_engine import execute_workflow, get_workflows_for_trigger
 from services.sla_monitor import check_sla_breaches, get_sla_alerts, acknowledge_sla_alert, get_sla_statistics
 
