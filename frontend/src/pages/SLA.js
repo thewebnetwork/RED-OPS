@@ -95,9 +95,14 @@ export default function SLA() {
   }, [hasFormChanges, dialogOpen]);
 
   const handleDialogClose = (open) => {
-    if (!open && hasFormChanges) {
-      setShowUnsavedWarning(true);
-      return;
+    if (!open) {
+      // Check for changes directly
+      const hasChanges = initialFormRef.current && 
+        JSON.stringify(formData) !== JSON.stringify(initialFormRef.current);
+      if (hasChanges) {
+        setShowUnsavedWarning(true);
+        return;
+      }
     }
     setDialogOpen(open);
     if (!open) resetForm();
