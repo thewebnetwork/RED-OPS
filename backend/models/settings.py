@@ -45,6 +45,7 @@ class AnnouncementTickerUpdate(BaseModel):
     send_to_all: bool = True
     target_teams: List[str] = []
     target_roles: List[str] = []
+    target_specialties: List[str] = []
     start_at: Optional[str] = None
     end_at: Optional[str] = None
     priority: Optional[str] = None
@@ -59,8 +60,10 @@ class AnnouncementTickerResponse(BaseModel):
     send_to_all: bool = True
     target_teams: List[str] = []
     target_roles: List[str] = []
+    target_specialties: List[str] = []
     target_team_names: List[str] = []
     target_role_names: List[str] = []
+    target_specialty_names: List[str] = []
     start_at: Optional[str] = None
     end_at: Optional[str] = None
     priority: Optional[str] = None
