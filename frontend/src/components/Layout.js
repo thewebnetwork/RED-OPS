@@ -25,7 +25,8 @@ import {
   Plug,
   Clock,
   Megaphone,
-  Mail
+  Mail,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
