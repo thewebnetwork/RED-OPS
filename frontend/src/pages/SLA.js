@@ -63,6 +63,11 @@ export default function SLA() {
     applies_to_type: 'role', // 'role' or 'team'
     applies_to_id: ''
   });
+  
+  // Unsaved changes tracking
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const initialFormRef = useRef(null);
 
   useEffect(() => {
     fetchData();

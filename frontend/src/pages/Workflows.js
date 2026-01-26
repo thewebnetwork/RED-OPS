@@ -75,6 +75,12 @@ export default function Workflows() {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [newWorkflowName, setNewWorkflowName] = useState('');
   const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
+  
+  // Unsaved changes tracking
+  const [hasCreateChanges, setHasCreateChanges] = useState(false);
+  const [hasDuplicateChanges, setHasDuplicateChanges] = useState(false);
+  const [showCreateUnsavedWarning, setShowCreateUnsavedWarning] = useState(false);
+  const [showDuplicateUnsavedWarning, setShowDuplicateUnsavedWarning] = useState(false);
 
   useEffect(() => {
     fetchWorkflows();

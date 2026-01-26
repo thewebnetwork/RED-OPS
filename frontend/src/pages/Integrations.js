@@ -73,6 +73,14 @@ export default function Integrations() {
   });
   
   const [visibleKeys, setVisibleKeys] = useState({});
+  
+  // Unsaved changes tracking
+  const [hasApiKeyChanges, setHasApiKeyChanges] = useState(false);
+  const [hasWebhookChanges, setHasWebhookChanges] = useState(false);
+  const [showApiKeyUnsavedWarning, setShowApiKeyUnsavedWarning] = useState(false);
+  const [showWebhookUnsavedWarning, setShowWebhookUnsavedWarning] = useState(false);
+  const initialApiKeyRef = useRef(null);
+  const initialWebhookRef = useRef(null);
 
   useEffect(() => {
     fetchData();

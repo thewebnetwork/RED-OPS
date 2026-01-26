@@ -50,6 +50,10 @@ export default function EmailSettings() {
   const [testing, setTesting] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Unsaved changes tracking
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const initialConfigRef = useRef(null);
 
   useEffect(() => {
     fetchConfig();
