@@ -26,7 +26,8 @@ import {
   Clock,
   Megaphone,
   Mail,
-  AlertTriangle
+  AlertTriangle,
+  BarChart3
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
