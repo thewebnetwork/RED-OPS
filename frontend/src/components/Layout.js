@@ -74,6 +74,7 @@ export default function Layout({ children }) {
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator', 'Privileged User'] },
     { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Administrator', 'Privileged User'] },
     { path: '/sla-policies', icon: Shield, label: 'SLA & Escalation', roles: ['Administrator'] },
+    { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Privileged User'] },
     { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Administrator'] },
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Administrator', 'Privileged User'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Administrator'] },
