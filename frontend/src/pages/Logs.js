@@ -286,6 +286,19 @@ export default function Logs() {
         </div>
       </div>
 
+      {/* Streaming Status Banner */}
+      {isStreaming && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 border border-rose-200 rounded-lg">
+          <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+          <span className="text-sm font-medium text-rose-700">
+            Live streaming logs for {activeTab}
+          </span>
+          <span className="text-sm text-rose-500">
+            ({streamingLogs.length} logs received)
+          </span>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-4 w-full max-w-md">
           <TabsTrigger value="system" className="flex items-center gap-2" data-testid="system-logs-tab">
