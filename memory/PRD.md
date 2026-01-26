@@ -32,6 +32,31 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 21: IAM Refactor & Workflow Module Alignment ✅ (January 26, 2026)
+
+**Identity & Access Management (IAM) Refactor:**
+
+**New IAM Model:**
+1. **Roles (3 Total)**: Simplified to `Administrator`, `Privileged User`, and `Standard User`. Roles define permission templates.
+2. **Teams**: For routing/grouping. Admins can create/delete teams and assign users to them.
+3. **Specialty**: Defines a user's profession (e.g., Photographer). Admins can manage a dropdown list of specialties and assign one to each user.
+4. **Access Tier**: Represents the user's software plan (e.g., Free, Starter). Admins can manage tiers and assign one to each user.
+5. **Per-User Granular Permissions**: An "Active Directory" style checkbox matrix in the user edit page to override role-based permissions.
+
+**Backend Changes:**
+- Updated `WorkflowCreate`, `WorkflowUpdate`, `WorkflowResponse` models with `assigned_specialties`, `assigned_access_tiers` fields
+- Added helper functions: `get_specialty_names_by_ids()`, `get_access_tier_names_by_ids()`
+- New endpoints: `GET /api/workflows/by-specialty/{id}`, `GET /api/workflows/by-access-tier/{id}`
+- Fixed `/api/workflow-templates` endpoint to return `{templates: [], categories: []}` format
+- Fixed auth utility for proper role name mapping
+
+**Frontend Changes:**
+- Workflow Editor Settings Sheet: Added "Target by Specialty" and "Target by Access Tier" sections with checkboxes
+- Workflow Cards: Display specialty badges (purple) and access tier badges (emerald) when assigned
+- Templates Tab: Fixed "All" filter - now correctly shows all 6 templates with category filtering
+
+**Testing:** 100% pass rate (15/15 backend tests, all frontend flows working)
+
 ### Phase 20: Full Escalation Matrix ✅ (January 26, 2026)
 
 **Implemented Auto-Escalation System (Option C):**
