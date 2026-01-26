@@ -554,7 +554,7 @@ export default function SLA() {
 
       {/* Unsaved Changes Warning Dialog */}
       <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog">
+        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
             <AlertDialogDescription>
