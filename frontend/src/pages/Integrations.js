@@ -673,6 +673,54 @@ export default function Integrations() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* API Key Unsaved Changes Warning Dialog */}
+      <AlertDialog open={showApiKeyUnsavedWarning} onOpenChange={setShowApiKeyUnsavedWarning}>
+        <AlertDialogContent data-testid="unsaved-changes-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowApiKeyUnsavedWarning(false)} data-testid="stay-btn">
+              Stay
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCloseApiKeyDialog}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="leave-btn"
+            >
+              Leave without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Webhook Unsaved Changes Warning Dialog */}
+      <AlertDialog open={showWebhookUnsavedWarning} onOpenChange={setShowWebhookUnsavedWarning}>
+        <AlertDialogContent data-testid="unsaved-changes-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowWebhookUnsavedWarning(false)} data-testid="stay-btn">
+              Stay
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCloseWebhookDialog}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="leave-btn"
+            >
+              Leave without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
