@@ -32,6 +32,32 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 15: Backend Refactor Phase 2 (Routes Extraction) ✅ (January 26, 2026)
+
+**Routes Extracted (6 modules, 34 endpoints)**
+- `routes/auth.py` - 7 routes (login, me, profile, change-password, forgot-password, reset-password, verify-reset-token)
+- `routes/users.py` - 5 routes (CRUD operations for user management)
+- `routes/roles.py` - 6 routes (CRUD + list all roles)
+- `routes/teams.py` - 7 routes (CRUD + member listing)
+- `routes/dashboard.py` - 3 routes (stats, activity, quick-stats)
+- `routes/notifications.py` - 6 routes (list, count, mark-read, delete)
+
+**Infrastructure Updates**
+- Created `server_v2.py` - Modular server using new route imports (for testing)
+- Updated `utils/helpers.py` - Added `get_next_code()` and `create_notification()` helper functions
+- Updated `REFACTORING_GUIDE.md` - Progress tracking and migration instructions
+
+**Remaining Routes to Extract (9 modules)**
+- `categories.py` - Category L1/L2 management
+- `orders.py` - Order CRUD, messages, files (largest module)
+- `workflows.py` - Workflow builder and execution
+- `settings.py` - UI settings, SMTP, announcements
+- `feedback.py` - Feature requests, bug reports
+- `webhooks.py` - Outgoing webhook configuration
+- `sla.py` - SLA monitoring and alerts
+- `api_keys.py` - API key management and analytics
+- `ratings.py` - Customer satisfaction ratings
+
 ### Phase 14: Enhancement Features ✅ (January 26, 2026)
 
 **1. Workflow Templates Gallery**
