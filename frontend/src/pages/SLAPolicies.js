@@ -92,14 +92,6 @@ export default function SLAPolicies() {
       console.error('Failed to fetch reference data');
     }
   }, []);
-      ]);
-      setRoles(rolesRes.data);
-      setTeams(teamsRes.data);
-      setSpecialties(specialtiesRes.data);
-    } catch (error) {
-      console.error('Failed to fetch reference data');
-    }
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
