@@ -7,22 +7,30 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function AnnouncementTicker() {
   const [ticker, setTicker] = useState(null);
 
-  const fetchTicker = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/announcement-ticker`);
-      setTicker(res.data);
-    } catch (error) {
-      // If 401, user not logged in yet - try again later
-      console.log('Announcement ticker fetch skipped - user may not be logged in');
-    }
-  }, []);
-
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchTicker = async () => {
+      try {
+        const res = await axios.get(`${API}/announcement-ticker`);
+        if (isMounted) {
+          setTicker(res.data);
+        }
+      } catch (error) {
+        // If 401, user not logged in yet - try again later
+        console.log('Announcement ticker fetch skipped - user may not be logged in');
+      }
+    };
+    
     fetchTicker();
     // Refresh ticker every 5 minutes
     const interval = setInterval(fetchTicker, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [fetchTicker]);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Don't render if no ticker or not active or no message
   if (!ticker || !ticker.is_active || !ticker.message) {
