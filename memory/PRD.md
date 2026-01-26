@@ -32,6 +32,29 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 10: P2-3 Outgoing Webhooks ✅ (January 26, 2026)
+Complete webhook system for external integrations:
+
+- **Webhook Infrastructure**:
+  - `trigger_webhooks()` function sends POST to configured URLs on events
+  - Events supported: `order.created`, `order.updated`, `order.delivered`, `order.closed`, `message.sent`, `user.created`
+  - Webhook delivery runs as background task (non-blocking)
+  - Logs all deliveries to `webhook_logs` collection (success/failure, status code, response)
+
+- **API Endpoints**:
+  - `GET/POST /api/webhooks` - List and create webhooks
+  - `PATCH /api/webhooks/{id}` - Update webhook (toggle active)
+  - `DELETE /api/webhooks/{id}` - Delete webhook
+  - `POST /api/webhooks/{id}/test` - Send test payload
+  - `GET /api/webhooks/{id}/logs` - Get logs for specific webhook
+  - `GET /api/webhook-logs` - Get all delivery logs
+
+- **Frontend Integration**:
+  - Integrations page now uses real API (not mock data)
+  - Test button sends test payload and shows success/failure toast
+  - Toggle and delete buttons work with backend
+  - Webhook logs can be viewed
+
 ### Phase 9: P0-2 Completion & P2-1 Bug Fix ✅ (January 26, 2026)
 Completed P0-2 unsaved changes guard on all remaining pages and fixed P2-1 user role assignment bug:
 
