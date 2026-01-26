@@ -355,12 +355,49 @@ export default function Announcements() {
                   )}
                 </div>
 
+                {/* Specialty Selector */}
+                <div>
+                  <Label className="flex items-center gap-2 mb-2">
+                    <Briefcase size={16} />
+                    Target Specialties
+                  </Label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3">
+                    {specialties.length === 0 ? (
+                      <p className="text-sm text-slate-500">No specialties available</p>
+                    ) : (
+                      specialties.map(specialty => (
+                        <label key={specialty.id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded">
+                          <input
+                            type="checkbox"
+                            checked={ticker.target_specialties.includes(specialty.id)}
+                            onChange={() => handleToggleSpecialty(specialty.id)}
+                            className="rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                          />
+                          <span className="text-sm">{specialty.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  {ticker.target_specialties.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {ticker.target_specialties.map(specialtyId => {
+                        const specialty = specialties.find(s => s.id === specialtyId);
+                        return specialty && (
+                          <Badge key={specialtyId} className="bg-emerald-100 text-emerald-700">
+                            {specialty.name}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
                 {/* Helper Text */}
                 <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg">
                   <div className="flex items-start gap-2">
                     <Info size={16} className="text-amber-500 mt-0.5" />
                     <p className="text-sm text-amber-700">
-                      Users who match <strong>any</strong> selected team or role will see this announcement.
+                      Users who match <strong>any</strong> selected team, role, or specialty will see this announcement.
                     </p>
                   </div>
                 </div>
