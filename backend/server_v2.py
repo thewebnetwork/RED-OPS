@@ -89,10 +89,11 @@ class IframeEmbeddingMiddleware(BaseHTTPMiddleware):
 
 
 async def sla_monitor_loop():
-    """Background task to periodically check SLA breaches"""
+    """Background task to periodically check SLA breaches and process policies"""
     while True:
         try:
             await check_sla_breaches(db)
+            await check_and_process_policies()
         except Exception as e:
             logger.error(f"SLA monitor error: {e}")
         await asyncio.sleep(300)  # Check every 5 minutes
