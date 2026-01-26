@@ -65,7 +65,8 @@
     "sla": "SLA",
     "logs": "Logs",
     "integrations": "Integrations",
-    "announcements": "Announcements"
+    "announcements": "Announcements",
+    "emailSettings": "Email Settings"
   },
   "dashboard": {
     "title": "Dashboard",
