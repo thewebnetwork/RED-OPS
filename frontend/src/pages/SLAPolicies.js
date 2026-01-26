@@ -392,6 +392,7 @@ export default function SLAPolicies() {
         roles={roles}
         teams={teams}
         specialties={specialties}
+        accessTiers={accessTiers}
         onSave={() => { fetchPolicies(); setShowPolicyDialog(false); }}
       />
     </div>
@@ -411,6 +412,9 @@ function PolicyCard({ policy, onEdit, onDelete }) {
   }
   if (policy.scope?.specialty_names?.length > 0) {
     scopeLabels.push(`Specialties: ${policy.scope.specialty_names.join(', ')}`);
+  }
+  if (policy.scope?.access_tier_names?.length > 0) {
+    scopeLabels.push(`Access Tiers: ${policy.scope.access_tier_names.join(', ')}`);
   }
   
   return (
