@@ -12,12 +12,10 @@ from .sla import router as sla_router
 from .api_keys import router as api_keys_router
 from .webhooks import router as webhooks_router
 from .ratings import router as ratings_router
-
-# TODO: Extract these from server.py (largest/most complex)
-# from .orders import router as orders_router
-# from .workflows import router as workflows_router
-# from .settings import router as settings_router
-# from .feedback import router as feedback_router
+from .orders import router as orders_router
+from .feedback import router as feedback_router
+from .settings import router as settings_router
+from .workflows import router as workflows_router
 
 __all__ = [
     "auth_router",
@@ -31,4 +29,8 @@ __all__ = [
     "api_keys_router",
     "webhooks_router",
     "ratings_router",
+    "orders_router",
+    "feedback_router",
+    "settings_router",
+    "workflows_router",
 ]

@@ -2,11 +2,17 @@
 Red Ribbon Ops Portal API - V2 (Modular)
 
 This is the refactored version using modular routes.
-Run alongside server.py for testing, then gradually migrate.
+All routes have been extracted from the monolithic server.py.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+
+# Import database
+from database import db
 
 # Import modular routes
 from routes import (
@@ -14,15 +20,69 @@ from routes import (
     users_router,
     roles_router,
     teams_router,
+    categories_router,
     dashboard_router,
     notifications_router,
+    sla_router,
+    api_keys_router,
+    webhooks_router,
+    ratings_router,
+    orders_router,
+    feedback_router,
+    settings_router,
+    workflows_router,
 )
+
+# Import SLA monitor service
+from services.sla_monitor import check_sla_breaches
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# SLA monitor background task
+sla_monitor_task = None
+
+async def sla_monitor_loop():
+    """Background task to periodically check SLA breaches"""
+    while True:
+        try:
+            await check_sla_breaches(db)
+        except Exception as e:
+            logger.error(f"SLA monitor error: {e}")
+        await asyncio.sleep(300)  # Check every 5 minutes
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan handler for startup and shutdown events"""
+    global sla_monitor_task
+    
+    # Startup
+    logger.info("Starting Red Ribbon Ops Portal API V2...")
+    
+    # Start SLA monitor background task
+    sla_monitor_task = asyncio.create_task(sla_monitor_loop())
+    logger.info("SLA monitor started")
+    
+    yield
+    
+    # Shutdown
+    if sla_monitor_task:
+        sla_monitor_task.cancel()
+        try:
+            await sla_monitor_task
+        except asyncio.CancelledError:
+            pass
+    logger.info("Red Ribbon Ops Portal API V2 shutdown complete")
+
 
 # Create FastAPI app
 app = FastAPI(
     title="Red Ribbon Ops Portal API - V2",
-    description="Modular version of the API",
-    version="2.0.0"
+    description="Modular version of the API with all routes extracted",
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
@@ -35,13 +95,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers with /api prefix
+# Include all routers with /api prefix
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(roles_router, prefix="/api")
 app.include_router(teams_router, prefix="/api")
+app.include_router(categories_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
 app.include_router(notifications_router, prefix="/api")
+app.include_router(sla_router, prefix="/api")
+app.include_router(api_keys_router, prefix="/api")
+app.include_router(webhooks_router, prefix="/api")
+app.include_router(ratings_router, prefix="/api")
+app.include_router(orders_router, prefix="/api")
+app.include_router(feedback_router, prefix="/api")
+app.include_router(settings_router, prefix="/api")
+app.include_router(workflows_router, prefix="/api")
 
 
 @app.get("/")
