@@ -88,17 +88,17 @@ class TestDashboardModule:
         response = requests.get(f"{BASE_URL}/api/dashboard/stats", headers=auth_headers)
         assert response.status_code == 200, f"Dashboard stats failed: {response.text}"
         data = response.json()
-        # Check expected fields
-        assert "total_orders" in data or "orders" in data
+        # Check expected fields - dashboard returns counts
+        assert "open_count" in data or "in_progress_count" in data
         print(f"✓ Dashboard stats: {data}")
     
-    def test_dashboard_recent_orders(self, auth_headers):
-        """Test recent orders endpoint"""
-        response = requests.get(f"{BASE_URL}/api/dashboard/recent-orders", headers=auth_headers)
+    def test_sla_monitoring_stats(self, auth_headers):
+        """Test SLA monitoring stats endpoint"""
+        response = requests.get(f"{BASE_URL}/api/sla-policies/monitoring/stats", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✓ Recent orders: {len(data)} orders")
+        assert "orders" in data
+        print(f"✓ SLA Monitoring stats: {data}")
 
 
 class TestOrdersModule:
@@ -117,8 +117,7 @@ class TestOrdersModule:
         order_data = {
             "title": "TEST_QA_Order_Full_Pass",
             "description": "Test order created during full QA pass",
-            "priority": "medium",
-            "request_type": "editing"
+            "priority": "Normal"  # Must be Low, Normal, High, or Urgent
         }
         response = requests.post(f"{BASE_URL}/api/orders", json=order_data, headers=auth_headers)
         assert response.status_code in [200, 201], f"Create order failed: {response.text}"
@@ -134,7 +133,7 @@ class TestOrdersModule:
         order_data = {
             "title": "TEST_QA_Detail_Order",
             "description": "Test order for detail view",
-            "priority": "low"
+            "priority": "Low"  # Must be Low, Normal, High, or Urgent
         }
         create_resp = requests.post(f"{BASE_URL}/api/orders", json=order_data, headers=auth_headers)
         if create_resp.status_code not in [200, 201]:
@@ -155,7 +154,7 @@ class TestOrdersModule:
         order_data = {
             "title": "TEST_QA_Status_Change",
             "description": "Test order for status change",
-            "priority": "medium"
+            "priority": "Normal"  # Must be Low, Normal, High, or Urgent
         }
         create_resp = requests.post(f"{BASE_URL}/api/orders", json=order_data, headers=auth_headers)
         if create_resp.status_code not in [200, 201]:
@@ -163,8 +162,8 @@ class TestOrdersModule:
         
         order_id = create_resp.json().get("id") or create_resp.json().get("_id")
         
-        # Update status
-        response = requests.put(f"{BASE_URL}/api/orders/{order_id}/status", 
+        # Update status - use PATCH
+        response = requests.patch(f"{BASE_URL}/api/orders/{order_id}/status", 
                                json={"status": "in_progress"}, headers=auth_headers)
         assert response.status_code == 200, f"Status update failed: {response.text}"
         print(f"✓ Order status updated to in_progress")
@@ -229,8 +228,8 @@ class TestTeamsModule:
         
         team_id = create_resp.json().get("id") or create_resp.json().get("_id")
         
-        # Update team
-        response = requests.put(f"{BASE_URL}/api/teams/{team_id}", 
+        # Update team - use PATCH not PUT
+        response = requests.patch(f"{BASE_URL}/api/teams/{team_id}", 
                                json={"name": "TEST_QA_Updated_Team"}, headers=auth_headers)
         assert response.status_code == 200
         print(f"✓ Team updated")
@@ -248,8 +247,8 @@ class TestWorkflowsModule:
         print(f"✓ Workflows list: {len(data)} workflows")
     
     def test_list_workflow_templates(self, auth_headers):
-        """Test listing workflow templates"""
-        response = requests.get(f"{BASE_URL}/api/workflows/templates", headers=auth_headers)
+        """Test listing workflow templates - filter by is_template"""
+        response = requests.get(f"{BASE_URL}/api/workflows?is_template=true", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
@@ -429,13 +428,14 @@ class TestNotificationsModule:
 class TestAnnouncementsModule:
     """Announcements tests"""
     
-    def test_list_announcements(self, auth_headers):
-        """Test listing announcements"""
-        response = requests.get(f"{BASE_URL}/api/settings/announcements", headers=auth_headers)
+    def test_get_announcement_ticker(self, auth_headers):
+        """Test getting announcement ticker"""
+        response = requests.get(f"{BASE_URL}/api/announcement-ticker", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✓ Announcements: {len(data)} announcements")
+        # Should have is_active field
+        assert "is_active" in data
+        print(f"✓ Announcement ticker: active={data.get('is_active')}")
 
 
 class TestSettingsModule:
@@ -443,15 +443,17 @@ class TestSettingsModule:
     
     def test_get_ui_settings(self, auth_headers):
         """Test getting UI settings"""
-        response = requests.get(f"{BASE_URL}/api/settings/ui", headers=auth_headers)
+        response = requests.get(f"{BASE_URL}/api/ui-settings", headers=auth_headers)
         assert response.status_code == 200
-        print(f"✓ UI Settings retrieved")
+        data = response.json()
+        assert isinstance(data, list)
+        print(f"✓ UI Settings: {len(data)} settings")
     
-    def test_get_email_settings(self, auth_headers):
-        """Test getting email settings"""
-        response = requests.get(f"{BASE_URL}/api/settings/email", headers=auth_headers)
+    def test_get_smtp_config(self, auth_headers):
+        """Test getting SMTP config"""
+        response = requests.get(f"{BASE_URL}/api/smtp-config", headers=auth_headers)
         assert response.status_code == 200
-        print(f"✓ Email Settings retrieved")
+        print(f"✓ SMTP Config retrieved")
 
 
 class TestAccessTiersModule:
