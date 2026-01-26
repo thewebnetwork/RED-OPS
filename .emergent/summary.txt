@@ -1,73 +1,72 @@
 <analysis>**original_problem_statement:**
-The user's initial request was for a no-code service hub platform. The project has evolved to include ticket management, user/role administration, a visual workflow builder, and various other modules.
+The user wants to refactor the platform's Identity and Access Management (IAM) model to enforce a clean separation between roles, teams, specialties, and access tiers.
 
-Recent user requests included:
-1.  **Test Order Creation**: Create a test order to validate a newly created workflow.
-2.  **Editor Workflow Implementation**: Create a new visual workflow for Editor Workflow functionality (Option B).
-3.  **Backend Refactoring**: Extract all Pydantic models and API routes from the monolithic  into a modular structure under  and .
-4.  **Workflow Templates Gallery**: An enhancement suggestion to create a gallery of pre-built, installable workflow templates.
-5.  **API Key Usage Analytics**: A feature to track and display usage statistics for generated API keys.
-6.  **Real-time Log Streaming**: Enhance the existing logs page with real-time streaming capabilities.
-7.  **Bug Fix - Unsaved Changes**: The unsaved changes confirmation prompt was missing from the workflow editor page when a user tries to navigate away with unsaved work.
-8.  **Bug Fix - Announcement Banner**: The announcement banner was static instead of having the previous scrolling/marquee effect.
-9.  **Bug Fix - Announcement Date Picker**: The date picker for scheduling announcements was showing an off-by-one-day error, likely due to a timezone issue.
+**PRODUCT REQUIREMENTS:**
+
+1.  **Roles (3 Total)**: Simplify to only , , and . Roles define permission templates.
+2.  **Teams**: For routing/grouping. Admins can create/delete teams and assign users to them.
+3.  **Specialty**: Defines a user's profession (e.g., Photographer). Admins can manage a dropdown list of specialties and assign one to each user.
+4.  **Access Tier**: Represents the user's software plan (e.g., Free, Starter). Admins can manage a dropdown list of tiers and assign one to each user.
+5.  **Per-User Granular Permissions**: Implement an Active Directory style checkbox matrix in the user edit page to override role-based permissions for any user.
+6.  **Workflow Module Alignment**: Ensure the workflow builder can reference and target the new entities (Team, Specialty, Access Tier) and respect the new permission structure.
+7.  **Migration**: Migrate existing profession-based roles into the new Specialty field for all users.
+8.  **Embedding & Mobile**: The application must support iframe embedding and be fully mobile-responsive.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application (React/FastAPI/MongoDB) with a modular backend structure in progress. Core features include ticket management, user/role/team administration, a visual workflow builder, SLA monitoring, and outgoing webhooks.
-
-Recent additions in this session include:
-*   A **Workflow Templates Gallery** with pre-built, one-click installable workflows.
-*   An **API Key Usage Analytics** tab under Integrations to monitor key activity.
-*   **Real-time Log Streaming** on the Logs page, implemented with Server-Sent Events (SSE).
-*   **Three major bug fixes** were implemented for the unsaved changes guard, announcement banner animation, and announcement date picker.
-*   The backend refactor is significantly underway: all Pydantic models and 11 out of 15 route modules (70+ routes) have been extracted from  into a new modular structure. A  has been created to document this process.
+A full-stack application (React/FastAPI/MongoDB) with a modular backend. The backend infrastructure for the new Identity & Access Management (IAM) model is complete and data has been migrated. The previous agent completed the frontend implementation for this IAM refactor, including overhauling the  page to show a permission matrix and the  page to manage new fields (, , ) and per-user permission overrides. This work was tested and verified by the testing subagent. The agent has just begun investigating the next high-priority task: aligning the Workflow module with the new IAM entities.
 
 **Last working item**:
--   **Last item agent was working**: Continuing the backend refactor (Phase 2). The agent was in the process of creating the remaining route modules for complex features like orders, feedback, and settings. It had just created placeholder files for  and  and was about to do the same for  and .
+-   **Last item agent was working**: Started the Workflow Module Alignment task. The goal is to update the workflow builder so that workflows can target users based on the new  and  entities, in addition to the existing  and  targeting. The agent's last action was to view  to understand the existing implementation.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: backend testing agent (A full regression test of the API will be required once the refactor is complete and the application is switched to the new  entrypoint).
+-   **Agent Testing Done**: N (for this specific task)
+-   **Which testing method agent to use?**: both. This task requires backend changes to the workflow models/API and frontend changes to the workflow editor UI. After implementation, a full test using  is recommended.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-*   None. The three bugs reported by the user in this session have been addressed and fixed.
+*   **Issue 1: Frontend - Workflow Templates filter not working (Priority: P2)**
+    *   **Description**: On the Workflows -> Templates page, selecting the All filter still shows No templates in this category. The API correctly returns templates, but the frontend filtering logic appears to be broken.
+    *   **Attempted fixes**: The agent verified the backend API was working correctly. No frontend fix was attempted.
+    *   **Next debug checklist**:
+        *   Inspect  to analyze the state management and filtering logic for the templates tab.
+        *   Check browser console logs on that page for any client-side errors during rendering or filtering.
+    *   **Why fix this issue and what will be achieved with the fix?**: This will restore functionality to the Workflow Templates feature, allowing users to browse and install pre-built workflows.
+    *   **Status**: NOT STARTED
+    *   **Is recurring issue?**: N
+    *   **Should Test frontend/backend/both after fix?**: Frontend
+    *   **Blocked on other issue**: No
 
 **In progress Task List**:
-*   **Task 1: Complete Backend Route Extraction (Priority: P1)**
-    *   **Description**: Extract the four remaining complex route modules (Orders, Feedback, Settings, Workflows) from  into their own files inside . After extraction, the main application will need to be switched to use the new modular  entrypoint, and the old route definitions in  will be removed.
-    *   **Where to resume**: The agent should start by creating the placeholder route files for  and . Then, it needs to populate all four newly created files (, , , ) with the corresponding route logic from . Finally, it must update  and , test the new server, and perform the final switchover.
-    *   **What will be achieved with this?**: This will complete the backend refactor, resulting in a fully modular, maintainable, and scalable API structure, resolving significant technical debt.
+*   **Task 1: Complete Workflow Module Alignment (Priority: P1)**
+    *   **Description**: The workflow builder needs to be updated so its triggers and actions can reference the new IAM entities (, ). Currently, it only supports  and .
+    *   **Where to resume**:
+        1.  Analyze the backend workflow model to determine how  and  are stored.
+        2.  Update the backend workflow model and API endpoints to include  and  for targeting.
+        3.  Update the frontend workflow editor UI ( or a child component) to add checkboxes or dropdowns for selecting specialties and access tiers.
+    *   **What will be achieved with this?**: The workflow system will be fully integrated with the new, more granular IAM model, enabling more powerful automation rules.
     *   **Status**: IN PROGRESS
-    - **Should Test frontend/backend/both after fix?**: Backend
+    *   **Should Test frontend/backend/both after fix?**: Both
     *   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P3**: Add a Preview as user option for announcements to allow admins to see how a targeted announcement will appear to specific users.
+    *   **P3**: Add a Preview as user option for announcements.
     *   **P3**: Implement advanced workflow actions, such as auto-escalation to a manager if a ticket remains in a breached state for a certain duration.
 *   **Future Tasks:**
-    *   **P3**: Add analytics for API key usage (Note: A basic version of this was implemented; this may refer to more advanced analytics).
-    *   **P3**: Implement real-time log streaming from the backend to the UI (Note: This has been implemented with SSE).
+    *   **P3**: Add advanced analytics for API key usage with charts.
+    *   **P3**: Add Slack/Teams direct integration presets for notifications.
 
 **Completed work in this session**
-- **Test Order & Workflow Validation (DONE)**: Created test order  to validate the New Request Notification Workflow.
-- **Editor Workflow Creation (DONE)**: Implemented a new visual workflow as per user's choice (Option B).
-- **Enhancement: Workflow Templates Gallery (DONE)**: Implemented a new UI tab and backend endpoints to provide pre-built, installable workflow templates (, ).
-- **Enhancement: API Key Usage Analytics (DONE)**: Added a new UI tab and backend logic to track and display API key usage statistics (, ).
-- **Enhancement: Real-time Log Streaming (DONE)**: Upgraded the Logs page with an SSE-based live streaming feature (, ).
-- **Bug Fixes (DONE)**:
-    - Fixed the announcement banner's scrolling animation ().
-    - Fixed the off-by-one-day date picker issue in Announcements ().
-    - Added the Unsaved Changes guard to the Workflow Editor page ().
-- **Backend Refactor (In Progress)**:
-    - Extracted all Pydantic models into .
-    - Extracted 70 routes into 11 modular files under .
-    - Created  and a target .
+-   **IAM Refactor - Frontend Implementation (DONE)**:
+    -   Overhauled  to display a permission matrix for managing the 3 core system roles.
+    -   Fixed application-wide routing and navigation by updating all role checks in  and  to use the new role names (, , ).
+    -   Fixed a runtime crash in the Edit User dialog in  related to the  component.
+    -   The entire IAM frontend was successfully tested via  (), which passed with 100% success.
+-   **Logo Pulse Animation (VERIFIED)**: Confirmed the requested pulse animation for the logo was already present in .
 
 **Earlier issues found/mentioned but not fixed**
-*   None.
+*   None beyond the pending issue listed above.
 
 **Known issue recurrence from previous fork**
 *   None.
@@ -76,54 +75,51 @@ Recent additions in this session include:
 
 
 **Key Technical Concepts**
-*   **Frontend**: React, Shadcn/UI, TailwindCSS, , Custom Hooks.
+*   **Frontend**: React, Shadcn/UI, TailwindCSS, , .
 *   **Backend**: FastAPI, Pydantic, JWT, , Server-Sent Events (SSE).
 *   **Database**: MongoDB.
-*   **Architecture**: Full-stack SPA. Backend is actively being migrated from a monolith to a modular, route-based structure.
+*   **Architecture**: Modular full-stack SPA. Backend uses a route-based structure.
+*   **Identity & Access Management (IAM)**: A new, restructured model separating Roles (permissions), Teams (grouping), Specialties (professions), and Access Tiers (software plan), with support for per-user permission overrides.
 
 **key DB schema**
-*   **New Collection**:  stores records of API key requests, including , , , , and .
+*   : Updated to include , , and a  object for granular overrides.
+*   : Simplified to 3 core roles. Each role document contains a  matrix.
+*   : Stores specialty documents .
+*   : Stores access tier documents .
+*   : Stores complex escalation rules, triggers, and actions.
+*   : Stores records of API key requests.
+*   : Contains workflow definitions, including their targeting rules (roles, teams, etc.).
 
 **All files of reference**
-*   : The monolith being refactored.
-*   : Directory containing the new modular route files.
-*   : Directory containing the new Pydantic model files.
-*   : New documentation for the refactoring process.
-*   : The new target entry point for the modular backend.
-*   : Enhanced with a Templates Gallery.
-*   : Enhanced with an Analytics tab.
-*   : Enhanced with real-time streaming.
-*   : Fixed with an unsaved changes guard.
-*   : Fixed to restore scrolling animation.
-*   : Fixed a date picker timezone bug.
-*   : Updated with the latest completed features and refactoring progress.
+*   **Files Modified in this Session**:
+    *    (Overwritten to implement the permission matrix UI).
+    *    (Updated  components with new role names for authorization).
+    *    (Updated sidebar navigation links with new role names).
+    *    (Fixed a bug in the edit user dialog).
+*   **Files for Next Task**:
+    *    (Contains frontend logic for workflow editor).
+    *    (Contains backend API for workflows).
+    *   Backend workflow model file (location to be determined).
 
 **Areas that need refactoring**:
-*   The primary task is to complete the refactoring of  by extracting the remaining routes and switching the application to use .
+*   None. The  page was the main candidate and has now been refactored.
 
 **key api endpoints**
-*   **New**:
-    *   : Fetches all pre-built workflow templates.
-    *   : Creates a new workflow from a template.
-    *   : Retrieves usage analytics for all API keys.
-    *   : An SSE endpoint for streaming logs in real-time.
+*   : Used by the new  page to fetch and update permission matrices.
+*   , : Used by  to manage users with new IAM fields.
+*   : Fetches workflow data. Will need to be updated to support new targeting options.
 
 **Critical Info for New Agent**
-*   You must continue the backend refactoring task, which is the user's current P1 priority.
-*   Reference  for the plan and progress.
-*   The goal is to move all remaining route logic from  to the  directory and make  the new application entry point.
-*   The three user-reported bugs (unsaved changes, announcement banner, date picker) have been fixed. Do not re-address them.
-*   The application is currently running on the original . The new modular structure is not yet live.
+*   The frontend portion of the IAM refactor is now complete and has been tested.
+*   The highest priority is to continue the **Workflow Module Alignment** task (P1) so that workflows can target users by  and .
+*   After the workflow alignment is complete, the next priority should be fixing the **Workflow Templates filter bug** (P2).
 
 **documents and test reports created in this job**
 *   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (msg 401)**: lets roll with this 🟡 P1: Complete Route Extraction - Approved continuing the refactoring task. (Status: **In Progress**)
-2.  **User (msg 289)**: Reported three bugs (unsaved changes, announcement banner, date picker) and confirmed the priority is to fix them first, then continue route extraction. (Status: Completed)
-3.  **User (msg 232)**: lets go to 🔴 P1: Backend Refactor Phase 2 - Approved starting the backend refactor. (Status: Completed)
-4.  **User (msg 107)**: Requested the Workflow Templates Gallery enhancement be implemented before other planned tasks. (Status: Completed)
-5.  **User (msg 5)**: Confirmed creation of the test order and selected Option B for the Editor Workflow. Provided a priority list for subsequent tasks. (Status: Completed)
+*   **User (msg 98)**: lets continue now credit added. - Gave approval to continue working.
+*   **User (msg 5)**: 1. All should be toggled nothing grouped. 2. No preference you pick whats more appealing. - Provided UI preference for the permission matrix on the  page, which has now been implemented.
 
 **Project Health Check:**
 *   **Broken**: No.
@@ -133,16 +129,16 @@ Recent additions in this session include:
 *   None.
 
 **Testing status**
-*   **Testing agent used after significant changes**: NO. Agent self-tested new features and bug fixes using  and multiple screenshots.
+*   **Testing agent used after significant changes**: YES.  ran after the IAM frontend implementation and all tests passed.
 *   **Troubleshoot agent used after agent stuck in loop**: NO.
-*   **Test files created**: None.
+*   **Test files created**: None in this session.
 *   **Known regressions**: None.
 
 **Credentials to test flow:**
 *   **Admin Email**: 
 *   **Admin Password**: 
 *   **SMTP Username**: 
-*   **SMTP Password**:  (Note: has spaces)
+*   **SMTP Password**: 
 
 **What agent forgot to execute**
-*   The agent is on track and in the middle of a large, user-approved refactoring task. Nothing has been forgotten.</analysis>
+*   The agent has a clear plan and is following the priorities set in the previous handoff. The primary forgotten item from the last fork () is now the current in-progress task.</analysis>
