@@ -432,17 +432,21 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    # Access control
+    # Access control - drafts only visible to owner
+    if order["status"] == "Draft" and order["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
     if current_user["role"] == "Requester" and order["requester_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     if current_user["role"] == "Editor":
-        if order["status"] != "Open" and order.get("editor_id") != current_user["id"]:
+        if order["status"] not in ["Open", "Draft"] and order.get("editor_id") != current_user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
     
     order = normalize_order(order)
+    sla_deadline = order.get('sla_deadline')
     return OrderResponse(
         **order,
-        is_sla_breached=is_sla_breached(order['sla_deadline'], order['status'])
+        is_sla_breached=is_sla_breached(sla_deadline, order['status']) if sla_deadline else False
     )
 
 
