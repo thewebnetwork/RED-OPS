@@ -633,6 +633,16 @@ export default function Integrations() {
                           <Button 
                             variant="ghost" 
                             size="icon"
+                            onClick={() => handleTestWebhook(webhook.id)}
+                            title="Send test webhook"
+                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                            data-testid={`test-webhook-${webhook.id}`}
+                          >
+                            <Send size={18} />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
                             onClick={() => handleToggleWebhook(webhook.id)}
                             className={webhook.is_active ? 'text-amber-500 hover:text-amber-700' : 'text-green-500 hover:text-green-700'}
                           >
