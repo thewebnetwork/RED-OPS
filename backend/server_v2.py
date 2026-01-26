@@ -41,6 +41,7 @@ from routes import (
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
 from services.sla_policy_engine import check_and_process_policies
+from services.review_reminder import check_pending_reviews
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -89,11 +90,12 @@ class IframeEmbeddingMiddleware(BaseHTTPMiddleware):
 
 
 async def sla_monitor_loop():
-    """Background task to periodically check SLA breaches and process policies"""
+    """Background task to periodically check SLA breaches, process policies, and review reminders"""
     while True:
         try:
             await check_sla_breaches(db)
             await check_and_process_policies()
+            await check_pending_reviews()  # Check for review reminders and auto-close
         except Exception as e:
             logger.error(f"SLA monitor error: {e}")
         await asyncio.sleep(300)  # Check every 5 minutes
