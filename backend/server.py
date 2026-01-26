@@ -3021,6 +3021,71 @@ async def get_smtp_settings():
         "use_tls": True
     }
 
+# ============== WEBHOOK EXECUTION ==============
+
+import httpx
+
+async def trigger_webhooks(event: str, payload: dict):
+    """Trigger all active outgoing webhooks for a given event"""
+    webhooks = await db.webhooks.find({
+        "direction": "outgoing",
+        "is_active": True,
+        "events": event
+    }, {"_id": 0}).to_list(100)
+    
+    if not webhooks:
+        return
+    
+    for webhook in webhooks:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(
+                    webhook["url"],
+                    json={
+                        "event": event,
+                        "timestamp": get_utc_now(),
+                        "data": payload
+                    },
+                    headers={
+                        "Content-Type": "application/json",
+                        "X-Webhook-Event": event,
+                        "X-Webhook-Source": "red-ops"
+                    }
+                )
+                
+                # Log webhook delivery
+                await db.webhook_logs.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "webhook_id": webhook["id"],
+                    "webhook_name": webhook["name"],
+                    "event": event,
+                    "url": webhook["url"],
+                    "status_code": response.status_code,
+                    "success": 200 <= response.status_code < 300,
+                    "response_body": response.text[:500] if response.text else None,
+                    "timestamp": get_utc_now()
+                })
+                
+                # Update last triggered
+                await db.webhooks.update_one(
+                    {"id": webhook["id"]},
+                    {"$set": {"last_triggered": get_utc_now()}}
+                )
+                
+        except Exception as e:
+            logging.error(f"Webhook delivery failed for {webhook['name']}: {e}")
+            await db.webhook_logs.insert_one({
+                "id": str(uuid.uuid4()),
+                "webhook_id": webhook["id"],
+                "webhook_name": webhook["name"],
+                "event": event,
+                "url": webhook["url"],
+                "status_code": None,
+                "success": False,
+                "error": str(e),
+                "timestamp": get_utc_now()
+            })
+
 # ============== LOGS ROUTES ==============
 
 class LogEntry(BaseModel):
