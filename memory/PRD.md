@@ -32,6 +32,23 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 19: Iframe Embedding & Mobile Responsiveness ✅ (January 26, 2026)
+
+**Iframe Embedding Support:**
+- Added `IframeEmbeddingMiddleware` to backend
+- Configurable via environment variables (`ALLOW_IFRAME_EMBEDDING`, `FRAME_ANCESTORS`)
+- Sets `Content-Security-Policy: frame-ancestors` header (no `X-Frame-Options: DENY`)
+- JWT-based auth works in iframes (no cookies needed)
+
+**Mobile Responsiveness (Already Present):**
+- ✅ Collapsible sidebar with hamburger menu
+- ✅ Responsive grid layouts (adapts to screen size)
+- ✅ Touch-friendly navigation
+- ✅ All primary workflows work on mobile
+
+**Documentation:**
+- Created `/app/docs/IFRAME_EMBEDDING.md` with configuration guide
+
 ### Phase 18: Bug Fixes & QA Verification ✅ (January 26, 2026)
 
 **Fixed Issues:**
