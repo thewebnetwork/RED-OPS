@@ -123,7 +123,7 @@ async def update_category_l1(category_id: str, cat_data: CategoryL1Update, curre
     return updated
 
 
-@router.delete("/{category_id}")
+@router.delete("/l1/{category_id}")
 async def delete_category_l1(category_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
     """Soft delete an L1 category (Admin only)"""
     result = await db.categories_l1.update_one({"id": category_id}, {"$set": {"active": False}})
