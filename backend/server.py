@@ -1520,6 +1520,16 @@ async def create_order(order_data: OrderCreate, background_tasks: BackgroundTask
         "status": "Open"
     })
     
+    # Execute workflows triggered by order.created
+    async def run_workflows():
+        workflows = await get_workflows_for_trigger(db, "order.created", order_data.category_l2_id)
+        for workflow in workflows:
+            await execute_workflow(db, workflow["id"], "order.created", {
+                "order": order,
+                "user": current_user
+            })
+    background_tasks.add_task(run_workflows)
+    
     return OrderResponse(
         **{k: v for k, v in order.items() if k != '_id'},
         is_sla_breached=False
