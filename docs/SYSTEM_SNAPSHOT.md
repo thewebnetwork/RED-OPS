@@ -232,7 +232,7 @@ All escalation actions are logged to `escalation_history` collection with:
 ### Integration Status
 | Integration | Status | Notes |
 |-------------|--------|-------|
-| **SMTP Email** | ⚠️ MOCKED | Logs to console, SMTP config UI exists |
+| **SMTP Email** | ✅ Live | Gmail SMTP configured (admin@redribbongroup.ca) |
 | **Webhooks** | ✅ Live | Full outbound webhook support |
 | **API Keys** | ✅ Live | Scoped API key generation |
 | **SSE Logs** | ✅ Live | Real-time log streaming |
