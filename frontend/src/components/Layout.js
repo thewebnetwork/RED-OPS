@@ -191,9 +191,6 @@ export default function Layout({ children }) {
 
       {/* Main content */}
       <div className="flex-1 lg:ml-64">
-        {/* Announcement Ticker */}
-        <AnnouncementTicker />
-
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center px-4 lg:px-8">
           <button 
@@ -203,8 +200,6 @@ export default function Layout({ children }) {
           >
             <Menu size={20} />
           </button>
-
-          <div className="flex-1" />
 
           {/* Rating Display (Google Review Style) */}
           {ratingStats && (
@@ -226,6 +221,11 @@ export default function Layout({ children }) {
               <span className="text-xs text-slate-500">({ratingStats.total_ratings})</span>
             </div>
           )}
+
+          {/* Announcement Banner - inline in header */}
+          <AnnouncementTicker />
+
+          <div className="flex-1" />
 
           {/* Language Switcher */}
           <LanguageSwitcher variant="compact" />
