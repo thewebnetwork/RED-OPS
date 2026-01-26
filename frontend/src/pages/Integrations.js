@@ -340,10 +340,14 @@ export default function Integrations() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 w-full max-w-sm">
+        <TabsList className="grid grid-cols-3 w-full max-w-lg">
           <TabsTrigger value="api-keys" className="flex items-center gap-2" data-testid="api-keys-tab">
             <Key size={14} />
             API Keys
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2" data-testid="analytics-tab">
+            <BarChart3 size={14} />
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="webhooks" className="flex items-center gap-2" data-testid="webhooks-tab">
             <Webhook size={14} />
