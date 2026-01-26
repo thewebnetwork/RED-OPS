@@ -561,7 +561,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
       setFormData({
         name: '',
         description: '',
-        scope: { role_ids: [], team_ids: [], specialty_ids: [] },
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
         sla_rules: { duration_minutes: 1440, business_hours_only: false },
         thresholds: { at_risk_minutes: 240 },
         escalation_levels: [],
