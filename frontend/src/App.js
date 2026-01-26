@@ -156,6 +156,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/drafts/:type/:draftId" 
+        element={
+          <PrivateRoute>
+            <DraftEditor />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/categories" 
         element={
           <PrivateRoute roles={["Administrator", "Privileged User"]}>
