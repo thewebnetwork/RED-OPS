@@ -685,10 +685,10 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                 <Target className="w-4 h-4" />
                 Policy Scope
               </h4>
-              <p className="text-sm text-slate-500">Select which roles, teams, or specialties this policy applies to</p>
+              <p className="text-sm text-slate-500">Select which roles, teams, specialties, or access tiers this policy applies to</p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Roles */}
               <div className="space-y-2">
                 <Label className="text-sm">Roles</Label>
@@ -750,6 +750,28 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                         }}
                       />
                       <label htmlFor={`specialty-${specialty.id}`} className="text-sm cursor-pointer">{specialty.name}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Access Tiers */}
+              <div className="space-y-2">
+                <Label className="text-sm">Access Tiers</Label>
+                <div className="border rounded-lg p-2 max-h-32 overflow-y-auto space-y-1">
+                  {accessTiers.map((tier) => (
+                    <div key={tier.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`tier-${tier.id}`}
+                        checked={formData.scope.access_tier_ids?.includes(tier.id)}
+                        onCheckedChange={(checked) => {
+                          const tierIds = checked
+                            ? [...(formData.scope.access_tier_ids || []), tier.id]
+                            : formData.scope.access_tier_ids?.filter(id => id !== tier.id) || [];
+                          setFormData({ ...formData, scope: { ...formData.scope, access_tier_ids: tierIds } });
+                        }}
+                      />
+                      <label htmlFor={`tier-${tier.id}`} className="text-sm cursor-pointer">{tier.name}</label>
                     </div>
                   ))}
                 </div>
