@@ -45,10 +45,16 @@ def require_roles(allowed_roles: list):
         if mapped_role and mapped_role in allowed_roles:
             return user
         
-        # Also check reverse - if checking for old role names
+        # Check reverse - if allowed role is an old name that maps to user's new role
+        # e.g., allowed="Admin", user_role="Administrator" -> ROLE_ALIASES["Admin"]="Administrator"
+        for allowed in allowed_roles:
+            if allowed in ROLE_ALIASES:
+                if ROLE_ALIASES[allowed] == user_role:
+                    return user
+        
+        # Also check if checking for new role names and user has old role
         for allowed in allowed_roles:
             if allowed in ROLE_ALIASES.values():
-                # Find old roles that map to this new role
                 for old_role, new_role in ROLE_ALIASES.items():
                     if new_role == allowed and user_role == old_role:
                         return user
