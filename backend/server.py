@@ -1110,6 +1110,15 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         # MOCKED: In production, send email with OTP code
         print(f"[MOCKED EMAIL] OTP Code for {user['email']}: {otp_code}")
     
+    # Trigger webhooks for user.created event
+    await trigger_webhooks("user.created", {
+        "user_id": user["id"],
+        "name": user["name"],
+        "email": user["email"],
+        "role": user["role"],
+        "created_by": current_user["name"]
+    })
+    
     return await build_user_response(user)
 
 @api_router.get("/users", response_model=List[UserResponse])
