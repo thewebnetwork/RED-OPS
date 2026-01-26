@@ -124,6 +124,43 @@ async def get_my_ratings(current_user: dict = Depends(get_current_user)):
     return [RatingResponse(**r) for r in ratings]
 
 
+@router.get("/my-stats")
+async def get_my_rating_stats(current_user: dict = Depends(get_current_user)):
+    """Get rating statistics for current user"""
+    role = current_user["role"]
+    
+    if role == "Requester":
+        query = {"requester_id": current_user["id"]}
+    else:
+        query = {"resolver_id": current_user["id"]}
+    
+    ratings = await db.ratings.find(query, {"_id": 0}).to_list(100)
+    
+    if not ratings:
+        return {
+            "total_ratings": 0,
+            "average_rating": 0,
+            "total_delivered": 0
+        }
+    
+    total = len(ratings)
+    avg = sum(r["rating"] for r in ratings) / total if total > 0 else 0
+    
+    # Get delivered count
+    delivered_count = 0
+    if role != "Requester":
+        delivered_count = await db.orders.count_documents({
+            "editor_id": current_user["id"],
+            "status": "Delivered"
+        })
+    
+    return {
+        "total_ratings": total,
+        "average_rating": round(avg, 2),
+        "total_delivered": delivered_count
+    }
+
+
 @router.get("/stats")
 async def get_rating_stats(current_user: dict = Depends(require_roles(["Admin"]))):
     """Get overall rating statistics"""
