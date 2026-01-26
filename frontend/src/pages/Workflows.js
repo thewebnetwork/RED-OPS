@@ -334,7 +334,7 @@ export default function Workflows() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 w-full max-w-sm">
+        <TabsList className="grid grid-cols-3 w-full max-w-md">
           <TabsTrigger value="workflows" className="flex items-center gap-2">
             <GitBranch size={14} />
             Workflows
@@ -342,6 +342,10 @@ export default function Workflows() {
           <TabsTrigger value="triggers" className="flex items-center gap-2" data-testid="workflow-triggers-tab">
             <Zap size={14} />
             Triggers
+          </TabsTrigger>
+          <TabsTrigger value="executions" className="flex items-center gap-2" data-testid="workflow-executions-tab">
+            <History size={14} />
+            Execution Logs
           </TabsTrigger>
         </TabsList>
 
