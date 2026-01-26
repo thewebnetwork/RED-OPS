@@ -25,6 +25,7 @@ import Announcements from "./pages/Announcements";
 import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
 import SLA from "./pages/SLA";
+import EmailSettings from "./pages/EmailSettings";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
