@@ -87,6 +87,78 @@ export default function Workflows() {
     fetchCategories();
   }, []);
 
+  // Track create dialog changes
+  useEffect(() => {
+    if (showCreateDialog) {
+      const hasChanges = newWorkflowName.trim() !== '' || newWorkflowDescription.trim() !== '';
+      setHasCreateChanges(hasChanges);
+    }
+  }, [newWorkflowName, newWorkflowDescription, showCreateDialog]);
+
+  // Track duplicate dialog changes
+  useEffect(() => {
+    if (showDuplicateDialog && selectedWorkflow) {
+      const defaultName = `${selectedWorkflow.name} (Copy)`;
+      const hasChanges = newWorkflowName !== defaultName && newWorkflowName.trim() !== '';
+      setHasDuplicateChanges(hasChanges);
+    }
+  }, [newWorkflowName, showDuplicateDialog, selectedWorkflow]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if ((hasCreateChanges && showCreateDialog) || (hasDuplicateChanges && showDuplicateDialog)) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasCreateChanges, hasDuplicateChanges, showCreateDialog, showDuplicateDialog]);
+
+  const handleCreateDialogClose = (open) => {
+    if (!open && hasCreateChanges) {
+      setShowCreateUnsavedWarning(true);
+      return;
+    }
+    setShowCreateDialog(open);
+    if (!open) {
+      setNewWorkflowName('');
+      setNewWorkflowDescription('');
+      setHasCreateChanges(false);
+    }
+  };
+
+  const handleDuplicateDialogClose = (open) => {
+    if (!open && hasDuplicateChanges) {
+      setShowDuplicateUnsavedWarning(true);
+      return;
+    }
+    setShowDuplicateDialog(open);
+    if (!open) {
+      setNewWorkflowName('');
+      setSelectedWorkflow(null);
+      setHasDuplicateChanges(false);
+    }
+  };
+
+  const confirmCloseCreateDialog = () => {
+    setShowCreateUnsavedWarning(false);
+    setShowCreateDialog(false);
+    setNewWorkflowName('');
+    setNewWorkflowDescription('');
+    setHasCreateChanges(false);
+  };
+
+  const confirmCloseDuplicateDialog = () => {
+    setShowDuplicateUnsavedWarning(false);
+    setShowDuplicateDialog(false);
+    setNewWorkflowName('');
+    setSelectedWorkflow(null);
+    setHasDuplicateChanges(false);
+  };
+
   const fetchWorkflows = async () => {
     try {
       const res = await axios.get(`${API}/workflows`);

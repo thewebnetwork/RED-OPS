@@ -73,6 +73,42 @@ export default function SLA() {
     fetchData();
   }, []);
 
+  // Track form changes
+  useEffect(() => {
+    if (initialFormRef.current && dialogOpen) {
+      const changed = JSON.stringify(formData) !== JSON.stringify(initialFormRef.current);
+      setHasFormChanges(changed);
+    }
+  }, [formData, dialogOpen]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasFormChanges && dialogOpen) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasFormChanges, dialogOpen]);
+
+  const handleDialogClose = (open) => {
+    if (!open && hasFormChanges) {
+      setShowUnsavedWarning(true);
+      return;
+    }
+    setDialogOpen(open);
+    if (!open) resetForm();
+  };
+
+  const confirmCloseDialog = () => {
+    setShowUnsavedWarning(false);
+    setDialogOpen(false);
+    resetForm();
+  };
+
   const fetchData = async () => {
     try {
       const [slaRes, rolesRes, teamsRes] = await Promise.all([

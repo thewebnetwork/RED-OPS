@@ -59,6 +59,27 @@ export default function EmailSettings() {
     fetchConfig();
   }, []);
 
+  // Track form changes
+  useEffect(() => {
+    if (initialConfigRef.current) {
+      const changed = JSON.stringify(config) !== JSON.stringify(initialConfigRef.current);
+      setHasFormChanges(changed);
+    }
+  }, [config]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasFormChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasFormChanges]);
+
   const fetchConfig = async () => {
     try {
       const res = await axios.get(`${API}/smtp-config`);

@@ -86,6 +86,97 @@ export default function Integrations() {
     fetchData();
   }, []);
 
+  // Track API key form changes
+  useEffect(() => {
+    if (initialApiKeyRef.current && apiKeyDialogOpen) {
+      const changed = JSON.stringify(newApiKey) !== JSON.stringify(initialApiKeyRef.current);
+      setHasApiKeyChanges(changed);
+    }
+  }, [newApiKey, apiKeyDialogOpen]);
+
+  // Track webhook form changes
+  useEffect(() => {
+    if (initialWebhookRef.current && webhookDialogOpen) {
+      const changed = JSON.stringify(newWebhook) !== JSON.stringify(initialWebhookRef.current);
+      setHasWebhookChanges(changed);
+    }
+  }, [newWebhook, webhookDialogOpen]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if ((hasApiKeyChanges && apiKeyDialogOpen) || (hasWebhookChanges && webhookDialogOpen)) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasApiKeyChanges, hasWebhookChanges, apiKeyDialogOpen, webhookDialogOpen]);
+
+  const handleApiKeyDialogClose = (open) => {
+    if (!open && hasApiKeyChanges && !generatedKey) {
+      setShowApiKeyUnsavedWarning(true);
+      return;
+    }
+    setApiKeyDialogOpen(open);
+    if (!open) {
+      setGeneratedKey(null);
+      const initialData = { name: '', permissions: 'read' };
+      setNewApiKey(initialData);
+      initialApiKeyRef.current = null;
+      setHasApiKeyChanges(false);
+    }
+  };
+
+  const handleWebhookDialogClose = (open) => {
+    if (!open && hasWebhookChanges) {
+      setShowWebhookUnsavedWarning(true);
+      return;
+    }
+    setWebhookDialogOpen(open);
+    if (!open) {
+      const initialData = { name: '', url: '', direction: 'outgoing', events: [], is_active: true };
+      setNewWebhook(initialData);
+      initialWebhookRef.current = null;
+      setHasWebhookChanges(false);
+    }
+  };
+
+  const confirmCloseApiKeyDialog = () => {
+    setShowApiKeyUnsavedWarning(false);
+    setApiKeyDialogOpen(false);
+    setGeneratedKey(null);
+    setNewApiKey({ name: '', permissions: 'read' });
+    initialApiKeyRef.current = null;
+    setHasApiKeyChanges(false);
+  };
+
+  const confirmCloseWebhookDialog = () => {
+    setShowWebhookUnsavedWarning(false);
+    setWebhookDialogOpen(false);
+    setNewWebhook({ name: '', url: '', direction: 'outgoing', events: [], is_active: true });
+    initialWebhookRef.current = null;
+    setHasWebhookChanges(false);
+  };
+
+  const handleOpenApiKeyDialog = () => {
+    const initialData = { name: '', permissions: 'read' };
+    setNewApiKey(initialData);
+    initialApiKeyRef.current = initialData;
+    setHasApiKeyChanges(false);
+    setApiKeyDialogOpen(true);
+  };
+
+  const handleOpenWebhookDialog = () => {
+    const initialData = { name: '', url: '', direction: 'outgoing', events: [], is_active: true };
+    setNewWebhook(initialData);
+    initialWebhookRef.current = initialData;
+    setHasWebhookChanges(false);
+    setWebhookDialogOpen(true);
+  };
+
   const fetchData = async () => {
     try {
       const [keysRes, webhooksRes] = await Promise.all([
