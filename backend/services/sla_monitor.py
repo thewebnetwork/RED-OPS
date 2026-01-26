@@ -11,6 +11,7 @@ async def check_sla_breaches(db):
     """
     Check all open orders for SLA breaches and warnings.
     This should be called periodically (e.g., every 15 minutes via a background task).
+    Also triggers the escalation engine for configured policies.
     """
     now = datetime.now(timezone.utc)
     
@@ -57,6 +58,13 @@ async def check_sla_breaches(db):
                     
         except Exception as e:
             logging.error(f"Error checking SLA for order {order.get('id')}: {e}")
+    
+    # Trigger escalation engine
+    try:
+        from .escalation_engine import check_and_process_escalations
+        await check_and_process_escalations()
+    except Exception as e:
+        logging.error(f"Error running escalation engine: {e}")
     
     return {
         "breached": len(breached_orders),
