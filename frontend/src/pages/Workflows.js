@@ -237,6 +237,7 @@ export default function Workflows() {
       setShowDuplicateDialog(false);
       setNewWorkflowName('');
       setSelectedWorkflow(null);
+      setHasDuplicateChanges(false);
       fetchWorkflows();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to duplicate workflow');
