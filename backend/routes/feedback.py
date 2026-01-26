@@ -22,6 +22,7 @@ class FeatureRequestCreate(BaseModel):
     who_is_for: Optional[str] = None
     reference_links: Optional[str] = None
     priority: Literal["Low", "Normal", "High"] = "Normal"
+    is_draft: bool = False  # If true, save as Draft instead of Open
 
 
 class FeatureRequestResponse(BaseModel):
@@ -50,13 +51,15 @@ class BugReportCreate(BaseModel):
     category_l1_id: Optional[str] = None
     category_l2_id: Optional[str] = None
     bug_type: str
-    steps_to_reproduce: str
-    expected_behavior: str
-    actual_behavior: str
+    steps_to_reproduce: str = ""
+    expected_behavior: str = ""
+    actual_behavior: str = ""
     browser: Optional[str] = None
     device: Optional[str] = None
     url_page: Optional[str] = None
     severity: Literal["Low", "Normal", "High", "Urgent"] = "Normal"
+    is_draft: bool = False  # If true, save as Draft instead of Open
+    description: Optional[str] = None  # Optional for drafts
 
 
 class BugReportResponse(BaseModel):
