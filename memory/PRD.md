@@ -315,19 +315,16 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 
 ## Next Phases (Roadmap)
 
-### P2: Known Issues 🟠
-- **User Role Assignment Bug**: New users always get 'Editor' role regardless of selection
-  - Check handleSaveUser function in Users.js
-  - Verify POST/PUT /api/users endpoints in server.py
+### P2: Integrations 🟠 (In Progress)
+- Integrate Real SMTP (user provides credentials) - Backend ready, UI ready
+- GHL/Marketplace Webhooks - Webhook infrastructure in place
+- Execute outgoing webhooks on events - IN PROGRESS
 
-### P2: Integrations 🟠
-- Integrate Real SMTP (user provides credentials)
-- GHL/Marketplace Webhooks
-- Execute outgoing webhooks on events
+### P2: Refactoring 🟡
+- Refactor monolithic server.py into modular structure
 
 ### P3: Backend Improvements 🟣
 - Workflow Execution Engine (execute workflows on ticket creation)
-- Refactor monolithic server.py into modular structure
 - Real-time log streaming for Logs module
 
 ### P3: Future Enhancements 🟤
