@@ -3492,6 +3492,111 @@ async def delete_sla(sla_id: str, current_user: dict = Depends(require_roles(["A
         raise HTTPException(status_code=404, detail="SLA not found")
     return {"message": "SLA deleted"}
 
+# ============== SLA ALERTS ROUTES ==============
+
+class SLAAlertResponse(BaseModel):
+    id: str
+    order_id: str
+    order_code: Optional[str] = None
+    alert_type: str  # "warning" or "breach"
+    sla_deadline: str
+    triggered_at: str
+    acknowledged: bool
+    acknowledged_by: Optional[str] = None
+    acknowledged_at: Optional[str] = None
+
+@api_router.get("/sla-alerts", response_model=List[SLAAlertResponse])
+async def list_sla_alerts(
+    alert_type: Optional[str] = None,
+    acknowledged: Optional[bool] = None,
+    current_user: dict = Depends(require_roles(["Admin", "Editor"]))
+):
+    """Get SLA alerts with optional filters"""
+    alerts = await get_sla_alerts(db, alert_type=alert_type, acknowledged=acknowledged)
+    return [SLAAlertResponse(**a) for a in alerts]
+
+@api_router.get("/sla-alerts/statistics")
+async def get_sla_stats(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get SLA statistics for dashboard"""
+    return await get_sla_statistics(db)
+
+@api_router.post("/sla-alerts/{alert_id}/acknowledge")
+async def acknowledge_alert(alert_id: str, current_user: dict = Depends(require_roles(["Admin", "Editor"]))):
+    """Acknowledge an SLA alert"""
+    alert = await acknowledge_sla_alert(db, alert_id, current_user["id"])
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"message": "Alert acknowledged", "alert": alert}
+
+@api_router.post("/sla-check")
+async def trigger_sla_check(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Manually trigger SLA breach check"""
+    result = await check_sla_breaches(db)
+    return result
+
+# ============== WORKFLOW EXECUTION ROUTES ==============
+
+class WorkflowExecutionResponse(BaseModel):
+    id: str
+    workflow_id: str
+    workflow_name: str
+    trigger_event: str
+    status: str
+    started_at: str
+    completed_at: Optional[str] = None
+    error: Optional[str] = None
+
+@api_router.get("/workflow-executions")
+async def list_workflow_executions(
+    workflow_id: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 50,
+    current_user: dict = Depends(require_roles(["Admin"]))
+):
+    """List workflow execution logs"""
+    query = {}
+    if workflow_id:
+        query["workflow_id"] = workflow_id
+    if status:
+        query["status"] = status
+    
+    executions = await db.workflow_executions.find(query, {"_id": 0}).sort("started_at", -1).to_list(limit)
+    return executions
+
+@api_router.get("/workflow-executions/{execution_id}")
+async def get_workflow_execution(execution_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get detailed workflow execution log"""
+    execution = await db.workflow_executions.find_one({"id": execution_id}, {"_id": 0})
+    if not execution:
+        raise HTTPException(status_code=404, detail="Execution not found")
+    return execution
+
+@api_router.post("/workflows/{workflow_id}/test")
+async def test_workflow(workflow_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Test run a workflow with sample data"""
+    workflow = await db.workflows.find_one({"id": workflow_id}, {"_id": 0})
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    # Create test context
+    test_context = {
+        "order": {
+            "id": "test-order-" + str(uuid.uuid4())[:8],
+            "order_code": "TEST-001",
+            "title": "Test Order for Workflow",
+            "status": "Open",
+            "priority": "Normal",
+            "requester_id": current_user["id"],
+            "requester_name": current_user["name"],
+            "requester_email": current_user["email"]
+        },
+        "user": current_user
+    }
+    
+    # Execute workflow
+    result = await execute_workflow(db, workflow_id, "test", test_context)
+    return result
+
 # Include router
 app.include_router(api_router)
 
