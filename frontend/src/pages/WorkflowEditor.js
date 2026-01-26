@@ -134,6 +134,61 @@ export default function WorkflowEditor() {
   const [teams, setTeams] = useState([]);
   const [categories, setCategories] = useState([]);
 
+  // Unsaved changes tracking
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const initialStateRef = useRef(null);
+
+  // Track changes to nodes and edges
+  useEffect(() => {
+    if (initialStateRef.current && !loading) {
+      const currentState = JSON.stringify({ nodes, edges });
+      const initialState = JSON.stringify(initialStateRef.current);
+      setHasChanges(currentState !== initialState);
+    }
+  }, [nodes, edges, loading]);
+
+  // Browser beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
+
+  // Handle back button with unsaved changes check
+  const handleBack = () => {
+    if (hasChanges) {
+      setPendingNavigation('/settings/workflows');
+      setShowUnsavedDialog(true);
+    } else {
+      navigate('/settings/workflows');
+    }
+  };
+
+  // Handle dialog actions
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    setHasChanges(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  const handleSaveAndNavigate = async () => {
+    await handleSave();
+    setShowUnsavedDialog(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
   // Fetch workflow data
   useEffect(() => {
     const loadData = async () => {
