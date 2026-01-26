@@ -1,0 +1,53 @@
+"""Helper functions"""
+import uuid
+from datetime import datetime, timezone, timedelta
+import jwt
+from passlib.context import CryptContext
+from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS, SLA_DAYS
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+def get_utc_now_dt() -> datetime:
+    return datetime.now(timezone.utc)
+
+def calculate_sla_deadline(created_at: datetime) -> datetime:
+    return created_at + timedelta(days=SLA_DAYS)
+
+def is_sla_breached(sla_deadline_str: str, status: str) -> bool:
+    if status in ["Delivered", "Closed"]:
+        return False
+    if not sla_deadline_str:
+        return False
+    try:
+        deadline = datetime.fromisoformat(sla_deadline_str.replace('Z', '+00:00'))
+        return datetime.now(timezone.utc) > deadline
+    except:
+        return False
+
+def normalize_order(order: dict) -> dict:
+    """Ensure all expected fields exist with default values"""
+    defaults = {
+        'requester_name': order.get('requester_name', 'Unknown'),
+        'requester_email': order.get('requester_email', ''),
+        'editor_name': order.get('editor_name'),
+        'closed_at': order.get('closed_at'),
+        'closed_by_id': order.get('closed_by_id'),
+        'close_reason': order.get('close_reason'),
+    }
+    return {**order, **defaults}
