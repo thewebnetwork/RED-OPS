@@ -4,8 +4,9 @@ Red Ribbon Ops Portal API - V2 (Modular)
 This is the refactored version using modular routes.
 All routes have been extracted from the monolithic server.py.
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 import os
 import asyncio
 import logging
@@ -42,6 +43,45 @@ logger = logging.getLogger(__name__)
 
 # SLA monitor background task
 sla_monitor_task = None
+
+
+# ============== IFRAME EMBEDDING MIDDLEWARE ==============
+
+class IframeEmbeddingMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to configure headers for iframe embedding support.
+    Configurable via environment variables:
+    - ALLOW_IFRAME_EMBEDDING: 'true' to allow embedding (default: true)
+    - FRAME_ANCESTORS: Space-separated list of allowed parent domains (default: '*')
+    """
+    
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Check if iframe embedding is allowed
+        allow_embedding = os.environ.get("ALLOW_IFRAME_EMBEDDING", "true").lower() == "true"
+        frame_ancestors = os.environ.get("FRAME_ANCESTORS", "*")
+        
+        if allow_embedding:
+            # Remove X-Frame-Options if present (we use CSP instead)
+            if "X-Frame-Options" in response.headers:
+                del response.headers["X-Frame-Options"]
+            
+            # Set Content-Security-Policy with frame-ancestors
+            # frame-ancestors controls which parents can embed this page
+            if frame_ancestors == "*":
+                csp = "frame-ancestors *"
+            else:
+                csp = f"frame-ancestors 'self' {frame_ancestors}"
+            
+            response.headers["Content-Security-Policy"] = csp
+        else:
+            # Restrict embedding in production if needed
+            response.headers["X-Frame-Options"] = "SAMEORIGIN"
+            response.headers["Content-Security-Policy"] = "frame-ancestors 'self'"
+        
+        return response
+
 
 async def sla_monitor_loop():
     """Background task to periodically check SLA breaches"""
