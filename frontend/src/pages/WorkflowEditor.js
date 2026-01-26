@@ -219,9 +219,12 @@ export default function WorkflowEditor() {
         
         setNodes(flowNodes);
         setEdges(flowEdges);
+        
+        // Store initial state for change tracking
+        initialStateRef.current = { nodes: flowNodes, edges: flowEdges };
       } catch (error) {
         toast.error('Failed to load workflow');
-        navigate('/workflows');
+        navigate('/settings/workflows');
       } finally {
         setLoading(false);
       }
