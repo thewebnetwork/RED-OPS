@@ -116,9 +116,14 @@ export default function Integrations() {
   }, [hasApiKeyChanges, hasWebhookChanges, apiKeyDialogOpen, webhookDialogOpen]);
 
   const handleApiKeyDialogClose = (open) => {
-    if (!open && hasApiKeyChanges && !generatedKey) {
-      setShowApiKeyUnsavedWarning(true);
-      return;
+    if (!open && !generatedKey) {
+      // Check for changes directly
+      const hasChanges = initialApiKeyRef.current && 
+        JSON.stringify(newApiKey) !== JSON.stringify(initialApiKeyRef.current);
+      if (hasChanges) {
+        setShowApiKeyUnsavedWarning(true);
+        return;
+      }
     }
     setApiKeyDialogOpen(open);
     if (!open) {
