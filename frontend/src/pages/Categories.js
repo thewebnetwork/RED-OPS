@@ -565,17 +565,6 @@ export default function Categories() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">{t('categories.enableWorkflow')}</p>
-                    <p className="text-xs text-slate-500">{t('categories.workflowDescription')}</p>
-                  </div>
-                  <Switch
-                    checked={formData.triggers_editor_workflow}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, triggers_editor_workflow: checked }))}
-                  />
-                </div>
               </>
             )}
 
