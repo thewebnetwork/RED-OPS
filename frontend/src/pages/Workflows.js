@@ -639,7 +639,7 @@ export default function Workflows() {
 
       {/* Duplicate Workflow Unsaved Changes Warning */}
       <AlertDialog open={showDuplicateUnsavedWarning} onOpenChange={setShowDuplicateUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog">
+        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
             <AlertDialogDescription>
