@@ -2585,6 +2585,204 @@ async def get_form_field_types(current_user: dict = Depends(get_current_user)):
         ]
     }
 
+# ============== WORKFLOW TEMPLATES ==============
+
+# Pre-built workflow templates
+WORKFLOW_TEMPLATES = [
+    {
+        "id": "template-editor-assignment",
+        "name": "Editor Assignment",
+        "description": "Automatically notifies editors when new orders are created and sends email alerts",
+        "category": "Assignment",
+        "icon": "UserPlus",
+        "color": "#10B981",
+        "popularity": 95,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "New Order Created", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.created"}},
+            {"id": "action-1", "type": "action", "label": "Notify Editors", "position": {"x": 250, "y": 170}, "data": {"action_type": "notify", "config": {"target": "role:Editor", "message": "New order {order_code} available: {title}"}}},
+            {"id": "action-2", "type": "action", "label": "Email Editor Team", "position": {"x": 250, "y": 290}, "data": {"action_type": "send_email", "config": {"to": "editors", "subject": "New Order: {order_code}", "body": "A new order is ready for pickup.\n\nTitle: {title}\nPriority: {priority}"}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "action-1"},
+            {"id": "e2", "source": "action-1", "target": "action-2"}
+        ]
+    },
+    {
+        "id": "template-sla-escalation",
+        "name": "SLA Escalation",
+        "description": "Automatically escalates tickets to managers when SLA is at risk or breached",
+        "category": "Escalation",
+        "icon": "AlertTriangle",
+        "color": "#EF4444",
+        "popularity": 88,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "SLA Warning", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.sla_warning"}},
+            {"id": "action-1", "type": "action", "label": "Notify Admin", "position": {"x": 250, "y": 170}, "data": {"action_type": "notify", "config": {"target": "role:Admin", "message": "⚠️ SLA at risk for {order_code}: {title}"}}},
+            {"id": "action-2", "type": "action", "label": "Email Manager", "position": {"x": 250, "y": 290}, "data": {"action_type": "send_email", "config": {"to": "admin", "subject": "SLA Alert: {order_code}", "body": "Order {order_code} is at risk of breaching SLA.\n\nDeadline: {sla_deadline}\nAssigned to: {editor_name}"}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "action-1"},
+            {"id": "e2", "source": "action-1", "target": "action-2"}
+        ]
+    },
+    {
+        "id": "template-customer-feedback",
+        "name": "Customer Feedback Request",
+        "description": "Sends satisfaction survey to customers after ticket delivery",
+        "category": "Feedback",
+        "icon": "Star",
+        "color": "#F59E0B",
+        "popularity": 82,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "Order Delivered", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.delivered"}},
+            {"id": "delay-1", "type": "delay", "label": "Wait 24 Hours", "position": {"x": 250, "y": 170}, "data": {"delay_type": "hours", "delay_value": 24}},
+            {"id": "action-1", "type": "action", "label": "Send Survey Email", "position": {"x": 250, "y": 290}, "data": {"action_type": "send_email", "config": {"to": "requester", "subject": "How did we do? Rate your experience", "body": "Hi {requester_name},\n\nYour order {order_code} has been delivered. We'd love to hear your feedback!\n\nPlease take a moment to rate your experience."}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "delay-1"},
+            {"id": "e2", "source": "delay-1", "target": "action-1"}
+        ]
+    },
+    {
+        "id": "template-auto-close",
+        "name": "Auto-Close Inactive Tickets",
+        "description": "Automatically closes tickets that have been pending response for too long",
+        "category": "Automation",
+        "icon": "Clock",
+        "color": "#6366F1",
+        "popularity": 76,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "Status Changed to Pending", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.status_changed", "condition": {"status": "Pending"}}},
+            {"id": "delay-1", "type": "delay", "label": "Wait 7 Days", "position": {"x": 250, "y": 170}, "data": {"delay_type": "days", "delay_value": 7}},
+            {"id": "action-1", "type": "action", "label": "Notify Requester", "position": {"x": 250, "y": 290}, "data": {"action_type": "notify", "config": {"target": "requester", "message": "Your ticket {order_code} will be auto-closed in 24 hours if no response is received."}}},
+            {"id": "delay-2", "type": "delay", "label": "Wait 24 Hours", "position": {"x": 250, "y": 410}, "data": {"delay_type": "hours", "delay_value": 24}},
+            {"id": "action-2", "type": "action", "label": "Close Ticket", "position": {"x": 250, "y": 530}, "data": {"action_type": "update_status", "config": {"status": "Closed", "reason": "Auto-closed due to inactivity"}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "delay-1"},
+            {"id": "e2", "source": "delay-1", "target": "action-1"},
+            {"id": "e3", "source": "action-1", "target": "delay-2"},
+            {"id": "e4", "source": "delay-2", "target": "action-2"}
+        ]
+    },
+    {
+        "id": "template-priority-routing",
+        "name": "Priority-Based Routing",
+        "description": "Routes high priority tickets to senior team members immediately",
+        "category": "Routing",
+        "icon": "Zap",
+        "color": "#8B5CF6",
+        "popularity": 71,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "New Order Created", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.created"}},
+            {"id": "condition-1", "type": "condition", "label": "Check Priority", "position": {"x": 250, "y": 170}, "data": {"field": "priority", "conditions": [{"operator": "equals", "value": "Urgent"}, {"operator": "equals", "value": "High"}]}},
+            {"id": "action-high", "type": "action", "label": "Notify Senior Team", "position": {"x": 100, "y": 290}, "data": {"action_type": "notify", "config": {"target": "team:senior", "message": "🔴 High priority order {order_code}: {title}"}}},
+            {"id": "action-normal", "type": "action", "label": "Add to Pool", "position": {"x": 400, "y": 290}, "data": {"action_type": "notify", "config": {"target": "role:Editor", "message": "New order {order_code} available"}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "condition-1"},
+            {"id": "e2", "source": "condition-1", "target": "action-high", "label": "High/Urgent", "source_handle": "yes"},
+            {"id": "e3", "source": "condition-1", "target": "action-normal", "label": "Normal/Low", "source_handle": "no"}
+        ]
+    },
+    {
+        "id": "template-webhook-integration",
+        "name": "External System Sync",
+        "description": "Sends order updates to external systems via webhook",
+        "category": "Integration",
+        "icon": "Link",
+        "color": "#0EA5E9",
+        "popularity": 65,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "Order Status Changed", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.status_changed"}},
+            {"id": "action-1", "type": "action", "label": "Send Webhook", "position": {"x": 250, "y": 170}, "data": {"action_type": "webhook", "config": {"url": "https://your-system.com/api/webhook", "method": "POST", "body": {"order_id": "{order_id}", "status": "{status}", "updated_at": "{updated_at}"}}}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "action-1"}
+        ]
+    }
+]
+
+@api_router.get("/workflow-templates")
+async def get_workflow_templates(
+    category: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get list of pre-built workflow templates"""
+    templates = WORKFLOW_TEMPLATES
+    
+    if category:
+        templates = [t for t in templates if t["category"].lower() == category.lower()]
+    
+    # Sort by popularity
+    templates = sorted(templates, key=lambda x: x.get("popularity", 0), reverse=True)
+    
+    return {
+        "templates": templates,
+        "categories": list(set(t["category"] for t in WORKFLOW_TEMPLATES))
+    }
+
+@api_router.get("/workflow-templates/{template_id}")
+async def get_workflow_template(template_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific workflow template"""
+    template = next((t for t in WORKFLOW_TEMPLATES if t["id"] == template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return template
+
+@api_router.post("/workflow-templates/{template_id}/install")
+async def install_workflow_template(
+    template_id: str,
+    custom_name: Optional[str] = None,
+    current_user: dict = Depends(require_roles(["Admin"]))
+):
+    """Install a workflow template (create a new workflow from template)"""
+    template = next((t for t in WORKFLOW_TEMPLATES if t["id"] == template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    # Create a new workflow from the template
+    workflow_id = str(uuid.uuid4())
+    workflow_name = custom_name or f"{template['name']}"
+    
+    # Check for duplicate name
+    existing = await db.workflows.find_one({"name": workflow_name, "active": True})
+    if existing:
+        # Append number to make unique
+        count = await db.workflows.count_documents({"name": {"$regex": f"^{template['name']}"}})
+        workflow_name = f"{template['name']} ({count + 1})"
+    
+    workflow = {
+        "id": workflow_id,
+        "name": workflow_name,
+        "description": template["description"],
+        "assigned_roles": [],
+        "assigned_role_names": [],
+        "assigned_teams": [],
+        "assigned_team_names": [],
+        "trigger_categories": [],
+        "trigger_category_names": [],
+        "color": template["color"],
+        "nodes": template["nodes"],
+        "edges": template["edges"],
+        "is_template": False,
+        "active": True,
+        "is_active": True,
+        "installed_from_template": template_id,
+        "created_at": get_utc_now(),
+        "updated_at": get_utc_now()
+    }
+    
+    await db.workflows.insert_one(workflow)
+    
+    # Return workflow response
+    return {
+        "id": workflow_id,
+        "name": workflow_name,
+        "description": workflow["description"],
+        "message": f"Workflow '{workflow_name}' created from template '{template['name']}'"
+    }
+
 # ============== UI SETTINGS ROUTES ==============
 
 @api_router.get("/ui-settings", response_model=List[UISettingResponse])
