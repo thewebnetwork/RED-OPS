@@ -48,7 +48,10 @@ export default function Logs() {
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingLogs, setStreamingLogs] = useState([]);
   const logContainerRef = useRef(null);
+  const eventSourceRef = useRef(null);
 
   useEffect(() => {
     fetchLogs(activeTab);
