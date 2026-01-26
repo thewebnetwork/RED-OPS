@@ -1,10 +1,12 @@
 """Dashboard and statistics routes"""
-from fastapi import APIRouter, Depends
+from datetime import datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 from database import db
-from utils.auth import get_current_user
+from utils.auth import get_current_user, require_roles
+from utils.helpers import normalize_order, is_sla_breached
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -20,6 +22,39 @@ class DashboardStats(BaseModel):
     orders_responded_count: int = 0
     feature_requests_count: int = 0
     bug_reports_count: int = 0
+
+
+class OrderResponse(BaseModel):
+    id: str
+    order_code: str
+    request_type: str
+    requester_id: str
+    requester_name: str
+    requester_email: str
+    editor_id: Optional[str] = None
+    editor_name: Optional[str] = None
+    title: str
+    category_l1_id: Optional[str] = None
+    category_l1_name: Optional[str] = None
+    category_l2_id: Optional[str] = None
+    category_l2_name: Optional[str] = None
+    status: str
+    priority: str
+    description: str
+    video_script: Optional[str] = None
+    reference_links: Optional[str] = None
+    footage_links: Optional[str] = None
+    music_preference: Optional[str] = None
+    delivery_format: Optional[str] = None
+    special_instructions: Optional[str] = None
+    close_reason: Optional[str] = None
+    closed_at: Optional[str] = None
+    sla_deadline: str
+    is_sla_breached: bool
+    created_at: str
+    updated_at: str
+    picked_at: Optional[str] = None
+    delivered_at: Optional[str] = None
 
 
 # ============== ROUTES ==============
