@@ -551,7 +551,13 @@ async def respond_to_order(
     
     await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"status": "In Progress", "updated_at": now, "last_responded_at": now}}
+        {"$set": {
+            "status": "In Progress", 
+            "updated_at": now, 
+            "last_responded_at": now,
+            "last_requester_message_at": now,  # Track requester activity
+            "review_started_at": None  # Clear review timestamp since they responded
+        }}
     )
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
