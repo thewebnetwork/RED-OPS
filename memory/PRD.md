@@ -32,6 +32,49 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 23: Unified SLA & Escalation Policies Module ✅ (January 26, 2026)
+
+**Major Refactor: Merged SLA + Escalation into One Module**
+
+The old separate "SLA" and "Escalation" modules have been unified into a single "SLA & Escalation Policies" module to eliminate duplication and admin confusion.
+
+**New Unified Module Structure:**
+
+**A) Policies Tab (Configuration)**
+- Policy Scope: Roles, Teams, AND/OR Specialties
+- SLA Clock Rules: Duration (minutes), Business Hours toggle
+- SLA Thresholds: At-risk threshold (minutes before deadline)
+- Multi-level Escalation Rules:
+  - Level 1 → Level 5 support
+  - Triggers: at_risk, breach, breach_plus_minutes
+  - Actions: notify_role, notify_team, escalate_to_role, escalate_to_team, change_priority, send_email, webhook
+
+**B) Monitoring Tab (Dashboard)**
+- At-risk orders list with countdown timer
+- Breached orders list
+- Applied policy shown per order
+- Stats cards: On Track, At Risk, Breached, Unacknowledged
+
+**C) Escalation History Tab**
+- Full log of escalation events
+- Acknowledge functionality
+
+**Backend Files Created:**
+- `/app/backend/models/sla_policy.py` - Pydantic models
+- `/app/backend/routes/sla_policies.py` - API endpoints
+- `/app/backend/services/sla_policy_engine.py` - Policy engine
+
+**Frontend:**
+- `/app/frontend/src/pages/SLAPolicies.js` - Unified page
+- Old /sla and /escalation routes redirect to /sla-policies
+- Sidebar updated to show "SLA & Escalation"
+
+**Workflow Integration:**
+- `auto_escalate` action replaced with `apply_sla_policy`
+- Workflows can now select a specific policy or auto-detect based on scope
+
+**Testing:** 100% pass rate (17 backend tests, all frontend flows)
+
 ### Phase 22: Auto-Escalate Workflow Action & Dashboard Fix ✅ (January 26, 2026)
 
 **Bug Fix - Dashboard Blank Screen:**
