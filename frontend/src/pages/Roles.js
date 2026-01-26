@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Checkbox } from '../components/ui/checkbox';
 import { Switch } from '../components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -21,118 +14,84 @@ import {
   DialogTitle,
 } from '../components/ui/dialog';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '../components/ui/tabs';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import { 
-  Plus, 
-  Edit,
-  Trash2,
+  Shield, 
+  ShieldCheck, 
+  User,
   Users,
-  Shield,
-  Briefcase,
-  Settings,
-  Video,
-  Camera,
-  Film,
-  Plane,
-  Home,
-  Paintbrush,
-  Zap,
-  Droplet,
-  Thermometer,
-  TreeDeciduous,
-  Bug,
-  Key,
-  Calculator,
-  Map,
-  Palette,
-  Share2,
-  PenTool,
-  Search,
-  Code,
-  Printer
+  ChevronDown,
+  ChevronRight,
+  RotateCcw,
+  Save,
+  Info
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const iconOptions = [
-  { value: 'shield', label: 'Shield', icon: Shield },
-  { value: 'user', label: 'User', icon: Users },
-  { value: 'video', label: 'Video', icon: Video },
-  { value: 'camera', label: 'Camera', icon: Camera },
-  { value: 'film', label: 'Film', icon: Film },
-  { value: 'plane', label: 'Plane/Drone', icon: Plane },
-  { value: 'home', label: 'Home', icon: Home },
-  { value: 'paintbrush', label: 'Paintbrush', icon: Paintbrush },
-  { value: 'zap', label: 'Electricity', icon: Zap },
-  { value: 'droplet', label: 'Water/Plumbing', icon: Droplet },
-  { value: 'thermometer', label: 'HVAC', icon: Thermometer },
-  { value: 'tree', label: 'Landscaping', icon: TreeDeciduous },
-  { value: 'bug', label: 'Pest Control', icon: Bug },
-  { value: 'key', label: 'Key/Locksmith', icon: Key },
-  { value: 'calculator', label: 'Calculator', icon: Calculator },
-  { value: 'map', label: 'Map/Survey', icon: Map },
-  { value: 'palette', label: 'Design', icon: Palette },
-  { value: 'share-2', label: 'Social Media', icon: Share2 },
-  { value: 'pen-tool', label: 'Writing', icon: PenTool },
-  { value: 'search', label: 'Search/SEO', icon: Search },
-  { value: 'code', label: 'Code/Web', icon: Code },
-  { value: 'printer', label: 'Print', icon: Printer },
-  { value: 'briefcase', label: 'Briefcase', icon: Briefcase },
-  { value: 'settings', label: 'Settings', icon: Settings },
-];
-
-const getIcon = (iconName) => {
-  const found = iconOptions.find(i => i.value === iconName);
-  return found ? found.icon : Briefcase;
+// Role icons and colors
+const roleConfig = {
+  'Administrator': {
+    icon: Shield,
+    color: '#dc2626',
+    bgColor: '#dc262615',
+    description: 'Full platform control - can manage all modules, users, and settings'
+  },
+  'Privileged User': {
+    icon: ShieldCheck,
+    color: '#2563eb',
+    bgColor: '#2563eb15',
+    description: 'Manager level - can manage teams, create workflows, receive escalations'
+  },
+  'Standard User': {
+    icon: User,
+    color: '#16a34a',
+    bgColor: '#16a34a15',
+    description: 'Basic access - can submit requests, pick orders, view dashboard'
+  }
 };
-
-const colorOptions = [
-  { value: '#DC2626', label: 'Red' },
-  { value: '#F59E0B', label: 'Amber' },
-  { value: '#EAB308', label: 'Yellow' },
-  { value: '#22C55E', label: 'Green' },
-  { value: '#10B981', label: 'Emerald' },
-  { value: '#06B6D4', label: 'Cyan' },
-  { value: '#3B82F6', label: 'Blue' },
-  { value: '#6366F1', label: 'Indigo' },
-  { value: '#8B5CF6', label: 'Violet' },
-  { value: '#A855F7', label: 'Purple' },
-  { value: '#EC4899', label: 'Pink' },
-  { value: '#78716C', label: 'Stone' },
-];
 
 export default function Roles() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('service_provider');
-  
-  // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingRole, setEditingRole] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    display_name: '',
-    description: '',
-    role_type: 'service_provider',
-    icon: 'briefcase',
-    color: '#3B82F6',
-    can_pick_orders: true,
-    can_create_orders: false
-  });
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [editingPermissions, setEditingPermissions] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalPermissions, setOriginalPermissions] = useState(null);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [pendingRoleSwitch, setPendingRoleSwitch] = useState(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [expandedModules, setExpandedModules] = useState({});
 
   useEffect(() => {
     fetchRoles();
   }, []);
 
+  useEffect(() => {
+    // Detect changes
+    if (originalPermissions && editingPermissions) {
+      const changed = JSON.stringify(editingPermissions) !== JSON.stringify(originalPermissions);
+      setHasChanges(changed);
+    }
+  }, [editingPermissions, originalPermissions]);
+
   const fetchRoles = async () => {
     try {
-      const res = await axios.get(`${API}/roles?active_only=false`);
+      const res = await axios.get(`${API}/roles`);
       setRoles(res.data);
+      // Auto-select first role
+      if (res.data.length > 0 && !selectedRole) {
+        selectRole(res.data[0]);
+      }
     } catch (error) {
       toast.error('Failed to load roles');
     } finally {
@@ -140,84 +99,151 @@ export default function Roles() {
     }
   };
 
-  const openDialog = (role = null) => {
-    setEditingRole(role);
-    
-    if (role) {
-      setFormData({
-        name: role.name,
-        display_name: role.display_name,
-        description: role.description || '',
-        role_type: role.role_type,
-        icon: role.icon || 'briefcase',
-        color: role.color || '#3B82F6',
-        can_pick_orders: role.can_pick_orders,
-        can_create_orders: role.can_create_orders
-      });
+  const selectRole = (role) => {
+    setSelectedRole(role);
+    setEditingPermissions(JSON.parse(JSON.stringify(role.permissions)));
+    setOriginalPermissions(JSON.parse(JSON.stringify(role.permissions)));
+    setHasChanges(false);
+    // Expand all modules by default
+    const expanded = {};
+    Object.keys(role.permissions).forEach(m => expanded[m] = true);
+    setExpandedModules(expanded);
+  };
+
+  const handleRoleSwitch = (role) => {
+    if (hasChanges) {
+      setPendingRoleSwitch(role);
+      setShowUnsavedWarning(true);
     } else {
-      setFormData({
-        name: '',
-        display_name: '',
-        description: '',
-        role_type: 'service_provider',
-        icon: 'briefcase',
-        color: '#3B82F6',
-        can_pick_orders: true,
-        can_create_orders: false
-      });
+      selectRole(role);
     }
-    setDialogOpen(true);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.display_name) {
-      toast.error('Name and Display Name are required');
-      return;
+  const confirmRoleSwitch = () => {
+    setShowUnsavedWarning(false);
+    if (pendingRoleSwitch) {
+      selectRole(pendingRoleSwitch);
+      setPendingRoleSwitch(null);
     }
+  };
 
-    // Generate name from display_name if creating new
-    const payload = {
-      ...formData,
-      name: editingRole ? formData.name : formData.display_name.replace(/\s+/g, ''),
-    };
-
-    try {
-      if (editingRole) {
-        await axios.patch(`${API}/roles/${editingRole.id}`, {
-          display_name: payload.display_name,
-          description: payload.description || null,
-          icon: payload.icon,
-          color: payload.color,
-          can_pick_orders: payload.can_pick_orders,
-          can_create_orders: payload.can_create_orders
-        });
-        toast.success('Role updated');
-      } else {
-        await axios.post(`${API}/roles`, payload);
-        toast.success('Role created');
+  const togglePermission = (module, action) => {
+    setEditingPermissions(prev => ({
+      ...prev,
+      [module]: {
+        ...prev[module],
+        [action]: !prev[module][action]
       }
-      fetchRoles();
-      setDialogOpen(false);
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Operation failed');
-    }
+    }));
   };
 
-  const handleDelete = async (roleId) => {
-    if (!window.confirm('Are you sure you want to deactivate this role?')) return;
+  const toggleAllInModule = (module, value) => {
+    const newModulePerms = {};
+    Object.keys(editingPermissions[module]).forEach(action => {
+      newModulePerms[action] = value;
+    });
+    setEditingPermissions(prev => ({
+      ...prev,
+      [module]: newModulePerms
+    }));
+  };
+
+  const isModuleFullyEnabled = (module) => {
+    return Object.values(editingPermissions[module]).every(v => v === true);
+  };
+
+  const isModulePartiallyEnabled = (module) => {
+    const values = Object.values(editingPermissions[module]);
+    return values.some(v => v) && !values.every(v => v);
+  };
+
+  const toggleModuleExpanded = (module) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [module]: !prev[module]
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!selectedRole) return;
     
     try {
-      await axios.delete(`${API}/roles/${roleId}`);
-      fetchRoles();
-      toast.success('Role deactivated');
+      await axios.patch(`${API}/roles/${selectedRole.id}`, {
+        permissions: editingPermissions
+      });
+      toast.success(`${selectedRole.name} permissions saved`);
+      setOriginalPermissions(JSON.parse(JSON.stringify(editingPermissions)));
+      setHasChanges(false);
+      // Refresh roles to get updated data
+      const res = await axios.get(`${API}/roles`);
+      setRoles(res.data);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to delete role');
+      toast.error(error.response?.data?.detail || 'Failed to save permissions');
     }
   };
 
-  const filterRolesByType = (type) => {
-    return roles.filter(r => r.role_type === type && r.active);
+  const handleResetToDefaults = async () => {
+    if (!selectedRole) return;
+    
+    try {
+      await axios.post(`${API}/roles/reset-defaults/${selectedRole.id}`);
+      toast.success(`${selectedRole.name} permissions reset to defaults`);
+      setShowResetConfirm(false);
+      // Refresh
+      const res = await axios.get(`${API}/roles`);
+      setRoles(res.data);
+      const updated = res.data.find(r => r.id === selectedRole.id);
+      if (updated) selectRole(updated);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reset permissions');
+    }
+  };
+
+  const getModuleLabel = (module) => {
+    const labels = {
+      dashboard: 'Dashboard',
+      command_center: 'Command Center',
+      orders: 'Orders/Tickets',
+      users: 'Users',
+      teams: 'Teams',
+      roles: 'Roles',
+      categories: 'Categories',
+      workflows: 'Workflows',
+      escalation: 'Escalation',
+      sla: 'SLA Management',
+      integrations: 'Integrations',
+      announcements: 'Announcements',
+      logs: 'Logs',
+      settings: 'Settings',
+      reports: 'Reports'
+    };
+    return labels[module] || module;
+  };
+
+  const getActionLabel = (action) => {
+    const labels = {
+      view: 'View',
+      create: 'Create',
+      edit: 'Edit',
+      delete: 'Delete',
+      export: 'Export',
+      pick: 'Pick/Claim',
+      execute: 'Execute',
+      acknowledge: 'Acknowledge'
+    };
+    return labels[action] || action;
+  };
+
+  const getEnabledCount = (role) => {
+    let total = 0;
+    let enabled = 0;
+    Object.values(role.permissions).forEach(module => {
+      Object.values(module).forEach(val => {
+        total++;
+        if (val) enabled++;
+      });
+    });
+    return { total, enabled };
   };
 
   if (loading) {
@@ -228,323 +254,241 @@ export default function Roles() {
     );
   }
 
-  const RoleCard = ({ role }) => {
-    const Icon = getIcon(role.icon);
-    return (
-      <div 
-        className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-shadow"
-        data-testid={`role-card-${role.name}`}
-      >
-        <div 
-          className="w-12 h-12 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${role.color}20` }}
-        >
-          <Icon size={24} style={{ color: role.color }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-slate-900">{role.display_name}</p>
-            {role.role_type === 'system' && (
-              <Badge variant="outline" className="text-xs">System</Badge>
-            )}
-          </div>
-          {role.description && (
-            <p className="text-sm text-slate-500 truncate">{role.description}</p>
-          )}
-          <div className="flex gap-2 mt-1">
-            {role.can_pick_orders && (
-              <Badge className="bg-green-100 text-green-700 text-xs">Can Pick Orders</Badge>
-            )}
-            {role.can_create_orders && (
-              <Badge className="bg-blue-100 text-blue-700 text-xs">Can Create</Badge>
-            )}
-          </div>
-        </div>
-        {role.role_type !== 'system' && (
-          <div className="flex gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => openDialog(role)}
-            >
-              <Edit size={16} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-8 w-8 text-red-500"
-              onClick={() => handleDelete(role.id)}
-            >
-              <Trash2 size={16} />
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6 animate-fade-in" data-testid="roles-page">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Roles</h1>
-          <p className="text-slate-500 mt-1">Manage service provider and custom roles</p>
+          <h1 className="text-2xl font-bold text-slate-900">Role Permissions</h1>
+          <p className="text-slate-500 mt-1">Configure access permissions for each role</p>
         </div>
-        <Button 
-          className="bg-rose-600 hover:bg-rose-700"
-          onClick={() => openDialog()}
-          data-testid="add-role-btn"
-        >
-          <Plus size={18} className="mr-2" />
-          Add Role
-        </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
-                <Shield size={20} className="text-rose-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{roles.filter(r => r.active).length}</p>
-                <p className="text-sm text-slate-500">Total Roles</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Briefcase size={20} className="text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{filterRolesByType('service_provider').length}</p>
-                <p className="text-sm text-slate-500">Service Providers</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users size={20} className="text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{roles.filter(r => r.can_pick_orders && r.active).length}</p>
-                <p className="text-sm text-slate-500">Can Pick Orders</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                <Settings size={20} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{filterRolesByType('custom').length}</p>
-                <p className="text-sm text-slate-500">Custom Roles</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-blue-800">
+          <p className="font-medium">Identity & Access Management</p>
+          <p className="mt-1">
+            The platform uses 3 fixed roles: <strong>Administrator</strong>, <strong>Privileged User</strong>, and <strong>Standard User</strong>. 
+            Each role has default permissions that can be customized below. For user-specific overrides, use the Permissions tab when editing a user.
+          </p>
+        </div>
       </div>
 
-      {/* Roles by Type */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="service_provider">Service Providers ({filterRolesByType('service_provider').length})</TabsTrigger>
-          <TabsTrigger value="system">System Roles ({filterRolesByType('system').length})</TabsTrigger>
-          <TabsTrigger value="custom">Custom ({filterRolesByType('custom').length})</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="service_provider" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterRolesByType('service_provider').map(role => (
-              <RoleCard key={role.id} role={role} />
-            ))}
-          </div>
-          {filterRolesByType('service_provider').length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              No service provider roles found
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="system" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterRolesByType('system').map(role => (
-              <RoleCard key={role.id} role={role} />
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="custom" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filterRolesByType('custom').map(role => (
-              <RoleCard key={role.id} role={role} />
-            ))}
-          </div>
-          {filterRolesByType('custom').length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <p>No custom roles yet</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => openDialog()}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Role Cards - Left Side */}
+        <div className="lg:col-span-1 space-y-4">
+          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">System Roles</h2>
+          {roles.map((role) => {
+            const config = roleConfig[role.name] || roleConfig['Standard User'];
+            const Icon = config.icon;
+            const counts = getEnabledCount(role);
+            const isSelected = selectedRole?.id === role.id;
+            
+            return (
+              <Card 
+                key={role.id}
+                className={`cursor-pointer transition-all ${
+                  isSelected 
+                    ? 'ring-2 ring-rose-500 shadow-md' 
+                    : 'hover:shadow-md hover:border-slate-300'
+                }`}
+                onClick={() => handleRoleSwitch(role)}
+                data-testid={`role-card-${role.name.replace(/\s+/g, '-').toLowerCase()}`}
               >
-                <Plus size={16} className="mr-2" />
-                Create Custom Role
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: config.bgColor }}
+                    >
+                      <Icon size={20} style={{ color: config.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-900">{role.display_name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{config.description}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          <Users size={12} className="mr-1" />
+                          {role.user_count} users
+                        </Badge>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs"
+                          style={{ borderColor: config.color, color: config.color }}
+                        >
+                          {counts.enabled}/{counts.total} enabled
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingRole ? 'Edit Role' : 'Create New Role'}</DialogTitle>
-            <DialogDescription>
-              {editingRole 
-                ? 'Update role settings and permissions' 
-                : 'Create a new service provider or custom role'
-              }
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label>Display Name *</Label>
-                <Input
-                  value={formData.display_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
-                  placeholder="e.g., General Contractor"
-                  className="mt-1.5"
-                  data-testid="role-display-name-input"
-                />
-              </div>
-              
-              <div className="col-span-2">
-                <Label>Description</Label>
-                <Input
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Brief description of this role"
-                  className="mt-1.5"
-                />
-              </div>
-
-              {!editingRole && (
-                <div className="col-span-2">
-                  <Label>Role Type</Label>
-                  <Select 
-                    value={formData.role_type} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, role_type: v }))}
-                  >
-                    <SelectTrigger className="mt-1.5">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="service_provider">Service Provider</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div>
-                <Label>Icon</Label>
-                <Select 
-                  value={formData.icon} 
-                  onValueChange={(v) => setFormData(prev => ({ ...prev, icon: v }))}
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-64">
-                    {iconOptions.map(opt => {
-                      const Icon = opt.icon;
+        {/* Permission Matrix - Right Side */}
+        <div className="lg:col-span-3">
+          {selectedRole && editingPermissions ? (
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {(() => {
+                      const config = roleConfig[selectedRole.name] || roleConfig['Standard User'];
+                      const Icon = config.icon;
                       return (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          <div className="flex items-center gap-2">
-                            <Icon size={16} />
-                            {opt.label}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Color</Label>
-                <Select 
-                  value={formData.color} 
-                  onValueChange={(v) => setFormData(prev => ({ ...prev, color: v }))}
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        <div className="flex items-center gap-2">
+                        <>
                           <div 
-                            className="w-4 h-4 rounded-full" 
-                            style={{ backgroundColor: opt.value }} 
-                          />
-                          {opt.label}
+                            className="w-10 h-10 rounded-lg flex items-center justify-center"
+                            style={{ backgroundColor: config.bgColor }}
+                          >
+                            <Icon size={20} style={{ color: config.color }} />
+                          </div>
+                          <div>
+                            <CardTitle>{selectedRole.display_name}</CardTitle>
+                            <CardDescription>{selectedRole.description}</CardDescription>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {hasChanges && (
+                      <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                        Unsaved changes
+                      </Badge>
+                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowResetConfirm(true)}
+                    >
+                      <RotateCcw size={14} className="mr-1" />
+                      Reset to Defaults
+                    </Button>
+                    <Button 
+                      size="sm"
+                      className="bg-rose-600 hover:bg-rose-700"
+                      onClick={handleSave}
+                      disabled={!hasChanges}
+                      data-testid="save-permissions-btn"
+                    >
+                      <Save size={14} className="mr-1" />
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {Object.entries(editingPermissions).map(([module, actions]) => (
+                    <Collapsible 
+                      key={module} 
+                      open={expandedModules[module]}
+                      onOpenChange={() => toggleModuleExpanded(module)}
+                    >
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            {expandedModules[module] ? (
+                              <ChevronDown className="w-4 h-4 text-slate-400" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-slate-400" />
+                            )}
+                            <span className="font-medium text-slate-900">{getModuleLabel(module)}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {Object.values(actions).filter(v => v).length}/{Object.keys(actions).length}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <span className="text-xs text-slate-500 mr-2">
+                              {isModuleFullyEnabled(module) ? 'All enabled' : isModulePartiallyEnabled(module) ? 'Partial' : 'Disabled'}
+                            </span>
+                            <Switch
+                              checked={isModuleFullyEnabled(module)}
+                              onCheckedChange={(checked) => toggleAllInModule(module, checked)}
+                              data-testid={`module-toggle-${module}`}
+                            />
+                          </div>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Permissions */}
-            <div className="space-y-3 pt-2">
-              <p className="text-sm font-medium text-slate-700">Permissions</p>
-              
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Can Pick Orders</p>
-                  <p className="text-xs text-slate-500">This role can claim and work on orders from the pool</p>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4 pt-1 bg-slate-50/50">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                            {Object.entries(actions).map(([action, enabled]) => (
+                              <label
+                                key={action}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                  enabled 
+                                    ? 'bg-white border-rose-200 text-rose-700' 
+                                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                }`}
+                                data-testid={`permission-${module}-${action}`}
+                              >
+                                <Checkbox
+                                  checked={enabled}
+                                  onCheckedChange={() => togglePermission(module, action)}
+                                />
+                                <span className="text-sm font-medium capitalize">{getActionLabel(action)}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
                 </div>
-                <Switch
-                  checked={formData.can_pick_orders}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, can_pick_orders: checked }))}
-                />
-              </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center text-slate-500">
+                <Shield className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                <p>Select a role to view and edit its permissions</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Can Create Orders</p>
-                  <p className="text-xs text-slate-500">This role can submit new orders/requests</p>
-                </div>
-                <Switch
-                  checked={formData.can_create_orders}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, can_create_orders: checked }))}
-                />
-              </div>
-            </div>
+      {/* Unsaved Changes Warning */}
+      <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved permission changes for "{selectedRole?.display_name}". 
+              Do you want to discard these changes?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingRoleSwitch(null)}>Stay</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRoleSwitch}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-            <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-role-btn">
-              {editingRole ? 'Update Role' : 'Create Role'}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Reset Confirmation */}
+      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Permissions</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reset all permissions for "{selectedRole?.display_name}" back to their default values. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetToDefaults} className="bg-rose-600 hover:bg-rose-700">
+              Reset to Defaults
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
