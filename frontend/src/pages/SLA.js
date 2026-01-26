@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -38,7 +39,11 @@ import {
   AlertTriangle,
   CheckCircle,
   Users,
-  Shield
+  Shield,
+  Bell,
+  RefreshCw,
+  CheckCheck,
+  XCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -47,9 +52,12 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function SLA() {
   const [slaDefinitions, setSlaDefinitions] = useState([]);
+  const [slaAlerts, setSlaAlerts] = useState([]);
+  const [slaStats, setSlaStats] = useState(null);
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('definitions');
   
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
