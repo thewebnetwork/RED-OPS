@@ -24,9 +24,8 @@ import UISettings from "./pages/UISettings";
 import Announcements from "./pages/Announcements";
 import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
-import SLA from "./pages/SLA";
+import SLAPolicies from "./pages/SLAPolicies";
 import EmailSettings from "./pages/EmailSettings";
-import EscalationPolicies from "./pages/EscalationPolicies";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
