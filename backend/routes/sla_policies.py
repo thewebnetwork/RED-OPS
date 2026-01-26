@@ -51,6 +51,15 @@ async def get_scope_names(scope: dict) -> dict:
                 names.append(specialty["name"])
         result["specialty_names"] = names
     
+    # Access Tier names
+    if scope.get("access_tier_ids"):
+        names = []
+        for tier_id in scope["access_tier_ids"]:
+            tier = await db.access_tiers.find_one({"id": tier_id}, {"_id": 0, "name": 1})
+            if tier:
+                names.append(tier["name"])
+        result["access_tier_names"] = names
+    
     return result
 
 
