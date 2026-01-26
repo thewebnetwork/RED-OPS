@@ -372,16 +372,22 @@ async def list_orders(
     status: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """List orders based on user role"""
+    """List orders based on user role. Drafts only visible to their owner."""
     query = {}
     
     if current_user["role"] == "Requester":
         query["requester_id"] = current_user["id"]
+        # Requester can see their own drafts
     elif current_user["role"] == "Editor":
+        # Editors cannot see drafts, only Open and their assigned orders
         query["$or"] = [
             {"status": "Open"},
             {"editor_id": current_user["id"]}
         ]
+    else:
+        # Admin - exclude drafts from general view unless filtering by Draft status
+        if status != "Draft":
+            query["status"] = {"$ne": "Draft"}
     
     if status:
         if current_user["role"] == "Editor" and status != "Open":
@@ -394,9 +400,10 @@ async def list_orders(
     result = []
     for order in orders:
         order = normalize_order(order)
+        sla_deadline = order.get('sla_deadline')
         result.append(OrderResponse(
             **order,
-            is_sla_breached=is_sla_breached(order['sla_deadline'], order['status'])
+            is_sla_breached=is_sla_breached(sla_deadline, order['status']) if sla_deadline else False
         ))
     
     return result
@@ -404,7 +411,7 @@ async def list_orders(
 
 @router.get("/pool", response_model=List[OrderResponse])
 async def get_order_pool(current_user: dict = Depends(require_roles(["Editor", "Admin"]))):
-    """Get pool of open orders available for pickup"""
+    """Get pool of open orders available for pickup (excludes drafts)"""
     orders = await db.orders.find({"status": "Open"}, {"_id": 0}).sort("created_at", 1).to_list(1000)
     
     result = []
