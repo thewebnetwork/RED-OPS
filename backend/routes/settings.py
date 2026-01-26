@@ -198,9 +198,11 @@ async def get_announcement_ticker(current_user: dict = Depends(get_current_user)
     if not send_to_all:
         target_teams = ticker.get("target_teams", [])
         target_roles = ticker.get("target_roles", [])
+        target_specialties = ticker.get("target_specialties", [])
         
         user_team_ids = current_user.get("team_ids", [])
         user_role = current_user.get("role", "")
+        user_specialty_id = current_user.get("specialty_id", "")
         
         # Get user's role ID from roles collection
         user_role_ids = []
@@ -208,11 +210,12 @@ async def get_announcement_ticker(current_user: dict = Depends(get_current_user)
         if role_doc:
             user_role_ids.append(role_doc.get("id", ""))
         
-        # OR logic: user matches if in any target team OR has any target role
+        # OR logic: user matches if in any target team OR has any target role OR has any target specialty
         team_match = bool(set(user_team_ids) & set(target_teams)) if target_teams else False
         role_match = bool(set(user_role_ids) & set(target_roles)) if target_roles else False
+        specialty_match = user_specialty_id in target_specialties if target_specialties else False
         
-        if not team_match and not role_match:
+        if not team_match and not role_match and not specialty_match:
             return default_response
     
     return AnnouncementTickerResponse(**ticker)
