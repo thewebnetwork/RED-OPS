@@ -118,9 +118,13 @@ export default function Workflows() {
   }, [hasCreateChanges, hasDuplicateChanges, showCreateDialog, showDuplicateDialog]);
 
   const handleCreateDialogClose = (open) => {
-    if (!open && hasCreateChanges) {
-      setShowCreateUnsavedWarning(true);
-      return;
+    if (!open) {
+      // Check for changes directly  
+      const hasChanges = newWorkflowName.trim() !== '' || newWorkflowDescription.trim() !== '';
+      if (hasChanges) {
+        setShowCreateUnsavedWarning(true);
+        return;
+      }
     }
     setShowCreateDialog(open);
     if (!open) {
@@ -131,9 +135,14 @@ export default function Workflows() {
   };
 
   const handleDuplicateDialogClose = (open) => {
-    if (!open && hasDuplicateChanges) {
-      setShowDuplicateUnsavedWarning(true);
-      return;
+    if (!open && selectedWorkflow) {
+      // Check for changes directly
+      const defaultName = `${selectedWorkflow.name} (Copy)`;
+      const hasChanges = newWorkflowName !== defaultName && newWorkflowName.trim() !== '';
+      if (hasChanges) {
+        setShowDuplicateUnsavedWarning(true);
+        return;
+      }
     }
     setShowDuplicateDialog(open);
     if (!open) {
