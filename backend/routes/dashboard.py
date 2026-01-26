@@ -158,3 +158,67 @@ async def get_quick_stats(current_user: dict = Depends(get_current_user)):
         stats["active_announcements"] = 1 if ann else 0
     
     return stats
+
+
+# ============== HELPER FUNCTIONS ==============
+
+async def get_role_by_name(role_name: str):
+    """Get role document by name"""
+    return await db.roles.find_one({"name": role_name}, {"_id": 0})
+
+
+def enrich_orders(orders):
+    """Enrich orders with is_sla_breached flag"""
+    result = []
+    for o in orders:
+        o = normalize_order(o)
+        result.append(OrderResponse(
+            **o,
+            is_sla_breached=is_sla_breached(o.get('sla_deadline', ''), o.get('status', ''))
+        ))
+    return result
+
+
+# ============== EDITOR/REQUESTER DASHBOARDS ==============
+
+@router.get("/editor")
+async def get_editor_dashboard(current_user: dict = Depends(get_current_user)):
+    """Dashboard for service providers who can pick orders"""
+    # Check if user's role can pick orders
+    role = await get_role_by_name(current_user["role"])
+    if not role or not role.get("can_pick_orders"):
+        raise HTTPException(status_code=403, detail="Your role cannot pick orders")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    new_orders = await db.orders.find({"status": "Open"}, {"_id": 0}).sort("created_at", 1).to_list(100)
+    in_progress = await db.orders.find({"editor_id": current_user["id"], "status": "In Progress", "last_responded_at": None}, {"_id": 0}).to_list(100)
+    pending_review = await db.orders.find({"editor_id": current_user["id"], "status": "Pending"}, {"_id": 0}).to_list(100)
+    responded = await db.orders.find({"editor_id": current_user["id"], "status": "In Progress", "last_responded_at": {"$ne": None}}, {"_id": 0}).to_list(100)
+    delivered = await db.orders.find({"editor_id": current_user["id"], "status": "Delivered"}, {"_id": 0}).sort("delivered_at", -1).limit(20).to_list(20)
+    sla_breaching = await db.orders.find({"editor_id": current_user["id"], "status": {"$ne": "Delivered"}, "sla_deadline": {"$lt": now}}, {"_id": 0}).to_list(100)
+    
+    return {
+        "new_orders": enrich_orders(new_orders),
+        "in_progress": enrich_orders(in_progress),
+        "pending_review": enrich_orders(pending_review),
+        "responded": enrich_orders(responded),
+        "delivered": enrich_orders(delivered),
+        "sla_breaching": enrich_orders(sla_breaching)
+    }
+
+
+@router.get("/requester")
+async def get_requester_dashboard(current_user: dict = Depends(require_roles(["Requester"]))):
+    """Dashboard for requesters"""
+    open_orders = await db.orders.find({"requester_id": current_user["id"], "status": "Open"}, {"_id": 0}).to_list(100)
+    in_progress = await db.orders.find({"requester_id": current_user["id"], "status": "In Progress"}, {"_id": 0}).to_list(100)
+    needs_review = await db.orders.find({"requester_id": current_user["id"], "status": "Pending"}, {"_id": 0}).to_list(100)
+    delivered = await db.orders.find({"requester_id": current_user["id"], "status": "Delivered"}, {"_id": 0}).sort("delivered_at", -1).limit(20).to_list(20)
+    
+    return {
+        "open_orders": enrich_orders(open_orders),
+        "in_progress": enrich_orders(in_progress),
+        "needs_review": enrich_orders(needs_review),
+        "delivered": enrich_orders(delivered)
+    }
