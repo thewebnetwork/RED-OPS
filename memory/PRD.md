@@ -32,6 +32,37 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 11: P2/P3 Complete Implementation ✅ (January 26, 2026)
+Major backend refactoring and new features:
+
+**P2: Backend Refactoring**
+- Created modular `/app/backend/services/` directory with:
+  - `notifications.py` - Notification creation and status change alerts
+  - `webhooks.py` - Webhook trigger function for outgoing webhooks
+  - `email.py` - Email notification services (MOCKED)
+  - `workflow_engine.py` - Workflow execution engine
+  - `sla_monitor.py` - SLA breach checking and alerts
+- All services imported and used by main `server.py`
+
+**P3: Workflow Execution Engine**
+- `execute_workflow()` runs workflows when orders are created
+- Supports node types: trigger, action, condition, form
+- Action types: assign_role, update_status, notify, email_user, forward_ticket, webhook
+- Test endpoint: `POST /api/workflows/{id}/test`
+- Execution logs: `GET /api/workflow-executions`
+- Frontend: Workflows page has "Execution Logs" tab showing recent executions with status
+
+**P3: SLA Breach Alerts**
+- Background task runs every 15 minutes checking for SLA breaches
+- Creates alerts for breaches (SLA exceeded) and warnings (4 hours before deadline)
+- Notifications sent to assigned editors and all admins (for breaches)
+- API endpoints:
+  - `GET /api/sla-alerts` - List alerts
+  - `GET /api/sla-alerts/statistics` - Get stats (on_track, at_risk, breached counts)
+  - `POST /api/sla-alerts/{id}/acknowledge` - Acknowledge an alert
+  - `POST /api/sla-check` - Manually trigger SLA check
+- Frontend: SLA page has stats cards and "Alerts" tab with Refresh/Check Now buttons
+
 ### Phase 10: P2-3 Outgoing Webhooks ✅ (January 26, 2026)
 Complete webhook system for external integrations:
 
