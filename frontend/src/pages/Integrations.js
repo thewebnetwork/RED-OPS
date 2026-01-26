@@ -505,9 +505,9 @@ export default function Integrations() {
                 <CardTitle>Webhooks</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">Configure incoming and outgoing webhooks</p>
               </div>
-              <Dialog open={webhookDialogOpen} onOpenChange={setWebhookDialogOpen}>
+              <Dialog open={webhookDialogOpen} onOpenChange={handleWebhookDialogClose}>
                 <DialogTrigger asChild>
-                  <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-webhook-btn">
+                  <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleOpenWebhookDialog} data-testid="create-webhook-btn">
                     <Plus size={16} className="mr-2" />
                     Add Webhook
                   </Button>
