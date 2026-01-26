@@ -425,6 +425,16 @@ export default function CommandCenter() {
                             fetchData();
                             toast.success('Editing request submitted!');
                           }}
+                          onDraftSaved={() => {
+                            setTitle('');
+                            setDescription('');
+                            setAttachments([]);
+                            setSelectedL1('');
+                            setSelectedL2('');
+                            fetchData();
+                            setActiveTab('my-requests');
+                            toast.success('Draft saved! You can continue editing later.');
+                          }}
                         />
                       )}
                       {showFeatureForm && (
@@ -442,6 +452,16 @@ export default function CommandCenter() {
                             setSelectedL2('');
                             fetchData();
                             toast.success('Feature request submitted!');
+                          }}
+                          onDraftSaved={() => {
+                            setTitle('');
+                            setDescription('');
+                            setAttachments([]);
+                            setSelectedL1('');
+                            setSelectedL2('');
+                            fetchData();
+                            setActiveTab('my-requests');
+                            toast.success('Draft saved! You can continue editing later.');
                           }}
                         />
                       )}
@@ -461,6 +481,16 @@ export default function CommandCenter() {
                             setSelectedL2('');
                             fetchData();
                             toast.success('Bug report submitted!');
+                          }}
+                          onDraftSaved={() => {
+                            setTitle('');
+                            setDescription('');
+                            setAttachments([]);
+                            setSelectedL1('');
+                            setSelectedL2('');
+                            fetchData();
+                            setActiveTab('my-requests');
+                            toast.success('Draft saved! You can continue editing later.');
                           }}
                         />
                       )}
