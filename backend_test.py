@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class RedRibbonOpsAPITester:
-    def __init__(self, base_url="https://ticketflow-128.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://servicehub-191.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.editor_token = None
