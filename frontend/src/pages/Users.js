@@ -125,10 +125,7 @@ export default function Users() {
       setUsers(usersRes.data);
       setRoles(rolesRes.data);
       setTeams(teamsRes.data);
-      // Set default role to first available role
-      if (rolesRes.data.length > 0 && !formData.role) {
-        setFormData(prev => ({ ...prev, role: rolesRes.data[0].name }));
-      }
+      // Note: Don't set default role here - it's handled in handleOpenDialog
     } catch (error) {
       toast.error(t('errors.generic'));
     } finally {
