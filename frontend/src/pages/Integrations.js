@@ -136,9 +136,14 @@ export default function Integrations() {
   };
 
   const handleWebhookDialogClose = (open) => {
-    if (!open && hasWebhookChanges) {
-      setShowWebhookUnsavedWarning(true);
-      return;
+    if (!open) {
+      // Check for changes directly
+      const hasChanges = initialWebhookRef.current && 
+        JSON.stringify(newWebhook) !== JSON.stringify(initialWebhookRef.current);
+      if (hasChanges) {
+        setShowWebhookUnsavedWarning(true);
+        return;
+      }
     }
     setWebhookDialogOpen(open);
     if (!open) {
