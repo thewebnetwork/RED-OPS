@@ -388,7 +388,7 @@ export default function Integrations() {
                     <div className="space-y-4 pt-4">
                       <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                         <p className="text-sm text-amber-800 font-medium mb-2">
-                          Copy this key now - you won't be able to see it again!
+                          Copy this key now - you won&apos;t be able to see it again!
                         </p>
                         <div className="flex items-center gap-2">
                           <code className="flex-1 p-2 bg-white rounded border text-sm font-mono break-all">
