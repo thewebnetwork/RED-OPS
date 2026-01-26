@@ -134,8 +134,11 @@ export default function Announcements() {
 
   const handleSave = async () => {
     // Validate before saving
-    if (!ticker.send_to_all && ticker.target_teams.length === 0 && ticker.target_roles.length === 0) {
-      toast.error('Select at least one team or role, or turn on "Send to all"');
+    if (!ticker.send_to_all && 
+        ticker.target_teams.length === 0 && 
+        ticker.target_roles.length === 0 && 
+        ticker.target_specialties.length === 0) {
+      toast.error('Select at least one role, team, or specialty, or turn on "Send to all"');
       return;
     }
     
@@ -169,6 +172,15 @@ export default function Announcements() {
         ? prev.target_roles.filter(id => id !== roleId)
         : [...prev.target_roles, roleId];
       return { ...prev, target_roles: newTargets };
+    });
+  };
+
+  const handleToggleSpecialty = (specialtyId) => {
+    setTicker(prev => {
+      const newTargets = prev.target_specialties.includes(specialtyId)
+        ? prev.target_specialties.filter(id => id !== specialtyId)
+        : [...prev.target_specialties, specialtyId];
+      return { ...prev, target_specialties: newTargets };
     });
   };
 
