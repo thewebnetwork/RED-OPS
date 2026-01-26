@@ -100,6 +100,7 @@ export default function Workflows() {
     fetchWorkflows();
     fetchCategories();
     fetchExecutions();
+    fetchTemplates();
   }, []);
 
   // Track create dialog changes
