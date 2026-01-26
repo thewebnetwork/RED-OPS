@@ -232,15 +232,17 @@ async def get_announcement_ticker_admin(current_user: dict = Depends(require_rol
             send_to_all=True,
             target_teams=[],
             target_roles=[],
+            target_specialties=[],
             target_team_names=[],
             target_role_names=[],
+            target_specialty_names=[],
             background_color="#A2182C",
             text_color="#FFFFFF",
             updated_at=get_utc_now(),
             updated_by_name=None
         )
     
-    # Resolve team and role names
+    # Resolve team, role, and specialty names
     target_team_names = []
     for team_id in ticker.get("target_teams", []):
         team = await db.teams.find_one({"id": team_id}, {"_id": 0})
@@ -253,8 +255,16 @@ async def get_announcement_ticker_admin(current_user: dict = Depends(require_rol
         if role:
             target_role_names.append(role.get("name", "Unknown"))
     
+    target_specialty_names = []
+    for specialty_id in ticker.get("target_specialties", []):
+        specialty = await db.specialties.find_one({"id": specialty_id}, {"_id": 0})
+        if specialty:
+            target_specialty_names.append(specialty.get("name", "Unknown"))
+    
     ticker["target_team_names"] = target_team_names
     ticker["target_role_names"] = target_role_names
+    ticker["target_specialties"] = ticker.get("target_specialties", [])
+    ticker["target_specialty_names"] = target_specialty_names
     
     return AnnouncementTickerResponse(**ticker)
 
