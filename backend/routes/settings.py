@@ -507,3 +507,18 @@ async def stream_logs(log_type: str, current_user: dict = Depends(require_roles(
             "Access-Control-Allow-Origin": "*",
         }
     )
+
+
+# ============== IDENTITY MIGRATION ==============
+
+@router.post("/migrate-identity")
+async def run_identity_migration(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """Run identity model migration - converts old roles to new structure (Admin only)"""
+    from services.identity_migration import run_migration
+    
+    results = await run_migration(db)
+    return {
+        "message": "Identity migration completed",
+        "results": results
+    }
+
