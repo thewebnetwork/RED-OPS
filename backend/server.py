@@ -246,6 +246,8 @@ class WorkflowCreate(BaseModel):
     assigned_roles: List[str] = []  # Role IDs that can use this workflow
     assigned_teams: List[str] = []  # Team IDs that can use this workflow
     trigger_categories: List[str] = []  # Category IDs that trigger this workflow
+    trigger_event: Optional[str] = None  # Event that triggers this workflow (order.created, etc.)
+    trigger_category_id: Optional[str] = None  # Specific category that triggers this workflow
     color: Optional[str] = None
     nodes: List[WorkflowNode] = []
     edges: List[WorkflowEdge] = []
@@ -257,10 +259,13 @@ class WorkflowUpdate(BaseModel):
     assigned_roles: Optional[List[str]] = None
     assigned_teams: Optional[List[str]] = None
     trigger_categories: Optional[List[str]] = None
+    trigger_event: Optional[str] = None
+    trigger_category_id: Optional[str] = None
     color: Optional[str] = None
     nodes: Optional[List[WorkflowNode]] = None
     edges: Optional[List[WorkflowEdge]] = None
     active: Optional[bool] = None
+    is_active: Optional[bool] = None  # Alias for active
 
 class WorkflowResponse(BaseModel):
     id: str
@@ -272,10 +277,13 @@ class WorkflowResponse(BaseModel):
     assigned_team_names: List[str] = []
     trigger_categories: List[str] = []
     trigger_category_names: List[str] = []
+    trigger_event: Optional[str] = None
+    trigger_category_id: Optional[str] = None
     color: Optional[str] = None
     nodes: List[dict] = []
     edges: List[dict] = []
     is_template: bool = False
+    is_active: bool = True
     active: bool
     created_at: str
     updated_at: Optional[str] = None
