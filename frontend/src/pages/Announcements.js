@@ -19,6 +19,26 @@ import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Helper to format ISO date to datetime-local input value (no timezone conversion)
+const formatDateTimeLocal = (isoString) => {
+  if (!isoString) return '';
+  // If it's already in datetime-local format (YYYY-MM-DDTHH:MM), return as-is
+  if (isoString.length === 16) return isoString;
+  // If it's an ISO string with timezone, extract just the local part
+  // Parse and format without timezone conversion
+  try {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return isoString.slice(0, 16);
+  }
+};
+
 export default function Announcements() {
   const [ticker, setTicker] = useState({
     message: '',
