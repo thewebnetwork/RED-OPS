@@ -19,11 +19,12 @@ export default function AnnouncementTicker() {
       const res = await axios.get(`${API}/announcement-ticker`);
       setTicker(res.data);
     } catch (error) {
-      console.error('Failed to fetch ticker');
+      // If 401, user not logged in yet - try again later
+      console.log('Announcement ticker fetch skipped - user may not be logged in');
     }
   };
 
-  // Don't render if no ticker or not active
+  // Don't render if no ticker or not active or no message
   if (!ticker || !ticker.is_active || !ticker.message) {
     return null;
   }
