@@ -104,9 +104,12 @@ class UnifiedRequestResponse(BaseModel):
 
 @router.post("/feature-requests", response_model=FeatureRequestResponse)
 async def create_feature_request(request_data: FeatureRequestCreate, current_user: dict = Depends(get_current_user)):
-    """Create a new feature request"""
+    """Create a new feature request (or save as draft)"""
     request_code = await get_next_code(db, "feature_request_code", "FR")
     now = get_utc_now()
+    
+    is_draft = getattr(request_data, 'is_draft', False)
+    initial_status = "Draft" if is_draft else "Open"
     
     cat_l1_name = None
     cat_l2_name = None
@@ -133,13 +136,92 @@ async def create_feature_request(request_data: FeatureRequestCreate, current_use
         "who_is_for": request_data.who_is_for,
         "reference_links": request_data.reference_links,
         "priority": request_data.priority,
-        "status": "Open",
+        "status": initial_status,
         "created_at": now,
         "updated_at": now
     }
     await db.feature_requests.insert_one(feature_request)
     
-    # Notify admins
+    # Only notify admins for non-draft requests
+    if not is_draft:
+        admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+        for admin in admins:
+            await create_notification(
+                db,
+                admin['id'],
+                "new_feature_request",
+                "New feature request",
+                f"New feature request {request_code}: {request_data.title}",
+                feature_request['id']
+            )
+    
+    return FeatureRequestResponse(**feature_request)
+
+
+@router.put("/feature-requests/{request_id}/draft", response_model=FeatureRequestResponse)
+async def update_feature_request_draft(request_id: str, request_data: FeatureRequestCreate, current_user: dict = Depends(get_current_user)):
+    """Update a draft feature request"""
+    request = await db.feature_requests.find_one({"id": request_id}, {"_id": 0})
+    if not request:
+        raise HTTPException(status_code=404, detail="Feature request not found")
+    
+    if request["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own drafts")
+    
+    if request["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft requests can be updated this way")
+    
+    cat_l1_name = None
+    cat_l2_name = None
+    if request_data.category_l1_id:
+        l1 = await db.categories_l1.find_one({"id": request_data.category_l1_id}, {"_id": 0})
+        cat_l1_name = l1["name"] if l1 else None
+    if request_data.category_l2_id:
+        l2 = await db.categories_l2.find_one({"id": request_data.category_l2_id}, {"_id": 0})
+        cat_l2_name = l2["name"] if l2 else None
+    
+    now = get_utc_now()
+    await db.feature_requests.update_one(
+        {"id": request_id},
+        {"$set": {
+            "title": request_data.title,
+            "description": request_data.description,
+            "category_l1_id": request_data.category_l1_id,
+            "category_l1_name": cat_l1_name,
+            "category_l2_id": request_data.category_l2_id,
+            "category_l2_name": cat_l2_name,
+            "why_important": request_data.why_important,
+            "who_is_for": request_data.who_is_for,
+            "reference_links": request_data.reference_links,
+            "priority": request_data.priority,
+            "updated_at": now
+        }}
+    )
+    
+    updated = await db.feature_requests.find_one({"id": request_id}, {"_id": 0})
+    return FeatureRequestResponse(**updated)
+
+
+@router.post("/feature-requests/{request_id}/submit", response_model=FeatureRequestResponse)
+async def submit_feature_request_draft(request_id: str, current_user: dict = Depends(get_current_user)):
+    """Submit a draft feature request - converts Draft to Open status"""
+    request = await db.feature_requests.find_one({"id": request_id}, {"_id": 0})
+    if not request:
+        raise HTTPException(status_code=404, detail="Feature request not found")
+    
+    if request["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only submit your own drafts")
+    
+    if request["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft requests can be submitted")
+    
+    now = get_utc_now()
+    await db.feature_requests.update_one(
+        {"id": request_id},
+        {"$set": {"status": "Open", "updated_at": now}}
+    )
+    
+    # Now notify admins
     admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
     for admin in admins:
         await create_notification(
@@ -147,11 +229,12 @@ async def create_feature_request(request_data: FeatureRequestCreate, current_use
             admin['id'],
             "new_feature_request",
             "New feature request",
-            f"New feature request {request_code}: {request_data.title}",
-            feature_request['id']
+            f"New feature request {request['request_code']}: {request['title']}",
+            request['id']
         )
     
-    return FeatureRequestResponse(**feature_request)
+    updated = await db.feature_requests.find_one({"id": request_id}, {"_id": 0})
+    return FeatureRequestResponse(**updated)
 
 
 @router.get("/feature-requests", response_model=List[FeatureRequestResponse])
