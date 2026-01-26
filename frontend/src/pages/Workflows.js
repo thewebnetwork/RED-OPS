@@ -213,6 +213,50 @@ export default function Workflows() {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      const res = await axios.get(`${API}/workflow-templates`);
+      setTemplates(res.data.templates || []);
+      setTemplateCategories(res.data.categories || []);
+    } catch (error) {
+      console.error('Failed to load templates');
+    }
+  };
+
+  const handleInstallTemplate = async (templateId) => {
+    setInstallingTemplate(templateId);
+    try {
+      const res = await axios.post(`${API}/workflow-templates/${templateId}/install`);
+      toast.success(res.data.message || 'Workflow installed successfully!');
+      fetchWorkflows();
+      // Navigate to the new workflow
+      if (res.data.id) {
+        navigate(`/workflows/${res.data.id}`);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to install template');
+    } finally {
+      setInstallingTemplate(null);
+    }
+  };
+
+  const getTemplateIcon = (iconName) => {
+    const icons = {
+      UserPlus: UserPlus,
+      AlertTriangle: AlertTriangle,
+      Star: Star,
+      Clock: Clock,
+      Zap: Zap,
+      Link: Link,
+    };
+    const IconComponent = icons[iconName] || GitBranch;
+    return IconComponent;
+  };
+
+  const filteredTemplates = selectedTemplateCategory === 'all' 
+    ? templates 
+    : templates.filter(t => t.category === selectedTemplateCategory);
+
   const handleTestWorkflow = async (workflowId) => {
     try {
       const res = await axios.post(`${API}/workflows/${workflowId}/test`);
