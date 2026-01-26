@@ -235,20 +235,20 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/sla" 
+        path="/sla-policies" 
         element={
           <PrivateRoute roles={["Administrator"]}>
-            <SLA />
+            <SLAPolicies />
           </PrivateRoute>
         } 
       />
       <Route 
+        path="/sla" 
+        element={<Navigate to="/sla-policies" />}
+      />
+      <Route 
         path="/escalation" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <EscalationPolicies />
-          </PrivateRoute>
-        } 
+        element={<Navigate to="/sla-policies" />}
       />
       <Route 
         path="/profile" 
