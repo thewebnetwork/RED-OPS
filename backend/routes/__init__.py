@@ -16,6 +16,7 @@ from .orders import router as orders_router
 from .feedback import router as feedback_router
 from .settings import router as settings_router
 from .workflows import router as workflows_router
+from .escalation import router as escalation_router
 
 __all__ = [
     "auth_router",
@@ -33,4 +34,5 @@ __all__ = [
     "feedback_router",
     "settings_router",
     "workflows_router",
+    "escalation_router",
 ]
