@@ -592,7 +592,7 @@ export default function Integrations() {
                       </div>
                     </div>
                     <div className="flex gap-3 pt-2">
-                      <Button variant="outline" onClick={() => setWebhookDialogOpen(false)} className="flex-1">
+                      <Button variant="outline" onClick={() => handleWebhookDialogClose(false)} className="flex-1">
                         Cancel
                       </Button>
                       <Button 
