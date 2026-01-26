@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Megaphone } from 'lucide-react';
 
@@ -7,14 +7,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function AnnouncementTicker() {
   const [ticker, setTicker] = useState(null);
 
-  useEffect(() => {
-    fetchTicker();
-    // Refresh ticker every 5 minutes
-    const interval = setInterval(fetchTicker, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchTicker = async () => {
+  const fetchTicker = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/announcement-ticker`);
       setTicker(res.data);
@@ -22,7 +15,14 @@ export default function AnnouncementTicker() {
       // If 401, user not logged in yet - try again later
       console.log('Announcement ticker fetch skipped - user may not be logged in');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTicker();
+    // Refresh ticker every 5 minutes
+    const interval = setInterval(fetchTicker, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchTicker]);
 
   // Don't render if no ticker or not active or no message
   if (!ticker || !ticker.is_active || !ticker.message) {
