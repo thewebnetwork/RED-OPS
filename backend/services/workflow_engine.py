@@ -257,6 +257,98 @@ async def execute_action(db, action_type: str, node_data: dict, context: dict) -
                 return {"forwarded_to": category.get("name")}
         return {"message": "No forwarding done"}
     
+    elif action_type == "auto_escalate":
+        # Auto-escalate if ticket is breached for a certain duration
+        config = node_data.get("config", {})
+        escalate_after_minutes = int(config.get("escalate_after_minutes", 60))
+        escalate_to_type = config.get("escalate_to_type", "role")  # role, team, or user
+        escalate_to_id = config.get("escalate_to_id")
+        escalation_message = config.get("escalation_message", "This ticket has been escalated due to extended SLA breach.")
+        
+        if not order.get("id"):
+            return {"message": "No order in context"}
+        
+        # Check if order is breached
+        is_breached = order.get("is_sla_breached", False)
+        if not is_breached:
+            return {"message": "Order not in breach status, skipping escalation"}
+        
+        # Check if already escalated recently (cooldown check)
+        existing_escalation = await db.escalation_history.find_one({
+            "order_id": order["id"],
+            "source": "workflow_auto_escalate",
+            "created_at": {"$gte": (datetime.now(timezone.utc) - timedelta(minutes=escalate_after_minutes)).isoformat()}
+        })
+        
+        if existing_escalation:
+            return {"message": "Already escalated recently, cooldown active"}
+        
+        # Determine escalation target
+        target_users = []
+        if escalate_to_type == "role" and escalate_to_id:
+            # Find users with this role
+            role = await db.roles.find_one({"id": escalate_to_id}, {"_id": 0})
+            if role:
+                users = await db.users.find({"role": role.get("name"), "active": True}, {"_id": 0}).to_list(100)
+                target_users = users
+        elif escalate_to_type == "team" and escalate_to_id:
+            # Find users in this team
+            team = await db.teams.find_one({"id": escalate_to_id}, {"_id": 0})
+            if team:
+                member_ids = team.get("members", [])
+                users = await db.users.find({"id": {"$in": member_ids}, "active": True}, {"_id": 0}).to_list(100)
+                target_users = users
+        elif escalate_to_type == "user" and escalate_to_id:
+            # Specific user
+            user = await db.users.find_one({"id": escalate_to_id, "active": True}, {"_id": 0})
+            if user:
+                target_users = [user]
+        
+        if not target_users:
+            # Fall back to all admins
+            admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
+            target_users = admins
+        
+        # Create escalation record
+        escalation_record = {
+            "id": str(uuid.uuid4()),
+            "order_id": order["id"],
+            "order_code": order.get("order_code"),
+            "source": "workflow_auto_escalate",
+            "reason": f"SLA breached for extended period",
+            "message": escalation_message.format(
+                order_code=order.get("order_code", ""),
+                title=order.get("title", ""),
+                status=order.get("status", "")
+            ),
+            "escalated_to": [u["id"] for u in target_users],
+            "escalated_to_names": [u["name"] for u in target_users],
+            "acknowledged": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.escalation_history.insert_one(escalation_record)
+        
+        # Send notifications to all targets
+        for target_user in target_users:
+            await create_notification(
+                db,
+                target_user["id"],
+                "escalation",
+                f"Escalation: {order.get('order_code')}",
+                escalation_message.format(
+                    order_code=order.get("order_code", ""),
+                    title=order.get("title", ""),
+                    status=order.get("status", "")
+                ),
+                order.get("id")
+            )
+        
+        return {
+            "escalated": True,
+            "escalated_to": [u["name"] for u in target_users],
+            "escalation_id": escalation_record["id"]
+        }
+    
     return {"message": f"Unknown action type: {action_type}"}
 
 
