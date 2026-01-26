@@ -26,6 +26,7 @@ import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
 import SLA from "./pages/SLA";
 import EmailSettings from "./pages/EmailSettings";
+import EscalationPolicies from "./pages/EscalationPolicies";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
