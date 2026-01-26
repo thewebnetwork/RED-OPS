@@ -138,6 +138,76 @@ async def delete_category_l1(category_id: str, current_user: dict = Depends(requ
 
 # ============== L2 CATEGORY (SUBCATEGORY) ROUTES ==============
 
+@router.post("/l2")
+async def create_category_l2_direct(cat_data: CategoryL2Create, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Create a new L2 category (Admin only)"""
+    # Verify L1 category exists
+    l1_category = await db.categories_l1.find_one({"id": cat_data.category_l1_id, "active": True})
+    if not l1_category:
+        raise HTTPException(status_code=404, detail="Parent category not found")
+    
+    # Check for duplicate name under same L1
+    existing = await db.categories_l2.find_one({
+        "name": cat_data.name,
+        "category_l1_id": cat_data.category_l1_id,
+        "active": True
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Subcategory with this name already exists")
+    
+    subcategory = {
+        "id": str(uuid.uuid4()),
+        "name": cat_data.name,
+        "name_en": cat_data.name_en,
+        "name_pt": cat_data.name_pt,
+        "name_es": cat_data.name_es,
+        "category_l1_id": cat_data.category_l1_id,
+        "category_l1_name": l1_category["name"],
+        "description": cat_data.description,
+        "active": True,
+        "created_at": get_utc_now()
+    }
+    
+    await db.categories_l2.insert_one(subcategory)
+    return {k: v for k, v in subcategory.items() if k != "_id"}
+
+
+@router.get("/l2")
+async def list_categories_l2(category_l1_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """List all L2 categories, optionally filtered by L1"""
+    query = {"active": True}
+    if category_l1_id:
+        query["category_l1_id"] = category_l1_id
+    
+    subcategories = await db.categories_l2.find(query, {"_id": 0}).to_list(100)
+    return subcategories
+
+
+@router.patch("/l2/{category_id}")
+async def update_category_l2_direct(category_id: str, cat_data: CategoryL2Update, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Update a L2 category (Admin only)"""
+    subcategory = await db.categories_l2.find_one({"id": category_id}, {"_id": 0})
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="Subcategory not found")
+    
+    update_dict = {k: v for k, v in cat_data.model_dump().items() if v is not None}
+    
+    if update_dict:
+        await db.categories_l2.update_one({"id": category_id}, {"$set": update_dict})
+    
+    updated = await db.categories_l2.find_one({"id": category_id}, {"_id": 0})
+    return updated
+
+
+@router.delete("/l2/{category_id}")
+async def delete_category_l2_direct(category_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Soft delete a L2 category (Admin only)"""
+    result = await db.categories_l2.update_one({"id": category_id}, {"$set": {"active": False}})
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Subcategory not found")
+    return {"message": "Subcategory deleted"}
+
+
 @router.post("/{category_l1_id}/subcategories")
 async def create_category_l2(category_l1_id: str, cat_data: CategoryL2Create, current_user: dict = Depends(require_roles(["Admin"]))):
     """Create a new L2 category under an L1 category (Admin only)"""
