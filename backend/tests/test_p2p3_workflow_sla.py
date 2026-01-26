@@ -36,11 +36,17 @@ def auth_headers(auth_token):
 class TestP2BackendRefactoring:
     """P2: Verify backend services are modularized"""
     
-    def test_services_directory_exists(self):
+    def test_services_directory_exists(self, auth_headers):
         """Verify services directory structure exists (checked via imports working)"""
-        # If the server is running, the imports worked
-        response = requests.get(f"{BASE_URL}/api/health")
+        # If the server is running and these endpoints work, the imports worked
+        # Test that workflow engine service is imported
+        response = requests.get(f"{BASE_URL}/api/workflows", headers=auth_headers)
         assert response.status_code == 200
+        
+        # Test that SLA monitor service is imported
+        response = requests.get(f"{BASE_URL}/api/sla-alerts/statistics", headers=auth_headers)
+        assert response.status_code == 200
+        
         print("✓ Backend services are properly imported and running")
     
     def test_notifications_service_works(self, auth_headers):
