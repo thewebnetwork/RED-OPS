@@ -162,6 +162,7 @@ app.include_router(workflows_router, prefix="/api")
 app.include_router(escalation_router, prefix="/api")
 app.include_router(specialties_router, prefix="/api")
 app.include_router(access_tiers_router, prefix="/api")
+app.include_router(sla_policies_router, prefix="/api")
 
 
 @app.get("/")
