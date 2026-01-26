@@ -590,13 +590,13 @@ export default function Workflows() {
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
-                          <span>Started: {format(new Date(execution.created_at), 'MMM d, yyyy HH:mm')}</span>
+                          <span>Started: {format(new Date(execution.started_at), 'MMM d, yyyy HH:mm')}</span>
                           {execution.completed_at && (
                             <span>Completed: {format(new Date(execution.completed_at), 'MMM d, yyyy HH:mm')}</span>
                           )}
                         </div>
-                        {execution.error_message && (
-                          <p className="text-sm text-red-600 mt-1">{execution.error_message}</p>
+                        {execution.error && (
+                          <p className="text-sm text-red-600 mt-1">{execution.error}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
