@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Plus, Shield, Clock, AlertTriangle, Bell, Users, 
@@ -25,7 +26,9 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function SLAPolicies() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('policies');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'policies';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -39,6 +42,7 @@ export default function SLAPolicies() {
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
   const [specialties, setSpecialties] = useState([]);
+  const [accessTiers, setAccessTiers] = useState([]);
   
   // Dialog states
   const [showPolicyDialog, setShowPolicyDialog] = useState(false);
@@ -74,10 +78,20 @@ export default function SLAPolicies() {
 
   const fetchReferenceData = useCallback(async () => {
     try {
-      const [rolesRes, teamsRes, specialtiesRes] = await Promise.all([
+      const [rolesRes, teamsRes, specialtiesRes, tiersRes] = await Promise.all([
         axios.get(`${API}/roles`),
         axios.get(`${API}/teams`),
-        axios.get(`${API}/specialties`)
+        axios.get(`${API}/specialties`),
+        axios.get(`${API}/access-tiers`)
+      ]);
+      setRoles(rolesRes.data);
+      setTeams(teamsRes.data);
+      setSpecialties(specialtiesRes.data);
+      setAccessTiers(tiersRes.data);
+    } catch (error) {
+      console.error('Failed to fetch reference data');
+    }
+  }, []);
       ]);
       setRoles(rolesRes.data);
       setTeams(teamsRes.data);
