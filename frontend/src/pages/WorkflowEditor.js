@@ -1264,6 +1264,19 @@ function FormNodeConfig({ data, updateData }) {
 // Action Node Configuration
 function ActionNodeConfig({ data, updateData, roles, teams }) {
   const [actions, setActions] = useState(data?.actions || []);
+  const [slaPolicies, setSlaPolicies] = useState([]);
+
+  useEffect(() => {
+    const fetchPolicies = async () => {
+      try {
+        const res = await axios.get(`${API}/sla-policies`);
+        setSlaPolicies(res.data);
+      } catch (error) {
+        console.error('Failed to fetch SLA policies');
+      }
+    };
+    fetchPolicies();
+  }, []);
 
   const actionTypes = [
     { type: 'assign_role', label: 'Auto-Assign Role', icon: UserPlus },
@@ -1273,7 +1286,7 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
     { type: 'update_status', label: 'Update Status', icon: RefreshCw },
     { type: 'notify', label: 'Send Notification', icon: Bell },
     { type: 'webhook', label: 'Trigger Webhook', icon: Webhook },
-    { type: 'auto_escalate', label: 'Auto-Escalate on Breach', icon: AlertTriangle },
+    { type: 'apply_sla_policy', label: 'Apply SLA Policy', icon: Shield },
   ];
 
   const addAction = (type) => {
