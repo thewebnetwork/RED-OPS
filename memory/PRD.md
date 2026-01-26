@@ -32,6 +32,34 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 14: Enhancement Features ✅ (January 26, 2026)
+
+**1. Workflow Templates Gallery**
+- 6 pre-built workflow templates:
+  - Editor Assignment (Assignment) - Notifies editors on new orders
+  - SLA Escalation (Escalation) - Auto-escalates when SLA at risk
+  - Customer Feedback Request (Feedback) - Sends survey after delivery
+  - Auto-Close Inactive Tickets (Automation) - Closes stale tickets
+  - Priority-Based Routing (Routing) - Routes high priority to senior team
+  - External System Sync (Integration) - Webhook to external systems
+- One-click install functionality
+- Category filtering (All, Escalation, Feedback, Automation, Routing, Integration, Assignment)
+- Popularity scores and node/edge counts displayed
+- API: `GET/POST /api/workflow-templates`, `POST /api/workflow-templates/{id}/install`
+
+**2. API Key Usage Analytics**
+- Summary dashboard with cards: Total Keys, Requests Today, This Week, All Time
+- Per-key usage table with Today/Week/Total breakdown
+- API: `GET /api/api-keys/analytics/summary`, `GET /api/api-keys/{id}/usage`
+- New tab "Analytics" in Integrations page
+
+**3. Real-time Log Streaming**
+- "Live Stream" button for SSE-based real-time logs
+- "Poll (5s)" button for interval-based refresh
+- Streaming status banner shows count of received logs
+- Backend SSE endpoint: `GET /api/logs/stream/{log_type}`
+- Supports system, api, ui, user log types
+
 ### Phase 13: Workflow Validation & Backend Refactor Start ✅ (January 26, 2026)
 
 **1. Test Workflow Validation**
