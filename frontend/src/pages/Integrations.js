@@ -365,15 +365,9 @@ export default function Integrations() {
                 <CardTitle>API Keys</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">Manage API keys for external integrations</p>
               </div>
-              <Dialog open={apiKeyDialogOpen} onOpenChange={(open) => {
-                setApiKeyDialogOpen(open);
-                if (!open) {
-                  setGeneratedKey(null);
-                  setNewApiKey({ name: '', permissions: 'read' });
-                }
-              }}>
+              <Dialog open={apiKeyDialogOpen} onOpenChange={handleApiKeyDialogClose}>
                 <DialogTrigger asChild>
-                  <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-api-key-btn">
+                  <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleOpenApiKeyDialog} data-testid="create-api-key-btn">
                     <Plus size={16} className="mr-2" />
                     Create Key
                   </Button>
