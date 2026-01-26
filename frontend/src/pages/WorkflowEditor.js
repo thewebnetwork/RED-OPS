@@ -752,6 +752,32 @@ export default function WorkflowEditor() {
           </SheetContent>
         </Sheet>
       </div>
+
+      {/* Unsaved Changes Dialog */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to this workflow. Would you like to save them before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <Button variant="outline" onClick={handleDiscardChanges}>
+              Discard Changes
+            </Button>
+            <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-rose-600 hover:bg-rose-700">
+              Save & Leave
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
