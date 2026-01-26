@@ -77,6 +77,10 @@ export default function Workflows() {
   const [workflows, setWorkflows] = useState([]);
   const [categories, setCategories] = useState([]);
   const [executions, setExecutions] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [templateCategories, setTemplateCategories] = useState([]);
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('all');
+  const [installingTemplate, setInstallingTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
