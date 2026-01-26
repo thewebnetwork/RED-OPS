@@ -603,6 +603,54 @@ export default function Workflows() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Workflow Unsaved Changes Warning */}
+      <AlertDialog open={showCreateUnsavedWarning} onOpenChange={setShowCreateUnsavedWarning}>
+        <AlertDialogContent data-testid="unsaved-changes-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCreateUnsavedWarning(false)} data-testid="stay-btn">
+              Stay
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCloseCreateDialog}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="leave-btn"
+            >
+              Leave without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicate Workflow Unsaved Changes Warning */}
+      <AlertDialog open={showDuplicateUnsavedWarning} onOpenChange={setShowDuplicateUnsavedWarning}>
+        <AlertDialogContent data-testid="unsaved-changes-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Save before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDuplicateUnsavedWarning(false)} data-testid="stay-btn">
+              Stay
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCloseDuplicateDialog}
+              className="bg-slate-600 hover:bg-slate-700"
+              data-testid="leave-btn"
+            >
+              Leave without saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
