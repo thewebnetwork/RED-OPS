@@ -26,8 +26,9 @@ class TestEscalationSetup:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "access_token" in data, "No access_token in response"
-        return data["access_token"]
+        # API returns 'token' not 'access_token'
+        assert "token" in data, "No token in response"
+        return data["token"]
     
     @pytest.fixture(scope="class")
     def headers(self, auth_token):
