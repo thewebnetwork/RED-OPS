@@ -373,8 +373,13 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 - Integrate Real SMTP (user provides credentials) - Backend ready, UI ready
 - ~~Execute outgoing webhooks on events~~ ✅ DONE
 
-### P2: Refactoring 🟡 (Next)
-- Refactor monolithic server.py into modular structure
+### P2: Refactoring ✅ DONE
+- ~~Refactor monolithic server.py into modular structure~~ ✅ DONE
+
+### P3: Backend Improvements ✅ DONE
+- ~~Workflow Execution Engine~~ ✅ DONE
+- ~~SLA breach alerts and notifications~~ ✅ DONE
+- Real-time log streaming for Logs module (remaining)
 
 ### P3: Backend Improvements 🟣
 - Workflow Execution Engine (execute workflows on ticket creation)
