@@ -448,23 +448,6 @@ export default function Categories() {
             </CardContent>
           </Card>
 
-          {/* Info Card */}
-          <Card className="border-slate-200 mt-4">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
-                  <Lightbulb size={16} className="text-amber-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">About Editor Workflow</p>
-                  <p className="text-sm text-slate-500 mt-1">
-                    When a subcategory has &quot;Editor Workflow&quot; enabled, requests under that category will be visible 
-                    in the Editor&apos;s order pool and follow the standard editing workflow (Open → In Progress → Pending → Delivered).
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
