@@ -194,15 +194,18 @@ export default function Integrations() {
 
   const fetchData = async () => {
     try {
-      const [keysRes, webhooksRes] = await Promise.all([
+      const [keysRes, webhooksRes, analyticsRes] = await Promise.all([
         axios.get(`${API}/api-keys`).catch(() => ({ data: [] })),
-        axios.get(`${API}/webhooks`).catch(() => ({ data: [] }))
+        axios.get(`${API}/webhooks`).catch(() => ({ data: [] })),
+        axios.get(`${API}/api-keys/analytics/summary`).catch(() => ({ data: null }))
       ]);
       setApiKeys(keysRes.data || []);
       setWebhooks(webhooksRes.data || []);
+      setAnalytics(analyticsRes.data || null);
     } catch (error) {
       setApiKeys([]);
       setWebhooks([]);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
