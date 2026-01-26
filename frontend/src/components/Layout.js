@@ -143,7 +143,7 @@ export default function Layout({ children }) {
                 }`}
               >
                 <item.icon size={18} strokeWidth={1.5} />
-                {t(item.labelKey)}
+                {item.label || t(item.labelKey)}
               </Link>
             ))}
           </div>
