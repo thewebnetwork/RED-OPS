@@ -2690,32 +2690,209 @@ def get_default_ui_settings():
 # ============== ANNOUNCEMENT TICKER ROUTES ==============
 
 @api_router.get("/announcement-ticker", response_model=AnnouncementTickerResponse)
-async def get_announcement_ticker():
-    """Get current announcement ticker (public - no auth required for display)"""
+async def get_announcement_ticker(current_user: dict = Depends(get_current_user)):
+    """Get current announcement ticker for the logged-in user"""
     ticker = await db.announcement_ticker.find_one({}, {"_id": 0})
     if not ticker:
         # Return default inactive ticker
         return AnnouncementTickerResponse(
             message="",
             is_active=False,
+            send_to_all=True,
+            target_teams=[],
+            target_roles=[],
+            target_team_names=[],
+            target_role_names=[],
             background_color="#A2182C",
             text_color="#FFFFFF",
             updated_at=get_utc_now(),
             updated_by_name=None
         )
+    
+    # Check if user should see this announcement
+    if not ticker.get("is_active", False):
+        return AnnouncementTickerResponse(
+            message="",
+            is_active=False,
+            send_to_all=True,
+            target_teams=[],
+            target_roles=[],
+            target_team_names=[],
+            target_role_names=[],
+            background_color="#A2182C",
+            text_color="#FFFFFF",
+            updated_at=get_utc_now(),
+            updated_by_name=None
+        )
+    
+    # Check schedule (if end_at exists and has passed)
+    now = datetime.now(timezone.utc)
+    if ticker.get("start_at"):
+        try:
+            start_dt = datetime.fromisoformat(ticker["start_at"].replace('Z', '+00:00'))
+            if now < start_dt:
+                # Not started yet
+                return AnnouncementTickerResponse(
+                    message="",
+                    is_active=False,
+                    send_to_all=True,
+                    target_teams=[],
+                    target_roles=[],
+                    target_team_names=[],
+                    target_role_names=[],
+                    background_color="#A2182C",
+                    text_color="#FFFFFF",
+                    updated_at=get_utc_now(),
+                    updated_by_name=None
+                )
+        except:
+            pass
+    
+    if ticker.get("end_at"):
+        try:
+            end_dt = datetime.fromisoformat(ticker["end_at"].replace('Z', '+00:00'))
+            if now > end_dt:
+                # Expired
+                return AnnouncementTickerResponse(
+                    message="",
+                    is_active=False,
+                    send_to_all=True,
+                    target_teams=[],
+                    target_roles=[],
+                    target_team_names=[],
+                    target_role_names=[],
+                    background_color="#A2182C",
+                    text_color="#FFFFFF",
+                    updated_at=get_utc_now(),
+                    updated_by_name=None
+                )
+        except:
+            pass
+    
+    # Check targeting
+    send_to_all = ticker.get("send_to_all", True)
+    if not send_to_all:
+        target_teams = ticker.get("target_teams", [])
+        target_roles = ticker.get("target_roles", [])
+        
+        user_team_ids = current_user.get("team_ids", [])
+        user_role = current_user.get("role", "")
+        
+        # Get user's role ID from roles collection
+        user_role_ids = []
+        role_doc = await db.roles.find_one({"name": user_role}, {"_id": 0})
+        if role_doc:
+            user_role_ids.append(role_doc.get("id", ""))
+        
+        # OR logic: user matches if in any target team OR has any target role
+        team_match = bool(set(user_team_ids) & set(target_teams)) if target_teams else False
+        role_match = bool(set(user_role_ids) & set(target_roles)) if target_roles else False
+        
+        if not team_match and not role_match:
+            # User doesn't match targeting criteria
+            return AnnouncementTickerResponse(
+                message="",
+                is_active=False,
+                send_to_all=True,
+                target_teams=[],
+                target_roles=[],
+                target_team_names=[],
+                target_role_names=[],
+                background_color="#A2182C",
+                text_color="#FFFFFF",
+                updated_at=get_utc_now(),
+                updated_by_name=None
+            )
+    
+    # User can see the announcement
+    return AnnouncementTickerResponse(**ticker)
+
+@api_router.get("/announcement-ticker/admin", response_model=AnnouncementTickerResponse)
+async def get_announcement_ticker_admin(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get full announcement ticker data for admin editing"""
+    ticker = await db.announcement_ticker.find_one({}, {"_id": 0})
+    if not ticker:
+        return AnnouncementTickerResponse(
+            message="",
+            is_active=False,
+            send_to_all=True,
+            target_teams=[],
+            target_roles=[],
+            target_team_names=[],
+            target_role_names=[],
+            background_color="#A2182C",
+            text_color="#FFFFFF",
+            updated_at=get_utc_now(),
+            updated_by_name=None
+        )
+    
+    # Resolve team and role names
+    target_team_names = []
+    for team_id in ticker.get("target_teams", []):
+        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+        if team:
+            target_team_names.append(team.get("name", "Unknown"))
+    
+    target_role_names = []
+    for role_id in ticker.get("target_roles", []):
+        role = await db.roles.find_one({"id": role_id}, {"_id": 0})
+        if role:
+            target_role_names.append(role.get("name", "Unknown"))
+    
+    ticker["target_team_names"] = target_team_names
+    ticker["target_role_names"] = target_role_names
+    
     return AnnouncementTickerResponse(**ticker)
 
 @api_router.put("/announcement-ticker", response_model=AnnouncementTickerResponse)
 async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
     """Update announcement ticker (Admin only)"""
+    # Validation: If send_to_all is OFF, require at least one team or role
+    if not ticker_data.send_to_all:
+        if not ticker_data.target_teams and not ticker_data.target_roles:
+            raise HTTPException(
+                status_code=400, 
+                detail="Select at least one team or role, or turn on 'Send to all'"
+            )
+    
+    now = get_utc_now()
+    
+    # Get existing ticker to preserve created_at
+    existing = await db.announcement_ticker.find_one({}, {"_id": 0})
+    
+    # Resolve team and role names
+    target_team_names = []
+    for team_id in ticker_data.target_teams:
+        team = await db.teams.find_one({"id": team_id}, {"_id": 0})
+        if team:
+            target_team_names.append(team.get("name", "Unknown"))
+    
+    target_role_names = []
+    for role_id in ticker_data.target_roles:
+        role = await db.roles.find_one({"id": role_id}, {"_id": 0})
+        if role:
+            target_role_names.append(role.get("name", "Unknown"))
+    
     ticker = {
+        "id": existing.get("id") if existing else str(uuid.uuid4()),
         "message": ticker_data.message,
         "is_active": ticker_data.is_active,
+        "send_to_all": ticker_data.send_to_all,
+        "target_teams": ticker_data.target_teams,
+        "target_roles": ticker_data.target_roles,
+        "target_team_names": target_team_names,
+        "target_role_names": target_role_names,
+        "start_at": ticker_data.start_at,
+        "end_at": ticker_data.end_at,
+        "priority": ticker_data.priority,
         "background_color": ticker_data.background_color or "#A2182C",
         "text_color": ticker_data.text_color or "#FFFFFF",
-        "updated_at": get_utc_now(),
+        "updated_at": now,
         "updated_by_id": current_user["id"],
-        "updated_by_name": current_user["name"]
+        "updated_by_name": current_user["name"],
+        "created_at": existing.get("created_at") if existing else now,
+        "created_by_id": existing.get("created_by_id") if existing else current_user["id"],
+        "created_by_name": existing.get("created_by_name") if existing else current_user["name"]
     }
     
     # Upsert - only one ticker document exists
