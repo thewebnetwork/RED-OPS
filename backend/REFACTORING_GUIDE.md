@@ -6,9 +6,9 @@ The backend is in the process of being refactored from a monolithic `server.py` 
 
 ### Progress Summary
 - **Phase 1 (Models)**: ✅ COMPLETED - All Pydantic models extracted to `/app/backend/models/`
-- **Phase 2 (Routes)**: 🔄 IN PROGRESS - 6 route modules extracted
+- **Phase 2 (Routes)**: 🔄 IN PROGRESS - 11 route modules extracted (70 endpoints)
 
-## Extracted Route Modules (6/15)
+## Extracted Route Modules (11/15)
 
 | Module | Routes | Status |
 |--------|--------|--------|
@@ -16,17 +16,19 @@ The backend is in the process of being refactored from a monolithic `server.py` 
 | `users.py` | 5 | ✅ Done |
 | `roles.py` | 6 | ✅ Done |
 | `teams.py` | 7 | ✅ Done |
+| `categories.py` | 11 | ✅ Done |
 | `dashboard.py` | 3 | ✅ Done |
 | `notifications.py` | 6 | ✅ Done |
-| `categories.py` | 8 | ⏳ Pending |
-| `orders.py` | 14 | ⏳ Pending |
-| `workflows.py` | 18 | ⏳ Pending |
-| `settings.py` | 11 | ⏳ Pending |
-| `feedback.py` | - | ⏳ Pending |
-| `webhooks.py` | - | ⏳ Pending |
-| `sla.py` | - | ⏳ Pending |
-| `api_keys.py` | - | ⏳ Pending |
-| `ratings.py` | - | ⏳ Pending |
+| `sla.py` | 7 | ✅ Done |
+| `api_keys.py` | 5 | ✅ Done |
+| `webhooks.py` | 8 | ✅ Done |
+| `ratings.py` | 5 | ✅ Done |
+| `orders.py` | ~14 | ⏳ Pending (complex) |
+| `workflows.py` | ~18 | ⏳ Pending (complex) |
+| `settings.py` | ~11 | ⏳ Pending |
+| `feedback.py` | ~8 | ⏳ Pending |
+
+**Total extracted: 70 routes in 11 modules**
 
 ## New Modular Structure
 
