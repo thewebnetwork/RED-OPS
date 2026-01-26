@@ -530,6 +530,26 @@ export default function Workflows() {
                     )}
                   </div>
                 )}
+                {(workflow.assigned_specialty_names?.length > 0 || workflow.assigned_access_tier_names?.length > 0) && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {workflow.assigned_specialty_names?.slice(0, 2).map((name, idx) => (
+                      <span
+                        key={`spec-${idx}`}
+                        className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                    {workflow.assigned_access_tier_names?.slice(0, 2).map((name, idx) => (
+                      <span
+                        key={`tier-${idx}`}
+                        className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
