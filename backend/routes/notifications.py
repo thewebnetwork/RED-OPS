@@ -55,6 +55,16 @@ async def get_notification_count(current_user: dict = Depends(get_current_user))
     return {"unread_count": count}
 
 
+@router.get("/unread-count")
+async def get_unread_notification_count(current_user: dict = Depends(get_current_user)):
+    """Get unread notification count (alias for /count)"""
+    count = await db.notifications.count_documents({
+        "user_id": current_user["id"],
+        "is_read": False
+    })
+    return {"unread_count": count}
+
+
 @router.patch("/{notification_id}/read")
 async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
     """Mark a notification as read"""
