@@ -349,16 +349,33 @@ class EmailTestRequest(BaseModel):
 class AnnouncementTickerUpdate(BaseModel):
     message: str
     is_active: bool = True
+    send_to_all: bool = True
+    target_teams: List[str] = []
+    target_roles: List[str] = []
+    start_at: Optional[str] = None
+    end_at: Optional[str] = None
+    priority: Optional[str] = None
     background_color: Optional[str] = "#A2182C"
     text_color: Optional[str] = "#FFFFFF"
 
 class AnnouncementTickerResponse(BaseModel):
+    id: Optional[str] = None
     message: str
     is_active: bool
+    send_to_all: bool = True
+    target_teams: List[str] = []
+    target_roles: List[str] = []
+    target_team_names: List[str] = []
+    target_role_names: List[str] = []
+    start_at: Optional[str] = None
+    end_at: Optional[str] = None
+    priority: Optional[str] = None
     background_color: str
     text_color: str
     updated_at: str
     updated_by_name: Optional[str] = None
+    created_at: Optional[str] = None
+    created_by_name: Optional[str] = None
 
 # Satisfaction Ratings
 class RatingCreate(BaseModel):
