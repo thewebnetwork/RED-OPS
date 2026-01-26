@@ -124,60 +124,62 @@ export default function SLA() {
 
   const fetchData = async () => {
     try {
-      const [slaRes, rolesRes, teamsRes] = await Promise.all([
+      const [slaRes, rolesRes, teamsRes, alertsRes, statsRes] = await Promise.all([
         axios.get(`${API}/sla`).catch(() => ({ data: [] })),
         axios.get(`${API}/roles`),
-        axios.get(`${API}/teams`)
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/sla-alerts`).catch(() => ({ data: [] })),
+        axios.get(`${API}/sla-alerts/statistics`).catch(() => ({ data: null }))
       ]);
       
-      setSlaDefinitions(slaRes.data || getSampleSLAs());
+      setSlaDefinitions(slaRes.data || []);
       setRoles(rolesRes.data || []);
       setTeams(teamsRes.data || []);
+      setSlaAlerts(alertsRes.data || []);
+      setSlaStats(statsRes.data);
     } catch (error) {
       console.error('Failed to fetch data');
-      setSlaDefinitions(getSampleSLAs());
+      setSlaDefinitions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getSampleSLAs = () => [
-    {
-      id: 'sla-1',
-      name: 'Premium SLA',
-      description: 'Fast response for high-priority clients',
-      response_time_hours: 2,
-      resolution_time_hours: 8,
-      priority: 'Urgent',
-      applies_to_type: 'role',
-      applies_to_id: 'role-admin',
-      applies_to_name: 'Admin',
-      is_active: true,
-      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'sla-2',
-      name: 'Standard SLA',
-      description: 'Default response times for regular requests',
-      response_time_hours: 8,
-      resolution_time_hours: 48,
-      priority: 'Normal',
-      applies_to_type: 'team',
-      applies_to_id: 'team-1',
-      applies_to_name: 'Video Editing Team',
-      is_active: true,
-      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'sla-3',
-      name: 'Basic SLA',
-      description: 'Extended response times for low-priority items',
-      response_time_hours: 24,
-      resolution_time_hours: 72,
-      priority: 'Low',
-      applies_to_type: 'role',
-      applies_to_id: 'role-editor',
-      applies_to_name: 'Editor',
+  const handleAcknowledgeAlert = async (alertId) => {
+    try {
+      await axios.post(`${API}/sla-alerts/${alertId}/acknowledge`);
+      setSlaAlerts(prev => prev.map(a => 
+        a.id === alertId ? { ...a, acknowledged: true } : a
+      ));
+      toast.success('Alert acknowledged');
+    } catch (error) {
+      toast.error('Failed to acknowledge alert');
+    }
+  };
+
+  const handleRefreshAlerts = async () => {
+    try {
+      const [alertsRes, statsRes] = await Promise.all([
+        axios.get(`${API}/sla-alerts`),
+        axios.get(`${API}/sla-alerts/statistics`)
+      ]);
+      setSlaAlerts(alertsRes.data || []);
+      setSlaStats(statsRes.data);
+      toast.success('Alerts refreshed');
+    } catch (error) {
+      toast.error('Failed to refresh alerts');
+    }
+  };
+
+  const handleTriggerSlaCheck = async () => {
+    try {
+      const res = await axios.post(`${API}/sla-check`);
+      toast.success(`SLA check complete: ${res.data.breached} breaches, ${res.data.warnings} warnings`);
+      handleRefreshAlerts();
+    } catch (error) {
+      toast.error('Failed to trigger SLA check');
+    }
+  };
       is_active: false,
       created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
     }
