@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,7 +32,10 @@ import {
   File,
   Image,
   FileVideo,
-  AlertCircle
+  AlertCircle,
+  Save,
+  Send,
+  Edit3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
