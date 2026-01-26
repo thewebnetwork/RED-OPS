@@ -21,7 +21,7 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://clean-slate-102.preview.e
 
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]
-ORDER_STATUSES = ["Open", "In Progress", "Pending", "Delivered", "Closed"]
+ORDER_STATUSES = ["Draft", "Open", "In Progress", "Pending", "Delivered", "Closed"]
 REQUEST_TYPES = ["Request", "Bug"]
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
 BUG_SEVERITIES = ["Low", "Normal", "High", "Urgent"]
@@ -35,12 +35,18 @@ ACTION_TYPES = ["assign_role", "forward_ticket", "email_user", "email_requester"
 # Workflow Trigger Events
 WORKFLOW_TRIGGER_EVENTS = [
     "order.created",
+    "order.submitted",  # When draft is submitted
     "order.status_changed",
     "order.assigned",
     "order.delivered",
+    "order.pending_review",  # When ticket enters Pending (needs requester review)
     "order.sla_warning",
     "order.sla_breached",
 ]
+
+# Review reminder configuration (in hours/days)
+REVIEW_REMINDER_HOURS = 24  # Send email reminder after 24 hours
+REVIEW_AUTO_CLOSE_DAYS = 5  # Auto-close after 5 days
 
 # Webhook Events
 WEBHOOK_EVENTS = [
