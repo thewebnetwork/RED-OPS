@@ -3694,6 +3694,133 @@ async def revoke_api_key(key_id: str, current_user: dict = Depends(require_roles
         raise HTTPException(status_code=404, detail="API key not found")
     return {"message": "API key revoked"}
 
+@api_router.get("/api-keys/{key_id}/usage")
+async def get_api_key_usage(key_id: str, days: int = 30, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get usage analytics for a specific API key"""
+    api_key = await db.api_keys.find_one({"id": key_id}, {"_id": 0})
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API key not found")
+    
+    # Get usage logs for this key
+    start_date = datetime.now(timezone.utc) - timedelta(days=days)
+    
+    pipeline = [
+        {"$match": {"api_key_id": key_id, "timestamp": {"$gte": start_date.isoformat()}}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": {"$dateFromString": {"dateString": "$timestamp"}}}},
+            "count": {"$sum": 1},
+            "avg_response_time": {"$avg": "$response_time_ms"},
+            "errors": {"$sum": {"$cond": [{"$gte": ["$status_code", 400]}, 1, 0]}}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    
+    daily_stats = await db.api_key_logs.aggregate(pipeline).to_list(100)
+    
+    # Get usage by endpoint
+    endpoint_pipeline = [
+        {"$match": {"api_key_id": key_id, "timestamp": {"$gte": start_date.isoformat()}}},
+        {"$group": {
+            "_id": "$endpoint",
+            "count": {"$sum": 1},
+            "avg_response_time": {"$avg": "$response_time_ms"}
+        }},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]
+    
+    endpoint_stats = await db.api_key_logs.aggregate(endpoint_pipeline).to_list(10)
+    
+    # Calculate totals
+    total_requests = sum(d.get("count", 0) for d in daily_stats)
+    total_errors = sum(d.get("errors", 0) for d in daily_stats)
+    avg_response_time = sum(d.get("avg_response_time", 0) for d in daily_stats) / len(daily_stats) if daily_stats else 0
+    error_rate = (total_errors / total_requests * 100) if total_requests > 0 else 0
+    
+    return ApiKeyUsageResponse(
+        key_id=key_id,
+        key_name=api_key.get("name", "Unknown"),
+        total_requests=total_requests,
+        requests_by_day=[{"date": d["_id"], "count": d["count"]} for d in daily_stats],
+        requests_by_endpoint=[{"endpoint": d["_id"], "count": d["count"], "avg_ms": round(d.get("avg_response_time", 0), 2)} for d in endpoint_stats],
+        avg_response_time_ms=round(avg_response_time, 2),
+        error_rate=round(error_rate, 2)
+    )
+
+@api_router.get("/api-keys/analytics/summary")
+async def get_api_keys_analytics_summary(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get summary analytics for all API keys"""
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    
+    # Get all active keys
+    keys = await db.api_keys.find({"is_active": True}, {"_id": 0}).to_list(100)
+    
+    summary = []
+    for key in keys:
+        # Count requests for this key
+        total = await db.api_key_logs.count_documents({"api_key_id": key["id"]})
+        today_count = await db.api_key_logs.count_documents({
+            "api_key_id": key["id"],
+            "timestamp": {"$gte": today.isoformat()}
+        })
+        week_count = await db.api_key_logs.count_documents({
+            "api_key_id": key["id"],
+            "timestamp": {"$gte": week_ago.isoformat()}
+        })
+        
+        summary.append({
+            "id": key["id"],
+            "name": key["name"],
+            "key_preview": key.get("key_preview", "****"),
+            "permissions": key.get("permissions", "read"),
+            "created_at": key["created_at"],
+            "last_used": key.get("last_used"),
+            "is_active": key.get("is_active", True),
+            "total_requests": total,
+            "requests_today": today_count,
+            "requests_this_week": week_count
+        })
+    
+    return {
+        "keys": summary,
+        "totals": {
+            "total_keys": len(keys),
+            "total_requests_all_time": sum(k["total_requests"] for k in summary),
+            "total_requests_today": sum(k["requests_today"] for k in summary),
+            "total_requests_week": sum(k["requests_this_week"] for k in summary)
+        }
+    }
+
+@api_router.post("/api-keys/{key_id}/log-usage")
+async def log_api_key_usage(
+    key_id: str,
+    endpoint: str,
+    method: str,
+    status_code: int,
+    response_time_ms: float
+):
+    """Internal endpoint to log API key usage (called by middleware)"""
+    log_entry = {
+        "id": str(uuid.uuid4()),
+        "api_key_id": key_id,
+        "endpoint": endpoint,
+        "method": method,
+        "status_code": status_code,
+        "response_time_ms": response_time_ms,
+        "timestamp": get_utc_now()
+    }
+    await db.api_key_logs.insert_one(log_entry)
+    
+    # Update last_used on the key
+    await db.api_keys.update_one(
+        {"id": key_id},
+        {"$set": {"last_used": get_utc_now()}}
+    )
+    
+    return {"logged": True}
+
 @api_router.get("/webhooks", response_model=List[WebhookResponse])
 async def list_webhooks(current_user: dict = Depends(require_roles(["Admin"]))):
     """List all webhooks"""
