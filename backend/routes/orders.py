@@ -32,6 +32,7 @@ class OrderCreate(BaseModel):
     music_preference: Optional[str] = None
     delivery_format: Optional[str] = None
     special_instructions: Optional[str] = None
+    is_draft: bool = False  # If true, save as Draft instead of Open
 
 
 class OrderResponse(BaseModel):
@@ -59,12 +60,14 @@ class OrderResponse(BaseModel):
     special_instructions: Optional[str] = None
     close_reason: Optional[str] = None
     closed_at: Optional[str] = None
-    sla_deadline: str
+    sla_deadline: Optional[str] = None  # None for drafts
     is_sla_breached: bool
     created_at: str
     updated_at: str
     picked_at: Optional[str] = None
     delivered_at: Optional[str] = None
+    review_started_at: Optional[str] = None  # When status changed to Pending
+    last_requester_message_at: Optional[str] = None  # Last message from requester
 
 
 class CloseOrderRequest(BaseModel):
