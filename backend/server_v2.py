@@ -133,7 +133,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Add iframe embedding middleware
+app.add_middleware(IframeEmbeddingMiddleware)
 
 # Include all routers with /api prefix
 app.include_router(auth_router, prefix="/api")
