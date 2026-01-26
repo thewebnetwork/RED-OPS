@@ -429,7 +429,7 @@ export default function WorkflowEditor() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/workflows')}
+            onClick={handleBack}
             data-testid="back-to-workflows"
           >
             <ArrowLeft size={20} />
@@ -438,6 +438,12 @@ export default function WorkflowEditor() {
             <h1 className="font-semibold text-slate-900">{workflow?.name}</h1>
             <p className="text-xs text-slate-500">{workflow?.description || 'No description'}</p>
           </div>
+          {hasChanges && (
+            <Badge className="bg-amber-100 text-amber-700 ml-2">
+              <AlertTriangle size={12} className="mr-1" />
+              Unsaved
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -449,9 +455,10 @@ export default function WorkflowEditor() {
             Settings
           </Button>
           <Button
-            variant="outline"
+            variant={hasChanges ? "default" : "outline"}
             onClick={handleSave}
             disabled={saving}
+            className={hasChanges ? "bg-rose-600 hover:bg-rose-700" : ""}
             data-testid="save-workflow-btn"
           >
             <Save size={16} className="mr-2" />
