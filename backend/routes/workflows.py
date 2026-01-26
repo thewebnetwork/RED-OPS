@@ -547,7 +547,13 @@ async def get_workflow_templates(
     # Sort by popularity
     templates = sorted(templates, key=lambda x: x["popularity"], reverse=True)
     
-    return templates
+    # Extract unique categories from all templates
+    categories = list(set(t["category"] for t in WORKFLOW_TEMPLATES))
+    
+    return {
+        "templates": templates,
+        "categories": sorted(categories)
+    }
 
 
 @router.get("/workflow-templates/{template_id}")
