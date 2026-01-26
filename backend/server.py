@@ -1491,6 +1491,18 @@ async def create_order(order_data: OrderCreate, background_tasks: BackgroundTask
             order['id']
         )
     
+    # Trigger webhooks for order.created event
+    background_tasks.add_task(trigger_webhooks, "order.created", {
+        "order_id": order["id"],
+        "order_code": order_code,
+        "title": order_data.title,
+        "requester_name": current_user["name"],
+        "requester_email": current_user["email"],
+        "category": cat_l2_name or cat_l1_name,
+        "priority": order_data.priority,
+        "status": "Open"
+    })
+    
     return OrderResponse(
         **{k: v for k, v in order.items() if k != '_id'},
         is_sla_breached=False
