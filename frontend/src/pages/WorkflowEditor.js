@@ -133,6 +133,8 @@ export default function WorkflowEditor() {
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [accessTiers, setAccessTiers] = useState([]);
 
   // Unsaved changes tracking
   const [hasChanges, setHasChanges] = useState(false);
