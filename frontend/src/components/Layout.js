@@ -79,6 +79,7 @@ export default function Layout({ children }) {
     { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Admin'] },
     { path: '/integrations', icon: Plug, labelKey: 'nav.integrations', roles: ['Admin'] },
     { path: '/announcements', icon: Megaphone, labelKey: 'nav.announcements', roles: ['Admin'] },
+    { path: '/email-settings', icon: Mail, labelKey: 'nav.emailSettings', roles: ['Admin'] },
     { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Admin'] },
   ];
 
