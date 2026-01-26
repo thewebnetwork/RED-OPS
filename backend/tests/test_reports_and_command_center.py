@@ -26,10 +26,10 @@ class TestAuthentication:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "access_token" in data, "No access_token in response"
+        assert "token" in data, "No token in response"
         assert "user" in data, "No user in response"
         print(f"✓ Admin login successful, user: {data['user'].get('name')}")
-        return data["access_token"]
+        return data["token"]
 
 
 class TestReportsModule:
@@ -43,7 +43,7 @@ class TestReportsModule:
             "password": ADMIN_PASSWORD
         })
         if response.status_code == 200:
-            self.token = response.json().get("access_token")
+            self.token = response.json().get("token")
             self.headers = {
                 "Authorization": f"Bearer {self.token}",
                 "Content-Type": "application/json"
@@ -280,7 +280,7 @@ class TestCategoriesForCommandCenter:
             "password": ADMIN_PASSWORD
         })
         if response.status_code == 200:
-            self.token = response.json().get("access_token")
+            self.token = response.json().get("token")
             self.headers = {
                 "Authorization": f"Bearer {self.token}",
                 "Content-Type": "application/json"
@@ -428,7 +428,7 @@ class TestReportCategories:
             "password": ADMIN_PASSWORD
         })
         if response.status_code == 200:
-            self.token = response.json().get("access_token")
+            self.token = response.json().get("token")
             self.headers = {
                 "Authorization": f"Bearer {self.token}",
                 "Content-Type": "application/json"
