@@ -35,6 +35,7 @@ from routes import (
     escalation_router,
     specialties_router,
     access_tiers_router,
+    sla_policies_router,
 )
 
 # Import SLA monitor service
