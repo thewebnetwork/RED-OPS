@@ -3506,6 +3506,32 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Background task for SLA monitoring
+sla_monitor_task = None
+
+async def sla_monitor_loop():
+    """Background loop to check SLA breaches every 15 minutes"""
+    while True:
+        try:
+            result = await check_sla_breaches(db)
+            if result["breached"] > 0 or result["warnings"] > 0:
+                logger.info(f"SLA Check: {result['breached']} breaches, {result['warnings']} warnings out of {result['checked']} orders")
+        except Exception as e:
+            logger.error(f"SLA monitor error: {e}")
+        
+        # Wait 15 minutes before next check
+        await asyncio.sleep(900)
+
+@app.on_event("startup")
+async def startup_event():
+    global sla_monitor_task
+    # Start SLA monitoring background task
+    sla_monitor_task = asyncio.create_task(sla_monitor_loop())
+    logger.info("SLA monitoring background task started")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    global sla_monitor_task
+    if sla_monitor_task:
+        sla_monitor_task.cancel()
     client.close()
