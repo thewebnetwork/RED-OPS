@@ -570,7 +570,7 @@ export default function Workflows() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>
+            <Button variant="outline" onClick={() => handleDuplicateDialogClose(false)}>
               Cancel
             </Button>
             <Button
