@@ -534,11 +534,11 @@ function OrderCard({ order, status }) {
 }
 
 // Policy Dialog Component
-function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, onSave }) {
+function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, accessTiers, onSave }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    scope: { role_ids: [], team_ids: [], specialty_ids: [] },
+    scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
     sla_rules: { duration_minutes: 1440, business_hours_only: false },
     thresholds: { at_risk_minutes: 240 },
     escalation_levels: [],
@@ -551,7 +551,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, o
       setFormData({
         name: policy.name || '',
         description: policy.description || '',
-        scope: policy.scope || { role_ids: [], team_ids: [], specialty_ids: [] },
+        scope: policy.scope || { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
         sla_rules: policy.sla_rules || { duration_minutes: 1440, business_hours_only: false },
         thresholds: policy.thresholds || { at_risk_minutes: 240 },
         escalation_levels: policy.escalation_levels || [],
