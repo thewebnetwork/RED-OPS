@@ -46,6 +46,7 @@ export default function Announcements() {
     send_to_all: true,
     target_teams: [],
     target_roles: [],
+    target_specialties: [],
     start_at: '',
     end_at: '',
     priority: '',
@@ -54,6 +55,7 @@ export default function Announcements() {
   });
   const [teams, setTeams] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -71,9 +73,12 @@ export default function Announcements() {
       setHasChanges(changed);
     }
     
-    // Validation: if send_to_all is OFF, require at least one team or role
-    if (!ticker.send_to_all && ticker.target_teams.length === 0 && ticker.target_roles.length === 0) {
-      setValidationError('Select at least one team or role, or turn on "Send to all"');
+    // Validation: if send_to_all is OFF, require at least one team, role, or specialty
+    if (!ticker.send_to_all && 
+        ticker.target_teams.length === 0 && 
+        ticker.target_roles.length === 0 && 
+        ticker.target_specialties.length === 0) {
+      setValidationError('Select at least one role, team, or specialty, or turn on "Send to all"');
     } else {
       setValidationError('');
     }
