@@ -65,6 +65,7 @@ const BLOCKED_EXTENSIONS = [
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
 const statusColors = {
+  'Draft': 'bg-slate-200 text-slate-600',
   'Open': 'bg-blue-100 text-blue-700',
   'In Progress': 'bg-amber-100 text-amber-700',
   'Pending': 'bg-purple-100 text-purple-700',
