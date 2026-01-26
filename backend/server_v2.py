@@ -37,6 +37,7 @@ from routes import (
     access_tiers_router,
     sla_policies_router,
 )
+from routes.reports import router as reports_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
