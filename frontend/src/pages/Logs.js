@@ -59,11 +59,88 @@ export default function Logs() {
 
   useEffect(() => {
     let interval;
-    if (autoRefresh) {
+    if (autoRefresh && !isStreaming) {
       interval = setInterval(() => fetchLogs(activeTab, true), 5000);
     }
     return () => clearInterval(interval);
-  }, [autoRefresh, activeTab]);
+  }, [autoRefresh, activeTab, isStreaming]);
+
+  // Start/stop streaming when isStreaming changes
+  useEffect(() => {
+    if (isStreaming) {
+      startStreaming();
+    } else {
+      stopStreaming();
+    }
+    return () => stopStreaming();
+  }, [isStreaming, activeTab]);
+
+  const startStreaming = () => {
+    stopStreaming(); // Close any existing connection
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Authentication required for log streaming');
+      setIsStreaming(false);
+      return;
+    }
+    
+    // Note: EventSource doesn't support custom headers, so we use a workaround
+    // For production, you'd want to use a library like eventsource or fetch with ReadableStream
+    const streamUrl = `${API}/logs/stream/${activeTab}`;
+    
+    try {
+      eventSourceRef.current = new EventSource(streamUrl);
+      
+      eventSourceRef.current.onmessage = (event) => {
+        try {
+          const logEntry = JSON.parse(event.data);
+          if (!logEntry.error) {
+            setStreamingLogs(prev => {
+              const newLogs = [logEntry, ...prev].slice(0, 100); // Keep last 100
+              return newLogs;
+            });
+            // Auto-scroll to top when new logs arrive
+            if (logContainerRef.current) {
+              logContainerRef.current.scrollTop = 0;
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing log:', e);
+        }
+      };
+      
+      eventSourceRef.current.onerror = () => {
+        console.log('SSE connection error, falling back to polling');
+        stopStreaming();
+        setIsStreaming(false);
+        setAutoRefresh(true);
+      };
+      
+      toast.success('Real-time streaming started');
+    } catch (error) {
+      console.error('Failed to start streaming:', error);
+      setIsStreaming(false);
+    }
+  };
+
+  const stopStreaming = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+  };
+
+  const toggleStreaming = () => {
+    if (isStreaming) {
+      setIsStreaming(false);
+      setAutoRefresh(false);
+      toast.info('Streaming stopped');
+    } else {
+      setAutoRefresh(false);
+      setIsStreaming(true);
+    }
+  };
 
   const fetchLogs = async (logType, silent = false) => {
     if (!silent) setLoading(true);
