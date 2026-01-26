@@ -235,7 +235,7 @@ export default function EmailSettings() {
                   placeholder="noreply@yourdomain.com"
                   className="mt-1.5"
                 />
-                <p className="text-xs text-slate-500 mt-1">Email address shown in the "From" field. Defaults to username if empty.</p>
+                <p className="text-xs text-slate-500 mt-1">Email address shown in the &quot;From&quot; field. Defaults to username if empty.</p>
               </div>
 
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
