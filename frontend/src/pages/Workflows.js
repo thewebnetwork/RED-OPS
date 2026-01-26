@@ -535,7 +535,7 @@ export default function Workflows() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+            <Button variant="outline" onClick={() => handleCreateDialogClose(false)}>
               Cancel
             </Button>
             <Button
