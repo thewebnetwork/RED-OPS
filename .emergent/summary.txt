@@ -1,152 +1,158 @@
 <analysis>**original_problem_statement:**
-The project is a no-code service hub platform that evolved from a video editing portal. Initial requirements included dynamic role/team management, a visual workflow builder, UI customization, satisfaction surveys, and password reset.
-
-The previous session focused on a branding overhaul, internationalization (i18n), and enhancing the Command Center form. At the start of this session, the user's priorities were to fix incomplete translations, add mobile responsiveness, and restore a missing UI customization feature.
-
-After the agent completed those tasks, the user provided a comprehensive new list of requirements, prioritized into P0 and P1 tasks.
-
-**PRODUCT REQUIREMENTS (New)**
-*   **P0 - Must Ship:**
-    1.  **Requester Visibility**: Requesters must see who a ticket is Assigned To.
-    2.  **Ticket Timestamps**: Ticket details must show Created and Last Modified timestamps.
-    3.  **Requester-side Close**: Requesters must be able to close their own tickets with a reason.
-    4.  **Label Change**: The label Editor should be changed to Assigned to: on order/ticket summaries.
-*   **P1 - Ship After P0:**
-    5.  **Branding Update**: Change top-left brand from Red Ribbon to Red Ops with an animated logo.
-    6.  **Announcement Ticker**: Add a global, admin-controlled scrolling ticker message.
-    7.  **Workflow Location Fix**: Move the Editor workflow from the Categories module to the Workflows module.
-    8.  **Logs Module**: Add a new module for viewing and exporting system, API, UI, and user activity logs.
-    9.  **Integrations Module**: Add a new module for managing API Keys and Webhooks (incoming/outgoing).
-    10. **User Provisioning**: Add admin options to force password change and force OTP setup (via email) on a user's next login.
-    11. **Edit User Enhancements**: Allow admins to assign users to a team and re-trigger the force password/OTP flags.
-    12. **SLA Module**: A new module for creating and assigning SLA (Service Level Agreement) resolution times to roles or teams.
+The user's initial request was for a no-code service hub platform. The project has evolved through several sprints. The most recent user requests were:
+1.  **Banner/Announcement UI Change:** The top announcement banner needed to be sticky within the header, non-dismissible, and styled with a white background and black, bold text.
+2.  **SMTP Configuration:** Switch from a mocked service to real SMTP using provided Gmail credentials and send a test email.
+3.  **Bug Fix:** Remove the About Editor Workflow feature from the Categories module, ensuring all workflow-related functionality resides exclusively in the Workflows module.
+4.  **New Feature - Enhanced Announcements:** Implement audience targeting for announcements, allowing admins to select specific teams and/or roles, or send to all users. This includes UI changes in the admin panel and updated backend delivery logic.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application (React, FastAPI, MongoDB) with a no-code foundation. It includes role/team management, a secure password reset flow (with mocked email), a satisfaction survey system, and a complete drag-and-drop visual workflow builder.
-
-In this session, the agent successfully restored the **UI Customization module**, completed the **full-app internationalization** for static text, significantly improved **mobile responsiveness** by implementing card-based layouts for tables, and implemented a system for **translating dynamic database content** (specifically for Category names).
+A full-stack application (React/FastAPI/MongoDB) featuring ticket management, user/role/team administration, a visual workflow builder, and UI customization. Key functionalities implemented include:
+*   **Core P0/P1 Features:** Ticket metadata, requester-side ticket closing, branding updates, and placeholder pages for future modules.
+*   **In-App Notifications:** Resolvers receive notifications for new messages in tickets.
+*   **Unsaved Changes Guard:** A confirmation prompt prevents data loss on all forms with a Save button.
+*   **Outgoing Webhooks:** The system can trigger webhooks on events like order creation, status changes, and new messages.
+*   **SLA Monitoring & Workflow Engine:** A background task monitors for SLA breaches, and a basic engine can execute visual workflows.
+*   **Recent Updates:**
+    *   The announcement banner UI has been updated as per the user's latest specifications.
+    *   SMTP is now configured and working with the user's provided Gmail credentials.
+    *   The Editor Workflow UI/logic has been removed from the Categories module.
+    *   The Announcements module has been enhanced with audience targeting (by teams/roles) and scheduling.
 
 **Last working item**:
-*   **Last item agent was working**: The agent just began implementing the new set of P0 requirements provided by the user. The first action taken was to start editing  to add the required ticket metadata (timestamps and Assigned To field).
+The agent was addressing user follow-up questions after implementing a set of features.
+*   **Last item agent was working**: Creating a test order to trigger a newly created Test Workflow (), as requested by the user for validation purposes. This was part of a larger conversation clarifying the removal of the old Editor Workflow flag.
 *   **Status**: IN PROGRESS
 *   **Agent Testing Done**: N
-*   **Which testing method agent to use?**: both
+*   **Which testing method agent to use?**: manual testing by curl
 *   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1: User creation role assignment bug (Priority: P2)**
-    *   **Description**: A recurring bug where newly created users are always assigned the 'Editor' role, regardless of the selection in the admin form. This has not been addressed in this session.
-    *   **Status**: NOT STARTED
-    *   **Is recurring issue?**: Y
+*   **Issue 1: Editor Workflow Functionality Ambiguity (Priority: P0)**
+    *   **Description**: The user is unclear on what happened to the Editor Workflow functionality after it was removed from the Categories page. The agent explained that it was a simple on/off flag, not a visual workflow, and is awaiting a decision on how to proceed.
+    *   **Attempted fixes**: N/A. The agent correctly removed the feature as requested and is now blocked on user feedback.
+    *   **Next debug checklist**: Await user's choice between the two proposed options:
+        1.  **Option A:** Re-add the simple Editor Workflow on/off toggle to the subcategory creation form in .
+        2.  **Option B:** Create a new, fully-featured visual workflow named Editor Workflow in the Workflows module.
+    *   **Why fix this issue and what will be achieved with the fix?**: To resolve user confusion and restore the intended business logic for handling specific types of orders.
+    *   **Status**: BLOCKED
+    *   **Is recurring issue?**: N
     *   **Should Test frontend/backend/both after fix?**: Both
+    *   **Blocked on other issue**: User Decision.
 
 **In progress Task List**:
-*   **Task 1: Implement all P0 requirements (Priority: P0)**
-    *   **Where to resume**: The agent has started modifying . The next steps are to fully implement the four P0 features across all required files (ticket lists, ticket detail pages, backend models/endpoints).
-    *   **What will be achieved with this?**: This will fulfill the user's highest-priority requests for improving ticket visibility and management for requesters.
+*   **Task 1: Validate Test Workflow Creation (Priority: P0)**
+    *   **Description**: Complete the user's request to create a test order that triggers the newly created Test Workflow.
+    *   **Where to resume**: The workflow is created and active. The agent needs to execute a  command to create an order associated with a category that is configured to trigger this workflow. The resulting order ID must be provided to the user for validation.
+    *   **What will be achieved with this?**: This will confirm for the user that the workflow creation and execution engine are functioning correctly.
     *   **Status**: IN PROGRESS
-    *   **Should Test frontend/backend/both after fix?**: Both
+    *   **Should Test frontend/backend/both after fix?**: Backend
+    *   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks (P1):**
-    *   **P1**: Update top-left branding to Red Ops with an animated logo.
-    *   **P1**: Implement a global, admin-controlled scrolling announcement ticker.
-    *   **P1**: Move the existing Editor workflow from the Categories module to the Workflows module.
-    *   **P1**: Create a comprehensive Logs module with filtering and export capabilities.
-    *   **P1**: Create an Integrations module for API Keys and Webhooks.
-    *   **P1**: Enhance user creation with force password change and force OTP setup options.
-    *   **P1**: Allow admins to assign users to teams and re-trigger security flags when editing users.
-    *   **P1**: Create a new SLA Management module to define and assign ticket resolution targets.
+*   **Upcoming Tasks:**
+    *   **P1:** Based on the user's decision for Issue 1, implement the chosen Editor Workflow solution.
+    *   **P2:** Complete the full refactor of . While some logic has been moved to a  directory, the routes and models still need to be extracted into their own dedicated modules (e.g., , ).
 *   **Future Tasks:**
-    *   **P2**: Refactor the monolithic  into a modular structure.
-    *   **P2**: Integrate user-provided SMTP credentials to enable real email sending.
+    *   **P3**: Add analytics for API key usage.
+    *   **P3**: Implement real-time log streaming from the backend to the UI.
+    *   **P3**: Add a Preview as user option for announcements to allow admins to see how a targeted announcement will appear to specific users.
+    *   **P3**: Implement advanced workflow actions, such as auto-escalation to a manager if a ticket remains in a breached state for a certain duration.
 
 **Completed work in this session**
-- **UI Customization Module Restored**: The  page is now fully functional, allowing admins to edit UI text values stored in the database.
-- **Full-App Internationalization**: Completed the translation of all major static pages (, , , , etc.) using the  framework. Tested and verified correct language switching.
-- **Mobile Responsiveness Implemented**: Made the application mobile-friendly by converting wide tables on pages like  and  into responsive card-based layouts.
-- **Dynamic DB Content Translation**: Implemented a system for translating database-driven content. The backend schema for  was updated to hold names in English, Portuguese, and Spanish, and the admin UI was updated to manage these translations.
+- **Banner/Announcement UI Rework (DONE)**: Moved to header, restyled, and made non-dismissible. (, )
+- **Real SMTP Integration (DONE)**: Configured Gmail SMTP and successfully sent a test email. (, )
+- **Editor Workflow Removal from Categories (DONE)**: Removed the info card and toggle from the UI. ()
+- **Enhanced Announcement Module (DONE)**: Implemented audience targeting by teams/roles and scheduling. (, )
+- **Unsaved Changes Guard Completion (DONE)**: Rolled out the feature to all remaining forms (, , , ).
+- **Outgoing Webhooks Implementation (DONE)**: Backend triggers and frontend UI are complete and verified. (, )
+- **Partial Backend Refactor (DONE)**: Created  and modularized notifications, webhooks, email, workflow, and SLA logic.
+- **Workflow Execution Engine (DONE)**: Implemented the engine to run visual workflows. ()
+- **SLA Breach Alerts (DONE)**: Implemented a background monitoring task and UI to display alerts. (, )
 
 **Earlier issues found/mentioned but not fixed**
-*   **Issue 1: User creation role assignment bug**
-    *   **Debug checklist**: Investigate  in  to confirm the correct  is sent. Verify the  and  endpoints in  are correctly processing the .
-    *   **Why to solve this issue and what will be achieved with this?**: This is critical for the application's permission system to function as intended.
-    *   **Should Test frontend/backend/both after fix?**: Both
-    *   **Is recurring issue?**: Y
+*   None.
 
 **Known issue recurrence from previous fork**
-*   None in this session, but the role assignment bug is a known recurring issue from a much earlier fork.
+*   None. The user role assignment bug was a known recurring issue that was fixed and verified as resolved in this session.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Frontend**: React, , , Shadcn/UI, TailwindCSS, React Flow, i18next
-*   **Backend**: FastAPI, Pydantic, JWT
-*   **Database**: MongoDB
-*   **Architecture**: Full-stack Single Page Application (SPA) with a monolithic REST API.
+*   **Frontend**: React, Shadcn/UI, TailwindCSS, , Custom Hooks.
+*   **Backend**: FastAPI, Pydantic, JWT,  (for background tasks).
+*   **Database**: MongoDB.
+*   **Architecture**: Full-stack SPA. Backend is transitioning from a monolith to a modular service-oriented structure.
 
 **key DB schema**
-*   **categories_l1**, **categories_l2**: Updated to include , , .
-*   **ui_settings**: 
-*   **workflows**: 
-
-**changes in tech stack**
-*   None.
+*   **announcement_settings**: Schema updated to include , , , , .
+*   **workflows**: Added  to link workflows to category IDs for automated execution on order creation.
+*   **New Collections**: , .
 
 **All files of reference**
-*   **Updated in this session**:
-    *   : Updated Category models and CRUD endpoints for multilingual support.
-    *   , , , : Refactored for i18n and mobile responsiveness.
-    *   : Heavily updated with new translation keys.
-    *   : Updated to reflect completed tasks and new requirements.
-*   **Key files for next steps**:
-    *   : Where the agent just started working.
-    *   : Will need modification for requester-side views.
-    *   : Will require new models and endpoints for P0 and P1 tasks.
+*   : Major updates to integrate new services and endpoints.
+*   : New directory containing modularized business logic.
+*   : Rewritten for new audience targeting feature.
+*   : Rewritten for new UI/UX.
+*   : Modified for new banner placement.
+*   : Modified to remove Editor Workflow logic.
+*    & : Updated to show new data (alerts, execution logs).
+*   : Updated with completed tasks.
 
 **Areas that need refactoring**:
-*   The monolithic  is a high-priority future task for refactoring into a modular structure.
+*   The monolithic  is the highest priority. The next refactoring step should be to extract all API routes into a  directory and all Pydantic models into a  directory.
 
 **key api endpoints**
-*   ,  (POST, PATCH): Endpoints were updated to handle multilingual name fields (, , ).
-*    (GET, PUT): Endpoints confirmed to be working for the UI Customization module.
+*   **New**:
+    *   , 
+    *   , 
+*   **Updated**:
+    *   : Body now accepts , , , etc.
+    *   : Response now includes targeting info and respects user's team/role for delivery.
+    *   : Now triggers workflow execution if a linked workflow exists.
 
 **Critical Info for New Agent**
-*   Your immediate and sole focus is to implement the four **P0** tasks defined by the user. Do not start any P1 tasks until all P0 tasks are complete and verified.
-*   The agent has already started on P0 by editing . You must continue this work.
-*   The previous major tasks (UI Customization, i18n, Mobile Responsiveness) are now complete. Leverage the patterns established there (e.g.,  hook, responsive Tailwind classes) for new development.
-*   The long-standing user role assignment bug remains unfixed. Plan to address this after the P0/P1 feature work is complete.
+*   Your first action is to resolve the user's pending request by creating a test order to trigger the new Test Workflow and providing the order ID.
+*   Your second action is to address the Editor Workflow ambiguity. You must wait for the user to choose between re-adding the old toggle (Option A) or creating a new visual workflow (Option B). This is a blocker for that feature.
+*   The user's Gmail password for SMTP contains spaces (). Do not remove them; they are part of the app password. The username is .
 
 **documents and test reports created in this job**
-*    (updated)
+*   
 *   
 *   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**:  (Status: Answered, agent clarified it was just starting the new tasks).
-2.  **User**: Provided detailed priorities: 1- Complete all P0 first 2- Option a in the white header... 3- OTP keep 6 digit code... 4- Reference screenshots... (Status: Received, this is the current directive).
-3.  **User**: Provided a comprehensive list of new P0 and P1 requirements via several email-style messages. (Status: Received and acknowledged by the agent).
-4.  **User**:  (Status: Superseded by the P0/P1 priority list).
+1.  **User (msg 521)**: Confirmed email receipt. Asked for clarification on whether all teams will appear in the Announcement selector. Asked where the Editor Workflow went and requested the creation of a test workflow with a corresponding ticket number for validation. (Status: Partially addressed, test ticket creation is pending).
+2.  **Agent (msg 520)**: Finished implementation of all tasks and provided a summary.
+3.  **User (msg 490)**: Clarified SMTP alias vs. username (). Provided detailed requirements for the enhanced Announcement module with audience targeting. (Status: Completed).
+4.  **Agent (msg 489)**: Asked user for help regarding failing SMTP credentials.
+5.  **User (msg 421)**: Provided three new tasks: fix announcement banner UI, configure SMTP with new credentials, and remove About Editor Workflow from the Categories module. (Status: Completed).
+6.  **Agent (msg 272)**: Finished implementation of P2-3 (Webhooks).
+7.  **User (msg 273)**: Approved the plan to refactor  and then build the P3 Workflow Engine and SLA alerts. (Status: Completed).
+8.  **Agent (msg 185)**: Provided a detailed breakdown of the next P2 and P3 tasks and recommended an order of execution.
+9.  **User (msg 186)**: Approved the agent's recommended task order.
+10. **Agent (msg 183)**: Finished the P0-2 and P2-1 tasks.
 
 **Project Health Check:**
 *   **Broken**: No.
-*   **Mocked**: Email sending (SMTP) for password resets and surveys.
+*   **Mocked**: OTP delivery is still logged to the console.
 
 **3rd Party Integrations**
-*   None currently implemented. The user has requested an Integrations module as a P1 task.
+*   None.
 
 **Testing status**
-*   **Testing agent used after significant changes**: YES (for i18n and mobile responsiveness fixes).
-*   **Troubleshoot agent used after agent stuck in loop**: NO
-*   **Test files created**: , 
-*   **Known regressions**: The user role assignment bug is unverified and likely still present.
+*   **Testing agent used after significant changes**: YES. Used three times in this session to verify unsaved changes, webhooks, and the new P3 features.
+*   **Troubleshoot agent used after agent stuck in loop**: NO.
+*   **Test files created**: , , .
+*   **Known regressions**: None.
 
 **Credentials to test flow:**
 *   **Admin Email**: 
 *   **Admin Password**: 
+*   **SMTP Username**: 
+*   **SMTP Password**:  (Note: has spaces)
 
 **What agent forgot to execute**
-*   The agent did not address the long-standing user role assignment bug that was carried over from the initial handoff summary. It remains pending.</analysis>
+*   The agent has not forgotten to execute any tasks. It is currently in the process of fulfilling a user request and is blocked on another point pending user feedback.</analysis>

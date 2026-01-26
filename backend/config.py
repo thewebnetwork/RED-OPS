@@ -16,7 +16,7 @@ RESET_TOKEN_EXPIRE_HOURS = 1
 SLA_DAYS = 7
 
 # Frontend URL
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://servicehub-191.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://ticketflow-129.preview.emergentagent.com')
 
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]
