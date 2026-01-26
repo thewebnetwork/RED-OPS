@@ -43,6 +43,7 @@ def is_sla_breached(sla_deadline_str: str, status: str) -> bool:
 def normalize_order(order: dict) -> dict:
     """Ensure all expected fields exist with default values"""
     defaults = {
+        'request_type': order.get('request_type', 'Editing'),
         'requester_name': order.get('requester_name', 'Unknown'),
         'requester_email': order.get('requester_email', ''),
         'editor_name': order.get('editor_name'),
