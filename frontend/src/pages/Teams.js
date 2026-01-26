@@ -94,9 +94,11 @@ export default function Teams() {
     setLoadingMembers(true);
     try {
       const res = await axios.get(`${API}/teams/${teamId}/members`);
-      setTeamMembers(res.data);
+      // API returns {team: {...}, members: [...]} - extract members array
+      setTeamMembers(res.data.members || []);
     } catch (error) {
       console.error('Failed to load team members');
+      setTeamMembers([]);
     } finally {
       setLoadingMembers(false);
     }
