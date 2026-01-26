@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Megaphone, Save, Eye, Users, Shield, Globe, Info } from 'lucide-react';
+import { Megaphone, Save, Eye, Users, Shield, Globe, Info, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
