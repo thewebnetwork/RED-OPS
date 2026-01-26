@@ -309,12 +309,9 @@ export default function SLA() {
           <h1 className="text-2xl font-bold text-slate-900">SLA Management</h1>
           <p className="text-slate-500 mt-1">Define and assign Service Level Agreements</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
-        }}>
+        <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
-            <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-sla-btn">
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => handleOpenDialog()} data-testid="create-sla-btn">
               <Plus size={16} className="mr-2" />
               Create SLA
             </Button>
