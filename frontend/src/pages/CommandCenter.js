@@ -609,7 +609,12 @@ export default function CommandCenter() {
                   {myRequests.map(request => (
                     <Link
                       key={request.id}
-                      to={request.request_type === 'Editing' ? `/orders/${request.id}` : `/requests/${request.request_type.toLowerCase()}/${request.id}`}
+                      to={request.status === 'Draft' 
+                        ? `/drafts/${request.request_type.toLowerCase()}/${request.id}`
+                        : request.request_type === 'Editing' 
+                          ? `/orders/${request.id}` 
+                          : `/requests/${request.request_type.toLowerCase()}/${request.id}`
+                      }
                       className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors"
                       data-testid={`request-row-${request.code}`}
                     >
@@ -617,7 +622,10 @@ export default function CommandCenter() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-mono text-xs text-slate-500">{request.code}</span>
                           <Badge className={requestTypeColors[request.request_type]}>{request.request_type}</Badge>
-                          <Badge className={statusColors[request.status]}>{request.status}</Badge>
+                          <Badge className={statusColors[request.status]}>
+                            {request.status === 'Draft' && <Edit3 size={12} className="mr-1" />}
+                            {request.status}
+                          </Badge>
                         </div>
                         <p className="font-medium text-slate-900 mt-1 truncate">{request.title}</p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500 mt-1">
@@ -633,6 +641,9 @@ export default function CommandCenter() {
                               <span className="font-medium text-slate-700">{request.assigned_to_name}</span>
                             </span>
                           )}
+                          {request.status === 'Draft' && (
+                            <span className="text-amber-600 font-medium">Click to continue editing</span>
+                          )}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
@@ -641,7 +652,11 @@ export default function CommandCenter() {
                           {format(new Date(request.updated_at), 'MMM d, yyyy')}
                         </p>
                       </div>
-                      <ArrowRight size={16} className="text-slate-400" />
+                      {request.status === 'Draft' ? (
+                        <Edit3 size={16} className="text-amber-500" />
+                      ) : (
+                        <ArrowRight size={16} className="text-slate-400" />
+                      )}
                     </Link>
                   ))}
                 </div>
