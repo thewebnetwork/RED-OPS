@@ -17,6 +17,8 @@ from .feedback import router as feedback_router
 from .settings import router as settings_router
 from .workflows import router as workflows_router
 from .escalation import router as escalation_router
+from .specialties import router as specialties_router
+from .access_tiers import router as access_tiers_router
 
 __all__ = [
     "auth_router",
@@ -35,4 +37,6 @@ __all__ = [
     "settings_router",
     "workflows_router",
     "escalation_router",
+    "specialties_router",
+    "access_tiers_router",
 ]
