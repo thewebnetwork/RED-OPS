@@ -41,3 +41,16 @@ WORKFLOW_TRIGGER_EVENTS = [
     "order.sla_warning",
     "order.sla_breached",
 ]
+
+# Webhook Events
+WEBHOOK_EVENTS = [
+    "order.created",
+    "order.status_changed",
+    "order.assigned",
+    "order.delivered",
+    "order.message_added",
+    "order.file_uploaded",
+    "order.sla_warning",
+    "order.sla_breached",
+    "test",
+]
