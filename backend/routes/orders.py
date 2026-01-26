@@ -141,10 +141,14 @@ async def create_order(
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(require_roles(["Requester", "Admin"]))
 ):
-    """Create a new order"""
+    """Create a new order (or save as draft)"""
     order_code = await get_next_code(db, "order_code", "RRG")
     created_at = get_utc_now_dt()
-    sla_deadline = calculate_sla_deadline(created_at)
+    
+    # Drafts don't get SLA deadline until submitted
+    is_draft = getattr(order_data, 'is_draft', False)
+    sla_deadline = None if is_draft else calculate_sla_deadline(created_at)
+    initial_status = "Draft" if is_draft else "Open"
     
     # Get category names
     cat_l1_name = None
@@ -170,7 +174,7 @@ async def create_order(
         "category_l1_name": cat_l1_name,
         "category_l2_id": order_data.category_l2_id,
         "category_l2_name": cat_l2_name,
-        "status": "Open",
+        "status": initial_status,
         "priority": order_data.priority,
         "description": order_data.description,
         "video_script": order_data.video_script,
@@ -179,16 +183,90 @@ async def create_order(
         "music_preference": order_data.music_preference,
         "delivery_format": order_data.delivery_format,
         "special_instructions": order_data.special_instructions,
-        "sla_deadline": sla_deadline.isoformat(),
+        "sla_deadline": sla_deadline.isoformat() if sla_deadline else None,
         "created_at": created_at.isoformat(),
         "updated_at": created_at.isoformat(),
         "picked_at": None,
         "delivered_at": None,
-        "last_responded_at": None
+        "last_responded_at": None,
+        "review_started_at": None,
+        "last_requester_message_at": None
     }
     await db.orders.insert_one(order)
     
-    # Notify editors
+    # Only notify/trigger workflows for non-draft orders
+    if not is_draft:
+        # Notify editors
+        editors = await db.users.find({"role": "Editor", "active": True}, {"_id": 0}).to_list(100)
+        for editor in editors:
+            await create_notification(
+                db,
+                editor['id'],
+                "new_order",
+                "New request available",
+                f"New editing request {order_code} '{order_data.title}' is available for pickup",
+                order['id']
+            )
+        
+        # Trigger webhooks
+        background_tasks.add_task(trigger_webhooks, "order.created", {
+            "order_id": order["id"],
+            "order_code": order_code,
+            "title": order_data.title,
+            "requester_name": current_user["name"],
+            "requester_email": current_user["email"],
+            "category": cat_l2_name or cat_l1_name,
+            "priority": order_data.priority,
+            "status": "Open"
+        })
+        
+        # Execute workflows triggered by order.created
+        async def run_workflows():
+            workflows = await get_workflows_for_trigger(db, "order.created", order_data.category_l2_id)
+            for workflow in workflows:
+                await execute_workflow(db, workflow["id"], "order.created", {
+                    "order": order,
+                    "user": current_user
+                })
+        background_tasks.add_task(run_workflows)
+    
+    return OrderResponse(
+        **{k: v for k, v in order.items() if k != '_id'},
+        is_sla_breached=False
+    )
+
+
+@router.post("/{order_id}/submit", response_model=OrderResponse)
+async def submit_draft(
+    order_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Submit a draft order - converts Draft to Open status"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only requester can submit their own draft
+    if order["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only submit your own drafts")
+    
+    if order["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft orders can be submitted")
+    
+    now = get_utc_now_dt()
+    sla_deadline = calculate_sla_deadline(now)
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "status": "Open",
+            "sla_deadline": sla_deadline.isoformat(),
+            "updated_at": now.isoformat()
+        }}
+    )
+    
+    # Now notify editors since the order is officially submitted
     editors = await db.users.find({"role": "Editor", "active": True}, {"_id": 0}).to_list(100)
     for editor in editors:
         await create_notification(
@@ -196,34 +274,95 @@ async def create_order(
             editor['id'],
             "new_order",
             "New request available",
-            f"New editing request {order_code} '{order_data.title}' is available for pickup",
+            f"New editing request {order['order_code']} '{order['title']}' is available for pickup",
             order['id']
         )
     
-    # Trigger webhooks
+    # Trigger webhooks for order.submitted (and order.created for backwards compat)
     background_tasks.add_task(trigger_webhooks, "order.created", {
         "order_id": order["id"],
-        "order_code": order_code,
-        "title": order_data.title,
-        "requester_name": current_user["name"],
-        "requester_email": current_user["email"],
-        "category": cat_l2_name or cat_l1_name,
-        "priority": order_data.priority,
+        "order_code": order["order_code"],
+        "title": order["title"],
+        "requester_name": order["requester_name"],
+        "requester_email": order["requester_email"],
+        "category": order.get("category_l2_name") or order.get("category_l1_name"),
+        "priority": order["priority"],
         "status": "Open"
     })
     
     # Execute workflows triggered by order.created
     async def run_workflows():
-        workflows = await get_workflows_for_trigger(db, "order.created", order_data.category_l2_id)
+        workflows = await get_workflows_for_trigger(db, "order.created", order.get("category_l2_id"))
         for workflow in workflows:
+            order["status"] = "Open"  # Update status for workflow context
             await execute_workflow(db, workflow["id"], "order.created", {
                 "order": order,
                 "user": current_user
             })
     background_tasks.add_task(run_workflows)
     
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    updated_order = normalize_order(updated_order)
     return OrderResponse(
-        **{k: v for k, v in order.items() if k != '_id'},
+        **updated_order,
+        is_sla_breached=False
+    )
+
+
+@router.put("/{order_id}/draft", response_model=OrderResponse)
+async def update_draft(
+    order_id: str,
+    order_data: OrderCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update a draft order"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only requester can update their own draft
+    if order["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own drafts")
+    
+    if order["status"] != "Draft":
+        raise HTTPException(status_code=400, detail="Only draft orders can be updated this way")
+    
+    # Get category names
+    cat_l1_name = None
+    cat_l2_name = None
+    if order_data.category_l1_id:
+        l1 = await db.categories_l1.find_one({"id": order_data.category_l1_id}, {"_id": 0})
+        cat_l1_name = l1["name"] if l1 else None
+    if order_data.category_l2_id:
+        l2 = await db.categories_l2.find_one({"id": order_data.category_l2_id}, {"_id": 0})
+        cat_l2_name = l2["name"] if l2 else None
+    
+    now = get_utc_now()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "title": order_data.title,
+            "description": order_data.description,
+            "category_l1_id": order_data.category_l1_id,
+            "category_l1_name": cat_l1_name,
+            "category_l2_id": order_data.category_l2_id,
+            "category_l2_name": cat_l2_name,
+            "priority": order_data.priority,
+            "video_script": order_data.video_script,
+            "reference_links": order_data.reference_links,
+            "footage_links": order_data.footage_links,
+            "music_preference": order_data.music_preference,
+            "delivery_format": order_data.delivery_format,
+            "special_instructions": order_data.special_instructions,
+            "updated_at": now
+        }}
+    )
+    
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    updated_order = normalize_order(updated_order)
+    return OrderResponse(
+        **updated_order,
         is_sla_breached=False
     )
 
