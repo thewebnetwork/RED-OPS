@@ -33,6 +33,34 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 25: Reports Module + Command Center Button Fix ✅ (January 26, 2026)
+
+**Part A: P0/P1 - Command Center Submit Button Behavior**
+- Submit and Save Draft buttons now **HIDDEN** until BOTH L1 and L2 categories are selected
+- Works universally for all category types (Editing, Feature Requests, Bug Reports)
+- Future-proof: Any new categories will automatically follow this rule
+
+**Part B: P1 - Reports Module (New)**
+1. **13 Canned Reports**:
+   - **Volume**: Tickets Created, Tickets Closed
+   - **Aging**: Open Ticket Aging (0-24h, 1-3d, 3-7d, 7-14d, 14d+)
+   - **Performance**: Avg Time to First Response, Avg Time to Resolution
+   - **SLA**: SLA Compliance Summary, SLA Policy Effectiveness
+   - **Distribution**: Tickets by Assignee, Team, Specialty, Category
+   - **Escalation**: Escalation Events Report
+   - **Workflow**: Stale Pending Review (supports 24h/5d workflow)
+
+2. **Comprehensive Filters**:
+   - Date range with presets (Today, Last 7/30 Days, This/Last Month)
+   - Status, SLA State, Category L1/L2, Team, Assignee
+   - Specialty, Access Tier, Search
+
+3. **Export Capabilities**:
+   - **CSV**: Direct download with headers
+   - **PDF**: Branded with rose theme, summary section, auto-table
+
+4. **Access Control**: Admin + Privileged User roles
+
 ### Phase 24: Command Center UX + Review Reminder Workflow ✅ (January 26, 2026)
 
 **Part A: Save Draft + Submit Request UX**
