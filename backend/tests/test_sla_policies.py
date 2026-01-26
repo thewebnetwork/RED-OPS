@@ -363,15 +363,22 @@ class TestWorkflowActionReplacement:
         assert response.status_code == 200, f"Failed to get workflow actions: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list), "Response should be a list"
+        # Response is an object with "actions" key
+        assert "actions" in data, "Response should contain 'actions' key"
+        actions = data["actions"]
+        assert isinstance(actions, list), "Actions should be a list"
         
-        action_types = [action["type"] for action in data]
+        action_types = [action["type"] for action in actions]
         
-        # Check if apply_sla_policy exists OR auto_escalate exists (depending on implementation)
-        has_sla_action = "apply_sla_policy" in action_types or "auto_escalate" in action_types
-        assert has_sla_action, f"Should have SLA-related action. Available: {action_types}"
+        # Check if apply_sla_policy exists (replaced auto_escalate)
+        assert "apply_sla_policy" in action_types, f"Should have 'apply_sla_policy' action. Available: {action_types}"
         
-        print(f"✓ Workflow actions available: {action_types}")
+        # Verify apply_sla_policy has correct config
+        sla_action = next((a for a in actions if a["type"] == "apply_sla_policy"), None)
+        assert sla_action is not None, "apply_sla_policy action not found"
+        assert "policy_id" in sla_action.get("config_fields", []), "apply_sla_policy should have policy_id config field"
+        
+        print(f"✓ Workflow actions include 'apply_sla_policy' with policy_id config")
 
 
 class TestRouteRedirects:
