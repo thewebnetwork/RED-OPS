@@ -340,10 +340,9 @@ A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Vis
 
 ### P2: Integrations 🟠 (In Progress)
 - Integrate Real SMTP (user provides credentials) - Backend ready, UI ready
-- GHL/Marketplace Webhooks - Webhook infrastructure in place
-- Execute outgoing webhooks on events - IN PROGRESS
+- ~~Execute outgoing webhooks on events~~ ✅ DONE
 
-### P2: Refactoring 🟡
+### P2: Refactoring 🟡 (Next)
 - Refactor monolithic server.py into modular structure
 
 ### P3: Backend Improvements 🟣
