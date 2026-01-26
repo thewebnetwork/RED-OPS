@@ -32,6 +32,34 @@ Real estate and marketing professionals who can pick orders from the pool:
 
 ## What's Been Implemented
 
+### Phase 23.1: Dashboard SLA Integration & Access Tier Scope ✅ (January 26, 2026)
+
+**Optimization: Single Source of Truth for SLA Stats**
+
+1. **Dashboard SLA Integration**:
+   - Removed old "SLA Breaching" KPI from Dashboard
+   - Added new unified "SLA Status" section with 4 KPIs:
+     - On Track (links to /sla-policies?tab=monitoring&status=on_track)
+     - At Risk (links to /sla-policies?tab=monitoring&status=at_risk)
+     - Breached (links to /sla-policies?tab=monitoring&status=breached)
+     - Unacknowledged (links to /sla-policies?tab=history)
+   - Dashboard fetches from unified `/api/sla-policies/monitoring/stats` endpoint
+   - SLA module mirrors these stats for consistency (single source of truth)
+
+2. **Access Tier Added to Policy Scope**:
+   - Backend: `SLAPolicyScope` model now includes `access_tier_ids` and `access_tier_names`
+   - Policy engine: `auto_apply_policy_to_order` now checks access tier in scope matching
+   - Frontend: Policy dialog shows 4-column scope selection (Roles, Teams, Specialties, Access Tiers)
+
+3. **Scope Priority Order** (highest to lowest):
+   - Role (4 points)
+   - Team (3 points)
+   - Specialty (2 points)
+   - Access Tier (1 point)
+   - Empty scope = fallback policy (0.5 points)
+
+**Testing:** 100% pass rate (12/12 backend tests, all frontend flows)
+
 ### Phase 23: Unified SLA & Escalation Policies Module ✅ (January 26, 2026)
 
 **Major Refactor: Merged SLA + Escalation into One Module**
