@@ -435,7 +435,7 @@ export default function Integrations() {
                         </Select>
                       </div>
                       <div className="flex gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setApiKeyDialogOpen(false)} className="flex-1">
+                        <Button variant="outline" onClick={() => handleApiKeyDialogClose(false)} className="flex-1">
                           Cancel
                         </Button>
                         <Button 
