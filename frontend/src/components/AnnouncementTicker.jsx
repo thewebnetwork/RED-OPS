@@ -31,11 +31,31 @@ export default function AnnouncementTicker() {
 
   return (
     <div 
-      className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg mr-4 max-w-md"
+      className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg mr-4 max-w-md overflow-hidden"
       data-testid="announcement-ticker"
     >
       <Megaphone size={16} className="shrink-0 text-black" />
-      <span className="text-sm font-bold text-black truncate">{ticker.message}</span>
+      <div className="overflow-hidden whitespace-nowrap">
+        <span 
+          className="inline-block text-sm font-bold text-black animate-marquee"
+          style={{
+            animation: 'marquee 15s linear infinite',
+          }}
+        >
+          {ticker.message}
+        </span>
+      </div>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          padding-left: 100%;
+          animation: marquee 15s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
