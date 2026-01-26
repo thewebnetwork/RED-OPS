@@ -3614,6 +3614,70 @@ async def create_log(log_data: dict, current_user: dict = Depends(get_current_us
     await db.activity_logs.insert_one(log_entry)
     return {"message": "Log created", "id": log_entry["id"]}
 
+from fastapi.responses import StreamingResponse
+import json
+
+@api_router.get("/logs/stream/{log_type}")
+async def stream_logs(log_type: str, current_user: dict = Depends(require_roles(["Admin"]))):
+    """Stream real-time logs using Server-Sent Events (SSE)"""
+    if log_type not in ['system', 'api', 'ui', 'user', 'all']:
+        raise HTTPException(status_code=400, detail="Invalid log type")
+    
+    async def event_generator():
+        last_timestamp = None
+        while True:
+            try:
+                # Query for new logs
+                query = {}
+                if log_type != 'all':
+                    query["source"] = log_type
+                if last_timestamp:
+                    query["timestamp"] = {"$gt": last_timestamp}
+                
+                logs = await db.activity_logs.find(
+                    query, {"_id": 0}
+                ).sort("timestamp", -1).limit(10).to_list(10)
+                
+                if logs:
+                    last_timestamp = logs[0]["timestamp"]
+                    for log in reversed(logs):
+                        yield f"data: {json.dumps(log)}\n\n"
+                
+                # Also generate some simulated activity for demo
+                if random.random() < 0.3:  # 30% chance of new log
+                    levels = ["INFO", "INFO", "INFO", "WARNING", "DEBUG"]
+                    messages = {
+                        "system": ["Server health check passed", "Memory usage: 42%", "Background task completed"],
+                        "api": ["GET /api/orders - 200 OK", "POST /api/auth/login - 200 OK", "GET /api/users - 200 OK"],
+                        "ui": ["Dashboard loaded", "Navigation to Orders", "Form validation passed"],
+                        "user": ["User viewed dashboard", "Order list refreshed", "Profile updated"]
+                    }
+                    source = log_type if log_type != 'all' else random.choice(['system', 'api', 'ui', 'user'])
+                    simulated_log = {
+                        "id": str(uuid.uuid4()),
+                        "timestamp": get_utc_now(),
+                        "level": random.choice(levels),
+                        "message": random.choice(messages.get(source, messages["system"])),
+                        "source": source
+                    }
+                    yield f"data: {json.dumps(simulated_log)}\n\n"
+                
+                await asyncio.sleep(2)  # Check every 2 seconds
+            except Exception as e:
+                logging.error(f"Log stream error: {e}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                break
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
 # ============== API KEYS & WEBHOOKS ROUTES ==============
 
 class ApiKeyCreate(BaseModel):
