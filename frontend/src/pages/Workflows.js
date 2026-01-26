@@ -615,7 +615,7 @@ export default function Workflows() {
 
       {/* Create Workflow Unsaved Changes Warning */}
       <AlertDialog open={showCreateUnsavedWarning} onOpenChange={setShowCreateUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog">
+        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
             <AlertDialogDescription>
