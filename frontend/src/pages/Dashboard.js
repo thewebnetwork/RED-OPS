@@ -631,11 +631,18 @@ export default function Dashboard() {
 
   if (!user) return <LoadingSpinner />;
 
+  // Check for admin roles (supports both old and new role names)
+  const isAdmin = user.role === 'Administrator' || user.role === 'Admin';
+  // Check for editor/privileged user roles
+  const isEditor = user.role === 'Privileged User' || user.role === 'Editor';
+  // Check for requester/standard user roles
+  const isRequester = user.role === 'Standard User' || user.role === 'Requester';
+
   return (
     <div className="animate-fade-in" data-testid="dashboard-page">
-      {user.role === 'Admin' && <AdminDashboard />}
-      {user.role === 'Editor' && <EditorDashboard />}
-      {user.role === 'Requester' && <RequesterDashboard />}
+      {isAdmin && <AdminDashboard />}
+      {isEditor && <EditorDashboard />}
+      {isRequester && <RequesterDashboard />}
     </div>
   );
 }
