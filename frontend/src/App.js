@@ -120,7 +120,7 @@ function AppRoutes() {
       <Route 
         path="/orders" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute roles={["Administrator", "Operator"]}>
             <Orders />
           </PrivateRoute>
         } 
@@ -128,7 +128,7 @@ function AppRoutes() {
       <Route 
         path="/orders/new" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User", "Standard User"]}>
+          <PrivateRoute roles={["Administrator", "Operator", "Standard User"]}>
             <CreateOrder />
           </PrivateRoute>
         } 
