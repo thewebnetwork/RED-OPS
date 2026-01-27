@@ -142,21 +142,28 @@ export default function Layout({ children }) {
         {/* Navigation */}
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <div className="space-y-1">
-            {filteredNavItems.map(item => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  location.pathname === item.path
-                    ? 'bg-white text-[#A2182C] shadow-lg'
-                    : 'text-white/80 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <item.icon size={18} strokeWidth={1.5} />
-                {item.label || t(item.labelKey)}
-              </Link>
-            ))}
+            {filteredNavItems.map(item => {
+              // Special handling for Report an Issue which redirects to command-center with type=issue
+              const isActive = item.path === '/report-issue' 
+                ? location.pathname === '/command-center' && location.search.includes('type=issue')
+                : location.pathname === item.path;
+              
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white text-[#A2182C] shadow-lg'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <item.icon size={18} strokeWidth={1.5} />
+                  {item.label || t(item.labelKey)}
+                </Link>
+              );
+            })}
           </div>
         </nav>
 
