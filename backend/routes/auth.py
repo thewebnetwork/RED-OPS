@@ -29,10 +29,13 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
-    team_id: Optional[str] = None
-    team_name: Optional[str] = None
+    account_type: Optional[str] = None
     specialty_id: Optional[str] = None
     specialty_name: Optional[str] = None
+    team_id: Optional[str] = None
+    team_name: Optional[str] = None
+    subscription_plan_id: Optional[str] = None
+    subscription_plan_name: Optional[str] = None
     access_tier_id: Optional[str] = None
     access_tier_name: Optional[str] = None
     permissions: Dict[str, Dict[str, bool]] = {}
