@@ -110,6 +110,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/my-services" 
+        element={
+          <PrivateRoute>
+            <MyServices />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/orders" 
         element={
           <PrivateRoute roles={["Administrator", "Privileged User"]}>
