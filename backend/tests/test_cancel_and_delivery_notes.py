@@ -15,9 +15,13 @@ import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials
+# Test credentials - using existing users
 ADMIN_EMAIL = "admin@redribbonops.com"
 ADMIN_PASSWORD = "Fmtvvl171**"
+REQUESTER_EMAIL = "requester@test.com"
+REQUESTER_PASSWORD = "TestPass123!"
+EDITOR_EMAIL = "editor@test.com"
+EDITOR_PASSWORD = "TestPass123!"
 
 
 class TestCancellationReasons:
@@ -102,70 +106,22 @@ class TestCancelTicketFlow:
         pytest.skip("Admin login failed")
     
     @pytest.fixture
-    def requester_user(self, admin_token):
-        """Create or get a requester user"""
-        headers = {"Authorization": f"Bearer {admin_token}"}
-        
-        # Check if test requester exists
-        response = requests.get(f"{BASE_URL}/api/users", headers=headers)
-        if response.status_code == 200:
-            users = response.json()
-            for user in users:
-                if user.get("email") == "test_requester_cancel@test.com":
-                    return user
-        
-        # Create requester user
-        response = requests.post(f"{BASE_URL}/api/users", headers=headers, json={
-            "name": "Test Requester Cancel",
-            "email": "test_requester_cancel@test.com",
-            "password": "TestPass123!",
-            "role": "Requester"
-        })
-        if response.status_code in [200, 201]:
-            return response.json()
-        pytest.skip("Failed to create requester user")
-    
-    @pytest.fixture
-    def requester_token(self, requester_user):
+    def requester_token(self):
         """Get requester auth token"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "test_requester_cancel@test.com",
-            "password": "TestPass123!"
+            "email": REQUESTER_EMAIL,
+            "password": REQUESTER_PASSWORD
         })
         if response.status_code == 200:
             return response.json()["token"]
         pytest.skip("Requester login failed")
     
     @pytest.fixture
-    def editor_user(self, admin_token):
-        """Create or get an editor user"""
-        headers = {"Authorization": f"Bearer {admin_token}"}
-        
-        # Check if test editor exists
-        response = requests.get(f"{BASE_URL}/api/users", headers=headers)
-        if response.status_code == 200:
-            users = response.json()
-            for user in users:
-                if user.get("email") == "test_editor_cancel@test.com":
-                    return user
-        
-        # Create editor user
-        response = requests.post(f"{BASE_URL}/api/users", headers=headers, json={
-            "name": "Test Editor Cancel",
-            "email": "test_editor_cancel@test.com",
-            "password": "TestPass123!",
-            "role": "Editor"
-        })
-        if response.status_code in [200, 201]:
-            return response.json()
-        pytest.skip("Failed to create editor user")
-    
-    @pytest.fixture
-    def editor_token(self, editor_user):
+    def editor_token(self):
         """Get editor auth token"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "test_editor_cancel@test.com",
-            "password": "TestPass123!"
+            "email": EDITOR_EMAIL,
+            "password": EDITOR_PASSWORD
         })
         if response.status_code == 200:
             return response.json()["token"]
@@ -181,7 +137,7 @@ class TestCancelTicketFlow:
             "description": "Test ticket for cancellation",
             "priority": "Normal"
         })
-        assert create_response.status_code in [200, 201]
+        assert create_response.status_code in [200, 201], f"Create failed: {create_response.text}"
         order = create_response.json()
         order_id = order["id"]
         
@@ -190,7 +146,7 @@ class TestCancelTicketFlow:
             "reason": "No longer needed",
             "notes": "Testing cancellation flow"
         })
-        assert cancel_response.status_code == 200
+        assert cancel_response.status_code == 200, f"Cancel failed: {cancel_response.text}"
         print(f"✓ Cancel response: {cancel_response.json()}")
         
         # Verify ticket is canceled
@@ -257,7 +213,7 @@ class TestCancelTicketFlow:
         
         # Editor picks the ticket
         pick_response = requests.post(f"{BASE_URL}/api/orders/{order_id}/pick", headers=editor_headers)
-        assert pick_response.status_code == 200
+        assert pick_response.status_code == 200, f"Pick failed: {pick_response.text}"
         print("✓ Editor picked the ticket")
         
         # Requester cancels the ticket
@@ -362,8 +318,8 @@ class TestDeliveryNotesFlow:
     def requester_token(self):
         """Get requester auth token"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "test_requester_cancel@test.com",
-            "password": "TestPass123!"
+            "email": REQUESTER_EMAIL,
+            "password": REQUESTER_PASSWORD
         })
         if response.status_code == 200:
             return response.json()["token"]
@@ -373,8 +329,8 @@ class TestDeliveryNotesFlow:
     def editor_token(self):
         """Get editor auth token"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "test_editor_cancel@test.com",
-            "password": "TestPass123!"
+            "email": EDITOR_EMAIL,
+            "password": EDITOR_PASSWORD
         })
         if response.status_code == 200:
             return response.json()["token"]
