@@ -125,7 +125,7 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/my-requests" 
+        path="/my-tickets" 
         element={
           <PrivateRoute>
             <MyRequests />
