@@ -544,3 +544,32 @@ async def run_identity_migration(current_user: dict = Depends(require_roles(["Ad
         "results": results
     }
 
+
+
+# ============== MY SERVICES CONTENT ==============
+
+class MyServicesContentUpdate(BaseModel):
+    content: str
+
+
+@router.get("/settings/my-services-content")
+async def get_my_services_content(current_user: dict = Depends(get_current_user)):
+    """Get the My Services page content"""
+    content = await db.settings.find_one({"key": "my_services_content"}, {"_id": 0})
+    if content:
+        return {"content": content.get("value", "")}
+    return {"content": None}
+
+
+@router.put("/settings/my-services-content")
+async def update_my_services_content(
+    data: MyServicesContentUpdate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update the My Services page content (Admin only)"""
+    await db.settings.update_one(
+        {"key": "my_services_content"},
+        {"$set": {"value": data.content, "updated_at": get_utc_now(), "updated_by": current_user["id"]}},
+        upsert=True
+    )
+    return {"message": "Content updated", "content": data.content}
