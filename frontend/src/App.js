@@ -124,6 +124,30 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/my-requests" 
+        element={
+          <PrivateRoute>
+            <MyRequests />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/report-issue" 
+        element={
+          <PrivateRoute>
+            <ReportIssue />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/ribbon-board" 
+        element={
+          <PrivateRoute>
+            <RibbonBoard />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/orders" 
         element={
           <PrivateRoute roles={["Administrator", "Operator"]}>
