@@ -21,7 +21,17 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://clean-slate-102.preview.e
 
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]
-ORDER_STATUSES = ["Draft", "Open", "In Progress", "Pending", "Delivered", "Closed"]
+ORDER_STATUSES = ["Draft", "Open", "In Progress", "Pending", "Delivered", "Closed", "Canceled"]
+
+# Cancellation reasons
+CANCELLATION_REASONS = [
+    "No longer needed",
+    "Changed my mind",
+    "Found a different solution",
+    "Fixed the issue myself",
+    "Duplicate ticket",
+    "Other"
+]
 REQUEST_TYPES = ["Request", "Bug"]
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
 BUG_SEVERITIES = ["Low", "Normal", "High", "Urgent"]
