@@ -85,9 +85,9 @@ export default function MyRequests() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Inbox className="text-[#A2182C]" />
-            My Requests
+            My Tickets
           </h1>
-          <p className="text-slate-500 mt-1">View and track all requests you've submitted</p>
+          <p className="text-slate-500 mt-1">View and track all tickets you've submitted</p>
         </div>
         <Link to="/command-center">
           <Button className="bg-rose-600 hover:bg-rose-700">
