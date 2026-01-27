@@ -52,6 +52,12 @@ def normalize_order(order: dict) -> dict:
         'close_reason': order.get('close_reason'),
         'review_started_at': order.get('review_started_at'),
         'last_requester_message_at': order.get('last_requester_message_at'),
+        # Cancellation fields
+        'cancellation_reason': order.get('cancellation_reason'),
+        'cancellation_notes': order.get('cancellation_notes'),
+        'canceled_at': order.get('canceled_at'),
+        # Resolution fields
+        'resolution_notes': order.get('resolution_notes'),
     }
     return {**order, **defaults}
 
