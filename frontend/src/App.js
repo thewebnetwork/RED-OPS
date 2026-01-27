@@ -29,6 +29,8 @@ import EmailSettings from "./pages/EmailSettings";
 import DraftEditor from "./pages/DraftEditor";
 import Reports from "./pages/Reports";
 import MyServices from "./pages/MyServices";
+import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
+import SubscriptionPlansAdmin from "./pages/SubscriptionPlansAdmin";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
