@@ -90,7 +90,7 @@ def get_effective_permissions(role: str, overrides: Optional[Dict] = None) -> Di
 
 
 async def build_user_response(user: dict) -> UserResponse:
-    """Build UserResponse with team info"""
+    """Build UserResponse with team info and new identity fields"""
     team_name = None
     if user.get("team_id"):
         team = await db.teams.find_one({"id": user["team_id"]}, {"_id": 0, "name": 1})
@@ -107,10 +107,13 @@ async def build_user_response(user: dict) -> UserResponse:
         name=user["name"],
         email=user["email"],
         role=user["role"],
-        team_id=user.get("team_id"),
-        team_name=team_name,
+        account_type=user.get("account_type"),
         specialty_id=user.get("specialty_id"),
         specialty_name=user.get("specialty_name"),
+        team_id=user.get("team_id"),
+        team_name=team_name,
+        subscription_plan_id=user.get("subscription_plan_id"),
+        subscription_plan_name=user.get("subscription_plan_name"),
         access_tier_id=user.get("access_tier_id"),
         access_tier_name=user.get("access_tier_name"),
         permissions=permissions,
