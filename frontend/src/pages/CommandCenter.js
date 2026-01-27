@@ -280,25 +280,18 @@ export default function CommandCenter() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="create" className="data-[state=active]:bg-rose-600 data-[state=active]:text-white" data-testid="create-tab">
-            <Plus size={16} className="mr-2" />
-            {t('commandCenter.newTicket')}
-          </TabsTrigger>
-          <TabsTrigger value="my-requests" data-testid="my-requests-tab">
-            <FileText size={16} className="mr-2" />
-            {t('commandCenter.myRequests')} ({myRequests.length})
-          </TabsTrigger>
+      <Tabs value="create">
+        <TabsList className="sr-only">
+          <TabsTrigger value="create" />
         </TabsList>
 
-        <TabsContent value="create" className="mt-6">
+        <TabsContent value="create" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Form Area */}
             <div className="lg:col-span-2">
               <Card className="border-slate-200">
                 <CardHeader className="border-b border-slate-100 pb-4">
-                  <CardTitle>{t('commandCenter.newTicket')}</CardTitle>
+                  <CardTitle>Fill Out Form</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {/* Title */}
