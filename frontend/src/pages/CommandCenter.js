@@ -74,6 +74,7 @@ const statusColors = {
   'Pending': 'bg-purple-100 text-purple-700',
   'Delivered': 'bg-green-100 text-green-700',
   'Closed': 'bg-slate-100 text-slate-500',
+  'Canceled': 'bg-red-100 text-red-600',
 };
 
 const requestTypeColors = {
