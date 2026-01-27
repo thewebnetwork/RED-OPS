@@ -420,6 +420,63 @@ async def delete_workflow(workflow_id: str, current_user: dict = Depends(require
 
 WORKFLOW_TEMPLATES = [
     {
+        "id": "template-pool-routing",
+        "name": "Pool Routing (24h Right of First Refusal)",
+        "description": "Routes paid service tickets to Partner pool first, then to Vendor/Freelancer pool after 24 hours if unclaimed",
+        "category": "Routing",
+        "icon": "Users",
+        "color": "#8B5CF6",
+        "popularity": 98,
+        "editable": True,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "Ticket Status = OPEN (Paid)", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.status_changed", "condition": {"status": "Open"}}},
+            {"id": "action-pool1", "type": "action", "label": "Route to Pool 1 (Partners)", "position": {"x": 250, "y": 170}, "data": {"action_type": "route_to_pool", "config": {"pool": "pool_1", "target_specialty": "{ticket_specialty}", "target_account_type": "Partner", "message": "New paid service request available for Partners: {order_code}"}}},
+            {"id": "delay-1", "type": "delay", "label": "Wait 24 Hours", "position": {"x": 250, "y": 290}, "data": {"delay_type": "hours", "delay_value": 24, "configurable": True}},
+            {"id": "condition-claimed", "type": "condition", "label": "Check if Claimed", "position": {"x": 250, "y": 410}, "data": {"field": "editor_id", "conditions": [{"operator": "is_not_null"}]}},
+            {"id": "action-pool2", "type": "action", "label": "Route to Pool 2 (Vendors)", "position": {"x": 400, "y": 530}, "data": {"action_type": "route_to_pool", "config": {"pool": "pool_2", "target_specialty": "{ticket_specialty}", "target_account_type": "Vendor/Freelancer", "message": "Unclaimed request available for Vendors: {order_code}"}}},
+            {"id": "end-claimed", "type": "end", "label": "Already Claimed", "position": {"x": 100, "y": 530}, "data": {"reason": "Ticket picked by Partner"}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "action-pool1"},
+            {"id": "e2", "source": "action-pool1", "target": "delay-1"},
+            {"id": "e3", "source": "delay-1", "target": "condition-claimed"},
+            {"id": "e4", "source": "condition-claimed", "target": "end-claimed", "label": "Claimed", "source_handle": "yes"},
+            {"id": "e5", "source": "condition-claimed", "target": "action-pool2", "label": "Not Claimed", "source_handle": "no"}
+        ]
+    },
+    {
+        "id": "template-payments-workflow",
+        "name": "Payments + Status Progression",
+        "description": "Sends GHL payment link, changes status on payment confirmation, then routes to pools. Example for Media Services > Editing Services.",
+        "category": "Payments",
+        "icon": "CreditCard",
+        "color": "#10B981",
+        "popularity": 96,
+        "editable": True,
+        "mocked": True,
+        "nodes": [
+            {"id": "trigger-1", "type": "trigger", "label": "Ticket Created (NEW)", "position": {"x": 250, "y": 50}, "data": {"trigger_type": "order.created", "condition": {"category_l1": "Media Services", "category_l2": "Editing Services"}}},
+            {"id": "action-payment", "type": "action", "label": "Send GHL Payment Link", "position": {"x": 250, "y": 170}, "data": {"action_type": "send_payment_link", "config": {"provider": "ghl_mocked", "price_partner": 100, "price_media_client": 150, "message": "Please complete payment for your request: {payment_link}"}}},
+            {"id": "webhook-wait", "type": "trigger", "label": "Wait for Payment Webhook", "position": {"x": 250, "y": 290}, "data": {"trigger_type": "webhook.payment_confirmed", "webhook_source": "ghl_mocked"}},
+            {"id": "action-status", "type": "action", "label": "Update Status: NEW → OPEN", "position": {"x": 250, "y": 410}, "data": {"action_type": "update_status", "config": {"status": "Open", "add_note": "Payment confirmed. Ticket is now open for fulfillment."}}},
+            {"id": "action-pool1", "type": "action", "label": "Route to Pool 1 (Partners)", "position": {"x": 250, "y": 530}, "data": {"action_type": "route_to_pool", "config": {"pool": "pool_1", "target_specialty": "{ticket_specialty}", "target_account_type": "Partner"}}},
+            {"id": "delay-1", "type": "delay", "label": "Wait 24 Hours", "position": {"x": 250, "y": 650}, "data": {"delay_type": "hours", "delay_value": 24}},
+            {"id": "condition-claimed", "type": "condition", "label": "Check if Claimed", "position": {"x": 250, "y": 770}, "data": {"field": "editor_id", "conditions": [{"operator": "is_not_null"}]}},
+            {"id": "action-pool2", "type": "action", "label": "Route to Pool 2 (Vendors)", "position": {"x": 400, "y": 890}, "data": {"action_type": "route_to_pool", "config": {"pool": "pool_2", "target_account_type": "Vendor/Freelancer"}}},
+            {"id": "end-claimed", "type": "end", "label": "Fulfilled", "position": {"x": 100, "y": 890}, "data": {}}
+        ],
+        "edges": [
+            {"id": "e1", "source": "trigger-1", "target": "action-payment"},
+            {"id": "e2", "source": "action-payment", "target": "webhook-wait"},
+            {"id": "e3", "source": "webhook-wait", "target": "action-status"},
+            {"id": "e4", "source": "action-status", "target": "action-pool1"},
+            {"id": "e5", "source": "action-pool1", "target": "delay-1"},
+            {"id": "e6", "source": "delay-1", "target": "condition-claimed"},
+            {"id": "e7", "source": "condition-claimed", "target": "end-claimed", "label": "Claimed", "source_handle": "yes"},
+            {"id": "e8", "source": "condition-claimed", "target": "action-pool2", "label": "Not Claimed", "source_handle": "no"}
+        ]
+    },
+    {
         "id": "template-editor-assignment",
         "name": "Editor Assignment",
         "description": "Automatically notifies editors when new orders are created and sends email alerts",
