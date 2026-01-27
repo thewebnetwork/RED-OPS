@@ -127,7 +127,7 @@ export default function MyRequests() {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{orders.length}</p>
-            <p className="text-sm text-slate-500">Total Requests</p>
+            <p className="text-sm text-slate-500">Total Tickets</p>
           </CardContent>
         </Card>
         <Card>
