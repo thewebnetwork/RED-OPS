@@ -97,10 +97,8 @@ export default function CommandCenter() {
   const preselectedCategory = searchParams.get('category');
   const preselectedType = searchParams.get('type');
   
-  const [activeTab, setActiveTab] = useState('create');
   const [categoriesL1, setCategoriesL1] = useState([]);
   const [categoriesL2, setCategoriesL2] = useState([]);
-  const [myRequests, setMyRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categorySearch, setCategorySearch] = useState('');
   
