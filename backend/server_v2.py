@@ -172,6 +172,7 @@ app.include_router(access_tiers_router, prefix="/api")
 app.include_router(subscription_plans_router, prefix="/api")
 app.include_router(sla_policies_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
+app.include_router(iam_router, prefix="/api")
 
 
 @app.get("/")
