@@ -311,25 +311,6 @@ export default function CommandCenter() {
                   {/* If type=issue in URL, it's Report an Issue → Bug type */}
                   {/* Otherwise it's Submit New Request → Request type */}
                   <input type="hidden" value={requestType} />
-                          className="sr-only"
-                        />
-                        <Lightbulb size={18} className={requestType === 'Request' ? 'text-rose-600' : 'text-slate-400'} />
-                        <span className={requestType === 'Request' ? 'text-rose-700 font-medium' : 'text-slate-600'}>{t('commandCenter.request')}</span>
-                      </label>
-                      <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${requestType === 'Bug' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                        <input
-                          type="radio"
-                          name="requestType"
-                          value="Bug"
-                          checked={requestType === 'Bug'}
-                          onChange={(e) => setRequestType(e.target.value)}
-                          className="sr-only"
-                        />
-                        <Bug size={18} className={requestType === 'Bug' ? 'text-rose-600' : 'text-slate-400'} />
-                        <span className={requestType === 'Bug' ? 'text-rose-700 font-medium' : 'text-slate-600'}>{t('commandCenter.incident')}</span>
-                      </label>
-                    </div>
-                  </div>
 
                   {/* Description */}
                   <div>
