@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,7 +8,6 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
-import { Badge } from '../components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -18,29 +17,24 @@ import {
 } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { 
-  Plus,
   Search,
   Video,
   Lightbulb,
   Bug,
   ChevronRight,
-  Clock,
   FileText,
-  ArrowRight,
   Upload,
   X,
   File,
   Image,
   FileVideo,
-  AlertCircle,
   Save,
-  Send,
-  Edit3
+  Send
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
 
 
 // Allowed file extensions (safe files only)
