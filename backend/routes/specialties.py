@@ -6,7 +6,7 @@ from typing import List
 from database import db
 from utils.auth import require_roles, get_current_user
 from utils.helpers import get_utc_now
-from models.identity import SpecialtyCreate, SpecialtyResponse
+from models.identity import SpecialtyCreate, SpecialtyUpdate, SpecialtyResponse
 
 router = APIRouter(prefix="/specialties", tags=["Specialties"])
 
@@ -75,6 +75,42 @@ async def get_specialty(specialty_id: str, current_user: dict = Depends(get_curr
     if not specialty:
         raise HTTPException(status_code=404, detail="Specialty not found")
     return await build_specialty_response(specialty)
+
+
+@router.patch("/{specialty_id}", response_model=SpecialtyResponse)
+async def update_specialty(
+    specialty_id: str,
+    specialty_data: SpecialtyUpdate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update a specialty (Admin only)"""
+    specialty = await db.specialties.find_one({"id": specialty_id})
+    if not specialty:
+        raise HTTPException(status_code=404, detail="Specialty not found")
+    
+    update_dict = {k: v for k, v in specialty_data.model_dump().items() if v is not None}
+    
+    if "name" in update_dict:
+        # Check for duplicate name (case-insensitive)
+        existing = await db.specialties.find_one({
+            "name": {"$regex": f"^{update_dict['name']}$", "$options": "i"},
+            "id": {"$ne": specialty_id},
+            "active": True
+        })
+        if existing:
+            raise HTTPException(status_code=400, detail="Specialty with this name already exists")
+    
+    if update_dict:
+        await db.specialties.update_one({"id": specialty_id}, {"$set": update_dict})
+        # Update name in users if changed
+        if "name" in update_dict:
+            await db.users.update_many(
+                {"specialty_id": specialty_id},
+                {"$set": {"specialty_name": update_dict["name"]}}
+            )
+    
+    updated = await db.specialties.find_one({"id": specialty_id}, {"_id": 0})
+    return await build_specialty_response(updated)
 
 
 @router.delete("/{specialty_id}")
