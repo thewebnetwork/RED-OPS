@@ -1,10 +1,11 @@
-# Red Ribbon Ops Portal - Product Requirements Document
+# Red Pulse Platform - Product Requirements Document
 
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.1 (P0 Blockers Fixed)
+## Current Version: 2.2 (All P0 Blockers Fixed)
 **Last Updated:** January 27, 2026
+**Platform Name:** Red Pulse
 
 ---
 
@@ -23,109 +24,105 @@ A comprehensive operations management platform designed as a request and fulfill
 
 ---
 
-## Sidebar Navigation Structure
+## Sidebar Navigation (Consolidated)
 
 ### All Users
 1. Dashboard
 2. My Services
-3. **My Requests** (NEW)
+3. My Requests
 4. Submit New Request
-5. **Report an Issue** (NEW)
-6. **The Ribbon Board** (NEW - Pool views)
+5. Report an Issue
+6. Opportunity Ribbon (Pool views)
 7. Reports
 
-### Admin/Operator Only
+### Admin Only
 8. All Orders
-9. Workflows
-10. SLA & Escalation
-11. Users
-12. Teams
-13. **Identity & Access** (Renamed from "Roles")
-14. Specialties
-15. Subscription Plans
-16. Categories
-17. Logs
-18. Integrations
-19. Announcements
-20. Email Settings
-21. Settings
-
-**REMOVED:** Quick Actions section at bottom
+9. Identity & Access (consolidated Users, Teams, Specialties, Roles, Plans)
+10. Logs
+11. Announcements
+12. Settings (consolidated hub)
 
 ---
 
-## Identity & Access Model (IAM) - v2.0
+## Consolidated Modules
 
-### Simplified Roles (Permissions Only)
+### Identity & Access Management (/iam)
+Contains 5 tabs:
+- **Users** - Create/edit/delete users with all IAM fields
+- **Teams** - Manage team assignments
+- **Specialties** - Admin-managed specialty list
+- **Roles** - View/edit role permissions (Administrator, Operator, Standard User)
+- **Plans** - Subscription plans for Partners
+
+### Settings Hub (/settings)
+Contains 6 modules:
+- **UI Customizations** - Field labels, branding
+- **Categories** - Service categories
+- **Workflows** - Automation and routing
+- **Email Settings** - SMTP and templates
+- **SLA & Escalation** - Policies
+- **Integrations** - API keys, webhooks
+
+---
+
+## Recent Fixes (P0 Blockers)
+
+### 1. User Create/Edit Dropdowns ✅
+- All dropdowns (Role, Specialty, Account Type, Team) now work correctly
+- Fixed z-index issue with Select component in Dialog (z-[100])
+
+### 2. Request Type Selector Removed ✅
+- Submit New Request: auto-sets type = Request (no selector)
+- Report an Issue: auto-sets type = Bug/Incident (no selector)
+- "Report an Issue" nav button active state fixed
+
+### 3. Satisfaction Survey Rule ✅
+- Confirmed: Surveys only sent on Delivered/Closed by resolver
+- Confirmed: Requester cancel does NOT trigger survey
+
+### 4. Module Consolidation ✅
+- Identity modules consolidated under IAM
+- Settings modules consolidated under Settings Hub
+- Sidebar cleaned up significantly
+
+### 5. Branding Updates ✅
+- Platform renamed to "Red Pulse"
+- Logo pulse animation active
+- "The Ribbon Board" → "Opportunity Ribbon"
+
+---
+
+## Identity & Access Model
+
+### Roles (Permissions)
 | Role | Description |
 |------|-------------|
 | Administrator | Full system control |
-| Operator | Internal staff ops, manage tickets/queues |
+| Operator | Internal staff ops |
 | Standard User | Basic user actions |
 
-### Account Types (Classification)
-| Type | Description | Subscription Required |
-|------|-------------|----------------------|
-| Partner | Business partners | Yes (Plan required) |
-| Media Client | Media service clients | No (A La Carte) |
-| Internal Staff | Company employees | No |
-| Vendor/Freelancer | External contractors | No |
+### Account Types
+| Type | Description |
+|------|-------------|
+| Partner | Business partners (requires subscription plan) |
+| Media Client | A La Carte clients |
+| Internal Staff | Company employees |
+| Vendor/Freelancer | External contractors |
 
 ### Subscription Plans (Partners Only)
-- **Core** - Basic Support, Standard SLA
-- **Engage** - Priority Support, Enhanced SLA, Analytics
-- **Lead-to-Cash** - Premium SLA, Advanced Analytics, Lead Tools
-- **Scale** - Dedicated Support, Custom SLA, All Features
+- Core, Engage, Lead-to-Cash, Scale
 
 ---
 
-## The Ribbon Board (Pool System)
+## Pool System (Opportunity Ribbon)
 
 ### Pool 1 (Partners)
-- Tickets available for Partners to pick
 - 24-hour right of first refusal
-- Visible to: Admins, Operators, Partners
+- Partners can pick from here
 
-### Pool 2 (Vendors/Freelancers)
-- Tickets that moved from Pool 1 after 24 hours
-- Visible to: Admins, Operators, Vendors/Freelancers
-
----
-
-## Completed Features (P0 Sprint)
-
-### 1. Identity & Access Model Rework ✅
-- [x] Simplified roles (Administrator, Operator, Standard User)
-- [x] Account Type field (Partner, Media Client, Internal Staff, Vendor/Freelancer)
-- [x] Specialty field (admin-managed, 56 seeded)
-- [x] Conditional Subscription Plans (Partners only)
-- [x] Per-user Access Controls (checkbox matrix)
-- [x] Identity & Access Management page
-
-### 2. Ticket Lifecycle Actions ✅
-- [x] Requester cancellation with reasons (dropdown + free text)
-- [x] Resolver delivery notes (required modal)
-- [x] Activity logging for both actions
-
-### 3. UI/Navigation Changes ✅
-- [x] Added "My Services" page
-- [x] Added "My Requests" page (dedicated)
-- [x] "Submit New Request" in sidebar
-- [x] "Report an Issue" as separate sidebar entry
-- [x] "Identity & Access" renamed from "Roles"
-- [x] Quick Actions section REMOVED
-- [x] Logo pulse animation restored
-- [x] Attachments moved under Categorization (compact)
-
-### 4. The Ribbon Board ✅
-- [x] Pool 1 (Partners) view
-- [x] Pool 2 (Vendors/Freelancers) view
-- [x] Role-based visibility
-- [x] Pick functionality with pool eligibility checks
-
-### 5. Workflow Templates ✅
-- [x] Pool Routing (24h Right of First Refusal)
-- [x] Payments + Status Progression (MOCKED GHL)
+### Pool 2 (Vendors)
+- After 24 hours in Pool 1
+- Vendors can pick from here
 
 ---
 
@@ -145,26 +142,15 @@ A comprehensive operations management platform designed as a request and fulfill
 
 ---
 
-## Testing Status
-
-- **Test Report:** /app/test_reports/iteration_28.json
-- **Frontend Tests:** 100% pass (All P0 blockers verified)
-- **Backend Tests:** 100% pass (22/22)
-
----
-
-## Next Sprint (Pending User Approval)
+## Next Sprint (Pending Approval)
 
 1. Email notifications for workflow actions
 2. Pool assignment notifications to Partners/Vendors
-3. Pool dashboard enhancement (admin full view)
+3. Pool pickup analytics views
 
 ---
 
-## Future Tasks (Backlog)
+## Testing Status
 
-- Real GHL payment integration (replace mock)
-- Advanced analytics for API key usage
-- Slack/Teams integration presets
-- Workflow preview/simulation feature
-- SLA policy templates
+- All P0 blockers verified and fixed
+- Last Test Report: `/app/test_reports/iteration_28.json`
