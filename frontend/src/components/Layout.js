@@ -28,7 +28,9 @@ import {
   Mail,
   AlertTriangle,
   BarChart3,
-  PackageOpen
+  PackageOpen,
+  Briefcase,
+  CreditCard
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
