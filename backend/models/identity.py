@@ -44,6 +44,15 @@ class SpecialtyCreate(BaseModel):
     color: Optional[str] = None
 
 
+class SpecialtyUpdate(BaseModel):
+    """Update an existing specialty"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    active: Optional[bool] = None
+
+
 class SpecialtyResponse(BaseModel):
     """Response model for specialty"""
     id: str
