@@ -709,6 +709,78 @@ async def close_order(
     return {"message": "Order closed successfully"}
 
 
+@router.post("/{order_id}/cancel")
+async def cancel_order(
+    order_id: str,
+    cancel_data: CancelOrderRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Allow requester to cancel their own ticket with a reason"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Only requester can cancel their own ticket
+    if order["requester_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Only the requester can cancel this ticket")
+    
+    # Cannot cancel if already Delivered, Closed, or Canceled
+    if order["status"] in ["Delivered", "Closed", "Canceled"]:
+        raise HTTPException(status_code=400, detail=f"Cannot cancel a ticket that is already {order['status']}")
+    
+    old_status = order["status"]
+    now = get_utc_now()
+    
+    # Update the order
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "status": "Canceled",
+            "cancellation_reason": cancel_data.reason,
+            "cancellation_notes": cancel_data.notes,
+            "canceled_at": now,
+            "updated_at": now
+        }}
+    )
+    
+    # Add system log entry to timeline
+    system_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": f"⚠️ Requester canceled this ticket.\n\n**Reason:** {cancel_data.reason}" + (f"\n**Notes:** {cancel_data.notes}" if cancel_data.notes else ""),
+        "created_at": now,
+        "is_system_message": True
+    }
+    await db.order_messages.insert_one(system_message)
+    
+    # Notify resolver/assignee if assigned
+    if order.get("editor_id"):
+        await create_notification(
+            db,
+            order["editor_id"],
+            "order_canceled",
+            "Requester canceled request",
+            f"Order {order['order_code']} '{order['title']}' was canceled by the requester.\n\nReason: {cancel_data.reason}" + (f"\nNotes: {cancel_data.notes}" if cancel_data.notes else ""),
+            order['id']
+        )
+    
+    # Trigger webhook
+    background_tasks.add_task(trigger_webhooks, "order.status_changed", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "old_status": old_status,
+        "new_status": "Canceled",
+        "cancellation_reason": cancel_data.reason,
+        "canceled_by": current_user["name"]
+    })
+    
+    return {"message": "Ticket canceled successfully"}
+
+
 # ============== MESSAGE ROUTES ==============
 
 @router.post("/{order_id}/messages", response_model=MessageResponse)
