@@ -95,6 +95,7 @@ export default function CommandCenter() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const preselectedCategory = searchParams.get('category');
+  const preselectedType = searchParams.get('type');
   
   const [activeTab, setActiveTab] = useState('create');
   const [categoriesL1, setCategoriesL1] = useState([]);
@@ -117,8 +118,13 @@ export default function CommandCenter() {
   }, []);
 
   useEffect(() => {
+    // Handle preselected type from URL (/report-issue redirects here with type=issue)
+    if (preselectedType === 'issue') {
+      setRequestType('Bug');
+    }
+    
     if (preselectedCategory && categoriesL1.length > 0) {
-      const bugCategory = categoriesL1.find(c => c.name.toLowerCase().includes('bug'));
+      const bugCategory = categoriesL1.find(c => c.name.toLowerCase().includes('bug') || c.name.toLowerCase().includes('issue'));
       const featureCategory = categoriesL1.find(c => c.name.toLowerCase().includes('feature'));
       
       if (preselectedCategory === 'bug' && bugCategory) {
@@ -129,7 +135,7 @@ export default function CommandCenter() {
         setRequestType('Request');
       }
     }
-  }, [preselectedCategory, categoriesL1]);
+  }, [preselectedCategory, preselectedType, categoriesL1]);
 
   useEffect(() => {
     if (selectedL1) {
