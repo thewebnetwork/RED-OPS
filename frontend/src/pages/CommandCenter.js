@@ -145,12 +145,8 @@ export default function CommandCenter() {
 
   const fetchData = async () => {
     try {
-      const [l1Res, requestsRes] = await Promise.all([
-        axios.get(`${API}/categories/l1`),
-        axios.get(`${API}/orders/my-requests`)
-      ]);
+      const l1Res = await axios.get(`${API}/categories/l1`);
       setCategoriesL1(l1Res.data);
-      setMyRequests(requestsRes.data);
     } catch (error) {
       toast.error('Failed to load data');
     } finally {
