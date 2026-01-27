@@ -616,8 +616,26 @@ async def deliver_order(
     
     await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"status": "Delivered", "delivered_at": now, "updated_at": now}}
+        {"$set": {
+            "status": "Delivered", 
+            "delivered_at": now, 
+            "updated_at": now,
+            "resolution_notes": deliver_data.resolution_notes
+        }}
     )
+    
+    # Add delivery notes to timeline
+    delivery_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": current_user["id"],
+        "author_name": current_user["name"],
+        "author_role": current_user["role"],
+        "message_body": f"✅ **Delivery Notes:**\n\n{deliver_data.resolution_notes}",
+        "created_at": now,
+        "is_delivery_note": True
+    }
+    await db.order_messages.insert_one(delivery_message)
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Delivered", current_user)
