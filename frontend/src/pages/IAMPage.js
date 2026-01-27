@@ -5,8 +5,17 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Checkbox } from '../components/ui/checkbox';
+import { Switch } from '../components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -14,42 +23,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { 
-  KeyRound,
-  Shield,
-  Users,
-  ChevronDown,
-  Edit,
-  Save,
-  Info,
-  Lock,
-  Building2,
-  Briefcase
+  KeyRound, Shield, Users, ChevronDown, Edit, Save, Info, Lock, Building2, Briefcase,
+  Plus, Search, Trash2, UserCheck, UserX, CreditCard, CheckCircle2, UsersRound
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Default permission modules
+// Permission modules
 const PERMISSION_MODULES = {
   dashboard: { label: 'Dashboard', actions: ['view'] },
-  my_services: { label: 'My Services', actions: ['view'] },
-  submit_request: { label: 'Submit Request', actions: ['view', 'create'] },
   orders: { label: 'Orders/Tickets', actions: ['view', 'create', 'edit', 'delete', 'export', 'pick', 'assign'] },
   users: { label: 'Users', actions: ['view', 'create', 'edit', 'delete'] },
   teams: { label: 'Teams', actions: ['view', 'create', 'edit', 'delete'] },
-  specialties: { label: 'Specialties', actions: ['view', 'create', 'edit', 'delete'] },
-  subscription_plans: { label: 'Subscription Plans', actions: ['view', 'create', 'edit', 'delete'] },
-  categories: { label: 'Categories', actions: ['view', 'create', 'edit', 'delete'] },
-  workflows: { label: 'Workflows', actions: ['view', 'create', 'edit', 'delete', 'execute'] },
-  sla_policies: { label: 'SLA Policies', actions: ['view', 'create', 'edit', 'delete', 'acknowledge'] },
-  integrations: { label: 'Integrations', actions: ['view', 'create', 'edit', 'delete'] },
-  announcements: { label: 'Announcements', actions: ['view', 'create', 'edit', 'delete'] },
-  logs: { label: 'Logs', actions: ['view', 'export'] },
   settings: { label: 'Settings', actions: ['view', 'edit'] },
   reports: { label: 'Reports', actions: ['view', 'export'] },
-  ribbon_board: { label: 'The Ribbon Board', actions: ['view', 'pick'] }
 };
 
 // Role templates
@@ -58,8 +59,7 @@ const ROLE_TEMPLATES = {
     description: 'Full system control. Can manage all modules, users, and settings.',
     permissions: Object.fromEntries(
       Object.entries(PERMISSION_MODULES).map(([key, config]) => [
-        key,
-        Object.fromEntries(config.actions.map(a => [a, true]))
+        key, Object.fromEntries(config.actions.map(a => [a, true]))
       ])
     )
   },
@@ -67,197 +67,368 @@ const ROLE_TEMPLATES = {
     description: 'Internal staff operations. Can manage tickets/queues but not system governance.',
     permissions: {
       dashboard: { view: true },
-      my_services: { view: true },
-      submit_request: { view: true, create: true },
       orders: { view: true, create: true, edit: true, pick: true, assign: true },
       teams: { view: true, create: true, edit: true },
-      categories: { view: true, create: true, edit: true },
-      workflows: { view: true },
-      logs: { view: true },
       reports: { view: true, export: true },
-      ribbon_board: { view: true }
     }
   },
   'Standard User': {
     description: 'Basic user actions. Can submit requests and view own data.',
     permissions: {
       dashboard: { view: true },
-      my_services: { view: true },
-      submit_request: { view: true, create: true },
       orders: { view: true, create: true },
       reports: { view: true },
-      ribbon_board: { view: true, pick: true }
     }
   }
 };
 
 export default function IAMPage() {
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('users');
   const [identityConfig, setIdentityConfig] = useState(null);
-  const [selectedRole, setSelectedRole] = useState('Administrator');
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingPermissions, setEditingPermissions] = useState(null);
+  
+  // Users state
+  const [users, setUsers] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [userForm, setUserForm] = useState({
+    name: '', email: '', password: '', role: 'Standard User', 
+    account_type: 'Internal Staff', specialty_id: '', team_id: '', subscription_plan_id: '',
+    force_password_change: false, force_otp_setup: false
+  });
+
+  // Teams state
+  const [teams, setTeams] = useState([]);
+  const [teamSearch, setTeamSearch] = useState('');
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState(null);
+  const [teamForm, setTeamForm] = useState({ name: '', description: '' });
+
+  // Specialties state
+  const [specialties, setSpecialties] = useState([]);
+  const [specialtySearch, setSpecialtySearch] = useState('');
+  const [specialtyDialogOpen, setSpecialtyDialogOpen] = useState(false);
+  const [editingSpecialty, setEditingSpecialty] = useState(null);
+  const [specialtyForm, setSpecialtyForm] = useState({ name: '', description: '', color: '#6366F1' });
+
+  // Subscription Plans state
+  const [plans, setPlans] = useState([]);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [planForm, setPlanForm] = useState({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: 1 });
+
+  // Delete confirmation
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', item: null });
 
   useEffect(() => {
-    fetchIdentityConfig();
+    fetchAllData();
   }, []);
 
-  const fetchIdentityConfig = async () => {
+  const fetchAllData = async () => {
     try {
-      const response = await axios.get(`${API}/users/identity-config`);
-      setIdentityConfig(response.data);
+      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes] = await Promise.all([
+        axios.get(`${API}/users`),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/specialties`),
+        axios.get(`${API}/subscription-plans`),
+        axios.get(`${API}/users/identity-config`)
+      ]);
+      setUsers(usersRes.data);
+      setTeams(teamsRes.data);
+      setSpecialties(specialtiesRes.data);
+      setPlans(plansRes.data);
+      setIdentityConfig(configRes.data);
     } catch (error) {
-      toast.error('Failed to fetch identity configuration');
+      toast.error('Failed to fetch data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditPermissions = (role) => {
-    setSelectedRole(role);
-    setEditingPermissions({ ...ROLE_TEMPLATES[role].permissions });
-    setEditDialogOpen(true);
+  // =============== USER HANDLERS ===============
+  const openUserDialog = (user = null) => {
+    if (user) {
+      setEditingUser(user);
+      setUserForm({
+        name: user.name, email: user.email, password: '',
+        role: user.role, account_type: user.account_type || 'Internal Staff',
+        specialty_id: user.specialty_id || '', team_id: user.team_id || '',
+        subscription_plan_id: user.subscription_plan_id || '',
+        force_password_change: user.force_password_change || false,
+        force_otp_setup: user.force_otp_setup || false
+      });
+    } else {
+      setEditingUser(null);
+      setUserForm({ name: '', email: '', password: '', role: 'Standard User', account_type: 'Internal Staff', specialty_id: '', team_id: '', subscription_plan_id: '', force_password_change: false, force_otp_setup: false });
+    }
+    setUserDialogOpen(true);
   };
 
-  const togglePermission = (module, action) => {
-    setEditingPermissions(prev => ({
-      ...prev,
-      [module]: {
-        ...prev[module],
-        [action]: !prev[module]?.[action]
+  const saveUser = async () => {
+    if (!userForm.name || !userForm.email) { toast.error('Name and email required'); return; }
+    if (!editingUser && !userForm.password) { toast.error('Password required for new users'); return; }
+    if (!userForm.specialty_id) { toast.error('Specialty is required'); return; }
+    if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
+
+    try {
+      const data = { ...userForm, team_id: userForm.team_id || null, subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null };
+      if (editingUser) {
+        if (!data.password) delete data.password;
+        await axios.patch(`${API}/users/${editingUser.id}`, data);
+        toast.success('User updated');
+      } else {
+        await axios.post(`${API}/users`, data);
+        toast.success('User created');
       }
-    }));
+      setUserDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save user');
+    }
   };
 
-  const getPermissionValue = (module, action) => {
-    return editingPermissions?.[module]?.[action] || false;
+  const toggleUserActive = async (userId, currentActive) => {
+    try {
+      await axios.patch(`${API}/users/${userId}`, { active: !currentActive });
+      toast.success('User status updated');
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to update user');
+    }
+  };
+
+  // =============== TEAM HANDLERS ===============
+  const openTeamDialog = (team = null) => {
+    if (team) {
+      setEditingTeam(team);
+      setTeamForm({ name: team.name, description: team.description || '' });
+    } else {
+      setEditingTeam(null);
+      setTeamForm({ name: '', description: '' });
+    }
+    setTeamDialogOpen(true);
+  };
+
+  const saveTeam = async () => {
+    if (!teamForm.name) { toast.error('Team name required'); return; }
+    try {
+      if (editingTeam) {
+        await axios.patch(`${API}/teams/${editingTeam.id}`, teamForm);
+        toast.success('Team updated');
+      } else {
+        await axios.post(`${API}/teams`, teamForm);
+        toast.success('Team created');
+      }
+      setTeamDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save team');
+    }
+  };
+
+  // =============== SPECIALTY HANDLERS ===============
+  const openSpecialtyDialog = (specialty = null) => {
+    if (specialty) {
+      setEditingSpecialty(specialty);
+      setSpecialtyForm({ name: specialty.name, description: specialty.description || '', color: specialty.color || '#6366F1' });
+    } else {
+      setEditingSpecialty(null);
+      setSpecialtyForm({ name: '', description: '', color: '#6366F1' });
+    }
+    setSpecialtyDialogOpen(true);
+  };
+
+  const saveSpecialty = async () => {
+    if (!specialtyForm.name) { toast.error('Specialty name required'); return; }
+    try {
+      if (editingSpecialty) {
+        await axios.patch(`${API}/specialties/${editingSpecialty.id}`, specialtyForm);
+        toast.success('Specialty updated');
+      } else {
+        await axios.post(`${API}/specialties`, specialtyForm);
+        toast.success('Specialty created');
+      }
+      setSpecialtyDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save specialty');
+    }
+  };
+
+  // =============== PLAN HANDLERS ===============
+  const openPlanDialog = (plan = null) => {
+    if (plan) {
+      setEditingPlan(plan);
+      setPlanForm({ name: plan.name, description: plan.description || '', price_monthly: plan.price_monthly || '', price_yearly: plan.price_yearly || '', features: (plan.features || []).join('\n'), sort_order: plan.sort_order || 1 });
+    } else {
+      setEditingPlan(null);
+      setPlanForm({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: plans.length + 1 });
+    }
+    setPlanDialogOpen(true);
+  };
+
+  const savePlan = async () => {
+    if (!planForm.name) { toast.error('Plan name required'); return; }
+    try {
+      const data = {
+        ...planForm,
+        price_monthly: planForm.price_monthly ? parseFloat(planForm.price_monthly) : null,
+        price_yearly: planForm.price_yearly ? parseFloat(planForm.price_yearly) : null,
+        features: planForm.features.split('\n').filter(f => f.trim()),
+        sort_order: parseInt(planForm.sort_order) || 1
+      };
+      if (editingPlan) {
+        await axios.patch(`${API}/subscription-plans/${editingPlan.id}`, data);
+        toast.success('Plan updated');
+      } else {
+        await axios.post(`${API}/subscription-plans`, data);
+        toast.success('Plan created');
+      }
+      setPlanDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save plan');
+    }
+  };
+
+  // =============== DELETE HANDLER ===============
+  const confirmDelete = async () => {
+    const { type, item } = deleteDialog;
+    try {
+      if (type === 'user') await axios.delete(`${API}/users/${item.id}`);
+      else if (type === 'team') await axios.delete(`${API}/teams/${item.id}`);
+      else if (type === 'specialty') await axios.delete(`${API}/specialties/${item.id}`);
+      else if (type === 'plan') await axios.delete(`${API}/subscription-plans/${item.id}`);
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted`);
+      setDeleteDialog({ open: false, type: '', item: null });
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete');
+    }
+  };
+
+  const getRoleColor = (role) => {
+    const colors = { 'Administrator': 'bg-rose-100 text-rose-700', 'Operator': 'bg-blue-100 text-blue-700', 'Standard User': 'bg-emerald-100 text-emerald-700' };
+    return colors[role] || 'bg-slate-100 text-slate-700';
+  };
+
+  const getAccountTypeColor = (type) => {
+    const colors = { 'Partner': 'bg-purple-100 text-purple-700', 'Media Client': 'bg-cyan-100 text-cyan-700', 'Internal Staff': 'bg-orange-100 text-orange-700', 'Vendor/Freelancer': 'bg-emerald-100 text-emerald-700' };
+    return colors[type] || 'bg-slate-100 text-slate-700';
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
   }
+
+  const filteredUsers = users.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()));
+  const filteredTeams = teams.filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase()));
+  const filteredSpecialties = specialties.filter(s => s.name.toLowerCase().includes(specialtySearch.toLowerCase()));
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="iam-page">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <KeyRound className="text-[#A2182C]" />
           Identity & Access Management
         </h1>
-        <p className="text-slate-500 mt-1">Configure roles, permissions, and access controls</p>
+        <p className="text-slate-500 mt-1">Manage users, teams, specialties, roles, and subscription plans</p>
       </div>
 
-      {/* Overview Cards */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center">
-                <Shield className="text-rose-600" size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{identityConfig?.roles?.length || 3}</p>
-                <p className="text-sm text-slate-500">Roles</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Building2 className="text-purple-600" size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{identityConfig?.account_types?.length || 4}</p>
-                <p className="text-sm text-slate-500">Account Types</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Lock className="text-blue-600" size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{Object.keys(PERMISSION_MODULES).length}</p>
-                <p className="text-sm text-slate-500">Modules</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <Briefcase className="text-emerald-600" size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{identityConfig?.subscription_plans?.length || 4}</p>
-                <p className="text-sm text-slate-500">Plans</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">Users</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">Teams</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">Specialties</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">Roles</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{plans.length}</p><p className="text-sm text-slate-500">Plans</p></CardContent></Card>
       </div>
 
-      <Tabs defaultValue="roles" className="w-full">
-        <TabsList>
-          <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
-          <TabsTrigger value="account-types">Account Types</TabsTrigger>
-          <TabsTrigger value="modules">Permission Modules</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="users"><Users size={16} className="mr-1" />Users</TabsTrigger>
+          <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />Teams</TabsTrigger>
+          <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />Specialties</TabsTrigger>
+          <TabsTrigger value="roles"><Shield size={16} className="mr-1" />Roles</TabsTrigger>
+          <TabsTrigger value="plans"><CreditCard size={16} className="mr-1" />Plans</TabsTrigger>
         </TabsList>
 
-        {/* Roles Tab */}
-        <TabsContent value="roles" className="mt-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            {identityConfig?.roles?.map(role => (
-              <Card key={role} className="relative overflow-hidden" data-testid={`role-card-${role}`}>
-                <div className={`absolute top-0 left-0 right-0 h-1 ${
-                  role === 'Administrator' ? 'bg-rose-500' :
-                  role === 'Operator' ? 'bg-blue-500' : 'bg-emerald-500'
-                }`} />
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield size={18} />
-                      {role}
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditPermissions(role)}
-                      data-testid={`edit-role-${role}`}
-                    >
-                      <Edit size={14} />
-                    </Button>
-                  </div>
-                  <CardDescription>{ROLE_TEMPLATES[role]?.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700">Key Permissions:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {Object.entries(ROLE_TEMPLATES[role]?.permissions || {})
-                        .filter(([_, perms]) => Object.values(perms).some(v => v))
-                        .slice(0, 6)
-                        .map(([module]) => (
-                          <Badge key={module} variant="secondary" className="text-xs">
-                            {PERMISSION_MODULES[module]?.label || module}
-                          </Badge>
-                        ))}
-                      {Object.keys(ROLE_TEMPLATES[role]?.permissions || {}).length > 6 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{Object.keys(ROLE_TEMPLATES[role]?.permissions || {}).length - 6} more
-                        </Badge>
-                      )}
+        {/* USERS TAB */}
+        <TabsContent value="users" className="mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Input placeholder="Search users..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
+            </div>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
+              <Plus size={16} className="mr-2" />Add User
+            </Button>
+          </div>
+          <Card>
+            <CardContent className="p-0">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredUsers.map(user => (
+                    <tr key={user.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-medium text-sm">{user.name.charAt(0)}</div>
+                          <div><p className="font-medium">{user.name}</p><p className="text-sm text-slate-500">{user.email}</p></div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3"><Badge className={getRoleColor(user.role)}>{user.role}</Badge></td>
+                      <td className="px-4 py-3">{user.account_type ? <Badge className={getAccountTypeColor(user.account_type)}>{user.account_type}</Badge> : '—'}</td>
+                      <td className="px-4 py-3">{user.specialty_name || '—'}</td>
+                      <td className="px-4 py-3"><Badge variant={user.active ? 'success' : 'secondary'}>{user.active ? 'Active' : 'Inactive'}</Badge></td>
+                      <td className="px-4 py-3 text-right">
+                        <Button variant="ghost" size="sm" onClick={() => openUserDialog(user)}><Edit size={16} /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toggleUserActive(user.id, user.active)}>{user.active ? <UserX size={16} /> : <UserCheck size={16} />}</Button>
+                        {user.id !== currentUser?.id && <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'user', item: user })}><Trash2 size={16} className="text-red-500" /></Button>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TEAMS TAB */}
+        <TabsContent value="teams" className="mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Input placeholder="Search teams..." value={teamSearch} onChange={(e) => setTeamSearch(e.target.value)} className="pl-10" />
+            </div>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openTeamDialog()}>
+              <Plus size={16} className="mr-2" />Add Team
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            {filteredTeams.map(team => (
+              <Card key={team.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium">{team.name}</h3>
+                      {team.description && <p className="text-sm text-slate-500 mt-1">{team.description}</p>}
+                      <p className="text-xs text-slate-400 mt-2">{team.member_count || 0} members</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openTeamDialog(team)}><Edit size={16} /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'team', item: team })}><Trash2 size={16} className="text-red-500" /></Button>
                     </div>
                   </div>
                 </CardContent>
@@ -266,51 +437,77 @@ export default function IAMPage() {
           </div>
         </TabsContent>
 
-        {/* Account Types Tab */}
-        <TabsContent value="account-types" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Types</CardTitle>
-              <CardDescription>
-                Account types determine user classification for routing, pricing, and UI experience
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                {identityConfig?.account_types?.map(type => (
-                  <div key={type} className="p-4 border rounded-lg" data-testid={`account-type-${type}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        type === 'Partner' ? 'bg-purple-100' :
-                        type === 'Media Client' ? 'bg-cyan-100' :
-                        type === 'Internal Staff' ? 'bg-orange-100' : 'bg-emerald-100'
-                      }`}>
-                        <Building2 className={`${
-                          type === 'Partner' ? 'text-purple-600' :
-                          type === 'Media Client' ? 'text-cyan-600' :
-                          type === 'Internal Staff' ? 'text-orange-600' : 'text-emerald-600'
-                        }`} size={20} />
-                      </div>
+        {/* SPECIALTIES TAB */}
+        <TabsContent value="specialties" className="mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Input placeholder="Search specialties..." value={specialtySearch} onChange={(e) => setSpecialtySearch(e.target.value)} className="pl-10" />
+            </div>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openSpecialtyDialog()}>
+              <Plus size={16} className="mr-2" />Add Specialty
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-4 gap-3">
+            {filteredSpecialties.map(s => (
+              <Card key={s.id}>
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ backgroundColor: s.color || '#6366F1' }}>{s.name.charAt(0)}</div>
                       <div>
-                        <p className="font-medium">{type}</p>
-                        <p className="text-sm text-slate-500">
-                          {type === 'Partner' && 'Business partners with subscription plans'}
-                          {type === 'Media Client' && 'Media service clients (A La Carte)'}
-                          {type === 'Internal Staff' && 'Company employees'}
-                          {type === 'Vendor/Freelancer' && 'External contractors'}
-                        </p>
+                        <p className="font-medium text-sm">{s.name}</p>
+                        <p className="text-xs text-slate-400">{s.user_count || 0} users</p>
                       </div>
                     </div>
-                    {type === 'Partner' && (
-                      <div className="mt-3 pt-3 border-t">
-                        <p className="text-xs text-slate-500 mb-2">Available Plans:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {identityConfig?.subscription_plans?.map(plan => (
-                            <Badge key={plan} variant="outline" className="text-xs">{plan}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openSpecialtyDialog(s)}><Edit size={14} /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'specialty', item: s })}><Trash2 size={14} className="text-red-500" /></Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* ROLES TAB */}
+        <TabsContent value="roles" className="mt-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            {identityConfig?.roles?.map(role => (
+              <Card key={role} className="relative overflow-hidden">
+                <div className={`absolute top-0 left-0 right-0 h-1 ${role === 'Administrator' ? 'bg-rose-500' : role === 'Operator' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Shield size={18} />{role}</CardTitle>
+                  <CardDescription>{ROLE_TEMPLATES[role]?.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm font-medium text-slate-700 mb-2">Key Permissions:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(ROLE_TEMPLATES[role]?.permissions || {}).filter(([_, perms]) => Object.values(perms).some(v => v)).slice(0, 5).map(([module]) => (
+                      <Badge key={module} variant="secondary" className="text-xs">{PERMISSION_MODULES[module]?.label || module}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Account Types</CardTitle>
+              <CardDescription>Classification for routing, pricing, and UI</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-4 gap-4">
+                {identityConfig?.account_types?.map(type => (
+                  <div key={type} className="p-4 border rounded-lg">
+                    <Badge className={getAccountTypeColor(type)}>{type}</Badge>
+                    <p className="text-sm text-slate-500 mt-2">
+                      {type === 'Partner' && 'Business partners with subscription plans'}
+                      {type === 'Media Client' && 'Media service clients (A La Carte)'}
+                      {type === 'Internal Staff' && 'Company employees'}
+                      {type === 'Vendor/Freelancer' && 'External contractors'}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -318,93 +515,175 @@ export default function IAMPage() {
           </Card>
         </TabsContent>
 
-        {/* Modules Tab */}
-        <TabsContent value="modules" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Permission Modules</CardTitle>
-              <CardDescription>
-                All available modules and their permission actions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {Object.entries(PERMISSION_MODULES).map(([key, config]) => (
-                  <div key={key} className="p-3 border rounded-lg" data-testid={`module-${key}`}>
-                    <p className="font-medium text-sm">{config.label}</p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {config.actions.map(action => (
-                        <Badge key={action} variant="secondary" className="text-xs capitalize">
-                          {action}
-                        </Badge>
-                      ))}
+        {/* PLANS TAB */}
+        <TabsContent value="plans" className="mt-6">
+          <div className="flex justify-end mb-4">
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openPlanDialog()}>
+              <Plus size={16} className="mr-2" />Add Plan
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-4 gap-4">
+            {plans.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map((plan, idx) => (
+              <Card key={plan.id} className="relative overflow-hidden">
+                <div className={`absolute top-0 left-0 right-0 h-1`} style={{ backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'][idx % 4] }} />
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openPlanDialog(plan)}><Edit size={14} /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'plan', item: plan })}><Trash2 size={14} className="text-red-500" /></Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  {plan.description && <CardDescription>{plan.description}</CardDescription>}
+                </CardHeader>
+                <CardContent>
+                  {plan.price_monthly && <p className="text-2xl font-bold">${plan.price_monthly}<span className="text-sm text-slate-500 font-normal">/mo</span></p>}
+                  {plan.features?.length > 0 && (
+                    <ul className="mt-3 space-y-1">
+                      {plan.features.slice(0, 4).map((f, i) => <li key={i} className="text-sm flex items-center gap-2"><CheckCircle2 size={14} className="text-green-500" />{f}</li>)}
+                    </ul>
+                  )}
+                  <p className="text-xs text-slate-400 mt-3">{plan.user_count || 0} partners</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 
-      {/* Edit Permissions Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      {/* USER DIALOG */}
+      <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit {selectedRole} Permissions</DialogTitle>
-            <DialogDescription>
-              Configure default permissions for the {selectedRole} role
-            </DialogDescription>
+            <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 pt-4">
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 mb-4">
-              <p className="text-sm text-amber-700 flex items-center gap-2">
-                <Info size={16} />
-                These are default permissions. Individual users can have overrides applied.
-              </p>
+          <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Name *</Label><Input value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} data-testid="user-name-input" /></div>
+              <div><Label>Email *</Label><Input type="email" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} data-testid="user-email-input" /></div>
             </div>
-            {Object.entries(PERMISSION_MODULES).map(([moduleKey, moduleConfig]) => (
-              <Collapsible key={moduleKey} className="border rounded-lg">
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-50">
-                  <span className="font-medium">{moduleConfig.label}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-4 pb-3">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {moduleConfig.actions.map((action) => (
-                      <label
-                        key={action}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={getPermissionValue(moduleKey, action)}
-                          onCheckedChange={() => togglePermission(moduleKey, action)}
-                        />
-                        <span className="text-sm capitalize">{action}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              className="bg-rose-600 hover:bg-rose-700"
-              onClick={() => {
-                toast.success('Permissions updated (changes apply to new users)');
-                setEditDialogOpen(false);
-              }}
-            >
-              <Save size={16} className="mr-2" />
-              Save Changes
-            </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>{editingUser ? 'New Password' : 'Password *'}</Label><Input type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} placeholder={editingUser ? 'Leave blank to keep' : ''} /></div>
+              <div>
+                <Label>Role *</Label>
+                <Select value={userForm.role} onValueChange={(v) => setUserForm({ ...userForm, role: v })}>
+                  <SelectTrigger data-testid="user-role-select"><SelectValue /></SelectTrigger>
+                  <SelectContent>{identityConfig?.roles?.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Account Type *</Label>
+              <Select value={userForm.account_type} onValueChange={(v) => setUserForm({ ...userForm, account_type: v, subscription_plan_id: v === 'Partner' ? userForm.subscription_plan_id : '' })}>
+                <SelectTrigger data-testid="user-account-type-select"><SelectValue /></SelectTrigger>
+                <SelectContent>{identityConfig?.account_types?.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Specialty *</Label>
+              <Select value={userForm.specialty_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, specialty_id: v === '__none__' ? '' : v })}>
+                <SelectTrigger data-testid="user-specialty-select"><SelectValue placeholder="Select specialty" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" disabled>Select a specialty...</SelectItem>
+                  {specialties.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Team</Label>
+              <Select value={userForm.team_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, team_id: v === '__none__' ? '' : v })}>
+                <SelectTrigger data-testid="user-team-select"><SelectValue placeholder="No team" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">No team</SelectItem>
+                  {teams.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {userForm.account_type === 'Partner' && (
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <Label className="text-purple-800">Subscription Plan *</Label>
+                <Select value={userForm.subscription_plan_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v === '__none__' ? '' : v })}>
+                  <SelectTrigger data-testid="user-subscription-plan-select" className="mt-1 border-purple-200"><SelectValue placeholder="Select plan" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__" disabled>Select a plan...</SelectItem>
+                    {plans.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex gap-4 pt-4 border-t">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Switch checked={userForm.force_password_change} onCheckedChange={(v) => setUserForm({ ...userForm, force_password_change: v })} />
+                <span className="text-sm">Force password change</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Switch checked={userForm.force_otp_setup} onCheckedChange={(v) => setUserForm({ ...userForm, force_otp_setup: v })} />
+                <span className="text-sm">Force OTP setup</span>
+              </label>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancel</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create'}</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* TEAM DIALOG */}
+      <Dialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingTeam ? 'Edit Team' : 'Add Team'}</DialogTitle></DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div><Label>Name *</Label><Input value={teamForm.name} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} /></div>
+            <div><Label>Description</Label><Input value={teamForm.description} onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })} /></div>
+            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setTeamDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={saveTeam}>Save</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* SPECIALTY DIALOG */}
+      <Dialog open={specialtyDialogOpen} onOpenChange={setSpecialtyDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingSpecialty ? 'Edit Specialty' : 'Add Specialty'}</DialogTitle></DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div><Label>Name *</Label><Input value={specialtyForm.name} onChange={(e) => setSpecialtyForm({ ...specialtyForm, name: e.target.value })} /></div>
+            <div><Label>Description</Label><Input value={specialtyForm.description} onChange={(e) => setSpecialtyForm({ ...specialtyForm, description: e.target.value })} /></div>
+            <div><Label>Color</Label><div className="flex gap-2"><Input type="color" value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} className="w-16 h-10 p-1" /><Input value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} /></div></div>
+            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setSpecialtyDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={saveSpecialty}>Save</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PLAN DIALOG */}
+      <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingPlan ? 'Edit Plan' : 'Add Plan'}</DialogTitle></DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div><Label>Name *</Label><Input value={planForm.name} onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })} /></div>
+            <div><Label>Description</Label><Input value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Monthly Price ($)</Label><Input type="number" step="0.01" value={planForm.price_monthly} onChange={(e) => setPlanForm({ ...planForm, price_monthly: e.target.value })} /></div>
+              <div><Label>Yearly Price ($)</Label><Input type="number" step="0.01" value={planForm.price_yearly} onChange={(e) => setPlanForm({ ...planForm, price_yearly: e.target.value })} /></div>
+            </div>
+            <div><Label>Features (one per line)</Label><Textarea value={planForm.features} onChange={(e) => setPlanForm({ ...planForm, features: e.target.value })} className="min-h-[100px]" /></div>
+            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setPlanDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={savePlan}>Save</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE DIALOG */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteDialog.type}?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. Are you sure you want to delete "{deleteDialog.item?.name}"?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
