@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -42,14 +42,13 @@ import {
   Trash2,
   UserCheck,
   UserX,
-  KeyRound,
   Shield,
   ChevronDown,
   Briefcase,
-  CreditCard
+  CreditCard,
+  Building2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -57,11 +56,12 @@ export default function Users() {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
   const [specialties, setSpecialties] = useState([]);
-  const [accessTiers, setAccessTiers] = useState([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [identityConfig, setIdentityConfig] = useState({ roles: [], account_types: [], subscription_plans: [] });
   const [permissionModules, setPermissionModules] = useState({});
+  const [defaultPermissions, setDefaultPermissions] = useState({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -72,25 +72,24 @@ export default function Users() {
   const [showPermissions, setShowPermissions] = useState(false);
   const initialFormRef = useRef(null);
   
-  // Form state with new identity fields
+  // Form state with new identity model
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'Standard User',
-    team_id: '',
+    account_type: 'Internal Staff',
     specialty_id: '',
-    access_tier_id: '',
+    team_id: '',
+    subscription_plan_id: '',
     permission_overrides: null,
     force_password_change: false,
     force_otp_setup: false
   });
   
-  // New specialty/tier inline creation
+  // Inline creation states
   const [newSpecialty, setNewSpecialty] = useState('');
-  const [newAccessTier, setNewAccessTier] = useState('');
   const [showNewSpecialty, setShowNewSpecialty] = useState(false);
-  const [showNewAccessTier, setShowNewAccessTier] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -138,20 +137,21 @@ export default function Users() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, rolesRes, teamsRes, specialtiesRes, tiersRes, modulesRes] = await Promise.all([
+      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes, modulesRes] = await Promise.all([
         axios.get(`${API}/users`),
-        axios.get(`${API}/roles`),
         axios.get(`${API}/teams`),
         axios.get(`${API}/specialties`),
-        axios.get(`${API}/access-tiers`),
-        axios.get(`${API}/users/permissions/modules`).catch(() => ({ data: { modules: {} } }))
+        axios.get(`${API}/subscription-plans`),
+        axios.get(`${API}/users/identity-config`),
+        axios.get(`${API}/users/permissions/modules`).catch(() => ({ data: { modules: {}, default_permissions: {} } }))
       ]);
       setUsers(usersRes.data);
-      setRoles(rolesRes.data);
       setTeams(teamsRes.data);
       setSpecialties(specialtiesRes.data);
-      setAccessTiers(tiersRes.data);
+      setSubscriptionPlans(plansRes.data);
+      setIdentityConfig(configRes.data);
       setPermissionModules(modulesRes.data.modules || {});
+      setDefaultPermissions(modulesRes.data.default_permissions || {});
     } catch (error) {
       toast.error(t('errors.generic'));
     } finally {
@@ -162,11 +162,20 @@ export default function Users() {
   const getRoleColor = (roleName) => {
     const colors = {
       'Administrator': { bg: '#dc262620', text: '#dc2626' },
-      'Privileged User': { bg: '#2563eb20', text: '#2563eb' },
+      'Operator': { bg: '#2563eb20', text: '#2563eb' },
       'Standard User': { bg: '#16a34a20', text: '#16a34a' }
     };
-    const color = colors[roleName] || { bg: '#e2e8f0', text: '#475569' };
-    return { backgroundColor: color.bg, color: color.text };
+    return colors[roleName] || { bg: '#e2e8f0', text: '#475569' };
+  };
+
+  const getAccountTypeColor = (accountType) => {
+    const colors = {
+      'Partner': { bg: '#8b5cf620', text: '#8b5cf6' },
+      'Media Client': { bg: '#06b6d420', text: '#06b6d4' },
+      'Internal Staff': { bg: '#f9731620', text: '#f97316' },
+      'Vendor/Freelancer': { bg: '#10b98120', text: '#10b981' }
+    };
+    return colors[accountType] || { bg: '#e2e8f0', text: '#475569' };
   };
 
   const handleOpenDialog = (user = null) => {
@@ -178,9 +187,10 @@ export default function Users() {
         email: user.email,
         password: '',
         role: user.role,
-        team_id: user.team_id || '',
+        account_type: user.account_type || 'Internal Staff',
         specialty_id: user.specialty_id || '',
-        access_tier_id: user.access_tier_id || '',
+        team_id: user.team_id || '',
+        subscription_plan_id: user.subscription_plan_id || '',
         permission_overrides: user.permission_overrides || null,
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false
@@ -189,15 +199,15 @@ export default function Users() {
       setShowPermissions(!!user.permission_overrides);
     } else {
       setEditingUser(null);
-      const defaultTier = accessTiers.find(t => t.name === 'Starter');
       initialData = { 
         name: '', 
         email: '', 
         password: '', 
-        role: 'Standard User', 
-        team_id: '',
+        role: 'Standard User',
+        account_type: 'Internal Staff',
         specialty_id: '',
-        access_tier_id: defaultTier?.id || '',
+        team_id: '',
+        subscription_plan_id: '',
         permission_overrides: null,
         force_password_change: false,
         force_otp_setup: false 
@@ -213,20 +223,34 @@ export default function Users() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.role) {
-      toast.error('Please fill in all required fields');
+    
+    // Validation
+    if (!formData.name || !formData.email || !formData.role || !formData.account_type) {
+      toast.error('Please fill in all required fields (Name, Email, Role, Account Type)');
+      return;
+    }
+    if (!formData.specialty_id) {
+      toast.error('Specialty is required');
       return;
     }
     if (!editingUser && !formData.password) {
       toast.error('Password is required for new users');
       return;
     }
+    if (formData.account_type === 'Partner' && !formData.subscription_plan_id) {
+      toast.error('Subscription Plan is required for Partners');
+      return;
+    }
 
     try {
       const submitData = { ...formData };
       if (!submitData.team_id) submitData.team_id = null;
-      if (!submitData.specialty_id) submitData.specialty_id = null;
-      if (!submitData.access_tier_id) submitData.access_tier_id = null;
+      
+      // Clear subscription plan if not Partner
+      if (submitData.account_type !== 'Partner') {
+        submitData.subscription_plan_id = null;
+      }
+      
       if (!showPermissions) submitData.permission_overrides = null;
       
       if (editingUser) {
@@ -257,20 +281,6 @@ export default function Users() {
       toast.success('Specialty created');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to create specialty');
-    }
-  };
-
-  const handleCreateAccessTier = async () => {
-    if (!newAccessTier.trim()) return;
-    try {
-      const response = await axios.post(`${API}/access-tiers`, { name: newAccessTier.trim() });
-      setAccessTiers([...accessTiers, response.data]);
-      setFormData({ ...formData, access_tier_id: response.data.id });
-      setNewAccessTier('');
-      setShowNewAccessTier(false);
-      toast.success('Access tier created');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create access tier');
     }
   };
 
@@ -310,14 +320,15 @@ export default function Users() {
       return formData.permission_overrides[module][action];
     }
     // Get from role defaults
-    const role = roles.find(r => r.name === formData.role);
-    return role?.permissions?.[module]?.[action] || false;
+    const roleDefaults = defaultPermissions[formData.role];
+    return roleDefaults?.[module]?.[action] || false;
   };
 
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase()) ||
-    (u.specialty_name || '').toLowerCase().includes(search.toLowerCase())
+    (u.specialty_name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (u.account_type || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
@@ -350,7 +361,7 @@ export default function Users() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
         <Input
-          placeholder="Search users by name, email, or specialty..."
+          placeholder="Search users by name, email, specialty, or account type..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -367,9 +378,10 @@ export default function Users() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">User</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Team</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tier</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
                 </tr>
@@ -392,6 +404,16 @@ export default function Users() {
                       <Badge style={getRoleColor(user.role)}>{user.role}</Badge>
                     </td>
                     <td className="px-4 py-3">
+                      {user.account_type ? (
+                        <Badge style={getAccountTypeColor(user.account_type)}>
+                          <Building2 size={12} className="mr-1" />
+                          {user.account_type}
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
                       {user.specialty_name ? (
                         <span className="text-sm text-slate-700 flex items-center gap-1">
                           <Briefcase size={14} className="text-slate-400" />
@@ -405,10 +427,10 @@ export default function Users() {
                       <span className="text-sm text-slate-700">{user.team_name || '—'}</span>
                     </td>
                     <td className="px-4 py-3">
-                      {user.access_tier_name ? (
+                      {user.subscription_plan_name ? (
                         <span className="text-sm text-slate-700 flex items-center gap-1">
                           <CreditCard size={14} className="text-slate-400" />
-                          {user.access_tier_name}
+                          {user.subscription_plan_name}
                         </span>
                       ) : (
                         <span className="text-sm text-slate-400">—</span>
@@ -421,7 +443,7 @@ export default function Users() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(user)}>
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(user)} data-testid={`edit-user-${user.id}`}>
                           <Edit size={16} />
                         </Button>
                         <Button 
@@ -460,11 +482,12 @@ export default function Users() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="permissions">Permissions</TabsTrigger>
+                <TabsTrigger value="permissions">Access Controls</TabsTrigger>
               </TabsList>
 
               {/* Basic Info Tab */}
               <TabsContent value="basic" className="space-y-4 mt-4">
+                {/* Name & Email */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name *</Label>
@@ -489,6 +512,7 @@ export default function Users() {
                   </div>
                 </div>
 
+                {/* Password & Role */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">{editingUser ? 'New Password' : 'Password *'}</Label>
@@ -511,117 +535,138 @@ export default function Users() {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.id} value={role.name}>
-                            {role.display_name || role.name}
-                          </SelectItem>
+                        {identityConfig.roles.map((role) => (
+                          <SelectItem key={role} value={role}>{role}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="team">Team</Label>
-                    <Select
-                      value={formData.team_id || '__none__'}
-                      onValueChange={(v) => setFormData({ ...formData, team_id: v === '__none__' ? '' : v })}
-                    >
-                      <SelectTrigger data-testid="user-team-select">
-                        <SelectValue placeholder="Select team (optional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">No team</SelectItem>
-                        {teams.map((team) => (
-                          <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {/* Specialty with inline creation */}
-                  <div className="space-y-2">
-                    <Label htmlFor="specialty">Specialty</Label>
-                    {showNewSpecialty ? (
-                      <div className="flex gap-2">
-                        <Input
-                          value={newSpecialty}
-                          onChange={(e) => setNewSpecialty(e.target.value)}
-                          placeholder="New specialty name"
-                          autoFocus
-                        />
-                        <Button type="button" size="sm" onClick={handleCreateSpecialty}>Add</Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewSpecialty(false)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <Select
-                        value={formData.specialty_id || '__none__'}
-                        onValueChange={(v) => {
-                          if (v === '__new__') {
-                            setShowNewSpecialty(true);
-                          } else {
-                            setFormData({ ...formData, specialty_id: v === '__none__' ? '' : v });
-                          }
-                        }}
-                      >
-                        <SelectTrigger data-testid="user-specialty-select">
-                          <SelectValue placeholder="Select specialty (optional)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__none__">No specialty</SelectItem>
-                          {specialties.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                          ))}
-                          <SelectItem value="__new__" className="text-blue-600 font-medium">
-                            <Plus size={14} className="inline mr-1" /> Create new specialty
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
-
-                {/* Access Tier with inline creation */}
+                {/* Account Type (required) */}
                 <div className="space-y-2">
-                  <Label htmlFor="tier">Access Tier</Label>
-                  {showNewAccessTier ? (
+                  <Label htmlFor="account_type">Account Type *</Label>
+                  <Select
+                    value={formData.account_type}
+                    onValueChange={(v) => {
+                      setFormData({ 
+                        ...formData, 
+                        account_type: v,
+                        // Clear subscription plan if not Partner
+                        subscription_plan_id: v === 'Partner' ? formData.subscription_plan_id : ''
+                      });
+                    }}
+                  >
+                    <SelectTrigger data-testid="user-account-type-select">
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {identityConfig.account_types.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    Determines routing, pricing logic, and UI experience
+                  </p>
+                </div>
+
+                {/* Specialty (required) with inline creation */}
+                <div className="space-y-2">
+                  <Label htmlFor="specialty">Specialty * (what the user does)</Label>
+                  {showNewSpecialty ? (
                     <div className="flex gap-2">
                       <Input
-                        value={newAccessTier}
-                        onChange={(e) => setNewAccessTier(e.target.value)}
-                        placeholder="New tier name"
+                        value={newSpecialty}
+                        onChange={(e) => setNewSpecialty(e.target.value)}
+                        placeholder="New specialty name"
                         autoFocus
                       />
-                      <Button type="button" size="sm" onClick={handleCreateAccessTier}>Add</Button>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewAccessTier(false)}>Cancel</Button>
+                      <Button type="button" size="sm" onClick={handleCreateSpecialty}>Add</Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewSpecialty(false)}>Cancel</Button>
                     </div>
                   ) : (
                     <Select
-                      value={formData.access_tier_id || '__none__'}
+                      value={formData.specialty_id || '__none__'}
                       onValueChange={(v) => {
                         if (v === '__new__') {
-                          setShowNewAccessTier(true);
+                          setShowNewSpecialty(true);
                         } else {
-                          setFormData({ ...formData, access_tier_id: v === '__none__' ? '' : v });
+                          setFormData({ ...formData, specialty_id: v === '__none__' ? '' : v });
                         }
                       }}
                     >
-                      <SelectTrigger data-testid="user-tier-select">
-                        <SelectValue placeholder="Select access tier" />
+                      <SelectTrigger data-testid="user-specialty-select">
+                        <SelectValue placeholder="Select specialty (required)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">No tier</SelectItem>
-                        {accessTiers.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                        <SelectItem value="__none__" disabled>Select a specialty...</SelectItem>
+                        {specialties.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                         ))}
                         <SelectItem value="__new__" className="text-blue-600 font-medium">
-                          <Plus size={14} className="inline mr-1" /> Create new tier
+                          <Plus size={14} className="inline mr-1" /> Create new specialty
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 </div>
+
+                {/* Team (optional) */}
+                <div className="space-y-2">
+                  <Label htmlFor="team">Team (optional)</Label>
+                  <Select
+                    value={formData.team_id || '__none__'}
+                    onValueChange={(v) => setFormData({ ...formData, team_id: v === '__none__' ? '' : v })}
+                  >
+                    <SelectTrigger data-testid="user-team-select">
+                      <SelectValue placeholder="Select team (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No team</SelectItem>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Subscription Plan (conditional - only for Partners) */}
+                {formData.account_type === 'Partner' && (
+                  <div className="space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <Label htmlFor="subscription_plan" className="text-purple-800">
+                      Partner Subscription Plan *
+                    </Label>
+                    <Select
+                      value={formData.subscription_plan_id || '__none__'}
+                      onValueChange={(v) => setFormData({ ...formData, subscription_plan_id: v === '__none__' ? '' : v })}
+                    >
+                      <SelectTrigger data-testid="user-subscription-plan-select" className="border-purple-300">
+                        <SelectValue placeholder="Select subscription plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" disabled>Select a plan...</SelectItem>
+                        {subscriptionPlans.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name} {plan.description && `- ${plan.description}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-purple-600">
+                      Required for Partner accounts. Determines features and pricing.
+                    </p>
+                  </div>
+                )}
+
+                {/* Non-Partner info */}
+                {formData.account_type && formData.account_type !== 'Partner' && (
+                  <div className="p-3 bg-slate-50 rounded-lg border">
+                    <p className="text-sm text-slate-600">
+                      <strong>{formData.account_type}</strong> accounts do not require a subscription plan.
+                    </p>
+                  </div>
+                )}
 
                 {/* Security Options */}
                 <div className="border-t pt-4 space-y-3">
@@ -649,11 +694,11 @@ export default function Users() {
                 </div>
               </TabsContent>
 
-              {/* Permissions Tab */}
+              {/* Permissions Tab (Access Controls) */}
               <TabsContent value="permissions" className="space-y-4 mt-4">
                 <div className="flex items-center justify-between pb-4 border-b">
                   <div>
-                    <p className="font-medium">Permission Overrides</p>
+                    <p className="font-medium">Per-User Permission Overrides</p>
                     <p className="text-sm text-slate-500">
                       Override default permissions from the "{formData.role}" role
                     </p>
@@ -661,11 +706,15 @@ export default function Users() {
                   <Switch
                     checked={showPermissions}
                     onCheckedChange={setShowPermissions}
+                    data-testid="enable-permissions-toggle"
                   />
                 </div>
 
                 {showPermissions && (
                   <div className="space-y-2">
+                    <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+                      Checked = granted, Unchecked = denied. These overrides will take precedence over role defaults.
+                    </p>
                     {Object.entries(permissionModules).map(([moduleKey, moduleConfig]) => (
                       <Collapsible key={moduleKey} className="border rounded-lg">
                         <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-50">
@@ -682,6 +731,7 @@ export default function Users() {
                                 <Checkbox
                                   checked={getPermissionValue(moduleKey, action)}
                                   onCheckedChange={() => togglePermission(moduleKey, action)}
+                                  data-testid={`perm-${moduleKey}-${action}`}
                                 />
                                 <span className="text-sm capitalize">{action}</span>
                               </label>
@@ -707,7 +757,7 @@ export default function Users() {
               <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-rose-600 hover:bg-rose-700">
+              <Button type="submit" className="bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
                 {editingUser ? 'Save Changes' : 'Create User'}
               </Button>
             </div>
