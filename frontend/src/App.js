@@ -232,6 +232,22 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/specialties" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <SpecialtiesAdmin />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/subscription-plans" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <SubscriptionPlansAdmin />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/settings" 
         element={
           <PrivateRoute roles={["Administrator"]}>
