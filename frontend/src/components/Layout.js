@@ -70,17 +70,18 @@ export default function Layout({ children }) {
   };
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Privileged User', 'Standard User'] },
-    { path: '/command-center', icon: Command, labelKey: 'nav.commandCenter', roles: ['Administrator', 'Privileged User', 'Standard User'] },
-    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator', 'Privileged User'] },
-    { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Administrator', 'Privileged User'] },
+    { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/my-services', icon: PackageOpen, label: 'My Services', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator', 'Operator'] },
+    { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Administrator', 'Operator'] },
     { path: '/sla-policies', icon: Shield, label: 'SLA & Escalation', roles: ['Administrator'] },
-    { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Privileged User'] },
+    { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Administrator'] },
-    { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Administrator', 'Privileged User'] },
+    { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Administrator', 'Operator'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Administrator'] },
-    { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Administrator', 'Privileged User'] },
-    { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Privileged User'] },
+    { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Administrator', 'Operator'] },
+    { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
     { path: '/integrations', icon: Plug, labelKey: 'nav.integrations', roles: ['Administrator'] },
     { path: '/announcements', icon: Megaphone, labelKey: 'nav.announcements', roles: ['Administrator'] },
     { path: '/email-settings', icon: Mail, labelKey: 'nav.emailSettings', roles: ['Administrator'] },
@@ -88,8 +89,8 @@ export default function Layout({ children }) {
   ];
 
   const quickLinks = [
-    { path: '/command-center?category=feature', icon: Lightbulb, labelKey: 'commandCenter.featureRequest', roles: ['Administrator', 'Privileged User', 'Standard User'] },
-    { path: '/command-center?category=bug', icon: Bug, labelKey: 'commandCenter.bugReport', roles: ['Administrator', 'Privileged User', 'Standard User'] },
+    { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/command-center?category=bug', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
   ];
 
   const filteredNavItems = navItems.filter(item => 
