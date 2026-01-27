@@ -296,18 +296,23 @@ export default function OrderDetail() {
   if (!order) return null;
 
   const finalFile = files.find(f => f.is_final_delivery);
-  const canPick = user?.role === 'Editor' && order.status === 'Open';
-  const canSubmitForReview = user?.role === 'Editor' && order.editor_id === user?.id && order.status === 'In Progress';
-  const canRespond = user?.role === 'Requester' && order.requester_id === user?.id && order.status === 'Pending';
-  const canDeliver = user?.role === 'Editor' && order.editor_id === user?.id && ['In Progress', 'Pending'].includes(order.status);
-  const canAddFile = (user?.role === 'Editor' && order.editor_id === user?.id) || 
-                     (user?.role === 'Requester' && order.requester_id === user?.id) ||
-                     user?.role === 'Admin';
+  // Check specialty_name for role-based permissions (system uses specialties now)
+  const isEditor = user?.specialty_name === 'Editor' || user?.role === 'Editor';
+  const isRequester = user?.specialty_name === 'Requester' || user?.role === 'Requester';
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
+  
+  const canPick = isEditor && order.status === 'Open';
+  const canSubmitForReview = isEditor && order.editor_id === user?.id && order.status === 'In Progress';
+  const canRespond = isRequester && order.requester_id === user?.id && order.status === 'Pending';
+  const canDeliver = isEditor && order.editor_id === user?.id && ['In Progress', 'Pending'].includes(order.status);
+  const canAddFile = (isEditor && order.editor_id === user?.id) || 
+                     (order.requester_id === user?.id) ||
+                     isAdmin;
   // Requester can close their own ticket if it's not already closed, delivered, or canceled
-  const canClose = (user?.role === 'Requester' && order.requester_id === user?.id && !['Closed', 'Delivered', 'Canceled'].includes(order.status)) ||
-                   (user?.role === 'Admin' && !['Closed', 'Delivered', 'Canceled'].includes(order.status));
+  const canClose = (order.requester_id === user?.id && !['Closed', 'Delivered', 'Canceled'].includes(order.status)) ||
+                   (isAdmin && !['Closed', 'Delivered', 'Canceled'].includes(order.status));
   // Requester can cancel their own ticket if it's still active
-  const canCancel = user?.role === 'Requester' && order.requester_id === user?.id && !['Delivered', 'Closed', 'Canceled'].includes(order.status);
+  const canCancel = order.requester_id === user?.id && !['Delivered', 'Closed', 'Canceled'].includes(order.status);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
