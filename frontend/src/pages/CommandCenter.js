@@ -270,8 +270,14 @@ export default function CommandCenter() {
     <div className="space-y-6 animate-fade-in" data-testid="command-center-page">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t('commandCenter.title')}</h1>
-        <p className="text-slate-500 mt-1">{t('commandCenter.subtitle')}</p>
+        <h1 className="text-2xl font-bold text-slate-900">
+          {preselectedType === 'issue' ? 'Report an Issue' : t('commandCenter.title')}
+        </h1>
+        <p className="text-slate-500 mt-1">
+          {preselectedType === 'issue' 
+            ? 'Report a problem or bug you\'ve encountered' 
+            : t('commandCenter.subtitle')}
+        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
