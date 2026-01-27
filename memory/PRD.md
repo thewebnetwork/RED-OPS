@@ -1,855 +1,196 @@
-# RED OPS PORTAL - Product Requirements Document
-
-## Original Problem Statement
-Build a simplified ticketing/order management system for video editing services. Replace WhatsApp + folder chaos with a single place to manage orders, communicate, and track deliverables.
-
-**V2 Update**: Transform the app into a "Command Center" - a multi-purpose request portal handling various request types using a two-level category system.
-
-**V3 Update (Current)**: Transform into a "Service Hub Platform" with dynamic roles, custom workflows, and form builder capabilities.
-
-## User Personas (Dynamic Roles)
-Roles are now dynamic and stored in database. Initial seed includes:
-
-### System Roles (2)
-1. **Admin** - Full system access, manages users/roles/categories
-2. **Requester** - Can submit requests and orders
-
-### Service Provider Roles (29)
-Real estate and marketing professionals who can pick orders from the pool:
-- **Video/Photo**: Video Editor, Photographer, Videographer, Drone Operator
-- **Staging**: Home Stager, Virtual Stager
-- **Technical**: Floor Plan Designer, Home Inspector, Appraiser, Land Surveyor
-- **Financial**: Mortgage Broker, Title Company
-- **Trades**: General Contractor, Electrician, Plumber, HVAC Technician, Roofer, Painter, Landscaper, Cleaner, Pest Control, Locksmith
-- **Marketing**: Graphic Designer, Social Media Manager, Copywriter, SEO Specialist, Web Developer, Print Specialist, Sign Installer
-
-## Current Order Workflow (7 Statuses)
-1. **Draft** - Partially completed request saved for later (no SLA, no notifications)
-2. **Open** - New order created by Requester, visible in Service Provider pool
-3. **In Progress** - Service Provider picked the order and is working on it
-4. **Pending** - Service Provider submitted for review, waiting on Requester feedback
-5. **Delivered** - Order completed (requires resolution_notes)
-6. **Closed** - Requester closed the ticket (with reason)
-7. **Canceled** - Requester canceled their own ticket (with reason + optional notes)
-5. **Delivered** - Order completed
-6. **Closed** - Requester closed the ticket (with reason)
-
-## What's Been Implemented
-
-### Phase 26: Requester Cancel + Delivery Notes + Clean Queue ✅ (January 27, 2026)
-
-**P0 (BLOCKER): Requester Can Cancel Their Own Ticket**
-1. **Cancel Button**: Visible in Order Detail for requester on active tickets (not Delivered/Closed/Canceled)
-2. **Cancel Modal**: 
-   - Required reason dropdown (6 options: No longer needed, Changed my mind, Found different solution, Fixed myself, Duplicate, Other)
-   - Optional notes field (required if "Other" selected)
-3. **On Cancel**:
-   - Status → "Canceled"
-   - `cancellation_reason` + `cancellation_notes` + `canceled_at` stored
-   - System log entry added to timeline
-   - Notification sent to resolver with reason
-4. **Cancellation Info**: Displayed in Order Detail (red banner with reason, notes, timestamp)
-
-**P1: Delivery Notes Required**
-1. **Delivery Modal**: Editor must provide `resolution_notes` to mark as Delivered
-2. **Blocked Until Filled**: "Confirm Delivery" button disabled until notes entered
-3. **Display**: Delivery notes shown in Order Detail (green banner) + timeline message
-
-**P2: Clear Ticket Queue**
-- ✅ Backed up all data to `/app/backup_*_20260127_*.json`
-- ✅ Cleared: orders, order_messages, order_files, feature_requests, bug_reports, notifications, escalation_history, review_reminders, rating_surveys
-- ✅ Dashboard shows zero tickets - ready for structured testing
-
-### Phase 25: Reports Module + Command Center Button Fix ✅ (January 26, 2026)
-
-**Part A: P0/P1 - Command Center Submit Button Behavior**
-- Submit and Save Draft buttons now **HIDDEN** until BOTH L1 and L2 categories are selected
-- Works universally for all category types (Editing, Feature Requests, Bug Reports)
-- Future-proof: Any new categories will automatically follow this rule
-
-**Part B: P1 - Reports Module (New)**
-1. **13 Canned Reports**:
-   - **Volume**: Tickets Created, Tickets Closed
-   - **Aging**: Open Ticket Aging (0-24h, 1-3d, 3-7d, 7-14d, 14d+)
-   - **Performance**: Avg Time to First Response, Avg Time to Resolution
-   - **SLA**: SLA Compliance Summary, SLA Policy Effectiveness
-   - **Distribution**: Tickets by Assignee, Team, Specialty, Category
-   - **Escalation**: Escalation Events Report
-   - **Workflow**: Stale Pending Review (supports 24h/5d workflow)
-
-2. **Comprehensive Filters**:
-   - Date range with presets (Today, Last 7/30 Days, This/Last Month)
-   - Status, SLA State, Category L1/L2, Team, Assignee
-   - Specialty, Access Tier, Search
-
-3. **Export Capabilities**:
-   - **CSV**: Direct download with headers
-   - **PDF**: Branded with rose theme, summary section, auto-table
-
-4. **Access Control**: Admin + Privileged User roles
-
-### Phase 24: Command Center UX + Review Reminder Workflow ✅ (January 26, 2026)
-
-**Part A: Save Draft + Submit Request UX**
-1. **Draft Status Support**:
-   - Added "Draft" status to all request types (Orders, Feature Requests, Bug Reports)
-   - Drafts don't trigger SLA timers, notifications, or workflows
-   - Drafts visible only to the requester who created them
-   
-2. **Command Center Form Improvements**:
-   - Added sticky "Save Draft" + "Submit Request" buttons to all forms
-   - Draft saves redirect to My Requests tab with success toast
-   - My Requests tab shows Draft badge with "Click to continue editing" hint
-   
-3. **Draft Editor Page** (`/drafts/:type/:draftId`):
-   - Allows editing and submitting drafts
-   - Submit converts Draft → Open and triggers normal workflows
-
-4. **Backend Endpoints**:
-   - `POST /api/orders` with `is_draft=true`
-   - `PUT /api/orders/{id}/draft` - Update draft
-   - `POST /api/orders/{id}/submit` - Submit draft
-   - Same pattern for `/feature-requests` and `/bug-reports`
-
-**Part B: Review Reminder Workflow (24h Email + 5-Day Auto-Close)**
-1. **Tracking Fields Added**:
-   - `review_started_at` - Set when ticket enters "Pending" status
-   - `last_requester_message_at` - Updated when requester sends a message
-   
-2. **Review Reminder Service** (`/backend/services/review_reminder.py`):
-   - Runs in background loop (every 5 minutes)
-   - 24h after Pending: Sends email reminder if no requester response
-   - 5 days after Pending: Auto-closes ticket with reason + system message
-   - Both in-app and email notifications on auto-close
-   
-3. **Auto-Close Behavior**:
-   - Status → Closed
-   - Close reason: "No requester response after 5 days (auto-closed by system)"
-   - System message added to ticket timeline
-   - Email sent to requester with ticket details
-
-4. **Configuration** (`config.py`):
-   - `REVIEW_REMINDER_HOURS = 24`
-   - `REVIEW_AUTO_CLOSE_DAYS = 5`
-   - New trigger events: `order.submitted`, `order.pending_review`
-
-### Phase 23.1: Dashboard SLA Integration & Access Tier Scope ✅ (January 26, 2026)
-
-**Optimization: Single Source of Truth for SLA Stats**
-
-1. **Dashboard SLA Integration**:
-   - Removed old "SLA Breaching" KPI from Dashboard
-   - Added new unified "SLA Status" section with 4 KPIs:
-     - On Track (links to /sla-policies?tab=monitoring&status=on_track)
-     - At Risk (links to /sla-policies?tab=monitoring&status=at_risk)
-     - Breached (links to /sla-policies?tab=monitoring&status=breached)
-     - Unacknowledged (links to /sla-policies?tab=history)
-   - Dashboard fetches from unified `/api/sla-policies/monitoring/stats` endpoint
-   - SLA module mirrors these stats for consistency (single source of truth)
-
-2. **Access Tier Added to Policy Scope**:
-   - Backend: `SLAPolicyScope` model now includes `access_tier_ids` and `access_tier_names`
-   - Policy engine: `auto_apply_policy_to_order` now checks access tier in scope matching
-   - Frontend: Policy dialog shows 4-column scope selection (Roles, Teams, Specialties, Access Tiers)
-
-3. **Scope Priority Order** (highest to lowest):
-   - Role (4 points)
-   - Team (3 points)
-   - Specialty (2 points)
-   - Access Tier (1 point)
-   - Empty scope = fallback policy (0.5 points)
-
-**Testing:** 100% pass rate (12/12 backend tests, all frontend flows)
-
-### Phase 23: Unified SLA & Escalation Policies Module ✅ (January 26, 2026)
-
-**Major Refactor: Merged SLA + Escalation into One Module**
-
-The old separate "SLA" and "Escalation" modules have been unified into a single "SLA & Escalation Policies" module to eliminate duplication and admin confusion.
-
-**New Unified Module Structure:**
-
-**A) Policies Tab (Configuration)**
-- Policy Scope: Roles, Teams, AND/OR Specialties
-- SLA Clock Rules: Duration (minutes), Business Hours toggle
-- SLA Thresholds: At-risk threshold (minutes before deadline)
-- Multi-level Escalation Rules:
-  - Level 1 → Level 5 support
-  - Triggers: at_risk, breach, breach_plus_minutes
-  - Actions: notify_role, notify_team, escalate_to_role, escalate_to_team, change_priority, send_email, webhook
-
-**B) Monitoring Tab (Dashboard)**
-- At-risk orders list with countdown timer
-- Breached orders list
-- Applied policy shown per order
-- Stats cards: On Track, At Risk, Breached, Unacknowledged
-
-**C) Escalation History Tab**
-- Full log of escalation events
-- Acknowledge functionality
-
-**Backend Files Created:**
-- `/app/backend/models/sla_policy.py` - Pydantic models
-- `/app/backend/routes/sla_policies.py` - API endpoints
-- `/app/backend/services/sla_policy_engine.py` - Policy engine
-
-**Frontend:**
-- `/app/frontend/src/pages/SLAPolicies.js` - Unified page
-- Old /sla and /escalation routes redirect to /sla-policies
-- Sidebar updated to show "SLA & Escalation"
-
-**Workflow Integration:**
-- `auto_escalate` action replaced with `apply_sla_policy`
-- Workflows can now select a specific policy or auto-detect based on scope
-
-**Testing:** 100% pass rate (17 backend tests, all frontend flows)
-
-### Phase 22: Auto-Escalate Workflow Action & Dashboard Fix ✅ (January 26, 2026)
-
-**Bug Fix - Dashboard Blank Screen:**
-- Dashboard.js was checking for `user.role === 'Admin'` but IAM refactor changed role to `Administrator`
-- Fixed by supporting both old and new role names: `Administrator`/`Admin`, `Privileged User`/`Editor`, `Standard User`/`Requester`
-
-**New Feature - Auto-Escalate on Breach Workflow Action:**
-- **Purpose**: Automatically escalate tickets that remain in SLA breached state beyond a configurable duration
-- **Backend**: Added `auto_escalate` action type to workflow engine with:
-  - `escalate_after_minutes`: Cooldown before escalating (default 60 min)
-  - `escalate_to_type`: Target type (role, team, or user)
-  - `escalate_to_id`: Target ID
-  - `escalation_message`: Custom notification message with variables `{order_code}`, `{title}`, `{status}`
-- **Frontend**: Added configuration UI in Workflow Editor with all fields
-- **Execution**: Creates record in `escalation_history`, sends notifications to target users
-
-**Testing:** 100% frontend, 85% backend (2 expected failures for role-restricted APIs)
-
-### Phase 21: IAM Refactor & Workflow Module Alignment ✅ (January 26, 2026)
-
-**Identity & Access Management (IAM) Refactor:**
-
-**New IAM Model:**
-1. **Roles (3 Total)**: Simplified to `Administrator`, `Privileged User`, and `Standard User`. Roles define permission templates.
-2. **Teams**: For routing/grouping. Admins can create/delete teams and assign users to them.
-3. **Specialty**: Defines a user's profession (e.g., Photographer). Admins can manage a dropdown list of specialties and assign one to each user.
-4. **Access Tier**: Represents the user's software plan (e.g., Free, Starter). Admins can manage tiers and assign one to each user.
-5. **Per-User Granular Permissions**: An "Active Directory" style checkbox matrix in the user edit page to override role-based permissions.
-
-**Backend Changes:**
-- Updated `WorkflowCreate`, `WorkflowUpdate`, `WorkflowResponse` models with `assigned_specialties`, `assigned_access_tiers` fields
-- Added helper functions: `get_specialty_names_by_ids()`, `get_access_tier_names_by_ids()`
-- New endpoints: `GET /api/workflows/by-specialty/{id}`, `GET /api/workflows/by-access-tier/{id}`
-- Fixed `/api/workflow-templates` endpoint to return `{templates: [], categories: []}` format
-- Fixed auth utility for proper role name mapping
-
-**Frontend Changes:**
-- Workflow Editor Settings Sheet: Added "Target by Specialty" and "Target by Access Tier" sections with checkboxes
-- Workflow Cards: Display specialty badges (purple) and access tier badges (emerald) when assigned
-- Templates Tab: Fixed "All" filter - now correctly shows all 6 templates with category filtering
-
-**Testing:** 100% pass rate (15/15 backend tests, all frontend flows working)
-
-### Phase 20: Full Escalation Matrix ✅ (January 26, 2026)
-
-**Implemented Auto-Escalation System (Option C):**
-
-**Backend:**
-- New `/api/escalation/` routes with full CRUD for policies
-- `EscalationPolicy` model with multi-level support
-- `EscalationLevel` with time thresholds and actions
-- 7 action types: notify_user, notify_role, reassign_user, reassign_team, change_priority, send_email, webhook
-- Escalation history tracking per order
-- Cooldown periods to prevent notification spam
-- Integration with SLA monitor for automatic processing
-
-**Frontend:**
-- New "Escalation" page accessible from sidebar
-- Stats cards: Escalated Orders, Unacknowledged, Today, Active Policies
-- Policy list with edit/delete actions
-- Create/Edit Policy dialog with:
-  - Trigger selection (Warning, Breach, Both)
-  - Priority and Category filters
-  - Multi-level configuration (expandable/collapsible)
-  - Action builder for each level
-- "Escalated Orders" tab showing active escalations
-- "Run Check" button for manual escalation trigger
-- Mobile responsive design
-
-**Testing:** 100% pass rate (18/18 backend, all frontend flows)
-
-### Phase 19: Iframe Embedding & Mobile Responsiveness ✅ (January 26, 2026)
-
-**Iframe Embedding Support:**
-- Added `IframeEmbeddingMiddleware` to backend
-- Configurable via environment variables (`ALLOW_IFRAME_EMBEDDING`, `FRAME_ANCESTORS`)
-- Sets `Content-Security-Policy: frame-ancestors` header (no `X-Frame-Options: DENY`)
-- JWT-based auth works in iframes (no cookies needed)
-
-**Mobile Responsiveness (Already Present):**
-- ✅ Collapsible sidebar with hamburger menu
-- ✅ Responsive grid layouts (adapts to screen size)
-- ✅ Touch-friendly navigation
-- ✅ All primary workflows work on mobile
-
-**Documentation:**
-- Created `/app/docs/IFRAME_EMBEDDING.md` with configuration guide
-
-### Phase 18: Bug Fixes & QA Verification ✅ (January 26, 2026)
-
-**Fixed Issues:**
-1. **Category Routes** - Fixed `/api/categories/l1` and `/api/categories/l2` paths (were using wrong prefix)
-2. **Dashboard Editor/Requester Routes** - Added missing `/api/dashboard/editor` and `/api/dashboard/requester` endpoints
-3. **Ratings My-Stats** - Added missing `/api/ratings/my-stats` endpoint
-4. **Notifications Unread-Count** - Added missing `/api/notifications/unread-count` endpoint alias
-5. **Teams Page Runtime Error** - Fixed `teamMembers.map is not a function` error by extracting `members` array from API response
-6. **Logo Text** - Changed "Red Ops" to "RED OPS" (all caps)
-7. **Logo Pulse Animation** - Added pulse animation with 3s duration
-8. **Announcement Banner** - Re-enabled expired announcement with scrolling marquee
-
-**Verified Working:**
-- Dashboard, Command Center, Teams, Workflows, Workflow Editor, Categories
-- Announcement banner with scrolling animation
-- All modular backend routes
-
-### Phase 17: Backend Refactor Complete ✅ (January 26, 2026)
-
-**COMPLETED: Full Backend Modularization**
-The monolithic `server.py` (4,255 lines) has been fully refactored into a modular structure:
-
-**All 15 Route Modules Extracted (121+ endpoints):**
-| Module | Routes | Description |
-|--------|--------|-------------|
-| `auth.py` | 7 | Login, profile, password management |
-| `users.py` | 5 | User CRUD operations |
-| `roles.py` | 6 | Role management |
-| `teams.py` | 7 | Team CRUD + members |
-| `categories.py` | 11 | Category L1/L2 CRUD |
-| `dashboard.py` | 3 | Stats endpoints |
-| `notifications.py` | 6 | User notifications |
-| `sla.py` | 7 | SLA management and alerts |
-| `api_keys.py` | 5 | API key management |
-| `webhooks.py` | 8 | Outgoing webhooks |
-| `ratings.py` | 5 | Satisfaction ratings |
-| `orders.py` | 14 | Order CRUD + messages + files |
-| `workflows.py` | 18 | Workflow builder + templates |
-| `settings.py` | 11 | UI settings, SMTP, announcements, logs |
-| `feedback.py` | 8 | Feature requests, bug reports |
-
-**Architecture:**
-- `server.py` - Entry point (imports from server_v2)
-- `server_v2.py` - Main FastAPI app with all routers included
-- `server_legacy.py` - Backup of original monolithic server
-- `routes/__init__.py` - Re-exports all routers
-- `models/` - All Pydantic models (11 files)
-- `services/` - Business logic modules
-- `utils/` - Helper utilities
-
-**Key Changes:**
-- Fixed `normalize_order()` to include `request_type` field
-- Updated `REFACTORING_GUIDE.md` with completion status
-- All API endpoints tested and working
-
-### Phase 16: Bug Fixes + Extended Route Extraction ✅ (January 26, 2026)
-
-**Bug Fixes:**
-1. **Announcement Banner Animation** - Fixed: Banner now scrolls/moves with marquee animation
-2. **Date Picker Timezone** - Fixed: Date selection no longer shows wrong day
-3. **Workflow Editor Unsaved Changes** - Fixed: Now prompts before leaving with unsaved work (dialog with Cancel/Discard/Save options)
-
-**Extended Route Extraction (11 modules, 70 endpoints)**
-- `routes/categories.py` - 11 routes (L1/L2 CRUD, tree view)
-- `routes/sla.py` - 7 routes (stats, alerts, breached/at-risk orders)
-- `routes/api_keys.py` - 5 routes (CRUD, usage analytics)
-- `routes/webhooks.py` - 8 routes (CRUD, test, logs)
-- `routes/ratings.py` - 5 routes (submit, list, stats, resolver stats)
-
-### Phase 15: Backend Refactor Phase 2 (Routes Extraction) ✅ (January 26, 2026)
-
-**Routes Extracted (6 modules, 34 endpoints)**
-- `routes/auth.py` - 7 routes (login, me, profile, change-password, forgot-password, reset-password, verify-reset-token)
-- `routes/users.py` - 5 routes (CRUD operations for user management)
-- `routes/roles.py` - 6 routes (CRUD + list all roles)
-- `routes/teams.py` - 7 routes (CRUD + member listing)
-- `routes/dashboard.py` - 3 routes (stats, activity, quick-stats)
-- `routes/notifications.py` - 6 routes (list, count, mark-read, delete)
-
-**Infrastructure Updates**
-- Created `server_v2.py` - Modular server using new route imports (for testing)
-- Updated `utils/helpers.py` - Added `get_next_code()` and `create_notification()` helper functions
-- Updated `REFACTORING_GUIDE.md` - Progress tracking and migration instructions
-
-**Remaining Routes to Extract (9 modules)**
-- `categories.py` - Category L1/L2 management
-- `orders.py` - Order CRUD, messages, files (largest module)
-- `workflows.py` - Workflow builder and execution
-- `settings.py` - UI settings, SMTP, announcements
-- `feedback.py` - Feature requests, bug reports
-- `webhooks.py` - Outgoing webhook configuration
-- `sla.py` - SLA monitoring and alerts
-- `api_keys.py` - API key management and analytics
-- `ratings.py` - Customer satisfaction ratings
-
-### Phase 14: Enhancement Features ✅ (January 26, 2026)
-
-**1. Workflow Templates Gallery**
-- 6 pre-built workflow templates:
-  - Editor Assignment (Assignment) - Notifies editors on new orders
-  - SLA Escalation (Escalation) - Auto-escalates when SLA at risk
-  - Customer Feedback Request (Feedback) - Sends survey after delivery
-  - Auto-Close Inactive Tickets (Automation) - Closes stale tickets
-  - Priority-Based Routing (Routing) - Routes high priority to senior team
-  - External System Sync (Integration) - Webhook to external systems
-- One-click install functionality
-- Category filtering (All, Escalation, Feedback, Automation, Routing, Integration, Assignment)
-- Popularity scores and node/edge counts displayed
-- API: `GET/POST /api/workflow-templates`, `POST /api/workflow-templates/{id}/install`
-
-**2. API Key Usage Analytics**
-- Summary dashboard with cards: Total Keys, Requests Today, This Week, All Time
-- Per-key usage table with Today/Week/Total breakdown
-- API: `GET /api/api-keys/analytics/summary`, `GET /api/api-keys/{id}/usage`
-- New tab "Analytics" in Integrations page
-
-**3. Real-time Log Streaming**
-- "Live Stream" button for SSE-based real-time logs
-- "Poll (5s)" button for interval-based refresh
-- Streaming status banner shows count of received logs
-- Backend SSE endpoint: `GET /api/logs/stream/{log_type}`
-- Supports system, api, ui, user log types
-
-### Phase 13: Workflow Validation & Backend Refactor Start ✅ (January 26, 2026)
-
-**1. Test Workflow Validation**
-- Created test order **RRG-000037** to validate workflow execution
-- Workflow "New Request Notification Workflow" triggered successfully
-- Execution ID: `c72d4de8-6a10-4570-94a8-069764eae3eb` (status: completed)
-
-**2. Editor Workflow (Visual Workflow)**
-- Created new visual workflow "Editor Workflow" (ID: `224f96a5-6797-4c35-8eef-db6b96bfa73a`)
-- Automatically notifies editors when new orders are created
-- 3 nodes: Trigger → Notify Editors → Email Editor Team
-- Color: Green (#10B981)
-- Configured to trigger on `order.created` event
-
-**3. Backend Refactoring - Phase 1 (Models Extraction)**
-- Created `/app/backend/models/` directory with modular Pydantic models:
-  - `auth.py` - LoginRequest, LoginResponse, PasswordChange, etc.
-  - `user.py` - UserCreate, UserUpdate, UserResponse
-  - `role.py` - RoleCreate, RoleUpdate, RoleResponse
-  - `team.py` - TeamCreate, TeamUpdate, TeamResponse
-  - `category.py` - CategoryL1/L2 models
-  - `order.py` - OrderCreate, OrderResponse, Message/File models
-  - `workflow.py` - WorkflowCreate, WorkflowNode, WorkflowEdge, etc.
-  - `settings.py` - UISettings, SMTP, Announcements
-  - `feedback.py` - FeatureRequest, BugReport, Ratings
-  - `dashboard.py` - DashboardStats, NotificationResponse
-- Created `/app/backend/routes/__init__.py` scaffolding
-- Created `/app/backend/REFACTORING_GUIDE.md` with migration plan
-
-### Phase 12: UI Fixes & Enhanced Announcements ✅ (January 26, 2026)
-Three fixes and one major feature enhancement:
-
-**1. Banner/Announcement UI Redesign**
-- Moved banner inline to header row (same line as ratings and profile)
-- Black megaphone icon, black bold text, white background
-- No close/dismiss button - always visible when active
-- Sticky/static with header as page scrolls
-
-**2. SMTP Configuration**
-- Configured Gmail SMTP with fmtvvlb@gmail.com
-- Sends FROM admin@redribbongroup.ca
-- Test email sent successfully with subject "email coming from emergent test platform"
-
-**3. Categories Module Cleanup**
-- Removed "About Editor Workflow" info card
-- Removed "Editor Workflow" badges from subcategories
-- Removed "Enable Editor Workflow" toggle from subcategory form
-- Categories now only manages L1/L2 categories (workflow logic moved to Workflows module)
-
-**4. Enhanced Announcement Targeting System**
-- New data model with audience targeting fields:
-  - `send_to_all` (boolean) - show to everyone
-  - `target_teams` (array of team_ids)
-  - `target_roles` (array of role_ids)
-  - `start_at` / `end_at` (optional schedule)
-- UI changes:
-  - "Send to All" toggle - when ON, hides selectors, shows "This will be shown to everyone"
-  - When OFF, shows team/role multi-select checkboxes with badges
-  - Helper text: "Users who match ANY selected team or role will see this"
-  - Validation: requires at least one team/role if send_to_all is OFF
-- Delivery logic: OR-based matching (user in ANY target team OR has ANY target role)
-- Admin preview shows how banner looks in header
-
-### Phase 11: P2/P3 Complete Implementation ✅ (January 26, 2026)
-Major backend refactoring and new features:
-
-**P2: Backend Refactoring**
-- Created modular `/app/backend/services/` directory with:
-  - `notifications.py` - Notification creation and status change alerts
-  - `webhooks.py` - Webhook trigger function for outgoing webhooks
-  - `email.py` - Email notification services (MOCKED)
-  - `workflow_engine.py` - Workflow execution engine
-  - `sla_monitor.py` - SLA breach checking and alerts
-- All services imported and used by main `server.py`
-
-**P3: Workflow Execution Engine**
-- `execute_workflow()` runs workflows when orders are created
-- Supports node types: trigger, action, condition, form
-- Action types: assign_role, update_status, notify, email_user, forward_ticket, webhook
-- Test endpoint: `POST /api/workflows/{id}/test`
-- Execution logs: `GET /api/workflow-executions`
-- Frontend: Workflows page has "Execution Logs" tab showing recent executions with status
-
-**P3: SLA Breach Alerts**
-- Background task runs every 15 minutes checking for SLA breaches
-- Creates alerts for breaches (SLA exceeded) and warnings (4 hours before deadline)
-- Notifications sent to assigned editors and all admins (for breaches)
-- API endpoints:
-  - `GET /api/sla-alerts` - List alerts
-  - `GET /api/sla-alerts/statistics` - Get stats (on_track, at_risk, breached counts)
-  - `POST /api/sla-alerts/{id}/acknowledge` - Acknowledge an alert
-  - `POST /api/sla-check` - Manually trigger SLA check
-- Frontend: SLA page has stats cards and "Alerts" tab with Refresh/Check Now buttons
-
-### Phase 10: P2-3 Outgoing Webhooks ✅ (January 26, 2026)
-Complete webhook system for external integrations:
-
-- **Webhook Infrastructure**:
-  - `trigger_webhooks()` function sends POST to configured URLs on events
-  - Events supported: `order.created`, `order.updated`, `order.delivered`, `order.closed`, `message.sent`, `user.created`
-  - Webhook delivery runs as background task (non-blocking)
-  - Logs all deliveries to `webhook_logs` collection (success/failure, status code, response)
-
-- **API Endpoints**:
-  - `GET/POST /api/webhooks` - List and create webhooks
-  - `PATCH /api/webhooks/{id}` - Update webhook (toggle active)
-  - `DELETE /api/webhooks/{id}` - Delete webhook
-  - `POST /api/webhooks/{id}/test` - Send test payload
-  - `GET /api/webhooks/{id}/logs` - Get logs for specific webhook
-  - `GET /api/webhook-logs` - Get all delivery logs
-
-- **Frontend Integration**:
-  - Integrations page now uses real API (not mock data)
-  - Test button sends test payload and shows success/failure toast
-  - Toggle and delete buttons work with backend
-  - Webhook logs can be viewed
-
-### Phase 9: P0-2 Completion & P2-1 Bug Fix ✅ (January 26, 2026)
-Completed P0-2 unsaved changes guard on all remaining pages and fixed P2-1 user role assignment bug:
-
-- **P0-2: Unsaved Changes Guard (COMPLETE)**:
-  - Integrations page: API Key and Webhook dialogs show warning AlertDialog
-  - SLA page: Create/Edit SLA dialog shows warning AlertDialog
-  - EmailSettings page: Shows yellow "You have unsaved changes" text above Save button
-  - Workflows page: Create and Duplicate workflow dialogs show warning AlertDialog
-  - All warning dialogs have "Stay" and "Leave without saving" buttons
-  - z-index set to 100 to ensure warnings appear above main dialogs
-  - Browser refresh/close triggers beforeunload confirmation
-
-- **P2-1: User Role Assignment Bug (FIXED)**:
-  - Fixed default role logic in Users.js handleOpenDialog
-  - New users now default to "Requester" role (not "Editor")
-  - Users can select any role and are created with that role correctly
-
-### Phase 8: New P0 Requirements ✅ (January 25, 2026)
-Two critical P0 features implemented:
-
-- **P0-1: Message Notifications (Resolver Alert)**:
-  - When requester sends message on ticket, resolver gets notification via bell icon
-  - If no resolver assigned, admins get notified instead
-  - Notification includes ticket reference (order_code) and message preview (first 50 chars)
-  - Long messages truncated with ellipsis
-  - Works both ways: resolver messages notify requester
-
-- **P0-2: Unsaved Changes Guard (Partial - Users, Categories, Announcements)**:
-  - Users page: Add/Edit User dialog shows "Unsaved changes" warning
-  - Categories page: Create/Edit Category dialog shows warning
-  - Announcements page: Shows "You have unsaved changes" text, beforeunload handler
-  - Warning dialog has "Stay" and "Leave without saving" options
-  - Browser refresh/close triggers beforeunload confirmation
-
-### Phase 7: P1 Requirements ✅ (January 25, 2026)
-All 8 P1 features implemented:
-
-- **P1-1: Branding Update**:
-  - Changed "Red Ribbon" to "Red Ops" throughout the app
-  - Sidebar header shows "Red Ops" with pulse animation on logo
-  - Login page footer updated to "Red Ops Portal"
-
-- **P1-2: Announcement Ticker**:
-  - `/announcements` page for admin-controlled ticker management
-  - Enable/disable toggle, message input, color pickers
-  - Live preview shows ticker appearance
-  - Ticker scrolls across top of all pages when active
-  - Users can dismiss ticker for their session
-
-- **P1-3: Workflow Location Fix**:
-  - Added "Triggers" tab to `/workflows` page
-  - Lists all L2 categories with workflow trigger toggles
-  - Moved workflow trigger configuration from Categories to Workflows module
-
-- **P1-4: Logs Module**:
-  - New `/logs` page with System, API, UI, User tabs
-  - Search input for filtering logs by message
-  - Level filter dropdown (All, Error, Warning, Info, Success, Debug)
-  - Auto-refresh toggle for live updates
-  - Download button to export logs as text file
-  - Backend: `/api/logs/{log_type}` endpoint
-
-- **P1-5: Integrations Module**:
-  - New `/integrations` page with API Keys and Webhooks tabs
-  - API Keys: Create, view, revoke keys with permissions
-  - Webhooks: Create, enable/disable, delete webhooks
-  - Events selection for outgoing webhooks
-  - Backend: `/api/api-keys`, `/api/webhooks` endpoints
-
-- **P1-6: User Provisioning**:
-  - "Force Password Change" toggle in Add/Edit User form
-  - "Force OTP Setup" toggle in Add/Edit User form
-  - OTP code (6 digits) logged to console (MOCKED email)
-  - Backend: `force_password_change`, `force_otp_setup` fields on User model
-
-- **P1-7: Edit User Enhancements**:
-  - Team assignment dropdown in user form
-  - Can re-trigger security flags when editing existing users
-  - Security Options section with clear descriptions
-
-- **P1-8: SLA Module**:
-  - New `/sla` page for SLA management
-  - Create SLA with name, description, priority
-  - Response time and resolution time in hours
-  - Assign SLA to role or team
-  - Enable/disable, edit, delete SLAs
-  - Backend: `/api/sla` CRUD endpoints
-
-### Phase 6: P0 Requirements ✅ (January 25, 2026)
-Core P0 requirements for ticket management:
-
-- **P0-1: Requester Visibility**:
-  - "Assigned to" field now visible in My Requests list (CommandCenter.js)
-  - "Assigned to" field visible in Order Detail sidebar
-  - Backend `/api/my-requests` includes `assigned_to_name` field
-
-- **P0-2: Ticket Timestamps**:
-  - "Created" timestamp with date and time visible in Order Detail
-  - "Last Updated" timestamp visible in Order Detail
-  - "Closed At" timestamp appears when ticket is closed
-
-- **P0-3: Requester-side Close**:
-  - "Close Ticket" button visible for requesters on their own open tickets
-  - Close dialog requires reason (1-500 characters)
-  - Backend `/api/orders/{order_id}/close` endpoint
-  - New "Closed" status added to ORDER_STATUSES
-  - "Close Reason" displayed in Order Info sidebar after closing
-
-- **P0-4: Label Change**:
-  - Changed "Editor" to "Assigned to" throughout the application
-  - Orders.js filter dropdown: "Editor" → "Assigned to"
-  - Orders.js table header: Shows "Assigned to"
-  - OrderDetail.js sidebar: Shows "Assigned to" label
-
-### Phase 5: Full i18n & Mobile Responsiveness ✅ (January 25, 2026)
-Complete internationalization of all pages and mobile-responsive design:
-
-- **Full-App Translations**:
-  - Dashboard page with all KPI cards, sections, and buttons translated
-  - Users page with table headers, buttons, and dialogs translated
-  - Teams page with titles, stats, and dialogs translated
-  - Categories page with dialog and labels translated
-  - Sidebar navigation fully translated
-  - Language switcher persists preference in localStorage
-
-- **Mobile Responsiveness**:
-  - Dashboard: KPI cards display in 2-column grid on mobile
-  - Users page: Shows card-based layout instead of table on mobile (md:hidden)
-  - Teams page: Stats stack vertically on mobile
-  - Command Center: Form fields stack properly on mobile
-  - All dialogs are responsive
-
-- **Dynamic Database Content Translation**:
-  - Categories now support multi-language names (name_en, name_pt, name_es)
-  - Backend models updated: CategoryL1Create, CategoryL2Create include language fields
-  - Frontend Categories dialog shows translation inputs with country flags
-  - getCategoryName helper function displays correct translation based on current language
-
-### Phase 4: UI Customization Module ✅ (January 25, 2026)
-Admin-controllable UI text customization:
-
-- **Backend**:
-  - UI Settings CRUD API (`/api/ui-settings`)
-  - 28 default UI settings organized by category (branding, navigation, buttons, labels, statuses, messages)
-  - Auto-seed on startup if no settings exist
-
-- **Frontend**:
-  - UI Settings page (`/settings`) with search and category tabs
-  - Editable text fields grouped by category
-  - Reset to Defaults and Save Changes buttons
-  - Settings linked from sidebar for Admin users
-
-### Phase 3: Branding & i18n Foundation ✅ (January 24, 2026)
-Custom branding and language switching:
-
-- **Branding**:
-  - Custom login page with background image and company logos
-  - Sidebar with brand colors (Pantone 187 C red)
-  - Circular logo on login form
-
-- **i18n Foundation**:
-  - react-i18next library integration
-  - Language switcher component (compact and default variants)
-  - Translation files for English, Portuguese, Spanish
-
-### Phase 2: Visual Workflow Builder ✅ (January 24, 2026)
-A drag-and-drop visual workflow builder similar to Go High Level / Microsoft Visio:
-
-- **Backend**:
-  - Full workflow CRUD API (`/api/workflows`)
-  - Workflow models support: nodes (with position), edges (connections), node-specific data
-  - 5 node types: Trigger, Form, Action, Condition, End
-  - Action types: assign_role, forward_ticket, email_user, email_requester, update_status, notify, webhook
-  - **Workflow Assignment**: Assign workflows to roles AND teams
-  - **Category Triggers**: Auto-trigger workflows when tickets created in specific categories
-  - Meta endpoints for available actions and form field types
-  - Duplicate workflow functionality
-
-- **Frontend**:
-  - Workflows management page (`/workflows`) with card grid view
-  - Visual workflow editor using React Flow library
-  - Node palette with 5 node types (color-coded)
-  - Canvas with grid background, drag-and-drop support
-  - Node configuration side panel with type-specific settings
-  - **Workflow Settings Panel**: Assign to Roles, Teams, and Trigger Categories
-  - Save, clear, and back navigation
-  - Duplicate and delete workflows
-
-- **Node Types**:
-  - **Trigger** (Green): Start point - Manual, Form Submit, Ticket Created, Status Changed, Schedule, Webhook
-  - **Form** (Blue): Collect user data with customizable fields
-    - **Dynamic Fields**: Text, Textarea, Number, Email, Phone, Date, Dropdown, Multi-Select, Checkbox, File
-    - **Field Options**: For dropdown/multiselect types
-    - **Trigger Flag**: Mark fields as triggers for workflow conditions
-    - **Conditional Sub-Fields**: Show additional fields based on parent field value (e.g., if Category="Renovation", show "How many bedrooms?")
-  - **Action** (Amber): Auto-assign role, forward ticket, email user/requester, update status, notify, webhook
-  - **Condition** (Purple): Branch logic with Yes/No outputs
-  - **End** (Red): Workflow completion
-
-### Phase 1: Dynamic Roles System ✅ (January 24, 2026)
-- **Backend**:
-  - Roles CRUD endpoints (`/api/roles`)
-  - Role validation for user creation/update
-  - Pre-seeded 31 roles (2 system + 29 service providers)
-  - `can_pick_orders` and `can_create_orders` permissions
-  - System roles protected from modification/deletion
-  
-- **Frontend**:
-  - Roles management page (`/roles`) with tabs by type
-  - Role cards showing icon, color, description, permissions
-  - Add/Edit role dialog with icon and color picker
-  - Users page updated with dynamic role dropdown (grouped by type)
-  - Sidebar updated with "Roles" link for Admin
-
-### V2 Command Center ✅ (January 24, 2026)
-- Command Center page with category-driven request forms
-- 2-level category system (L1/L2)
-- Feature Requests and Bug Reports tracking
-- Profile page with avatar upload and password change
-- Quick links for common actions
-
-### V1 MVP ✅
-- JWT authentication
-- Order management workflow
-- Messages and files per order
-- Notifications system
-- SLA tracking
-
-## Admin Credentials
-- Email: admin@redribbonops.com
-- Password: Fmtvvl171**
+# Red Ribbon Ops Portal - Product Requirements Document
+
+## Overview
+A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
+
+## Current Version: 2.0 (IAM Sprint Complete)
+**Last Updated:** January 27, 2026
+
+---
+
+## Core Architecture
+
+### Tech Stack
+- **Frontend:** React 18, TailwindCSS, Shadcn/UI
+- **Backend:** FastAPI (Python 3.11), Pydantic
+- **Database:** MongoDB
+- **Authentication:** JWT-based
+
+### URL Configuration
+- **Frontend:** Port 3000
+- **Backend:** Port 8001 (all routes prefixed with /api)
+- **Preview URL:** https://iam-refactor.preview.emergentagent.com
+
+---
+
+## Identity & Access Model (IAM) - v2.0
+
+### Simplified Roles (Permissions Only)
+| Role | Description |
+|------|-------------|
+| Administrator | Full system control |
+| Operator | Internal staff ops, manage tickets/queues |
+| Standard User | Basic user actions |
+
+### Account Types (Classification)
+| Type | Description | Subscription Required |
+|------|-------------|----------------------|
+| Partner | Business partners | Yes (Plan required) |
+| Media Client | Media service clients | No (A La Carte) |
+| Internal Staff | Company employees | No |
+| Vendor/Freelancer | External contractors | No |
+
+### Subscription Plans (Partners Only)
+- **Core** - Basic Support, Standard SLA
+- **Engage** - Priority Support, Enhanced SLA, Analytics
+- **Lead-to-Cash** - Premium SLA, Advanced Analytics, Lead Tools
+- **Scale** - Dedicated Support, Custom SLA, All Features
+
+### Specialties (Admin-Managed)
+56+ specialties including: Video Editor, Photographer, Drone Operator, Home Stager, Floor Plan Designer, General Contractor, etc.
+
+---
+
+## Completed Features (P0)
+
+### 1. Identity & Access Model Rework ✅
+- [x] Simplified roles (Administrator, Operator, Standard User)
+- [x] Account Type field (Partner, Media Client, Internal Staff, Vendor/Freelancer)
+- [x] Specialty field (admin-managed, 56 seeded)
+- [x] Conditional Subscription Plans (Partners only)
+- [x] Per-user Access Controls (checkbox matrix)
+- [x] User creation with all new fields
+- [x] Identity config API endpoint
+
+### 2. Ticket Lifecycle Actions ✅
+- [x] Requester cancellation with reasons (dropdown + free text)
+- [x] Resolver delivery notes (required modal)
+- [x] Activity logging for both actions
+
+### 3. UI Sidebar Changes ✅
+- [x] Added "My Services" page
+- [x] "Submit New Request" replaced "Command Center"
+- [x] Reports accessible to all users (scoped)
+
+### 4. Workflow Templates ✅
+- [x] Pool Routing (24h Right of First Refusal)
+  - Routes to Partner pool → 24h delay → Vendor pool
+  - 6 nodes, 5 edges, editable
+- [x] Payments + Status Progression
+  - MOCKED GHL payment webhook
+  - NEW → OPEN on payment confirmation → Pool routing
+  - 9 nodes, 8 edges
+
+---
+
+## Completed Features (P1)
+
+### 1. Admin UIs ✅
+- [x] Specialties Management page (/specialties)
+- [x] Subscription Plans Management page (/subscription-plans)
+
+### 2. Banner Targeting ✅
+- [x] Specialty targeting added to announcement banner
+
+### 3. Data Reset ✅
+- [x] Backup created at /app/backups/ticket_backup_*.json
+- [x] Tickets, notifications, activity logs cleared for UAT
+
+---
 
 ## API Endpoints
 
-### Workflows (NEW)
-- GET `/api/workflows` - List all workflows
-- GET `/api/workflows/{id}` - Get specific workflow
-- GET `/api/workflows/by-role/{role_name}` - Get workflows for role
-- GET `/api/workflows/by-team/{team_id}` - Get workflows for team
-- GET `/api/workflows/by-category/{category_id}` - Get workflows triggered by category
-- POST `/api/workflows` - Create workflow (Admin)
-- PUT `/api/workflows/{id}` - Full update with nodes/edges (Admin)
-- PATCH `/api/workflows/{id}` - Partial update (Admin)
-- POST `/api/workflows/{id}/duplicate?new_name=X` - Duplicate workflow (Admin)
-- DELETE `/api/workflows/{id}` - Soft delete workflow (Admin)
-- GET `/api/workflows/meta/actions` - Available action types
-- GET `/api/workflows/meta/field-types` - Available form field types
+### Identity & Access
+- `GET /api/users/identity-config` - Get roles, account types, plans
+- `GET /api/users` - List users with new IAM fields
+- `POST /api/users` - Create user with account_type, specialty, etc.
+- `PATCH /api/users/{id}` - Update user
 
-### Roles
-- GET `/api/roles` - List all roles (filter by role_type, active_only)
-- GET `/api/roles/service-providers` - List service providers
-- POST `/api/roles` - Create role (Admin)
-- PATCH `/api/roles/{id}` - Update role (Admin, non-system only)
-- DELETE `/api/roles/{id}` - Deactivate role (Admin, non-system only)
+### Specialties
+- `GET /api/specialties` - List all specialties
+- `POST /api/specialties` - Create specialty (Admin)
+- `PATCH /api/specialties/{id}` - Update specialty (Admin)
+- `DELETE /api/specialties/{id}` - Delete specialty (Admin)
 
-### Users (uses dynamic roles)
-- POST `/api/users` - Create user with any valid role
-- PATCH `/api/users/{id}` - Update user including role change
+### Subscription Plans
+- `GET /api/subscription-plans` - List all plans
+- `POST /api/subscription-plans` - Create plan (Admin)
+- `PATCH /api/subscription-plans/{id}` - Update plan (Admin)
+- `DELETE /api/subscription-plans/{id}` - Delete plan (Admin)
 
-## Tech Stack
-- **Frontend**: React, React Router, Axios, Shadcn/UI, TailwindCSS, **React Flow**, **i18next**
-- **Backend**: FastAPI, Pydantic, PyJWT, passlib
-- **Database**: MongoDB (Motor async driver)
+### Workflow Templates
+- `GET /api/workflow-templates` - List all templates
+- `POST /api/workflow-templates/{id}/install` - Install from template
 
-## Branding
-- **Primary Color**: Pantone 187 C (#A2182C) - Red Ribbon Red
-- **Secondary Color**: Pantone 730 C (#97662D) - Gold/Brown
-- **Accent Color**: Pantone 5523 C (#AEC6C8) - Light Teal
-- **Logo Assets**: `/public/assets/logos/` (logo-full.jpg, logo-badge.jpg, logo-icon.jpg, house-palm.jpg)
+### Mocked Payment (GHL)
+- `POST /api/webhooks/ghl-payment-mock` - Receive payment webhook
+- `POST /api/simulate-payment/{order_id}` - Admin simulate payment
 
-## Internationalization (i18n)
-- **English** (primary) - Default language
-- **Portuguese - Brazil** (secondary)
-- **Spanish - Spain** (third option)
-- Language preference stored in localStorage
-- Translation files: `/src/i18n/locales/` (en.json, pt.json, es.json)
+---
 
-## MOCKED Features
-- **SMTP email notifications** - Logged but not sent
-- **OTP email delivery** - 6-digit codes logged to console
+## Mocked Integrations
 
-## Next Phases (Roadmap)
+| Integration | Status | Endpoint |
+|-------------|--------|----------|
+| GHL Payments | MOCKED | `/api/webhooks/ghl-payment-mock` |
 
-### P2: Integrations 🟠 (In Progress)
-- Integrate Real SMTP (user provides credentials) - Backend ready, UI ready
-- ~~Execute outgoing webhooks on events~~ ✅ DONE
+---
 
-### P2: Refactoring ✅ DONE
-- ~~Refactor monolithic server.py into modular structure~~ ✅ DONE
+## Test Credentials
 
-### P3: Backend Improvements ✅ DONE
-- ~~Workflow Execution Engine~~ ✅ DONE
-- ~~SLA breach alerts and notifications~~ ✅ DONE
-- Real-time log streaming for Logs module (remaining)
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@redribbonops.com | Fmtvvl171** |
+| Test Partner | partner@test.com | Test123! |
 
-### P3: Backend Improvements 🟣
-- Workflow Execution Engine (execute workflows on ticket creation)
-- Real-time log streaming for Logs module
+---
 
-### P3: Future Enhancements 🟤
-- SLA breach alerts and notifications
-- API key usage analytics
-- Webhook delivery logs and retry mechanism
-- User activity audit trail
+## Future Tasks (Backlog)
 
-## Test Reports
-- `/app/test_reports/iteration_1.json` - V1 MVP
-- `/app/test_reports/iteration_2.json` - Simplified workflow
-- `/app/test_reports/iteration_3.json` - V2 Command Center (100% pass)
-- `/app/test_reports/iteration_4.json` - Phase 1 Dynamic Roles (100% pass)
-- `/app/test_reports/iteration_5.json` - Phase 2 Visual Workflow Builder (100% pass)
-- `/app/test_reports/iteration_6.json` - Workflow Builder Enhancements (100% pass)
-- `/app/test_reports/iteration_7.json` - Branding & Internationalization (100% pass)
-- `/app/test_reports/iteration_8.json` - Full i18n translations (100% pass)
-- `/app/test_reports/iteration_9.json` - Mobile responsiveness & Categories multilang (95% pass)
-- `/app/test_reports/iteration_10.json` - P0 Ticket features (100% pass)
-- `/app/test_reports/iteration_11.json` - P1 Requirements (100% pass)
-- `/app/test_reports/iteration_12.json` - P0 Message Notifications & Unsaved Changes (100% pass)
-- `/app/test_reports/iteration_13.json` - P0-2 Completion & P2-1 Role Bug Fix (100% pass)
-- `/app/test_reports/iteration_14.json` - P2-3 Outgoing Webhooks (100% pass)
-- `/app/test_reports/iteration_15.json` - P2/P3 Refactor, Workflow Engine, SLA Alerts (100% pass)
+### P2 - Refinements
+- [ ] Real GHL payment integration
+- [ ] Email notifications for workflow actions
+- [ ] Pool assignment notifications
+
+### P3 - Enhancements
+- [ ] Advanced analytics for API key usage
+- [ ] Slack/Teams integration presets
+- [ ] Workflow preview/simulation feature
+- [ ] SLA policy templates
+
+---
+
+## File Structure
+
+```
+/app/
+├── backend/
+│   ├── models/
+│   │   ├── identity.py          # IAM model
+│   │   └── ...
+│   ├── routes/
+│   │   ├── users.py             # User CRUD
+│   │   ├── specialties.py       # Specialty management
+│   │   ├── subscription_plans.py # Plan management
+│   │   └── workflows.py         # Templates included
+│   └── server_v2.py
+├── frontend/
+│   └── src/
+│       ├── pages/
+│       │   ├── Users.js         # New IAM fields
+│       │   ├── MyServices.js    # New page
+│       │   ├── SpecialtiesAdmin.js
+│       │   └── SubscriptionPlansAdmin.js
+│       └── components/
+│           └── Layout.js        # Updated sidebar
+└── memory/
+    └── PRD.md
+```
+
+---
+
+## Testing Status
+
+- **Backend Tests:** 22/22 passed (100%)
+- **Frontend Tests:** All UI features verified (100%)
+- **Last Test Report:** /app/test_reports/iteration_27.json
