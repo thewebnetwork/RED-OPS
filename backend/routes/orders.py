@@ -121,6 +121,14 @@ class FileResponse(BaseModel):
     created_at: str
 
 
+# ============== CANCELLATION REASONS ==============
+
+@router.get("/cancellation-reasons")
+async def get_cancellation_reasons():
+    """Get list of valid cancellation reasons"""
+    return {"reasons": CANCELLATION_REASONS}
+
+
 # ============== HELPER FUNCTIONS ==============
 
 async def notify_status_change(order: dict, old_status: str, new_status: str, changed_by: dict):
