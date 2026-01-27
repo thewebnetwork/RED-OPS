@@ -350,69 +350,6 @@ export default function CommandCenter() {
                     />
                   </div>
 
-                  {/* File Attachments */}
-                  <div>
-                    <Label>{t('commandCenter.attachments')}</Label>
-                    <p className="text-xs text-slate-500 mt-1 mb-2">
-                      {t('commandCenter.attachmentsHelp')}
-                    </p>
-                    
-                    {/* Upload Area */}
-                    <div 
-                      className="border-2 border-dashed border-slate-300 rounded-lg p-4 sm:p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        accept={ALLOWED_EXTENSIONS.join(',')}
-                        data-testid="file-upload-input"
-                      />
-                      <Upload size={32} className="mx-auto text-slate-400 mb-2" />
-                      <p className="text-sm text-slate-600">{t('commandCenter.clickToUpload')}</p>
-                      <p className="text-xs text-slate-400 mt-1">{t('commandCenter.maxSize')} • {t('commandCenter.noExecutable')}</p>
-                    </div>
-
-                    {/* Attached Files List */}
-                    {attachments.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {attachments.map((file, index) => {
-                          const FileIcon = getFileIcon(file.name);
-                          return (
-                            <div key={index} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
-                              <FileIcon size={18} className="text-slate-500 shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
-                                <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => removeAttachment(index)}
-                                className="p-1 hover:bg-slate-200 rounded shrink-0"
-                              >
-                                <X size={16} className="text-slate-500" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                        <p className="text-xs text-slate-500">
-                          {t('commandCenter.total')}: {formatFileSize(attachments.reduce((sum, f) => sum + f.size, 0))} / 50 MB
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Security Notice */}
-                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-                      <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
-                      <p className="text-xs text-amber-700">
-                        {t('commandCenter.securityNotice')}
-                      </p>
-                    </div>
-                  </div>
-
                   {/* Dynamic Form Based on Category */}
                   {selectedL2 && (
                     <div className="pt-4 border-t border-slate-100">
