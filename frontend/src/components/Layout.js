@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Bug,
   Lightbulb,
-  Command,
+  PlusCircle,
   FolderTree,
   User,
   Shield,
@@ -27,7 +27,8 @@ import {
   Megaphone,
   Mail,
   AlertTriangle,
-  BarChart3
+  BarChart3,
+  PackageOpen
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
