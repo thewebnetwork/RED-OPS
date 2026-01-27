@@ -448,6 +448,96 @@ async def get_order_pool(current_user: dict = Depends(require_roles(["Editor", "
     return result
 
 
+@router.get("/my-requests", response_model=List[OrderResponse])
+async def get_my_requests(current_user: dict = Depends(get_current_user)):
+    """Get all requests created by the current user"""
+    orders = await db.orders.find(
+        {"requester_id": current_user["id"], "status": {"$ne": "Draft"}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    result = []
+    for order in orders:
+        order = normalize_order(order)
+        result.append(OrderResponse(
+            **order,
+            is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
+        ))
+    
+    return result
+
+
+@router.get("/pool/{pool_number}", response_model=List[OrderResponse])
+async def get_pool_tickets(
+    pool_number: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get tickets in a specific pool.
+    Pool 1 = Partner pool (first 24 hours)
+    Pool 2 = Vendor/Freelancer pool (after 24 hours)
+    """
+    account_type = current_user.get("account_type")
+    role = current_user.get("role")
+    
+    # Access control
+    if pool_number == 1:
+        if role not in ["Administrator", "Operator"] and account_type != "Partner":
+            raise HTTPException(status_code=403, detail="Access denied to Pool 1")
+    elif pool_number == 2:
+        if role not in ["Administrator", "Operator"] and account_type != "Vendor/Freelancer":
+            raise HTTPException(status_code=403, detail="Access denied to Pool 2")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid pool number")
+    
+    # Get tickets in this pool
+    # Pool 1: Open tickets, not yet picked, in pool less than 24 hours
+    # Pool 2: Open tickets, not yet picked, in pool more than 24 hours
+    now = datetime.now(timezone.utc)
+    twenty_four_hours_ago = now - timedelta(hours=24)
+    
+    query = {
+        "status": "Open",
+        "editor_id": None,
+        "pool_number": pool_number
+    }
+    
+    # If pool_number not set, use time-based logic
+    orders = await db.orders.find(
+        {"status": "Open", "editor_id": None},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(1000)
+    
+    result = []
+    for order in orders:
+        order = normalize_order(order)
+        pool_entered = order.get("pool_entered_at") or order.get("created_at")
+        
+        try:
+            if isinstance(pool_entered, str):
+                pool_entered_dt = datetime.fromisoformat(pool_entered.replace('Z', '+00:00'))
+            else:
+                pool_entered_dt = pool_entered
+        except:
+            pool_entered_dt = now
+        
+        # Determine which pool this ticket belongs to
+        in_pool_1 = pool_entered_dt > twenty_four_hours_ago
+        
+        if pool_number == 1 and in_pool_1:
+            result.append(OrderResponse(
+                **order,
+                is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
+            ))
+        elif pool_number == 2 and not in_pool_1:
+            result.append(OrderResponse(
+                **order,
+                is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
+            ))
+    
+    return result
+
+
 @router.get("/{order_id}", response_model=OrderResponse)
 async def get_order(order_id: str, current_user: dict = Depends(get_current_user)):
     """Get a specific order"""
