@@ -186,12 +186,52 @@ export default function OrderDetail() {
   };
 
   const handleDeliver = async () => {
+    if (!deliveryNotes.trim()) {
+      toast.error('Please provide delivery notes');
+      return;
+    }
+
+    setDeliveringOrder(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/deliver`);
+      await axios.post(`${API}/orders/${orderId}/deliver`, {
+        resolution_notes: deliveryNotes.trim()
+      });
       toast.success('Order delivered!');
+      setDeliverDialogOpen(false);
+      setDeliveryNotes('');
       fetchOrderData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to deliver order');
+    } finally {
+      setDeliveringOrder(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelReason) {
+      toast.error('Please select a cancellation reason');
+      return;
+    }
+    if (cancelReason === 'Other' && !cancelNotes.trim()) {
+      toast.error('Please provide additional details for "Other" reason');
+      return;
+    }
+
+    setCancelingOrder(true);
+    try {
+      await axios.post(`${API}/orders/${orderId}/cancel`, {
+        reason: cancelReason,
+        notes: cancelNotes.trim() || null
+      });
+      toast.success('Ticket canceled successfully');
+      setCancelDialogOpen(false);
+      setCancelReason('');
+      setCancelNotes('');
+      fetchOrderData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to cancel ticket');
+    } finally {
+      setCancelingOrder(false);
     }
   };
 
