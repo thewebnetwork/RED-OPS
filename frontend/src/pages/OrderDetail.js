@@ -48,11 +48,13 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusConfig = {
+  'Draft': { class: 'bg-slate-200 text-slate-600', color: 'bg-slate-400' },
   'Open': { class: 'bg-blue-100 text-blue-700', color: 'bg-blue-500' },
   'In Progress': { class: 'bg-amber-100 text-amber-700', color: 'bg-amber-500' },
   'Pending': { class: 'bg-purple-100 text-purple-700', color: 'bg-purple-500' },
   'Delivered': { class: 'bg-green-100 text-green-700', color: 'bg-green-500' },
   'Closed': { class: 'bg-slate-100 text-slate-500', color: 'bg-slate-500' },
+  'Canceled': { class: 'bg-red-100 text-red-600', color: 'bg-red-500' },
 };
 
 const priorityConfig = {
