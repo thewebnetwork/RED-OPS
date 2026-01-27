@@ -743,3 +743,126 @@ async def test_workflow(workflow_id: str, background_tasks: BackgroundTasks, cur
         "execution_id": execution_id,
         "workflow_name": workflow["name"]
     }
+
+
+
+# ============== MOCKED GHL PAYMENT WEBHOOK ==============
+
+class MockedGHLPaymentWebhook(BaseModel):
+    """Simulated GHL payment webhook payload"""
+    order_id: str
+    payment_status: str = "confirmed"
+    amount: Optional[float] = None
+    transaction_id: Optional[str] = None
+
+
+@router.post("/webhooks/ghl-payment-mock")
+async def receive_ghl_payment_mock(
+    payload: MockedGHLPaymentWebhook,
+    background_tasks: BackgroundTasks
+):
+    """
+    MOCKED GHL Payment Webhook Endpoint
+    
+    This simulates receiving a payment confirmation from GoHighLevel.
+    In production, this would be replaced with a real GHL webhook integration.
+    
+    Use this endpoint to simulate payment confirmation for testing workflows.
+    """
+    order_id = payload.order_id
+    
+    # Find the order
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if payload.payment_status == "confirmed":
+        # Update order status from NEW to OPEN
+        now = get_utc_now()
+        update_data = {
+            "status": "Open",
+            "payment_confirmed": True,
+            "payment_confirmed_at": now,
+            "payment_transaction_id": payload.transaction_id or f"mock-txn-{uuid.uuid4().hex[:8]}",
+            "payment_amount": payload.amount
+        }
+        
+        await db.orders.update_one({"id": order_id}, {"$set": update_data})
+        
+        # Add activity log
+        activity = {
+            "id": str(uuid.uuid4()),
+            "order_id": order_id,
+            "type": "status_change",
+            "description": "Payment confirmed via GHL webhook (MOCKED). Status changed from New to Open.",
+            "actor": "System",
+            "timestamp": now
+        }
+        await db.order_activity.insert_one(activity)
+        
+        # Trigger any workflows that listen for payment confirmation
+        workflows = await db.workflows.find({
+            "is_active": True,
+            "active": True,
+            "trigger_event": "webhook.payment_confirmed"
+        }, {"_id": 0}).to_list(100)
+        
+        context = {
+            "order": {**order, **update_data},
+            "payment": {
+                "status": payload.payment_status,
+                "amount": payload.amount,
+                "transaction_id": payload.transaction_id
+            }
+        }
+        
+        for workflow in workflows:
+            execution_id = str(uuid.uuid4())
+            background_tasks.add_task(execute_workflow, db, workflow["id"], "webhook.payment_confirmed", context, execution_id)
+        
+        return {
+            "message": "Payment confirmation processed (MOCKED)",
+            "order_id": order_id,
+            "new_status": "Open",
+            "workflows_triggered": len(workflows)
+        }
+    else:
+        return {
+            "message": "Payment status received but not confirmed",
+            "order_id": order_id,
+            "status": payload.payment_status
+        }
+
+
+@router.post("/simulate-payment/{order_id}")
+async def simulate_payment(
+    order_id: str,
+    amount: float = 100.0,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """
+    Admin endpoint to simulate a GHL payment for testing purposes.
+    This triggers the same flow as if GHL sent a payment confirmation webhook.
+    """
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Create mock webhook payload
+    mock_payload = MockedGHLPaymentWebhook(
+        order_id=order_id,
+        payment_status="confirmed",
+        amount=amount,
+        transaction_id=f"sim-{uuid.uuid4().hex[:8]}"
+    )
+    
+    # Call the mock webhook handler
+    from fastapi import BackgroundTasks
+    bg_tasks = BackgroundTasks()
+    result = await receive_ghl_payment_mock(mock_payload, bg_tasks)
+    
+    return {
+        **result,
+        "simulated_by": current_user["name"],
+        "note": "This is a simulated payment for testing purposes"
+    }
