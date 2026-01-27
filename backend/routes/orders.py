@@ -68,6 +68,12 @@ class OrderResponse(BaseModel):
     delivered_at: Optional[str] = None
     review_started_at: Optional[str] = None  # When status changed to Pending
     last_requester_message_at: Optional[str] = None  # Last message from requester
+    # Cancellation fields
+    cancellation_reason: Optional[str] = None
+    cancellation_notes: Optional[str] = None
+    canceled_at: Optional[str] = None
+    # Resolution/Delivery fields
+    resolution_notes: Optional[str] = None
 
 
 class CloseOrderRequest(BaseModel):
