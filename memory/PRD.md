@@ -23,11 +23,14 @@ Real estate and marketing professionals who can pick orders from the pool:
 - **Trades**: General Contractor, Electrician, Plumber, HVAC Technician, Roofer, Painter, Landscaper, Cleaner, Pest Control, Locksmith
 - **Marketing**: Graphic Designer, Social Media Manager, Copywriter, SEO Specialist, Web Developer, Print Specialist, Sign Installer
 
-## Current Order Workflow (6 Statuses)
+## Current Order Workflow (7 Statuses)
 1. **Draft** - Partially completed request saved for later (no SLA, no notifications)
 2. **Open** - New order created by Requester, visible in Service Provider pool
 3. **In Progress** - Service Provider picked the order and is working on it
 4. **Pending** - Service Provider submitted for review, waiting on Requester feedback
+5. **Delivered** - Order completed (requires resolution_notes)
+6. **Closed** - Requester closed the ticket (with reason)
+7. **Canceled** - Requester canceled their own ticket (with reason + optional notes)
 5. **Delivered** - Order completed
 6. **Closed** - Requester closed the ticket (with reason)
 
