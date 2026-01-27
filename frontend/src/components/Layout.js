@@ -134,10 +134,20 @@ export default function Layout({ children }) {
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map(item => {
-              // Special handling for Report an Issue which redirects to command-center with type=issue
-              const isActive = item.path === '/report-issue' 
-                ? location.pathname === '/command-center' && location.search.includes('type=issue')
-                : location.pathname === item.path;
+              // Determine active state correctly for each item
+              let isActive = false;
+              
+              if (item.path === '/report-issue') {
+                // Report an Issue is active when on /report-issue OR /command-center with type=issue
+                isActive = location.pathname === '/report-issue' || 
+                  (location.pathname === '/command-center' && location.search.includes('type=issue'));
+              } else if (item.path === '/command-center') {
+                // Command Center (Submit New Request) is active ONLY when on /command-center WITHOUT type=issue
+                isActive = location.pathname === '/command-center' && !location.search.includes('type=issue');
+              } else {
+                // All other items use exact path matching
+                isActive = location.pathname === item.path;
+              }
               
               return (
                 <Link
