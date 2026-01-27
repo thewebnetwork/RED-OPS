@@ -303,9 +303,11 @@ export default function OrderDetail() {
   const canAddFile = (user?.role === 'Editor' && order.editor_id === user?.id) || 
                      (user?.role === 'Requester' && order.requester_id === user?.id) ||
                      user?.role === 'Admin';
-  // Requester can close their own ticket if it's not already closed or delivered
-  const canClose = (user?.role === 'Requester' && order.requester_id === user?.id && !['Closed', 'Delivered'].includes(order.status)) ||
-                   (user?.role === 'Admin' && !['Closed', 'Delivered'].includes(order.status));
+  // Requester can close their own ticket if it's not already closed, delivered, or canceled
+  const canClose = (user?.role === 'Requester' && order.requester_id === user?.id && !['Closed', 'Delivered', 'Canceled'].includes(order.status)) ||
+                   (user?.role === 'Admin' && !['Closed', 'Delivered', 'Canceled'].includes(order.status));
+  // Requester can cancel their own ticket if it's still active
+  const canCancel = user?.role === 'Requester' && order.requester_id === user?.id && !['Delivered', 'Closed', 'Canceled'].includes(order.status);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
