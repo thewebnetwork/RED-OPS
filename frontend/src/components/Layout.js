@@ -154,27 +154,6 @@ export default function Layout({ children }) {
               </Link>
             ))}
           </div>
-
-          {/* Quick Links */}
-          {filteredQuickLinks.length > 0 && (
-            <div className="mt-6">
-              <p className="px-4 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{t('dashboard.quickActions')}</p>
-              <div className="space-y-1">
-                {filteredQuickLinks.map(item => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setSidebarOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
-                    data-testid={`quick-link-${item.labelKey}`}
-                  >
-                    <item.icon size={16} strokeWidth={1.5} />
-                    {t(item.labelKey)}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
         </nav>
 
         {/* User section */}
