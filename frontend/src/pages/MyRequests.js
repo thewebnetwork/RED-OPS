@@ -156,15 +156,15 @@ export default function MyRequests() {
         </Card>
       </div>
 
-      {/* Requests List */}
+      {/* Tickets List */}
       {filteredOrders.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Inbox size={48} className="mx-auto mb-4 text-slate-300" />
             <p className="text-slate-500">
               {orders.length === 0 
-                ? "You haven't submitted any requests yet"
-                : "No requests match your filters"}
+                ? "You haven't submitted any tickets yet"
+                : "No tickets match your filters"}
             </p>
             {orders.length === 0 && (
               <Link to="/command-center">
