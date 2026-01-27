@@ -20,7 +20,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ### URL Configuration
 - **Frontend:** Port 3000
 - **Backend:** Port 8001 (all routes prefixed with /api)
-- **Preview URL:** https://iam-refactor.preview.emergentagent.com
+- **Preview URL:** https://ticketpro-15.preview.emergentagent.com
 
 ---
 
