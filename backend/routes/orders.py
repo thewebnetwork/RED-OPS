@@ -595,10 +595,11 @@ async def respond_to_order(
 @router.post("/{order_id}/deliver")
 async def deliver_order(
     order_id: str,
+    deliver_data: DeliverOrderRequest,
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(require_roles(["Editor"]))
 ):
-    """Mark order as delivered"""
+    """Mark order as delivered - requires resolution notes"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
