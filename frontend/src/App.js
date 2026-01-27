@@ -256,7 +256,7 @@ function AppRoutes() {
       <Route 
         path="/logs" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute roles={["Administrator", "Operator"]}>
             <Logs />
           </PrivateRoute>
         } 
