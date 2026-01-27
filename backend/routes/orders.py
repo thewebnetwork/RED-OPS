@@ -74,6 +74,15 @@ class CloseOrderRequest(BaseModel):
     reason: str = Field(..., min_length=1, max_length=500)
 
 
+class CancelOrderRequest(BaseModel):
+    reason: str = Field(..., description="Cancellation reason from predefined list")
+    notes: Optional[str] = Field(None, max_length=1000, description="Optional additional notes")
+
+
+class DeliverOrderRequest(BaseModel):
+    resolution_notes: str = Field(..., min_length=1, max_length=2000, description="Required delivery/resolution notes")
+
+
 class MessageCreate(BaseModel):
     message_body: str
 
