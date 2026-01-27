@@ -19,6 +19,7 @@ from .workflows import router as workflows_router
 from .escalation import router as escalation_router
 from .specialties import router as specialties_router
 from .access_tiers import router as access_tiers_router
+from .subscription_plans import router as subscription_plans_router
 from .sla_policies import router as sla_policies_router
 
 __all__ = [
@@ -40,5 +41,6 @@ __all__ = [
     "escalation_router",
     "specialties_router",
     "access_tiers_router",
+    "subscription_plans_router",
     "sla_policies_router",
 ]
