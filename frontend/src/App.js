@@ -220,6 +220,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/iam" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <IAMPage />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/teams" 
         element={
           <PrivateRoute roles={["Administrator", "Operator"]}>
