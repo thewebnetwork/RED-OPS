@@ -307,17 +307,10 @@ export default function CommandCenter() {
                     />
                   </div>
 
-                  {/* Request Type */}
-                  <div>
-                    <Label>{t('commandCenter.requestType')}</Label>
-                    <div className="flex flex-wrap gap-4 mt-2">
-                      <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${requestType === 'Request' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                        <input
-                          type="radio"
-                          name="requestType"
-                          value="Request"
-                          checked={requestType === 'Request'}
-                          onChange={(e) => setRequestType(e.target.value)}
+                  {/* Request Type - Auto-set based on entry point, hidden */}
+                  {/* If type=issue in URL, it's Report an Issue → Bug type */}
+                  {/* Otherwise it's Submit New Request → Request type */}
+                  <input type="hidden" value={requestType} />
                           className="sr-only"
                         />
                         <Lightbulb size={18} className={requestType === 'Request' ? 'text-rose-600' : 'text-slate-400'} />
