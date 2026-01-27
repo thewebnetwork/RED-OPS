@@ -35,6 +35,7 @@ import MyRequests from "./pages/MyRequests";
 import ReportIssue from "./pages/ReportIssue";
 import RibbonBoard from "./pages/RibbonBoard";
 import IAMPage from "./pages/IAMPage";
+import SettingsHub from "./pages/SettingsHub";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
