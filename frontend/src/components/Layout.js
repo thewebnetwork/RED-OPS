@@ -30,7 +30,10 @@ import {
   BarChart3,
   PackageOpen,
   Briefcase,
-  CreditCard
+  CreditCard,
+  Inbox,
+  Layers,
+  KeyRound
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
