@@ -3,7 +3,7 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.0 (IAM Sprint Complete)
+## Current Version: 2.1 (P0 Blockers Fixed)
 **Last Updated:** January 27, 2026
 
 ---
@@ -20,6 +20,37 @@ A comprehensive operations management platform designed as a request and fulfill
 - **Frontend:** Port 3000
 - **Backend:** Port 8001 (all routes prefixed with /api)
 - **Preview URL:** https://iam-refactor.preview.emergentagent.com
+
+---
+
+## Sidebar Navigation Structure
+
+### All Users
+1. Dashboard
+2. My Services
+3. **My Requests** (NEW)
+4. Submit New Request
+5. **Report an Issue** (NEW)
+6. **The Ribbon Board** (NEW - Pool views)
+7. Reports
+
+### Admin/Operator Only
+8. All Orders
+9. Workflows
+10. SLA & Escalation
+11. Users
+12. Teams
+13. **Identity & Access** (Renamed from "Roles")
+14. Specialties
+15. Subscription Plans
+16. Categories
+17. Logs
+18. Integrations
+19. Announcements
+20. Email Settings
+21. Settings
+
+**REMOVED:** Quick Actions section at bottom
 
 ---
 
@@ -46,12 +77,22 @@ A comprehensive operations management platform designed as a request and fulfill
 - **Lead-to-Cash** - Premium SLA, Advanced Analytics, Lead Tools
 - **Scale** - Dedicated Support, Custom SLA, All Features
 
-### Specialties (Admin-Managed)
-56+ specialties including: Video Editor, Photographer, Drone Operator, Home Stager, Floor Plan Designer, General Contractor, etc.
+---
+
+## The Ribbon Board (Pool System)
+
+### Pool 1 (Partners)
+- Tickets available for Partners to pick
+- 24-hour right of first refusal
+- Visible to: Admins, Operators, Partners
+
+### Pool 2 (Vendors/Freelancers)
+- Tickets that moved from Pool 1 after 24 hours
+- Visible to: Admins, Operators, Vendors/Freelancers
 
 ---
 
-## Completed Features (P0)
+## Completed Features (P0 Sprint)
 
 ### 1. Identity & Access Model Rework ✅
 - [x] Simplified roles (Administrator, Operator, Standard User)
@@ -59,72 +100,32 @@ A comprehensive operations management platform designed as a request and fulfill
 - [x] Specialty field (admin-managed, 56 seeded)
 - [x] Conditional Subscription Plans (Partners only)
 - [x] Per-user Access Controls (checkbox matrix)
-- [x] User creation with all new fields
-- [x] Identity config API endpoint
+- [x] Identity & Access Management page
 
 ### 2. Ticket Lifecycle Actions ✅
 - [x] Requester cancellation with reasons (dropdown + free text)
 - [x] Resolver delivery notes (required modal)
 - [x] Activity logging for both actions
 
-### 3. UI Sidebar Changes ✅
+### 3. UI/Navigation Changes ✅
 - [x] Added "My Services" page
-- [x] "Submit New Request" replaced "Command Center"
-- [x] Reports accessible to all users (scoped)
+- [x] Added "My Requests" page (dedicated)
+- [x] "Submit New Request" in sidebar
+- [x] "Report an Issue" as separate sidebar entry
+- [x] "Identity & Access" renamed from "Roles"
+- [x] Quick Actions section REMOVED
+- [x] Logo pulse animation restored
+- [x] Attachments moved under Categorization (compact)
 
-### 4. Workflow Templates ✅
+### 4. The Ribbon Board ✅
+- [x] Pool 1 (Partners) view
+- [x] Pool 2 (Vendors/Freelancers) view
+- [x] Role-based visibility
+- [x] Pick functionality with pool eligibility checks
+
+### 5. Workflow Templates ✅
 - [x] Pool Routing (24h Right of First Refusal)
-  - Routes to Partner pool → 24h delay → Vendor pool
-  - 6 nodes, 5 edges, editable
-- [x] Payments + Status Progression
-  - MOCKED GHL payment webhook
-  - NEW → OPEN on payment confirmation → Pool routing
-  - 9 nodes, 8 edges
-
----
-
-## Completed Features (P1)
-
-### 1. Admin UIs ✅
-- [x] Specialties Management page (/specialties)
-- [x] Subscription Plans Management page (/subscription-plans)
-
-### 2. Banner Targeting ✅
-- [x] Specialty targeting added to announcement banner
-
-### 3. Data Reset ✅
-- [x] Backup created at /app/backups/ticket_backup_*.json
-- [x] Tickets, notifications, activity logs cleared for UAT
-
----
-
-## API Endpoints
-
-### Identity & Access
-- `GET /api/users/identity-config` - Get roles, account types, plans
-- `GET /api/users` - List users with new IAM fields
-- `POST /api/users` - Create user with account_type, specialty, etc.
-- `PATCH /api/users/{id}` - Update user
-
-### Specialties
-- `GET /api/specialties` - List all specialties
-- `POST /api/specialties` - Create specialty (Admin)
-- `PATCH /api/specialties/{id}` - Update specialty (Admin)
-- `DELETE /api/specialties/{id}` - Delete specialty (Admin)
-
-### Subscription Plans
-- `GET /api/subscription-plans` - List all plans
-- `POST /api/subscription-plans` - Create plan (Admin)
-- `PATCH /api/subscription-plans/{id}` - Update plan (Admin)
-- `DELETE /api/subscription-plans/{id}` - Delete plan (Admin)
-
-### Workflow Templates
-- `GET /api/workflow-templates` - List all templates
-- `POST /api/workflow-templates/{id}/install` - Install from template
-
-### Mocked Payment (GHL)
-- `POST /api/webhooks/ghl-payment-mock` - Receive payment webhook
-- `POST /api/simulate-payment/{order_id}` - Admin simulate payment
+- [x] Payments + Status Progression (MOCKED GHL)
 
 ---
 
@@ -141,56 +142,29 @@ A comprehensive operations management platform designed as a request and fulfill
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@redribbonops.com | Fmtvvl171** |
-| Test Partner | partner@test.com | Test123! |
-
----
-
-## Future Tasks (Backlog)
-
-### P2 - Refinements
-- [ ] Real GHL payment integration
-- [ ] Email notifications for workflow actions
-- [ ] Pool assignment notifications
-
-### P3 - Enhancements
-- [ ] Advanced analytics for API key usage
-- [ ] Slack/Teams integration presets
-- [ ] Workflow preview/simulation feature
-- [ ] SLA policy templates
-
----
-
-## File Structure
-
-```
-/app/
-├── backend/
-│   ├── models/
-│   │   ├── identity.py          # IAM model
-│   │   └── ...
-│   ├── routes/
-│   │   ├── users.py             # User CRUD
-│   │   ├── specialties.py       # Specialty management
-│   │   ├── subscription_plans.py # Plan management
-│   │   └── workflows.py         # Templates included
-│   └── server_v2.py
-├── frontend/
-│   └── src/
-│       ├── pages/
-│       │   ├── Users.js         # New IAM fields
-│       │   ├── MyServices.js    # New page
-│       │   ├── SpecialtiesAdmin.js
-│       │   └── SubscriptionPlansAdmin.js
-│       └── components/
-│           └── Layout.js        # Updated sidebar
-└── memory/
-    └── PRD.md
-```
 
 ---
 
 ## Testing Status
 
-- **Backend Tests:** 22/22 passed (100%)
-- **Frontend Tests:** All UI features verified (100%)
-- **Last Test Report:** /app/test_reports/iteration_27.json
+- **Test Report:** /app/test_reports/iteration_28.json
+- **Frontend Tests:** 100% pass (All P0 blockers verified)
+- **Backend Tests:** 100% pass (22/22)
+
+---
+
+## Next Sprint (Pending User Approval)
+
+1. Email notifications for workflow actions
+2. Pool assignment notifications to Partners/Vendors
+3. Pool dashboard enhancement (admin full view)
+
+---
+
+## Future Tasks (Backlog)
+
+- Real GHL payment integration (replace mock)
+- Advanced analytics for API key usage
+- Slack/Teams integration presets
+- Workflow preview/simulation feature
+- SLA policy templates
