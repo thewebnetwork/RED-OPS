@@ -366,14 +366,123 @@ export default function OrderDetail() {
           </Button>
         )}
         {canDeliver && (
-          <Button 
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleDeliver}
-            data-testid="deliver-btn"
-          >
-            <CheckCircle2 size={18} className="mr-2" />
-            Mark as Delivered
-          </Button>
+          <Dialog open={deliverDialogOpen} onOpenChange={setDeliverDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                className="bg-green-600 hover:bg-green-700"
+                data-testid="deliver-btn"
+              >
+                <CheckCircle2 size={18} className="mr-2" />
+                Mark as Delivered
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Mark as Delivered</DialogTitle>
+                <DialogDescription>
+                  Please provide delivery notes describing what was completed. This will be visible to the requester.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Delivery Notes *</Label>
+                  <Textarea
+                    value={deliveryNotes}
+                    onChange={(e) => setDeliveryNotes(e.target.value)}
+                    placeholder="Describe what was delivered, any important notes, next steps..."
+                    className="mt-1.5 min-h-[120px]"
+                    data-testid="delivery-notes-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setDeliverDialogOpen(false);
+                      setDeliveryNotes('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={handleDeliver}
+                    disabled={deliveringOrder || !deliveryNotes.trim()}
+                    data-testid="confirm-deliver-btn"
+                  >
+                    {deliveringOrder ? 'Delivering...' : 'Confirm Delivery'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+        {canCancel && (
+          <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                data-testid="cancel-ticket-btn"
+              >
+                <XCircle size={18} className="mr-2" />
+                Cancel Ticket
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cancel this ticket?</DialogTitle>
+                <DialogDescription>
+                  This will cancel your request. The resolver will be notified. This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Reason for cancellation *</Label>
+                  <Select value={cancelReason} onValueChange={setCancelReason}>
+                    <SelectTrigger className="mt-1.5" data-testid="cancel-reason-select">
+                      <SelectValue placeholder="Select a reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cancellationReasons.map(reason => (
+                        <SelectItem key={reason} value={reason}>{reason}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Additional notes {cancelReason === 'Other' ? '*' : '(optional)'}</Label>
+                  <Textarea
+                    value={cancelNotes}
+                    onChange={(e) => setCancelNotes(e.target.value)}
+                    placeholder="Any additional details..."
+                    className="mt-1.5"
+                    data-testid="cancel-notes-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setCancelDialogOpen(false);
+                      setCancelReason('');
+                      setCancelNotes('');
+                    }}
+                  >
+                    Keep Ticket
+                  </Button>
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700"
+                    onClick={handleCancelOrder}
+                    disabled={cancelingOrder || !cancelReason || (cancelReason === 'Other' && !cancelNotes.trim())}
+                    data-testid="confirm-cancel-btn"
+                  >
+                    {cancelingOrder ? 'Canceling...' : 'Cancel Ticket'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
         {canClose && (
           <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
