@@ -691,19 +691,23 @@ async def close_order(
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user)
 ):
-    """Allow requesters to close their own tickets with a reason"""
+    """Allow requesters or admins to close tickets with a reason"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if order["requester_id"] != current_user["id"] and current_user["role"] != "Admin":
-        raise HTTPException(status_code=403, detail="Only the requester can close this order")
+    is_admin = current_user["role"] in ["Admin", "Administrator"]
+    is_owner = order["requester_id"] == current_user["id"]
     
-    if order["status"] == "Closed":
-        raise HTTPException(status_code=400, detail="Order is already closed")
+    if not is_owner and not is_admin:
+        raise HTTPException(status_code=403, detail="Only the requester or admin can close this order")
+    
+    if order["status"] in ["Closed", "Canceled"]:
+        raise HTTPException(status_code=400, detail=f"Order is already {order['status'].lower()}")
     
     old_status = order["status"]
     now = get_utc_now()
+    closed_by = "Admin" if is_admin and not is_owner else "Requester"
     
     await db.orders.update_one(
         {"id": order_id},
@@ -711,6 +715,9 @@ async def close_order(
             "status": "Closed",
             "close_reason": close_data.reason,
             "closed_at": now,
+            "closed_by": closed_by,
+            "closed_by_id": current_user["id"],
+            "closed_by_name": current_user["name"],
             "updated_at": now
         }}
     )
