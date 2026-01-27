@@ -149,7 +149,7 @@ export default function CommandCenter() {
     try {
       const [l1Res, requestsRes] = await Promise.all([
         axios.get(`${API}/categories/l1`),
-        axios.get(`${API}/my-requests`)
+        axios.get(`${API}/orders/my-requests`)
       ]);
       setCategoriesL1(l1Res.data);
       setMyRequests(requestsRes.data);
