@@ -1,0 +1,22 @@
+[
+  {
+    "id": "38397beb-230c-4b4e-878c-58d49af6a0ab",
+    "request_code": "FR-000002",
+    "request_type": "Feature",
+    "requester_id": "10f6c063-cd73-41ff-a5fd-99d571016a71",
+    "requester_name": "Admin",
+    "title": "Draft Feature Test",
+    "category_l1_id": null,
+    "category_l1_name": null,
+    "category_l2_id": null,
+    "category_l2_name": null,
+    "description": "Testing feature draft",
+    "why_important": null,
+    "who_is_for": null,
+    "reference_links": null,
+    "priority": "Normal",
+    "status": "Draft",
+    "created_at": "2026-01-26T22:53:00.957973+00:00",
+    "updated_at": "2026-01-26T22:53:00.957973+00:00"
+  }
+]
