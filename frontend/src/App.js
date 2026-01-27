@@ -31,6 +31,10 @@ import Reports from "./pages/Reports";
 import MyServices from "./pages/MyServices";
 import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
 import SubscriptionPlansAdmin from "./pages/SubscriptionPlansAdmin";
+import MyRequests from "./pages/MyRequests";
+import ReportIssue from "./pages/ReportIssue";
+import RibbonBoard from "./pages/RibbonBoard";
+import IAMPage from "./pages/IAMPage";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
