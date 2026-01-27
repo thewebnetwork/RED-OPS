@@ -18,10 +18,10 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 # Test credentials - using existing users
 ADMIN_EMAIL = "admin@redribbonops.com"
 ADMIN_PASSWORD = "Fmtvvl171**"
-REQUESTER_EMAIL = "requester@test.com"
-REQUESTER_PASSWORD = "TestPass123!"
-EDITOR_EMAIL = "editor@test.com"
-EDITOR_PASSWORD = "TestPass123!"
+REQUESTER_EMAIL = "testrequester@test.com"
+REQUESTER_PASSWORD = "Test123!"
+EDITOR_EMAIL = "testeditor-p0@test.com"
+EDITOR_PASSWORD = "Test123!"
 
 
 class TestCancellationReasons:
