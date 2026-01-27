@@ -288,6 +288,14 @@ function AppRoutes() {
         path="/settings" 
         element={
           <PrivateRoute roles={["Administrator"]}>
+            <SettingsHub />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/settings/ui" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
             <UISettings />
           </PrivateRoute>
         } 
