@@ -570,15 +570,44 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
 async def pick_order(
     order_id: str,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(require_roles(["Editor"]))
+    current_user: dict = Depends(get_current_user)
 ):
     """Pick an order from the pool"""
+    # Check if user can pick orders (Partner or Vendor/Freelancer)
+    account_type = current_user.get("account_type")
+    role = current_user.get("role")
+    
+    if role not in ["Administrator", "Operator"] and account_type not in ["Partner", "Vendor/Freelancer"]:
+        raise HTTPException(status_code=403, detail="Only Partners and Vendors can pick orders")
+    
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
     if order["status"] != "Open":
         raise HTTPException(status_code=400, detail="Order is not available for pickup")
+    
+    if order.get("editor_id"):
+        raise HTTPException(status_code=400, detail="Order already assigned")
+    
+    # Check pool eligibility based on time
+    now_dt = datetime.now(timezone.utc)
+    pool_entered = order.get("pool_entered_at") or order.get("created_at")
+    try:
+        if isinstance(pool_entered, str):
+            pool_entered_dt = datetime.fromisoformat(pool_entered.replace('Z', '+00:00'))
+        else:
+            pool_entered_dt = pool_entered
+        hours_in_pool = (now_dt - pool_entered_dt).total_seconds() / 3600
+    except:
+        hours_in_pool = 0
+    
+    # Partners can only pick from Pool 1 (first 24 hours)
+    # Vendors can only pick from Pool 2 (after 24 hours)
+    if account_type == "Partner" and hours_in_pool >= 24:
+        raise HTTPException(status_code=400, detail="This ticket is no longer in the Partner pool")
+    if account_type == "Vendor/Freelancer" and hours_in_pool < 24:
+        raise HTTPException(status_code=400, detail="This ticket is still in the Partner pool")
     
     old_status = order["status"]
     now = get_utc_now()
@@ -590,6 +619,7 @@ async def pick_order(
             "editor_name": current_user["name"],
             "status": "In Progress",
             "picked_at": now,
+            "picked_from_pool": 1 if hours_in_pool < 24 else 2,
             "updated_at": now
         }}
     )
@@ -603,7 +633,8 @@ async def pick_order(
         "title": order.get("title"),
         "old_status": old_status,
         "new_status": "In Progress",
-        "assigned_to": current_user["name"]
+        "assigned_to": current_user["name"],
+        "picked_by_account_type": account_type
     })
     
     return {"message": "Order picked successfully", "order_code": order["order_code"]}
