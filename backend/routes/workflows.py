@@ -1,6 +1,7 @@
 """Workflow management routes including templates and executions"""
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, Query, BackgroundTasks
+from pydantic import BaseModel
 from typing import Optional, List
 
 from database import db
