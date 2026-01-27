@@ -77,7 +77,7 @@ export default function Layout({ children }) {
   const navItems = [
     { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/my-services', icon: PackageOpen, label: 'My Services', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/my-requests', icon: Inbox, label: 'My Requests', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/my-tickets', icon: Inbox, label: 'My Tickets', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/report-issue', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/ribbon-board', icon: Layers, label: 'Opportunity Ribbon', roles: ['Administrator', 'Operator', 'Standard User'] },
