@@ -104,10 +104,6 @@ export default function Layout({ children }) {
     item.roles.includes(user?.role)
   );
 
-  const filteredQuickLinks = quickLinks.filter(item =>
-    item.roles.includes(user?.role)
-  );
-
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Mobile sidebar backdrop */}
