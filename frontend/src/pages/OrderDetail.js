@@ -82,6 +82,14 @@ export default function OrderDetail() {
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [closeReason, setCloseReason] = useState('');
   const [closingOrder, setClosingOrder] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelNotes, setCancelNotes] = useState('');
+  const [cancelingOrder, setCancelingOrder] = useState(false);
+  const [cancellationReasons, setCancellationReasons] = useState([]);
+  const [deliverDialogOpen, setDeliverDialogOpen] = useState(false);
+  const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [deliveringOrder, setDeliveringOrder] = useState(false);
   const [newFile, setNewFile] = useState({
     file_type: 'Export',
     label: '',
