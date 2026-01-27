@@ -192,7 +192,7 @@ function AppRoutes() {
       <Route 
         path="/teams" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute roles={["Administrator", "Operator"]}>
             <Teams />
           </PrivateRoute>
         } 
@@ -200,7 +200,7 @@ function AppRoutes() {
       <Route 
         path="/workflows" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute roles={["Administrator", "Operator"]}>
             <Workflows />
           </PrivateRoute>
         } 
@@ -208,7 +208,7 @@ function AppRoutes() {
       <Route 
         path="/workflows/:workflowId" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute roles={["Administrator", "Operator"]}>
             <WorkflowEditor />
           </PrivateRoute>
         } 
@@ -216,7 +216,7 @@ function AppRoutes() {
       <Route 
         path="/reports" 
         element={
-          <PrivateRoute roles={["Administrator", "Privileged User"]}>
+          <PrivateRoute>
             <Reports />
           </PrivateRoute>
         } 
