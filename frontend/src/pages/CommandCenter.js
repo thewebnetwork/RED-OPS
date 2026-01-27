@@ -587,6 +587,50 @@ export default function CommandCenter() {
                       </div>
                     </div>
                   )}
+
+                  {/* Compact Attachments (moved under categorization) */}
+                  <div className="border-t pt-4">
+                    <Label className="text-xs text-slate-500">{t('commandCenter.attachments')}</Label>
+                    <div 
+                      className="mt-2 border border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-rose-400 transition-colors cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept={ALLOWED_EXTENSIONS.join(',')}
+                        data-testid="file-upload-input"
+                      />
+                      <Upload size={20} className="mx-auto text-slate-400 mb-1" />
+                      <p className="text-xs text-slate-600">{t('commandCenter.clickToUpload')}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Max 50 MB total</p>
+                    </div>
+                    
+                    {attachments.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {attachments.map((file, index) => {
+                          const FileIcon = getFileIcon(file.name);
+                          return (
+                            <div key={index} className="flex items-center gap-2 p-1.5 bg-slate-50 rounded text-xs">
+                              <FileIcon size={14} className="text-slate-500 shrink-0" />
+                              <span className="flex-1 truncate text-slate-600">{file.name}</span>
+                              <span className="text-slate-400 shrink-0">{formatFileSize(file.size)}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeAttachment(index)}
+                                className="p-0.5 hover:bg-slate-200 rounded shrink-0"
+                              >
+                                <X size={12} className="text-slate-400" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
