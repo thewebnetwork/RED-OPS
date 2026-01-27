@@ -588,6 +588,30 @@ export default function OrderDetail() {
                   <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.special_instructions}</p>
                 </div>
               )}
+              
+              {/* Resolution/Delivery Notes */}
+              {order.resolution_notes && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <Label className="text-xs text-green-700 font-semibold">Delivery Notes</Label>
+                  <p className="mt-1 text-green-800 whitespace-pre-wrap">{order.resolution_notes}</p>
+                </div>
+              )}
+              
+              {/* Cancellation Info */}
+              {order.status === 'Canceled' && order.cancellation_reason && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <Label className="text-xs text-red-700 font-semibold">Cancellation Reason</Label>
+                  <p className="mt-1 text-red-800">{order.cancellation_reason}</p>
+                  {order.cancellation_notes && (
+                    <p className="mt-2 text-red-700 text-sm whitespace-pre-wrap">{order.cancellation_notes}</p>
+                  )}
+                  {order.canceled_at && (
+                    <p className="mt-2 text-xs text-red-600">
+                      Canceled: {format(new Date(order.canceled_at), 'PPpp')}
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
