@@ -98,11 +98,21 @@ export default function OrderDetail() {
 
   useEffect(() => {
     fetchOrderData();
+    fetchCancellationReasons();
   }, [orderId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const fetchCancellationReasons = async () => {
+    try {
+      const res = await axios.get(`${API}/orders/cancellation-reasons`);
+      setCancellationReasons(res.data.reasons || []);
+    } catch (error) {
+      console.error('Failed to fetch cancellation reasons');
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
