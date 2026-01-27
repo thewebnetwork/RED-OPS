@@ -80,6 +80,8 @@ export default function Layout({ children }) {
     { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Administrator'] },
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Administrator', 'Operator'] },
     { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Administrator'] },
+    { path: '/specialties', icon: Briefcase, label: 'Specialties', roles: ['Administrator'] },
+    { path: '/subscription-plans', icon: CreditCard, label: 'Subscription Plans', roles: ['Administrator'] },
     { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Administrator', 'Operator'] },
     { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
     { path: '/integrations', icon: Plug, labelKey: 'nav.integrations', roles: ['Administrator'] },
