@@ -77,14 +77,17 @@ export default function Layout({ children }) {
   const navItems = [
     { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/my-services', icon: PackageOpen, label: 'My Services', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/my-requests', icon: Inbox, label: 'My Requests', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/report-issue', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/ribbon-board', icon: Layers, label: 'The Ribbon Board', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator', 'Operator'] },
     { path: '/workflows', icon: GitBranch, labelKey: 'nav.workflows', roles: ['Administrator', 'Operator'] },
     { path: '/sla-policies', icon: Shield, label: 'SLA & Escalation', roles: ['Administrator'] },
     { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/users', icon: Users, labelKey: 'nav.users', roles: ['Administrator'] },
     { path: '/teams', icon: UsersRound, labelKey: 'nav.teams', roles: ['Administrator', 'Operator'] },
-    { path: '/roles', icon: Shield, labelKey: 'nav.roles', roles: ['Administrator'] },
+    { path: '/iam', icon: KeyRound, label: 'Identity & Access', roles: ['Administrator'] },
     { path: '/specialties', icon: Briefcase, label: 'Specialties', roles: ['Administrator'] },
     { path: '/subscription-plans', icon: CreditCard, label: 'Subscription Plans', roles: ['Administrator'] },
     { path: '/categories', icon: FolderTree, labelKey: 'nav.categories', roles: ['Administrator', 'Operator'] },
@@ -95,10 +98,7 @@ export default function Layout({ children }) {
     { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Administrator'] },
   ];
 
-  const quickLinks = [
-    { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/command-center?category=bug', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
-  ];
+  // Quick Links removed as per user request
 
   const filteredNavItems = navItems.filter(item => 
     item.roles.includes(user?.role)
