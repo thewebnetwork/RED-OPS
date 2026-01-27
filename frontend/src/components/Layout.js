@@ -113,14 +113,14 @@ export default function Layout({ children }) {
             <div className="relative">
               <img 
                 src="/assets/logos/logo-icon.jpg" 
-                alt="Red Ops" 
+                alt="Red Pulse" 
                 className="w-10 h-10 rounded-lg object-cover"
               />
               {/* Pulse animation ring */}
               <span className="absolute inset-0 rounded-lg animate-ping bg-white/30" style={{ animationDuration: '2s' }} />
               <span className="absolute inset-0 rounded-lg animate-pulse bg-white/10" style={{ animationDuration: '1.5s' }} />
             </div>
-            <span className="font-bold text-lg tracking-tight">RED OPS</span>
+            <span className="font-bold text-lg tracking-tight">RED PULSE</span>
           </div>
           <button 
             className="ml-auto lg:hidden text-white/70 hover:text-white"
