@@ -119,9 +119,13 @@ async def list_all_teams(current_user: dict = Depends(require_roles(["Administra
             if spec:
                 related_specialty_names.append(spec["name"])
         
+        # Ensure related_specialty_ids is set
+        team_data = {**team}
+        if "related_specialty_ids" not in team_data:
+            team_data["related_specialty_ids"] = []
+        
         result.append(TeamResponse(
-            **team,
-            related_specialty_ids=team.get("related_specialty_ids", []),
+            **team_data,
             related_specialty_names=related_specialty_names,
             member_count=member_count
         ))
