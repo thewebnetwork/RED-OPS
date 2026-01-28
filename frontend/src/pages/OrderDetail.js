@@ -311,6 +311,29 @@ export default function OrderDetail() {
     }
   };
 
+  // Soft delete handler (Admin only)
+  const handleSoftDelete = async () => {
+    if (!deleteReason.trim()) {
+      toast.error('Please provide a reason for deletion');
+      return;
+    }
+
+    setDeletingOrder(true);
+    try {
+      await axios.delete(`${API}/orders/${orderId}`, {
+        data: { reason: deleteReason.trim() }
+      });
+      toast.success('Ticket soft-deleted successfully');
+      setDeleteDialogOpen(false);
+      setDeleteReason('');
+      navigate('/orders');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete ticket');
+    } finally {
+      setDeletingOrder(false);
+    }
+  };
+
   const handleAddFile = async (e) => {
     e.preventDefault();
     if (!newFile.label || !newFile.url) {
