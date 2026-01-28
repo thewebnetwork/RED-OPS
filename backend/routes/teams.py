@@ -68,11 +68,24 @@ async def list_teams(current_user: dict = Depends(get_current_user)):
     """List all active teams"""
     teams = await db.teams.find({"active": True}, {"_id": 0}).to_list(100)
     
-    # Get member counts
+    # Get member counts and resolve specialty names
     result = []
     for team in teams:
         member_count = await db.users.count_documents({"team_id": team["id"], "active": True})
-        result.append(TeamResponse(**team, member_count=member_count))
+        
+        # Resolve related specialty names
+        related_specialty_names = []
+        for spec_id in team.get("related_specialty_ids", []):
+            spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+            if spec:
+                related_specialty_names.append(spec["name"])
+        
+        result.append(TeamResponse(
+            **team,
+            related_specialty_ids=team.get("related_specialty_ids", []),
+            related_specialty_names=related_specialty_names,
+            member_count=member_count
+        ))
     
     return result
 
