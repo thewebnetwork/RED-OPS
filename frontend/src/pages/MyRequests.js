@@ -85,7 +85,7 @@ export default function MyRequests() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Inbox className="text-[#A2182C]" />
-            My Tickets
+            My Submitted Tickets
           </h1>
           <p className="text-slate-500 mt-1">View and track all tickets you have submitted</p>
         </div>
