@@ -37,7 +37,7 @@ import {
 } from '../components/ui/alert-dialog';
 import { 
   KeyRound, Shield, Users, ChevronDown, Edit, Save, Info, Lock, Building2, Briefcase,
-  Plus, Search, Trash2, UserCheck, UserX, CreditCard, CheckCircle2, UsersRound
+  Plus, Search, Trash2, UserCheck, UserX, CreditCard, CheckCircle2, UsersRound, Eye, EyeOff, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
