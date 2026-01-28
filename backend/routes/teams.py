@@ -184,7 +184,12 @@ async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = 
         if spec:
             related_specialty_names.append(spec["name"])
     
-    return TeamResponse(**updated, related_specialty_names=related_specialty_names, member_count=member_count)
+    # Ensure related_specialty_ids is set
+    updated_data = {**updated}
+    if "related_specialty_ids" not in updated_data:
+        updated_data["related_specialty_ids"] = []
+    
+    return TeamResponse(**updated_data, related_specialty_names=related_specialty_names, member_count=member_count)
 
 
 @router.delete("/{team_id}")
