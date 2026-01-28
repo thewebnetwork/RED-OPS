@@ -43,7 +43,7 @@ class TestIAMRoles:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        self.token = response.json()["access_token"]
+        self.token = response.json()["token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_list_roles(self):
@@ -153,7 +153,7 @@ class TestIAMAccountTypes:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        self.token = response.json()["access_token"]
+        self.token = response.json()["token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_list_account_types(self):
@@ -261,7 +261,7 @@ class TestOrderReassign:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        self.token = response.json()["access_token"]
+        self.token = response.json()["token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
         self.user = response.json()["user"]
     
@@ -345,7 +345,7 @@ class TestMyTicketsEndpoint:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        self.token = response.json()["access_token"]
+        self.token = response.json()["token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_my_requests_endpoint(self):
