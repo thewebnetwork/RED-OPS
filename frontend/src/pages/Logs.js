@@ -87,7 +87,7 @@ export default function Logs() {
     
     // Note: EventSource doesn't support custom headers, so we use a workaround
     // For production, you'd want to use a library like eventsource or fetch with ReadableStream
-    const streamUrl = `${API}/settings/logs/stream/${activeTab}`;
+    const streamUrl = `${API}/logs/stream/${activeTab}`;
     
     try {
       eventSourceRef.current = new EventSource(streamUrl);
@@ -145,7 +145,7 @@ export default function Logs() {
   const fetchLogs = async (logType, silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const res = await axios.get(`${API}/settings/logs/${logType}`, {
+      const res = await axios.get(`${API}/logs/${logType}`, {
         params: { limit: 500 }
       });
       setLogs(res.data.logs || []);
