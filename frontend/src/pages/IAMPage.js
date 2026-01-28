@@ -272,11 +272,16 @@ export default function IAMPage() {
   const saveTeam = async () => {
     if (!teamForm.name) { toast.error('Team name required'); return; }
     try {
+      const data = {
+        name: teamForm.name,
+        description: teamForm.description || null,
+        related_specialty_ids: teamForm.related_specialty_ids || []
+      };
       if (editingTeam) {
-        await axios.patch(`${API}/teams/${editingTeam.id}`, teamForm);
+        await axios.patch(`${API}/teams/${editingTeam.id}`, data);
         toast.success('Team updated');
       } else {
-        await axios.post(`${API}/teams`, teamForm);
+        await axios.post(`${API}/teams`, data);
         toast.success('Team created');
       }
       setTeamDialogOpen(false);
