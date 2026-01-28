@@ -181,6 +181,40 @@ def enrich_orders(orders):
 
 # ============== EDITOR/REQUESTER DASHBOARDS ==============
 
+@router.get("/my-work")
+async def get_my_work_dashboard(current_user: dict = Depends(get_current_user)):
+    """
+    Unified dashboard for ALL roles showing:
+    - Tickets I'm working on (assigned to me, in progress)
+    - Tickets delivered (that I resolved)
+    - My submitted tickets count (tickets I created)
+    """
+    user_id = current_user["id"]
+    
+    # Tickets I'm working on (assigned to me, not delivered/closed)
+    working_on = await db.orders.find(
+        {"editor_id": user_id, "status": {"$in": ["In Progress", "Pending"]}},
+        {"_id": 0}
+    ).sort("updated_at", -1).to_list(100)
+    
+    # Tickets I've delivered
+    delivered = await db.orders.find(
+        {"editor_id": user_id, "status": "Delivered"},
+        {"_id": 0}
+    ).sort("delivered_at", -1).limit(20).to_list(20)
+    
+    # Count of tickets I submitted (my requests)
+    my_submitted_count = await db.orders.count_documents(
+        {"requester_id": user_id, "status": {"$ne": "Draft"}}
+    )
+    
+    return {
+        "working_on": enrich_orders(working_on),
+        "delivered": enrich_orders(delivered),
+        "my_submitted_count": my_submitted_count
+    }
+
+
 @router.get("/editor")
 async def get_editor_dashboard(current_user: dict = Depends(get_current_user)):
     """Dashboard for service providers who can pick orders"""
@@ -222,3 +256,4 @@ async def get_requester_dashboard(current_user: dict = Depends(require_roles(["R
         "needs_review": enrich_orders(needs_review),
         "delivered": enrich_orders(delivered)
     }
+
