@@ -153,8 +153,7 @@ export default function Logs() {
       if (!silent) {
         toast.error('Failed to fetch logs');
       }
-      // Set sample logs for demo if API not available
-      setLogs(generateSampleLogs(logType));
+      setLogs([]);
     } finally {
       setLoading(false);
     }
