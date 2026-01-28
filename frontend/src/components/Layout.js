@@ -80,7 +80,8 @@ export default function Layout({ children }) {
     { path: '/my-tickets', icon: Inbox, label: 'My Tickets', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/report-issue', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/ribbon-board', icon: Layers, label: 'Opportunity Ribbon', roles: ['Administrator', 'Operator', 'Standard User'] },
+    // Opportunity Ribbon - visible to all except Media Clients (Partners get Pool 1, Vendors get Pool 2)
+    { path: '/ribbon-board', icon: Layers, label: 'Opportunity Ribbon', roles: ['Administrator', 'Operator', 'Standard User'], excludeAccountTypes: ['Media Client'] },
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator'] },
     { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/iam', icon: KeyRound, label: 'Identity & Access', roles: ['Administrator'] },
@@ -91,9 +92,13 @@ export default function Layout({ children }) {
 
   // Quick Links removed as per user request
 
-  const filteredNavItems = navItems.filter(item => 
-    item.roles.includes(user?.role)
-  );
+  const filteredNavItems = navItems.filter(item => {
+    // Check role permission
+    if (!item.roles.includes(user?.role)) return false;
+    // Check account type exclusions
+    if (item.excludeAccountTypes && item.excludeAccountTypes.includes(user?.account_type)) return false;
+    return true;
+  });
 
   return (
     <div className="flex min-h-screen bg-slate-50">
