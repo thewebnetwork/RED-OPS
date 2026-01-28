@@ -337,6 +337,263 @@ async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, curr
     return AnnouncementTickerResponse(**ticker)
 
 
+# ============== ANNOUNCEMENTS (MULTIPLE) ROUTES ==============
+
+class AnnouncementCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    message: str = Field(..., min_length=1, max_length=2000)
+    is_active: bool = True
+    send_to_all: bool = True
+    target_teams: Optional[List[str]] = []
+    target_roles: Optional[List[str]] = []
+    target_specialties: Optional[List[str]] = []
+    start_at: Optional[str] = None
+    end_at: Optional[str] = None
+    priority: int = 1  # Higher priority = shown first
+    background_color: str = "#A2182C"
+    text_color: str = "#FFFFFF"
+
+
+class AnnouncementUpdate(BaseModel):
+    title: Optional[str] = None
+    message: Optional[str] = None
+    is_active: Optional[bool] = None
+    send_to_all: Optional[bool] = None
+    target_teams: Optional[List[str]] = None
+    target_roles: Optional[List[str]] = None
+    target_specialties: Optional[List[str]] = None
+    start_at: Optional[str] = None
+    end_at: Optional[str] = None
+    priority: Optional[int] = None
+    background_color: Optional[str] = None
+    text_color: Optional[str] = None
+
+
+class AnnouncementResponse(BaseModel):
+    id: str
+    title: str
+    message: str
+    is_active: bool
+    send_to_all: bool
+    target_teams: List[str] = []
+    target_roles: List[str] = []
+    target_specialties: List[str] = []
+    target_team_names: List[str] = []
+    target_role_names: List[str] = []
+    target_specialty_names: List[str] = []
+    start_at: Optional[str] = None
+    end_at: Optional[str] = None
+    priority: int = 1
+    background_color: str = "#A2182C"
+    text_color: str = "#FFFFFF"
+    created_at: str
+    created_by_name: Optional[str] = None
+    updated_at: str
+    updated_by_name: Optional[str] = None
+
+
+@router.get("/announcements", response_model=List[AnnouncementResponse])
+async def list_announcements(
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """List all announcements (Admin only)"""
+    announcements = await db.announcements.find({}, {"_id": 0}).sort("priority", -1).to_list(100)
+    
+    result = []
+    for ann in announcements:
+        # Resolve target names
+        target_team_names = []
+        for team_id in ann.get("target_teams", []):
+            team = await db.teams.find_one({"id": team_id}, {"_id": 0, "name": 1})
+            if team:
+                target_team_names.append(team["name"])
+        
+        target_role_names = []
+        for role_id in ann.get("target_roles", []):
+            role = await db.roles.find_one({"id": role_id}, {"_id": 0, "name": 1})
+            if role:
+                target_role_names.append(role["name"])
+        
+        target_specialty_names = []
+        for spec_id in ann.get("target_specialties", []):
+            spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+            if spec:
+                target_specialty_names.append(spec["name"])
+        
+        ann["target_team_names"] = target_team_names
+        ann["target_role_names"] = target_role_names
+        ann["target_specialty_names"] = target_specialty_names
+        result.append(AnnouncementResponse(**ann))
+    
+    return result
+
+
+@router.get("/announcements/active", response_model=Optional[AnnouncementResponse])
+async def get_active_announcement(current_user: dict = Depends(get_current_user)):
+    """Get the highest priority active announcement for the current user"""
+    now = datetime.now(timezone.utc)
+    
+    # Get all active announcements, sorted by priority (highest first)
+    announcements = await db.announcements.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).sort("priority", -1).to_list(100)
+    
+    for ann in announcements:
+        # Check schedule
+        if ann.get("start_at"):
+            try:
+                start_dt = datetime.fromisoformat(ann["start_at"].replace('Z', '+00:00'))
+                if now < start_dt:
+                    continue
+            except (ValueError, TypeError):
+                pass
+        
+        if ann.get("end_at"):
+            try:
+                end_dt = datetime.fromisoformat(ann["end_at"].replace('Z', '+00:00'))
+                if now > end_dt:
+                    continue
+            except (ValueError, TypeError):
+                pass
+        
+        # Check targeting
+        if not ann.get("send_to_all", True):
+            target_teams = ann.get("target_teams", [])
+            target_roles = ann.get("target_roles", [])
+            target_specialties = ann.get("target_specialties", [])
+            
+            user_team_id = current_user.get("team_id", "")
+            user_role = current_user.get("role", "")
+            user_specialty_id = current_user.get("specialty_id", "")
+            
+            # Get user's role ID
+            user_role_ids = []
+            role_doc = await db.roles.find_one({"name": user_role}, {"_id": 0, "id": 1})
+            if role_doc:
+                user_role_ids.append(role_doc.get("id", ""))
+            
+            team_match = user_team_id in target_teams if target_teams else False
+            role_match = bool(set(user_role_ids) & set(target_roles)) if target_roles else False
+            specialty_match = user_specialty_id in target_specialties if target_specialties else False
+            
+            if not team_match and not role_match and not specialty_match:
+                continue
+        
+        # This announcement matches - return it
+        return AnnouncementResponse(**ann)
+    
+    return None
+
+
+@router.post("/announcements", response_model=AnnouncementResponse)
+async def create_announcement(
+    data: AnnouncementCreate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Create a new announcement"""
+    if not data.send_to_all:
+        if not (data.target_teams or data.target_roles or data.target_specialties):
+            raise HTTPException(status_code=400, detail="Select at least one target or enable 'Send to all'")
+    
+    now = get_utc_now()
+    announcement = {
+        "id": str(uuid.uuid4()),
+        "title": data.title,
+        "message": data.message,
+        "is_active": data.is_active,
+        "send_to_all": data.send_to_all,
+        "target_teams": data.target_teams or [],
+        "target_roles": data.target_roles or [],
+        "target_specialties": data.target_specialties or [],
+        "start_at": data.start_at,
+        "end_at": data.end_at,
+        "priority": data.priority,
+        "background_color": data.background_color,
+        "text_color": data.text_color,
+        "created_at": now,
+        "created_by_id": current_user["id"],
+        "created_by_name": current_user["name"],
+        "updated_at": now,
+        "updated_by_id": current_user["id"],
+        "updated_by_name": current_user["name"]
+    }
+    
+    await db.announcements.insert_one(announcement)
+    announcement["target_team_names"] = []
+    announcement["target_role_names"] = []
+    announcement["target_specialty_names"] = []
+    
+    return AnnouncementResponse(**announcement)
+
+
+@router.get("/announcements/{announcement_id}", response_model=AnnouncementResponse)
+async def get_announcement(
+    announcement_id: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Get a specific announcement"""
+    ann = await db.announcements.find_one({"id": announcement_id}, {"_id": 0})
+    if not ann:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    ann["target_team_names"] = []
+    ann["target_role_names"] = []
+    ann["target_specialty_names"] = []
+    
+    return AnnouncementResponse(**ann)
+
+
+@router.patch("/announcements/{announcement_id}", response_model=AnnouncementResponse)
+async def update_announcement(
+    announcement_id: str,
+    data: AnnouncementUpdate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update an announcement"""
+    ann = await db.announcements.find_one({"id": announcement_id}, {"_id": 0})
+    if not ann:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    
+    # Validate targeting
+    send_to_all = update_data.get("send_to_all", ann.get("send_to_all", True))
+    if not send_to_all:
+        target_teams = update_data.get("target_teams", ann.get("target_teams", []))
+        target_roles = update_data.get("target_roles", ann.get("target_roles", []))
+        target_specialties = update_data.get("target_specialties", ann.get("target_specialties", []))
+        if not (target_teams or target_roles or target_specialties):
+            raise HTTPException(status_code=400, detail="Select at least one target or enable 'Send to all'")
+    
+    update_data["updated_at"] = get_utc_now()
+    update_data["updated_by_id"] = current_user["id"]
+    update_data["updated_by_name"] = current_user["name"]
+    
+    await db.announcements.update_one({"id": announcement_id}, {"$set": update_data})
+    
+    updated = await db.announcements.find_one({"id": announcement_id}, {"_id": 0})
+    updated["target_team_names"] = []
+    updated["target_role_names"] = []
+    updated["target_specialty_names"] = []
+    
+    return AnnouncementResponse(**updated)
+
+
+@router.delete("/announcements/{announcement_id}")
+async def delete_announcement(
+    announcement_id: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Delete an announcement"""
+    ann = await db.announcements.find_one({"id": announcement_id}, {"_id": 0})
+    if not ann:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    await db.announcements.delete_one({"id": announcement_id})
+    return {"message": "Announcement deleted"}
+
+
 # ============== SMTP CONFIG ROUTES ==============
 
 @router.get("/smtp-config", response_model=SMTPConfigResponse)
