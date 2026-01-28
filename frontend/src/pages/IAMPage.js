@@ -97,8 +97,18 @@ export default function IAMPage() {
   const [userForm, setUserForm] = useState({
     name: '', email: '', password: '', role: 'Standard User', 
     account_type: 'Internal Staff', specialty_id: '', team_id: '', subscription_plan_id: '',
-    force_password_change: false, force_otp_setup: false
+    force_password_change: true, force_otp_setup: true, send_welcome_email: true
   });
+
+  // Generate a random password
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  };
 
   // Teams state
   const [teams, setTeams] = useState([]);
