@@ -121,11 +121,10 @@ export default function Layout({ children }) {
               <img 
                 src="/assets/logos/logo-icon.jpg" 
                 alt="Red Ops" 
-                className="w-10 h-10 rounded-lg object-cover"
+                className="w-10 h-10 rounded-lg object-cover relative z-10"
               />
-              {/* Pulse animation ring */}
-              <span className="absolute inset-0 rounded-lg animate-ping bg-white/30" style={{ animationDuration: '2s' }} />
-              <span className="absolute inset-0 rounded-lg animate-pulse bg-white/10" style={{ animationDuration: '1.5s' }} />
+              {/* Subtle glow effect instead of constant pulse */}
+              <span className="absolute inset-0 rounded-lg bg-white/20 blur-sm" />
             </div>
             <span className="font-bold text-lg tracking-tight">RED OPS</span>
           </div>
