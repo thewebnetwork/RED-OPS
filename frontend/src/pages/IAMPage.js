@@ -410,24 +410,26 @@ export default function IAMPage() {
           <KeyRound className="text-[#A2182C]" />
           Identity & Access Management
         </h1>
-        <p className="text-slate-500 mt-1">Manage users, teams, specialties, roles, and subscription plans</p>
+        <p className="text-slate-500 mt-1">Manage users, teams, specialties, roles, account types, and subscription plans</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">Users</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">Teams</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">Specialties</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">Roles</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">Roles</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm text-slate-500">Account Types</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{plans.length}</p><p className="text-sm text-slate-500">Plans</p></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users"><Users size={16} className="mr-1" />Users</TabsTrigger>
           <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />Teams</TabsTrigger>
           <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />Specialties</TabsTrigger>
           <TabsTrigger value="roles"><Shield size={16} className="mr-1" />Roles</TabsTrigger>
+          <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />Account Types</TabsTrigger>
           <TabsTrigger value="plans"><CreditCard size={16} className="mr-1" />Plans</TabsTrigger>
         </TabsList>
 
