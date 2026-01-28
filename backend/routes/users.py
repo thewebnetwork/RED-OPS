@@ -186,6 +186,8 @@ async def get_permission_modules(current_user: dict = Depends(require_roles(["Ad
 @router.post("", response_model=UserResponse)
 async def create_user(user_data: UserCreate, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Create a new user (Admin only)"""
+    from services.email import send_account_created_email
+    
     existing = await db.users.find_one({"email": user_data.email.lower()})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -221,6 +223,9 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
             raise HTTPException(status_code=400, detail="Invalid subscription plan")
         subscription_plan_name = plan["name"]
     
+    # Store the plain password for email before hashing
+    plain_password = user_data.password
+    
     user = {
         "id": str(uuid.uuid4()),
         "name": user_data.name,
@@ -246,6 +251,21 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
     }
     
     await db.users.insert_one(user)
+    
+    # Send welcome email with credentials
+    if user_data.send_welcome_email:
+        try:
+            await send_account_created_email(
+                to_email=user_data.email.lower(),
+                user_name=user_data.name,
+                temp_password=plain_password,
+                role=user_data.role
+            )
+        except Exception as e:
+            # Log but don't fail the user creation
+            import logging
+            logging.error(f"Failed to send welcome email: {e}")
+    
     return await build_user_response(user)
 
 
