@@ -103,7 +103,7 @@ class TestRolesEndpoint:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_roles_endpoint_returns_all_roles(self, admin_headers):
@@ -139,7 +139,7 @@ class TestFileUpload:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     @pytest.fixture(scope="class")
@@ -201,7 +201,7 @@ class TestBugReportCreatesOrder:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_bug_report_creates_order(self, admin_headers):
@@ -248,7 +248,7 @@ class TestPoolFiltering:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_pool_endpoint_exists(self, admin_headers):
@@ -280,7 +280,7 @@ class TestDashboardStats:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_dashboard_stats_endpoint(self, admin_headers):
@@ -312,7 +312,7 @@ class TestWorkflowsEndpoint:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_workflows_endpoint_exists(self, admin_headers):
@@ -339,7 +339,7 @@ class TestMyRequestsEndpoint:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_my_requests_endpoint(self, admin_headers):
