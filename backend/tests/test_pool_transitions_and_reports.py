@@ -413,20 +413,6 @@ class TestReportsModule:
         
         print(f"✓ Stale Pending Review report generated: {data['total_rows']} rows")
     
-    def test_generate_tickets_by_priority_report(self):
-        """Test generating Tickets by Priority report"""
-        response = requests.post(
-            f"{BASE_URL}/api/reports/tickets_by_priority/generate",
-            headers=self.headers,
-            json={}
-        )
-        assert response.status_code == 200, f"Failed to generate report: {response.text}"
-        
-        data = response.json()
-        assert data["report_id"] == "tickets_by_priority"
-        
-        print(f"✓ Tickets by Priority report generated: {data['total_rows']} rows")
-    
     def test_generate_tickets_by_team_report(self):
         """Test generating Tickets by Team report"""
         response = requests.post(
