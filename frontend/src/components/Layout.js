@@ -33,7 +33,8 @@ import {
   CreditCard,
   Inbox,
   Layers,
-  KeyRound
+  KeyRound,
+  Trash2
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
