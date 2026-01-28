@@ -23,7 +23,7 @@ class TestIAMPermissionMatrix:
             "password": "Fmtvvl171**"
         })
         assert login_response.status_code == 200, f"Login failed: {login_response.text}"
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")  # Fixed: use "token" not "access_token"
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         print(f"✓ Admin login successful")
     
@@ -57,6 +57,7 @@ class TestIAMPermissionMatrix:
         """Test GET /api/iam/roles/{id} - Get role with permissions"""
         # First get list of roles
         list_response = self.session.get(f"{BASE_URL}/api/iam/roles")
+        assert list_response.status_code == 200, f"Failed to list roles: {list_response.text}"
         roles = list_response.json()
         
         # Get Administrator role
@@ -81,6 +82,7 @@ class TestIAMPermissionMatrix:
         """Test PATCH /api/iam/roles/{id} - Update role permissions"""
         # Get Operator role (non-system role that can be modified)
         list_response = self.session.get(f"{BASE_URL}/api/iam/roles")
+        assert list_response.status_code == 200, f"Failed to list roles: {list_response.text}"
         roles = list_response.json()
         
         operator_role = next((r for r in roles if r['name'] == 'Operator'), None)
@@ -129,6 +131,7 @@ class TestIAMPermissionMatrix:
     def test_role_permissions_structure(self):
         """Test that permissions follow expected module/action structure"""
         list_response = self.session.get(f"{BASE_URL}/api/iam/roles")
+        assert list_response.status_code == 200, f"Failed to list roles: {list_response.text}"
         roles = list_response.json()
         
         # Expected modules and actions based on PERMISSION_MODULES in IAMPage.js
@@ -154,6 +157,7 @@ class TestIAMPermissionMatrix:
     def test_system_role_name_protection(self):
         """Test that system roles cannot have their name changed"""
         list_response = self.session.get(f"{BASE_URL}/api/iam/roles")
+        assert list_response.status_code == 200, f"Failed to list roles: {list_response.text}"
         roles = list_response.json()
         
         # Find a system role
