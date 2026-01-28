@@ -822,9 +822,22 @@ async def deliver_order(
         "delivered_by": current_user["name"]
     })
     
-    # Create satisfaction survey
+    # Get requester for email and survey
     requester = await db.users.find_one({"id": order["requester_id"]}, {"_id": 0})
     if requester:
+        # Send ticket resolved email
+        background_tasks.add_task(
+            send_ticket_resolved_email,
+            requester["email"],
+            requester["name"],
+            current_user["name"],
+            order["order_code"],
+            order.get("title", ""),
+            deliver_data.resolution_notes,
+            order_id
+        )
+        
+        # Create satisfaction survey
         survey_token = str(uuid.uuid4())
         survey = {
             "id": str(uuid.uuid4()),
