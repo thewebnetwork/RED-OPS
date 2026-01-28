@@ -89,6 +89,11 @@ class OrderResponse(BaseModel):
     canceled_at: Optional[str] = None
     # Resolution/Delivery fields
     resolution_notes: Optional[str] = None
+    # Soft delete fields
+    deleted: Optional[bool] = None
+    deleted_at: Optional[str] = None
+    deleted_by_name: Optional[str] = None
+    deletion_reason: Optional[str] = None
 
 
 class CloseOrderRequest(BaseModel):
