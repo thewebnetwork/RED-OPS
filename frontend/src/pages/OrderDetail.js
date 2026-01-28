@@ -418,6 +418,8 @@ export default function OrderDetail() {
   const canReassign = (isAdmin || isOperator || isResolver) && !['Closed', 'Canceled', 'Delivered'].includes(order.status);
   // Admin can force Open/unassigned tickets to Pool 2
   const canForceToPool2 = isAdmin && order.status === 'Open' && !order.editor_id;
+  // Admin can soft-delete any ticket that isn't already deleted
+  const canSoftDelete = isAdmin && !order.deleted;
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
