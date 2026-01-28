@@ -27,8 +27,8 @@ export default function AnnouncementTicker() {
     };
     
     fetchActiveAnnouncements();
-    // Refresh announcements every 60 seconds for better responsiveness
-    const interval = setInterval(fetchActiveAnnouncements, 60 * 1000);
+    // Refresh announcements every 10 seconds for instant updates when deleted
+    const interval = setInterval(fetchActiveAnnouncements, 10 * 1000);
     
     return () => {
       isMounted = false;
