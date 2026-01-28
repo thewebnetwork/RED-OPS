@@ -1,12 +1,13 @@
 """Feedback routes - Feature Requests and Bug Reports"""
 import uuid
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from typing import Optional, List, Literal
 
 from database import db
 from utils.auth import get_current_user, require_roles
-from utils.helpers import get_utc_now, get_next_code, create_notification
+from utils.helpers import get_utc_now, get_next_code, create_notification, calculate_sla_deadline
 
 router = APIRouter(tags=["Feedback"])
 
