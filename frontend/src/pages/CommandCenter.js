@@ -1094,6 +1094,23 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
     additional_notes: ''
   });
 
+  const uploadFiles = async (orderId, files) => {
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', file.name);
+      formData.append('file_type', file.type || 'application/octet-stream');
+      
+      try {
+        await axios.post(`${API}/orders/${orderId}/files`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } catch (err) {
+        console.error('Failed to upload file:', file.name, err);
+      }
+    }
+  };
+
   const handleSubmit = async (e, isDraft = false) => {
     e?.preventDefault();
     
@@ -1120,7 +1137,7 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
     }
     
     try {
-      await axios.post(`${API}/orders`, {
+      const response = await axios.post(`${API}/orders`, {
         title,
         description: description || '',
         category_l1_id: categoryL1Id,
@@ -1131,6 +1148,11 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
         priority: formData.priority,
         additional_notes: formData.additional_notes
       });
+      
+      // Upload attachments if any
+      if (attachments && attachments.length > 0 && response.data?.id) {
+        await uploadFiles(response.data.id, attachments);
+      }
       
       if (isDraft) {
         onDraftSaved?.();
