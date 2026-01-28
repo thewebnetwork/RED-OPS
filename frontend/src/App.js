@@ -342,6 +342,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/deleted-tickets" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <DeletedTickets />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/sla" 
         element={<Navigate to="/sla-policies" />}
       />
