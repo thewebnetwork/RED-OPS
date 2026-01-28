@@ -77,7 +77,7 @@ export default function Layout({ children }) {
   const navItems = [
     { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/my-services', icon: PackageOpen, label: 'My Services', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/my-tickets', icon: Inbox, label: 'My Tickets', roles: ['Administrator', 'Operator', 'Standard User'] },
+    { path: '/my-tickets', icon: Inbox, label: 'My Submitted Tickets', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/report-issue', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
     // Opportunity Ribbon - visible to all except Media Clients (Partners get Pool 1, Vendors get Pool 2)
