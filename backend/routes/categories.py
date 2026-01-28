@@ -186,12 +186,19 @@ async def list_categories_l2(category_l1_id: Optional[str] = None, current_user:
 
 @router.patch("/l2/{category_id}")
 async def update_category_l2_direct(category_id: str, cat_data: CategoryL2Update, current_user: dict = Depends(require_roles(["Admin"]))):
-    """Update a L2 category (Admin only)"""
+    """Update a L2 category (Admin only) - includes moving to different parent"""
     subcategory = await db.categories_l2.find_one({"id": category_id}, {"_id": 0})
     if not subcategory:
         raise HTTPException(status_code=404, detail="Subcategory not found")
     
     update_dict = {k: v for k, v in cat_data.model_dump().items() if v is not None}
+    
+    # If changing parent category, validate new parent and update category_l1_name
+    if "category_l1_id" in update_dict:
+        new_parent = await db.categories_l1.find_one({"id": update_dict["category_l1_id"], "active": True}, {"_id": 0})
+        if not new_parent:
+            raise HTTPException(status_code=404, detail="New parent category not found")
+        update_dict["category_l1_name"] = new_parent["name"]
     
     if update_dict:
         await db.categories_l2.update_one({"id": category_id}, {"$set": update_dict})
