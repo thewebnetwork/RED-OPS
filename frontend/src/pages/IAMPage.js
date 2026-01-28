@@ -189,11 +189,19 @@ export default function IAMPage() {
         specialty_id: user.specialty_id || '', team_id: user.team_id || '',
         subscription_plan_id: user.subscription_plan_id || '',
         force_password_change: user.force_password_change || false,
-        force_otp_setup: user.force_otp_setup || false
+        force_otp_setup: user.force_otp_setup || false,
+        send_welcome_email: false
       });
     } else {
       setEditingUser(null);
-      setUserForm({ name: '', email: '', password: '', role: 'Standard User', account_type: 'Internal Staff', specialty_id: '', team_id: '', subscription_plan_id: '', force_password_change: false, force_otp_setup: false });
+      // Generate temp password for new users
+      const tempPassword = generatePassword();
+      setUserForm({ 
+        name: '', email: '', password: tempPassword, role: 'Standard User', 
+        account_type: 'Internal Staff', specialty_id: '', team_id: '', 
+        subscription_plan_id: '', force_password_change: true, force_otp_setup: true,
+        send_welcome_email: true
+      });
     }
     setUserDialogOpen(true);
   };
