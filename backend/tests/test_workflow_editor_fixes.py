@@ -262,8 +262,12 @@ class TestAssignSpecialtyActionEngine:
         response = self.session.get(f"{BASE_URL}/api/workflow-templates")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✅ GET /api/workflow-templates returned {len(data)} templates")
+        # Endpoint returns dict with 'templates' key
+        assert isinstance(data, dict)
+        assert "templates" in data
+        templates = data.get("templates", [])
+        assert isinstance(templates, list)
+        print(f"✅ GET /api/workflow-templates returned {len(templates)} templates")
 
 
 if __name__ == "__main__":
