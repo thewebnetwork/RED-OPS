@@ -1024,3 +1024,293 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
     </Dialog>
   );
 }
+
+// SLA Policy Templates Component
+function PolicyTemplates({ roles, teams, specialties, accessTiers, onApplyTemplate }) {
+  // Pre-built SLA policy templates
+  const templates = [
+    {
+      id: 'standard-sla',
+      name: 'Standard SLA (24 Hours)',
+      description: 'Standard response/resolution SLA with 24-hour deadline. Includes 4-hour at-risk warning and escalation on breach.',
+      category: 'Basic',
+      icon: '⏱️',
+      config: {
+        name: 'Standard SLA - 24 Hours',
+        description: 'Standard service level agreement with 24-hour resolution target',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 1440, business_hours_only: false },
+        thresholds: { at_risk_minutes: 240 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: 'At Risk Alert',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [{ type: 'notify_role', notification_message: 'Ticket approaching SLA deadline' }]
+          },
+          {
+            level: 2,
+            name: 'SLA Breach Alert',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [{ type: 'change_priority', new_priority: 'High' }]
+          }
+        ],
+        is_active: true
+      }
+    },
+    {
+      id: 'urgent-sla',
+      name: 'Urgent SLA (4 Hours)',
+      description: 'High-priority SLA with 4-hour response time. Immediate escalation chain on breach.',
+      category: 'Priority',
+      icon: '🚨',
+      config: {
+        name: 'Urgent SLA - 4 Hours',
+        description: 'Urgent service level agreement for critical issues requiring rapid resolution',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 240, business_hours_only: false },
+        thresholds: { at_risk_minutes: 60 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: 'At Risk - 1 Hour Warning',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [{ type: 'notify_role', notification_message: 'Urgent ticket: 1 hour until SLA breach' }]
+          },
+          {
+            level: 2,
+            name: 'Immediate Breach Response',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [
+              { type: 'change_priority', new_priority: 'Critical' },
+              { type: 'notify_role', notification_message: 'URGENT: SLA breached - immediate attention required' }
+            ]
+          },
+          {
+            level: 3,
+            name: 'Executive Escalation',
+            trigger: 'breach_plus_minutes',
+            delay_minutes: 30,
+            actions: [{ type: 'notify_role', notification_message: 'Executive escalation: SLA breach > 30 minutes' }]
+          }
+        ],
+        is_active: true
+      }
+    },
+    {
+      id: 'business-hours-sla',
+      name: 'Business Hours SLA (8 Hours)',
+      description: 'SLA counted only during business hours. 8-hour resolution target with business day tracking.',
+      category: 'Business',
+      icon: '🏢',
+      config: {
+        name: 'Business Hours SLA - 8 Hours',
+        description: 'Service level agreement measured during business hours only (9AM-5PM)',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 480, business_hours_only: true, timezone: 'America/New_York' },
+        thresholds: { at_risk_minutes: 120 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: '2 Hour Warning',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [{ type: 'notify_role', notification_message: 'Ticket at risk - 2 business hours remaining' }]
+          },
+          {
+            level: 2,
+            name: 'Business SLA Breach',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [{ type: 'change_priority', new_priority: 'High' }]
+          }
+        ],
+        is_active: true
+      }
+    },
+    {
+      id: 'premium-sla',
+      name: 'Premium Partner SLA (2 Hours)',
+      description: 'Premium SLA for top-tier partners. 2-hour response with aggressive escalation ladder.',
+      category: 'Premium',
+      icon: '⭐',
+      config: {
+        name: 'Premium Partner SLA - 2 Hours',
+        description: 'Premium service level agreement for high-value partners with priority handling',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 120, business_hours_only: false },
+        thresholds: { at_risk_minutes: 30 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: 'Premium At Risk',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [
+              { type: 'notify_role', notification_message: 'PREMIUM: 30 minutes until SLA breach' },
+              { type: 'change_priority', new_priority: 'High' }
+            ]
+          },
+          {
+            level: 2,
+            name: 'Premium Breach - Immediate',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [
+              { type: 'change_priority', new_priority: 'Critical' },
+              { type: 'notify_role', notification_message: 'PREMIUM SLA BREACH - Immediate executive attention required' }
+            ]
+          },
+          {
+            level: 3,
+            name: 'Executive Override',
+            trigger: 'breach_plus_minutes',
+            delay_minutes: 15,
+            actions: [{ type: 'notify_role', notification_message: 'PREMIUM: Executive override - SLA breach > 15 minutes' }]
+          },
+          {
+            level: 4,
+            name: 'Critical Escalation',
+            trigger: 'breach_plus_minutes',
+            delay_minutes: 30,
+            actions: [{ type: 'notify_role', notification_message: 'CRITICAL: Premium partner SLA breach exceeds 30 minutes' }]
+          }
+        ],
+        is_active: true
+      }
+    },
+    {
+      id: 'extended-sla',
+      name: 'Extended SLA (72 Hours)',
+      description: 'Extended timeline SLA for complex requests. 3-day resolution window with staged alerts.',
+      category: 'Extended',
+      icon: '📅',
+      config: {
+        name: 'Extended SLA - 72 Hours',
+        description: 'Extended service level agreement for complex issues requiring thorough investigation',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 4320, business_hours_only: false },
+        thresholds: { at_risk_minutes: 1440 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: '24 Hour Warning',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [{ type: 'notify_role', notification_message: 'Extended ticket: 24 hours remaining until deadline' }]
+          },
+          {
+            level: 2,
+            name: 'Extended SLA Breach',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [{ type: 'change_priority', new_priority: 'High' }]
+          },
+          {
+            level: 3,
+            name: 'Continued Breach Alert',
+            trigger: 'breach_plus_minutes',
+            delay_minutes: 1440,
+            actions: [{ type: 'notify_role', notification_message: 'Extended SLA: Breach exceeds 24 hours' }]
+          }
+        ],
+        is_active: true
+      }
+    },
+    {
+      id: 'first-response-sla',
+      name: 'First Response SLA (1 Hour)',
+      description: 'Focused on initial acknowledgment. 1-hour first response guarantee for all tickets.',
+      category: 'Response',
+      icon: '💬',
+      config: {
+        name: 'First Response SLA - 1 Hour',
+        description: 'Service level agreement focused on initial acknowledgment and first response time',
+        scope: { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] },
+        sla_rules: { duration_minutes: 60, business_hours_only: false },
+        thresholds: { at_risk_minutes: 15 },
+        escalation_levels: [
+          {
+            level: 1,
+            name: '15 Minute Warning',
+            trigger: 'at_risk',
+            delay_minutes: 0,
+            actions: [{ type: 'notify_role', notification_message: 'First response needed: 15 minutes remaining' }]
+          },
+          {
+            level: 2,
+            name: 'First Response Breach',
+            trigger: 'breach',
+            delay_minutes: 0,
+            actions: [
+              { type: 'change_priority', new_priority: 'High' },
+              { type: 'notify_role', notification_message: 'First response SLA breached - immediate acknowledgment required' }
+            ]
+          }
+        ],
+        is_active: true
+      }
+    }
+  ];
+
+  const categories = [...new Set(templates.map(t => t.category))];
+
+  return (
+    <div className="space-y-6" data-testid="sla-templates-section">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileCode className="w-5 h-5" />
+            SLA Policy Templates
+          </CardTitle>
+          <CardDescription>
+            Pre-configured SLA policies for common scenarios. Click "Use Template" to create a policy based on these settings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {categories.map(category => (
+            <div key={category} className="mb-6 last:mb-0">
+              <h3 className="text-sm font-semibold text-slate-600 mb-3 uppercase tracking-wide">{category}</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {templates.filter(t => t.category === category).map(template => (
+                  <Card key={template.id} className="hover:border-rose-300 transition-colors">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{template.icon}</span>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-slate-900">{template.name}</h4>
+                          <p className="text-sm text-slate-500 mt-1 line-clamp-2">{template.description}</p>
+                          <div className="flex items-center gap-2 mt-3">
+                            <Badge variant="outline" className="text-xs">
+                              {template.config.sla_rules.duration_minutes / 60}h SLA
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {template.config.escalation_levels.length} Escalations
+                            </Badge>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="mt-3 w-full bg-rose-600 hover:bg-rose-700"
+                            onClick={() => onApplyTemplate(template.config)}
+                            data-testid={`use-template-${template.id}`}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Use Template
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
