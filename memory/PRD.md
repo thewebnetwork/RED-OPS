@@ -1,11 +1,11 @@
-# Red Pulse Platform - Product Requirements Document
+# Red Ops Platform - Product Requirements Document
 
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
 ## Current Version: 2.3 (All P0 Blockers Fixed - Jan 28, 2026)
 **Last Updated:** January 28, 2026
-**Platform Name:** Red Pulse
+**Platform Name:** Red Ops
 
 ---
 

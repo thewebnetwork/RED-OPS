@@ -61,14 +61,14 @@ export default function Login() {
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#A2182C] shadow-lg mb-4 relative">
               <img 
                 src="/assets/logos/logo-realty.jpg" 
-                alt="Red Pulse" 
+                alt="Red Ops" 
                 className="w-full h-full object-cover object-center scale-150"
               />
               {/* Pulse animation */}
               <span className="absolute inset-0 rounded-full animate-ping bg-[#A2182C]/20" style={{ animationDuration: '2s' }} />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-[#A2182C]">Red Pulse</h1>
+              <h1 className="text-2xl font-bold text-[#A2182C]">Red Ops</h1>
               <p className="text-sm text-slate-500 mt-1">{t('auth.loginSubtitle')}</p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function Login() {
         
         {/* Powered by text */}
         <p className="text-center text-xs text-white/60 mt-4">
-          Red Pulse Platform
+          Red Ops Platform
         </p>
       </div>
     </div>
