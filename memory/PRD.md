@@ -3,14 +3,77 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.2 (Searchable Dropdowns & User Email Alerts - Jan 28, 2026)
+## Current Version: 3.3 (Admin Soft-Delete & SLA Templates - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://fulfillio.preview.emergentagent.com
 
 ---
 
-## P0 - IAM Searchable Dropdowns & Email Alerts (Latest)
+## P0 - Admin Ticket Soft-Delete (Latest) ✅
+
+### A) Soft-Delete Functionality ✅
+- **Delete Button:** Visible on Order Detail page for Administrators only
+- **Mandatory Reason:** Admin must provide reason for deletion (audit trail)
+- **Soft-Delete Fields:** `deleted`, `deleted_at`, `deleted_by_id`, `deleted_by_name`, `deletion_reason`
+- **API Endpoints:**
+  - `DELETE /api/orders/{id}` - Soft-delete with reason
+  - `POST /api/orders/{id}/restore` - Restore deleted ticket
+  - `GET /api/orders/deleted/list` - List all deleted tickets
+
+### B) Deleted Tickets Management Page ✅
+- **Route:** `/deleted-tickets` (Admin only)
+- **Features:**
+  - Search by ticket code, title, requester, or deletion reason
+  - Table showing: Ticket info, Status before delete, Deleted by, Deleted at, Reason
+  - View button to see full ticket details
+  - Restore button with confirmation dialog
+- **Navigation:** Added to sidebar for Administrators
+
+### C) Access Control ✅
+- Non-admin users cannot see Delete button
+- Non-admin users cannot access /deleted-tickets route
+- Delete button hidden for already-deleted tickets
+
+---
+
+## P1 - SLA Policy Templates ✅
+
+### A) Templates Tab ✅
+- **Location:** SLA & Escalation Policies page → "Templates" tab
+- **Purpose:** Pre-configured SLA policy templates for quick policy creation
+
+### B) Available Templates ✅
+| Template | Duration | Escalations | Description |
+|----------|----------|-------------|-------------|
+| Standard SLA | 24h | 2 | Standard response/resolution with 4h at-risk warning |
+| Urgent SLA | 4h | 3 | High-priority with immediate escalation chain |
+| Business Hours SLA | 8h | 2 | Business hours only (9AM-5PM) |
+| Premium Partner SLA | 2h | 4 | Top-tier partners with aggressive escalation |
+| Extended SLA | 72h | 3 | Complex requests with 3-day window |
+| First Response SLA | 1h | 2 | Focused on initial acknowledgment |
+
+### C) Use Template Flow ✅
+1. Click "Use Template" button
+2. Policy dialog opens with pre-filled values
+3. Customize scope, escalation actions
+4. Save as new policy
+
+---
+
+## P1 - Logo Animation Fix ✅
+
+### Issue
+Logo in sidebar had constant pulse animation that was distracting.
+
+### Fix ✅
+- **Before:** `animate-ping` + `animate-pulse` CSS animations
+- **After:** Subtle glow effect with `bg-white/20 blur-sm`
+- **Result:** Professional, non-distracting logo appearance
+
+---
+
+## P0 - IAM Searchable Dropdowns & Email Alerts ✅
 
 ### A) Searchable Dropdowns ✅
 - **All IAM dropdowns** now use `SearchableSelect` component with type-to-filter functionality
