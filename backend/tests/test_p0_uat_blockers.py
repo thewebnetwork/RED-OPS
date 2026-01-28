@@ -36,8 +36,8 @@ class TestAuthentication:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200, f"Admin login failed: {response.text}"
-        token = response.json().get("access_token")
-        assert token, "No access token returned"
+        token = response.json().get("token")  # API returns 'token' not 'access_token'
+        assert token, "No token returned"
         return token
     
     @pytest.fixture(scope="class")
@@ -53,7 +53,7 @@ class TestAuthentication:
         })
         assert response.status_code == 200
         data = response.json()
-        assert "access_token" in data
+        assert "token" in data, f"Expected 'token' in response, got: {list(data.keys())}"
         assert "user" in data
         print(f"✓ Admin login successful, role: {data['user'].get('role')}")
 
