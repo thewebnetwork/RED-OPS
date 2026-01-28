@@ -1,7 +1,9 @@
 """Order management routes including messages and files"""
 import uuid
+import os
+import base64
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 
@@ -25,6 +27,10 @@ from services.email import (
 from config import FRONTEND_URL, CANCELLATION_REASONS
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
+
+# File upload directory
+UPLOAD_DIR = "/app/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # ============== MODELS ==============
