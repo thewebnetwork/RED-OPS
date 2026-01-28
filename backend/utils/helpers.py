@@ -58,6 +58,11 @@ def normalize_order(order: dict) -> dict:
         'canceled_at': order.get('canceled_at'),
         # Resolution fields
         'resolution_notes': order.get('resolution_notes'),
+        # Soft delete fields
+        'deleted': order.get('deleted'),
+        'deleted_at': order.get('deleted_at'),
+        'deleted_by_name': order.get('deleted_by_name'),
+        'deletion_reason': order.get('deletion_reason'),
     }
     return {**order, **defaults}
 
