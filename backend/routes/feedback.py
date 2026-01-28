@@ -281,9 +281,11 @@ async def update_feature_request_status(
 
 @router.post("/bug-reports", response_model=BugReportResponse)
 async def create_bug_report(report_data: BugReportCreate, current_user: dict = Depends(get_current_user)):
-    """Create a new bug report (or save as draft)"""
+    """Create a new bug report (or save as draft) - Also creates an order ticket"""
     report_code = await get_next_code(db, "bug_report_code", "BUG")
+    order_code = await get_next_code(db, "order_code", "RRG")
     now = get_utc_now()
+    now_dt = datetime.now(timezone.utc)
     
     is_draft = getattr(report_data, 'is_draft', False)
     initial_status = "Draft" if is_draft else "Open"
@@ -297,8 +299,10 @@ async def create_bug_report(report_data: BugReportCreate, current_user: dict = D
         l2 = await db.categories_l2.find_one({"id": report_data.category_l2_id}, {"_id": 0})
         cat_l2_name = l2["name"] if l2 else None
     
+    bug_id = str(uuid.uuid4())
+    
     bug_report = {
-        "id": str(uuid.uuid4()),
+        "id": bug_id,
         "report_code": report_code,
         "request_type": "Bug",
         "requester_id": current_user["id"],
@@ -322,9 +326,36 @@ async def create_bug_report(report_data: BugReportCreate, current_user: dict = D
     }
     await db.bug_reports.insert_one(bug_report)
     
+    # Also create an order record so it appears in All Orders and My Submitted Tickets
+    sla_deadline = calculate_sla_deadline(now_dt) if not is_draft else None
+    order = {
+        "id": bug_id,  # Use same ID for easy linking
+        "order_code": order_code,
+        "request_type": "Issue",
+        "requester_id": current_user["id"],
+        "requester_name": current_user["name"],
+        "requester_email": current_user.get("email", ""),
+        "title": report_data.title,
+        "description": f"Bug Type: {report_data.bug_type}\n\nSteps to Reproduce:\n{report_data.steps_to_reproduce or 'N/A'}\n\nExpected: {report_data.expected_behavior or 'N/A'}\n\nActual: {report_data.actual_behavior or 'N/A'}",
+        "category_l1_id": report_data.category_l1_id,
+        "category_l1_name": cat_l1_name,
+        "category_l2_id": report_data.category_l2_id,
+        "category_l2_name": cat_l2_name,
+        "priority": report_data.severity or "Normal",
+        "status": initial_status,
+        "editor_id": None,
+        "editor_name": None,
+        "sla_deadline": sla_deadline.isoformat() if sla_deadline else None,
+        "pool_entered_at": now if not is_draft else None,
+        "linked_bug_report_id": bug_id,
+        "created_at": now,
+        "updated_at": now
+    }
+    await db.orders.insert_one(order)
+    
     # Only notify admins for non-draft reports
     if not is_draft:
-        admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+        admins = await db.users.find({"role": "Administrator", "active": True}, {"_id": 0}).to_list(100)
         for admin in admins:
             await create_notification(
                 db,
