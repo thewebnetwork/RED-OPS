@@ -157,7 +157,7 @@ async def get_cancellation_reasons():
 # ============== HELPER FUNCTIONS ==============
 
 async def notify_status_change(order: dict, old_status: str, new_status: str, changed_by: dict):
-    """Send notifications when order status changes"""
+    """Send notifications (in-app and email) when order status changes"""
     # Notify requester
     if order.get("requester_id") and order["requester_id"] != changed_by["id"]:
         await create_notification(
@@ -168,6 +168,36 @@ async def notify_status_change(order: dict, old_status: str, new_status: str, ch
             f"Your order {order['order_code']} status changed from {old_status} to {new_status}",
             order["id"]
         )
+        
+        # Send email to requester for status changes
+        requester_email = order.get("requester_email")
+        requester_name = order.get("requester_name", "User")
+        if requester_email and new_status in ["In Progress", "Pending", "Delivered", "Closed"]:
+            try:
+                if new_status == "Pending":
+                    # Special email for Pending status (review required)
+                    await send_ticket_pending_review_email(
+                        requester_email=requester_email,
+                        requester_name=requester_name,
+                        resolver_name=order.get("editor_name", changed_by.get("name", "Team Member")),
+                        order_code=order["order_code"],
+                        title=order.get("title", ""),
+                        order_id=order["id"]
+                    )
+                else:
+                    # General status change email
+                    await send_ticket_status_changed_email(
+                        to_email=requester_email,
+                        to_name=requester_name,
+                        order_code=order["order_code"],
+                        title=order.get("title", ""),
+                        old_status=old_status,
+                        new_status=new_status,
+                        changed_by=changed_by.get("name", "System"),
+                        order_id=order["id"]
+                    )
+            except Exception as e:
+                logging.error(f"Failed to send status change email to {requester_email}: {e}")
     
     # Notify editor if assigned and not the one who made the change
     if order.get("editor_id") and order["editor_id"] != changed_by["id"]:
@@ -179,6 +209,23 @@ async def notify_status_change(order: dict, old_status: str, new_status: str, ch
             f"Order {order['order_code']} status changed from {old_status} to {new_status}",
             order["id"]
         )
+        
+        # Also send email to editor for relevant status changes
+        editor = await db.users.find_one({"id": order["editor_id"]}, {"_id": 0, "email": 1, "name": 1})
+        if editor and editor.get("email") and new_status in ["Canceled", "Closed"]:
+            try:
+                await send_ticket_status_changed_email(
+                    to_email=editor["email"],
+                    to_name=editor.get("name", "Team Member"),
+                    order_code=order["order_code"],
+                    title=order.get("title", ""),
+                    old_status=old_status,
+                    new_status=new_status,
+                    changed_by=changed_by.get("name", "System"),
+                    order_id=order["id"]
+                )
+            except Exception as e:
+                logging.error(f"Failed to send status change email to editor: {e}")
 
 
 # ============== ORDER CRUD ROUTES ==============
