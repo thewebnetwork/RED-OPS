@@ -1418,27 +1418,27 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
                     </SelectContent>
                   </Select>
                   <Select
-                    value={action.config?.pool_preference || ''}
-                    onValueChange={(val) => updateAction(action.id, { pool_preference: val })}
+                    value={action.config?.pool_preference || 'any'}
+                    onValueChange={(val) => updateAction(action.id, { pool_preference: val === 'any' ? '' : val })}
                   >
                     <SelectTrigger className="h-8 text-sm">
                       <SelectValue placeholder="Pool preference (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any pool</SelectItem>
+                      <SelectItem value="any">Any pool</SelectItem>
                       <SelectItem value="pool_1">Pool 1 (Partners first)</SelectItem>
                       <SelectItem value="pool_2">Pool 2 (Vendors/Freelancers)</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select
-                    value={action.config?.fallback || ''}
-                    onValueChange={(val) => updateAction(action.id, { fallback: val })}
+                    value={action.config?.fallback || 'none'}
+                    onValueChange={(val) => updateAction(action.id, { fallback: val === 'none' ? '' : val })}
                   >
                     <SelectTrigger className="h-8 text-sm">
                       <SelectValue placeholder="Fallback if no eligible users" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Leave unassigned</SelectItem>
+                      <SelectItem value="none">Leave unassigned</SelectItem>
                       <SelectItem value="admin_queue">Route to Admin queue</SelectItem>
                       <SelectItem value="any_specialty">Assign to any available specialty</SelectItem>
                     </SelectContent>
