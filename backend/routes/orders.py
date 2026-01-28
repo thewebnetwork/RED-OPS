@@ -937,6 +937,219 @@ async def cancel_order(
     return {"message": "Ticket canceled successfully"}
 
 
+# ============== REASSIGN ROUTES ==============
+
+class ReassignRequest(BaseModel):
+    reassign_type: Literal["user", "team", "specialty"] = Field(..., description="Type of reassignment")
+    target_id: str = Field(..., description="ID of user, team, or specialty to reassign to")
+    reason: Optional[str] = Field(None, max_length=500, description="Optional reason for reassignment")
+
+
+@router.post("/{order_id}/reassign")
+async def reassign_order(
+    order_id: str,
+    reassign_data: ReassignRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Reassign a ticket to another user, team, or specialty.
+    Only available to: assigned resolver, Admin, Operator
+    """
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Check permission - must be admin, operator, or current resolver
+    is_admin = current_user["role"] == "Administrator"
+    is_operator = current_user["role"] == "Operator"
+    is_resolver = order.get("editor_id") == current_user["id"]
+    
+    if not (is_admin or is_operator or is_resolver):
+        raise HTTPException(status_code=403, detail="Only admins, operators, or the assigned resolver can reassign")
+    
+    # Cannot reassign closed/canceled/delivered tickets
+    if order["status"] in ["Closed", "Canceled", "Delivered"]:
+        raise HTTPException(status_code=400, detail=f"Cannot reassign a {order['status'].lower()} ticket")
+    
+    now = get_utc_now()
+    old_editor_id = order.get("editor_id")
+    old_editor_name = order.get("editor_name")
+    
+    update_data = {"updated_at": now}
+    new_editor_id = None
+    new_editor_name = None
+    reassign_target_label = ""
+    
+    if reassign_data.reassign_type == "user":
+        # Reassign to a specific user
+        target_user = await db.users.find_one({"id": reassign_data.target_id, "active": True}, {"_id": 0, "password": 0})
+        if not target_user:
+            raise HTTPException(status_code=404, detail="Target user not found or inactive")
+        
+        new_editor_id = target_user["id"]
+        new_editor_name = target_user["name"]
+        reassign_target_label = f"user: {new_editor_name}"
+        
+        update_data["editor_id"] = new_editor_id
+        update_data["editor_name"] = new_editor_name
+        # If was Open, move to In Progress since it's now assigned
+        if order["status"] == "Open":
+            update_data["status"] = "In Progress"
+            update_data["picked_at"] = now
+        
+    elif reassign_data.reassign_type == "team":
+        # Reassign to a team - unassign current resolver, ticket goes back to pool
+        target_team = await db.teams.find_one({"id": reassign_data.target_id, "active": True}, {"_id": 0})
+        if not target_team:
+            raise HTTPException(status_code=404, detail="Target team not found or inactive")
+        
+        reassign_target_label = f"team: {target_team['name']}"
+        
+        # Unassign and set team preference
+        update_data["editor_id"] = None
+        update_data["editor_name"] = None
+        update_data["preferred_team_id"] = target_team["id"]
+        update_data["preferred_team_name"] = target_team["name"]
+        # Move back to Open if it was In Progress
+        if order["status"] == "In Progress":
+            update_data["status"] = "Open"
+        
+    elif reassign_data.reassign_type == "specialty":
+        # Reassign to a specialty pool - unassign current resolver
+        target_specialty = await db.specialties.find_one({"id": reassign_data.target_id, "active": True}, {"_id": 0})
+        if not target_specialty:
+            raise HTTPException(status_code=404, detail="Target specialty not found or inactive")
+        
+        reassign_target_label = f"specialty: {target_specialty['name']}"
+        
+        # Unassign and set specialty preference
+        update_data["editor_id"] = None
+        update_data["editor_name"] = None
+        update_data["preferred_specialty_id"] = target_specialty["id"]
+        update_data["preferred_specialty_name"] = target_specialty["name"]
+        # Move back to Open if it was In Progress
+        if order["status"] == "In Progress":
+            update_data["status"] = "Open"
+    
+    # Update the order
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    
+    # Log the reassignment in order_messages (activity log)
+    log_message = f"🔄 **Ticket Reassigned**\n\n" \
+                  f"**From:** {old_editor_name or 'Unassigned'}\n" \
+                  f"**To:** {reassign_target_label}\n" \
+                  f"**By:** {current_user['name']}"
+    if reassign_data.reason:
+        log_message += f"\n**Reason:** {reassign_data.reason}"
+    
+    reassign_log = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": log_message,
+        "created_at": now,
+        "is_system_message": True,
+        "reassignment_info": {
+            "type": reassign_data.reassign_type,
+            "from_user_id": old_editor_id,
+            "from_user_name": old_editor_name,
+            "to_id": reassign_data.target_id,
+            "to_label": reassign_target_label,
+            "by_user_id": current_user["id"],
+            "by_user_name": current_user["name"],
+            "reason": reassign_data.reason
+        }
+    }
+    await db.order_messages.insert_one(reassign_log)
+    
+    # Notify relevant parties
+    # Notify old resolver if they didn't do the reassign
+    if old_editor_id and old_editor_id != current_user["id"]:
+        await create_notification(
+            db,
+            old_editor_id,
+            "order_reassigned",
+            "Ticket reassigned",
+            f"Ticket {order['order_code']} has been reassigned from you to {reassign_target_label}",
+            order_id
+        )
+    
+    # Notify new resolver if assigned to a specific user
+    if new_editor_id and new_editor_id != current_user["id"]:
+        await create_notification(
+            db,
+            new_editor_id,
+            "order_assigned",
+            "Ticket assigned to you",
+            f"Ticket {order['order_code']} '{order['title']}' has been assigned to you",
+            order_id
+        )
+    
+    # Notify requester
+    if order.get("requester_id") and order["requester_id"] != current_user["id"]:
+        await create_notification(
+            db,
+            order["requester_id"],
+            "order_reassigned",
+            "Your ticket has been reassigned",
+            f"Your ticket {order['order_code']} has been reassigned to {reassign_target_label}",
+            order_id
+        )
+    
+    # Trigger webhook
+    background_tasks.add_task(trigger_webhooks, "order.reassigned", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "from_user": old_editor_name,
+        "to": reassign_target_label,
+        "reassign_type": reassign_data.reassign_type,
+        "reassigned_by": current_user["name"],
+        "reason": reassign_data.reason
+    })
+    
+    return {
+        "message": f"Ticket reassigned to {reassign_target_label}",
+        "reassignment": {
+            "type": reassign_data.reassign_type,
+            "from": old_editor_name,
+            "to": reassign_target_label
+        }
+    }
+
+
+@router.get("/{order_id}/reassign-options")
+async def get_reassign_options(
+    order_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get available users, teams, and specialties for reassignment"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Get active users (excluding the current requester)
+    users = await db.users.find(
+        {"active": True, "id": {"$ne": order.get("requester_id")}},
+        {"_id": 0, "password": 0}
+    ).to_list(500)
+    
+    # Get active teams
+    teams = await db.teams.find({"active": True}, {"_id": 0}).to_list(100)
+    
+    # Get active specialties
+    specialties = await db.specialties.find({"active": True}, {"_id": 0}).to_list(100)
+    
+    return {
+        "users": [{"id": u["id"], "name": u["name"], "role": u.get("role"), "specialty_name": u.get("specialty_name")} for u in users],
+        "teams": [{"id": t["id"], "name": t["name"]} for t in teams],
+        "specialties": [{"id": s["id"], "name": s["name"]} for s in specialties]
+    }
+
+
 # ============== MESSAGE ROUTES ==============
 
 @router.post("/{order_id}/messages", response_model=MessageResponse)
