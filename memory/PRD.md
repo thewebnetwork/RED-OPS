@@ -3,14 +3,38 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.8 (P1 Improvements - Jan 28, 2026)
+## Current Version: 2.9 (Pool & Reports Validation - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ops-tracker-6.preview.emergentagent.com
 
 ---
 
-## P1 Improvements Completed (Latest)
+## Pool Notifications & Reports Module Validated (Latest)
+
+### A) Pool 1 → Pool 2 Transitions ✅
+- **Logic:** Tickets open >24 hours automatically move from Pool 1 to Pool 2
+- **Background Task:** `check_pool_transitions()` runs every 5 minutes via `server_v2.py`
+- **Notification:** Vendors receive email when tickets enter Pool 2 (MOCKED - SMTP not configured)
+- **Filtering:** Partners see Pool 1, Vendors see Pool 2, Admins see both
+
+### B) Reports Module Validated ✅
+- **13 Canned Reports:** Volume (2), Aging (1), Performance (2), SLA (2), Distribution (4), Escalation (1), Workflow (1)
+- **Filters:** Date range, Status, Category L1/L2, Team, Assignee, Specialty, Access Tier, SLA State, Search
+- **Export:** CSV (proper headers, downloads) and PDF (JSON data for jsPDF frontend generation)
+- **Reports Available:**
+  - Tickets Created / Closed (day/week/month breakdown)
+  - Open Ticket Aging (0-24h, 1-3d, 3-7d, 7-14d, 14d+ buckets)
+  - Avg Time to First Response / Resolution
+  - SLA Compliance Summary (compliance_rate)
+  - Tickets by Assignee/Team/Specialty/Category
+  - Escalation Events Report
+  - SLA Policy Effectiveness
+  - Stale Pending Review Tickets (24h/5d workflow)
+
+---
+
+## P1 Improvements Completed
 
 ### A) Categories - Move Subcategories ✅
 - **Feature:** Subcategories can now be moved to different Level 1 (parent) categories
