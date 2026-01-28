@@ -393,6 +393,8 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
 @router.delete("/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Soft delete a user (Admin only)"""
+    from services.email import send_account_disabled_email
+    
     user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -401,6 +403,18 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_roles([
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
     
     await db.users.update_one({"id": user_id}, {"$set": {"active": False}})
+    
+    # Send account disabled email
+    try:
+        await send_account_disabled_email(
+            to_email=user["email"],
+            user_name=user["name"],
+            disabled_by=current_user.get("name", "Administrator")
+        )
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to send account disabled email: {e}")
+    
     return {"message": "User deactivated"}
 
 
