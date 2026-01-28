@@ -259,7 +259,7 @@ async def get_sla_state_for_order(order: dict) -> str:
 # ============== ROUTES ==============
 
 @router.get("/available", response_model=List[ReportMetadata])
-async def list_available_reports(current_user: dict = Depends(require_roles(["Admin", "Privileged User"]))):
+async def list_available_reports(current_user: dict = Depends(get_current_user)):
     """Get list of available canned reports"""
     return [ReportMetadata(**r) for r in CANNED_REPORTS]
 
@@ -268,7 +268,7 @@ async def list_available_reports(current_user: dict = Depends(require_roles(["Ad
 async def generate_report(
     report_id: str,
     filters: ReportFilter,
-    current_user: dict = Depends(require_roles(["Admin", "Privileged User"]))
+    current_user: dict = Depends(get_current_user)
 ):
     """Generate a specific report with filters"""
     # Find report definition
