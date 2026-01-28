@@ -455,7 +455,7 @@ async def test_smtp_config(test_data: EmailTestRequest, current_user: dict = Dep
 # ============== LOGS ROUTES ==============
 
 @router.get("/logs/{log_type}", response_model=LogsResponse)
-async def get_logs(log_type: str, limit: int = 500, current_user: dict = Depends(require_roles(["Admin"]))):
+async def get_logs(log_type: str, limit: int = 500, current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
     """Get logs by type (system, api, ui, user)."""
     if log_type not in ['system', 'api', 'ui', 'user']:
         raise HTTPException(status_code=400, detail="Invalid log type")
