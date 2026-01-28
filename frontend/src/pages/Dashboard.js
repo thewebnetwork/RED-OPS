@@ -473,11 +473,10 @@ function EditorDashboard() {
 // Requester Dashboard (Standard User)
 function RequesterDashboard() {
   const { t } = useTranslation();
-  const [dashboard, setDashboard] = useState({
-    open_orders: [],
-    in_progress: [],
-    needs_review: [],
-    delivered: []
+  const [myWork, setMyWork] = useState({
+    working_on: [],
+    delivered: [],
+    my_submitted_count: 0
   });
   const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -488,11 +487,11 @@ function RequesterDashboard() {
 
   const fetchData = async () => {
     try {
-      const [dashboardRes, ratingsRes] = await Promise.all([
-        axios.get(`${API}/dashboard/requester`),
+      const [myWorkRes, ratingsRes] = await Promise.all([
+        axios.get(`${API}/dashboard/my-work`),
         axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
       ]);
-      setDashboard(dashboardRes.data);
+      setMyWork(myWorkRes.data);
       setRatingStats(ratingsRes.data);
     } catch (error) {
       toast.error(t('errors.generic'));
@@ -509,10 +508,9 @@ function RequesterDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.myOrders')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboard.trackRequests')}</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
+          <p className="text-slate-500 mt-1">Your work overview</p>
         </div>
-        {/* Button removed - use sidebar navigation instead */}
       </div>
 
       {/* Rating Stats for Requester (if they also resolve orders) */}
@@ -521,80 +519,46 @@ function RequesterDashboard() {
       )}
 
       {/* KPI Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPICard label={t('orders.status.open')} value={dashboard.open_orders.length} icon={Inbox} color="bg-blue-500" />
-        <KPICard label={t('orders.status.inProgress')} value={dashboard.in_progress.length} icon={Clock} color="bg-amber-500" />
-        <KPICard label={t('dashboard.needsReview')} value={dashboard.needs_review.length} icon={AlertCircle} color="bg-purple-500" />
-        <KPICard label={t('orders.status.delivered')} value={dashboard.delivered.length} icon={CheckCircle2} color="bg-green-500" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <KPICard label="Tickets I'm Working On" value={myWork.working_on.length} icon={Clock} color="bg-amber-500" />
+        <KPICard label="Tickets Delivered" value={myWork.delivered.length} icon={CheckCircle2} color="bg-green-500" />
+        <Link to="/my-tickets">
+          <KPICard label="My Submitted Tickets" value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
+        </Link>
       </div>
 
-      {/* Needs Review Alert */}
-      {dashboard.needs_review.length > 0 && (
-        <Card className="border-purple-200 bg-purple-50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-purple-700 flex items-center gap-2">
-              <AlertCircle size={20} />
-              {t('dashboard.needsReview')} ({dashboard.needs_review.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {dashboard.needs_review.map(order => (
-              <OrderCard key={order.id} order={order} t={t} />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Open Orders */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Inbox size={20} className="text-blue-500" />
-            {t('dashboard.openOrders')} ({dashboard.open_orders.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 space-y-3">
-          {dashboard.open_orders.map(order => (
-            <OrderCard key={order.id} order={order} t={t} />
-          ))}
-          {dashboard.open_orders.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noOpenOrders')}</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* In Progress */}
+      {/* Tickets I'm Working On */}
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            {t('orders.status.inProgress')} ({dashboard.in_progress.length})
+            Tickets I'm Working On ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
-          {dashboard.in_progress.map(order => (
+          {myWork.working_on.map(order => (
             <OrderCard key={order.id} order={order} t={t} />
           ))}
-          {dashboard.in_progress.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noOrdersInProgress')}</p>
+          {myWork.working_on.length === 0 && (
+            <p className="text-center text-slate-500 py-8">No tickets currently assigned to you</p>
           )}
         </CardContent>
       </Card>
 
-      {/* Delivered */}
+      {/* Tickets Delivered */}
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 size={20} className="text-green-500" />
-            {t('orders.status.delivered')} ({dashboard.delivered.length})
+            Tickets Delivered ({myWork.delivered.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
-          {dashboard.delivered.slice(0, 5).map(order => (
+          {myWork.delivered.slice(0, 10).map(order => (
             <OrderCard key={order.id} order={order} t={t} />
           ))}
-          {dashboard.delivered.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noDelivered')}</p>
+          {myWork.delivered.length === 0 && (
+            <p className="text-center text-slate-500 py-8">No delivered tickets yet</p>
           )}
         </CardContent>
       </Card>
