@@ -34,7 +34,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { 
   KeyRound, Shield, Users, ChevronDown, Edit, Save, Info, Lock, Building2, Briefcase,
   Plus, Search, Trash2, UserCheck, UserX, CreditCard, CheckCircle2, UsersRound
