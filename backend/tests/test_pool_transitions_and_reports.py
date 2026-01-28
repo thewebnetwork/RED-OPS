@@ -327,47 +327,75 @@ class TestReportsModule:
         
         print(f"✓ Tickets by Assignee report generated: {data['total_rows']} rows")
     
-    def test_generate_tickets_by_status_report(self):
-        """Test generating Tickets by Status report"""
+    def test_generate_tickets_by_specialty_report(self):
+        """Test generating Tickets by Specialty report"""
         response = requests.post(
-            f"{BASE_URL}/api/reports/tickets_by_status/generate",
+            f"{BASE_URL}/api/reports/tickets_by_specialty/generate",
             headers=self.headers,
             json={}
         )
         assert response.status_code == 200, f"Failed to generate report: {response.text}"
         
         data = response.json()
-        assert data["report_id"] == "tickets_by_status"
+        assert data["report_id"] == "tickets_by_specialty"
         
-        print(f"✓ Tickets by Status report generated: {data['total_rows']} rows")
+        print(f"✓ Tickets by Specialty report generated: {data['total_rows']} rows")
     
-    def test_generate_resolution_time_report(self):
-        """Test generating Resolution Time report"""
+    def test_generate_avg_first_response_report(self):
+        """Test generating Avg First Response report"""
         response = requests.post(
-            f"{BASE_URL}/api/reports/resolution_time/generate",
+            f"{BASE_URL}/api/reports/avg_first_response/generate",
             headers=self.headers,
             json={}
         )
         assert response.status_code == 200, f"Failed to generate report: {response.text}"
         
         data = response.json()
-        assert data["report_id"] == "resolution_time"
+        assert data["report_id"] == "avg_first_response"
         
-        print(f"✓ Resolution Time report generated: {data['total_rows']} rows")
+        print(f"✓ Avg First Response report generated: {data['total_rows']} rows")
     
-    def test_generate_escalation_report(self):
-        """Test generating Escalation report"""
+    def test_generate_avg_resolution_time_report(self):
+        """Test generating Avg Resolution Time report"""
         response = requests.post(
-            f"{BASE_URL}/api/reports/escalation_report/generate",
+            f"{BASE_URL}/api/reports/avg_resolution_time/generate",
             headers=self.headers,
             json={}
         )
         assert response.status_code == 200, f"Failed to generate report: {response.text}"
         
         data = response.json()
-        assert data["report_id"] == "escalation_report"
+        assert data["report_id"] == "avg_resolution_time"
         
-        print(f"✓ Escalation report generated: {data['total_rows']} rows")
+        print(f"✓ Avg Resolution Time report generated: {data['total_rows']} rows")
+    
+    def test_generate_escalation_events_report(self):
+        """Test generating Escalation Events report"""
+        response = requests.post(
+            f"{BASE_URL}/api/reports/escalation_events/generate",
+            headers=self.headers,
+            json={}
+        )
+        assert response.status_code == 200, f"Failed to generate report: {response.text}"
+        
+        data = response.json()
+        assert data["report_id"] == "escalation_events"
+        
+        print(f"✓ Escalation Events report generated: {data['total_rows']} rows")
+    
+    def test_generate_sla_policy_effectiveness_report(self):
+        """Test generating SLA Policy Effectiveness report"""
+        response = requests.post(
+            f"{BASE_URL}/api/reports/sla_policy_effectiveness/generate",
+            headers=self.headers,
+            json={}
+        )
+        assert response.status_code == 200, f"Failed to generate report: {response.text}"
+        
+        data = response.json()
+        assert data["report_id"] == "sla_policy_effectiveness"
+        
+        print(f"✓ SLA Policy Effectiveness report generated: {data['total_rows']} rows")
     
     def test_generate_stale_pending_review_report(self):
         """Test generating Stale Pending Review report"""
