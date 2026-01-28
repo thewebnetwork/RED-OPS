@@ -431,6 +431,18 @@ async def list_announcements(
 @router.get("/announcements/active", response_model=Optional[AnnouncementResponse])
 async def get_active_announcement(current_user: dict = Depends(get_current_user)):
     """Get the highest priority active announcement for the current user"""
+    all_active = await get_all_active_announcements_for_user(current_user)
+    return all_active[0] if all_active else None
+
+
+@router.get("/announcements/active/all", response_model=List[AnnouncementResponse])
+async def get_all_active_announcements(current_user: dict = Depends(get_current_user)):
+    """Get ALL active announcements for the current user, sorted by priority (highest first)"""
+    return await get_all_active_announcements_for_user(current_user)
+
+
+async def get_all_active_announcements_for_user(current_user: dict) -> List[AnnouncementResponse]:
+    """Helper function to get all active announcements matching the user's targeting criteria"""
     now = datetime.now(timezone.utc)
     
     # Get all active announcements, sorted by priority (highest first)
@@ -439,6 +451,13 @@ async def get_active_announcement(current_user: dict = Depends(get_current_user)
         {"_id": 0}
     ).sort("priority", -1).to_list(100)
     
+    # Get user's role ID once
+    user_role_ids = []
+    role_doc = await db.roles.find_one({"name": current_user.get("role", "")}, {"_id": 0, "id": 1})
+    if role_doc:
+        user_role_ids.append(role_doc.get("id", ""))
+    
+    result = []
     for ann in announcements:
         # Check schedule
         if ann.get("start_at"):
@@ -464,14 +483,7 @@ async def get_active_announcement(current_user: dict = Depends(get_current_user)
             target_specialties = ann.get("target_specialties", [])
             
             user_team_id = current_user.get("team_id", "")
-            user_role = current_user.get("role", "")
             user_specialty_id = current_user.get("specialty_id", "")
-            
-            # Get user's role ID
-            user_role_ids = []
-            role_doc = await db.roles.find_one({"name": user_role}, {"_id": 0, "id": 1})
-            if role_doc:
-                user_role_ids.append(role_doc.get("id", ""))
             
             team_match = user_team_id in target_teams if target_teams else False
             role_match = bool(set(user_role_ids) & set(target_roles)) if target_roles else False
@@ -480,10 +492,13 @@ async def get_active_announcement(current_user: dict = Depends(get_current_user)
             if not team_match and not role_match and not specialty_match:
                 continue
         
-        # This announcement matches - return it
-        return AnnouncementResponse(**ann)
+        # This announcement matches - add to result
+        ann["target_team_names"] = []
+        ann["target_role_names"] = []
+        ann["target_specialty_names"] = []
+        result.append(AnnouncementResponse(**ann))
     
-    return None
+    return result
 
 
 @router.post("/announcements", response_model=AnnouncementResponse)
