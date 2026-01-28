@@ -5,30 +5,30 @@ import { Megaphone } from 'lucide-react';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AnnouncementTicker() {
-  const [announcement, setAnnouncement] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
     
-    const fetchActiveAnnouncement = async () => {
+    const fetchActiveAnnouncements = async () => {
       try {
-        // Use the new multi-announcement endpoint that returns the highest priority active announcement
-        const res = await axios.get(`${API}/announcements/active`);
+        // Fetch ALL active announcements for the user (sorted by priority)
+        const res = await axios.get(`${API}/announcements/active/all`);
         if (isMounted) {
-          setAnnouncement(res.data);
+          setAnnouncements(res.data || []);
         }
       } catch (error) {
         // If 401, user not logged in yet - try again later
-        console.log('Announcement fetch skipped - user may not be logged in');
+        console.log('Announcements fetch skipped - user may not be logged in');
         if (isMounted) {
-          setAnnouncement(null);
+          setAnnouncements([]);
         }
       }
     };
     
-    fetchActiveAnnouncement();
-    // Refresh announcement every 60 seconds for better responsiveness
-    const interval = setInterval(fetchActiveAnnouncement, 60 * 1000);
+    fetchActiveAnnouncements();
+    // Refresh announcements every 60 seconds for better responsiveness
+    const interval = setInterval(fetchActiveAnnouncements, 60 * 1000);
     
     return () => {
       isMounted = false;
@@ -36,43 +36,86 @@ export default function AnnouncementTicker() {
     };
   }, []);
 
-  // Don't render if no active announcement
-  if (!announcement || !announcement.message) {
+  // Don't render if no active announcements
+  if (!announcements || announcements.length === 0) {
     return null;
   }
 
-  // Use the announcement's custom colors or fallback to defaults
-  const bgColor = announcement.background_color || '#A2182C';
-  const textColor = announcement.text_color || '#FFFFFF';
+  // Single announcement - full width banner
+  if (announcements.length === 1) {
+    const ann = announcements[0];
+    const bgColor = ann.background_color || '#A2182C';
+    const textColor = ann.text_color || '#FFFFFF';
 
+    return (
+      <div 
+        className="flex-1 flex items-center gap-2 px-4 py-1.5 rounded-lg mr-4 overflow-hidden"
+        style={{ backgroundColor: bgColor }}
+        data-testid="announcement-ticker"
+      >
+        <Megaphone size={18} className="shrink-0" style={{ color: textColor }} />
+        <div className="flex-1 overflow-hidden whitespace-nowrap">
+          <span 
+            className="inline-block text-sm font-bold animate-marquee-single"
+            style={{ color: textColor }}
+          >
+            {ann.message}
+          </span>
+        </div>
+        <style>{`
+          @keyframes marquee-single {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+          .animate-marquee-single {
+            display: inline-block;
+            animation: marquee-single 20s linear infinite;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Multiple announcements - split evenly based on count
   return (
     <div 
-      className="flex items-center gap-2 px-3 py-1.5 rounded-lg mr-4 max-w-md overflow-hidden"
-      style={{ backgroundColor: bgColor }}
+      className="flex-1 flex items-center gap-2 mr-4"
       data-testid="announcement-ticker"
     >
-      <Megaphone size={16} className="shrink-0" style={{ color: textColor }} />
-      <div className="overflow-hidden whitespace-nowrap">
-        <span 
-          className="inline-block text-sm font-bold animate-marquee"
-          style={{
-            color: textColor,
-            animation: 'marquee 15s linear infinite',
-          }}
-        >
-          {announcement.message}
-        </span>
-      </div>
+      {announcements.map((ann, index) => {
+        const bgColor = ann.background_color || '#A2182C';
+        const textColor = ann.text_color || '#FFFFFF';
+        
+        return (
+          <div
+            key={ann.id}
+            className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg overflow-hidden"
+            style={{ backgroundColor: bgColor }}
+            data-testid={`announcement-${index}`}
+          >
+            <Megaphone size={16} className="shrink-0" style={{ color: textColor }} />
+            <div className="flex-1 overflow-hidden whitespace-nowrap">
+              <span 
+                className={`inline-block text-sm font-bold animate-marquee-${index}`}
+                style={{ color: textColor }}
+              >
+                {ann.message}
+              </span>
+            </div>
+          </div>
+        );
+      })}
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-          display: inline-block;
-          padding-left: 100%;
-          animation: marquee 15s linear infinite;
-        }
+        ${announcements.map((_, index) => `
+          @keyframes marquee-${index} {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+          .animate-marquee-${index} {
+            display: inline-block;
+            animation: marquee-${index} ${15 + index * 2}s linear infinite;
+          }
+        `).join('\n')}
       `}</style>
     </div>
   );
