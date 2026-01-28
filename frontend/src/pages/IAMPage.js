@@ -596,10 +596,23 @@ export default function IAMPage() {
               <Card key={team.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-medium">{team.name}</h3>
                       {team.description && <p className="text-sm text-slate-500 mt-1">{team.description}</p>}
                       <p className="text-xs text-slate-400 mt-2">{team.member_count || 0} members</p>
+                      {team.related_specialty_names && team.related_specialty_names.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs text-slate-500 mb-1">Related Specialties:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {team.related_specialty_names.slice(0, 3).map((name, i) => (
+                              <Badge key={i} variant="secondary" className="text-xs">{name}</Badge>
+                            ))}
+                            {team.related_specialty_names.length > 3 && (
+                              <Badge variant="outline" className="text-xs">+{team.related_specialty_names.length - 3} more</Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openTeamDialog(team)}><Edit size={16} /></Button>
