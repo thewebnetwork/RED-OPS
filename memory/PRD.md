@@ -3,119 +3,128 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.5 (Email Notifications + Announcements - Jan 28, 2026)
+## Current Version: 2.6 (UAT Round 2 Fixes - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
+**Preview URL:** https://ticketpro-15.preview.emergentagent.com
 
 ---
 
-## Core Architecture
+## UAT Round 2 Fixes Completed
 
-### Tech Stack
-- **Frontend:** React 18, TailwindCSS, Shadcn/UI
-- **Backend:** FastAPI (Python 3.11), Pydantic
-- **Database:** MongoDB
-- **Authentication:** JWT-based
+### A) Ticket Creation Fixed ✅
+- **Issue:** Submit button not showing for some categories (e.g., Photography)
+- **Fix:** Added `GenericRequestForm` that shows for ALL L2 category selections that don't have special forms
+- **Result:** Submit button ALWAYS appears after L2 category selection
 
-### URL Configuration
-- **Frontend:** Port 3000
-- **Backend:** Port 8001 (all routes prefixed with /api)
-- **Preview URL:** https://ticketpro-15.preview.emergentagent.com
+### B) Report an Issue Fixed ✅
+- **Issue:** Page showing "Failed to load" 
+- **Fix:** Same GenericRequestForm fix + proper error handling
+- **Route:** `/command-center?type=issue`
 
----
+### C) Opportunity Ribbon Clarification ✅
+- **Behavior:** Pool shows UNASSIGNED tickets only (by design)
+- **Assigned tickets:** Go to resolver's "My Assigned Tickets" (new endpoint)
+- **New endpoint:** `GET /api/orders/my-assigned`
 
-## Latest Features Implemented (Jan 28, 2026)
+### D) Admin Force to Pool 2 ✅
+- **New Feature:** Admin can bypass 24h right-of-first-refusal
+- **Endpoint:** `POST /api/orders/{id}/force-pool-2`
+- **UI:** "Force to Pool 2" button on OrderDetail for Admin
+- **Requirements:** Ticket must be Open AND unassigned
+- **Audit:** Logged with timestamp, admin name, reason
 
-### 1. Email Notifications ✅
-Complete email notification system for ticket lifecycle:
+### E) Dashboard Button Removed ✅
+- **Issue:** Duplicate "+NEW REQUEST" button
+- **Fix:** Removed from Dashboard.js - users should use sidebar navigation
 
-| Event | Recipient | Includes Survey |
-|-------|-----------|-----------------|
-| Ticket Created | Requester | No |
-| Ticket Assigned | Resolver | No |
-| Ticket Picked Up | Requester | No |
-| Ticket Resolved/Delivered | Requester | **Yes** |
-| Ticket Cancelled (by requester) | Resolver + Admin | **No** |
-
-**Note:** Email is MOCKED if SMTP not configured. Check backend logs for email output.
-
-### 2. Pool Notifications ✅
-- **Pool 1 (Partners):** Notified immediately when new ticket is created
-- **Pool 2 (Vendors):** Notified after 24 hours via SLA monitor background task
-
-### 3. Announcements System ✅
-Full CRUD for multiple announcements with:
-- **Priority ordering** (highest priority shown first)
-- **Scheduling** (start_at, end_at datetime)
-- **Targeting** by teams, roles, or specialties
-- **Custom colors** (background, text)
-- **List view** with edit/delete
-- **Preview** in creation dialog
+### F) My Tickets Renamed ✅
+- **Old:** "My Tickets"
+- **New:** "My Submitted Tickets"
+- **Clarifies:** These are tickets the user submitted (not assigned to them)
 
 ---
 
-## Previous P0 Blockers Fixed
+## Pool System Explained
 
-1. ✅ User creation crash (Pydantic error handling)
-2. ✅ Tickets not persisting (database re-seeded)
-3. ✅ Reports failing for non-admins
-4. ✅ No logs showing (role name fixed)
-5. ✅ Sidebar dual highlight bug
-6. ✅ Page headers ("Submit New Request" not "Command Center")
-7. ✅ Opportunity Ribbon hidden for Media Clients
-8. ✅ IAM CRUD for Roles + Account Types
-9. ✅ Admin reopen capability
+### Pool 1 (Partners)
+- **Who sees it:** Partners
+- **When tickets appear:** Immediately on creation
+- **Contains:** Open + unassigned tickets
+
+### Pool 2 (Vendors/Freelancers)
+- **Who sees it:** Vendors/Freelancers
+- **When tickets appear:** After 24 hours (right-of-first-refusal expired)
+- **Contains:** Open + unassigned tickets, pool_entered_at > 24h ago
+- **Admin override:** "Force to Pool 2" bypasses 24h wait
+
+### Assigned Tickets
+- **Where they go:** Removed from pools, appear in resolver's work queue
+- **Endpoint:** `GET /api/orders/my-assigned`
+
+---
+
+## Key API Endpoints
+
+### Orders
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/orders` | POST | Create ticket |
+| `/api/orders/my-requests` | GET | My submitted tickets |
+| `/api/orders/my-assigned` | GET | Tickets assigned to me (resolver) |
+| `/api/orders/pool/1` | GET | Pool 1 (Partners) |
+| `/api/orders/pool/2` | GET | Pool 2 (Vendors) |
+| `/api/orders/{id}/force-pool-2` | POST | Admin force to Pool 2 |
+| `/api/orders/{id}/pick` | POST | Pick ticket from pool |
+| `/api/orders/{id}/reassign` | POST | Reassign ticket |
+| `/api/orders/{id}/reopen` | POST | Admin reopen closed ticket |
+| `/api/orders/{id}/cancel` | POST | Requester cancel ticket |
+
+### Announcements
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/announcements` | GET | List all (Admin) |
+| `/api/announcements` | POST | Create |
+| `/api/announcements/{id}` | PATCH | Update |
+| `/api/announcements/{id}` | DELETE | Delete |
+| `/api/announcements/active` | GET | Get active for user |
+
+### IAM
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/iam/roles` | GET/POST | Role CRUD |
+| `/api/iam/account-types` | GET/POST | Account Type CRUD |
+
+---
+
+## Forms in CommandCenter
+
+| Form | Condition |
+|------|-----------|
+| EditingRequestForm | `triggers_editor_workflow` |
+| FeatureRequestForm | L2 name matches "Feature Request" pattern |
+| BugReportForm | L2 name matches "Bug" pattern |
+| **GenericRequestForm** | **All other L2 selections** |
 
 ---
 
 ## Sidebar Navigation
 
 ### All Users
-1. Dashboard
-2. My Services
-3. My Tickets - /my-tickets
-4. Submit New Request
-5. Report an Issue
-6. Opportunity Ribbon (NOT visible to Media Clients)
-7. Reports
+- Dashboard
+- My Services
+- **My Submitted Tickets** (renamed)
+- Submit New Request
+- Report an Issue
+- Opportunity Ribbon (NOT for Media Clients)
+- Reports
 
 ### Admin Only
-8. All Orders (Administrator ONLY)
-9. Identity & Access (6 tabs)
-10. Logs (Administrator, Operator)
-11. Announcements (full CRUD)
-12. Settings
-
----
-
-## Key API Endpoints
-
-### Email (triggered automatically)
-- Ticket created → `send_ticket_created_email()`
-- Ticket assigned → `send_ticket_assigned_email()`
-- Ticket picked up → `send_ticket_picked_up_email()`
-- Ticket resolved → `send_ticket_resolved_email()` + survey
-- Ticket cancelled → `send_ticket_cancelled_email()` (NO survey)
-
-### Pool Notifications
-- Pool 1: Triggered on ticket creation
-- Pool 2: Triggered by `check_pool_transitions()` in SLA monitor (every 5 min)
-
-### Announcements
-- `GET /api/announcements` - List all (Admin)
-- `GET /api/announcements/active` - Get active for current user
-- `POST /api/announcements` - Create
-- `PATCH /api/announcements/{id}` - Update
-- `DELETE /api/announcements/{id}` - Delete
-
-### IAM
-- `GET/POST /api/iam/roles` - Role CRUD
-- `GET/POST /api/iam/account-types` - Account Type CRUD
-
-### Orders
-- `POST /api/orders/{id}/reopen` - Admin reopens closed tickets
-- `POST /api/orders/{id}/reassign` - Reassign by user/team/specialty
-- `POST /api/orders/{id}/cancel` - Requester cancels
+- All Orders
+- Identity & Access (6 tabs)
+- Logs
+- Announcements
+- Settings
 
 ---
 
@@ -125,50 +134,26 @@ Full CRUD for multiple announcements with:
 ---
 
 ## Mocked Integrations
-- **Email (SMTP):** MOCKED if SMTP_USER/SMTP_PASSWORD not set
-- **GHL Payment Webhook:** `/api/webhooks/ghl-payment-mock` (MOCKED)
+- **Email (SMTP):** MOCKED if SMTP credentials not configured
+- **GHL Payment:** `/api/webhooks/ghl-payment-mock`
 
 ---
 
-## SMTP Configuration (for real emails)
-Set in `/app/backend/.env`:
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-specific-password
-SMTP_FROM=your-email@gmail.com
-FRONTEND_URL=https://your-domain.com
-```
+## Test Reports
+- Latest: `/app/test_reports/iteration_32.json` (100% pass)
 
 ---
 
 ## File References
 
-### Backend
-- `/app/backend/services/email.py` - All email templates
-- `/app/backend/routes/orders.py` - Ticket lifecycle with emails
-- `/app/backend/routes/settings.py` - Announcements CRUD
-- `/app/backend/services/sla_monitor.py` - Pool 2 notifications
-- `/app/backend/routes/iam.py` - Roles/Account Types CRUD
+### Frontend (Key Changes)
+- `CommandCenter.js` - GenericRequestForm added
+- `OrderDetail.js` - Force to Pool 2 button
+- `Dashboard.js` - +NEW REQUEST button removed
+- `MyRequests.js` - Renamed to "My Submitted Tickets"
+- `RibbonBoard.js` - Pool visibility (unassigned only)
 
-### Frontend
-- `/app/frontend/src/pages/Announcements.js` - Full CRUD UI
-- `/app/frontend/src/components/Layout.js` - Sidebar navigation
-- `/app/frontend/src/pages/IAMPage.js` - 6-tab IAM
-- `/app/frontend/src/pages/CommandCenter.js` - Ticket submission
-- `/app/frontend/src/pages/OrderDetail.js` - Reassign, reopen
-
----
-
-## Test Reports
-- `/app/test_reports/iteration_31.json` - Latest (Email + Announcements)
-- `/app/backend/tests/test_email_pool_announcements.py` - Automated tests
-
----
-
-## Future/Backlog
-- Advanced analytics with charts
-- Slack/Teams notification presets
-- Workflow preview simulation
-- SLA policy templates
+### Backend (Key Changes)
+- `routes/orders.py` - `/my-assigned`, `/force-pool-2` endpoints
+- `routes/settings.py` - Announcements CRUD
+- `services/email.py` - Email notification templates
