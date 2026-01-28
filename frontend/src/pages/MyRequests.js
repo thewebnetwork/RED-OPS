@@ -163,7 +163,7 @@ export default function MyRequests() {
             <Inbox size={48} className="mx-auto mb-4 text-slate-300" />
             <p className="text-slate-500">
               {orders.length === 0 
-                ? "You haven't submitted any tickets yet"
+                ? "You have not submitted any tickets yet"
                 : "No tickets match your filters"}
             </p>
             {orders.length === 0 && (
