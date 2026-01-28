@@ -87,7 +87,7 @@ export default function Logs() {
     
     // Note: EventSource doesn't support custom headers, so we use a workaround
     // For production, you'd want to use a library like eventsource or fetch with ReadableStream
-    const streamUrl = `${API}/logs/stream/${activeTab}`;
+    const streamUrl = `${API}/settings/logs/stream/${activeTab}`;
     
     try {
       eventSourceRef.current = new EventSource(streamUrl);
