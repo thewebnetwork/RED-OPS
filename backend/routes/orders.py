@@ -507,6 +507,87 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
     return result
 
 
+@router.get("/my-assigned", response_model=List[OrderResponse])
+async def get_my_assigned_tickets(current_user: dict = Depends(get_current_user)):
+    """Get all tickets assigned to the current user (for resolvers)"""
+    orders = await db.orders.find(
+        {"editor_id": current_user["id"], "status": {"$nin": ["Closed", "Canceled"]}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    result = []
+    for order in orders:
+        order = normalize_order(order)
+        result.append(OrderResponse(
+            **order,
+            is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
+        ))
+    
+    return result
+
+
+@router.post("/{order_id}/force-pool-2")
+async def force_ticket_to_pool_2(
+    order_id: str,
+    background_tasks: BackgroundTasks,
+    reason: Optional[str] = None,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Admin-only: Force a ticket to Pool 2 immediately (bypass 24h right-of-first-refusal)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order["status"] != "Open":
+        raise HTTPException(status_code=400, detail="Only Open tickets can be forced to Pool 2")
+    
+    if order.get("editor_id"):
+        raise HTTPException(status_code=400, detail="Cannot force assigned tickets to pool")
+    
+    now = get_utc_now()
+    
+    # Set pool_entered_at to 25 hours ago to make it eligible for Pool 2
+    forced_pool_entered = (datetime.now(timezone.utc) - timedelta(hours=25)).isoformat()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "pool_entered_at": forced_pool_entered,
+            "forced_to_pool_2": True,
+            "forced_to_pool_2_at": now,
+            "forced_to_pool_2_by": current_user["id"],
+            "forced_to_pool_2_by_name": current_user["name"],
+            "forced_to_pool_2_reason": reason,
+            "pool_2_notified": False,  # Reset so vendors get notified
+            "updated_at": now
+        }}
+    )
+    
+    # Log the action
+    log_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": f"⚡ **Ticket Forced to Pool 2**\n\n**By:** {current_user['name']}\n**Reason:** {reason or 'Not specified'}",
+        "created_at": now,
+        "is_system_message": True
+    }
+    await db.order_messages.insert_one(log_message)
+    
+    # Trigger webhook
+    background_tasks.add_task(trigger_webhooks, "order.forced_to_pool_2", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "forced_by": current_user["name"],
+        "reason": reason
+    })
+    
+    return {"message": "Ticket forced to Pool 2 successfully"}
+
+
 @router.get("/pool/{pool_number}", response_model=List[OrderResponse])
 async def get_pool_tickets(
     pool_number: int,
