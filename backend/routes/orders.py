@@ -1633,6 +1633,22 @@ async def reassign_order(
             f"Ticket {order['order_code']} has been reassigned from you to {reassign_target_label}",
             order_id
         )
+        
+        # Send email to old resolver
+        old_editor = await db.users.find_one({"id": old_editor_id}, {"_id": 0, "email": 1, "name": 1})
+        if old_editor and old_editor.get("email"):
+            background_tasks.add_task(
+                send_ticket_reassigned_email,
+                to_email=old_editor["email"],
+                to_name=old_editor.get("name", "Team Member"),
+                from_name=old_editor_name,
+                to_target=reassign_target_label,
+                reassigned_by=current_user["name"],
+                order_code=order["order_code"],
+                title=order.get("title", ""),
+                reason=reassign_data.reason,
+                order_id=order_id
+            )
     
     # Notify new resolver if assigned to a specific user
     if new_editor_id and new_editor_id != current_user["id"]:
@@ -1644,6 +1660,20 @@ async def reassign_order(
             f"Ticket {order['order_code']} '{order['title']}' has been assigned to you",
             order_id
         )
+        
+        # Send assignment email to new resolver
+        new_editor = await db.users.find_one({"id": new_editor_id}, {"_id": 0, "email": 1, "name": 1})
+        if new_editor and new_editor.get("email"):
+            background_tasks.add_task(
+                send_ticket_assigned_email,
+                resolver_email=new_editor["email"],
+                resolver_name=new_editor.get("name", "Team Member"),
+                requester_name=order.get("requester_name", "User"),
+                order_code=order["order_code"],
+                title=order.get("title", ""),
+                priority=order.get("priority", "Normal"),
+                order_id=order_id
+            )
     
     # Notify requester
     if order.get("requester_id") and order["requester_id"] != current_user["id"]:
@@ -1655,6 +1685,21 @@ async def reassign_order(
             f"Your ticket {order['order_code']} has been reassigned to {reassign_target_label}",
             order_id
         )
+        
+        # Send email to requester about reassignment
+        if order.get("requester_email"):
+            background_tasks.add_task(
+                send_ticket_reassigned_email,
+                to_email=order["requester_email"],
+                to_name=order.get("requester_name", "User"),
+                from_name=old_editor_name,
+                to_target=reassign_target_label,
+                reassigned_by=current_user["name"],
+                order_code=order["order_code"],
+                title=order.get("title", ""),
+                reason=reassign_data.reason,
+                order_id=order_id
+            )
     
     # Trigger webhook
     background_tasks.add_task(trigger_webhooks, "order.reassigned", {
