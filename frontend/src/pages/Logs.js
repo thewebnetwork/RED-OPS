@@ -145,7 +145,7 @@ export default function Logs() {
   const fetchLogs = async (logType, silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const res = await axios.get(`${API}/logs/${logType}`, {
+      const res = await axios.get(`${API}/settings/logs/${logType}`, {
         params: { limit: 500 }
       });
       setLogs(res.data.logs || []);
