@@ -244,6 +244,17 @@ async def execute_action(db, action_type: str, node_data: dict, context: dict) -
     elif action_type == "forward_ticket":
         # Forward to another category/team
         target_category = node_data.get("config", {}).get("category_id")
+        target_team = node_data.get("config", {}).get("team_id")
+        
+        if target_team and order.get("id"):
+            team = await db.teams.find_one({"id": target_team}, {"_id": 0})
+            if team:
+                await db.orders.update_one(
+                    {"id": order["id"]},
+                    {"$set": {"team_id": target_team, "team_name": team.get("name")}}
+                )
+                return {"forwarded_to_team": team.get("name")}
+        
         if target_category and order.get("id"):
             category = await db.categories_l2.find_one({"id": target_category}, {"_id": 0})
             if category:
@@ -256,6 +267,76 @@ async def execute_action(db, action_type: str, node_data: dict, context: dict) -
                 )
                 return {"forwarded_to": category.get("name")}
         return {"message": "No forwarding done"}
+    
+    elif action_type == "assign_specialty":
+        # Route ticket to users with a specific specialty
+        config = node_data.get("config", {})
+        specialty_id = config.get("specialty_id")
+        pool_preference = config.get("pool_preference", "")  # pool_1, pool_2, or empty for any
+        fallback = config.get("fallback", "")  # admin_queue, any_specialty, or empty
+        
+        if not specialty_id:
+            return {"message": "No specialty configured"}
+        
+        if not order.get("id"):
+            return {"message": "No order in context"}
+        
+        # Get specialty info
+        specialty = await db.specialties.find_one({"id": specialty_id}, {"_id": 0})
+        if not specialty:
+            return {"message": "Specialty not found"}
+        
+        # Set the required specialty on the order for pool filtering
+        update_data = {
+            "required_specialty_id": specialty_id,
+            "required_specialty_name": specialty.get("name"),
+            "pool_preference": pool_preference
+        }
+        
+        # Optionally try to auto-assign to an eligible user
+        query = {"specialty_id": specialty_id, "active": True}
+        
+        # Filter by pool preference via account_type
+        if pool_preference == "pool_1":
+            query["account_type"] = "Partner"
+        elif pool_preference == "pool_2":
+            query["account_type"] = "Vendor/Freelancer"
+        
+        # Find an eligible user
+        eligible_user = await db.users.find_one(query, {"_id": 0})
+        
+        if eligible_user:
+            update_data["editor_id"] = eligible_user["id"]
+            update_data["editor_name"] = eligible_user["name"]
+            update_data["status"] = "In Progress"
+            await db.orders.update_one({"id": order["id"]}, {"$set": update_data})
+            return {
+                "routed_to_specialty": specialty.get("name"),
+                "assigned_to": eligible_user["name"],
+                "pool": pool_preference or "any"
+            }
+        else:
+            # No eligible user found - apply fallback
+            if fallback == "admin_queue":
+                admin = await db.users.find_one({"role": "Administrator", "active": True}, {"_id": 0})
+                if admin:
+                    update_data["editor_id"] = admin["id"]
+                    update_data["editor_name"] = admin["name"]
+                    update_data["status"] = "In Progress"
+            elif fallback == "any_specialty":
+                any_user = await db.users.find_one({"specialty_id": {"$ne": None}, "active": True}, {"_id": 0})
+                if any_user:
+                    update_data["editor_id"] = any_user["id"]
+                    update_data["editor_name"] = any_user["name"]
+                    update_data["status"] = "In Progress"
+            
+            # Still update the required specialty for pool visibility
+            await db.orders.update_one({"id": order["id"]}, {"$set": update_data})
+            return {
+                "routed_to_specialty": specialty.get("name"),
+                "assigned_to": update_data.get("editor_name", "Unassigned"),
+                "fallback_applied": fallback or "none"
+            }
     
     elif action_type == "auto_escalate":
         # Legacy action - redirect to apply_sla_policy logic
