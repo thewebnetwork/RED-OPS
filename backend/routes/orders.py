@@ -865,6 +865,89 @@ async def close_order(
     return {"message": "Order closed successfully"}
 
 
+class ReopenOrderRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=500, description="Reason for reopening")
+
+
+@router.post("/{order_id}/reopen")
+async def reopen_order(
+    order_id: str,
+    reopen_data: ReopenOrderRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Allow Admin to reopen a closed ticket. Requesters must submit a new request."""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order["status"] not in ["Closed", "Canceled"]:
+        raise HTTPException(status_code=400, detail=f"Order is not closed/canceled (current: {order['status']})")
+    
+    old_status = order["status"]
+    now = get_utc_now()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "status": "Open",
+            "reopened_at": now,
+            "reopened_by_id": current_user["id"],
+            "reopened_by_name": current_user["name"],
+            "reopen_reason": reopen_data.reason,
+            "closed_at": None,
+            "close_reason": None,
+            "canceled_at": None,
+            "cancellation_reason": None,
+            "updated_at": now
+        }}
+    )
+    
+    # Add reopen message to timeline
+    reopen_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": f"🔄 **Ticket Reopened**\n\n**By:** {current_user['name']}\n**From:** {old_status}\n**Reason:** {reopen_data.reason}",
+        "created_at": now,
+        "is_system_message": True
+    }
+    await db.order_messages.insert_one(reopen_message)
+    
+    # Notify requester
+    await create_notification(
+        db,
+        order["requester_id"],
+        "order_reopened",
+        "Your ticket has been reopened",
+        f"Ticket {order['order_code']} '{order['title']}' has been reopened by {current_user['name']}",
+        order['id']
+    )
+    
+    # Notify previous editor if assigned
+    if order.get("editor_id"):
+        await create_notification(
+            db,
+            order["editor_id"],
+            "order_reopened",
+            "A ticket you worked on was reopened",
+            f"Ticket {order['order_code']} has been reopened",
+            order['id']
+        )
+    
+    background_tasks.add_task(trigger_webhooks, "order.reopened", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "reopened_by": current_user["name"],
+        "reason": reopen_data.reason
+    })
+    
+    return {"message": "Order reopened successfully"}
+
+
 @router.post("/{order_id}/cancel")
 async def cancel_order(
     order_id: str,
