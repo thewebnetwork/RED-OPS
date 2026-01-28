@@ -222,7 +222,7 @@ async def get_announcement_ticker(current_user: dict = Depends(get_current_user)
 
 
 @router.get("/announcement-ticker/admin", response_model=AnnouncementTickerResponse)
-async def get_announcement_ticker_admin(current_user: dict = Depends(require_roles(["Admin"]))):
+async def get_announcement_ticker_admin(current_user: dict = Depends(require_roles(["Administrator"]))):
     """Get full announcement ticker data for admin editing"""
     ticker = await db.announcement_ticker.find_one({}, {"_id": 0})
     if not ticker:
