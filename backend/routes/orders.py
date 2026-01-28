@@ -1507,13 +1507,95 @@ async def list_messages(order_id: str, current_user: dict = Depends(get_current_
 
 # ============== FILE ROUTES ==============
 
+@router.post("/{order_id}/files/upload")
+async def upload_file(
+    order_id: str,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload a file attachment to an order"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Create order-specific upload directory
+    order_upload_dir = os.path.join(UPLOAD_DIR, order_id)
+    os.makedirs(order_upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_ext = os.path.splitext(file.filename)[1] if file.filename else ''
+    stored_filename = f"{file_id}{file_ext}"
+    file_path = os.path.join(order_upload_dir, stored_filename)
+    
+    # Save file to disk
+    try:
+        content = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    
+    # Create file record in DB
+    file_doc = {
+        "id": file_id,
+        "order_id": order_id,
+        "uploaded_by_user_id": current_user["id"],
+        "uploaded_by_name": current_user["name"],
+        "file_type": "Attachment",
+        "label": file.filename or "Attachment",
+        "url": f"/api/orders/{order_id}/files/{file_id}/download",
+        "original_filename": file.filename,
+        "stored_filename": stored_filename,
+        "content_type": file.content_type,
+        "is_final_delivery": False,
+        "created_at": get_utc_now()
+    }
+    await db.order_files.insert_one(file_doc)
+    
+    return {
+        "id": file_id,
+        "label": file.filename,
+        "url": file_doc["url"],
+        "message": "File uploaded successfully"
+    }
+
+
+@router.get("/{order_id}/files/{file_id}/download")
+async def download_file(
+    order_id: str,
+    file_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Download a file attachment"""
+    from fastapi.responses import FileResponse as FastAPIFileResponse
+    
+    file_doc = await db.order_files.find_one({"id": file_id, "order_id": order_id}, {"_id": 0})
+    if not file_doc:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    stored_filename = file_doc.get("stored_filename")
+    if not stored_filename:
+        raise HTTPException(status_code=404, detail="File storage info missing")
+    
+    file_path = os.path.join(UPLOAD_DIR, order_id, stored_filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    
+    return FastAPIFileResponse(
+        path=file_path,
+        filename=file_doc.get("original_filename", stored_filename),
+        media_type=file_doc.get("content_type", "application/octet-stream")
+    )
+
+
 @router.post("/{order_id}/files", response_model=FileResponse)
 async def create_file(
     order_id: str,
     file_data: FileCreate,
     current_user: dict = Depends(get_current_user)
 ):
-    """Add a file to an order"""
+    """Add a file reference to an order (for external URLs)"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
