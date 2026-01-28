@@ -36,8 +36,9 @@ class UserCreate(BaseModel):
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None  # Required if account_type = Partner
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
-    force_password_change: bool = False
-    force_otp_setup: bool = False
+    force_password_change: bool = True
+    force_otp_setup: bool = True
+    send_welcome_email: bool = True  # Send welcome email with temp password
 
 
 class UserUpdate(BaseModel):
