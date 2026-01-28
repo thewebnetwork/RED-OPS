@@ -257,24 +257,24 @@ class TestLogsAccess:
     
     def test_system_logs_access(self, auth_headers):
         """Test that Administrator can access system logs"""
-        response = requests.get(f"{BASE_URL}/api/settings/logs/system", headers=auth_headers)
+        response = requests.get(f"{BASE_URL}/api/logs/system", headers=auth_headers)
         assert response.status_code == 200, f"System logs access failed: {response.text}"
         data = response.json()
         assert "logs" in data
     
     def test_api_logs_access(self, auth_headers):
         """Test that Administrator can access API logs"""
-        response = requests.get(f"{BASE_URL}/api/settings/logs/api", headers=auth_headers)
+        response = requests.get(f"{BASE_URL}/api/logs/api", headers=auth_headers)
         assert response.status_code == 200, f"API logs access failed: {response.text}"
     
     def test_ui_logs_access(self, auth_headers):
         """Test that Administrator can access UI logs"""
-        response = requests.get(f"{BASE_URL}/api/settings/logs/ui", headers=auth_headers)
+        response = requests.get(f"{BASE_URL}/api/logs/ui", headers=auth_headers)
         assert response.status_code == 200, f"UI logs access failed: {response.text}"
     
     def test_user_logs_access(self, auth_headers):
         """Test that Administrator can access user logs"""
-        response = requests.get(f"{BASE_URL}/api/settings/logs/user", headers=auth_headers)
+        response = requests.get(f"{BASE_URL}/api/logs/user", headers=auth_headers)
         assert response.status_code == 200, f"User logs access failed: {response.text}"
 
 
