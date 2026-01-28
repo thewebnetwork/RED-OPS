@@ -551,46 +551,86 @@ export default function IAMPage() {
 
         {/* ROLES TAB */}
         <TabsContent value="roles" className="mt-6">
+          <div className="flex justify-end mb-4">
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openRoleDialog()}>
+              <Plus size={16} className="mr-2" />Add Role
+            </Button>
+          </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {identityConfig?.roles?.map(role => (
-              <Card key={role} className="relative overflow-hidden">
-                <div className={`absolute top-0 left-0 right-0 h-1 ${role === 'Administrator' ? 'bg-rose-500' : role === 'Operator' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+            {(roles.length > 0 ? roles : (identityConfig?.roles || []).map(r => ({ id: r, name: r, description: ROLE_TEMPLATES[r]?.description, is_system: true }))).map(role => (
+              <Card key={role.id || role.name} className="relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: role.color || (role.name === 'Administrator' ? '#DC2626' : role.name === 'Operator' ? '#2563EB' : '#10B981') }} />
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Shield size={18} />{role}</CardTitle>
-                  <CardDescription>{ROLE_TEMPLATES[role]?.description}</CardDescription>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2"><Shield size={18} />{role.name}</CardTitle>
+                      <CardDescription className="mt-1">{role.description || ROLE_TEMPLATES[role.name]?.description}</CardDescription>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openRoleDialog(role)}><Edit size={14} /></Button>
+                      {!role.is_system && (
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'role', item: role })}><Trash2 size={14} className="text-red-500" /></Button>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium text-slate-700 mb-2">Key Permissions:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries(ROLE_TEMPLATES[role]?.permissions || {}).filter(([_, perms]) => Object.values(perms).some(v => v)).slice(0, 5).map(([module]) => (
-                      <Badge key={module} variant="secondary" className="text-xs">{PERMISSION_MODULES[module]?.label || module}</Badge>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 mb-2">Key Permissions:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(role.permissions || ROLE_TEMPLATES[role.name]?.permissions || {}).filter(([_, perms]) => Object.values(perms).some(v => v)).slice(0, 5).map(([module]) => (
+                          <Badge key={module} variant="secondary" className="text-xs">{PERMISSION_MODULES[module]?.label || module}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    {role.is_system && <Badge variant="outline" className="text-xs">System</Badge>}
                   </div>
+                  {role.user_count !== undefined && <p className="text-xs text-slate-400 mt-3">{role.user_count} users</p>}
                 </CardContent>
               </Card>
             ))}
           </div>
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Account Types</CardTitle>
-              <CardDescription>Classification for routing, pricing, and UI</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-4 gap-4">
-                {identityConfig?.account_types?.map(type => (
-                  <div key={type} className="p-4 border rounded-lg">
-                    <Badge className={getAccountTypeColor(type)}>{type}</Badge>
-                    <p className="text-sm text-slate-500 mt-2">
-                      {type === 'Partner' && 'Business partners with subscription plans'}
-                      {type === 'Media Client' && 'Media service clients (A La Carte)'}
-                      {type === 'Internal Staff' && 'Company employees'}
-                      {type === 'Vendor/Freelancer' && 'External contractors'}
-                    </p>
+        </TabsContent>
+
+        {/* ACCOUNT TYPES TAB */}
+        <TabsContent value="account-types" className="mt-6">
+          <div className="flex justify-end mb-4">
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openAccountTypeDialog()}>
+              <Plus size={16} className="mr-2" />Add Account Type
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-4 gap-4">
+            {(accountTypes.length > 0 ? accountTypes : (identityConfig?.account_types || []).map(at => ({ id: at, name: at, is_system: true }))).map(at => (
+              <Card key={at.id || at.name} className="relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: at.color || '#6366F1' }} />
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Badge className={getAccountTypeColor(at.name)}>{at.name}</Badge>
+                      <p className="text-sm text-slate-500 mt-2">
+                        {at.description || (
+                          at.name === 'Partner' ? 'Business partners with subscription plans' :
+                          at.name === 'Media Client' ? 'Media service clients (A La Carte)' :
+                          at.name === 'Internal Staff' ? 'Company employees' :
+                          at.name === 'Vendor/Freelancer' ? 'External contractors' : ''
+                        )}
+                      </p>
+                      {at.requires_subscription && <Badge variant="outline" className="mt-2 text-xs">Requires Plan</Badge>}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openAccountTypeDialog(at)}><Edit size={14} /></Button>
+                      {!at.is_system && (
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'accountType', item: at })}><Trash2 size={14} className="text-red-500" /></Button>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  {at.is_system && <Badge variant="outline" className="mt-2 text-xs">System</Badge>}
+                  {at.user_count !== undefined && <p className="text-xs text-slate-400 mt-3">{at.user_count} users</p>}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         {/* PLANS TAB */}
