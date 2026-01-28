@@ -90,6 +90,15 @@ export default function OrderDetail() {
   const [deliverDialogOpen, setDeliverDialogOpen] = useState(false);
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [deliveringOrder, setDeliveringOrder] = useState(false);
+  
+  // Reassign state
+  const [reassignDialogOpen, setReassignDialogOpen] = useState(false);
+  const [reassignOptions, setReassignOptions] = useState({ users: [], teams: [], specialties: [] });
+  const [reassignType, setReassignType] = useState('user');
+  const [reassignTargetId, setReassignTargetId] = useState('');
+  const [reassignReason, setReassignReason] = useState('');
+  const [reassigning, setReassigning] = useState(false);
+  
   const [newFile, setNewFile] = useState({
     file_type: 'Export',
     label: '',
