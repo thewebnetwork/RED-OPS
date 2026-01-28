@@ -243,7 +243,7 @@ export default function Logs() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">System Logs</h1>
-          <p className="text-slate-500 mt-1">View and export application logs</p>
+          <p className="text-slate-500 mt-1">View and export application logs across all modules</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -251,11 +251,12 @@ export default function Logs() {
             onClick={toggleStreaming}
             className={isStreaming ? "bg-rose-600 hover:bg-rose-700" : ""}
             data-testid="stream-logs-btn"
+            title="Stream logs in real-time as they occur"
           >
             {isStreaming ? (
               <>
                 <Pause size={16} className="mr-2" />
-                Stop Streaming
+                Stop Stream
               </>
             ) : (
               <>
@@ -274,11 +275,12 @@ export default function Logs() {
             className={autoRefresh && !isStreaming ? "bg-green-600 hover:bg-green-700" : ""}
             disabled={isStreaming}
             data-testid="auto-refresh-btn"
+            title="Auto-refresh logs every 5 seconds"
           >
             <RefreshCw size={16} className={`mr-2 ${autoRefresh && !isStreaming ? 'animate-spin' : ''}`} />
-            {autoRefresh && !isStreaming ? 'Polling ON' : 'Poll (5s)'}
+            {autoRefresh && !isStreaming ? 'Polling' : 'Poll (5s)'}
           </Button>
-          <Button variant="outline" onClick={handleDownload} data-testid="download-logs-btn">
+          <Button variant="outline" onClick={handleDownload} data-testid="download-logs-btn" title="Download visible logs as text file">
             <Download size={16} className="mr-2" />
             Download
           </Button>
