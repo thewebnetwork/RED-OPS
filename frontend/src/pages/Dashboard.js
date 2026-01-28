@@ -378,16 +378,13 @@ function AdminDashboard() {
   );
 }
 
-// Editor Dashboard
+// Editor Dashboard (for Operators, Partners, Vendors, Internal Staff)
 function EditorDashboard() {
   const { t } = useTranslation();
-  const [dashboard, setDashboard] = useState({
-    new_orders: [],
-    in_progress: [],
-    pending_review: [],
-    responded: [],
+  const [myWork, setMyWork] = useState({
+    working_on: [],
     delivered: [],
-    sla_breaching: []
+    my_submitted_count: 0
   });
   const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -398,26 +395,16 @@ function EditorDashboard() {
 
   const fetchData = async () => {
     try {
-      const [dashboardRes, ratingsRes] = await Promise.all([
-        axios.get(`${API}/dashboard/editor`),
+      const [myWorkRes, ratingsRes] = await Promise.all([
+        axios.get(`${API}/dashboard/my-work`),
         axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null }))
       ]);
-      setDashboard(dashboardRes.data);
+      setMyWork(myWorkRes.data);
       setRatingStats(ratingsRes.data);
     } catch (error) {
       toast.error(t('errors.generic'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePickOrder = async (orderId) => {
-    try {
-      await axios.post(`${API}/orders/${orderId}/pick`);
-      toast.success(t('success.orderPicked'));
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || t('errors.generic'));
     }
   };
 
@@ -428,116 +415,60 @@ function EditorDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - Editor</h1>
-        <p className="text-slate-500 mt-1">{t('dashboard.manageOrders')}</p>
+        <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
+        <p className="text-slate-500 mt-1">Your work overview</p>
       </div>
 
       {/* Rating Stats Card - Google Review Style */}
       <RatingStatsCard stats={ratingStats} title={t('ratings.yourRatings')} t={t} />
 
       {/* KPI Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <KPICard label={t('dashboard.newOrders')} value={dashboard.new_orders.length} icon={Inbox} color="bg-blue-500" />
-        <KPICard label={t('orders.status.inProgress')} value={dashboard.in_progress.length} icon={Clock} color="bg-amber-500" />
-        <KPICard label={t('dashboard.sentForReview')} value={dashboard.pending_review.length} icon={Send} color="bg-purple-500" />
-        <KPICard label={t('dashboard.cameBack')} value={dashboard.responded.length} icon={RotateCcw} color="bg-indigo-500" />
-        <KPICard label={t('orders.status.delivered')} value={dashboard.delivered.length} icon={CheckCircle2} color="bg-green-500" />
-        <KPICard label={t('dashboard.slaBreach')} value={dashboard.sla_breaching.length} icon={AlertTriangle} color="bg-red-500" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <KPICard label="Tickets I'm Working On" value={myWork.working_on.length} icon={Clock} color="bg-amber-500" />
+        <KPICard label="Tickets Delivered" value={myWork.delivered.length} icon={CheckCircle2} color="bg-green-500" />
+        <Link to="/my-tickets">
+          <KPICard label="My Submitted Tickets" value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
+        </Link>
       </div>
 
-      {/* SLA Breaching Alert */}
-      {dashboard.sla_breaching.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-red-700 flex items-center gap-2">
-              <AlertTriangle size={20} />
-              {t('dashboard.slaBreach')} ({dashboard.sla_breaching.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {dashboard.sla_breaching.map(order => (
-              <OrderCard key={order.id} order={order} t={t} />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* New Orders Pool */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Inbox size={20} className="text-blue-500" />
-            {t('dashboard.newOrders')} - {t('dashboard.pickFromPool')} ({dashboard.new_orders.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 space-y-3">
-          {dashboard.new_orders.map(order => (
-            <OrderCard 
-              key={order.id} 
-              order={order} 
-              showPickButton 
-              onPick={handlePickOrder}
-              t={t}
-            />
-          ))}
-          {dashboard.new_orders.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noNewOrders')}</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Orders Responded (Came Back) */}
-      {dashboard.responded.length > 0 && (
-        <Card className="border-indigo-200 bg-indigo-50">
-          <CardHeader className="border-b border-indigo-100 pb-4">
-            <CardTitle className="flex items-center gap-2 text-indigo-700">
-              <RotateCcw size={20} />
-              {t('dashboard.ordersResponded')} ({dashboard.responded.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 space-y-3">
-            {dashboard.responded.map(order => (
-              <OrderCard key={order.id} order={order} t={t} />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* In Progress */}
+      {/* Tickets I'm Working On */}
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            {t('dashboard.ordersWorkingOn')} ({dashboard.in_progress.length})
+            Tickets I'm Working On ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
-          {dashboard.in_progress.map(order => (
+          {myWork.working_on.map(order => (
             <OrderCard key={order.id} order={order} t={t} />
           ))}
-          {dashboard.in_progress.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noOrdersInProgress')}</p>
+          {myWork.working_on.length === 0 && (
+            <p className="text-center text-slate-500 py-8">No tickets currently assigned to you</p>
           )}
         </CardContent>
       </Card>
 
-      {/* Pending Review */}
+      {/* Tickets Delivered */}
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
-            <Send size={20} className="text-purple-500" />
-            {t('dashboard.sentForReview')} ({dashboard.pending_review.length})
+            <CheckCircle2 size={20} className="text-green-500" />
+            Tickets Delivered ({myWork.delivered.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
-          {dashboard.pending_review.map(order => (
+          {myWork.delivered.slice(0, 10).map(order => (
             <OrderCard key={order.id} order={order} t={t} />
           ))}
-          {dashboard.pending_review.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noPendingReview')}</p>
+          {myWork.delivered.length === 0 && (
+            <p className="text-center text-slate-500 py-8">No delivered tickets yet</p>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
       {/* Recently Delivered */}
       <Card className="border-slate-200">
