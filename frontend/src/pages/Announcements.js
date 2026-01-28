@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -8,24 +8,32 @@ import { Textarea } from '../components/ui/textarea';
 import { Switch } from '../components/ui/switch';
 import { Badge } from '../components/ui/badge';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
-import { Megaphone, Save, Eye, Users, Shield, Globe, Info, Briefcase } from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Megaphone, Plus, Edit, Trash2, Eye, Users, Shield, Globe, Briefcase, Calendar, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Helper to format ISO date to datetime-local input value (no timezone conversion)
 const formatDateTimeLocal = (isoString) => {
   if (!isoString) return '';
-  // If it's already in datetime-local format (YYYY-MM-DDTHH:MM), return as-is
   if (isoString.length === 16) return isoString;
-  // If it's an ISO string with timezone, extract just the local part
-  // Parse and format without timezone conversion
   try {
     const date = new Date(isoString);
     const year = date.getFullYear();
@@ -40,459 +48,510 @@ const formatDateTimeLocal = (isoString) => {
 };
 
 export default function Announcements() {
-  const [ticker, setTicker] = useState({
+  const [activeTab, setActiveTab] = useState('list');
+  const [announcements, setAnnouncements] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, item: null });
+  
+  // Form state
+  const [form, setForm] = useState({
+    title: '',
     message: '',
-    is_active: false,
+    is_active: true,
     send_to_all: true,
     target_teams: [],
     target_roles: [],
     target_specialties: [],
     start_at: '',
     end_at: '',
-    priority: '',
+    priority: 1,
     background_color: '#A2182C',
     text_color: '#FFFFFF'
   });
-  const [teams, setTeams] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [specialties, setSpecialties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [validationError, setValidationError] = useState('');
-  const initialDataRef = useRef(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Track changes
-  useEffect(() => {
-    if (initialDataRef.current) {
-      const changed = JSON.stringify(ticker) !== JSON.stringify(initialDataRef.current);
-      setHasChanges(changed);
-    }
-    
-    // Validation: if send_to_all is OFF, require at least one team, role, or specialty
-    if (!ticker.send_to_all && 
-        ticker.target_teams.length === 0 && 
-        ticker.target_roles.length === 0 && 
-        ticker.target_specialties.length === 0) {
-      setValidationError('Select at least one role, team, or specialty, or turn on "Send to all"');
-    } else {
-      setValidationError('');
-    }
-  }, [ticker]);
-
-  // Browser beforeunload warning
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasChanges) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes.';
-        return e.returnValue;
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasChanges]);
-
   const fetchData = async () => {
     try {
-      const [tickerRes, teamsRes, rolesRes, specialtiesRes] = await Promise.all([
-        axios.get(`${API}/announcement-ticker/admin`),
+      const [announcementsRes, teamsRes, rolesRes, specialtiesRes] = await Promise.all([
+        axios.get(`${API}/announcements`).catch(() => ({ data: [] })),
         axios.get(`${API}/teams`),
-        axios.get(`${API}/roles`),
+        axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
         axios.get(`${API}/specialties`)
       ]);
       
-      const tickerData = {
-        message: tickerRes.data.message || '',
-        is_active: tickerRes.data.is_active || false,
-        send_to_all: tickerRes.data.send_to_all ?? true,
-        target_teams: tickerRes.data.target_teams || [],
-        target_roles: tickerRes.data.target_roles || [],
-        target_specialties: tickerRes.data.target_specialties || [],
-        start_at: tickerRes.data.start_at || '',
-        end_at: tickerRes.data.end_at || '',
-        priority: tickerRes.data.priority || '',
-        background_color: tickerRes.data.background_color || '#A2182C',
-        text_color: tickerRes.data.text_color || '#FFFFFF'
-      };
-      
-      setTicker(tickerData);
-      initialDataRef.current = tickerData;
+      setAnnouncements(announcementsRes.data || []);
       setTeams(teamsRes.data || []);
       setRoles(rolesRes.data || []);
       setSpecialties(specialtiesRes.data || []);
     } catch (error) {
-      console.error('Failed to fetch data');
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
+  const openDialog = (announcement = null) => {
+    if (announcement) {
+      setEditingAnnouncement(announcement);
+      setForm({
+        title: announcement.title || '',
+        message: announcement.message || '',
+        is_active: announcement.is_active ?? true,
+        send_to_all: announcement.send_to_all ?? true,
+        target_teams: announcement.target_teams || [],
+        target_roles: announcement.target_roles || [],
+        target_specialties: announcement.target_specialties || [],
+        start_at: formatDateTimeLocal(announcement.start_at) || '',
+        end_at: formatDateTimeLocal(announcement.end_at) || '',
+        priority: announcement.priority || 1,
+        background_color: announcement.background_color || '#A2182C',
+        text_color: announcement.text_color || '#FFFFFF'
+      });
+    } else {
+      setEditingAnnouncement(null);
+      setForm({
+        title: '',
+        message: '',
+        is_active: true,
+        send_to_all: true,
+        target_teams: [],
+        target_roles: [],
+        target_specialties: [],
+        start_at: '',
+        end_at: '',
+        priority: 1,
+        background_color: '#A2182C',
+        text_color: '#FFFFFF'
+      });
+    }
+    setDialogOpen(true);
+  };
+
   const handleSave = async () => {
-    // Validate before saving
-    if (!ticker.send_to_all && 
-        ticker.target_teams.length === 0 && 
-        ticker.target_roles.length === 0 && 
-        ticker.target_specialties.length === 0) {
-      toast.error('Select at least one role, team, or specialty, or turn on "Send to all"');
+    if (!form.title.trim() || !form.message.trim()) {
+      toast.error('Title and message are required');
       return;
     }
     
-    setSaving(true);
+    if (!form.send_to_all && !form.target_teams.length && !form.target_roles.length && !form.target_specialties.length) {
+      toast.error('Select at least one target or enable "Send to all"');
+      return;
+    }
+    
     try {
-      await axios.put(`${API}/announcement-ticker`, ticker);
-      toast.success('Announcement updated');
-      initialDataRef.current = { ...ticker };
-      setHasChanges(false);
-      // Trigger a page refresh for the ticker component
-      window.dispatchEvent(new Event('ticker-updated'));
+      const payload = {
+        ...form,
+        start_at: form.start_at ? new Date(form.start_at).toISOString() : null,
+        end_at: form.end_at ? new Date(form.end_at).toISOString() : null
+      };
+      
+      if (editingAnnouncement) {
+        await axios.patch(`${API}/announcements/${editingAnnouncement.id}`, payload);
+        toast.success('Announcement updated');
+      } else {
+        await axios.post(`${API}/announcements`, payload);
+        toast.success('Announcement created');
+      }
+      
+      setDialogOpen(false);
+      fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to update announcement');
-    } finally {
-      setSaving(false);
+      toast.error(error.response?.data?.detail || 'Failed to save announcement');
     }
   };
 
-  const handleToggleTeam = (teamId) => {
-    setTicker(prev => {
-      const newTargets = prev.target_teams.includes(teamId)
-        ? prev.target_teams.filter(id => id !== teamId)
-        : [...prev.target_teams, teamId];
-      return { ...prev, target_teams: newTargets };
-    });
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${API}/announcements/${deleteDialog.item.id}`);
+      toast.success('Announcement deleted');
+      setDeleteDialog({ open: false, item: null });
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to delete announcement');
+    }
   };
 
-  const handleToggleRole = (roleId) => {
-    setTicker(prev => {
-      const newTargets = prev.target_roles.includes(roleId)
-        ? prev.target_roles.filter(id => id !== roleId)
-        : [...prev.target_roles, roleId];
-      return { ...prev, target_roles: newTargets };
-    });
+  const handleToggle = (field, id) => {
+    const current = form[field];
+    const updated = current.includes(id) 
+      ? current.filter(i => i !== id)
+      : [...current, id];
+    setForm({ ...form, [field]: updated });
   };
 
-  const handleToggleSpecialty = (specialtyId) => {
-    setTicker(prev => {
-      const newTargets = prev.target_specialties.includes(specialtyId)
-        ? prev.target_specialties.filter(id => id !== specialtyId)
-        : [...prev.target_specialties, specialtyId];
-      return { ...prev, target_specialties: newTargets };
-    });
+  const getStatusBadge = (ann) => {
+    const now = new Date();
+    const startAt = ann.start_at ? new Date(ann.start_at) : null;
+    const endAt = ann.end_at ? new Date(ann.end_at) : null;
+    
+    if (!ann.is_active) return <Badge variant="outline" className="text-slate-500">Inactive</Badge>;
+    if (startAt && now < startAt) return <Badge className="bg-yellow-100 text-yellow-700">Scheduled</Badge>;
+    if (endAt && now > endAt) return <Badge className="bg-slate-100 text-slate-600">Expired</Badge>;
+    return <Badge className="bg-emerald-100 text-emerald-700">Active</Badge>;
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
   }
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="announcements-page">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Announcement Banner</h1>
-        <p className="text-slate-500 mt-1">Manage the global announcement banner and target specific audiences</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <Megaphone className="text-[#A2182C]" />
+            Announcements
+          </h1>
+          <p className="text-slate-500 mt-1">Create and manage platform announcements for users</p>
+        </div>
+        <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
+          <Plus size={16} className="mr-2" />
+          New Announcement
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Settings Card */}
-        <Card className="border-slate-200">
-          <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Megaphone size={20} />
-              Banner Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            {/* Active Toggle */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold">{announcements.length}</p>
+            <p className="text-sm text-slate-500">Total</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-emerald-600">{announcements.filter(a => a.is_active).length}</p>
+            <p className="text-sm text-slate-500">Active</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-yellow-600">{announcements.filter(a => a.start_at && new Date(a.start_at) > new Date()).length}</p>
+            <p className="text-sm text-slate-500">Scheduled</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-slate-400">{announcements.filter(a => !a.is_active).length}</p>
+            <p className="text-sm text-slate-500">Inactive</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Announcements List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All Announcements</CardTitle>
+          <CardDescription>Announcements are displayed by priority (highest first). One announcement shown at a time per user.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {announcements.length === 0 ? (
+            <div className="py-12 text-center text-slate-500">
+              <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
+              <p>No announcements yet</p>
+              <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
+                Create Your First Announcement
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {announcements.map((ann) => (
+                <div 
+                  key={ann.id} 
+                  className="p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                  style={{ borderLeftColor: ann.background_color, borderLeftWidth: '4px' }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-slate-900">{ann.title}</h3>
+                        {getStatusBadge(ann)}
+                        <Badge variant="outline" className="text-xs">Priority: {ann.priority}</Badge>
+                      </div>
+                      <p className="text-sm text-slate-600 mt-1 line-clamp-2">{ann.message}</p>
+                      <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500">
+                        {ann.send_to_all ? (
+                          <span className="flex items-center gap-1"><Globe size={12} /> All Users</span>
+                        ) : (
+                          <>
+                            {ann.target_team_names?.length > 0 && (
+                              <span className="flex items-center gap-1"><Users size={12} /> {ann.target_team_names.join(', ')}</span>
+                            )}
+                            {ann.target_role_names?.length > 0 && (
+                              <span className="flex items-center gap-1"><Shield size={12} /> {ann.target_role_names.join(', ')}</span>
+                            )}
+                            {ann.target_specialty_names?.length > 0 && (
+                              <span className="flex items-center gap-1"><Briefcase size={12} /> {ann.target_specialty_names.join(', ')}</span>
+                            )}
+                          </>
+                        )}
+                        {ann.start_at && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} /> 
+                            Starts: {format(new Date(ann.start_at), 'MMM d, yyyy HH:mm')}
+                          </span>
+                        )}
+                        {ann.end_at && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} /> 
+                            Ends: {format(new Date(ann.end_at), 'MMM d, yyyy HH:mm')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Button variant="ghost" size="sm" onClick={() => openDialog(ann)}>
+                        <Edit size={16} />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, item: ann })}>
+                        <Trash2 size={16} className="text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingAnnouncement ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
+            <DialogDescription>
+              Create announcements that will be displayed to users in a banner.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 pt-4">
+            {/* Basic Info */}
+            <div className="grid gap-4">
               <div>
-                <Label className="text-base">Enable Banner</Label>
-                <p className="text-sm text-slate-500">Show the announcement banner</p>
+                <Label>Title *</Label>
+                <Input 
+                  value={form.title} 
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Announcement title"
+                  data-testid="announcement-title-input"
+                />
               </div>
-              <Switch
-                checked={ticker.is_active}
-                onCheckedChange={(checked) => setTicker(prev => ({ ...prev, is_active: checked }))}
-                data-testid="ticker-active-switch"
-              />
+              <div>
+                <Label>Message *</Label>
+                <Textarea 
+                  value={form.message} 
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  placeholder="The announcement message to display"
+                  rows={3}
+                  data-testid="announcement-message-input"
+                />
+              </div>
             </div>
 
-            {/* Message */}
-            <div>
-              <Label>Announcement Message *</Label>
-              <Textarea
-                value={ticker.message}
-                onChange={(e) => setTicker(prev => ({ ...prev, message: e.target.value }))}
-                placeholder="Enter your announcement message..."
-                className="mt-1.5 min-h-[80px]"
-                data-testid="ticker-message-input"
-              />
+            {/* Active & Priority */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={form.is_active} 
+                  onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+                  data-testid="announcement-active-switch"
+                />
+                <Label>Active</Label>
+              </div>
+              <div>
+                <Label>Priority (higher = shown first)</Label>
+                <Input 
+                  type="number" 
+                  min={1} 
+                  max={100}
+                  value={form.priority} 
+                  onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 1 })}
+                />
+              </div>
             </div>
 
             {/* Schedule */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Start Date/Time (optional)</Label>
-                <Input
-                  type="datetime-local"
-                  value={ticker.start_at ? formatDateTimeLocal(ticker.start_at) : ''}
-                  onChange={(e) => setTicker(prev => ({ ...prev, start_at: e.target.value || '' }))}
-                  className="mt-1.5"
+                <Label>Start At (optional)</Label>
+                <Input 
+                  type="datetime-local" 
+                  value={form.start_at} 
+                  onChange={(e) => setForm({ ...form, start_at: e.target.value })}
                 />
               </div>
               <div>
-                <Label>End Date/Time (optional)</Label>
-                <Input
-                  type="datetime-local"
-                  value={ticker.end_at ? formatDateTimeLocal(ticker.end_at) : ''}
-                  onChange={(e) => setTicker(prev => ({ ...prev, end_at: e.target.value || '' }))}
-                  className="mt-1.5"
+                <Label>End At (optional)</Label>
+                <Input 
+                  type="datetime-local" 
+                  value={form.end_at} 
+                  onChange={(e) => setForm({ ...form, end_at: e.target.value })}
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Targeting Card */}
-        <Card className="border-slate-200">
-          <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center gap-2">
-              <Users size={20} />
-              Audience Targeting
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            {/* Send to All Toggle */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+            {/* Targeting */}
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Globe size={20} className="text-slate-500" />
-                <div>
-                  <Label className="text-base">Send to All</Label>
-                  <p className="text-sm text-slate-500">Show to everyone</p>
-                </div>
+                <Switch 
+                  checked={form.send_to_all} 
+                  onCheckedChange={(v) => setForm({ ...form, send_to_all: v })}
+                />
+                <Label className="flex items-center gap-2">
+                  <Globe size={16} />
+                  Send to All Users
+                </Label>
               </div>
-              <Switch
-                checked={ticker.send_to_all}
-                onCheckedChange={(checked) => setTicker(prev => ({ ...prev, send_to_all: checked }))}
-                data-testid="send-to-all-switch"
-              />
-            </div>
 
-            {ticker.send_to_all ? (
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Info size={16} className="text-blue-500 mt-0.5" />
-                  <p className="text-sm text-blue-700">This announcement will be shown to everyone.</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Team Selector */}
-                <div>
-                  <Label className="flex items-center gap-2 mb-2">
-                    <Users size={16} />
-                    Target Teams
-                  </Label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                    {teams.length === 0 ? (
-                      <p className="text-sm text-slate-500">No teams available</p>
-                    ) : (
-                      teams.map(team => (
-                        <label key={team.id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={ticker.target_teams.includes(team.id)}
-                            onChange={() => handleToggleTeam(team.id)}
-                            className="rounded border-slate-300 text-rose-600 focus:ring-rose-500"
-                          />
-                          <span className="text-sm">{team.name}</span>
-                        </label>
-                      ))
-                    )}
-                  </div>
-                  {ticker.target_teams.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {ticker.target_teams.map(teamId => {
-                        const team = teams.find(t => t.id === teamId);
-                        return team && (
-                          <Badge key={teamId} className="bg-blue-100 text-blue-700">
-                            {team.name}
-                          </Badge>
-                        );
-                      })}
+              {!form.send_to_all && (
+                <div className="space-y-4 p-4 border rounded-lg bg-slate-50">
+                  {!form.send_to_all && form.target_teams.length === 0 && form.target_roles.length === 0 && form.target_specialties.length === 0 && (
+                    <div className="flex items-center gap-2 text-amber-600 text-sm">
+                      <AlertCircle size={16} />
+                      Select at least one team, role, or specialty
                     </div>
                   )}
-                </div>
-
-                {/* Role Selector */}
-                <div>
-                  <Label className="flex items-center gap-2 mb-2">
-                    <Shield size={16} />
-                    Target Roles
-                  </Label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                    {roles.length === 0 ? (
-                      <p className="text-sm text-slate-500">No roles available</p>
-                    ) : (
-                      roles.map(role => (
-                        <label key={role.id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={ticker.target_roles.includes(role.id)}
-                            onChange={() => handleToggleRole(role.id)}
-                            className="rounded border-slate-300 text-rose-600 focus:ring-rose-500"
-                          />
-                          <span className="text-sm">{role.name}</span>
-                        </label>
-                      ))
-                    )}
-                  </div>
-                  {ticker.target_roles.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {ticker.target_roles.map(roleId => {
-                        const role = roles.find(r => r.id === roleId);
-                        return role && (
-                          <Badge key={roleId} className="bg-purple-100 text-purple-700">
-                            {role.name}
-                          </Badge>
-                        );
-                      })}
+                  
+                  {/* Teams */}
+                  <div>
+                    <Label className="flex items-center gap-2 mb-2"><Users size={14} /> Target Teams</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {teams.map((team) => (
+                        <Badge 
+                          key={team.id}
+                          variant={form.target_teams.includes(team.id) ? 'default' : 'outline'}
+                          className={`cursor-pointer ${form.target_teams.includes(team.id) ? 'bg-blue-600' : ''}`}
+                          onClick={() => handleToggle('target_teams', team.id)}
+                        >
+                          {team.name}
+                        </Badge>
+                      ))}
+                      {teams.length === 0 && <span className="text-sm text-slate-400">No teams available</span>}
                     </div>
-                  )}
-                </div>
-
-                {/* Specialty Selector */}
-                <div>
-                  <Label className="flex items-center gap-2 mb-2">
-                    <Briefcase size={16} />
-                    Target Specialties
-                  </Label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                    {specialties.length === 0 ? (
-                      <p className="text-sm text-slate-500">No specialties available</p>
-                    ) : (
-                      specialties.map(specialty => (
-                        <label key={specialty.id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={ticker.target_specialties.includes(specialty.id)}
-                            onChange={() => handleToggleSpecialty(specialty.id)}
-                            className="rounded border-slate-300 text-rose-600 focus:ring-rose-500"
-                          />
-                          <span className="text-sm">{specialty.name}</span>
-                        </label>
-                      ))
-                    )}
                   </div>
-                  {ticker.target_specialties.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {ticker.target_specialties.map(specialtyId => {
-                        const specialty = specialties.find(s => s.id === specialtyId);
-                        return specialty && (
-                          <Badge key={specialtyId} className="bg-emerald-100 text-emerald-700">
-                            {specialty.name}
-                          </Badge>
-                        );
-                      })}
+
+                  {/* Roles */}
+                  <div>
+                    <Label className="flex items-center gap-2 mb-2"><Shield size={14} /> Target Roles</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {roles.map((role) => (
+                        <Badge 
+                          key={role.id}
+                          variant={form.target_roles.includes(role.id) ? 'default' : 'outline'}
+                          className={`cursor-pointer ${form.target_roles.includes(role.id) ? 'bg-purple-600' : ''}`}
+                          onClick={() => handleToggle('target_roles', role.id)}
+                        >
+                          {role.name}
+                        </Badge>
+                      ))}
+                      {roles.length === 0 && <span className="text-sm text-slate-400">No roles available</span>}
                     </div>
-                  )}
-                </div>
-
-                {/* Helper Text */}
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <Info size={16} className="text-amber-500 mt-0.5" />
-                    <p className="text-sm text-amber-700">
-                      Users who match <strong>any</strong> selected team, role, or specialty will see this announcement.
-                    </p>
                   </div>
-                </div>
 
-                {/* Validation Error */}
-                {validationError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-700">{validationError}</p>
+                  {/* Specialties */}
+                  <div>
+                    <Label className="flex items-center gap-2 mb-2"><Briefcase size={14} /> Target Specialties</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {specialties.map((spec) => (
+                        <Badge 
+                          key={spec.id}
+                          variant={form.target_specialties.includes(spec.id) ? 'default' : 'outline'}
+                          className={`cursor-pointer ${form.target_specialties.includes(spec.id) ? 'bg-emerald-600' : ''}`}
+                          onClick={() => handleToggle('target_specialties', spec.id)}
+                        >
+                          {spec.name}
+                        </Badge>
+                      ))}
+                      {specialties.length === 0 && <span className="text-sm text-slate-400">No specialties available</span>}
+                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Preview & Save */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Eye size={20} />
-            Preview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="border border-slate-200 rounded-lg overflow-hidden mb-6">
-            {/* Simulated Header */}
-            <div className="bg-white h-16 flex items-center px-6 border-b border-slate-200">
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 bg-slate-200 rounded" />
-                <div className="w-24 h-4 bg-slate-200 rounded" />
-              </div>
-              <div className="flex-1" />
-              
-              {/* Banner Preview (inline in header) */}
-              {ticker.is_active && ticker.message && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-slate-200 mr-4 max-w-sm">
-                  <Megaphone size={16} className="shrink-0 text-black" />
-                  <span className="text-sm font-bold text-black truncate">{ticker.message}</span>
                 </div>
               )}
-              
-              <div className="w-8 h-8 bg-slate-200 rounded-full" />
             </div>
-            
-            {/* Simulated Content */}
-            <div className="p-6 space-y-3 bg-slate-50">
-              <div className="w-full h-6 bg-slate-200 rounded" />
-              <div className="w-3/4 h-4 bg-slate-200 rounded" />
-              <div className="w-1/2 h-4 bg-slate-200 rounded" />
+
+            {/* Colors */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Background Color</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="color" 
+                    value={form.background_color} 
+                    onChange={(e) => setForm({ ...form, background_color: e.target.value })}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input 
+                    value={form.background_color} 
+                    onChange={(e) => setForm({ ...form, background_color: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="color" 
+                    value={form.text_color} 
+                    onChange={(e) => setForm({ ...form, text_color: e.target.value })}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input 
+                    value={form.text_color} 
+                    onChange={(e) => setForm({ ...form, text_color: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div>
+              <Label className="mb-2 block">Preview</Label>
+              <div 
+                className="p-4 rounded-lg text-center"
+                style={{ backgroundColor: form.background_color, color: form.text_color }}
+              >
+                <p className="font-medium">{form.title || 'Title'}</p>
+                <p className="text-sm opacity-90">{form.message || 'Your announcement message will appear here'}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleSave} data-testid="save-announcement-btn">
+                {editingAnnouncement ? 'Update' : 'Create'} Announcement
+              </Button>
             </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-slate-500">
-              {ticker.is_active ? (
-                ticker.send_to_all ? (
-                  <span className="flex items-center gap-2">
-                    <Globe size={16} /> Visible to all users
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <Users size={16} /> 
-                    Visible to: {ticker.target_teams.length} team(s), {ticker.target_roles.length} role(s)
-                  </span>
-                )
-              ) : (
-                <span className="text-slate-400">Banner is disabled</span>
-              )}
-            </div>
-            
-            <Button 
-              onClick={handleSave} 
-              className={`${hasChanges && !validationError ? 'bg-rose-600 hover:bg-rose-700' : 'bg-slate-400'}`}
-              disabled={saving || !hasChanges || !!validationError}
-              data-testid="save-ticker-btn"
-            >
-              <Save size={18} className="mr-2" />
-              {saving ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Announcement?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{deleteDialog.item?.title}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
