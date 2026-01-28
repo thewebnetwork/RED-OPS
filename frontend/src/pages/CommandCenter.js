@@ -396,6 +396,35 @@ export default function CommandCenter() {
                           }}
                         />
                       )}
+                      {/* Generic form for categories that don't have special forms */}
+                      {!showEditingForm && !showFeatureForm && !showBugForm && (
+                        <GenericRequestForm
+                          title={title}
+                          description={description}
+                          attachments={attachments}
+                          categoryL1Id={selectedL1}
+                          categoryL2Id={selectedL2}
+                          requestType={requestType}
+                          onSuccess={() => {
+                            setTitle('');
+                            setDescription('');
+                            setAttachments([]);
+                            setSelectedL1('');
+                            setSelectedL2('');
+                            fetchData();
+                            toast.success('Request submitted successfully!');
+                          }}
+                          onDraftSaved={() => {
+                            setTitle('');
+                            setDescription('');
+                            setAttachments([]);
+                            setSelectedL1('');
+                            setSelectedL2('');
+                            fetchData();
+                            toast.success('Draft saved! View it in My Tickets.');
+                          }}
+                        />
+                      )}
                     </div>
                   )}
 
