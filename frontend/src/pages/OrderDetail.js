@@ -41,7 +41,8 @@ import {
   Play,
   RotateCcw,
   XCircle,
-  Shuffle
+  Shuffle,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
