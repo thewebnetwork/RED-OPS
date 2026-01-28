@@ -123,7 +123,12 @@ export default function IAMPage() {
   const [roles, setRoles] = useState([]);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
-  const [roleForm, setRoleForm] = useState({ name: '', description: '', color: '#6366F1' });
+  const [roleForm, setRoleForm] = useState({ 
+    name: '', 
+    description: '', 
+    color: '#6366F1',
+    permissions: {}
+  });
 
   // Account Types state
   const [accountTypes, setAccountTypes] = useState([]);
