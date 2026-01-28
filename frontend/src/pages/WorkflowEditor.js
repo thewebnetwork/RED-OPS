@@ -1541,14 +1541,14 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
                     </p>
                   </div>
                   <Select
-                    value={action.config?.policy_id || ''}
-                    onValueChange={(val) => updateAction(action.id, { policy_id: val })}
+                    value={action.config?.policy_id || 'auto'}
+                    onValueChange={(val) => updateAction(action.id, { policy_id: val === 'auto' ? '' : val })}
                   >
                     <SelectTrigger className="h-8 text-sm">
                       <SelectValue placeholder="Select SLA Policy (or auto-detect)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Auto-detect based on scope</SelectItem>
+                      <SelectItem value="auto">Auto-detect based on scope</SelectItem>
                       {slaPolicies.map((policy) => (
                         <SelectItem key={policy.id} value={policy.id}>
                           {policy.name}
