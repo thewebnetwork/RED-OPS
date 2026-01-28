@@ -178,7 +178,7 @@ class TestIAMPermissionMatrix:
     def test_create_custom_role_with_permissions(self):
         """Test creating a new custom role with permissions"""
         new_role_data = {
-            "name": "TEST_Custom_Role",
+            "name": "TEST_Custom_Role_1769633814",
             "description": "Test custom role with specific permissions",
             "color": "#FF5733",
             "permissions": {
