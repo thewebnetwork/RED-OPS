@@ -340,7 +340,7 @@ function AdminDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            Tickets I'm Working On ({myWork.working_on.length})
+            Tickets I&apos;m Working On ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
@@ -436,7 +436,7 @@ function EditorDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            Tickets I'm Working On ({myWork.working_on.length})
+            Tickets I&apos;m Working On ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
@@ -532,7 +532,7 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            Tickets I'm Working On ({myWork.working_on.length})
+            Tickets I&apos;m Working On ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
