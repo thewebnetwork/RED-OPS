@@ -640,6 +640,7 @@ export default function WorkflowEditor() {
                     updateData={updateNodeData}
                     roles={roles}
                     teams={teams}
+                    specialties={specialties}
                   />
                 )}
 
