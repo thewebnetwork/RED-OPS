@@ -228,6 +228,10 @@ export default function SLAPolicies() {
             <Shield className="w-4 h-4 mr-2" />
             Policies ({policies.length})
           </TabsTrigger>
+          <TabsTrigger value="templates" data-testid="templates-tab">
+            <FileCode className="w-4 h-4 mr-2" />
+            Templates
+          </TabsTrigger>
           <TabsTrigger value="monitoring" data-testid="monitoring-tab">
             <Eye className="w-4 h-4 mr-2" />
             Monitoring
