@@ -6,7 +6,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ## Current Version: 2.6 (UAT Round 2 Fixes - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
-**Preview URL:** https://ticketpro-15.preview.emergentagent.com
+**Preview URL:** https://ops-tracker-6.preview.emergentagent.com
 
 ---
 
