@@ -105,7 +105,7 @@ export default function IAMPage() {
   const [teamSearch, setTeamSearch] = useState('');
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
-  const [teamForm, setTeamForm] = useState({ name: '', description: '' });
+  const [teamForm, setTeamForm] = useState({ name: '', description: '', related_specialty_ids: [] });
 
   // Specialties state
   const [specialties, setSpecialties] = useState([]);
