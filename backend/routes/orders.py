@@ -647,6 +647,31 @@ async def pick_order(
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "In Progress", current_user)
     
+    # Send email to requester that their ticket was picked up
+    requester = await db.users.find_one({"id": order["requester_id"]}, {"_id": 0, "password": 0})
+    if requester:
+        background_tasks.add_task(
+            send_ticket_picked_up_email,
+            requester["email"],
+            requester["name"],
+            current_user["name"],
+            order["order_code"],
+            order.get("title", ""),
+            order_id
+        )
+    
+    # Send email to new resolver that they have been assigned
+    background_tasks.add_task(
+        send_ticket_assigned_email,
+        current_user["email"],
+        current_user["name"],
+        order.get("requester_name", ""),
+        order["order_code"],
+        order.get("title", ""),
+        order.get("priority_or_severity", "Normal"),
+        order_id
+    )
+    
     background_tasks.add_task(trigger_webhooks, "order.status_changed", {
         "order_id": order_id,
         "order_code": order["order_code"],
