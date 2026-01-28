@@ -421,7 +421,25 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_roles([
 @router.post("/{user_id}/restore")
 async def restore_user(user_id: str, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Restore a deactivated user (Admin only)"""
+    from services.email import send_account_reactivated_email
+    
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     result = await db.users.update_one({"id": user_id}, {"$set": {"active": True}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    # Send reactivation email
+    try:
+        await send_account_reactivated_email(
+            to_email=user["email"],
+            user_name=user["name"],
+            reactivated_by=current_user.get("name", "Administrator")
+        )
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to send account reactivation email: {e}")
+    
     return {"message": "User restored"}
