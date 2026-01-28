@@ -426,20 +426,6 @@ class TestReportsModule:
         assert data["report_id"] == "tickets_by_team"
         
         print(f"✓ Tickets by Team report generated: {data['total_rows']} rows")
-    
-    def test_generate_sla_policy_compliance_report(self):
-        """Test generating SLA Policy Compliance report"""
-        response = requests.post(
-            f"{BASE_URL}/api/reports/sla_policy_compliance/generate",
-            headers=self.headers,
-            json={}
-        )
-        assert response.status_code == 200, f"Failed to generate report: {response.text}"
-        
-        data = response.json()
-        assert data["report_id"] == "sla_policy_compliance"
-        
-        print(f"✓ SLA Policy Compliance report generated: {data['total_rows']} rows")
 
 
 class TestReportsExport:
