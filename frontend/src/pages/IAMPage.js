@@ -468,6 +468,24 @@ export default function IAMPage() {
     return colors[type] || 'bg-slate-100 text-slate-700';
   };
 
+  // Get specialties filtered by selected team (if team has related specialties)
+  const getFilteredSpecialties = () => {
+    if (!userForm.team_id) return specialties;
+    const selectedTeam = teams.find(t => t.id === userForm.team_id);
+    if (!selectedTeam || !selectedTeam.related_specialty_ids || selectedTeam.related_specialty_ids.length === 0) {
+      return specialties;
+    }
+    return specialties.filter(s => selectedTeam.related_specialty_ids.includes(s.id));
+  };
+
+  // Convert arrays to searchable select options
+  const roleOptions = (identityConfig?.roles || []).map(r => ({ value: r, label: r }));
+  const accountTypeOptions = (identityConfig?.account_types || []).map(t => ({ value: t, label: t }));
+  const specialtyOptions = specialties.map(s => ({ value: s.id, label: s.name, color: s.color }));
+  const filteredSpecialtyOptions = getFilteredSpecialties().map(s => ({ value: s.id, label: s.name, color: s.color }));
+  const teamOptions = [{ value: '', label: 'No team' }, ...teams.map(t => ({ value: t.id, label: t.name }))];
+  const planOptions = plans.map(p => ({ value: p.id, label: p.name }));
+
   if (loading) {
     return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
   }
