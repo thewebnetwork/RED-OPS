@@ -1096,17 +1096,16 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
 
   const uploadFiles = async (orderId, files) => {
     for (const file of files) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('filename', file.name);
-      formData.append('file_type', file.type || 'application/octet-stream');
+      const uploadData = new FormData();
+      uploadData.append('file', file);
       
       try {
-        await axios.post(`${API}/orders/${orderId}/files`, formData, {
+        await axios.post(`${API}/orders/${orderId}/files/upload`, uploadData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } catch (err) {
         console.error('Failed to upload file:', file.name, err);
+        toast.error(`Failed to upload: ${file.name}`);
       }
     }
   };
