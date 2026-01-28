@@ -860,3 +860,56 @@ async def update_my_services_content(
         upsert=True
     )
     return {"message": "Content updated", "content": data.content}
+
+
+# ============== SMTP TEST ==============
+
+class TestEmailRequest(BaseModel):
+    to_email: str
+
+@router.post("/smtp/test")
+async def send_test_email(
+    data: TestEmailRequest,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Send a test email to verify SMTP configuration (Admin only)"""
+    from services.email import send_email_notification, get_smtp_config
+    
+    config = get_smtp_config()
+    
+    # Check if SMTP is configured
+    if not config['user'] or not config['password']:
+        return {
+            "success": False,
+            "message": "SMTP not configured. Please set SMTP_USER and SMTP_PASSWORD in environment.",
+            "config": {
+                "host": config['host'],
+                "port": config['port'],
+                "user": "Not set" if not config['user'] else config['user'][:5] + "***",
+                "from": config['from_addr'] or "Not set"
+            }
+        }
+    
+    # Send test email
+    subject = "Red Ops - Test Email"
+    body = f"""Hello,
+
+This is a test email from Red Ops to verify your SMTP configuration is working correctly.
+
+Sent by: {current_user['name']} ({current_user['email']})
+Time: {get_utc_now()}
+
+If you received this email, your SMTP settings are configured correctly!
+
+Best regards,
+Red Ops Platform"""
+    
+    success = await send_email_notification(data.to_email, subject, body)
+    
+    return {
+        "success": success,
+        "message": "Test email sent successfully!" if success else "Failed to send test email. Check server logs.",
+        "to": data.to_email,
+        "from": config['from_addr'],
+        "smtp_host": config['host']
+    }
