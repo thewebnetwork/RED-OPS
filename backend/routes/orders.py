@@ -22,7 +22,12 @@ from services.email import (
     send_ticket_picked_up_email,
     send_ticket_resolved_email,
     send_ticket_cancelled_email,
-    send_pool_assignment_email
+    send_pool_assignment_email,
+    send_ticket_status_changed_email,
+    send_ticket_pending_review_email,
+    send_ticket_reopened_email,
+    send_ticket_reassigned_email,
+    send_ticket_closed_email
 )
 from config import FRONTEND_URL, CANCELLATION_REASONS
 
