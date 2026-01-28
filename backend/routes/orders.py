@@ -1058,6 +1058,166 @@ class ReopenOrderRequest(BaseModel):
     reason: str = Field(..., min_length=1, max_length=500, description="Reason for reopening")
 
 
+class SoftDeleteOrderRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=500, description="Reason for deletion")
+
+
+# ============== SOFT DELETE / RESTORE ROUTES (Admin only) ==============
+
+@router.delete("/{order_id}")
+async def soft_delete_order(
+    order_id: str,
+    delete_data: SoftDeleteOrderRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Soft delete an order (Admin only). Order can be restored later."""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order.get("deleted"):
+        raise HTTPException(status_code=400, detail="Order is already deleted")
+    
+    now = get_utc_now()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {
+            "deleted": True,
+            "deleted_at": now,
+            "deleted_by_id": current_user["id"],
+            "deleted_by_name": current_user["name"],
+            "deletion_reason": delete_data.reason,
+            "updated_at": now
+        }}
+    )
+    
+    # Add deletion message to timeline
+    delete_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": f"🗑️ **Ticket Soft-Deleted**\n\n**By:** {current_user['name']}\n**Reason:** {delete_data.reason}",
+        "created_at": now,
+        "is_system_message": True
+    }
+    await db.order_messages.insert_one(delete_message)
+    
+    # Notify requester
+    if order.get("requester_id"):
+        await create_notification(
+            db,
+            order["requester_id"],
+            "order_deleted",
+            "Your ticket has been removed",
+            f"Ticket {order['order_code']} has been removed by an administrator. Reason: {delete_data.reason}",
+            order_id
+        )
+    
+    background_tasks.add_task(trigger_webhooks, "order.deleted", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "deleted_by": current_user["name"],
+        "reason": delete_data.reason
+    })
+    
+    return {"message": "Ticket soft-deleted successfully"}
+
+
+@router.post("/{order_id}/restore")
+async def restore_deleted_order(
+    order_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Restore a soft-deleted order (Admin only)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if not order.get("deleted"):
+        raise HTTPException(status_code=400, detail="Order is not deleted")
+    
+    now = get_utc_now()
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {
+            "$set": {
+                "deleted": False,
+                "restored_at": now,
+                "restored_by_id": current_user["id"],
+                "restored_by_name": current_user["name"],
+                "updated_at": now
+            },
+            "$unset": {
+                "deleted_at": "",
+                "deleted_by_id": "",
+                "deleted_by_name": "",
+                "deletion_reason": ""
+            }
+        }
+    )
+    
+    # Add restore message to timeline
+    restore_message = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "author_user_id": "system",
+        "author_name": "System",
+        "author_role": "System",
+        "message_body": f"♻️ **Ticket Restored**\n\n**By:** {current_user['name']}",
+        "created_at": now,
+        "is_system_message": True
+    }
+    await db.order_messages.insert_one(restore_message)
+    
+    # Notify requester
+    if order.get("requester_id"):
+        await create_notification(
+            db,
+            order["requester_id"],
+            "order_restored",
+            "Your ticket has been restored",
+            f"Ticket {order['order_code']} has been restored by an administrator.",
+            order_id
+        )
+    
+    background_tasks.add_task(trigger_webhooks, "order.restored", {
+        "order_id": order_id,
+        "order_code": order["order_code"],
+        "title": order.get("title"),
+        "restored_by": current_user["name"]
+    })
+    
+    return {"message": "Ticket restored successfully"}
+
+
+@router.get("/deleted/list", response_model=List[OrderResponse])
+async def list_deleted_orders(
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """List all soft-deleted orders (Admin only)"""
+    orders = await db.orders.find(
+        {"deleted": True},
+        {"_id": 0}
+    ).sort("deleted_at", -1).to_list(1000)
+    
+    result = []
+    for order in orders:
+        order = normalize_order(order)
+        result.append(OrderResponse(
+            **order,
+            is_sla_breached=False  # Deleted orders don't have SLA tracking
+        ))
+    
+    return result
+
+
 @router.post("/{order_id}/reopen")
 async def reopen_order(
     order_id: str,
