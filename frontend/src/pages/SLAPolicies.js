@@ -272,6 +272,24 @@ export default function SLAPolicies() {
           </div>
         </TabsContent>
 
+        {/* Templates Tab */}
+        <TabsContent value="templates" className="mt-4">
+          <PolicyTemplates
+            roles={roles}
+            teams={teams}
+            specialties={specialties}
+            accessTiers={accessTiers}
+            onApplyTemplate={(template) => {
+              setEditingPolicy(null);
+              setShowPolicyDialog(true);
+              // Small delay to ensure dialog is open before setting form data
+              setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('apply-template', { detail: template }));
+              }, 100);
+            }}
+          />
+        </TabsContent>
+
         {/* Monitoring Tab */}
         <TabsContent value="monitoring" className="mt-4">
           <div className="grid md:grid-cols-2 gap-6">
