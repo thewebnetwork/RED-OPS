@@ -245,6 +245,43 @@ export default function OrderDetail() {
     }
   };
 
+  // Reassign handlers
+  const openReassignDialog = async () => {
+    try {
+      const res = await axios.get(`${API}/orders/${orderId}/reassign-options`);
+      setReassignOptions(res.data);
+      setReassignDialogOpen(true);
+    } catch (error) {
+      toast.error('Failed to load reassign options');
+    }
+  };
+
+  const handleReassign = async () => {
+    if (!reassignTargetId) {
+      toast.error('Please select a target to reassign to');
+      return;
+    }
+
+    setReassigning(true);
+    try {
+      await axios.post(`${API}/orders/${orderId}/reassign`, {
+        reassign_type: reassignType,
+        target_id: reassignTargetId,
+        reason: reassignReason.trim() || null
+      });
+      toast.success('Ticket reassigned successfully');
+      setReassignDialogOpen(false);
+      setReassignTargetId('');
+      setReassignReason('');
+      setReassignType('user');
+      fetchOrderData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reassign ticket');
+    } finally {
+      setReassigning(false);
+    }
+  };
+
   const handleAddFile = async (e) => {
     e.preventDefault();
     if (!newFile.label || !newFile.url) {
