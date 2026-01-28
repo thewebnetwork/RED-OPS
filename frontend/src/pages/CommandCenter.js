@@ -770,6 +770,20 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
     priority: 'Normal'
   });
 
+  const uploadFiles = async (orderId, files) => {
+    for (const file of files) {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      try {
+        await axios.post(`${API}/orders/${orderId}/files/upload`, uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } catch (err) {
+        console.error('Failed to upload file:', file.name, err);
+      }
+    }
+  };
+
   const handleSubmit = async (e, isDraft = false) => {
     e?.preventDefault();
     
@@ -796,7 +810,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
     }
     
     try {
-      await axios.post(`${API}/feature-requests`, {
+      const response = await axios.post(`${API}/feature-requests`, {
         title,
         description: description || '',
         category_l1_id: categoryL1Id,
@@ -805,6 +819,11 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
         is_draft: isDraft,
         ...formData
       });
+      
+      // Upload attachments if any
+      if (attachments && attachments.length > 0 && response.data?.id) {
+        await uploadFiles(response.data.id, attachments);
+      }
       
       if (isDraft) {
         onDraftSaved?.();
