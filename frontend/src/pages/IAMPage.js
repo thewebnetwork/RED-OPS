@@ -119,6 +119,18 @@ export default function IAMPage() {
   const [editingPlan, setEditingPlan] = useState(null);
   const [planForm, setPlanForm] = useState({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: 1 });
 
+  // Roles state
+  const [roles, setRoles] = useState([]);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState(null);
+  const [roleForm, setRoleForm] = useState({ name: '', description: '', color: '#6366F1' });
+
+  // Account Types state
+  const [accountTypes, setAccountTypes] = useState([]);
+  const [accountTypeDialogOpen, setAccountTypeDialogOpen] = useState(false);
+  const [editingAccountType, setEditingAccountType] = useState(null);
+  const [accountTypeForm, setAccountTypeForm] = useState({ name: '', description: '', color: '#6366F1', requires_subscription: false });
+
   // Delete confirmation
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', item: null });
 
