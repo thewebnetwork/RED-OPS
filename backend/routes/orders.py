@@ -1101,6 +1101,19 @@ async def close_order(
             order['id']
         )
     
+    # Send close email to requester (if not the one closing)
+    if order.get("requester_email") and not is_owner:
+        background_tasks.add_task(
+            send_ticket_closed_email,
+            requester_email=order["requester_email"],
+            requester_name=order.get("requester_name", "User"),
+            closed_by=current_user["name"],
+            order_code=order["order_code"],
+            title=order.get("title", ""),
+            close_reason=close_data.reason,
+            order_id=order_id
+        )
+    
     background_tasks.add_task(trigger_webhooks, "order.closed", {
         "order_id": order_id,
         "order_code": order["order_code"],
