@@ -213,14 +213,20 @@ export default function IAMPage() {
     if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
 
     try {
-      const data = { ...userForm, team_id: userForm.team_id || null, subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null };
+      const data = { 
+        ...userForm, 
+        team_id: userForm.team_id || null, 
+        subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null,
+        send_welcome_email: !editingUser ? userForm.send_welcome_email : false
+      };
       if (editingUser) {
         if (!data.password) delete data.password;
+        delete data.send_welcome_email;
         await axios.patch(`${API}/users/${editingUser.id}`, data);
         toast.success('User updated');
       } else {
         await axios.post(`${API}/users`, data);
-        toast.success('User created');
+        toast.success('User created' + (data.send_welcome_email ? ' - Welcome email sent' : ''));
       }
       setUserDialogOpen(false);
       fetchAllData();
