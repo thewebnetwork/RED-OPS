@@ -3,7 +3,7 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.3 (All P0 Blockers Fixed - Jan 28, 2026)
+## Current Version: 2.4 (UAT P0 Blockers Fixed - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 
@@ -24,7 +24,47 @@ A comprehensive operations management platform designed as a request and fulfill
 
 ---
 
-## Sidebar Navigation (Updated)
+## P0 Blockers Fixed (UAT Jan 28, 2026)
+
+### 1. CRASH on User Creation ✅
+- **Issue:** React crash rendering Pydantic validation error objects
+- **Fix:** IAMPage.js now handles array validation errors and displays readable messages
+
+### 2. Tickets Not Being Created/Persisted ✅
+- **Issue:** Database was wiped, seed data missing
+- **Fix:** Re-seeded Admin user, categories, specialties, teams, roles, account types
+
+### 3. Reports Module Failing (Non-Admins) ✅
+- **Issue:** Reports endpoint required "Admin" role (wrong role name)
+- **Fix:** Changed to allow all authenticated users (get_current_user)
+
+### 4. No Logs Showing ✅
+- **Issue:** Logs endpoint required "Admin" role (wrong role name)
+- **Fix:** Changed to "Administrator", "Operator" roles
+
+### 5. Sidebar Active State Bug ✅
+- **Issue:** Both "Submit New Request" and "Report an Issue" highlighted
+- **Fix:** Logic correctly checks location.search for type=issue
+
+### 6. Page Header "Command Center" ✅
+- **Issue:** Page showed "Command Center" instead of "Submit New Request"
+- **Fix:** Updated CommandCenter.js to show context-aware titles
+
+### 7. Opportunity Ribbon Visibility ✅
+- **Issue:** Media Clients should NOT see Opportunity Ribbon
+- **Fix:** Added excludeAccountTypes filter to nav items in Layout.js
+
+### 8. IAM CRUD Issues ✅
+- **Issue:** Could not create/edit roles and account types
+- **Fix:** Backend /api/iam/roles and /api/iam/account-types endpoints working, frontend IAMPage has 6 tabs
+
+### 9. Ticket Reopen Rule ✅
+- **Issue:** Admin needed ability to reopen closed tickets
+- **Fix:** Added POST /api/orders/{id}/reopen endpoint (Admin only)
+
+---
+
+## Sidebar Navigation
 
 ### All Users
 1. Dashboard
@@ -32,119 +72,64 @@ A comprehensive operations management platform designed as a request and fulfill
 3. **My Tickets** (renamed from My Requests) - /my-tickets
 4. Submit New Request
 5. Report an Issue
-6. Opportunity Ribbon (Pool views)
+6. **Opportunity Ribbon** (NOT visible to Media Clients)
 7. Reports
 
 ### Admin Only
-8. **All Orders** (Administrator ONLY, not Operator)
-9. Identity & Access (consolidated - 6 tabs)
-10. Logs
+8. **All Orders** (Administrator ONLY)
+9. Identity & Access (6 tabs)
+10. Logs (Administrator, Operator)
 11. Announcements
-12. Settings (consolidated hub)
+12. Settings
 
 ---
 
-## Consolidated Modules
+## Identity & Access Management (/iam)
 
-### Identity & Access Management (/iam)
-Contains **6 tabs** (updated):
-- **Users** - Create/edit/delete users with all IAM fields
-- **Teams** - Manage team assignments
-- **Specialties** - Admin-managed specialty list
-- **Roles** - Full CRUD: Add/Edit/Delete roles with color and permissions
-- **Account Types** - Full CRUD: Add/Edit/Delete account types (SEPARATE tab from Roles)
+Contains **6 tabs**:
+- **Users** - Full CRUD with Pydantic error handling
+- **Teams** - Full CRUD
+- **Specialties** - Full CRUD
+- **Roles** - Full CRUD (system roles protected)
+- **Account Types** - Full CRUD (system types protected)
 - **Plans** - Subscription plans for Partners
 
-### Settings Hub (/settings)
-Contains 6 modules:
-- **UI Customizations** - Field labels, branding
-- **Categories** - Service categories
-- **Workflows** - Automation and routing
-- **Email Settings** - SMTP and templates
-- **SLA & Escalation** - Policies
-- **Integrations** - API keys, webhooks
-
 ---
 
-## P0 Blockers Fixed (January 28, 2026)
+## Ticket Lifecycle Rules
 
-### 1. Sidebar Active State Bug ✅
-- **Fixed:** Only ONE item highlighted at a time
-- "Report an Issue" and "Submit New Request" no longer both highlight simultaneously
-- Logic checks location.search for type=issue to determine correct active state
+### Status Flow
+Open → In Progress → Delivered → Closed
 
-### 2. My Requests → My Tickets Rename ✅
-- **Renamed:** "My Requests" → "My Tickets" in sidebar
-- **Route changed:** /my-requests → /my-tickets
-- **Removed:** Module-level "My Requests" tabs inside forms
+### Permissions
+- **Cancel:** Requester can cancel own tickets with reason
+- **Close:** Requester or Admin can close tickets
+- **Reopen:** **Admin ONLY** can reopen closed/canceled tickets
+- **Reassign:** Admin, Operator, or current resolver can reassign
 
-### 3. Form Header Update ✅
-- **Changed:** "Create a request" → "Fill Out Form" (neutral header)
-- **Removed:** "My Requests" tab from inside CommandCenter form
-
-### 4. All Orders Admin-Only ✅
-- **Enforced:** Only Administrator role can access /orders page
-- **Removed:** Operator access to All Orders
-
-### 5. IAM CRUD for Roles + Account Types ✅
-- **Separated:** Roles and Account Types are now separate tabs
-- **Roles Tab:** Add Role button, edit/delete existing roles (system roles protected)
-- **Account Types Tab:** Add Account Type button, edit/delete (system types protected)
-- **Backend:** New /api/iam/roles and /api/iam/account-types endpoints
-
-### 6. Resolver Reassign Capability ✅
-- **Added:** "Reassign" button on Order Detail page
-- **Options:** Reassign by User, Team, or Specialty
-- **Permissions:** Admin, Operator, or current resolver can reassign
-- **Logging:** Reassignment logged in activity with from/to/by/reason
-- **Backend:** POST /api/orders/{id}/reassign endpoint
-
----
-
-## Identity & Access Model
-
-### Roles (Permissions)
-| Role | Description |
-|------|-------------|
-| Administrator | Full system control |
-| Operator | Manage orders, limited admin |
-| Standard User | Create/view own requests |
-
-### Account Types (Routing)
-| Type | Description |
-|------|-------------|
-| Partner | Business partners with subscription plans |
-| Media Client | Media service clients (A La Carte) |
-| Internal Staff | Company employees |
-| Vendor/Freelancer | External contractors |
+### Satisfaction Survey Rules
+- ✅ Sent when resolver delivers/closes ticket
+- ❌ NOT sent when requester cancels ticket
 
 ---
 
 ## Key API Endpoints
 
-### IAM APIs (New)
-- `GET /api/iam/roles` - List active roles
-- `POST /api/iam/roles` - Create role
-- `PATCH /api/iam/roles/{id}` - Update role
-- `DELETE /api/iam/roles/{id}` - Delete role (soft delete)
-- `GET /api/iam/account-types` - List active account types
-- `POST /api/iam/account-types` - Create account type
-- `PATCH /api/iam/account-types/{id}` - Update account type
-- `DELETE /api/iam/account-types/{id}` - Delete account type
+### IAM APIs
+- `GET/POST /api/iam/roles` - Role CRUD
+- `GET/POST /api/iam/account-types` - Account Type CRUD
 
-### Order Reassign APIs (New)
-- `GET /api/orders/{id}/reassign-options` - Get users/teams/specialties for reassign
-- `POST /api/orders/{id}/reassign` - Reassign ticket
+### Order Lifecycle
+- `POST /api/orders/{id}/reopen` - Admin reopens closed tickets
+- `POST /api/orders/{id}/reassign` - Reassign by user/team/specialty
+- `POST /api/orders/{id}/cancel` - Requester cancels with reason
 
-### Existing Core APIs
-- `GET /api/orders/pool/1` - Partner pool tickets
-- `GET /api/orders/pool/2` - Vendor pool tickets
-- `GET /api/orders/my-requests` - User's own tickets
+### Logs
+- `GET /api/logs/{log_type}` - Get logs (system, api, ui, user)
 
----
-
-## Mocked Integrations
-- **GHL Payment Webhook:** `/api/webhooks/ghl-payment-mock` (MOCKED)
+### Reports
+- `GET /api/reports/available` - List available reports
+- `POST /api/reports/{id}/generate` - Generate report
 
 ---
 
@@ -153,38 +138,42 @@ Contains 6 modules:
 
 ---
 
-## Upcoming Tasks (Next Sprint)
+## Mocked Integrations
+- **GHL Payment Webhook:** `/api/webhooks/ghl-payment-mock` (MOCKED)
 
-### P0 - Approved for Implementation
-1. **Email Notifications** - Workflow emails for:
-   - Ticket Created
-   - Ticket Assigned
-   - Ticket Picked Up
-   - Ticket Resolved/Delivered
-   - Ticket Cancelled
+---
 
-2. **Pool Assignment Notifications** - Notify Partners (Pool 1) and Vendors (Pool 2) when tickets enter their pools
+## Upcoming Tasks (Pending User Approval)
 
-### Future/Backlog
-- Advanced analytics for API key usage with charts
-- Slack/Teams notification integration presets
-- Workflow preview/simulation feature
-- SLA & Escalation policy templates
+### Email Notifications (Approved Sprint)
+- Ticket Created → email to requester
+- Ticket Assigned → email to resolver
+- Ticket Picked Up → email to requester
+- Ticket Resolved/Delivered → email to requester + satisfaction survey
+- Ticket Cancelled (by requester) → email to resolver, NO satisfaction survey
+
+### Pool Assignment Notifications
+- Notify Partners when ticket enters Pool 1
+- Notify Vendors when ticket enters Pool 2
+
+### Announcements Module Improvements
+- Multiple overlapping announcements
+- List view with edit/delete
+- Targeting by role/team/specialty
 
 ---
 
 ## File References
 
 ### Frontend
-- `/app/frontend/src/components/Layout.js` - Sidebar, navigation
-- `/app/frontend/src/pages/IAMPage.js` - 6-tab IAM hub
-- `/app/frontend/src/pages/CommandCenter.js` - Form submission
-- `/app/frontend/src/pages/MyRequests.js` - My Tickets page
-- `/app/frontend/src/pages/OrderDetail.js` - Reassign functionality
-- `/app/frontend/src/App.js` - Route definitions
+- `/app/frontend/src/components/Layout.js` - Sidebar, account_type filtering
+- `/app/frontend/src/pages/IAMPage.js` - 6-tab IAM, error handling
+- `/app/frontend/src/pages/CommandCenter.js` - Context-aware page titles
+- `/app/frontend/src/pages/Logs.js` - Correct API path
+- `/app/frontend/src/pages/OrderDetail.js` - Reassign, reopen UI
 
 ### Backend
-- `/app/backend/server_v2.py` - Main server
 - `/app/backend/routes/iam.py` - Roles/Account Types CRUD
-- `/app/backend/routes/orders.py` - Orders including reassign
-- `/app/backend/routes/users.py` - User management
+- `/app/backend/routes/orders.py` - Reopen, reassign, cancel
+- `/app/backend/routes/reports.py` - All authenticated users
+- `/app/backend/routes/settings.py` - Logs with correct roles
