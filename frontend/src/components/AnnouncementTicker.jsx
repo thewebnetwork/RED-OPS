@@ -1,30 +1,34 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Megaphone } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AnnouncementTicker() {
-  const [ticker, setTicker] = useState(null);
+  const [announcement, setAnnouncement] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     
-    const fetchTicker = async () => {
+    const fetchActiveAnnouncement = async () => {
       try {
-        const res = await axios.get(`${API}/announcement-ticker`);
+        // Use the new multi-announcement endpoint that returns the highest priority active announcement
+        const res = await axios.get(`${API}/announcements/active`);
         if (isMounted) {
-          setTicker(res.data);
+          setAnnouncement(res.data);
         }
       } catch (error) {
         // If 401, user not logged in yet - try again later
-        console.log('Announcement ticker fetch skipped - user may not be logged in');
+        console.log('Announcement fetch skipped - user may not be logged in');
+        if (isMounted) {
+          setAnnouncement(null);
+        }
       }
     };
     
-    fetchTicker();
-    // Refresh ticker every 5 minutes
-    const interval = setInterval(fetchTicker, 5 * 60 * 1000);
+    fetchActiveAnnouncement();
+    // Refresh announcement every 60 seconds for better responsiveness
+    const interval = setInterval(fetchActiveAnnouncement, 60 * 1000);
     
     return () => {
       isMounted = false;
@@ -32,8 +36,8 @@ export default function AnnouncementTicker() {
     };
   }, []);
 
-  // Don't render if no ticker or not active or no message
-  if (!ticker || !ticker.is_active || !ticker.message) {
+  // Don't render if no active announcement
+  if (!announcement || !announcement.message) {
     return null;
   }
 
