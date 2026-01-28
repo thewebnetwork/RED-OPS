@@ -3,14 +3,52 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.1 (Role Permissions Fix - Jan 28, 2026)
+## Current Version: 3.2 (Searchable Dropdowns & User Email Alerts - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ticketmaster-102.preview.emergentagent.com
 
 ---
 
-## P0 - Role Permission Matrix Restored (Latest)
+## P0 - IAM Searchable Dropdowns & Email Alerts (Latest)
+
+### A) Searchable Dropdowns ✅
+- **All IAM dropdowns** now use `SearchableSelect` component with type-to-filter functionality
+- **User Create/Edit Dialog:**
+  - Role dropdown (searchable)
+  - Account Type dropdown (searchable)
+  - Team dropdown (searchable, optional)
+  - Specialty dropdown (searchable)
+  - Subscription Plan dropdown (searchable, for Partners only)
+- **Team Edit Dialog:**
+  - Related Specialties multi-select (searchable, with badge display)
+- **Component:** `/app/frontend/src/components/ui/searchable-select.jsx`
+
+### B) Team-Specialty Relationship ✅
+- **Backend:** `teams` model includes `related_specialty_ids` field
+- **UI:** Team edit dialog has multi-select for assigning specialties to teams
+- **User Filtering:** When creating/editing users, if a team is selected that has related specialties, the specialty dropdown filters to only show those specialties
+- **Team Cards:** Display related specialty names as badges
+
+### C) User Account Email Alerts ✅
+- **Account Created Email:**
+  - Sends welcome email with username, temporary password, role, login URL
+  - HTML formatted with Red Ops branding
+  - Security notes about password change and OTP setup
+  - Toggle in Add User dialog: "Send welcome email with login credentials" (ON by default)
+- **Account Disabled Email:** Notification when account is deactivated
+- **Account Reactivated Email:** Notification when account is restored
+- **SMTP:** Live Gmail configuration (admin@redribbongroup.ca)
+
+### D) Temp Password Generation ✅
+- **Auto-Generated:** 12-character random password on new user creation
+- **Editable:** Admin can modify before saving
+- **Show/Hide:** Eye icon toggle on password field
+- **Regenerate:** Refresh button to generate new password
+
+---
+
+## P0 - Role Permission Matrix Restored ✅
 
 ### Issue
 The granular permissions matrix (checkboxes) was missing from IAM → Roles, preventing access control validation.
