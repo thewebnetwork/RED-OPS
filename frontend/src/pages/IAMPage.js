@@ -921,12 +921,33 @@ export default function IAMPage() {
 
       {/* TEAM DIALOG */}
       <Dialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editingTeam ? 'Edit Team' : 'Add Team'}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingTeam ? 'Edit Team' : 'Add Team'}</DialogTitle>
+            <DialogDescription>
+              Assign related specialties to filter user specialty options
+            </DialogDescription>
+          </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div><Label>Name *</Label><Input value={teamForm.name} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} /></div>
+            <div><Label>Name *</Label><Input value={teamForm.name} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} data-testid="team-name-input" /></div>
             <div><Label>Description</Label><Input value={teamForm.description} onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })} /></div>
-            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setTeamDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={saveTeam}>Save</Button></div>
+            <div>
+              <Label>Related Specialties</Label>
+              <p className="text-xs text-slate-500 mb-2">Users in this team will have specialty options filtered to these selections</p>
+              <SearchableMultiSelect
+                options={specialtyOptions}
+                value={teamForm.related_specialty_ids}
+                onValueChange={(v) => setTeamForm({ ...teamForm, related_specialty_ids: v })}
+                placeholder="Select related specialties..."
+                searchPlaceholder="Search specialties..."
+                emptyText="No specialties found"
+                data-testid="team-specialties-select"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setTeamDialogOpen(false)}>Cancel</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveTeam} data-testid="save-team-btn">Save</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
