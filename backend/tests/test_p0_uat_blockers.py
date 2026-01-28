@@ -69,7 +69,7 @@ class TestDashboardMyWork:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         return {"Authorization": f"Bearer {token}"}
     
     def test_my_work_endpoint_exists(self, admin_headers):
