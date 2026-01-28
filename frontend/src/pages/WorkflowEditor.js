@@ -1370,9 +1370,9 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.filter(r => r.can_pick_orders).map((role) => (
+                    {roles.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
-                        {role.display_name}
+                        {role.display_name || role.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
