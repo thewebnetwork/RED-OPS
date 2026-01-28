@@ -83,6 +83,7 @@ export default function Layout({ children }) {
     // Opportunity Ribbon - visible to all except Media Clients (Partners get Pool 1, Vendors get Pool 2)
     { path: '/ribbon-board', icon: Layers, label: 'Opportunity Ribbon', roles: ['Administrator', 'Operator', 'Standard User'], excludeAccountTypes: ['Media Client'] },
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator'] },
+    { path: '/deleted-tickets', icon: Trash2, label: 'Deleted Tickets', roles: ['Administrator'] },
     { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/iam', icon: KeyRound, label: 'Identity & Access', roles: ['Administrator'] },
     { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
