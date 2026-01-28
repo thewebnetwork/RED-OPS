@@ -256,10 +256,14 @@ export default function IAMPage() {
   const openTeamDialog = (team = null) => {
     if (team) {
       setEditingTeam(team);
-      setTeamForm({ name: team.name, description: team.description || '' });
+      setTeamForm({ 
+        name: team.name, 
+        description: team.description || '',
+        related_specialty_ids: team.related_specialty_ids || []
+      });
     } else {
       setEditingTeam(null);
-      setTeamForm({ name: '', description: '' });
+      setTeamForm({ name: '', description: '', related_specialty_ids: [] });
     }
     setTeamDialogOpen(true);
   };
