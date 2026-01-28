@@ -3,14 +3,39 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.9 (Pool & Reports Validation - Jan 28, 2026)
+## Current Version: 3.0 (Workflow Fixes - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ops-tracker-6.preview.emergentagent.com
 
 ---
 
-## Pool Notifications & Reports Module Validated (Latest)
+## Workflow Editor Fixes (Latest)
+
+### A) P0 - ResizeObserver Crash Fixed ✅
+- **Issue:** Workflow editor crashed with "ResizeObserver loop completed with undelivered notifications"
+- **Fix:** Added window.onerror handler to suppress benign ResizeObserver loop errors
+- **Verified:** Opened 5+ workflows back-to-back without crashes
+
+### B) P1 - "Route to Specialty" Action Added ✅
+- **New Action:** `assign_specialty` - Routes tickets to users with a specific specialty
+- **Config Options:**
+  - **Specialty Dropdown:** Select target specialty
+  - **Pool Preference:** Any pool / Pool 1 (Partners) / Pool 2 (Vendors)
+  - **Fallback:** Leave unassigned / Route to Admin queue / Assign to any specialty
+- **Backend:** `workflow_engine.py` handles action - sets `required_specialty_id` on order and auto-assigns if eligible user found
+
+---
+
+## SMTP Email Configuration ✅
+- **Host:** smtp.gmail.com:587
+- **Login:** fmtvvlb@gmail.com
+- **From Address:** admin@redribbongroup.ca (alias)
+- **Status:** LIVE - All email notifications now working
+
+---
+
+## Pool Notifications & Reports Module Validated
 
 ### A) Pool 1 → Pool 2 Transitions ✅
 - **Logic:** Tickets open >24 hours automatically move from Pool 1 to Pool 2
