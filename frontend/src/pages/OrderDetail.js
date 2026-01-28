@@ -106,6 +106,11 @@ export default function OrderDetail() {
   const [forcePool2Reason, setForcePool2Reason] = useState('');
   const [forcingToPool2, setForcingToPool2] = useState(false);
   
+  // Soft delete state (Admin only)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deletingOrder, setDeletingOrder] = useState(false);
+  
   const [newFile, setNewFile] = useState({
     file_type: 'Export',
     label: '',
