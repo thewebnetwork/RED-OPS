@@ -3,7 +3,7 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.4 (UAT P0 Blockers Fixed - Jan 28, 2026)
+## Current Version: 2.5 (Email Notifications + Announcements - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 
@@ -24,43 +24,47 @@ A comprehensive operations management platform designed as a request and fulfill
 
 ---
 
-## P0 Blockers Fixed (UAT Jan 28, 2026)
+## Latest Features Implemented (Jan 28, 2026)
 
-### 1. CRASH on User Creation ✅
-- **Issue:** React crash rendering Pydantic validation error objects
-- **Fix:** IAMPage.js now handles array validation errors and displays readable messages
+### 1. Email Notifications ✅
+Complete email notification system for ticket lifecycle:
 
-### 2. Tickets Not Being Created/Persisted ✅
-- **Issue:** Database was wiped, seed data missing
-- **Fix:** Re-seeded Admin user, categories, specialties, teams, roles, account types
+| Event | Recipient | Includes Survey |
+|-------|-----------|-----------------|
+| Ticket Created | Requester | No |
+| Ticket Assigned | Resolver | No |
+| Ticket Picked Up | Requester | No |
+| Ticket Resolved/Delivered | Requester | **Yes** |
+| Ticket Cancelled (by requester) | Resolver + Admin | **No** |
 
-### 3. Reports Module Failing (Non-Admins) ✅
-- **Issue:** Reports endpoint required "Admin" role (wrong role name)
-- **Fix:** Changed to allow all authenticated users (get_current_user)
+**Note:** Email is MOCKED if SMTP not configured. Check backend logs for email output.
 
-### 4. No Logs Showing ✅
-- **Issue:** Logs endpoint required "Admin" role (wrong role name)
-- **Fix:** Changed to "Administrator", "Operator" roles
+### 2. Pool Notifications ✅
+- **Pool 1 (Partners):** Notified immediately when new ticket is created
+- **Pool 2 (Vendors):** Notified after 24 hours via SLA monitor background task
 
-### 5. Sidebar Active State Bug ✅
-- **Issue:** Both "Submit New Request" and "Report an Issue" highlighted
-- **Fix:** Logic correctly checks location.search for type=issue
+### 3. Announcements System ✅
+Full CRUD for multiple announcements with:
+- **Priority ordering** (highest priority shown first)
+- **Scheduling** (start_at, end_at datetime)
+- **Targeting** by teams, roles, or specialties
+- **Custom colors** (background, text)
+- **List view** with edit/delete
+- **Preview** in creation dialog
 
-### 6. Page Header "Command Center" ✅
-- **Issue:** Page showed "Command Center" instead of "Submit New Request"
-- **Fix:** Updated CommandCenter.js to show context-aware titles
+---
 
-### 7. Opportunity Ribbon Visibility ✅
-- **Issue:** Media Clients should NOT see Opportunity Ribbon
-- **Fix:** Added excludeAccountTypes filter to nav items in Layout.js
+## Previous P0 Blockers Fixed
 
-### 8. IAM CRUD Issues ✅
-- **Issue:** Could not create/edit roles and account types
-- **Fix:** Backend /api/iam/roles and /api/iam/account-types endpoints working, frontend IAMPage has 6 tabs
-
-### 9. Ticket Reopen Rule ✅
-- **Issue:** Admin needed ability to reopen closed tickets
-- **Fix:** Added POST /api/orders/{id}/reopen endpoint (Admin only)
+1. ✅ User creation crash (Pydantic error handling)
+2. ✅ Tickets not persisting (database re-seeded)
+3. ✅ Reports failing for non-admins
+4. ✅ No logs showing (role name fixed)
+5. ✅ Sidebar dual highlight bug
+6. ✅ Page headers ("Submit New Request" not "Command Center")
+7. ✅ Opportunity Ribbon hidden for Media Clients
+8. ✅ IAM CRUD for Roles + Account Types
+9. ✅ Admin reopen capability
 
 ---
 
@@ -69,67 +73,49 @@ A comprehensive operations management platform designed as a request and fulfill
 ### All Users
 1. Dashboard
 2. My Services
-3. **My Tickets** (renamed from My Requests) - /my-tickets
+3. My Tickets - /my-tickets
 4. Submit New Request
 5. Report an Issue
-6. **Opportunity Ribbon** (NOT visible to Media Clients)
+6. Opportunity Ribbon (NOT visible to Media Clients)
 7. Reports
 
 ### Admin Only
-8. **All Orders** (Administrator ONLY)
+8. All Orders (Administrator ONLY)
 9. Identity & Access (6 tabs)
 10. Logs (Administrator, Operator)
-11. Announcements
+11. Announcements (full CRUD)
 12. Settings
-
----
-
-## Identity & Access Management (/iam)
-
-Contains **6 tabs**:
-- **Users** - Full CRUD with Pydantic error handling
-- **Teams** - Full CRUD
-- **Specialties** - Full CRUD
-- **Roles** - Full CRUD (system roles protected)
-- **Account Types** - Full CRUD (system types protected)
-- **Plans** - Subscription plans for Partners
-
----
-
-## Ticket Lifecycle Rules
-
-### Status Flow
-Open → In Progress → Delivered → Closed
-
-### Permissions
-- **Cancel:** Requester can cancel own tickets with reason
-- **Close:** Requester or Admin can close tickets
-- **Reopen:** **Admin ONLY** can reopen closed/canceled tickets
-- **Reassign:** Admin, Operator, or current resolver can reassign
-
-### Satisfaction Survey Rules
-- ✅ Sent when resolver delivers/closes ticket
-- ❌ NOT sent when requester cancels ticket
 
 ---
 
 ## Key API Endpoints
 
-### IAM APIs
+### Email (triggered automatically)
+- Ticket created → `send_ticket_created_email()`
+- Ticket assigned → `send_ticket_assigned_email()`
+- Ticket picked up → `send_ticket_picked_up_email()`
+- Ticket resolved → `send_ticket_resolved_email()` + survey
+- Ticket cancelled → `send_ticket_cancelled_email()` (NO survey)
+
+### Pool Notifications
+- Pool 1: Triggered on ticket creation
+- Pool 2: Triggered by `check_pool_transitions()` in SLA monitor (every 5 min)
+
+### Announcements
+- `GET /api/announcements` - List all (Admin)
+- `GET /api/announcements/active` - Get active for current user
+- `POST /api/announcements` - Create
+- `PATCH /api/announcements/{id}` - Update
+- `DELETE /api/announcements/{id}` - Delete
+
+### IAM
 - `GET/POST /api/iam/roles` - Role CRUD
 - `GET/POST /api/iam/account-types` - Account Type CRUD
 
-### Order Lifecycle
+### Orders
 - `POST /api/orders/{id}/reopen` - Admin reopens closed tickets
 - `POST /api/orders/{id}/reassign` - Reassign by user/team/specialty
-- `POST /api/orders/{id}/cancel` - Requester cancels with reason
-
-### Logs
-- `GET /api/logs/{log_type}` - Get logs (system, api, ui, user)
-
-### Reports
-- `GET /api/reports/available` - List available reports
-- `POST /api/reports/{id}/generate` - Generate report
+- `POST /api/orders/{id}/cancel` - Requester cancels
 
 ---
 
@@ -139,41 +125,50 @@ Open → In Progress → Delivered → Closed
 ---
 
 ## Mocked Integrations
+- **Email (SMTP):** MOCKED if SMTP_USER/SMTP_PASSWORD not set
 - **GHL Payment Webhook:** `/api/webhooks/ghl-payment-mock` (MOCKED)
 
 ---
 
-## Upcoming Tasks (Pending User Approval)
-
-### Email Notifications (Approved Sprint)
-- Ticket Created → email to requester
-- Ticket Assigned → email to resolver
-- Ticket Picked Up → email to requester
-- Ticket Resolved/Delivered → email to requester + satisfaction survey
-- Ticket Cancelled (by requester) → email to resolver, NO satisfaction survey
-
-### Pool Assignment Notifications
-- Notify Partners when ticket enters Pool 1
-- Notify Vendors when ticket enters Pool 2
-
-### Announcements Module Improvements
-- Multiple overlapping announcements
-- List view with edit/delete
-- Targeting by role/team/specialty
+## SMTP Configuration (for real emails)
+Set in `/app/backend/.env`:
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-specific-password
+SMTP_FROM=your-email@gmail.com
+FRONTEND_URL=https://your-domain.com
+```
 
 ---
 
 ## File References
 
-### Frontend
-- `/app/frontend/src/components/Layout.js` - Sidebar, account_type filtering
-- `/app/frontend/src/pages/IAMPage.js` - 6-tab IAM, error handling
-- `/app/frontend/src/pages/CommandCenter.js` - Context-aware page titles
-- `/app/frontend/src/pages/Logs.js` - Correct API path
-- `/app/frontend/src/pages/OrderDetail.js` - Reassign, reopen UI
-
 ### Backend
+- `/app/backend/services/email.py` - All email templates
+- `/app/backend/routes/orders.py` - Ticket lifecycle with emails
+- `/app/backend/routes/settings.py` - Announcements CRUD
+- `/app/backend/services/sla_monitor.py` - Pool 2 notifications
 - `/app/backend/routes/iam.py` - Roles/Account Types CRUD
-- `/app/backend/routes/orders.py` - Reopen, reassign, cancel
-- `/app/backend/routes/reports.py` - All authenticated users
-- `/app/backend/routes/settings.py` - Logs with correct roles
+
+### Frontend
+- `/app/frontend/src/pages/Announcements.js` - Full CRUD UI
+- `/app/frontend/src/components/Layout.js` - Sidebar navigation
+- `/app/frontend/src/pages/IAMPage.js` - 6-tab IAM
+- `/app/frontend/src/pages/CommandCenter.js` - Ticket submission
+- `/app/frontend/src/pages/OrderDetail.js` - Reassign, reopen
+
+---
+
+## Test Reports
+- `/app/test_reports/iteration_31.json` - Latest (Email + Announcements)
+- `/app/backend/tests/test_email_pool_announcements.py` - Automated tests
+
+---
+
+## Future/Backlog
+- Advanced analytics with charts
+- Slack/Teams notification presets
+- Workflow preview simulation
+- SLA policy templates
