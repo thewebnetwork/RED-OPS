@@ -273,6 +273,25 @@ async def create_order(
                     "user": current_user
                 })
         background_tasks.add_task(run_workflows)
+        
+        # Notify Pool 1 (Partners) about new ticket availability
+        async def notify_pool_1():
+            partners = await db.users.find(
+                {"account_type": "Partner", "active": True}, 
+                {"_id": 0, "email": 1, "name": 1}
+            ).to_list(100)
+            for partner in partners:
+                await send_pool_assignment_email(
+                    partner["email"],
+                    partner["name"],
+                    order_code,
+                    order_data.title,
+                    order_data.priority,
+                    cat_l2_name or cat_l1_name or "General",
+                    "Partner Pool (Pool 1)",
+                    order["id"]
+                )
+        background_tasks.add_task(notify_pool_1)
     
     return OrderResponse(
         **{k: v for k, v in order.items() if k != '_id'},
