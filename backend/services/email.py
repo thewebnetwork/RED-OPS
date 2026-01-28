@@ -29,12 +29,12 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
     # Check if SMTP is configured
     if not config['user'] or not config['password']:
         logging.warning("[MOCKED EMAIL] SMTP not configured - email not sent")
-        print(f"\n{'='*50}")
-        print(f"📧 MOCKED EMAIL (SMTP not configured)")
+        print("\n" + "="*50)
+        print("📧 MOCKED EMAIL (SMTP not configured)")
         print(f"To: {to_email}")
         print(f"Subject: {subject}")
         print(f"Body: {body[:500]}{'...' if len(body) > 500 else ''}")
-        print(f"{'='*50}\n")
+        print("="*50 + "\n")
         return True
     
     try:
@@ -64,11 +64,11 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
             server.send_message(msg)
         
         logging.info(f"✅ Email sent successfully to {to_email}: {subject}")
-        print(f"\n{'='*50}")
-        print(f"✅ EMAIL SENT SUCCESSFULLY")
+        print("\n" + "="*50)
+        print("✅ EMAIL SENT SUCCESSFULLY")
         print(f"To: {to_email}")
         print(f"Subject: {subject}")
-        print(f"{'='*50}\n")
+        print("="*50 + "\n")
         return True
         
     except Exception as e:
@@ -477,8 +477,6 @@ Red Ops Team
 
 async def send_account_disabled_email(to_email: str, user_name: str, disabled_by: str = None):
     """Send notification when an account is disabled"""
-    config = get_smtp_config()
-    
     subject = "Red Ops - Your Account Has Been Disabled"
     body = f"""
 Hello {user_name},
