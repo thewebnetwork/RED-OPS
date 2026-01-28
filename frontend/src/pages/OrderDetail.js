@@ -473,6 +473,95 @@ export default function OrderDetail() {
             </DialogContent>
           </Dialog>
         )}
+        {canReassign && (
+          <Dialog open={reassignDialogOpen} onOpenChange={setReassignDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                onClick={openReassignDialog}
+                data-testid="reassign-btn"
+              >
+                <Shuffle size={18} className="mr-2" />
+                Reassign
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Reassign Ticket</DialogTitle>
+                <DialogDescription>
+                  Transfer this ticket to another user, team, or specialty pool.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Reassign by</Label>
+                  <Select value={reassignType} onValueChange={(v) => { setReassignType(v); setReassignTargetId(''); }}>
+                    <SelectTrigger className="mt-1.5" data-testid="reassign-type-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="team">Team</SelectItem>
+                      <SelectItem value="specialty">Specialty</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Select {reassignType === 'user' ? 'User' : reassignType === 'team' ? 'Team' : 'Specialty'} *</Label>
+                  <Select value={reassignTargetId} onValueChange={setReassignTargetId}>
+                    <SelectTrigger className="mt-1.5" data-testid="reassign-target-select">
+                      <SelectValue placeholder={`Select a ${reassignType}...`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reassignType === 'user' && reassignOptions.users.map(u => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name} {u.specialty_name && `(${u.specialty_name})`}
+                        </SelectItem>
+                      ))}
+                      {reassignType === 'team' && reassignOptions.teams.map(t => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                      {reassignType === 'specialty' && reassignOptions.specialties.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Reason (optional)</Label>
+                  <Textarea
+                    value={reassignReason}
+                    onChange={(e) => setReassignReason(e.target.value)}
+                    placeholder="Why is this ticket being reassigned?"
+                    className="mt-1.5"
+                    data-testid="reassign-reason-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setReassignDialogOpen(false);
+                      setReassignTargetId('');
+                      setReassignReason('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                    onClick={handleReassign}
+                    disabled={reassigning || !reassignTargetId}
+                    data-testid="confirm-reassign-btn"
+                  >
+                    {reassigning ? 'Reassigning...' : 'Reassign Ticket'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         {canCancel && (
           <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
             <DialogTrigger asChild>
