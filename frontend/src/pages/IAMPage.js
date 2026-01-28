@@ -906,7 +906,7 @@ export default function IAMPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleteDialog.type}?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. Are you sure you want to delete "{deleteDialog.item?.name}"?</AlertDialogDescription>
+            <AlertDialogDescription>This action cannot be undone. Are you sure you want to delete &quot;{deleteDialog.item?.name}&quot;?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
