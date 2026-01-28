@@ -240,6 +240,18 @@ async def create_order(
                 order['id']
             )
         
+        # Send email notification to requester
+        background_tasks.add_task(
+            send_ticket_created_email,
+            current_user["email"],
+            current_user["name"],
+            order_code,
+            order_data.title,
+            order_data.priority,
+            cat_l2_name or cat_l1_name or "General",
+            order["id"]
+        )
+        
         # Trigger webhooks
         background_tasks.add_task(trigger_webhooks, "order.created", {
             "order_id": order["id"],
