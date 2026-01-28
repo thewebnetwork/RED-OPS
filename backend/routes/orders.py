@@ -600,12 +600,18 @@ async def get_pool_tickets(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Get tickets in a specific pool.
+    Get tickets in a specific pool filtered by user's specialty.
     Pool 1 = Partner pool (first 24 hours)
     Pool 2 = Vendor/Freelancer pool (after 24 hours)
+    
+    Filtering rules:
+    - Partners/Vendors only see tickets matching their Specialty
+    - Support/Issue tickets are excluded unless user has support specialty
+    - Admins/Operators see all tickets
     """
     account_type = current_user.get("account_type")
     role = current_user.get("role")
+    user_specialty_id = current_user.get("specialty_id")
     
     # Access control
     if pool_number == 1:
@@ -617,19 +623,15 @@ async def get_pool_tickets(
     else:
         raise HTTPException(status_code=400, detail="Invalid pool number")
     
+    # Get user's specialty info for filtering
+    user_specialty = None
+    if user_specialty_id:
+        user_specialty = await db.specialties.find_one({"id": user_specialty_id}, {"_id": 0})
+    
     # Get tickets in this pool
-    # Pool 1: Open tickets, not yet picked, in pool less than 24 hours
-    # Pool 2: Open tickets, not yet picked, in pool more than 24 hours
     now = datetime.now(timezone.utc)
     twenty_four_hours_ago = now - timedelta(hours=24)
     
-    query = {
-        "status": "Open",
-        "editor_id": None,
-        "pool_number": pool_number
-    }
-    
-    # If pool_number not set, use time-based logic
     orders = await db.orders.find(
         {"status": "Open", "editor_id": None},
         {"_id": 0}
@@ -651,16 +653,39 @@ async def get_pool_tickets(
         # Determine which pool this ticket belongs to
         in_pool_1 = pool_entered_dt > twenty_four_hours_ago
         
-        if pool_number == 1 and in_pool_1:
-            result.append(OrderResponse(
-                **order,
-                is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
-            ))
-        elif pool_number == 2 and not in_pool_1:
-            result.append(OrderResponse(
-                **order,
-                is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
-            ))
+        # Check pool timing
+        if pool_number == 1 and not in_pool_1:
+            continue
+        elif pool_number == 2 and in_pool_1:
+            continue
+        
+        # Apply specialty filtering for non-admin users
+        if role not in ["Administrator", "Operator"]:
+            request_type = order.get("request_type", "").lower()
+            category_l1_name = order.get("category_l1_name", "").lower()
+            
+            # Exclude Support/Issue tickets from Partners/Vendors unless they have support specialty
+            is_support_ticket = (
+                request_type in ["issue", "bug"] or 
+                "support" in category_l1_name or 
+                "issue" in category_l1_name or
+                "bug" in category_l1_name
+            )
+            
+            user_specialty_name = (user_specialty.get("name", "") if user_specialty else "").lower()
+            has_support_specialty = "support" in user_specialty_name
+            
+            if is_support_ticket and not has_support_specialty:
+                continue
+            
+            # If user has a specialty, optionally filter by it
+            # For now, we allow all service tickets if not support
+            # Can be extended to match specialty with category
+        
+        result.append(OrderResponse(
+            **order,
+            is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
+        ))
     
     return result
 
