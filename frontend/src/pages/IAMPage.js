@@ -201,7 +201,14 @@ export default function IAMPage() {
       setUserDialogOpen(false);
       fetchAllData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to save user');
+      const detail = error.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        // Handle Pydantic validation errors (array of error objects)
+        const messages = detail.map(e => e.msg || e.message || 'Validation error').join(', ');
+        toast.error(messages);
+      } else {
+        toast.error(detail || 'Failed to save user');
+      }
     }
   };
 
