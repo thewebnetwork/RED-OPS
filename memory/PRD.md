@@ -3,14 +3,36 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.7 (UAT Round 3 Fixes - Jan 28, 2026)
+## Current Version: 2.8 (P1 Improvements - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ops-tracker-6.preview.emergentagent.com
 
 ---
 
-## UAT Round 3 Fixes Completed (Latest)
+## P1 Improvements Completed (Latest)
+
+### A) Categories - Move Subcategories ✅
+- **Feature:** Subcategories can now be moved to different Level 1 (parent) categories
+- **How:** Edit dialog shows Parent Category dropdown with "(change to move)" hint
+- **Backend:** `PATCH /api/categories/l2/{id}` accepts `category_l1_id` field
+- **Validation:** New parent must exist, `category_l1_name` auto-updated
+
+### B) Logs Module Improvements ✅
+- **Empty States:** Descriptive messages for each log type (system, api, ui, user)
+- **Control Labels:** Clearer labels with tooltips - "Live Stream", "Poll (5s)", "Download"
+- **Real Data:** Logs from `activity_logs` collection, no sample/mock data
+- **Header:** Updated to "View and export application logs across all modules"
+
+### C) Announcements 24h Retention ✅
+- **Feature:** Expired announcements retained for 24 hours before auto-deletion
+- **Backend:** `GET /api/announcements` filters out announcements expired > 24h and auto-deletes
+- **UI:** Status badge shows "Expired (24h retention)" for expired announcements
+- **Purpose:** Allows admins to review/reactivate recently expired announcements
+
+---
+
+## UAT Round 3 Fixes Completed
 
 ### A) Dashboard Restructured ✅
 - **Old:** "Recent Orders" list
