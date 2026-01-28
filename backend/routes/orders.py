@@ -2,6 +2,7 @@
 import uuid
 import os
 import base64
+import logging
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, UploadFile, File, Form
 from pydantic import BaseModel, Field
