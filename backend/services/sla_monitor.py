@@ -4,7 +4,62 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import List
 from .notifications import create_notification
-from .email import send_email_notification
+from .email import send_email_notification, send_pool_assignment_email
+
+
+async def check_pool_transitions(db):
+    """
+    Check for tickets that have transitioned from Pool 1 to Pool 2 (after 24 hours).
+    Notify Vendors/Freelancers about newly available tickets.
+    """
+    now = datetime.now(timezone.utc)
+    twenty_four_hours_ago = now - timedelta(hours=24)
+    
+    # Find Open tickets that entered Pool 1 more than 24 hours ago
+    # and haven't been notified for Pool 2 yet
+    pool_2_tickets = await db.orders.find({
+        "status": "Open",
+        "editor_id": None,
+        "pool_entered_at": {"$exists": True, "$lte": twenty_four_hours_ago.isoformat()},
+        "pool_2_notified": {"$ne": True}
+    }, {"_id": 0}).to_list(100)
+    
+    if not pool_2_tickets:
+        return {"notified": 0}
+    
+    # Get all active Vendors/Freelancers
+    vendors = await db.users.find(
+        {"account_type": "Vendor/Freelancer", "active": True},
+        {"_id": 0, "email": 1, "name": 1}
+    ).to_list(100)
+    
+    notified_count = 0
+    
+    for ticket in pool_2_tickets:
+        # Mark as notified first to avoid duplicates
+        await db.orders.update_one(
+            {"id": ticket["id"]},
+            {"$set": {"pool_2_notified": True}}
+        )
+        
+        # Notify each vendor
+        for vendor in vendors:
+            try:
+                await send_pool_assignment_email(
+                    vendor["email"],
+                    vendor["name"],
+                    ticket["order_code"],
+                    ticket.get("title", ""),
+                    ticket.get("priority_or_severity", "Normal"),
+                    ticket.get("category_l2_name") or ticket.get("category_l1_name") or "General",
+                    "Vendor Pool (Pool 2)",
+                    ticket["id"]
+                )
+                notified_count += 1
+            except Exception as e:
+                logging.error(f"Failed to notify vendor {vendor['email']} about ticket {ticket['order_code']}: {e}")
+    
+    return {"notified": notified_count, "tickets": len(pool_2_tickets), "vendors": len(vendors)}
 
 
 async def check_sla_breaches(db):
