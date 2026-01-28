@@ -159,54 +159,6 @@ export default function Logs() {
     }
   };
 
-  const generateSampleLogs = (logType) => {
-    const now = new Date();
-    const levels = ['INFO', 'INFO', 'INFO', 'WARNING', 'ERROR', 'SUCCESS'];
-    const messages = {
-      system: [
-        'Server started successfully',
-        'Database connection established',
-        'Memory usage at 45%',
-        'CPU usage spike detected',
-        'Scheduled task completed',
-        'Cache cleared'
-      ],
-      api: [
-        'POST /api/auth/login - 200 OK',
-        'GET /api/orders - 200 OK',
-        'POST /api/orders - 201 Created',
-        'GET /api/users - 401 Unauthorized',
-        'PUT /api/orders/123 - 200 OK',
-        'DELETE /api/orders/456 - 404 Not Found'
-      ],
-      ui: [
-        'User navigated to Dashboard',
-        'Form submitted: Create Order',
-        'Modal opened: User Profile',
-        'Button clicked: Submit Request',
-        'Page load time: 1.2s',
-        'Component error: undefined property'
-      ],
-      user: [
-        'User admin@redribbonops.com logged in',
-        'User created new order RRG-000001',
-        'Password changed for user@test.com',
-        'User profile updated',
-        'File uploaded: document.pdf',
-        'Order status changed to Delivered'
-      ]
-    };
-
-    return Array.from({ length: 50 }, (_, i) => ({
-      id: `log-${i}`,
-      timestamp: new Date(now - i * 60000 * Math.random() * 10).toISOString(),
-      level: levels[Math.floor(Math.random() * levels.length)],
-      message: messages[logType][Math.floor(Math.random() * messages[logType].length)],
-      source: logType,
-      details: i % 5 === 0 ? { extra: 'Additional context info' } : null
-    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  };
-
   const handleDownload = () => {
     const content = logs.map(log => 
       `[${log.timestamp}] [${log.level}] ${log.message}`
