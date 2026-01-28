@@ -226,7 +226,11 @@ function AdminDashboard() {
     breached: 0,
     unacknowledged: 0
   });
-  const [recentOrders, setRecentOrders] = useState([]);
+  const [myWork, setMyWork] = useState({
+    working_on: [],
+    delivered: [],
+    my_submitted_count: 0
+  });
   const [ratingStats, setRatingStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -236,14 +240,14 @@ function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, ordersRes, ratingsRes, slaStatsRes] = await Promise.all([
+      const [statsRes, myWorkRes, ratingsRes, slaStatsRes] = await Promise.all([
         axios.get(`${API}/dashboard/stats`),
-        axios.get(`${API}/orders`),
+        axios.get(`${API}/dashboard/my-work`),
         axios.get(`${API}/ratings/my-stats`).catch(() => ({ data: null })),
         axios.get(`${API}/sla-policies/monitoring/stats`).catch(() => ({ data: { orders: {}, escalations: {} } }))
       ]);
       setStats(statsRes.data);
-      setRecentOrders(ordersRes.data.slice(0, 10));
+      setMyWork(myWorkRes.data);
       setRatingStats(ratingsRes.data);
       setSlaStats({
         on_track: slaStatsRes.data?.orders?.on_track || 0,
@@ -269,9 +273,6 @@ function AdminDashboard() {
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - Admin</h1>
           <p className="text-slate-500 mt-1">{t('dashboard.overview')}</p>
         </div>
-        <Link to="/users">
-          <Button variant="outline">{t('users.manageUsers')}</Button>
-        </Link>
       </div>
 
       {/* Rating Stats for Admin (if they have any) */}
@@ -280,11 +281,14 @@ function AdminDashboard() {
       )}
 
       {/* Order Status KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <KPICard label={t('orders.status.open')} value={stats.open_count} icon={Inbox} color="bg-blue-500" />
         <KPICard label={t('orders.status.inProgress')} value={stats.in_progress_count} icon={Clock} color="bg-amber-500" />
         <KPICard label={t('dashboard.pendingReview')} value={stats.pending_count} icon={AlertCircle} color="bg-purple-500" />
         <KPICard label={t('orders.status.delivered')} value={stats.delivered_count} icon={CheckCircle2} color="bg-green-500" />
+        <Link to="/my-tickets">
+          <KPICard label="My Submitted Tickets" value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
+        </Link>
       </div>
 
       {/* SLA Status KPIs - Linked to SLA Module */}
@@ -331,22 +335,41 @@ function AdminDashboard() {
         </div>
       </div>
 
+      {/* Tickets I'm Working On */}
       <Card className="border-slate-200">
         <CardHeader className="border-b border-slate-100 pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle>{t('dashboard.recentOrders')}</CardTitle>
-            <Link to="/orders" className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
-              {t('dashboard.viewAll')} <ArrowRight size={14} />
-            </Link>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Clock size={20} className="text-amber-500" />
+            Tickets I'm Working On ({myWork.working_on.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
           <div className="space-y-3">
-            {recentOrders.map(order => (
+            {myWork.working_on.map(order => (
               <OrderCard key={order.id} order={order} t={t} />
             ))}
-            {recentOrders.length === 0 && (
-              <p className="text-center text-slate-500 py-8">{t('common.noResults')}</p>
+            {myWork.working_on.length === 0 && (
+              <p className="text-center text-slate-500 py-8">No tickets currently assigned to you</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tickets Delivered */}
+      <Card className="border-slate-200">
+        <CardHeader className="border-b border-slate-100 pb-4">
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle2 size={20} className="text-green-500" />
+            Tickets Delivered ({myWork.delivered.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            {myWork.delivered.slice(0, 10).map(order => (
+              <OrderCard key={order.id} order={order} t={t} />
+            ))}
+            {myWork.delivered.length === 0 && (
+              <p className="text-center text-slate-500 py-8">No delivered tickets yet</p>
             )}
           </div>
         </CardContent>
