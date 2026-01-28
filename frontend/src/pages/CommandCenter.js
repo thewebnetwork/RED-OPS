@@ -337,8 +337,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            setActiveTab('my-requests');
-                            toast.success('Draft saved! You can continue editing later.');
+                            toast.success('Draft saved! View it in My Tickets.');
                           }}
                         />
                       )}
@@ -365,8 +364,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            setActiveTab('my-requests');
-                            toast.success('Draft saved! You can continue editing later.');
+                            toast.success('Draft saved! View it in My Tickets.');
                           }}
                         />
                       )}
@@ -394,8 +392,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            setActiveTab('my-requests');
-                            toast.success('Draft saved! You can continue editing later.');
+                            toast.success('Draft saved! View it in My Tickets.');
                           }}
                         />
                       )}
