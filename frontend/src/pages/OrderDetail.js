@@ -100,6 +100,11 @@ export default function OrderDetail() {
   const [reassignReason, setReassignReason] = useState('');
   const [reassigning, setReassigning] = useState(false);
   
+  // Force to Pool 2 state
+  const [forcePool2DialogOpen, setForcePool2DialogOpen] = useState(false);
+  const [forcePool2Reason, setForcePool2Reason] = useState('');
+  const [forcingToPool2, setForcingToPool2] = useState(false);
+  
   const [newFile, setNewFile] = useState({
     file_type: 'Export',
     label: '',
