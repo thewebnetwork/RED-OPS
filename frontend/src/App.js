@@ -36,6 +36,7 @@ import ReportIssue from "./pages/ReportIssue";
 import RibbonBoard from "./pages/RibbonBoard";
 import IAMPage from "./pages/IAMPage";
 import SettingsHub from "./pages/SettingsHub";
+import DeletedTickets from "./pages/DeletedTickets";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
