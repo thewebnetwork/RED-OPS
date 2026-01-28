@@ -259,12 +259,12 @@ export default function CommandCenter() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">
-          {preselectedType === 'issue' ? 'Report an Issue' : t('commandCenter.title')}
+          {preselectedType === 'issue' ? 'Report an Issue' : 'Submit New Request'}
         </h1>
         <p className="text-slate-500 mt-1">
           {preselectedType === 'issue' 
-            ? 'Report a problem or bug you\'ve encountered' 
-            : t('commandCenter.subtitle')}
+            ? 'Report a problem or bug you have encountered' 
+            : 'Place requests, report issues, or request new features'}
         </p>
       </div>
 
