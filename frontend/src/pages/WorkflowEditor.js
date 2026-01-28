@@ -1300,6 +1300,7 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
 
   const actionTypes = [
     { type: 'assign_role', label: 'Auto-Assign Role', icon: UserPlus },
+    { type: 'assign_specialty', label: 'Route to Specialty', icon: Forward },
     { type: 'forward_ticket', label: 'Forward Ticket', icon: Forward },
     { type: 'email_user', label: 'Email Assigned User', icon: Mail },
     { type: 'email_requester', label: 'Email Requester', icon: Mail },
