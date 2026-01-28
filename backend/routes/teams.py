@@ -167,7 +167,7 @@ async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = 
 
 
 @router.delete("/{team_id}")
-async def delete_team(team_id: str, current_user: dict = Depends(require_roles(["Admin"]))):
+async def delete_team(team_id: str, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Soft delete a team (Admin only)"""
     team = await db.teams.find_one({"id": team_id}, {"_id": 0})
     if not team:
