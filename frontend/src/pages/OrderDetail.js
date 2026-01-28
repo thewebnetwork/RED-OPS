@@ -790,6 +790,60 @@ export default function OrderDetail() {
             </DialogContent>
           </Dialog>
         )}
+        {canSoftDelete && (
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-red-400 text-red-600 hover:bg-red-50"
+                data-testid="delete-ticket-btn"
+              >
+                <Trash2 size={18} className="mr-2" />
+                Delete Ticket
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-red-600">Soft Delete Ticket</DialogTitle>
+                <DialogDescription>
+                  This will soft-delete the ticket. It can be restored later from the Deleted Tickets page. 
+                  A reason is required for the audit trail.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Reason for deletion *</Label>
+                  <Textarea
+                    value={deleteReason}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                    placeholder="e.g., Duplicate ticket, Test data, Spam request..."
+                    className="mt-1.5 min-h-[100px]"
+                    data-testid="delete-reason-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setDeleteDialogOpen(false);
+                      setDeleteReason('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700"
+                    onClick={handleSoftDelete}
+                    disabled={deletingOrder || !deleteReason.trim()}
+                    data-testid="confirm-delete-btn"
+                  >
+                    {deletingOrder ? 'Deleting...' : 'Delete Ticket'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
