@@ -594,3 +594,246 @@ Red Ops Team
     """
     
     return await send_email_notification(to_email, subject, body.strip(), html_body)
+
+
+# ============== TICKET STATUS CHANGE EMAILS ==============
+
+async def send_ticket_status_changed_email(to_email: str, to_name: str, order_code: str, 
+                                           title: str, old_status: str, new_status: str, 
+                                           changed_by: str, order_id: str):
+    """Send email when ticket status changes"""
+    config = get_smtp_config()
+    order_url = f"{config['frontend_url']}/orders/{order_id}"
+    
+    status_messages = {
+        "In Progress": "Work has begun on your ticket.",
+        "Pending": "Your ticket is pending your review. Please check and respond.",
+        "Delivered": "Your ticket has been delivered/resolved.",
+        "Closed": "Your ticket has been closed.",
+        "Open": "Your ticket is now open and available for pickup.",
+    }
+    
+    status_message = status_messages.get(new_status, f"Status changed to {new_status}.")
+    
+    subject = f"[Red Ops] Ticket Status Update: {order_code} - {new_status}"
+    body = f"""
+Hello {to_name},
+
+Your ticket status has been updated.
+
+Ticket Details:
+- Code: {order_code}
+- Title: {title}
+- Previous Status: {old_status}
+- New Status: {new_status}
+- Updated By: {changed_by}
+
+{status_message}
+
+View ticket: {order_url}
+
+Best regards,
+Red Ops Team
+    """
+    
+    # Status-specific colors
+    status_colors = {
+        "Open": "#3b82f6",
+        "In Progress": "#f59e0b", 
+        "Pending": "#8b5cf6",
+        "Delivered": "#22c55e",
+        "Closed": "#64748b",
+        "Canceled": "#ef4444"
+    }
+    color = status_colors.get(new_status, "#6b7280")
+    
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: {color}; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0;">Ticket Status Update</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">{order_code}</p>
+            </div>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;">
+                <p>Hello <strong>{to_name}</strong>,</p>
+                <p>Your ticket status has been updated.</p>
+                
+                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                    <table style="width: 100%;">
+                        <tr><td style="padding: 5px 0; color: #666;">Title:</td><td style="padding: 5px 0;"><strong>{title}</strong></td></tr>
+                        <tr><td style="padding: 5px 0; color: #666;">Previous Status:</td><td style="padding: 5px 0;"><span style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px;">{old_status}</span></td></tr>
+                        <tr><td style="padding: 5px 0; color: #666;">New Status:</td><td style="padding: 5px 0;"><span style="background: {color}; color: white; padding: 2px 8px; border-radius: 4px;">{new_status}</span></td></tr>
+                        <tr><td style="padding: 5px 0; color: #666;">Updated By:</td><td style="padding: 5px 0;">{changed_by}</td></tr>
+                    </table>
+                </div>
+                
+                <p style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 12px;">{status_message}</p>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="{order_url}" style="display: inline-block; background: {color}; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">View Ticket</a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">Best regards,<br>Red Ops Team</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return await send_email_notification(to_email, subject, body.strip(), html_body)
+
+
+async def send_ticket_pending_review_email(requester_email: str, requester_name: str, 
+                                           resolver_name: str, order_code: str, title: str, order_id: str):
+    """Send email when ticket is submitted for review - notify requester"""
+    config = get_smtp_config()
+    order_url = f"{config['frontend_url']}/orders/{order_id}"
+    
+    subject = f"[Red Ops] Action Required: Review Ticket {order_code}"
+    body = f"""
+Hello {requester_name},
+
+Your ticket requires your review!
+
+{resolver_name} has submitted work for your review on ticket {order_code}.
+
+Ticket Details:
+- Code: {order_code}
+- Title: {title}
+
+Please review the work and respond:
+{order_url}
+
+If you're satisfied, you can close the ticket. If changes are needed, send a response.
+
+Best regards,
+Red Ops Team
+    """
+    
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #8b5cf6; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0;">⏳ Review Required</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">{order_code}</p>
+            </div>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;">
+                <p>Hello <strong>{requester_name}</strong>,</p>
+                <p><strong>{resolver_name}</strong> has submitted work for your review.</p>
+                
+                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Title:</strong> {title}</p>
+                </div>
+                
+                <p style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 12px;">
+                    <strong>Action Required:</strong> Please review the submitted work and respond or close the ticket.
+                </p>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="{order_url}" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">Review Now</a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">Best regards,<br>Red Ops Team</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return await send_email_notification(requester_email, subject, body.strip(), html_body)
+
+
+async def send_ticket_reopened_email(to_email: str, to_name: str, reopened_by: str,
+                                     order_code: str, title: str, reopen_reason: str, order_id: str):
+    """Send email when a ticket is reopened"""
+    subject, body = get_email_template("ticket_reopened", {
+        "to_name": to_name,
+        "reopened_by": reopened_by,
+        "order_code": order_code,
+        "title": title,
+        "reopen_reason": reopen_reason,
+        "order_id": order_id
+    })
+    return await send_email_notification(to_email, subject, body)
+
+
+async def send_ticket_reassigned_email(to_email: str, to_name: str, from_name: str, to_target: str,
+                                       reassigned_by: str, order_code: str, title: str, 
+                                       reason: str, order_id: str):
+    """Send email when a ticket is reassigned"""
+    subject, body = get_email_template("ticket_reassigned", {
+        "to_name": to_name,
+        "from_name": from_name,
+        "to_target": to_target,
+        "reassigned_by": reassigned_by,
+        "order_code": order_code,
+        "title": title,
+        "reason": reason or "Not specified",
+        "order_id": order_id
+    })
+    return await send_email_notification(to_email, subject, body)
+
+
+async def send_ticket_closed_email(requester_email: str, requester_name: str, closed_by: str,
+                                   order_code: str, title: str, close_reason: str, order_id: str):
+    """Send email when a ticket is closed"""
+    config = get_smtp_config()
+    order_url = f"{config['frontend_url']}/orders/{order_id}"
+    
+    subject = f"[Red Ops] Ticket Closed: {order_code}"
+    body = f"""
+Hello {requester_name},
+
+Your ticket has been closed.
+
+Ticket Details:
+- Code: {order_code}
+- Title: {title}
+- Closed By: {closed_by}
+- Reason: {close_reason}
+
+View details: {order_url}
+
+If you need to reopen this ticket, please contact your administrator.
+
+Best regards,
+Red Ops Team
+    """
+    
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #64748b; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h1 style="margin: 0;">Ticket Closed</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">{order_code}</p>
+            </div>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;">
+                <p>Hello <strong>{requester_name}</strong>,</p>
+                <p>Your ticket has been closed.</p>
+                
+                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                    <table style="width: 100%;">
+                        <tr><td style="padding: 5px 0; color: #666;">Title:</td><td style="padding: 5px 0;"><strong>{title}</strong></td></tr>
+                        <tr><td style="padding: 5px 0; color: #666;">Closed By:</td><td style="padding: 5px 0;">{closed_by}</td></tr>
+                        <tr><td style="padding: 5px 0; color: #666;">Reason:</td><td style="padding: 5px 0;">{close_reason}</td></tr>
+                    </table>
+                </div>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="{order_url}" style="display: inline-block; background: #64748b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">View Ticket</a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                    If you need to reopen this ticket, please contact your administrator.<br><br>
+                    Best regards,<br>Red Ops Team
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return await send_email_notification(requester_email, subject, body.strip(), html_body)
