@@ -4,20 +4,30 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv('/app/backend/.env')
 
 # SMTP Config - Loaded from environment
-SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-SMTP_USER = os.environ.get('SMTP_USER', '')
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
-SMTP_FROM = os.environ.get('SMTP_FROM', '')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+def get_smtp_config():
+    """Get SMTP config from environment - called at runtime to ensure .env is loaded"""
+    return {
+        'host': os.environ.get('SMTP_HOST', 'smtp.gmail.com'),
+        'port': int(os.environ.get('SMTP_PORT', 587)),
+        'user': os.environ.get('SMTP_USER', ''),
+        'password': os.environ.get('SMTP_PASSWORD', ''),
+        'from_addr': os.environ.get('SMTP_FROM', ''),
+        'frontend_url': os.environ.get('FRONTEND_URL', os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000'))
+    }
 
 
 async def send_email_notification(to_email: str, subject: str, body: str, html_body: str = None):
     """Send email notification via SMTP"""
+    config = get_smtp_config()
+    
     # Check if SMTP is configured
-    if not SMTP_USER or not SMTP_PASSWORD:
+    if not config['user'] or not config['password']:
         logging.warning("[MOCKED EMAIL] SMTP not configured - email not sent")
         print(f"\n{'='*50}")
         print(f"📧 MOCKED EMAIL (SMTP not configured)")
@@ -31,7 +41,7 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
         # Create message
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
-        msg['From'] = SMTP_FROM or SMTP_USER
+        msg['From'] = config['from_addr'] or config['user']
         msg['To'] = to_email
         
         # Attach plain text body
@@ -47,12 +57,18 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
         msg.attach(html_part)
         
         # Send via SMTP
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        logging.info(f"Sending email via {config['host']}:{config['port']} from {config['from_addr']} to {to_email}")
+        with smtplib.SMTP(config['host'], config['port']) as server:
             server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.login(config['user'], config['password'])
             server.send_message(msg)
         
-        logging.info(f"Email sent successfully to {to_email}: {subject}")
+        logging.info(f"✅ Email sent successfully to {to_email}: {subject}")
+        print(f"\n{'='*50}")
+        print(f"✅ EMAIL SENT SUCCESSFULLY")
+        print(f"To: {to_email}")
+        print(f"Subject: {subject}")
+        print(f"{'='*50}\n")
         return True
         
     except Exception as e:
@@ -67,7 +83,8 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
 
 def get_email_template(template_type: str, data: dict) -> tuple:
     """Get email subject and body for different notification types"""
-    order_url = f"{FRONTEND_URL}/orders/{data.get('order_id', '')}"
+    config = get_smtp_config()
+    order_url = f"{config['frontend_url']}/orders/{data.get('order_id', '')}"
     
     templates = {
         "ticket_created": {
