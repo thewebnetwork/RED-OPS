@@ -766,74 +766,154 @@ export default function IAMPage() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
+            <DialogDescription>
+              {!editingUser && 'Create a new user account. A temporary password will be generated.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div><Label>Name *</Label><Input value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} data-testid="user-name-input" /></div>
               <div><Label>Email *</Label><Input type="email" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} data-testid="user-email-input" /></div>
             </div>
+            
+            {/* Password field with show/hide and regenerate */}
+            <div>
+              <Label>{editingUser ? 'New Password' : 'Temporary Password *'}</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={userForm.password} 
+                    onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} 
+                    placeholder={editingUser ? 'Leave blank to keep' : ''} 
+                    data-testid="user-password-input"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </Button>
+                </div>
+                {!editingUser && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => setUserForm({ ...userForm, password: generatePassword() })}
+                    title="Generate new password"
+                  >
+                    <RefreshCw size={14} />
+                  </Button>
+                )}
+              </div>
+              {!editingUser && <p className="text-xs text-slate-500 mt-1">This password will be sent to the user via email</p>}
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>{editingUser ? 'New Password' : 'Password *'}</Label><Input type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} placeholder={editingUser ? 'Leave blank to keep' : ''} /></div>
               <div>
                 <Label>Role *</Label>
-                <Select value={userForm.role} onValueChange={(v) => setUserForm({ ...userForm, role: v })}>
-                  <SelectTrigger data-testid="user-role-select"><SelectValue /></SelectTrigger>
-                  <SelectContent>{identityConfig?.roles?.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-                </Select>
+                <SearchableSelect
+                  options={roleOptions}
+                  value={userForm.role}
+                  onValueChange={(v) => setUserForm({ ...userForm, role: v })}
+                  placeholder="Select role..."
+                  searchPlaceholder="Search roles..."
+                  data-testid="user-role-select"
+                />
+              </div>
+              <div>
+                <Label>Account Type *</Label>
+                <SearchableSelect
+                  options={accountTypeOptions}
+                  value={userForm.account_type}
+                  onValueChange={(v) => setUserForm({ ...userForm, account_type: v, subscription_plan_id: v === 'Partner' ? userForm.subscription_plan_id : '' })}
+                  placeholder="Select account type..."
+                  searchPlaceholder="Search account types..."
+                  data-testid="user-account-type-select"
+                />
               </div>
             </div>
-            <div>
-              <Label>Account Type *</Label>
-              <Select value={userForm.account_type} onValueChange={(v) => setUserForm({ ...userForm, account_type: v, subscription_plan_id: v === 'Partner' ? userForm.subscription_plan_id : '' })}>
-                <SelectTrigger data-testid="user-account-type-select"><SelectValue /></SelectTrigger>
-                <SelectContent>{identityConfig?.account_types?.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Specialty *</Label>
-              <Select value={userForm.specialty_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, specialty_id: v === '__none__' ? '' : v })}>
-                <SelectTrigger data-testid="user-specialty-select"><SelectValue placeholder="Select specialty" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__" disabled>Select a specialty...</SelectItem>
-                  {specialties.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+
             <div>
               <Label>Team</Label>
-              <Select value={userForm.team_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, team_id: v === '__none__' ? '' : v })}>
-                <SelectTrigger data-testid="user-team-select"><SelectValue placeholder="No team" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">No team</SelectItem>
-                  {teams.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                options={teamOptions}
+                value={userForm.team_id || ''}
+                onValueChange={(v) => {
+                  // When team changes, check if current specialty is still valid
+                  const newTeam = teams.find(t => t.id === v);
+                  let newSpecialtyId = userForm.specialty_id;
+                  if (newTeam && newTeam.related_specialty_ids && newTeam.related_specialty_ids.length > 0) {
+                    // If current specialty is not in the team's related specialties, clear it
+                    if (!newTeam.related_specialty_ids.includes(userForm.specialty_id)) {
+                      newSpecialtyId = '';
+                    }
+                  }
+                  setUserForm({ ...userForm, team_id: v || '', specialty_id: newSpecialtyId });
+                }}
+                placeholder="Select team (optional)..."
+                searchPlaceholder="Search teams..."
+                data-testid="user-team-select"
+              />
+              {userForm.team_id && teams.find(t => t.id === userForm.team_id)?.related_specialty_ids?.length > 0 && (
+                <p className="text-xs text-blue-600 mt-1">
+                  <Info size={12} className="inline mr-1" />
+                  Specialty options filtered by team
+                </p>
+              )}
             </div>
+
+            <div>
+              <Label>Specialty *</Label>
+              <SearchableSelect
+                options={filteredSpecialtyOptions}
+                value={userForm.specialty_id}
+                onValueChange={(v) => setUserForm({ ...userForm, specialty_id: v })}
+                placeholder="Select specialty..."
+                searchPlaceholder="Search specialties..."
+                emptyText="No specialties found"
+                data-testid="user-specialty-select"
+              />
+            </div>
+
             {userForm.account_type === 'Partner' && (
               <div className="p-4 bg-purple-50 rounded-lg">
                 <Label className="text-purple-800">Subscription Plan *</Label>
-                <Select value={userForm.subscription_plan_id || '__none__'} onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v === '__none__' ? '' : v })}>
-                  <SelectTrigger data-testid="user-subscription-plan-select" className="mt-1 border-purple-200"><SelectValue placeholder="Select plan" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__" disabled>Select a plan...</SelectItem>
-                    {plans.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  options={planOptions}
+                  value={userForm.subscription_plan_id}
+                  onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v })}
+                  placeholder="Select plan..."
+                  searchPlaceholder="Search plans..."
+                  className="mt-1 border-purple-200"
+                  data-testid="user-subscription-plan-select"
+                />
               </div>
             )}
-            <div className="flex gap-4 pt-4 border-t">
+
+            <div className="flex flex-col gap-3 pt-4 border-t">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Switch checked={userForm.force_password_change} onCheckedChange={(v) => setUserForm({ ...userForm, force_password_change: v })} />
-                <span className="text-sm">Force password change</span>
+                <span className="text-sm">Force password change on first login</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <Switch checked={userForm.force_otp_setup} onCheckedChange={(v) => setUserForm({ ...userForm, force_otp_setup: v })} />
-                <span className="text-sm">Force OTP setup</span>
+                <span className="text-sm">Force OTP/2FA setup</span>
               </label>
+              {!editingUser && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Switch checked={userForm.send_welcome_email} onCheckedChange={(v) => setUserForm({ ...userForm, send_welcome_email: v })} />
+                  <span className="text-sm">Send welcome email with login credentials</span>
+                </label>
+              )}
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancel</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create'}</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create User'}</Button>
             </div>
           </div>
         </DialogContent>
