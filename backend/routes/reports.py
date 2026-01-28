@@ -340,7 +340,7 @@ async def export_report_csv(
 async def export_report_pdf(
     report_id: str,
     filters: ReportFilter,
-    current_user: dict = Depends(require_roles(["Admin", "Privileged User"]))
+    current_user: dict = Depends(get_current_user)
 ):
     """Export report as PDF - returns JSON for frontend PDF generation"""
     report = await generate_report(report_id, filters, current_user)
