@@ -1399,6 +1399,53 @@ function ActionNodeConfig({ data, updateData, roles, teams }) {
                 </Select>
               )}
 
+              {action.action_type === 'assign_specialty' && (
+                <div className="space-y-2">
+                  <Select
+                    value={action.config?.specialty_id || ''}
+                    onValueChange={(val) => updateAction(action.id, { specialty_id: val })}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((spec) => (
+                        <SelectItem key={spec.id} value={spec.id}>
+                          {spec.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={action.config?.pool_preference || ''}
+                    onValueChange={(val) => updateAction(action.id, { pool_preference: val })}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Pool preference (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Any pool</SelectItem>
+                      <SelectItem value="pool_1">Pool 1 (Partners first)</SelectItem>
+                      <SelectItem value="pool_2">Pool 2 (Vendors/Freelancers)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={action.config?.fallback || ''}
+                    onValueChange={(val) => updateAction(action.id, { fallback: val })}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Fallback if no eligible users" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Leave unassigned</SelectItem>
+                      <SelectItem value="admin_queue">Route to Admin queue</SelectItem>
+                      <SelectItem value="any_specialty">Assign to any available specialty</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-400">Routes ticket to users with the selected specialty</p>
+                </div>
+              )}
+
               {action.action_type === 'forward_ticket' && (
                 <Select
                   value={action.config?.team_id || ''}
