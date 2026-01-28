@@ -141,7 +141,20 @@ async def get_team(team_id: str, current_user: dict = Depends(get_current_user))
         raise HTTPException(status_code=404, detail="Team not found")
     
     member_count = await db.users.count_documents({"team_id": team_id, "active": True})
-    return TeamResponse(**team, member_count=member_count)
+    
+    # Resolve related specialty names
+    related_specialty_names = []
+    for spec_id in team.get("related_specialty_ids", []):
+        spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+        if spec:
+            related_specialty_names.append(spec["name"])
+    
+    # Ensure related_specialty_ids is set
+    team_data = {**team}
+    if "related_specialty_ids" not in team_data:
+        team_data["related_specialty_ids"] = []
+    
+    return TeamResponse(**team_data, related_specialty_names=related_specialty_names, member_count=member_count)
 
 
 @router.patch("/{team_id}", response_model=TeamResponse)
