@@ -27,9 +27,9 @@ class TestAuth:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "access_token" in data
+        assert "token" in data
         assert data["user"]["role"] == "Administrator"
-        return data["access_token"]
+        return data["token"]
 
 
 class TestIAMRoles:
