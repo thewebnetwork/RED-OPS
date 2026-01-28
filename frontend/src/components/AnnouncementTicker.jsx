@@ -41,20 +41,26 @@ export default function AnnouncementTicker() {
     return null;
   }
 
+  // Use the announcement's custom colors or fallback to defaults
+  const bgColor = announcement.background_color || '#A2182C';
+  const textColor = announcement.text_color || '#FFFFFF';
+
   return (
     <div 
-      className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg mr-4 max-w-md overflow-hidden"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-lg mr-4 max-w-md overflow-hidden"
+      style={{ backgroundColor: bgColor }}
       data-testid="announcement-ticker"
     >
-      <Megaphone size={16} className="shrink-0 text-black" />
+      <Megaphone size={16} className="shrink-0" style={{ color: textColor }} />
       <div className="overflow-hidden whitespace-nowrap">
         <span 
-          className="inline-block text-sm font-bold text-black animate-marquee"
+          className="inline-block text-sm font-bold animate-marquee"
           style={{
+            color: textColor,
             animation: 'marquee 15s linear infinite',
           }}
         >
-          {ticker.message}
+          {announcement.message}
         </span>
       </div>
       <style>{`
