@@ -270,7 +270,7 @@ async def get_announcement_ticker_admin(current_user: dict = Depends(require_rol
 
 
 @router.put("/announcement-ticker", response_model=AnnouncementTickerResponse)
-async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+async def update_announcement_ticker(ticker_data: AnnouncementTickerUpdate, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Update announcement ticker (Admin only)"""
     # Validation: If send_to_all is OFF, require at least one team, role, or specialty
     if not ticker_data.send_to_all:
