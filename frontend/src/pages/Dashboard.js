@@ -579,12 +579,7 @@ function RequesterDashboard() {
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.myOrders')}</h1>
           <p className="text-slate-500 mt-1">{t('dashboard.trackRequests')}</p>
         </div>
-        <Link to="/orders/new">
-          <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-order-btn">
-            <Plus size={18} className="mr-2" />
-            {t('dashboard.newRequest')}
-          </Button>
-        </Link>
+        {/* Button removed - use sidebar navigation instead */}
       </div>
 
       {/* Rating Stats for Requester (if they also resolve orders) */}
