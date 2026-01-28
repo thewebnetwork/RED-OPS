@@ -789,6 +789,118 @@ export default function IAMPage() {
         </DialogContent>
       </Dialog>
 
+      {/* ROLE DIALOG */}
+      <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingRole ? 'Edit Role' : 'Add Role'}</DialogTitle>
+            <DialogDescription>
+              {editingRole?.is_system && <Badge variant="outline" className="mt-2">System Role - Name cannot be changed</Badge>}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label>Name *</Label>
+              <Input 
+                value={roleForm.name} 
+                onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })} 
+                disabled={editingRole?.is_system}
+                data-testid="role-name-input"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input 
+                value={roleForm.description} 
+                onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })} 
+                data-testid="role-description-input"
+              />
+            </div>
+            <div>
+              <Label>Color</Label>
+              <div className="flex gap-2">
+                <Input 
+                  type="color" 
+                  value={roleForm.color} 
+                  onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
+                  className="w-16 h-10 p-1" 
+                />
+                <Input 
+                  value={roleForm.color} 
+                  onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveRole} data-testid="save-role-btn">
+                {editingRole ? 'Save' : 'Create'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ACCOUNT TYPE DIALOG */}
+      <Dialog open={accountTypeDialogOpen} onOpenChange={setAccountTypeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingAccountType ? 'Edit Account Type' : 'Add Account Type'}</DialogTitle>
+            <DialogDescription>
+              {editingAccountType?.is_system && <Badge variant="outline" className="mt-2">System Type - Name cannot be changed</Badge>}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label>Name *</Label>
+              <Input 
+                value={accountTypeForm.name} 
+                onChange={(e) => setAccountTypeForm({ ...accountTypeForm, name: e.target.value })} 
+                disabled={editingAccountType?.is_system}
+                data-testid="account-type-name-input"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input 
+                value={accountTypeForm.description} 
+                onChange={(e) => setAccountTypeForm({ ...accountTypeForm, description: e.target.value })} 
+                data-testid="account-type-description-input"
+              />
+            </div>
+            <div>
+              <Label>Color</Label>
+              <div className="flex gap-2">
+                <Input 
+                  type="color" 
+                  value={accountTypeForm.color} 
+                  onChange={(e) => setAccountTypeForm({ ...accountTypeForm, color: e.target.value })} 
+                  className="w-16 h-10 p-1" 
+                />
+                <Input 
+                  value={accountTypeForm.color} 
+                  onChange={(e) => setAccountTypeForm({ ...accountTypeForm, color: e.target.value })} 
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch 
+                checked={accountTypeForm.requires_subscription} 
+                onCheckedChange={(v) => setAccountTypeForm({ ...accountTypeForm, requires_subscription: v })} 
+                data-testid="requires-subscription-switch"
+              />
+              <Label className="cursor-pointer">Requires Subscription Plan</Label>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setAccountTypeDialogOpen(false)}>Cancel</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveAccountType} data-testid="save-account-type-btn">
+                {editingAccountType ? 'Save' : 'Create'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* DELETE DIALOG */}
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
         <AlertDialogContent>
