@@ -13,6 +13,25 @@ import ReactFlow, {
   Panel,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+
+// Suppress ResizeObserver loop errors (benign in React/ReactFlow)
+if (typeof window !== 'undefined') {
+  const resizeObserverErr = window.onerror;
+  window.onerror = function (message, source, lineno, colno, error) {
+    if (message && message.toString().includes('ResizeObserver loop')) {
+      return true; // Suppress this specific error
+    }
+    return resizeObserverErr ? resizeObserverErr(message, source, lineno, colno, error) : false;
+  };
+  
+  // Also handle unhandled promise rejections with ResizeObserver
+  window.addEventListener('error', (e) => {
+    if (e.message && e.message.includes('ResizeObserver loop')) {
+      e.stopImmediatePropagation();
+    }
+  });
+}
+
 import {
   ArrowLeft,
   Save,
