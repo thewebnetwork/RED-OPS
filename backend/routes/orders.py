@@ -13,7 +13,15 @@ from utils.helpers import (
 )
 from services.webhooks import trigger_webhooks
 from services.workflow_engine import get_workflows_for_trigger, execute_workflow
-from services.email import send_satisfaction_survey_email
+from services.email import (
+    send_satisfaction_survey_email,
+    send_ticket_created_email,
+    send_ticket_assigned_email,
+    send_ticket_picked_up_email,
+    send_ticket_resolved_email,
+    send_ticket_cancelled_email,
+    send_pool_assignment_email
+)
 from config import FRONTEND_URL, CANCELLATION_REASONS
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
