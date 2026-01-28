@@ -295,11 +295,17 @@ async def get_user(user_id: str, current_user: dict = Depends(require_roles(["Ad
 @router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Update a user (Admin only)"""
+    from services.email import send_account_disabled_email, send_account_reactivated_email
+    
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     update_dict = {k: v for k, v in user_data.model_dump().items() if v is not None}
+    
+    # Track if active status is changing for email notifications
+    was_active = user.get("active", True)
+    new_active = update_dict.get("active")
     
     if "email" in update_dict:
         update_dict["email"] = update_dict["email"].lower()
@@ -358,6 +364,27 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
     
     if update_dict:
         await db.users.update_one({"id": user_id}, {"$set": update_dict})
+    
+    # Send email notifications for account status changes
+    if new_active is not None and was_active != new_active:
+        try:
+            if new_active:
+                # Account reactivated
+                await send_account_reactivated_email(
+                    to_email=user["email"],
+                    user_name=user["name"],
+                    reactivated_by=current_user.get("name", "Administrator")
+                )
+            else:
+                # Account disabled
+                await send_account_disabled_email(
+                    to_email=user["email"],
+                    user_name=user["name"],
+                    disabled_by=current_user.get("name", "Administrator")
+                )
+        except Exception as e:
+            import logging
+            logging.error(f"Failed to send account status email: {e}")
     
     updated_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
     return await build_user_response(updated_user)
