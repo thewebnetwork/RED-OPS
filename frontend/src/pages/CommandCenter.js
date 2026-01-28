@@ -1083,3 +1083,125 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
     </form>
   );
 }
+
+
+// Generic Request Form - for categories without special forms
+function GenericRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, requestType, onSuccess, onDraftSaved }) {
+  const [loading, setLoading] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [formData, setFormData] = useState({
+    priority: 'Normal',
+    additional_notes: ''
+  });
+
+  const handleSubmit = async (e, isDraft = false) => {
+    e?.preventDefault();
+    
+    if (!isDraft) {
+      if (!title) {
+        toast.error('Please enter a title');
+        return;
+      }
+      if (!description) {
+        toast.error('Please provide a description');
+        return;
+      }
+    } else {
+      if (!title) {
+        toast.error('Please enter at least a title to save as draft');
+        return;
+      }
+    }
+
+    if (isDraft) {
+      setSavingDraft(true);
+    } else {
+      setLoading(true);
+    }
+    
+    try {
+      await axios.post(`${API}/orders`, {
+        title,
+        description: description || '',
+        category_l1_id: categoryL1Id,
+        category_l2_id: categoryL2Id,
+        attachment_count: attachments?.length || 0,
+        is_draft: isDraft,
+        request_type: requestType,
+        priority: formData.priority,
+        additional_notes: formData.additional_notes
+      });
+      
+      if (isDraft) {
+        onDraftSaved?.();
+      } else {
+        onSuccess();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to submit request');
+    } finally {
+      setLoading(false);
+      setSavingDraft(false);
+    }
+  };
+
+  return (
+    <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
+      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+        <p className="text-sm text-slate-700 font-medium">
+          {requestType === 'Issue' ? 'Report an Issue' : 'Submit Request'}
+        </p>
+        <p className="text-xs text-slate-600">Fill out the form and submit your request.</p>
+      </div>
+
+      <div>
+        <Label>Priority</Label>
+        <Select value={formData.priority} onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}>
+          <SelectTrigger className="mt-1.5">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Low">Low</SelectItem>
+            <SelectItem value="Normal">Normal</SelectItem>
+            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Urgent">Urgent</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Additional Notes (optional)</Label>
+        <Textarea
+          value={formData.additional_notes}
+          onChange={(e) => setFormData(prev => ({ ...prev, additional_notes: e.target.value }))}
+          placeholder="Any additional information..."
+          className="mt-1.5"
+        />
+      </div>
+
+      {/* Sticky Action Buttons */}
+      <div className="sticky bottom-0 pt-4 pb-2 bg-white border-t border-slate-100 -mx-6 px-6 flex gap-3">
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="flex-1"
+          onClick={(e) => handleSubmit(e, true)}
+          disabled={savingDraft || loading}
+          data-testid="save-draft-btn"
+        >
+          <Save size={16} className="mr-2" />
+          {savingDraft ? 'Saving...' : 'Save Draft'}
+        </Button>
+        <Button 
+          type="submit" 
+          className="flex-1 bg-rose-600 hover:bg-rose-700" 
+          disabled={loading || savingDraft}
+          data-testid="submit-request-btn"
+        >
+          <Send size={16} className="mr-2" />
+          {loading ? 'Submitting...' : 'Submit Request'}
+        </Button>
+      </div>
+    </form>
+  );
+}
