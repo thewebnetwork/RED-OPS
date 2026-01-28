@@ -287,6 +287,24 @@ export default function OrderDetail() {
     }
   };
 
+  // Force to Pool 2 handler
+  const handleForceToPool2 = async () => {
+    setForcingToPool2(true);
+    try {
+      await axios.post(`${API}/orders/${orderId}/force-pool-2`, null, {
+        params: { reason: forcePool2Reason.trim() || null }
+      });
+      toast.success('Ticket forced to Pool 2 successfully');
+      setForcePool2DialogOpen(false);
+      setForcePool2Reason('');
+      fetchOrderData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to force ticket to Pool 2');
+    } finally {
+      setForcingToPool2(false);
+    }
+  };
+
   const handleAddFile = async (e) => {
     e.preventDefault();
     if (!newFile.label || !newFile.url) {
