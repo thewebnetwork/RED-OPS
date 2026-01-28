@@ -1064,6 +1064,34 @@ async def cancel_order(
             f"Order {order['order_code']} '{order['title']}' was canceled by the requester.\n\nReason: {cancel_data.reason}" + (f"\nNotes: {cancel_data.notes}" if cancel_data.notes else ""),
             order['id']
         )
+        
+        # Send email to resolver (NOT to requester, NO satisfaction survey)
+        resolver = await db.users.find_one({"id": order["editor_id"]}, {"_id": 0, "password": 0})
+        if resolver:
+            background_tasks.add_task(
+                send_ticket_cancelled_email,
+                resolver["email"],
+                resolver["name"],
+                current_user["name"],
+                order["order_code"],
+                order.get("title", ""),
+                cancel_data.reason,
+                order_id
+            )
+    
+    # Also notify admins of cancellation
+    admins = await db.users.find({"role": "Administrator", "active": True, "id": {"$ne": current_user["id"]}}, {"_id": 0}).to_list(10)
+    for admin in admins:
+        background_tasks.add_task(
+            send_ticket_cancelled_email,
+            admin["email"],
+            admin["name"],
+            current_user["name"],
+            order["order_code"],
+            order.get("title", ""),
+            cancel_data.reason,
+            order_id
+        )
     
     # Trigger webhook
     background_tasks.add_task(trigger_webhooks, "order.status_changed", {
