@@ -325,12 +325,44 @@ export default function IAMPage() {
   const openRoleDialog = (role = null) => {
     if (role) {
       setEditingRole(role);
-      setRoleForm({ name: role.name, description: role.description || '', color: role.color || '#6366F1' });
+      // Load existing permissions or use template defaults
+      const existingPermissions = role.permissions || ROLE_TEMPLATES[role.name]?.permissions || {};
+      setRoleForm({ 
+        name: role.name, 
+        description: role.description || '', 
+        color: role.color || '#6366F1',
+        permissions: JSON.parse(JSON.stringify(existingPermissions)) // Deep clone
+      });
     } else {
       setEditingRole(null);
-      setRoleForm({ name: '', description: '', color: '#6366F1' });
+      setRoleForm({ name: '', description: '', color: '#6366F1', permissions: {} });
     }
     setRoleDialogOpen(true);
+  };
+  
+  const togglePermission = (module, action) => {
+    setRoleForm(prev => {
+      const newPermissions = { ...prev.permissions };
+      if (!newPermissions[module]) {
+        newPermissions[module] = {};
+      }
+      newPermissions[module][action] = !newPermissions[module]?.[action];
+      return { ...prev, permissions: newPermissions };
+    });
+  };
+  
+  const toggleModuleAll = (module, actions) => {
+    setRoleForm(prev => {
+      const newPermissions = { ...prev.permissions };
+      const currentModule = newPermissions[module] || {};
+      const allEnabled = actions.every(a => currentModule[a]);
+      
+      newPermissions[module] = {};
+      actions.forEach(action => {
+        newPermissions[module][action] = !allEnabled;
+      });
+      return { ...prev, permissions: newPermissions };
+    });
   };
 
   const saveRole = async () => {
