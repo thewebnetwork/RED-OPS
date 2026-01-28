@@ -835,7 +835,7 @@ export default function IAMPage() {
 
       {/* ROLE DIALOG */}
       <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRole ? 'Edit Role' : 'Add Role'}</DialogTitle>
             <DialogDescription>
@@ -843,14 +843,31 @@ export default function IAMPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div>
-              <Label>Name *</Label>
-              <Input 
-                value={roleForm.name} 
-                onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })} 
-                disabled={editingRole?.is_system}
-                data-testid="role-name-input"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Name *</Label>
+                <Input 
+                  value={roleForm.name} 
+                  onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })} 
+                  disabled={editingRole?.is_system}
+                  data-testid="role-name-input"
+                />
+              </div>
+              <div>
+                <Label>Color</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    type="color" 
+                    value={roleForm.color} 
+                    onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
+                    className="w-16 h-10 p-1" 
+                  />
+                  <Input 
+                    value={roleForm.color} 
+                    onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
+                  />
+                </div>
+              </div>
             </div>
             <div>
               <Label>Description</Label>
@@ -860,25 +877,63 @@ export default function IAMPage() {
                 data-testid="role-description-input"
               />
             </div>
-            <div>
-              <Label>Color</Label>
-              <div className="flex gap-2">
-                <Input 
-                  type="color" 
-                  value={roleForm.color} 
-                  onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
-                  className="w-16 h-10 p-1" 
-                />
-                <Input 
-                  value={roleForm.color} 
-                  onChange={(e) => setRoleForm({ ...roleForm, color: e.target.value })} 
-                />
+            
+            {/* Permission Matrix */}
+            <div className="border rounded-lg p-4 bg-slate-50">
+              <div className="flex items-center gap-2 mb-4">
+                <Shield size={18} className="text-rose-600" />
+                <Label className="text-base font-semibold">Permission Matrix</Label>
+              </div>
+              
+              <div className="space-y-3">
+                {Object.entries(PERMISSION_MODULES).map(([moduleKey, moduleConfig]) => (
+                  <Collapsible key={moduleKey} defaultOpen={true}>
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                      <CollapsibleTrigger className="flex items-center gap-2 flex-1 hover:bg-slate-50 rounded p-1">
+                        <ChevronDown size={16} className="text-slate-400" />
+                        <span className="font-medium">{moduleConfig.label}</span>
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          {moduleConfig.actions.filter(a => roleForm.permissions?.[moduleKey]?.[a]).length}/{moduleConfig.actions.length}
+                        </Badge>
+                      </CollapsibleTrigger>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => toggleModuleAll(moduleKey, moduleConfig.actions)}
+                      >
+                        {moduleConfig.actions.every(a => roleForm.permissions?.[moduleKey]?.[a]) ? 'Disable All' : 'Enable All'}
+                      </Button>
+                    </div>
+                    <CollapsibleContent>
+                      <div className="flex flex-wrap gap-3 p-3 pl-8 bg-white rounded-b-lg border-x border-b">
+                        {moduleConfig.actions.map(action => (
+                          <div key={action} className="flex items-center gap-2">
+                            <Checkbox 
+                              id={`${moduleKey}-${action}`}
+                              checked={roleForm.permissions?.[moduleKey]?.[action] || false}
+                              onCheckedChange={() => togglePermission(moduleKey, action)}
+                              data-testid={`perm-${moduleKey}-${action}`}
+                            />
+                            <label 
+                              htmlFor={`${moduleKey}-${action}`} 
+                              className="text-sm cursor-pointer capitalize"
+                            >
+                              {action}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
               </div>
             </div>
-            <div className="flex justify-end gap-3">
+            
+            <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
               <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveRole} data-testid="save-role-btn">
-                {editingRole ? 'Save' : 'Create'}
+                {editingRole ? 'Save Changes' : 'Create Role'}
               </Button>
             </div>
           </div>
