@@ -1345,6 +1345,19 @@ async def reopen_order(
         order['id']
     )
     
+    # Send email to requester about reopened ticket
+    if order.get("requester_email"):
+        background_tasks.add_task(
+            send_ticket_reopened_email,
+            to_email=order["requester_email"],
+            to_name=order.get("requester_name", "User"),
+            reopened_by=current_user["name"],
+            order_code=order["order_code"],
+            title=order.get("title", ""),
+            reopen_reason=reopen_data.reason,
+            order_id=order_id
+        )
+    
     # Notify previous editor if assigned
     if order.get("editor_id"):
         await create_notification(
@@ -1355,6 +1368,20 @@ async def reopen_order(
             f"Ticket {order['order_code']} has been reopened",
             order['id']
         )
+        
+        # Send email to editor
+        editor = await db.users.find_one({"id": order["editor_id"]}, {"_id": 0, "email": 1, "name": 1})
+        if editor and editor.get("email"):
+            background_tasks.add_task(
+                send_ticket_reopened_email,
+                to_email=editor["email"],
+                to_name=editor.get("name", "Team Member"),
+                reopened_by=current_user["name"],
+                order_code=order["order_code"],
+                title=order.get("title", ""),
+                reopen_reason=reopen_data.reason,
+                order_id=order_id
+            )
     
     background_tasks.add_task(trigger_webhooks, "order.reopened", {
         "order_id": order_id,
