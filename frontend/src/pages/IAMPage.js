@@ -309,6 +309,64 @@ export default function IAMPage() {
     }
   };
 
+  // =============== ROLE HANDLERS ===============
+  const openRoleDialog = (role = null) => {
+    if (role) {
+      setEditingRole(role);
+      setRoleForm({ name: role.name, description: role.description || '', color: role.color || '#6366F1' });
+    } else {
+      setEditingRole(null);
+      setRoleForm({ name: '', description: '', color: '#6366F1' });
+    }
+    setRoleDialogOpen(true);
+  };
+
+  const saveRole = async () => {
+    if (!roleForm.name) { toast.error('Role name required'); return; }
+    try {
+      if (editingRole) {
+        await axios.patch(`${API}/iam/roles/${editingRole.id}`, roleForm);
+        toast.success('Role updated');
+      } else {
+        await axios.post(`${API}/iam/roles`, roleForm);
+        toast.success('Role created');
+      }
+      setRoleDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save role');
+    }
+  };
+
+  // =============== ACCOUNT TYPE HANDLERS ===============
+  const openAccountTypeDialog = (at = null) => {
+    if (at) {
+      setEditingAccountType(at);
+      setAccountTypeForm({ name: at.name, description: at.description || '', color: at.color || '#6366F1', requires_subscription: at.requires_subscription || false });
+    } else {
+      setEditingAccountType(null);
+      setAccountTypeForm({ name: '', description: '', color: '#6366F1', requires_subscription: false });
+    }
+    setAccountTypeDialogOpen(true);
+  };
+
+  const saveAccountType = async () => {
+    if (!accountTypeForm.name) { toast.error('Account type name required'); return; }
+    try {
+      if (editingAccountType) {
+        await axios.patch(`${API}/iam/account-types/${editingAccountType.id}`, accountTypeForm);
+        toast.success('Account type updated');
+      } else {
+        await axios.post(`${API}/iam/account-types`, accountTypeForm);
+        toast.success('Account type created');
+      }
+      setAccountTypeDialogOpen(false);
+      fetchAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save account type');
+    }
+  };
+
   // =============== DELETE HANDLER ===============
   const confirmDelete = async () => {
     const { type, item } = deleteDialog;
@@ -317,6 +375,8 @@ export default function IAMPage() {
       else if (type === 'team') await axios.delete(`${API}/teams/${item.id}`);
       else if (type === 'specialty') await axios.delete(`${API}/specialties/${item.id}`);
       else if (type === 'plan') await axios.delete(`${API}/subscription-plans/${item.id}`);
+      else if (type === 'role') await axios.delete(`${API}/iam/roles/${item.id}`);
+      else if (type === 'accountType') await axios.delete(`${API}/iam/account-types/${item.id}`);
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted`);
       setDeleteDialog({ open: false, type: '', item: null });
       fetchAllData();
