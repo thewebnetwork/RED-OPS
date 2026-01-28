@@ -387,6 +387,8 @@ export default function OrderDetail() {
   const isOperator = user?.role === 'Operator';
   const isResolver = order.editor_id === user?.id;
   const canReassign = (isAdmin || isOperator || isResolver) && !['Closed', 'Canceled', 'Delivered'].includes(order.status);
+  // Admin can force Open/unassigned tickets to Pool 2
+  const canForceToPool2 = isAdmin && order.status === 'Open' && !order.editor_id;
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
@@ -405,6 +407,11 @@ export default function OrderDetail() {
               <Badge className="bg-red-100 text-red-700">
                 <AlertTriangle size={12} className="mr-1" />
                 SLA Breach
+              </Badge>
+            )}
+            {order.forced_to_pool_2 && (
+              <Badge className="bg-orange-100 text-orange-700">
+                Forced to Pool 2
               </Badge>
             )}
           </div>
