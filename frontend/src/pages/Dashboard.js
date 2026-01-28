@@ -470,28 +470,7 @@ function EditorDashboard() {
   );
 }
 
-      {/* Recently Delivered */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 size={20} className="text-green-500" />
-            {t('dashboard.recentlyDelivered')} ({dashboard.delivered.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 space-y-3">
-          {dashboard.delivered.slice(0, 5).map(order => (
-            <OrderCard key={order.id} order={order} t={t} />
-          ))}
-          {dashboard.delivered.length === 0 && (
-            <p className="text-center text-slate-500 py-8">{t('dashboard.noDelivered')}</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// Requester Dashboard
+// Requester Dashboard (Standard User)
 function RequesterDashboard() {
   const { t } = useTranslation();
   const [dashboard, setDashboard] = useState({
