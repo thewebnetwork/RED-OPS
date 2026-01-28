@@ -584,6 +584,22 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
     }
   }, [policy, open]);
 
+  // Listen for template application
+  useEffect(() => {
+    const handleApplyTemplate = (e) => {
+      if (e.detail && open) {
+        setFormData({
+          ...e.detail,
+          scope: e.detail.scope || { role_ids: [], team_ids: [], specialty_ids: [], access_tier_ids: [] }
+        });
+        toast.success('Template applied! Customize and save your policy.');
+      }
+    };
+    
+    document.addEventListener('apply-template', handleApplyTemplate);
+    return () => document.removeEventListener('apply-template', handleApplyTemplate);
+  }, [open]);
+
   const handleSave = async () => {
     if (!formData.name.trim()) {
       toast.error('Policy name is required');
