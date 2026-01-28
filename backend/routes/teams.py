@@ -137,7 +137,7 @@ async def get_team(team_id: str, current_user: dict = Depends(get_current_user))
 
 
 @router.patch("/{team_id}", response_model=TeamResponse)
-async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = Depends(require_roles(["Admin"]))):
+async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Update a team (Admin only)"""
     team = await db.teams.find_one({"id": team_id}, {"_id": 0})
     if not team:
@@ -155,7 +155,15 @@ async def update_team(team_id: str, team_data: TeamUpdate, current_user: dict = 
     
     updated = await db.teams.find_one({"id": team_id}, {"_id": 0})
     member_count = await db.users.count_documents({"team_id": team_id, "active": True})
-    return TeamResponse(**updated, member_count=member_count)
+    
+    # Resolve related specialty names
+    related_specialty_names = []
+    for spec_id in updated.get("related_specialty_ids", []):
+        spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+        if spec:
+            related_specialty_names.append(spec["name"])
+    
+    return TeamResponse(**updated, related_specialty_names=related_specialty_names, member_count=member_count)
 
 
 @router.delete("/{team_id}")
