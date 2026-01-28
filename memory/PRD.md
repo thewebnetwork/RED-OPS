@@ -3,14 +3,37 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.0 (Workflow Fixes - Jan 28, 2026)
+## Current Version: 3.1 (Role Permissions Fix - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ops-tracker-6.preview.emergentagent.com
 
 ---
 
-## Workflow Editor Fixes (Latest)
+## P0 - Role Permission Matrix Restored (Latest)
+
+### Issue
+The granular permissions matrix (checkboxes) was missing from IAM → Roles, preventing access control validation.
+
+### Fix Applied ✅
+- **Permission Matrix UI restored** in Role edit dialog
+- **6 Collapsible Modules:**
+  - Dashboard (view)
+  - Orders/Tickets (view, create, edit, delete, export, pick, assign)
+  - Users (view, create, edit, delete)
+  - Teams (view, create, edit, delete)
+  - Settings (view, edit)
+  - Reports (view, export)
+- **Enable All / Disable All** buttons per module
+- **Individual checkboxes** for each action
+- **Save persists** permissions to backend via `PATCH /api/iam/roles/{id}`
+
+### Note
+Admin account was accidentally deactivated - has been reactivated.
+
+---
+
+## Workflow Editor Fixes
 
 ### A) P0 - ResizeObserver Crash Fixed ✅
 - **Issue:** Workflow editor crashed with "ResizeObserver loop completed with undelivered notifications"
