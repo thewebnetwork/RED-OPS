@@ -196,7 +196,11 @@ export default function Announcements() {
     
     if (!ann.is_active) return <Badge variant="outline" className="text-slate-500">Inactive</Badge>;
     if (startAt && now < startAt) return <Badge className="bg-yellow-100 text-yellow-700">Scheduled</Badge>;
-    if (endAt && now > endAt) return <Badge className="bg-slate-100 text-slate-600">Expired</Badge>;
+    if (endAt && now > endAt) return (
+      <Badge className="bg-slate-100 text-slate-600" title="Will be auto-deleted after 24 hours">
+        Expired (24h retention)
+      </Badge>
+    );
     return <Badge className="bg-emerald-100 text-emerald-700">Active</Badge>;
   };
 
