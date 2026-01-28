@@ -365,9 +365,15 @@ export default function Logs() {
                   <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
                 </div>
               ) : filteredLogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+                <div className="flex flex-col items-center justify-center h-64 text-slate-500 p-8">
                   <FileText size={48} className="text-slate-300 mb-3" />
-                  <p>No logs found</p>
+                  <p className="text-lg font-medium mb-2">No logs found</p>
+                  <p className="text-sm text-center text-slate-400 max-w-md">
+                    {activeTab === 'system' && 'System logs track server events, startup, and scheduled tasks. Logs appear here as system activity occurs.'}
+                    {activeTab === 'api' && 'API logs record HTTP requests and responses. Logs appear as API calls are made.'}
+                    {activeTab === 'ui' && 'UI logs track user interface events and component activity.'}
+                    {activeTab === 'user' && 'User activity logs record login events, profile updates, and user actions.'}
+                  </p>
                 </div>
               ) : (
                 <div 
