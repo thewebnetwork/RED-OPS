@@ -3,10 +3,49 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 2.6 (UAT Round 2 Fixes - Jan 28, 2026)
+## Current Version: 2.7 (UAT Round 3 Fixes - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://ops-tracker-6.preview.emergentagent.com
+
+---
+
+## UAT Round 3 Fixes Completed (Latest)
+
+### A) Dashboard Restructured ✅
+- **Old:** "Recent Orders" list
+- **New:** "Tickets I'm Working On" + "Tickets Delivered" sections for ALL roles
+- **Added:** "My Submitted Tickets" KPI widget linking to /my-tickets
+- **Endpoint:** `GET /api/dashboard/my-work` returns `working_on`, `delivered`, `my_submitted_count`
+
+### B) Sidebar Renamed ✅
+- **Old:** "My Tickets"
+- **New:** "My Submitted Tickets"
+
+### C) "Manage Users" Button Removed ✅
+- Removed from Admin dashboard (use sidebar navigation instead)
+
+### D) File Upload Fixed ✅
+- **New Endpoint:** `POST /api/orders/{order_id}/files/upload` (multipart/form-data)
+- **Download:** `GET /api/orders/{order_id}/files/{file_id}/download`
+- Files saved to `/app/uploads/{order_id}/`
+
+### E) Workflow "Auto-Assign Role" Dropdown Fixed ✅
+- **Issue:** Dropdown was empty due to filtering by `can_pick_orders` field
+- **Fix:** Removed filter, now shows all roles (Administrator, Privileged User, Standard User)
+
+### F) Bug/Issue Tickets Visibility Fixed ✅
+- **Issue:** Bug reports not showing in All Orders or My Submitted Tickets
+- **Fix:** Bug reports now create BOTH `bug_reports` AND `orders` records
+- **Result:** Admins see all tickets in All Orders, requesters see in My Submitted Tickets
+
+### G) Pool Filtering Fixed ✅
+- **Issue:** Partners seeing Support/Issue tickets they shouldn't handle
+- **Fix:** Pool endpoint now excludes Issue/Bug/Support tickets unless user has support specialty
+- **Rules:** Partners/Vendors only see service tickets matching their specialty
+
+### H) Announcements Instant Clear ✅
+- Polling reduced from 60s to 10s for faster banner updates
 
 ---
 
