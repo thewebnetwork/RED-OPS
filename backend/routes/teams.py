@@ -43,7 +43,7 @@ class TeamResponse(BaseModel):
 # ============== ROUTES ==============
 
 @router.post("", response_model=TeamResponse)
-async def create_team(team_data: TeamCreate, current_user: dict = Depends(require_roles(["Admin"]))):
+async def create_team(team_data: TeamCreate, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Create a new team (Admin only)"""
     # Check for duplicate name
     existing = await db.teams.find_one({"name": team_data.name, "active": True})
@@ -55,12 +55,21 @@ async def create_team(team_data: TeamCreate, current_user: dict = Depends(requir
         "name": team_data.name,
         "description": team_data.description,
         "color": team_data.color,
+        "related_specialty_ids": team_data.related_specialty_ids or [],
         "active": True,
         "created_at": get_utc_now()
     }
     
     await db.teams.insert_one(team)
-    return TeamResponse(**team, member_count=0)
+    
+    # Resolve specialty names
+    related_specialty_names = []
+    for spec_id in team.get("related_specialty_ids", []):
+        spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+        if spec:
+            related_specialty_names.append(spec["name"])
+    
+    return TeamResponse(**team, related_specialty_names=related_specialty_names, member_count=0)
 
 
 @router.get("", response_model=List[TeamResponse])
