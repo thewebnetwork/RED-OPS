@@ -396,11 +396,26 @@ class AnnouncementResponse(BaseModel):
 async def list_announcements(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
-    """List all announcements (Admin only)"""
-    announcements = await db.announcements.find({}, {"_id": 0}).sort("priority", -1).to_list(100)
+    """List all announcements (Admin only) - expired announcements retained for 24 hours"""
+    now = datetime.now(timezone.utc)
+    twenty_four_hours_ago = now - timedelta(hours=24)
+    
+    # Filter: show active announcements OR expired within last 24 hours
+    all_announcements = await db.announcements.find({}, {"_id": 0}).sort("priority", -1).to_list(100)
     
     result = []
-    for ann in announcements:
+    for ann in all_announcements:
+        # Check if expired more than 24 hours ago
+        if ann.get("end_at"):
+            try:
+                end_dt = datetime.fromisoformat(ann["end_at"].replace('Z', '+00:00'))
+                if end_dt < twenty_four_hours_ago:
+                    # Expired more than 24 hours ago - auto-delete from DB
+                    await db.announcements.delete_one({"id": ann["id"]})
+                    continue
+            except (ValueError, TypeError):
+                pass
+        
         # Resolve target names
         target_team_names = []
         for team_id in ann.get("target_teams", []):
