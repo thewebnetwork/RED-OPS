@@ -151,7 +151,7 @@ function AppRoutes() {
       <Route 
         path="/orders" 
         element={
-          <PrivateRoute roles={["Administrator", "Operator"]}>
+          <PrivateRoute roles={["Administrator"]}>
             <Orders />
           </PrivateRoute>
         } 
