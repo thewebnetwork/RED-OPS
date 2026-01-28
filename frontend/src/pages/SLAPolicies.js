@@ -1284,7 +1284,7 @@ function PolicyTemplates({ roles, teams, specialties, accessTiers, onApplyTempla
             SLA Policy Templates
           </CardTitle>
           <CardDescription>
-            Pre-configured SLA policies for common scenarios. Click "Use Template" to create a policy based on these settings.
+            Pre-configured SLA policies for common scenarios. Click &quot;Use Template&quot; to create a policy based on these settings.
           </CardDescription>
         </CardHeader>
         <CardContent>
