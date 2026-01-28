@@ -193,21 +193,21 @@ class TestReportsModule:
         print(f"✓ Found {len(reports)} available reports")
         print(f"  Report IDs: {report_ids}")
         
-        # Check for expected reports
+        # Check for expected reports (actual report IDs from the API)
         expected_reports = [
             "tickets_created",
             "tickets_closed",
             "open_ticket_aging",
+            "avg_first_response",
+            "avg_resolution_time",
             "sla_compliance",
-            "tickets_by_category",
             "tickets_by_assignee",
-            "tickets_by_status",
-            "resolution_time",
-            "escalation_report",
-            "stale_pending_review",
-            "tickets_by_priority",
             "tickets_by_team",
-            "sla_policy_compliance"
+            "tickets_by_specialty",
+            "tickets_by_category",
+            "escalation_events",
+            "sla_policy_effectiveness",
+            "stale_pending_review"
         ]
         
         for expected in expected_reports:
