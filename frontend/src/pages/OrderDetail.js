@@ -360,6 +360,10 @@ export default function OrderDetail() {
                    (isAdmin && !['Closed', 'Delivered', 'Canceled'].includes(order.status));
   // Requester can cancel their own ticket if it's still active
   const canCancel = order.requester_id === user?.id && !['Delivered', 'Closed', 'Canceled'].includes(order.status);
+  // Resolvers (admin, operator, current editor) can reassign tickets that aren't closed/canceled/delivered
+  const isOperator = user?.role === 'Operator';
+  const isResolver = order.editor_id === user?.id;
+  const canReassign = (isAdmin || isOperator || isResolver) && !['Closed', 'Canceled', 'Delivered'].includes(order.status);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
