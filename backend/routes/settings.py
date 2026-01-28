@@ -486,7 +486,7 @@ async def create_log(log_data: dict, current_user: dict = Depends(get_current_us
 
 
 @router.get("/logs/stream/{log_type}")
-async def stream_logs(log_type: str, current_user: dict = Depends(require_roles(["Admin"]))):
+async def stream_logs(log_type: str, current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
     """Stream logs in real-time using Server-Sent Events"""
     if log_type not in ['system', 'api', 'ui', 'user']:
         raise HTTPException(status_code=400, detail="Invalid log type")
