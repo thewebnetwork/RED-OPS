@@ -431,6 +431,53 @@ export default function OrderDetail() {
             Pick This Order
           </Button>
         )}
+        {canForceToPool2 && (
+          <Dialog open={forcePool2DialogOpen} onOpenChange={setForcePool2DialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                data-testid="force-pool-2-btn"
+              >
+                <AlertCircle size={18} className="mr-2" />
+                Force to Pool 2
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Force Ticket to Pool 2</DialogTitle>
+                <DialogDescription>
+                  This will bypass the 24-hour right-of-first-refusal window and make the ticket immediately available to Vendors/Freelancers.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <Label>Reason (optional)</Label>
+                  <Textarea
+                    value={forcePool2Reason}
+                    onChange={(e) => setForcePool2Reason(e.target.value)}
+                    placeholder="Why is this being forced to Pool 2?"
+                    className="mt-1.5"
+                    data-testid="force-pool-2-reason-input"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" onClick={() => setForcePool2DialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-orange-600 hover:bg-orange-700"
+                    onClick={handleForceToPool2}
+                    disabled={forcingToPool2}
+                    data-testid="confirm-force-pool-2-btn"
+                  >
+                    {forcingToPool2 ? 'Forcing...' : 'Force to Pool 2'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         {canSubmitForReview && (
           <Button 
             className="bg-purple-600 hover:bg-purple-700"
