@@ -81,7 +81,7 @@ export default function Layout({ children }) {
     { path: '/command-center', icon: PlusCircle, label: 'Submit New Request', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/report-issue', icon: Bug, label: 'Report an Issue', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/ribbon-board', icon: Layers, label: 'Opportunity Ribbon', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator', 'Operator'] },
+    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator'] },
     { path: '/reports', icon: BarChart3, label: 'Reports', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/iam', icon: KeyRound, label: 'Identity & Access', roles: ['Administrator'] },
     { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
