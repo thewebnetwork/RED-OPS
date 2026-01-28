@@ -1283,7 +1283,7 @@ function FormNodeConfig({ data, updateData }) {
 }
 
 // Action Node Configuration
-function ActionNodeConfig({ data, updateData, roles, teams }) {
+function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
   const [actions, setActions] = useState(data?.actions || []);
   const [slaPolicies, setSlaPolicies] = useState([]);
 
