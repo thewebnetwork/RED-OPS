@@ -550,7 +550,7 @@ export default function Categories() {
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>{t('categories.parentCategory')}</Label>
+                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs text-slate-500 ml-1">(change to move)</span>}</Label>
                   <Select 
                     value={formData.category_l1_id} 
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}
@@ -564,6 +564,11 @@ export default function Categories() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {editingCategory && formData.category_l1_id !== editingCategory.category_l1_id && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      This subcategory will be moved to a different parent category
+                    </p>
+                  )}
                 </div>
               </>
             )}
