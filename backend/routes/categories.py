@@ -48,6 +48,7 @@ class CategoryL2Update(BaseModel):
     name_es: Optional[str] = None
     description: Optional[str] = None
     active: Optional[bool] = None
+    category_l1_id: Optional[str] = None  # Allow moving to different parent
 
 
 # ============== L1 CATEGORY ROUTES ==============
