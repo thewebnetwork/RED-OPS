@@ -23,7 +23,45 @@
     "phone": "Telefone",
     "description": "Descrição",
     "required": "Obrigatório",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "update": "Atualizar",
+    "view": "Ver",
+    "export": "Exportar",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "refresh": "Atualizar",
+    "reset": "Redefinir",
+    "clear": "Limpar",
+    "all": "Todos",
+    "none": "Nenhum",
+    "select": "Selecionar",
+    "selectAll": "Selecionar tudo",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "enabled": "Habilitado",
+    "disabled": "Desabilitado",
+    "pending": "Pendente",
+    "completed": "Concluído",
+    "failed": "Falhou",
+    "tip": "Dica",
+    "info": "Informação",
+    "warning": "Aviso",
+    "error": "Erro",
+    "success": "Sucesso",
+    "more": "mais",
+    "less": "Menos",
+    "of": "de",
+    "to": "para",
+    "from": "de",
+    "total": "Total",
+    "users": "usuários",
+    "members": "membros",
+    "partners": "parceiros",
+    "system": "Sistema"
   },
   "auth": {
     "login": "Entrar",
@@ -49,13 +87,16 @@
     "newPassword": "Nova Senha",
     "updatePassword": "Atualizar Senha",
     "passwordResetSuccess": "Senha redefinida com sucesso!",
-    "resetLinkSent": "Link de redefinição enviado para seu e-mail"
+    "resetLinkSent": "Link de redefinição enviado para seu e-mail",
+    "enterNewPassword": "Digite nova senha",
+    "confirmNewPassword": "Confirme nova senha"
   },
   "nav": {
     "dashboard": "Painel",
     "commandCenter": "Central de Comando",
     "allOrders": "Todos os Pedidos",
     "workflows": "Fluxos de Trabalho",
+    "escalation": "Escalonamento",
     "users": "Usuários",
     "teams": "Equipes",
     "roles": "Funções",
@@ -66,7 +107,12 @@
     "logs": "Logs",
     "integrations": "Integrações",
     "announcements": "Anúncios",
-    "emailSettings": "Config. de Email"
+    "emailSettings": "Config. de Email",
+    "documentation": "Documentação",
+    "poolPickerRules": "Regras de Pool",
+    "reports": "Relatórios",
+    "myRequests": "Minhas Solicitações",
+    "myServices": "Meus Serviços"
   },
   "dashboard": {
     "title": "Painel",
@@ -100,7 +146,15 @@
     "recentlyDelivered": "Entregues Recentemente",
     "noDelivered": "Nenhum pedido entregue ainda",
     "needsReview": "Precisa da Sua Revisão",
-    "noOpenOrders": "Nenhum pedido aberto"
+    "noOpenOrders": "Nenhum pedido aberto",
+    "mySubmittedTickets": "Meus Tickets Enviados",
+    "ticketsWorkingOn": "Tickets em que Estou Trabalhando",
+    "ticketsDelivered": "Tickets Entregues",
+    "onTrack": "No Prazo",
+    "atRisk": "Em Risco",
+    "breached": "Vencido",
+    "unacknowledged": "Não Reconhecido",
+    "slaStatus": "Status de SLA"
   },
   "orders": {
     "title": "Pedidos",
@@ -119,18 +173,26 @@
       "open": "Aberto",
       "inProgress": "Em Andamento",
       "pending": "Pendente",
-      "delivered": "Entregue"
+      "delivered": "Entregue",
+      "closed": "Fechado"
     },
     "priority_levels": {
       "low": "Baixa",
       "medium": "Média",
+      "normal": "Normal",
       "high": "Alta",
-      "urgent": "Urgente"
+      "urgent": "Urgente",
+      "critical": "Crítica"
     },
     "pickOrder": "Pegar Pedido",
     "submitForReview": "Enviar para Revisão",
     "markDelivered": "Marcar como Entregue",
-    "requestRevision": "Solicitar Revisão"
+    "requestRevision": "Solicitar Revisão",
+    "typeYourMessage": "Digite sua mensagem...",
+    "searchByCodeTitle": "Buscar por código ou título...",
+    "filterByStatus": "Filtrar por status",
+    "noTicketsYet": "Você ainda não enviou nenhum ticket",
+    "noTicketsMatch": "Nenhum ticket corresponde aos seus filtros"
   },
   "commandCenter": {
     "title": "Central de Comando",
@@ -157,7 +219,8 @@
     "request": "Solicitação",
     "incident": "Incidente / Problemas",
     "total": "Total",
-    "searchCategories": "Digite para encontrar uma categoria mais rápido..."
+    "searchCategories": "Digite para encontrar uma categoria mais rápido...",
+    "describeWhatYouNeed": "Descreva o que você precisa..."
   },
   "workflows": {
     "title": "Construtor de Fluxos",
@@ -201,7 +264,25 @@
     "nodeSettings": "Personalize o comportamento e configurações deste nó",
     "nodeLabel": "Rótulo do Nó",
     "deleteNode": "Excluir Nó",
-    "clear": "Limpar"
+    "clear": "Limpar",
+    "enterNodeLabel": "Digite rótulo do nó",
+    "fieldLabel": "Rótulo do campo (ex: Categoria, Quantos quartos?)",
+    "selectValue": "Selecionar valor",
+    "valueToMatch": "Valor para corresponder",
+    "subFieldLabel": "Rótulo do subcampo",
+    "addAction": "Adicionar uma ação...",
+    "selectRole": "Selecionar função",
+    "selectSpecialty": "Selecionar especialidade",
+    "poolPreference": "Preferência de pool (opcional)",
+    "fallbackOption": "Alternativa se não houver usuários elegíveis",
+    "selectTeam": "Selecionar equipe",
+    "emailSubject": "Assunto do e-mail",
+    "selectStatus": "Selecionar status",
+    "notificationMessage": "Mensagem de notificação",
+    "webhookUrl": "URL do Webhook",
+    "selectSlaPolicy": "Selecionar Política SLA (ou auto-detectar)",
+    "fieldName": "Nome do campo (ex: prioridade, status)",
+    "value": "Valor"
   },
   "users": {
     "title": "Usuários",
@@ -240,7 +321,8 @@
     "avgTeamSize": "Tamanho Médio",
     "selectTeam": "Selecione uma equipe",
     "color": "Cor",
-    "viewMembers": "Ver Membros"
+    "viewMembers": "Ver Membros",
+    "relatedSpecialties": "Especialidades Relacionadas"
   },
   "roles": {
     "title": "Funções",
@@ -252,7 +334,11 @@
     "canPickOrders": "Pode Pegar Pedidos",
     "canCreateOrders": "Pode Criar Pedidos",
     "systemRole": "Função do Sistema",
-    "serviceProvider": "Prestador de Serviço"
+    "serviceProvider": "Prestador de Serviço",
+    "keyPermissions": "Permissões Principais",
+    "permissionMatrix": "Matriz de Permissões",
+    "enableAll": "Habilitar Todos",
+    "disableAll": "Desabilitar Todos"
   },
   "categories": {
     "title": "Categorias",
@@ -270,7 +356,10 @@
     "icon": "Ícone",
     "selectParent": "Selecionar pai",
     "enableWorkflow": "Ativar Fluxo de Editor",
-    "workflowDescription": "Solicitações passarão pelo processo de atribuição de editor"
+    "workflowDescription": "Solicitações passarão pelo processo de atribuição de editor",
+    "englishName": "Nome em inglês",
+    "portugueseName": "Nome em português",
+    "spanishName": "Nome em espanhol"
   },
   "profile": {
     "title": "Perfil",
@@ -280,7 +369,16 @@
     "newPassword": "Nova Senha",
     "confirmPassword": "Confirmar Senha",
     "updateProfile": "Atualizar Perfil",
-    "uploadAvatar": "Enviar Avatar"
+    "uploadAvatar": "Enviar Avatar",
+    "profileSettings": "Configurações de Perfil",
+    "manageAccount": "Gerencie as configurações da sua conta",
+    "profilePicture": "Foto de Perfil",
+    "clickToUpload": "Clique para enviar. Máx. 2MB.",
+    "fullName": "Nome Completo",
+    "roleOnlyAdmin": "A função só pode ser alterada por um administrador",
+    "saveChanges": "Salvar Alterações",
+    "saving": "Salvando...",
+    "changing": "Alterando..."
   },
   "forms": {
     "formFields": "Campos do Formulário",
@@ -365,7 +463,8 @@
     "comment": "Comentário (opcional)",
     "review": "avaliação",
     "reviews": "avaliações",
-    "responseRate": "Taxa de Resposta"
+    "responseRate": "Taxa de Resposta",
+    "shareExperience": "Compartilhe sua experiência (opcional)"
   },
   "notifications": {
     "title": "Notificações",
@@ -379,19 +478,265 @@
     "forbidden": "Proibido",
     "validation": "Erro de validação",
     "network": "Erro de rede",
-    "serverError": "Erro do servidor"
+    "serverError": "Erro do servidor",
+    "failedToLoad": "Falha ao carregar",
+    "failedToSave": "Falha ao salvar",
+    "failedToDelete": "Falha ao excluir"
   },
   "success": {
     "saved": "Salvo com sucesso",
     "created": "Criado com sucesso",
     "updated": "Atualizado com sucesso",
     "deleted": "Excluído com sucesso",
-    "orderPicked": "Pedido pego com sucesso!"
+    "orderPicked": "Pedido pego com sucesso!",
+    "profileUpdated": "Perfil atualizado com sucesso",
+    "passwordChanged": "Senha alterada com sucesso"
   },
   "language": {
     "title": "Idioma",
     "en": "English",
     "pt": "Português (Brasil)",
     "es": "Español (España)"
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Configure as configurações do sistema, fluxos de trabalho e integrações",
+    "documentation": {
+      "title": "Documentação do Sistema",
+      "description": "Visualize e baixe o snapshot de lógica do sistema para referência UAT",
+      "loading": "Carregando documentação...",
+      "backToSettings": "Voltar às Configurações",
+      "errorLoading": "Erro ao Carregar Documentação",
+      "tryAgain": "Tentar Novamente",
+      "systemDocumentation": "Documentação do Sistema",
+      "uatReference": "Snapshot de Lógica do Sistema para UAT e referência",
+      "downloadMd": "Baixar .md",
+      "downloadPdf": "Baixar PDF",
+      "lastUpdated": "Última atualização",
+      "markdownDownloaded": "Arquivo Markdown baixado",
+      "pdfDownloaded": "Arquivo PDF baixado",
+      "failedDownload": "Falha ao baixar arquivo"
+    },
+    "poolRules": {
+      "title": "Regras de Pool",
+      "description": "Configure quais tipos de conta podem pegar do Pool 1 e Pool 2",
+      "loading": "Carregando regras de pool...",
+      "configureAccountTypes": "Configure quais tipos de conta podem pegar de quais pools",
+      "resetToDefaults": "Redefinir Padrões",
+      "saveChanges": "Salvar Alterações",
+      "howItWorks": "Como Funciona a Elegibilidade de Pool",
+      "accountTypeConfig": "Config. Tipo de Conta:",
+      "accountTypeConfigDesc": "Controla quais pools cada tipo de conta pode acessar",
+      "userLevelCanPick": "\"Pode Pegar\" a Nível de Usuário:",
+      "userLevelCanPickDesc": "Substituição individual do usuário (configurado na edição de usuário)",
+      "effectiveRule": "Regra Efetiva:",
+      "effectiveRuleDesc": "Usuário pode pegar = Config. de conta permite + can_pick do usuário está ATIVO",
+      "canPickOpportunities": "Pode Pegar Oportunidades",
+      "allowedPools": "Pools Permitidos",
+      "pool1": "Pool 1 (Ribbon de Oportunidades)",
+      "pool1Desc": "Primeiras 24 horas de disponibilidade do ticket",
+      "pool2": "Pool 2 (Pool de Oportunidades)",
+      "pool2Desc": "Após 24 horas ou se não houver pegadores do Pool 1",
+      "current": "Atual",
+      "canPickFrom": "Pode pegar de",
+      "canPickEnabledNoPools": "Pode pegar habilitado mas nenhum pool selecionado",
+      "cannotPickOpportunities": "Não pode pegar oportunidades",
+      "unsavedChanges": "Você tem alterações não salvas",
+      "rulesSaved": "Regras de pool salvas com sucesso",
+      "rulesReset": "Regras de pool redefinidas para os padrões",
+      "failedSave": "Falha ao salvar regras de pool",
+      "failedReset": "Falha ao redefinir regras"
+    },
+    "uiCustomizations": {
+      "title": "Personalizações de UI",
+      "description": "Personalize rótulos de campos, nomes de exibição e marca na plataforma"
+    },
+    "emailSettings": {
+      "title": "Configurações de Email",
+      "description": "Configure SMTP e modelos de notificação por e-mail"
+    },
+    "slaEscalation": {
+      "title": "SLA e Escalonamento",
+      "description": "Configure acordos de nível de serviço e políticas de escalonamento"
+    },
+    "integrations": {
+      "title": "Integrações",
+      "description": "Gerencie chaves de API, webhooks e integrações externas"
+    },
+    "translations": {
+      "title": "Editor de Traduções",
+      "description": "Revise e corrija traduções para espanhol e português",
+      "selectLanguage": "Selecionar Idioma",
+      "searchKeys": "Buscar chaves de tradução...",
+      "key": "Chave",
+      "english": "Inglês (Referência)",
+      "translation": "Tradução",
+      "saveTranslations": "Salvar Traduções",
+      "translationsSaved": "Traduções salvas com sucesso",
+      "noChanges": "Nenhuma alteração para salvar",
+      "resetToOriginal": "Redefinir para o Original"
+    }
+  },
+  "iam": {
+    "title": "Gestão de Identidade e Acesso",
+    "subtitle": "Gerencie usuários, equipes, especialidades, funções, tipos de conta e planos de assinatura",
+    "users": "Usuários",
+    "teams": "Equipes",
+    "specialties": "Especialidades",
+    "roles": "Funções",
+    "accountTypes": "Tipos de Conta",
+    "plans": "Planos",
+    "addUser": "Adicionar Usuário",
+    "editUser": "Editar Usuário",
+    "createUserDesc": "Crie uma nova conta de usuário. Uma senha temporária será gerada.",
+    "nameRequired": "Nome *",
+    "emailRequired": "E-mail *",
+    "temporaryPassword": "Senha Temporária *",
+    "newPasswordOptional": "Nova Senha",
+    "leaveBlankToKeep": "Deixe em branco para manter",
+    "passwordSentByEmail": "Esta senha será enviada ao usuário por e-mail",
+    "roleRequired": "Função *",
+    "accountTypeRequired": "Tipo de Conta *",
+    "team": "Equipe",
+    "selectTeamOptional": "Selecione equipe (opcional)...",
+    "specialtyFiltered": "Opções de especialidade filtradas por equipe",
+    "specialtiesRequired": "Especialidades * (Selecione múltiplas)",
+    "noSpecialtiesAvailable": "Nenhuma especialidade disponível",
+    "primary": "Principal",
+    "setPrimary": "Definir Principal",
+    "selected": "Selecionado",
+    "specialty": "especialidade",
+    "subscriptionPlanRequired": "Plano de Assinatura *",
+    "selectPlan": "Selecione plano...",
+    "canPickOpportunities": "Pode pegar oportunidades dos pools",
+    "forcePasswordChange": "Forçar alteração de senha no primeiro login",
+    "forceOtpSetup": "Forçar configuração de OTP/2FA",
+    "sendWelcomeEmail": "Enviar e-mail de boas-vindas com credenciais",
+    "createUser": "Criar Usuário",
+    "addTeam": "Adicionar Equipe",
+    "editTeam": "Editar Equipe",
+    "teamSpecialtiesDesc": "Atribua especialidades relacionadas para filtrar opções de especialidade dos usuários",
+    "teamNameRequired": "Nome *",
+    "relatedSpecialties": "Especialidades Relacionadas",
+    "relatedSpecialtiesDesc": "Usuários nesta equipe terão opções de especialidade filtradas para estas seleções",
+    "selectRelatedSpecialties": "Selecione especialidades relacionadas...",
+    "addSpecialty": "Adicionar Especialidade",
+    "editSpecialty": "Editar Especialidade",
+    "addRole": "Adicionar Função",
+    "systemRoleNote": "Função do Sistema - O nome não pode ser alterado",
+    "addAccountType": "Adicionar Tipo de Conta",
+    "systemTypeNote": "Tipo do Sistema - O nome não pode ser alterado",
+    "requiresSubscription": "Requer Plano de Assinatura",
+    "addPlan": "Adicionar Plano",
+    "editPlan": "Editar Plano",
+    "monthlyPrice": "Preço Mensal ($)",
+    "yearlyPrice": "Preço Anual ($)",
+    "featuresPerLine": "Recursos (um por linha)",
+    "deleteConfirm": "Excluir {{type}}?",
+    "deleteWarning": "Esta ação não pode ser desfeita. Tem certeza de que deseja excluir \"{{name}}\"?",
+    "welcomeEmailSent": "E-mail de boas-vindas enviado",
+    "userCreated": "Usuário criado",
+    "userUpdated": "Usuário atualizado",
+    "userStatusUpdated": "Status do usuário atualizado",
+    "teamCreated": "Equipe criada",
+    "teamUpdated": "Equipe atualizada",
+    "specialtyCreated": "Especialidade criada",
+    "specialtyUpdated": "Especialidade atualizada",
+    "roleCreated": "Função criada",
+    "roleUpdated": "Função atualizada",
+    "accountTypeCreated": "Tipo de conta criado",
+    "accountTypeUpdated": "Tipo de conta atualizado",
+    "planCreated": "Plano criado",
+    "planUpdated": "Plano atualizado",
+    "accountTypeDescriptions": {
+      "partner": "Parceiros externos com planos de assinatura",
+      "internalStaff": "Membros da equipe interna",
+      "vendorFreelancer": "Fornecedores externos e freelancers",
+      "mediaClient": "Clientes que enviam solicitações"
+    }
+  },
+  "sla": {
+    "title": "Políticas de SLA",
+    "description": "Defina acordos de nível de serviço e metas de tempo de resposta",
+    "addPolicy": "Adicionar Política",
+    "editPolicy": "Editar Política",
+    "policyName": "Nome da Política",
+    "describeWhenApplies": "Descreva quando esta política se aplica...",
+    "selectRoleFilter": "Selecionar função",
+    "selectTeamFilter": "Selecionar equipe",
+    "selectPriorityFilter": "Prioridade",
+    "levels": {
+      "low": "Baixa",
+      "normal": "Normal",
+      "high": "Alta",
+      "critical": "Crítica"
+    }
+  },
+  "escalation": {
+    "title": "Políticas de Escalonamento",
+    "description": "Configure regras de escalonamento automático para tickets",
+    "addPolicy": "Adicionar Política",
+    "editPolicy": "Editar Política",
+    "describeWhenApplies": "Descreva quando esta política deve ser aplicada...",
+    "addCategoryFilter": "Adicionar filtro de categoria...",
+    "emailSubjectPlaceholder": "Use {order_code}, {title}, {level}, {level_name}",
+    "selectUser": "Selecionar usuário...",
+    "selectRole": "Selecionar função...",
+    "selectTeam": "Selecionar equipe...",
+    "priority": "Prioridade",
+    "emailSubject": "Assunto do e-mail",
+    "webhookUrl": "URL do Webhook"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "generateReport": "Gerar Relatório",
+    "clickToGenerate": "Clique em \"Gerar Relatório\" para ver resultados",
+    "filters": "Filtros",
+    "statusFilter": "Status",
+    "priorityFilter": "Prioridade",
+    "categoryFilter": "Categoria",
+    "assigneeFilter": "Atribuído",
+    "requesterFilter": "Solicitante",
+    "teamFilter": "Equipe",
+    "dateRange": "Período",
+    "exportCsv": "Exportar CSV",
+    "exportPdf": "Exportar PDF"
+  },
+  "integrations": {
+    "title": "Integrações",
+    "subtitle": "Gerencie chaves de API, webhooks e integrações externas",
+    "apiKeys": "Chaves de API",
+    "webhooks": "Webhooks",
+    "sendTestWebhook": "Enviar webhook de teste",
+    "testSuccess": "Webhook de teste enviado com sucesso",
+    "testFailed": "Falha ao enviar webhook de teste"
+  },
+  "subscriptionPlans": {
+    "title": "Planos de Assinatura",
+    "searchPlans": "Buscar planos...",
+    "addPlan": "Adicionar Plano",
+    "planName": "Nome do Plano",
+    "planDescription": "Breve descrição deste plano",
+    "features": "Recursos",
+    "featuresPlaceholder": "Suporte Prioritário\nEntrega Rápida\nGerente Dedicado"
+  },
+  "myServices": {
+    "title": "Meus Serviços",
+    "serviceInfoPlaceholder": "Digite informações do serviço usando Markdown..."
+  },
+  "createOrder": {
+    "describeNeed": "Descreva o que você precisa...",
+    "videoScript": "Cole seu roteiro de vídeo aqui...",
+    "exampleVideos": "Links para vídeos de exemplo ou inspiração...",
+    "rawFootage": "Links para material bruto (Google Drive, Dropbox, etc.)",
+    "otherDetails": "Quaisquer outros detalhes ou requisitos..."
+  },
+  "draftEditor": {
+    "title": "Digite um título para sua solicitação",
+    "description": "Descreva sua solicitação em detalhes",
+    "videoScript": "Cole seu roteiro de vídeo aqui...",
+    "rawFootageLinks": "Links para material bruto (Google Drive, Dropbox, etc.)",
+    "exampleLinks": "Links para vídeos de exemplo ou inspiração...",
+    "otherDetails": "Quaisquer outros detalhes ou requisitos..."
   }
 }
