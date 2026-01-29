@@ -91,3 +91,61 @@ async def download_system_logic_snapshot(
             raise HTTPException(status_code=500, detail=f"Error reading documentation: {str(e)}")
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'md' or 'pdf'")
+
+
+
+@router.get("/system-docs-pack")
+async def list_system_docs_pack(
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """List available System Documentation Pack files (Admin only)"""
+    if not os.path.exists(SYSTEM_DOCS_DIR):
+        raise HTTPException(status_code=404, detail="System docs directory not found")
+    
+    files = []
+    for filename in os.listdir(SYSTEM_DOCS_DIR):
+        filepath = os.path.join(SYSTEM_DOCS_DIR, filename)
+        if os.path.isfile(filepath):
+            ext = filename.split('.')[-1].lower()
+            size_kb = round(os.path.getsize(filepath) / 1024, 2)
+            files.append(DocFile(
+                filename=filename,
+                format=ext,
+                size_kb=size_kb,
+                path=f"/api/documentation/system-docs-pack/download/{filename}"
+            ))
+    
+    return SystemDocsResponse(files=files, directory=SYSTEM_DOCS_DIR)
+
+
+@router.get("/system-docs-pack/download/{filename}")
+async def download_system_docs_pack_file(
+    filename: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Download a specific file from the System Documentation Pack (Admin only)"""
+    filepath = os.path.join(SYSTEM_DOCS_DIR, filename)
+    
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+    
+    # Validate filename is in allowed list
+    allowed_files = os.listdir(SYSTEM_DOCS_DIR)
+    if filename not in allowed_files:
+        raise HTTPException(status_code=403, detail="File not allowed")
+    
+    # Determine media type
+    ext = filename.split('.')[-1].lower()
+    media_types = {
+        'pdf': 'application/pdf',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'md': 'text/markdown',
+        'html': 'text/html'
+    }
+    media_type = media_types.get(ext, 'application/octet-stream')
+    
+    return FileResponse(
+        filepath,
+        media_type=media_type,
+        filename=filename
+    )
