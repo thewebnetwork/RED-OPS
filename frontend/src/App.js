@@ -37,6 +37,9 @@ import RibbonBoard from "./pages/RibbonBoard";
 import IAMPage from "./pages/IAMPage";
 import SettingsHub from "./pages/SettingsHub";
 import DeletedTickets from "./pages/DeletedTickets";
+import ForcePasswordChange from "./pages/ForcePasswordChange";
+import SetupOTP from "./pages/SetupOTP";
+import VerifyOTP from "./pages/VerifyOTP";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
