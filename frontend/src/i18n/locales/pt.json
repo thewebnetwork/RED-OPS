@@ -112,7 +112,10 @@
     "poolPickerRules": "Regras de Pool",
     "reports": "Relatórios",
     "myRequests": "Minhas Solicitações",
-    "myServices": "Meus Serviços"
+    "myServices": "Meus Serviços",
+    "reportIssue": "Reportar um Problema",
+    "opportunityRibbon": "Ribbon de Oportunidades",
+    "deletedTickets": "Tickets Excluídos"
   },
   "dashboard": {
     "title": "Painel",
