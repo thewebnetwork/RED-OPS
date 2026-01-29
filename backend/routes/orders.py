@@ -381,8 +381,8 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
             if user.get("email"):
                 background_tasks.add_task(
                     send_pool_assignment_email,
-                    vendor["email"],
-                    vendor.get("name", "Team Member"),
+                    user["email"],
+                    user.get("name", "Team Member"),
                     order["order_code"],
                     order.get("title", ""),
                     order.get("priority", "Normal"),
