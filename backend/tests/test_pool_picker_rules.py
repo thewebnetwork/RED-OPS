@@ -41,8 +41,8 @@ class TestPoolPickerRulesAPI:
         })
         assert login_response.status_code == 200, f"Admin login failed: {login_response.text}"
         
-        token = login_response.json().get("access_token")
-        assert token, "No access token returned"
+        token = login_response.json().get("token")
+        assert token, "No token returned"
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
         yield
