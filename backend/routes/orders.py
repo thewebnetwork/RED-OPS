@@ -860,28 +860,39 @@ async def get_pool_tickets(
 ):
     """
     Get tickets in a specific pool filtered by user's specialty.
-    Pool 1 = Partner + Internal Staff pool (first 24 hours OR until no eligible users)
-    Pool 2 = Vendor/Freelancer pool (after 24 hours OR if no Pool 1 users for specialty)
+    Access is config-driven via Pool Picker Rules.
     
     Filtering rules:
-    - Pool 1/2 users only see tickets matching their routing_specialty_id (multi-specialty ANY match)
+    - Users only see tickets from pools allowed by their account type config
+    - User-level can_pick must be True
+    - Users only see tickets matching their specialty (multi-specialty ANY match)
     - Support/Issue tickets are excluded unless user has support specialty
     - Admins/Operators see all tickets
     """
     account_type = current_user.get("account_type")
     role = current_user.get("role")
     user_specialty_id = current_user.get("specialty_id")
+    user_can_pick = current_user.get("can_pick", True)  # Default to True
     
-    # Access control
-    # Pool 1 = Partners + Internal Staff
-    # Pool 2 = Vendors/Freelancers
-    if pool_number == 1:
-        if role not in ["Administrator", "Operator"] and account_type not in ["Partner", "Internal Staff"]:
-            raise HTTPException(status_code=403, detail="Access denied to Pool 1")
-    elif pool_number == 2:
-        if role not in ["Administrator", "Operator"] and account_type != "Vendor/Freelancer":
-            raise HTTPException(status_code=403, detail="Access denied to Pool 2")
-    else:
+    pool_name = f"POOL_{pool_number}"
+    
+    # Access control - config-driven
+    if role not in ["Administrator", "Operator"]:
+        # Check user-level can_pick
+        if not user_can_pick:
+            raise HTTPException(status_code=403, detail="You are not allowed to pick opportunities (user-level restriction)")
+        
+        # Check pool picker config
+        pool_config = await get_pool_picker_config()
+        user_config = pool_config.get(account_type, {"can_pick": False, "allowed_pools": []})
+        
+        if not user_config.get("can_pick", False):
+            raise HTTPException(status_code=403, detail=f"Account type '{account_type}' is not allowed to pick opportunities")
+        
+        if pool_name not in user_config.get("allowed_pools", []):
+            raise HTTPException(status_code=403, detail=f"Account type '{account_type}' is not allowed to access {pool_name}")
+    
+    if pool_number not in [1, 2]:
         raise HTTPException(status_code=400, detail="Invalid pool number")
     
     # Get user's specialty info for filtering
