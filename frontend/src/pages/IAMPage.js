@@ -194,7 +194,8 @@ export default function IAMPage() {
         subscription_plan_id: user.subscription_plan_id || '',
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false,
-        send_welcome_email: false
+        send_welcome_email: false,
+        can_pick: user.can_pick !== false  // Default to true if not set
       });
     } else {
       setEditingUser(null);
@@ -204,7 +205,7 @@ export default function IAMPage() {
         name: '', email: '', password: tempPassword, role: 'Standard User', 
         account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', 
         subscription_plan_id: '', force_password_change: true, force_otp_setup: true,
-        send_welcome_email: true
+        send_welcome_email: true, can_pick: true
       });
     }
     setUserDialogOpen(true);
