@@ -98,7 +98,7 @@ export default function IAMPage() {
   const [userForm, setUserForm] = useState({
     name: '', email: '', password: '', role: 'Standard User', 
     account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', subscription_plan_id: '',
-    force_password_change: true, force_otp_setup: true, send_welcome_email: true
+    force_password_change: true, force_otp_setup: true, send_welcome_email: true, can_pick: true
   });
 
   // Generate a random password
