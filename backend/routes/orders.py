@@ -100,6 +100,11 @@ class OrderResponse(BaseModel):
     deleted_at: Optional[str] = None
     deleted_by_name: Optional[str] = None
     deletion_reason: Optional[str] = None
+    # Pool routing fields
+    pool_stage: Optional[str] = None  # POOL_1, POOL_2, or None
+    routing_specialty_id: Optional[str] = None
+    routing_specialty_name: Optional[str] = None
+    pool1_expires_at: Optional[str] = None
 
 
 class CloseOrderRequest(BaseModel):
