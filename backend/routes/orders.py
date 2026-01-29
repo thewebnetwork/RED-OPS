@@ -266,54 +266,55 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
         if specialty:
             routing_specialty_name = specialty.get("name")
     
-    # Step 2: Query eligible Pool 1 candidates (Partners with matching specialty)
-    # Now supports multi-specialty: user is eligible if ANY of their specialties match
-    partner_query = {
-        "account_type": "Partner",
+    # Step 2: Query eligible Pool 1 candidates (Partners + Internal Staff with matching specialty)
+    # Pool 1 includes BOTH account_type = Partner AND account_type = Internal Staff
+    # Uses multi-specialty: user is eligible if ANY of their specialties match
+    pool1_query = {
+        "account_type": {"$in": ["Partner", "Internal Staff"]},
         "active": True
     }
     
     # If we have a routing specialty, filter by it (ANY match rule)
     if routing_specialty_id:
         # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
-        partner_query["$or"] = [
+        pool1_query["$or"] = [
             {"specialty_ids": routing_specialty_id},
             {"specialty_id": routing_specialty_id}
         ]
     
-    eligible_partners = await db.users.find(partner_query, {"_id": 0}).to_list(100)
-    partner_count = len(eligible_partners)
+    eligible_pool1_users = await db.users.find(pool1_query, {"_id": 0}).to_list(100)
+    pool1_count = len(eligible_pool1_users)
     
     now = datetime.now(timezone.utc)
     
     # Step 3: Determine pool stage
-    if partner_count > 0:
-        # Eligible Partners exist -> Pool 1 for 24 hours
+    if pool1_count > 0:
+        # Eligible Pool 1 users exist (Partners + Internal Staff) -> Pool 1 for 24 hours
         pool1_expires_at = now + timedelta(hours=24)
         return {
             "pool_stage": "POOL_1",
             "routing_specialty_id": routing_specialty_id,
             "routing_specialty_name": routing_specialty_name,
             "pool1_expires_at": pool1_expires_at.isoformat(),
-            "eligible_partner_count": partner_count,
-            "eligible_partners": eligible_partners
+            "eligible_pool1_count": pool1_count,
+            "eligible_pool1_users": eligible_pool1_users
         }
     else:
-        # No eligible Partners -> Skip Pool 1, go directly to Pool 2
+        # No eligible Pool 1 users -> Skip Pool 1, go directly to Pool 2
         # Query Pool 2 eligible users (Vendors/Freelancers with matching specialty)
-        # Now supports multi-specialty: user is eligible if ANY of their specialties match
-        vendor_query = {
+        # Uses multi-specialty: user is eligible if ANY of their specialties match
+        pool2_query = {
             "account_type": "Vendor/Freelancer",
             "active": True
         }
         if routing_specialty_id:
             # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
-            vendor_query["$or"] = [
+            pool2_query["$or"] = [
                 {"specialty_ids": routing_specialty_id},
                 {"specialty_id": routing_specialty_id}
             ]
         
-        eligible_vendors = await db.users.find(vendor_query, {"_id": 0}).to_list(100)
+        eligible_pool2_users = await db.users.find(pool2_query, {"_id": 0}).to_list(100)
         
         return {
             "pool_stage": "POOL_2",
