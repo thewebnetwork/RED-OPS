@@ -3,14 +3,14 @@
 Identity Model:
 - Role: Administrator, Operator, Standard User (permissions only)
 - Account Type: Partner, Media Client, Internal Staff, Vendor/Freelancer
-- Specialty: What the user does (required, admin-managed)
+- Specialties: What the user does (multiple allowed, at least one required)
 - Team: Optional grouping
 - Subscription Plan: For Partners only (Core, Engage, Lead-to-Cash, Scale)
 - Access Controls: Module-level permissions with overrides
 """
 import uuid
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
 
 from database import db
@@ -26,19 +26,38 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 # ============== MODELS ==============
 
+class SpecialtyEntry(BaseModel):
+    """Represents a user's specialty assignment"""
+    specialty_id: str
+    is_primary: bool = False
+
+
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
     role: str  # Administrator, Operator, or Standard User
     account_type: str  # Partner, Media Client, Internal Staff, Vendor/Freelancer
-    specialty_id: str  # Required - what the user does
+    # Multi-specialty support (new)
+    specialty_ids: Optional[List[str]] = None  # Array of specialty IDs
+    primary_specialty_id: Optional[str] = None  # Which one is primary
+    # Legacy single specialty (backwards compatibility)
+    specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None  # Required if account_type = Partner
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     force_password_change: bool = True
     force_otp_setup: bool = True
     send_welcome_email: bool = True  # Send welcome email with temp password
+    
+    @field_validator('specialty_ids', mode='before')
+    @classmethod
+    def ensure_specialty_ids_list(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            return [v] if v else None
+        return v
 
 
 class UserUpdate(BaseModel):
@@ -47,13 +66,33 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     role: Optional[str] = None
     account_type: Optional[str] = None
-    specialty_id: Optional[str] = None
+    # Multi-specialty support (new)
+    specialty_ids: Optional[List[str]] = None  # Array of specialty IDs
+    primary_specialty_id: Optional[str] = None  # Which one is primary
+    # Legacy single specialty (backwards compatibility)
+    specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     active: Optional[bool] = None
     force_password_change: Optional[bool] = None
     force_otp_setup: Optional[bool] = None
+    
+    @field_validator('specialty_ids', mode='before')
+    @classmethod
+    def ensure_specialty_ids_list(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            return [v] if v else None
+        return v
+
+
+class SpecialtyInfo(BaseModel):
+    """Specialty info for display"""
+    id: str
+    name: str
+    is_primary: bool = False
 
 
 class UserResponse(BaseModel):
@@ -62,6 +101,11 @@ class UserResponse(BaseModel):
     email: str
     role: str
     account_type: Optional[str] = None
+    # Multi-specialty support (new)
+    specialty_ids: List[str] = []  # Array of specialty IDs
+    specialties: List[SpecialtyInfo] = []  # Full specialty info with names
+    primary_specialty_id: Optional[str] = None
+    # Legacy single specialty (backwards compatibility) - returns primary or first
     specialty_id: Optional[str] = None
     specialty_name: Optional[str] = None
     team_id: Optional[str] = None
