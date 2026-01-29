@@ -112,7 +112,10 @@
     "poolPickerRules": "Pool Picker Rules",
     "reports": "Reports",
     "myRequests": "My Requests",
-    "myServices": "My Services"
+    "myServices": "My Services",
+    "reportIssue": "Report an Issue",
+    "opportunityRibbon": "Opportunity Ribbon",
+    "deletedTickets": "Deleted Tickets"
   },
   "dashboard": {
     "title": "Dashboard",
