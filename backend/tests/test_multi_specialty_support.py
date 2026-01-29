@@ -296,32 +296,30 @@ class TestMultiSpecialtySupport:
         print(f"✓ User list returns multi-specialty fields for {len(users)} users")
 
     def test_09_existing_multi_specialty_user(self):
-        """Test the existing multi-specialty test user"""
-        # Login as the multi-specialty test user
-        login_resp = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": "multispec@test.com",
-            "password": "TestPass123!"
-        })
-        
-        if login_resp.status_code != 200:
-            pytest.skip("Multi-specialty test user not found or wrong password")
-        
-        user = login_resp.json()["user"]
-        
-        # Verify multi-specialty fields
-        assert "specialty_ids" in user or len(user.get("specialty_ids", [])) > 0, "User should have specialty_ids"
-        
-        # Get full user details via admin
+        """Test the existing multi-specialty test user via admin API"""
+        # Get full user details via admin (login response uses legacy fields for backwards compat)
         user_resp = requests.get(f"{BASE_URL}/api/users", headers=self.admin_headers)
         users = user_resp.json()
         multi_user = next((u for u in users if u["email"] == "multispec@test.com"), None)
         
-        if multi_user:
-            assert len(multi_user.get("specialty_ids", [])) >= 2, "Multi-spec user should have multiple specialties"
-            print(f"✓ Multi-specialty user has {len(multi_user['specialty_ids'])} specialties")
-            print(f"  Specialties: {[s['name'] for s in multi_user.get('specialties', [])]}")
-        else:
-            print("✓ Multi-specialty test user exists (verified via login)")
+        if not multi_user:
+            pytest.skip("Multi-specialty test user not found")
+        
+        # Verify multi-specialty fields
+        assert "specialty_ids" in multi_user, "User should have specialty_ids field"
+        assert len(multi_user.get("specialty_ids", [])) >= 2, f"Multi-spec user should have multiple specialties, got {len(multi_user.get('specialty_ids', []))}"
+        
+        # Verify specialties array with names
+        assert "specialties" in multi_user, "User should have specialties array"
+        assert len(multi_user["specialties"]) >= 2, "Should have multiple specialty objects"
+        
+        # Verify primary_specialty_id
+        assert "primary_specialty_id" in multi_user, "User should have primary_specialty_id"
+        assert multi_user["primary_specialty_id"] in multi_user["specialty_ids"], "Primary should be in specialty_ids"
+        
+        print(f"✓ Multi-specialty user has {len(multi_user['specialty_ids'])} specialties")
+        print(f"  Specialties: {[s['name'] for s in multi_user.get('specialties', [])]}")
+        print(f"  Primary: {multi_user.get('specialty_name')}")
 
 
 class TestPoolRoutingMultiSpecialty:
