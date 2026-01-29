@@ -23,7 +23,45 @@
     "phone": "Phone",
     "description": "Description",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "add": "Add",
+    "remove": "Remove",
+    "update": "Update",
+    "view": "View",
+    "export": "Export",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "reset": "Reset",
+    "clear": "Clear",
+    "all": "All",
+    "none": "None",
+    "select": "Select",
+    "selectAll": "Select All",
+    "filter": "Filter",
+    "sort": "Sort",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed",
+    "tip": "Tip",
+    "info": "Info",
+    "warning": "Warning",
+    "error": "Error",
+    "success": "Success",
+    "more": "more",
+    "less": "Less",
+    "of": "of",
+    "to": "to",
+    "from": "from",
+    "total": "Total",
+    "users": "users",
+    "members": "members",
+    "partners": "partners",
+    "system": "System"
   },
   "auth": {
     "login": "Login",
@@ -49,7 +87,9 @@
     "newPassword": "New Password",
     "updatePassword": "Update Password",
     "passwordResetSuccess": "Password reset successfully!",
-    "resetLinkSent": "Reset link sent to your email"
+    "resetLinkSent": "Reset link sent to your email",
+    "enterNewPassword": "Enter new password",
+    "confirmNewPassword": "Confirm new password"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -67,7 +107,12 @@
     "logs": "Logs",
     "integrations": "Integrations",
     "announcements": "Announcements",
-    "emailSettings": "Email Settings"
+    "emailSettings": "Email Settings",
+    "documentation": "Documentation",
+    "poolPickerRules": "Pool Picker Rules",
+    "reports": "Reports",
+    "myRequests": "My Requests",
+    "myServices": "My Services"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -101,7 +146,15 @@
     "recentlyDelivered": "Recently Delivered",
     "noDelivered": "No delivered orders yet",
     "needsReview": "Needs Your Review",
-    "noOpenOrders": "No open orders"
+    "noOpenOrders": "No open orders",
+    "mySubmittedTickets": "My Submitted Tickets",
+    "ticketsWorkingOn": "Tickets I'm Working On",
+    "ticketsDelivered": "Tickets Delivered",
+    "onTrack": "On Track",
+    "atRisk": "At Risk",
+    "breached": "Breached",
+    "unacknowledged": "Unacknowledged",
+    "slaStatus": "SLA Status"
   },
   "orders": {
     "title": "Orders",
@@ -120,18 +173,26 @@
       "open": "Open",
       "inProgress": "In Progress",
       "pending": "Pending",
-      "delivered": "Delivered"
+      "delivered": "Delivered",
+      "closed": "Closed"
     },
     "priority_levels": {
       "low": "Low",
       "medium": "Medium",
+      "normal": "Normal",
       "high": "High",
-      "urgent": "Urgent"
+      "urgent": "Urgent",
+      "critical": "Critical"
     },
     "pickOrder": "Pick Order",
     "submitForReview": "Submit for Review",
     "markDelivered": "Mark as Delivered",
-    "requestRevision": "Request Revision"
+    "requestRevision": "Request Revision",
+    "typeYourMessage": "Type your message...",
+    "searchByCodeTitle": "Search by code or title...",
+    "filterByStatus": "Filter by status",
+    "noTicketsYet": "You have not submitted any tickets yet",
+    "noTicketsMatch": "No tickets match your filters"
   },
   "commandCenter": {
     "title": "Command Center",
@@ -158,7 +219,8 @@
     "request": "Request",
     "incident": "Incident / Issues",
     "total": "Total",
-    "searchCategories": "Type to find a category faster..."
+    "searchCategories": "Type to find a category faster...",
+    "describeWhatYouNeed": "Describe what you need..."
   },
   "workflows": {
     "title": "Workflow Builder",
@@ -202,7 +264,25 @@
     "nodeSettings": "Customize this node's behavior and settings",
     "nodeLabel": "Node Label",
     "deleteNode": "Delete Node",
-    "clear": "Clear"
+    "clear": "Clear",
+    "enterNodeLabel": "Enter node label",
+    "fieldLabel": "Field label (e.g., Category, How many bedrooms?)",
+    "selectValue": "Select value",
+    "valueToMatch": "Value to match",
+    "subFieldLabel": "Sub-field label",
+    "addAction": "Add an action...",
+    "selectRole": "Select role",
+    "selectSpecialty": "Select specialty",
+    "poolPreference": "Pool preference (optional)",
+    "fallbackOption": "Fallback if no eligible users",
+    "selectTeam": "Select team",
+    "emailSubject": "Email subject",
+    "selectStatus": "Select status",
+    "notificationMessage": "Notification message",
+    "webhookUrl": "Webhook URL",
+    "selectSlaPolicy": "Select SLA Policy (or auto-detect)",
+    "fieldName": "Field name (e.g., priority, status)",
+    "value": "Value"
   },
   "users": {
     "title": "Users",
@@ -241,7 +321,8 @@
     "avgTeamSize": "Avg. Team Size",
     "selectTeam": "Select a team",
     "color": "Color",
-    "viewMembers": "View Members"
+    "viewMembers": "View Members",
+    "relatedSpecialties": "Related Specialties"
   },
   "roles": {
     "title": "Roles",
@@ -253,7 +334,11 @@
     "canPickOrders": "Can Pick Orders",
     "canCreateOrders": "Can Create Orders",
     "systemRole": "System Role",
-    "serviceProvider": "Service Provider"
+    "serviceProvider": "Service Provider",
+    "keyPermissions": "Key Permissions",
+    "permissionMatrix": "Permission Matrix",
+    "enableAll": "Enable All",
+    "disableAll": "Disable All"
   },
   "categories": {
     "title": "Categories",
@@ -271,7 +356,10 @@
     "icon": "Icon",
     "selectParent": "Select parent",
     "enableWorkflow": "Enable Editor Workflow",
-    "workflowDescription": "Requests will go through the editor assignment process"
+    "workflowDescription": "Requests will go through the editor assignment process",
+    "englishName": "English name",
+    "portugueseName": "Portuguese name",
+    "spanishName": "Spanish name"
   },
   "profile": {
     "title": "Profile",
@@ -281,7 +369,16 @@
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",
     "updateProfile": "Update Profile",
-    "uploadAvatar": "Upload Avatar"
+    "uploadAvatar": "Upload Avatar",
+    "profileSettings": "Profile Settings",
+    "manageAccount": "Manage your account settings",
+    "profilePicture": "Profile Picture",
+    "clickToUpload": "Click to upload. Max 2MB.",
+    "fullName": "Full Name",
+    "roleOnlyAdmin": "Role can only be changed by an admin",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "changing": "Changing..."
   },
   "forms": {
     "formFields": "Form Fields",
@@ -366,7 +463,8 @@
     "comment": "Comment (optional)",
     "review": "review",
     "reviews": "reviews",
-    "responseRate": "Response Rate"
+    "responseRate": "Response Rate",
+    "shareExperience": "Share your experience (optional)"
   },
   "notifications": {
     "title": "Notifications",
@@ -380,19 +478,265 @@
     "forbidden": "Forbidden",
     "validation": "Validation error",
     "network": "Network error",
-    "serverError": "Server error"
+    "serverError": "Server error",
+    "failedToLoad": "Failed to load",
+    "failedToSave": "Failed to save",
+    "failedToDelete": "Failed to delete"
   },
   "success": {
     "saved": "Saved successfully",
     "created": "Created successfully",
     "updated": "Updated successfully",
     "deleted": "Deleted successfully",
-    "orderPicked": "Order picked successfully!"
+    "orderPicked": "Order picked successfully!",
+    "profileUpdated": "Profile updated successfully",
+    "passwordChanged": "Password changed successfully"
   },
   "language": {
     "title": "Language",
     "en": "English",
     "pt": "Português (Brasil)",
     "es": "Español (España)"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure system settings, workflows, and integrations",
+    "documentation": {
+      "title": "System Documentation",
+      "description": "View and download system logic snapshot for UAT reference",
+      "loading": "Loading documentation...",
+      "backToSettings": "Back to Settings",
+      "errorLoading": "Error Loading Documentation",
+      "tryAgain": "Try Again",
+      "systemDocumentation": "System Documentation",
+      "uatReference": "System Logic Snapshot for UAT and reference",
+      "downloadMd": "Download .md",
+      "downloadPdf": "Download PDF",
+      "lastUpdated": "Last updated",
+      "markdownDownloaded": "Markdown file downloaded",
+      "pdfDownloaded": "PDF file downloaded",
+      "failedDownload": "Failed to download file"
+    },
+    "poolRules": {
+      "title": "Pool Picker Rules",
+      "description": "Configure which account types can pick from Pool 1 and Pool 2",
+      "loading": "Loading pool picker rules...",
+      "configureAccountTypes": "Configure which account types can pick from which pools",
+      "resetToDefaults": "Reset to Defaults",
+      "saveChanges": "Save Changes",
+      "howItWorks": "How Pool Eligibility Works",
+      "accountTypeConfig": "Account Type Config:",
+      "accountTypeConfigDesc": "Controls which pools each account type can access",
+      "userLevelCanPick": "User-level \"Can Pick\":",
+      "userLevelCanPickDesc": "Individual user override (set in user edit)",
+      "effectiveRule": "Effective Rule:",
+      "effectiveRuleDesc": "User can pick = Account config allows + User can_pick is ON",
+      "canPickOpportunities": "Can Pick Opportunities",
+      "allowedPools": "Allowed Pools",
+      "pool1": "Pool 1 (Opportunity Ribbon)",
+      "pool1Desc": "First 24 hours of ticket availability",
+      "pool2": "Pool 2 (Opportunity Pool)",
+      "pool2Desc": "After 24 hours or if no Pool 1 pickers",
+      "current": "Current",
+      "canPickFrom": "Can pick from",
+      "canPickEnabledNoPools": "Can pick enabled but no pools selected",
+      "cannotPickOpportunities": "Cannot pick opportunities",
+      "unsavedChanges": "You have unsaved changes",
+      "rulesSaved": "Pool picker rules saved successfully",
+      "rulesReset": "Pool picker rules reset to defaults",
+      "failedSave": "Failed to save pool picker rules",
+      "failedReset": "Failed to reset rules"
+    },
+    "uiCustomizations": {
+      "title": "UI Customizations",
+      "description": "Customize field labels, display names, and branding across the platform"
+    },
+    "emailSettings": {
+      "title": "Email Settings",
+      "description": "Configure SMTP and email notification templates"
+    },
+    "slaEscalation": {
+      "title": "SLA & Escalation",
+      "description": "Set up service level agreements and escalation policies"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Manage API keys, webhooks, and external integrations"
+    },
+    "translations": {
+      "title": "Translation Editor",
+      "description": "Review and correct translations for Spanish and Portuguese",
+      "selectLanguage": "Select Language",
+      "searchKeys": "Search translation keys...",
+      "key": "Key",
+      "english": "English (Reference)",
+      "translation": "Translation",
+      "saveTranslations": "Save Translations",
+      "translationsSaved": "Translations saved successfully",
+      "noChanges": "No changes to save",
+      "resetToOriginal": "Reset to Original"
+    }
+  },
+  "iam": {
+    "title": "Identity & Access Management",
+    "subtitle": "Manage users, teams, specialties, roles, account types, and subscription plans",
+    "users": "Users",
+    "teams": "Teams",
+    "specialties": "Specialties",
+    "roles": "Roles",
+    "accountTypes": "Account Types",
+    "plans": "Plans",
+    "addUser": "Add User",
+    "editUser": "Edit User",
+    "createUserDesc": "Create a new user account. A temporary password will be generated.",
+    "nameRequired": "Name *",
+    "emailRequired": "Email *",
+    "temporaryPassword": "Temporary Password *",
+    "newPasswordOptional": "New Password",
+    "leaveBlankToKeep": "Leave blank to keep",
+    "passwordSentByEmail": "This password will be sent to the user via email",
+    "roleRequired": "Role *",
+    "accountTypeRequired": "Account Type *",
+    "team": "Team",
+    "selectTeamOptional": "Select team (optional)...",
+    "specialtyFiltered": "Specialty options filtered by team",
+    "specialtiesRequired": "Specialties * (Select multiple)",
+    "noSpecialtiesAvailable": "No specialties available",
+    "primary": "Primary",
+    "setPrimary": "Set Primary",
+    "selected": "Selected",
+    "specialty": "specialty",
+    "subscriptionPlanRequired": "Subscription Plan *",
+    "selectPlan": "Select plan...",
+    "canPickOpportunities": "Can pick opportunities from pools",
+    "forcePasswordChange": "Force password change on first login",
+    "forceOtpSetup": "Force OTP/2FA setup",
+    "sendWelcomeEmail": "Send welcome email with login credentials",
+    "createUser": "Create User",
+    "addTeam": "Add Team",
+    "editTeam": "Edit Team",
+    "teamSpecialtiesDesc": "Assign related specialties to filter user specialty options",
+    "teamNameRequired": "Name *",
+    "relatedSpecialties": "Related Specialties",
+    "relatedSpecialtiesDesc": "Users in this team will have specialty options filtered to these selections",
+    "selectRelatedSpecialties": "Select related specialties...",
+    "addSpecialty": "Add Specialty",
+    "editSpecialty": "Edit Specialty",
+    "addRole": "Add Role",
+    "systemRoleNote": "System Role - Name cannot be changed",
+    "addAccountType": "Add Account Type",
+    "systemTypeNote": "System Type - Name cannot be changed",
+    "requiresSubscription": "Requires Subscription Plan",
+    "addPlan": "Add Plan",
+    "editPlan": "Edit Plan",
+    "monthlyPrice": "Monthly Price ($)",
+    "yearlyPrice": "Yearly Price ($)",
+    "featuresPerLine": "Features (one per line)",
+    "deleteConfirm": "Delete {{type}}?",
+    "deleteWarning": "This action cannot be undone. Are you sure you want to delete \"{{name}}\"?",
+    "welcomeEmailSent": "Welcome email sent",
+    "userCreated": "User created",
+    "userUpdated": "User updated",
+    "userStatusUpdated": "User status updated",
+    "teamCreated": "Team created",
+    "teamUpdated": "Team updated",
+    "specialtyCreated": "Specialty created",
+    "specialtyUpdated": "Specialty updated",
+    "roleCreated": "Role created",
+    "roleUpdated": "Role updated",
+    "accountTypeCreated": "Account type created",
+    "accountTypeUpdated": "Account type updated",
+    "planCreated": "Plan created",
+    "planUpdated": "Plan updated",
+    "accountTypeDescriptions": {
+      "partner": "External partners with subscription plans",
+      "internalStaff": "Internal team members",
+      "vendorFreelancer": "External vendors and freelancers",
+      "mediaClient": "Clients who submit requests"
+    }
+  },
+  "sla": {
+    "title": "SLA Policies",
+    "description": "Define service level agreements and response time targets",
+    "addPolicy": "Add Policy",
+    "editPolicy": "Edit Policy",
+    "policyName": "Policy Name",
+    "describeWhenApplies": "Describe when this policy applies...",
+    "selectRoleFilter": "Select role",
+    "selectTeamFilter": "Select team",
+    "selectPriorityFilter": "Priority",
+    "levels": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "critical": "Critical"
+    }
+  },
+  "escalation": {
+    "title": "Escalation Policies",
+    "description": "Configure automatic escalation rules for tickets",
+    "addPolicy": "Add Policy",
+    "editPolicy": "Edit Policy",
+    "describeWhenApplies": "Describe when this policy should be applied...",
+    "addCategoryFilter": "Add category filter...",
+    "emailSubjectPlaceholder": "Use {order_code}, {title}, {level}, {level_name}",
+    "selectUser": "Select user...",
+    "selectRole": "Select role...",
+    "selectTeam": "Select team...",
+    "priority": "Priority",
+    "emailSubject": "Email subject",
+    "webhookUrl": "Webhook URL"
+  },
+  "reports": {
+    "title": "Reports",
+    "generateReport": "Generate Report",
+    "clickToGenerate": "Click \"Generate Report\" to view results",
+    "filters": "Filters",
+    "statusFilter": "Status",
+    "priorityFilter": "Priority",
+    "categoryFilter": "Category",
+    "assigneeFilter": "Assignee",
+    "requesterFilter": "Requester",
+    "teamFilter": "Team",
+    "dateRange": "Date Range",
+    "exportCsv": "Export CSV",
+    "exportPdf": "Export PDF"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Manage API keys, webhooks, and external integrations",
+    "apiKeys": "API Keys",
+    "webhooks": "Webhooks",
+    "sendTestWebhook": "Send test webhook",
+    "testSuccess": "Test webhook sent successfully",
+    "testFailed": "Failed to send test webhook"
+  },
+  "subscriptionPlans": {
+    "title": "Subscription Plans",
+    "searchPlans": "Search plans...",
+    "addPlan": "Add Plan",
+    "planName": "Plan Name",
+    "planDescription": "Brief description of this plan",
+    "features": "Features",
+    "featuresPlaceholder": "Priority Support\nFast Turnaround\nDedicated Manager"
+  },
+  "myServices": {
+    "title": "My Services",
+    "serviceInfoPlaceholder": "Enter service information using Markdown..."
+  },
+  "createOrder": {
+    "describeNeed": "Describe what you need...",
+    "videoScript": "Paste your video script here...",
+    "exampleVideos": "Links to example videos or inspiration...",
+    "rawFootage": "Links to raw footage (Google Drive, Dropbox, etc.)",
+    "otherDetails": "Any other details or requirements..."
+  },
+  "draftEditor": {
+    "title": "Enter a title for your request",
+    "description": "Describe your request in detail",
+    "videoScript": "Paste your video script here...",
+    "rawFootageLinks": "Links to raw footage (Google Drive, Dropbox, etc.)",
+    "exampleLinks": "Links to example videos or inspiration...",
+    "otherDetails": "Any other details or requirements..."
   }
 }
