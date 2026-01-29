@@ -237,6 +237,7 @@ async def notify_status_change(order: dict, old_status: str, new_status: str, ch
 async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None):
     """
     Determine the correct pool stage based on whether eligible Partners exist for the ticket's specialty.
+    Uses multi-specialty matching (ANY match rule).
     
     Returns:
         dict with pool_stage, routing_specialty_id, routing_specialty_name, pool1_expires_at, eligible_users
@@ -266,14 +267,19 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
             routing_specialty_name = specialty.get("name")
     
     # Step 2: Query eligible Pool 1 candidates (Partners with matching specialty)
+    # Now supports multi-specialty: user is eligible if ANY of their specialties match
     partner_query = {
         "account_type": "Partner",
         "active": True
     }
     
-    # If we have a routing specialty, filter by it
+    # If we have a routing specialty, filter by it (ANY match rule)
     if routing_specialty_id:
-        partner_query["specialty_id"] = routing_specialty_id
+        # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
+        partner_query["$or"] = [
+            {"specialty_ids": routing_specialty_id},
+            {"specialty_id": routing_specialty_id}
+        ]
     
     eligible_partners = await db.users.find(partner_query, {"_id": 0}).to_list(100)
     partner_count = len(eligible_partners)
