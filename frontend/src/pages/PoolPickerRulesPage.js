@@ -46,7 +46,7 @@ export default function PoolPickerRulesPage() {
   const fetchRules = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/api/settings/pool-picker-rules`);
+      const res = await axios.get(`${API}/api/pool-picker-rules`);
       setRules(res.data.rules);
       setHasChanges(false);
     } catch (err) {
