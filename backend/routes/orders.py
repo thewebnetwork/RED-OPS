@@ -810,11 +810,11 @@ async def get_pool_tickets(
 ):
     """
     Get tickets in a specific pool filtered by user's specialty.
-    Pool 1 = Partner pool (first 24 hours)
-    Pool 2 = Vendor/Freelancer pool (after 24 hours)
+    Pool 1 = Partner pool (first 24 hours OR until no eligible partners)
+    Pool 2 = Vendor/Freelancer pool (after 24 hours OR if no partners for specialty)
     
     Filtering rules:
-    - Partners/Vendors only see tickets matching their Specialty
+    - Partners/Vendors only see tickets matching their routing_specialty_id
     - Support/Issue tickets are excluded unless user has support specialty
     - Admins/Operators see all tickets
     """
@@ -841,35 +841,69 @@ async def get_pool_tickets(
     now = datetime.now(timezone.utc)
     twenty_four_hours_ago = now - timedelta(hours=24)
     
+    # Build query based on pool_stage field (primary) with fallback to time-based (legacy)
+    pool_stage_value = f"POOL_{pool_number}"
+    
     orders = await db.orders.find(
-        {"status": "Open", "editor_id": None},
+        {"status": "Open", "editor_id": None, "deleted": {"$ne": True}},
         {"_id": 0}
     ).sort("created_at", 1).to_list(1000)
     
     result = []
     for order in orders:
         order = normalize_order(order)
-        pool_entered = order.get("pool_entered_at") or order.get("created_at")
         
-        try:
-            if isinstance(pool_entered, str):
-                pool_entered_dt = datetime.fromisoformat(pool_entered.replace('Z', '+00:00'))
-            else:
-                pool_entered_dt = pool_entered
-        except:
-            pool_entered_dt = now
+        # Check pool_stage field first (new smart routing)
+        order_pool_stage = order.get("pool_stage")
         
-        # Determine which pool this ticket belongs to
-        in_pool_1 = pool_entered_dt > twenty_four_hours_ago
-        
-        # Check pool timing
-        if pool_number == 1 and not in_pool_1:
-            continue
-        elif pool_number == 2 and in_pool_1:
-            continue
+        if order_pool_stage:
+            # Use the explicit pool_stage field
+            # Check if Pool 1 has expired (past 24h threshold)
+            if order_pool_stage == "POOL_1":
+                pool1_expires = order.get("pool1_expires_at")
+                if pool1_expires:
+                    try:
+                        expires_dt = datetime.fromisoformat(pool1_expires.replace('Z', '+00:00'))
+                        if now > expires_dt:
+                            # Pool 1 has expired, this ticket should now be in Pool 2
+                            order_pool_stage = "POOL_2"
+                            # Update the order in DB (best effort)
+                            await db.orders.update_one(
+                                {"id": order["id"]},
+                                {"$set": {"pool_stage": "POOL_2"}}
+                            )
+                    except:
+                        pass
+            
+            if order_pool_stage != pool_stage_value:
+                continue
+        else:
+            # Legacy fallback: time-based pool determination
+            pool_entered = order.get("pool_entered_at") or order.get("created_at")
+            try:
+                if isinstance(pool_entered, str):
+                    pool_entered_dt = datetime.fromisoformat(pool_entered.replace('Z', '+00:00'))
+                else:
+                    pool_entered_dt = pool_entered
+            except:
+                pool_entered_dt = now
+            
+            in_pool_1 = pool_entered_dt > twenty_four_hours_ago
+            
+            if pool_number == 1 and not in_pool_1:
+                continue
+            elif pool_number == 2 and in_pool_1:
+                continue
         
         # Apply specialty filtering for non-admin users
         if role not in ["Administrator", "Operator"]:
+            # Filter by routing_specialty_id (new system)
+            routing_specialty = order.get("routing_specialty_id")
+            if routing_specialty and user_specialty_id:
+                if routing_specialty != user_specialty_id:
+                    continue  # User specialty doesn't match ticket routing specialty
+            
+            # Additional filtering for support tickets
             request_type = order.get("request_type", "").lower()
             category_l1_name = order.get("category_l1_name", "").lower()
             
@@ -886,10 +920,6 @@ async def get_pool_tickets(
             
             if is_support_ticket and not has_support_specialty:
                 continue
-            
-            # If user has a specialty, optionally filter by it
-            # For now, we allow all service tickets if not support
-            # Can be extended to match specialty with category
         
         result.append(OrderResponse(
             **order,
