@@ -520,10 +520,10 @@ function RequesterDashboard() {
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <KPICard label="Tickets I'm Working On" value={myWork.working_on.length} icon={Clock} color="bg-amber-500" />
-        <KPICard label="Tickets Delivered" value={myWork.delivered.length} icon={CheckCircle2} color="bg-green-500" />
+        <KPICard label={t('dashboard.ticketsWorkingOn')} value={myWork.working_on.length} icon={Clock} color="bg-amber-500" />
+        <KPICard label={t('dashboard.ticketsDelivered')} value={myWork.delivered.length} icon={CheckCircle2} color="bg-green-500" />
         <Link to="/my-tickets">
-          <KPICard label="My Submitted Tickets" value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
+          <KPICard label={t('dashboard.mySubmittedTickets')} value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
         </Link>
       </div>
 
@@ -532,7 +532,7 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            Tickets I&apos;m Working On ({myWork.working_on.length})
+            {t('dashboard.ticketsWorkingOn')} ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
@@ -540,7 +540,7 @@ function RequesterDashboard() {
             <OrderCard key={order.id} order={order} t={t} />
           ))}
           {myWork.working_on.length === 0 && (
-            <p className="text-center text-slate-500 py-8">No tickets currently assigned to you</p>
+            <p className="text-center text-slate-500 py-8">{t('dashboard.noOrdersInProgress')}</p>
           )}
         </CardContent>
       </Card>
@@ -550,7 +550,7 @@ function RequesterDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 size={20} className="text-green-500" />
-            Tickets Delivered ({myWork.delivered.length})
+            {t('dashboard.ticketsDelivered')} ({myWork.delivered.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-3">
@@ -558,7 +558,7 @@ function RequesterDashboard() {
             <OrderCard key={order.id} order={order} t={t} />
           ))}
           {myWork.delivered.length === 0 && (
-            <p className="text-center text-slate-500 py-8">No delivered tickets yet</p>
+            <p className="text-center text-slate-500 py-8">{t('dashboard.noDelivered')}</p>
           )}
         </CardContent>
       </Card>
