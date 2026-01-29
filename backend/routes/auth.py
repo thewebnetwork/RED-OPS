@@ -1,7 +1,9 @@
 """Authentication routes"""
 import uuid
+import pyotp
+import secrets
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict
 
