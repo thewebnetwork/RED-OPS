@@ -356,6 +356,7 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "access_tier_name": subscription_plan_name,
         "permission_overrides": user_data.permission_overrides,
         "active": True,
+        "can_pick": user_data.can_pick,  # User-level pool picking permission
         "force_password_change": user_data.force_password_change,
         "force_otp_setup": user_data.force_otp_setup,
         "otp_verified": False,
