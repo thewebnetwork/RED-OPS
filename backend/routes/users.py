@@ -402,7 +402,7 @@ async def get_user(user_id: str, current_user: dict = Depends(require_roles(["Ad
 
 @router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = Depends(require_roles(["Administrator"]))):
-    """Update a user (Admin only)"""
+    """Update a user (Admin only) - supports multiple specialties"""
     from services.email import send_account_disabled_email, send_account_reactivated_email
     
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -432,12 +432,58 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         if update_dict["account_type"] not in ACCOUNT_TYPES:
             raise HTTPException(status_code=400, detail=f"Invalid account type. Must be one of: {', '.join(ACCOUNT_TYPES)}")
     
-    # Handle specialty update
-    if "specialty_id" in update_dict:
+    # Handle multi-specialty update
+    if "specialty_ids" in update_dict:
+        specialty_ids = update_dict["specialty_ids"]
+        if specialty_ids:
+            # Verify all specialties exist
+            for spec_id in specialty_ids:
+                specialty = await db.specialties.find_one({"id": spec_id, "active": True})
+                if not specialty:
+                    raise HTTPException(status_code=400, detail=f"Invalid or inactive specialty: {spec_id}")
+            
+            # Handle primary specialty
+            primary_specialty_id = update_dict.get("primary_specialty_id")
+            if not primary_specialty_id:
+                # Keep existing primary if it's in the new list, otherwise use first
+                existing_primary = user.get("primary_specialty_id") or user.get("specialty_id")
+                if existing_primary and existing_primary in specialty_ids:
+                    primary_specialty_id = existing_primary
+                else:
+                    primary_specialty_id = specialty_ids[0]
+            elif primary_specialty_id not in specialty_ids:
+                raise HTTPException(status_code=400, detail="Primary specialty must be one of the selected specialties")
+            
+            update_dict["primary_specialty_id"] = primary_specialty_id
+            
+            # Update legacy fields for backwards compatibility
+            primary_specialty = await db.specialties.find_one({"id": primary_specialty_id}, {"_id": 0, "name": 1})
+            update_dict["specialty_id"] = primary_specialty_id
+            update_dict["specialty_name"] = primary_specialty["name"] if primary_specialty else None
+    
+    # Handle legacy single specialty update (backwards compatibility)
+    elif "specialty_id" in update_dict and update_dict["specialty_id"]:
         specialty = await db.specialties.find_one({"id": update_dict["specialty_id"], "active": True})
         if not specialty:
             raise HTTPException(status_code=400, detail="Invalid or inactive specialty")
         update_dict["specialty_name"] = specialty["name"]
+        # Also update multi-specialty fields
+        update_dict["specialty_ids"] = [update_dict["specialty_id"]]
+        update_dict["primary_specialty_id"] = update_dict["specialty_id"]
+    
+    # Handle primary_specialty_id update without specialty_ids change
+    if "primary_specialty_id" in update_dict and "specialty_ids" not in update_dict:
+        existing_specialty_ids = user.get("specialty_ids", [])
+        if not existing_specialty_ids and user.get("specialty_id"):
+            existing_specialty_ids = [user["specialty_id"]]
+        
+        if update_dict["primary_specialty_id"] and update_dict["primary_specialty_id"] not in existing_specialty_ids:
+            raise HTTPException(status_code=400, detail="Primary specialty must be one of the user's specialties")
+        
+        if update_dict["primary_specialty_id"]:
+            primary_specialty = await db.specialties.find_one({"id": update_dict["primary_specialty_id"]}, {"_id": 0, "name": 1})
+            update_dict["specialty_id"] = update_dict["primary_specialty_id"]
+            update_dict["specialty_name"] = primary_specialty["name"] if primary_specialty else None
     
     # Handle team update
     if "team_id" in update_dict:
