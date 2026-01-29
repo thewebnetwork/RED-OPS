@@ -573,7 +573,23 @@ export default function IAMPage() {
                       </td>
                       <td className="px-4 py-3"><Badge className={getRoleColor(user.role)}>{user.role}</Badge></td>
                       <td className="px-4 py-3">{user.account_type ? <Badge className={getAccountTypeColor(user.account_type)}>{user.account_type}</Badge> : '—'}</td>
-                      <td className="px-4 py-3">{user.specialty_name || '—'}</td>
+                      <td className="px-4 py-3">
+                        {/* Multi-specialty display */}
+                        {user.specialties && user.specialties.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {user.specialties.slice(0, 2).map((spec, i) => (
+                              <Badge key={spec.id} variant={spec.is_primary ? "default" : "outline"} className="text-xs">
+                                {spec.name}
+                              </Badge>
+                            ))}
+                            {user.specialties.length > 2 && (
+                              <Badge variant="outline" className="text-xs">+{user.specialties.length - 2} more</Badge>
+                            )}
+                          </div>
+                        ) : (
+                          user.specialty_name || '—'
+                        )}
+                      </td>
                       <td className="px-4 py-3"><Badge variant={user.active ? 'success' : 'secondary'}>{user.active ? 'Active' : 'Inactive'}</Badge></td>
                       <td className="px-4 py-3 text-right">
                         <Button variant="ghost" size="sm" onClick={() => openUserDialog(user)}><Edit size={16} /></Button>
