@@ -49,6 +49,7 @@ class CategoryL2Update(BaseModel):
     description: Optional[str] = None
     active: Optional[bool] = None
     category_l1_id: Optional[str] = None  # Allow moving to different parent
+    specialty_id: Optional[str] = None  # Link to specialty for pool routing
 
 
 # ============== L1 CATEGORY ROUTES ==============
