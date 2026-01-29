@@ -1,0 +1,310 @@
+[
+  {
+    "_id": "697a4f45d9af146454d8a548",
+    "id": "44cdce0d-a3ac-43e6-803a-cc7bf5e9d6c2",
+    "timestamp": "2026-01-28T18:02:45.982387+00:00",
+    "level": "INFO",
+    "message": "TEST_P1_Log_Entry - Testing log creation",
+    "source": "system",
+    "details": {
+      "test": true
+    },
+    "user_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "user_name": "Admin"
+  },
+  {
+    "_id": "697ad9e587f3cf428e62fe75",
+    "id": "6d4ef18a-a56b-49a9-944e-8d1fd76deeb7",
+    "timestamp": "2026-01-29T03:54:13.050429+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ad9e687f3cf428e62fe76",
+    "id": "3ed6992a-ad0d-43f5-8be5-15679eeff139",
+    "timestamp": "2026-01-29T03:54:14.301424+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ad9e687f3cf428e62fe77",
+    "id": "3c45ed3e-7618-4cbf-93b4-4652d11590b7",
+    "timestamp": "2026-01-29T03:54:14.310210+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Media Client",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Media Client",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada1a94cf3dc883db2f4f",
+    "id": "e4a674fb-42b2-415b-828e-8e924a09aff7",
+    "timestamp": "2026-01-29T03:55:06.235418+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ada1b94cf3dc883db2f50",
+    "id": "1d5e0be7-6cf9-44b1-8421-ba20140f4255",
+    "timestamp": "2026-01-29T03:55:07.469835+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ada1b94cf3dc883db2f51",
+    "id": "17a61784-60ff-4b46-8661-4e7f2bb82606",
+    "timestamp": "2026-01-29T03:55:07.493664+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Media Client",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Media Client",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada1e94cf3dc883db2f52",
+    "id": "0e759dac-7448-4ea5-a761-a3a8aec13d42",
+    "timestamp": "2026-01-29T03:55:10.361640+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ada45c53b2c95838cbf94",
+    "id": "19c90f6d-3345-471d-a0d9-537746a6808a",
+    "timestamp": "2026-01-29T03:55:49.993478+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Vendor/Freelancer",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Vendor/Freelancer",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada6fb3b6da2a9cdaf5de",
+    "id": "b1f0d4dc-17dc-4a57-8458-38a7c6540609",
+    "timestamp": "2026-01-29T03:56:31.791432+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ada70b3b6da2a9cdaf5df",
+    "id": "a47654fa-2349-4b25-b8f5-2a2da975f325",
+    "timestamp": "2026-01-29T03:56:32.093292+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Vendor/Freelancer",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Vendor/Freelancer",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada71b3b6da2a9cdaf5e0",
+    "id": "95e9e1a5-59a7-47d9-afe8-734d563682ec",
+    "timestamp": "2026-01-29T03:56:33.033385+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697ada71b3b6da2a9cdaf5e1",
+    "id": "5be944c0-820f-42e5-a813-a46337fafa2e",
+    "timestamp": "2026-01-29T03:56:33.086026+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Media Client",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Media Client",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada76b3b6da2a9cdaf5e4",
+    "id": "d6e30397-ccd3-44d8-a973-00be31911d3b",
+    "timestamp": "2026-01-29T03:56:38.882321+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Vendor/Freelancer",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Vendor/Freelancer",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697ada77b3b6da2a9cdaf5e5",
+    "id": "1ce35a33-ba12-4083-878c-d6f579140c0d",
+    "timestamp": "2026-01-29T03:56:39.220132+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  },
+  {
+    "_id": "697adaadb3b6da2a9cdaf5e6",
+    "id": "38a19038-6fdd-406f-8bd6-41b2b48d5bfe",
+    "timestamp": "2026-01-29T03:57:33.276457+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Partner",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Partner",
+      "can_pick": false,
+      "allowed_pools": [
+        "POOL_1"
+      ]
+    }
+  },
+  {
+    "_id": "697adaadb3b6da2a9cdaf5e7",
+    "id": "6c0f3f21-51e7-4689-88dd-6d05636729f5",
+    "timestamp": "2026-01-29T03:57:33.297732+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Internal Staff",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Internal Staff",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_1",
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697adaadb3b6da2a9cdaf5e8",
+    "id": "5163a663-7f6c-4648-ab3d-ad1e13099c79",
+    "timestamp": "2026-01-29T03:57:33.325720+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Vendor/Freelancer",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Vendor/Freelancer",
+      "can_pick": true,
+      "allowed_pools": [
+        "POOL_2"
+      ]
+    }
+  },
+  {
+    "_id": "697adaadb3b6da2a9cdaf5e9",
+    "id": "51e7df95-6721-4392-90cc-0c7b68b68298",
+    "timestamp": "2026-01-29T03:57:33.340950+00:00",
+    "level": "INFO",
+    "message": "Pool picker rules updated for Media Client",
+    "source": "settings",
+    "actor_id": "91dfb139-5e9a-4ff0-aa83-4476b208d1f9",
+    "actor_name": "Admin2",
+    "details": {
+      "account_type": "Media Client",
+      "can_pick": false,
+      "allowed_pools": []
+    }
+  }
+]

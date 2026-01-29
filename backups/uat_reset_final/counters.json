@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "order_code",
+    "seq": 100
+  },
+  {
+    "_id": "ticket_code",
+    "seq": 0
+  },
+  {
+    "_id": "feature_request_code",
+    "seq": 6
+  },
+  {
+    "_id": "bug_report_code",
+    "seq": 15
+  }
+]
