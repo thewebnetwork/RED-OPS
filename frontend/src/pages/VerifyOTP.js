@@ -43,6 +43,7 @@ export default function VerifyOTP() {
       }
       
       // Mark OTP as verified for this session
+      sessionStorage.setItem('otp_session_verified', 'true');
       updateUser({ otp_session_verified: true });
       
       toast.success('Verification successful!');
