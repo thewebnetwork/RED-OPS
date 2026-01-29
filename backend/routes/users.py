@@ -597,3 +597,48 @@ async def restore_user(user_id: str, current_user: dict = Depends(require_roles(
         logging.error(f"Failed to send account reactivation email: {e}")
     
     return {"message": "User restored"}
+
+
+
+# ============== MIGRATION ENDPOINT ==============
+
+@router.post("/migrate/single-to-multi-specialty")
+async def migrate_single_to_multi_specialty(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """
+    Migrate users from single specialty_id to multi-specialty (specialty_ids array).
+    This is a one-time migration that:
+    - Finds all users with specialty_id but no specialty_ids
+    - Creates specialty_ids array with that single specialty
+    - Sets primary_specialty_id to the existing specialty_id
+    """
+    import logging
+    
+    # Find users that need migration (have specialty_id but no specialty_ids)
+    users_to_migrate = await db.users.find({
+        "specialty_id": {"$exists": True, "$ne": None},
+        "$or": [
+            {"specialty_ids": {"$exists": False}},
+            {"specialty_ids": None},
+            {"specialty_ids": []}
+        ]
+    }, {"_id": 0, "id": 1, "name": 1, "specialty_id": 1}).to_list(10000)
+    
+    migrated_count = 0
+    for user in users_to_migrate:
+        try:
+            await db.users.update_one(
+                {"id": user["id"]},
+                {"$set": {
+                    "specialty_ids": [user["specialty_id"]],
+                    "primary_specialty_id": user["specialty_id"]
+                }}
+            )
+            migrated_count += 1
+        except Exception as e:
+            logging.error(f"Failed to migrate user {user['id']}: {e}")
+    
+    return {
+        "message": "Migration complete",
+        "users_found": len(users_to_migrate),
+        "users_migrated": migrated_count
+    }
