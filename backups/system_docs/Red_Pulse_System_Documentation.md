@@ -747,9 +747,9 @@ The Logs module (`/logs`) provides:
 
 ---
 
-# 11. Design Rationale – Why We Built It This Way
+# 12. Design Rationale – Why We Built It This Way
 
-## 11.1 Why Pools Exist
+## 12.1 Why Pools Exist
 
 **Problem:** In service delivery businesses, work needs to be distributed fairly across different tiers of service providers, while giving premium partners first access to opportunities.
 
@@ -761,7 +761,7 @@ The Logs module (`/logs`) provides:
 
 **Why 24 hours?** Based on business analysis: most partners who will pick up work do so within the first day. After that, the ticket likely needs the extended workforce.
 
-## 11.2 Why IAM Uses Minimal Roles + Overrides
+## 12.2 Why IAM Uses Minimal Roles + Overrides
 
 **Problem:** Complex role systems become unmanageable. Every new permission requires defining it across dozens of roles.
 
@@ -772,7 +772,7 @@ The Logs module (`/logs`) provides:
 - Easy to audit (who has what access)
 - Flexible where needed (individual overrides)
 
-## 11.3 Why Survey Triggers Only on Delivery
+## 12.3 Why Survey Triggers Only on Delivery
 
 **Problem:** Surveys sent when requesters cancel create bad experiences and skewed data.
 
@@ -783,7 +783,7 @@ The Logs module (`/logs`) provides:
 
 This ensures satisfaction data reflects actual service quality.
 
-## 11.4 Why Specialty-Based Routing
+## 12.4 Why Specialty-Based Routing
 
 **Problem:** Random assignment leads to poor quality and inefficiency.
 
@@ -794,7 +794,7 @@ This ensures satisfaction data reflects actual service quality.
 - Users only see relevant opportunities
 - Reduces "cherry-picking" of easy tickets
 
-## 11.5 Why Configurable Pool Rules
+## 12.5 Why Configurable Pool Rules
 
 **Problem:** Business rules change. Hard-coded pool logic requires developer intervention for every change.
 
