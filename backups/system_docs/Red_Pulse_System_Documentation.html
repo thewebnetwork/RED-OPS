@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Red Pulse System Documentation Pack</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            color: #333;
+        }
+        h1 {
+            color: #A2182C;
+            border-bottom: 2px solid #A2182C;
+            padding-bottom: 10px;
+            page-break-before: always;
+        }
+        h1:first-of-type {
+            page-break-before: avoid;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 25px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        ul, ol {
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .toc {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc a {
+            color: #A2182C;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        @media print {
+            body {
+                padding: 20px;
+            }
+            h1 {
+                page-break-before: always;
+            }
+            h1:first-of-type {
+                page-break-before: avoid;
+            }
+            table {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+<h1 id="red-pulse-system-documentation-pack">Red Pulse System Documentation Pack</h1>
+
+<h2 id="official-system-reference-v41">Official System Reference v4.1</h2>
+
+<p><strong>Document Version:</strong> 1.0<br />
+<strong>Platform:</strong> Red Pulse (Red Ops)<br />
+<strong>Generated:</strong> December 2025<br />
+<strong>Environment:</strong> https://translate-redops.preview.emergentagent.com</p>
+
+<hr />
+
+<h1 id="table-of-contents">Table of Contents</h1>
+
+<ol>
+<li><a href="#1-executive-overview">Executive Overview</a></li>
+<li><a href="#2-modules--navigation-map">Modules &amp; Navigation Map</a></li>
+<li><a href="#3-identity--access-management-iam">Identity &amp; Access Management (IAM)</a></li>
+<li><a href="#4-ticket-lifecycle--rules">Ticket Lifecycle &amp; Rules</a></li>
+<li><a href="#5-pools--opportunity-ribbon">Pools &amp; Opportunity Ribbon</a></li>
+<li><a href="#6-workflow-engine">Workflow Engine</a></li>
+<li><a href="#7-notifications--email">Notifications &amp; Email</a></li>
+<li><a href="#8-reports">Reports</a></li>
+<li><a href="#9-integrations">Integrations</a></li>
+<li><a href="#10-admin-operations">Admin Operations</a></li>
+<li><a href="#11-design-rationale--why-we-built-it-this-way">Design Rationale – Why We Built It This Way</a></li>
+<li><a href="#12-known-issues--tech-debt--open-items">Known Issues / Tech Debt / Open Items</a></li>
+</ol>
+
+<hr />
+
+<h1 id="1-executive-overview">1. Executive Overview</h1>
+
+<h2 id="what-is-red-pulse">What is Red Pulse?</h2>
+
+<p>Red Pulse is a <strong>command-center ticketing platform</strong> designed to manage requests from multiple user types through a pool-based distribution system. It combines:</p>
+
+<ul>
+<li><strong>Request Management</strong> – Clients submit tickets that flow through a defined lifecycle</li>
+<li><strong>Pool-Based Distribution</strong> – Work opportunities are distributed to service providers through tiered pools</li>
+<li><strong>Identity &amp; Access Management</strong> – Granular role and permission control</li>
+<li><strong>Workflow Automation</strong> – Configurable triggers and actions for common processes</li>
+<li><strong>SLA Monitoring</strong> – Service level tracking with escalation policies</li>
+</ul>
+
+<h2 id="primary-user-types">Primary User Types</h2>
+
+<table>
+<thead>
+<tr>
+  <th>User Type</th>
+  <th>Role</th>
+  <th>Primary Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Media Client</strong></td>
+  <td>Requester</td>
+  <td>Submit tickets, track progress, provide feedback</td>
+</tr>
+<tr>
+  <td><strong>Partner</strong></td>
+  <td>Premium Service Provider</td>
+  <td>Pick tickets from Pool 1 (first 24h), deliver work</td>
+</tr>
+<tr>
+  <td><strong>Internal Staff</strong></td>
+  <td>Internal Team</td>
+  <td>Pick tickets from Pool 1, manage operations</td>
+</tr>
+<tr>
+  <td><strong>Vendor/Freelancer</strong></td>
+  <td>Extended Service Provider</td>
+  <td>Pick tickets from Pool 2 (after 24h), deliver work</td>
+</tr>
+<tr>
+  <td><strong>Administrator</strong></td>
+  <td>System Admin</td>
+  <td>Full configuration, user management, reporting</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="core-value-proposition">Core Value Proposition</h2>
+
+<p>Red Pulse solves the <strong>"fair distribution problem"</strong> in service delivery:
+- Premium partners get first access to opportunities (Pool 1)
+- Extended workforce gets access to overflow work (Pool 2)
+- Clients get consistent service regardless of who picks up their request
+- Administrators have full visibility and control</p>
+
+<hr />
+
+<h1 id="2-modules-navigation-map">2. Modules &amp; Navigation Map</h1>
+
+<h2 id="main-sidebar-navigation">Main Sidebar Navigation</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Module</th>
+  <th>Route</th>
+  <th>Access</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Dashboard</td>
+  <td><code>/</code></td>
+  <td>All Users</td>
+  <td>Role-specific KPIs and overview</td>
+</tr>
+<tr>
+  <td>My Services</td>
+  <td><code>/my-services</code></td>
+  <td>All Users</td>
+  <td>Personal service information (Markdown)</td>
+</tr>
+<tr>
+  <td>My Submitted Tickets</td>
+  <td><code>/my-tickets</code></td>
+  <td>All Users</td>
+  <td>User's own submitted requests</td>
+</tr>
+<tr>
+  <td>Submit New Request</td>
+  <td><code>/command-center</code></td>
+  <td>All Users</td>
+  <td>Create new ticket/request</td>
+</tr>
+<tr>
+  <td>Report an Issue</td>
+  <td><code>/report-issue</code></td>
+  <td>All Users</td>
+  <td>Report bugs/issues</td>
+</tr>
+<tr>
+  <td>Opportunity Ribbon</td>
+  <td><code>/ribbon-board</code></td>
+  <td>Non-Media Clients</td>
+  <td>Pool 1 &amp; Pool 2 ticket pools</td>
+</tr>
+<tr>
+  <td>All Orders</td>
+  <td><code>/orders</code></td>
+  <td>Admin Only</td>
+  <td>Full ticket management</td>
+</tr>
+<tr>
+  <td>Deleted Tickets</td>
+  <td><code>/deleted-tickets</code></td>
+  <td>Admin Only</td>
+  <td>Soft-deleted tickets view</td>
+</tr>
+<tr>
+  <td>Reports</td>
+  <td><code>/reports</code></td>
+  <td>All Users</td>
+  <td>Canned reports module</td>
+</tr>
+<tr>
+  <td>Identity &amp; Access</td>
+  <td><code>/iam</code></td>
+  <td>Admin Only</td>
+  <td>User/Team/Role management</td>
+</tr>
+<tr>
+  <td>Logs</td>
+  <td><code>/logs</code></td>
+  <td>Admin, Operator</td>
+  <td>Activity/system logs</td>
+</tr>
+<tr>
+  <td>Announcements</td>
+  <td><code>/announcements</code></td>
+  <td>Admin Only</td>
+  <td>System announcements</td>
+</tr>
+<tr>
+  <td>Settings</td>
+  <td><code>/settings</code></td>
+  <td>Admin Only</td>
+  <td>Settings hub</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="settings-hub-admin-only-subpages">Settings Hub (Admin-Only Subpages)</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Subpage</th>
+  <th>Route</th>
+  <th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Categories</td>
+  <td><code>/categories</code></td>
+  <td>L1/L2 category management</td>
+</tr>
+<tr>
+  <td>Workflows</td>
+  <td><code>/workflows</code></td>
+  <td>Visual workflow builder</td>
+</tr>
+<tr>
+  <td>SLA &amp; Escalation</td>
+  <td><code>/sla-policies</code></td>
+  <td>SLA policies + escalation rules</td>
+</tr>
+<tr>
+  <td>Email Settings</td>
+  <td><code>/email-settings</code></td>
+  <td>SMTP configuration</td>
+</tr>
+<tr>
+  <td>Integrations</td>
+  <td><code>/integrations</code></td>
+  <td>API keys, webhooks</td>
+</tr>
+<tr>
+  <td>Pool Picker Rules</td>
+  <td><code>/settings/pool-picker-rules</code></td>
+  <td>Pool eligibility configuration</td>
+</tr>
+<tr>
+  <td>Documentation</td>
+  <td><code>/settings/documentation</code></td>
+  <td>System logic snapshot viewer</td>
+</tr>
+<tr>
+  <td>Translation Editor</td>
+  <td><code>/settings/translations</code></td>
+  <td>i18n translation editor</td>
+</tr>
+<tr>
+  <td>UI Customizations</td>
+  <td><code>/settings/ui</code></td>
+  <td>Field labels, branding</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="iam-page-tabs">IAM Page Tabs</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Tab</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Users</td>
+  <td>Create/edit/deactivate user accounts</td>
+</tr>
+<tr>
+  <td>Teams</td>
+  <td>Team management with specialty associations</td>
+</tr>
+<tr>
+  <td>Specialties</td>
+  <td>Service specialties (used for routing)</td>
+</tr>
+<tr>
+  <td>Roles</td>
+  <td>Role definitions with permission matrices</td>
+</tr>
+<tr>
+  <td>Account Types</td>
+  <td>Partner, Internal Staff, Vendor, Media Client</td>
+</tr>
+<tr>
+  <td>Plans</td>
+  <td>Subscription plans for Partners</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1 id="3-identity-access-management-iam">3. Identity &amp; Access Management (IAM)</h1>
+
+<h2 id="31-roles-permission-model">3.1 Roles &amp; Permission Model</h2>
+
+<p>Red Pulse uses a <strong>minimal role system</strong> with three base roles:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Role</th>
+  <th>Description</th>
+  <th>Key Capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Administrator</strong></td>
+  <td>Full system access</td>
+  <td>All CRUD operations, settings, user management</td>
+</tr>
+<tr>
+  <td><strong>Operator</strong></td>
+  <td>Team lead/supervisor</td>
+  <td>View all tickets, limited settings, no system governance</td>
+</tr>
+<tr>
+  <td><strong>Standard User</strong></td>
+  <td>Regular user</td>
+  <td>Create tickets, view own tickets, pick from eligible pools</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="permission-merge-logic">Permission Merge Logic</h3>
+
+<p>Permissions are calculated in two steps:</p>
+
+<pre><code>Final Permissions = Role Base Permissions + User-Level Overrides
+</code></pre>
+
+<p><strong>Rule:</strong> User-level overrides ALWAYS win over role defaults.</p>
+
+<p><strong>Example:</strong>
+- Role "Standard User" has <code>orders.delete = false</code>
+- User has override <code>orders.delete = true</code>
+- <strong>Result:</strong> User CAN delete orders</p>
+
+<h3 id="permission-matrix-modules-roles">Permission Matrix (Modules × Roles)</h3>
+
+<table>
+<thead>
+<tr>
+  <th>Module</th>
+  <th style="text-align:center;">Administrator</th>
+  <th style="text-align:center;">Operator</th>
+  <th style="text-align:center;">Standard User</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>dashboard</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">✅ View</td>
+</tr>
+<tr>
+  <td>orders</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">✅ No delete</td>
+  <td style="text-align:center;">✅ Own only</td>
+</tr>
+<tr>
+  <td>users</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">👁️ View</td>
+  <td style="text-align:center;">❌ None</td>
+</tr>
+<tr>
+  <td>teams</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">👁️ View</td>
+  <td style="text-align:center;">❌ None</td>
+</tr>
+<tr>
+  <td>specialties</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">👁️ View</td>
+  <td style="text-align:center;">👁️ View</td>
+</tr>
+<tr>
+  <td>workflows</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">👁️ View + Execute</td>
+  <td style="text-align:center;">❌ None</td>
+</tr>
+<tr>
+  <td>sla_policies</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">👁️ View + Acknowledge</td>
+  <td style="text-align:center;">❌ None</td>
+</tr>
+<tr>
+  <td>settings</td>
+  <td style="text-align:center;">✅ Full</td>
+  <td style="text-align:center;">❌ None</td>
+  <td style="text-align:center;">❌ None</td>
+</tr>
+<tr>
+  <td>reports</td>
+  <td style="text-align:center;">✅ Full + Export</td>
+  <td style="text-align:center;">✅ Full + Export</td>
+  <td style="text-align:center;">👁️ View only</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="32-account-types">3.2 Account Types</h2>
+
+<p>Account types determine <strong>pool access</strong> and <strong>business relationships</strong>:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Account Type</th>
+  <th>Pool Access</th>
+  <th>Subscription Required</th>
+  <th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Partner</strong></td>
+  <td>Pool 1 only</td>
+  <td>✅ Yes</td>
+  <td>Premium external partners</td>
+</tr>
+<tr>
+  <td><strong>Internal Staff</strong></td>
+  <td>Pool 1 only</td>
+  <td>❌ No</td>
+  <td>Internal team members</td>
+</tr>
+<tr>
+  <td><strong>Vendor/Freelancer</strong></td>
+  <td>Pool 2 only</td>
+  <td>❌ No</td>
+  <td>Extended workforce</td>
+</tr>
+<tr>
+  <td><strong>Media Client</strong></td>
+  <td>None (requester)</td>
+  <td>❌ No</td>
+  <td>End clients who submit requests</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="33-multi-specialty-support">3.3 Multi-Specialty Support</h2>
+
+<p>Users can have <strong>multiple specialties</strong> assigned:</p>
+
+<ul>
+<li><code>specialty_ids</code>: Array of specialty IDs the user can handle</li>
+<li><code>primary_specialty_id</code>: The user's main specialty (for display)</li>
+</ul>
+
+<p><strong>Pool Routing Match:</strong> A user sees a ticket if ANY of their specialties matches the ticket's routing specialty.</p>
+
+<h2 id="34-can-pick-override">3.4 "Can Pick" Override</h2>
+
+<p>Each user has a <code>can_pick</code> boolean field that acts as a <strong>master switch</strong>:</p>
+
+<pre><code>Effective Can Pick = Account Type Allows + User.can_pick is TRUE
+</code></pre>
+
+<p>This allows admins to:
+- Temporarily disable a user's pool access without changing their account type
+- Grant pool access to users whose account type normally wouldn't allow it</p>
+
+<h2 id="35-known-limitations">3.5 Known Limitations</h2>
+
+<ol>
+<li>No support for custom roles (only 3 system roles)</li>
+<li>Permission overrides are per-user, not per-team</li>
+<li>Account types cannot be changed without admin intervention</li>
+</ol>
+
+<hr />
+
+<h1 id="4-ticket-lifecycle-rules">4. Ticket Lifecycle &amp; Rules</h1>
+
+<h2 id="41-all-statuses">4.1 All Statuses</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Status</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Draft</strong></td>
+  <td>Incomplete ticket saved by requester; not visible in pools</td>
+</tr>
+<tr>
+  <td><strong>Open</strong></td>
+  <td>Submitted ticket; visible in Pool 1/Pool 2; awaiting pickup</td>
+</tr>
+<tr>
+  <td><strong>In Progress</strong></td>
+  <td>Picked up by resolver; actively being worked on</td>
+</tr>
+<tr>
+  <td><strong>Pending</strong></td>
+  <td>Submitted for review; awaiting requester response</td>
+</tr>
+<tr>
+  <td><strong>Delivered</strong></td>
+  <td>Final work delivered; awaiting requester close/feedback</td>
+</tr>
+<tr>
+  <td><strong>Closed</strong></td>
+  <td>Ticket resolved and closed</td>
+</tr>
+<tr>
+  <td><strong>Canceled</strong></td>
+  <td>Ticket canceled</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="42-status-transitions">4.2 Status Transitions</h2>
+
+<pre><code>                    ┌─────────────────────────────────────┐
+                    │                                     │
+                    ▼                                     │
+Draft ──► Open ──► In Progress ──► Pending ──► Delivered ──► Closed
+           │            │            │   ▲
+           │            │            │   │ (Revision)
+           │            │            └───┘
+           │            │
+           ▼            ▼
+       Canceled     Canceled
+           │
+           │ (Restore - Admin only)
+           ▼
+         Open
+</code></pre>
+
+<h3 id="transition-rules">Transition Rules</h3>
+
+<table>
+<thead>
+<tr>
+  <th>From</th>
+  <th>To</th>
+  <th>Who Can Perform</th>
+  <th>Required Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Draft</td>
+  <td>Open</td>
+  <td>Requester only</td>
+  <td>Title, Category</td>
+</tr>
+<tr>
+  <td>Open</td>
+  <td>In Progress</td>
+  <td>Anyone who picks</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>Open</td>
+  <td>Canceled</td>
+  <td>Admin only</td>
+  <td><code>cancel_reason</code></td>
+</tr>
+<tr>
+  <td>In Progress</td>
+  <td>Pending</td>
+  <td>Assigned resolver</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>In Progress</td>
+  <td>Delivered</td>
+  <td>Assigned resolver</td>
+  <td><code>resolution_notes</code></td>
+</tr>
+<tr>
+  <td>In Progress</td>
+  <td>Open (Release)</td>
+  <td>Assigned resolver, Admin</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>Pending</td>
+  <td>In Progress</td>
+  <td>Requester (responds), Admin</td>
+  <td>Message text</td>
+</tr>
+<tr>
+  <td>Pending</td>
+  <td>Delivered</td>
+  <td>Requester (accepts)</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>Delivered</td>
+  <td>Closed</td>
+  <td>Requester, Admin, Auto (7 days)</td>
+  <td>Optional <code>reason</code></td>
+</tr>
+<tr>
+  <td>Delivered</td>
+  <td>In Progress (Reopen)</td>
+  <td>Requester (within 7 days)</td>
+  <td><code>reopen_reason</code></td>
+</tr>
+<tr>
+  <td>Canceled</td>
+  <td>Open (Restore)</td>
+  <td>Admin only</td>
+  <td>None</td>
+</tr>
+<tr>
+  <td>Any</td>
+  <td>Soft-Deleted</td>
+  <td>Admin only</td>
+  <td>None</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="43-required-fields-by-action">4.3 Required Fields by Action</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Action</th>
+  <th>Required Fields</th>
+  <th>Character Limits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Cancel</strong></td>
+  <td><code>reason</code> (from predefined list), optional <code>notes</code></td>
+  <td>Notes: 1-500 chars</td>
+</tr>
+<tr>
+  <td><strong>Deliver</strong></td>
+  <td><code>resolution_notes</code></td>
+  <td>1-2000 chars</td>
+</tr>
+<tr>
+  <td><strong>Close</strong></td>
+  <td><code>reason</code> (optional free text)</td>
+  <td>1-500 chars</td>
+</tr>
+<tr>
+  <td><strong>Reopen</strong></td>
+  <td><code>reason</code></td>
+  <td>1-500 chars</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Cancel Reason Options:</strong>
+- "No longer needed"
+- "Changed my mind"
+- "Found a different solution"
+- "Fixed the issue myself"
+- "Duplicate ticket"
+- "Other" (requires notes)</p>
+
+<h2 id="44-who-can-do-what">4.4 Who Can Do What</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Action</th>
+  <th style="text-align:center;">Administrator</th>
+  <th style="text-align:center;">Operator</th>
+  <th style="text-align:center;">Standard User</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Create Ticket</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+<tr>
+  <td>Cancel Ticket</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">❌</td>
+  <td style="text-align:center;">❌ (can cancel own before pickup)</td>
+</tr>
+<tr>
+  <td>Close Ticket</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">❌</td>
+  <td style="text-align:center;">✅ (as requester)</td>
+</tr>
+<tr>
+  <td>Reopen Ticket</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">❌</td>
+  <td style="text-align:center;">✅ (as requester, within 7 days)</td>
+</tr>
+<tr>
+  <td>Soft-Delete</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">❌</td>
+  <td style="text-align:center;">❌</td>
+</tr>
+<tr>
+  <td>Restore Deleted</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">❌</td>
+  <td style="text-align:center;">❌</td>
+</tr>
+<tr>
+  <td>Permanent Delete</td>
+  <td style="text-align:center;">N/A</td>
+  <td style="text-align:center;">N/A</td>
+  <td style="text-align:center;">N/A (not implemented)</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1 id="5-pools-opportunity-ribbon">5. Pools &amp; Opportunity Ribbon</h1>
+
+<h2 id="51-pool-architecture">5.1 Pool Architecture</h2>
+
+<p>Red Pulse uses a <strong>two-tier pool system</strong> for fair work distribution:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Pool</th>
+  <th>Name</th>
+  <th>Duration</th>
+  <th>Eligible Users</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Pool 1</strong></td>
+  <td>Opportunity Ribbon</td>
+  <td>First 24 hours</td>
+  <td>Partners, Internal Staff</td>
+</tr>
+<tr>
+  <td><strong>Pool 2</strong></td>
+  <td>Opportunity Pool</td>
+  <td>After 24 hours</td>
+  <td>Vendors/Freelancers</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="52-pool-routing-logic">5.2 Pool Routing Logic</h2>
+
+<p>When a ticket becomes <code>Open</code>:</p>
+
+<pre><code>1. Ticket submitted → Status = "Open"
+2. System determines routing_specialty_id:
+   - From Category L2's specialty_id
+   - Fallback to Category L1's specialty_id
+   - Fallback to null (no specialty filter)
+3. Query Pool 1 eligible users (matching specialty)
+4. IF eligible users &gt; 0:
+   → Assign to POOL_1
+   → Set pool1_expires_at = now + 24 hours
+5. ELSE (no Pool 1 users available):
+   → Skip Pool 1 entirely
+   → Assign to POOL_2 immediately
+6. Background service promotes POOL_1 → POOL_2 after expiry
+</code></pre>
+
+<h2 id="53-pool-eligibility-configuration">5.3 Pool Eligibility Configuration</h2>
+
+<p>Pool eligibility is <strong>admin-configurable</strong> via Settings → Pool Picker Rules:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Account Type</th>
+  <th>Can Pick</th>
+  <th>Default Pools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Partner</td>
+  <td>✅ Yes</td>
+  <td>POOL_1</td>
+</tr>
+<tr>
+  <td>Internal Staff</td>
+  <td>✅ Yes</td>
+  <td>POOL_1</td>
+</tr>
+<tr>
+  <td>Vendor/Freelancer</td>
+  <td>✅ Yes</td>
+  <td>POOL_2</td>
+</tr>
+<tr>
+  <td>Media Client</td>
+  <td>❌ No</td>
+  <td>[]</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>API Endpoint:</strong> <code>GET/POST /api/pool-picker-rules</code></p>
+
+<h2 id="54-pick-flow">5.4 Pick Flow</h2>
+
+<p>When a user picks a ticket:</p>
+
+<ol>
+<li>User views ticket on Ribbon Board</li>
+<li>User clicks "Pick" button</li>
+<li>System validates:
+<ul>
+<li>User's account type is allowed for this pool</li>
+<li>User's <code>can_pick</code> flag is true</li>
+<li>User has matching specialty (if required)</li>
+</ul></li>
+<li>If valid:
+<ul>
+<li><code>assigned_to</code> = picker's user ID</li>
+<li><code>status</code> = "In Progress"</li>
+<li><code>pool_stage</code> = null (removed from pool)</li>
+</ul></li>
+<li>Ticket appears in user's "Tickets I'm Working On" section</li>
+<li>Notification sent to requester: "Your ticket has been picked up by [name]"</li>
+</ol>
+
+<h2 id="55-admin-override-actions">5.5 Admin Override Actions</h2>
+
+<p>Administrators can:
+- <strong>Force to Pool 2:</strong> <code>POST /api/orders/{id}/force-pool-2</code> – Immediately moves ticket to Pool 2
+- <strong>Reassign:</strong> <code>POST /api/orders/{id}/reassign</code> – Assign to specific user, team, or specialty
+- <strong>Return to Pool:</strong> Release assigned ticket back to appropriate pool</p>
+
+<h2 id="56-pool-notifications">5.6 Pool Notifications</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Event</th>
+  <th>Notification Type</th>
+  <th>Recipients</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ticket enters Pool 1</td>
+  <td>In-app + Email</td>
+  <td>Eligible Partners/Staff with matching specialty</td>
+</tr>
+<tr>
+  <td>Ticket enters Pool 2</td>
+  <td>In-app + Email</td>
+  <td>Eligible Vendors with matching specialty</td>
+</tr>
+<tr>
+  <td>Ticket picked</td>
+  <td>In-app</td>
+  <td>Requester</td>
+</tr>
+<tr>
+  <td>Pool 1 → Pool 2 promotion</td>
+  <td>In-app</td>
+  <td>Eligible Pool 2 users</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1 id="6-workflow-engine">6. Workflow Engine</h1>
+
+<h2 id="61-supported-trigger-events">6.1 Supported Trigger Events</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Trigger</th>
+  <th>When It Fires</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>order.created</code></td>
+  <td>Ticket submitted (not drafts)</td>
+</tr>
+<tr>
+  <td><code>order.submitted</code></td>
+  <td>Draft converted to Open</td>
+</tr>
+<tr>
+  <td><code>order.status_changed</code></td>
+  <td>Any status transition</td>
+</tr>
+<tr>
+  <td><code>order.assigned</code></td>
+  <td>Editor picks or is assigned</td>
+</tr>
+<tr>
+  <td><code>order.delivered</code></td>
+  <td>Resolver delivers work</td>
+</tr>
+<tr>
+  <td><code>order.pending_review</code></td>
+  <td>Status changes to Pending</td>
+</tr>
+<tr>
+  <td><code>order.sla_warning</code></td>
+  <td>X hours before SLA breach</td>
+</tr>
+<tr>
+  <td><code>order.sla_breached</code></td>
+  <td>SLA deadline passes</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="62-supported-action-types">6.2 Supported Action Types</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Action</th>
+  <th>Description</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>assign_role</code></td>
+  <td>Auto-assign to user by role</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>assign_specialty</code></td>
+  <td>Route to users with specific specialty</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>forward_ticket</code></td>
+  <td>Move to different category/team</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>update_status</code></td>
+  <td>Change ticket status</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>notify</code></td>
+  <td>Send in-app notification</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>email_user</code></td>
+  <td>Send email to specific address</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>email_requester</code></td>
+  <td>Send email to ticket requester</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>webhook</code></td>
+  <td>Trigger external webhook</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>route_to_pool</code></td>
+  <td>Route ticket to Pool 1 or Pool 2</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>apply_sla_policy</code></td>
+  <td>Apply specific SLA policy</td>
+  <td>✅ Active</td>
+</tr>
+<tr>
+  <td><code>send_payment_link</code></td>
+  <td>Send GHL payment link</td>
+  <td>⚠️ MOCKED</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="63-categoryspecialty-evaluation">6.3 Category/Specialty Evaluation</h2>
+
+<p>Workflows can be restricted by category:</p>
+
+<ol>
+<li><code>trigger_category_id = null</code>: Workflow fires for ALL tickets</li>
+<li><code>trigger_category_id = X</code>: Workflow fires ONLY for tickets in category X</li>
+</ol>
+
+<p><strong>Evaluation Order:</strong>
+1. Find all active workflows for the trigger event
+2. Filter by category restriction (if any)
+3. Execute matching workflows in creation order</p>
+
+<h2 id="64-background-servicestimers">6.4 Background Services/Timers</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Service</th>
+  <th>Purpose</th>
+  <th>Interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Pool Promotion</td>
+  <td>Move expired Pool 1 tickets to Pool 2</td>
+  <td>Every 5 minutes</td>
+</tr>
+<tr>
+  <td>Review Reminder</td>
+  <td>Email requesters with delivered tickets</td>
+  <td>Daily</td>
+</tr>
+<tr>
+  <td>SLA Monitor</td>
+  <td>Check for at-risk and breached tickets</td>
+  <td>Every minute</td>
+</tr>
+<tr>
+  <td>Auto-Close</td>
+  <td>Close delivered tickets after 7 days</td>
+  <td>Daily</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="65-existing-workflow-templates">6.5 Existing Workflow Templates</h2>
+
+<p>Workflows are fully customizable via the UI. No hardcoded templates exist – all workflows are stored in the database and editable by administrators.</p>
+
+<h2 id="66-known-limitations">6.6 Known Limitations</h2>
+
+<ol>
+<li><strong>No Undo/Redo:</strong> Workflow editor changes are immediate</li>
+<li><strong>Form Nodes:</strong> Defined in schema but runtime UI is limited</li>
+<li><strong>No Versioning:</strong> Editing a workflow affects all future executions</li>
+<li><strong>No Dry-Run:</strong> Cannot preview workflow execution before deployment</li>
+<li><strong>Single Field Conditions:</strong> Condition nodes support one field comparison only</li>
+</ol>
+
+<hr />
+
+<h1 id="7-notifications-email">7. Notifications &amp; Email</h1>
+
+<h2 id="71-in-app-notification-matrix">7.1 In-App Notification Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Event</th>
+  <th>Recipients</th>
+  <th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ticket Created</td>
+  <td>Admins</td>
+  <td><code>new_order</code></td>
+</tr>
+<tr>
+  <td>Ticket Picked Up</td>
+  <td>Requester</td>
+  <td><code>order_picked</code></td>
+</tr>
+<tr>
+  <td>Status Change</td>
+  <td>Requester + Editor (if not actor)</td>
+  <td><code>status_change</code></td>
+</tr>
+<tr>
+  <td>New Message</td>
+  <td>Other party</td>
+  <td><code>new_message</code></td>
+</tr>
+<tr>
+  <td>File Uploaded</td>
+  <td>Other party</td>
+  <td><code>file_uploaded</code></td>
+</tr>
+<tr>
+  <td>Workflow Triggered</td>
+  <td>Target user</td>
+  <td><code>workflow_notification</code></td>
+</tr>
+<tr>
+  <td>Feature Request</td>
+  <td>Admins</td>
+  <td><code>new_feature_request</code></td>
+</tr>
+<tr>
+  <td>Bug Report</td>
+  <td>Admins</td>
+  <td><code>new_bug_report</code></td>
+</tr>
+<tr>
+  <td>Pool Assignment</td>
+  <td>Eligible pool users</td>
+  <td><code>pool_assignment</code></td>
+</tr>
+<tr>
+  <td>SLA Warning</td>
+  <td>Admin</td>
+  <td><code>sla_warning</code></td>
+</tr>
+<tr>
+  <td>SLA Breached</td>
+  <td>Admin</td>
+  <td><code>sla_breached</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="72-email-notification-matrix">7.2 Email Notification Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Event</th>
+  <th>Recipients</th>
+  <th>Template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>User Created</td>
+  <td>New user</td>
+  <td>Welcome email with credentials</td>
+</tr>
+<tr>
+  <td>Password Reset</td>
+  <td>User</td>
+  <td>Reset link</td>
+</tr>
+<tr>
+  <td>Ticket Created</td>
+  <td>Requester</td>
+  <td>Confirmation</td>
+</tr>
+<tr>
+  <td>Ticket Assigned</td>
+  <td>Resolver</td>
+  <td>Assignment notification</td>
+</tr>
+<tr>
+  <td>Ticket Picked</td>
+  <td>Requester</td>
+  <td>Pickup notification</td>
+</tr>
+<tr>
+  <td>Ticket Delivered</td>
+  <td>Requester</td>
+  <td>Delivery + survey link</td>
+</tr>
+<tr>
+  <td>Ticket Canceled</td>
+  <td>Requester + Editor</td>
+  <td>Cancellation notice</td>
+</tr>
+<tr>
+  <td>Ticket Reopened</td>
+  <td>Editor</td>
+  <td>Reopen notification</td>
+</tr>
+<tr>
+  <td>Ticket Closed</td>
+  <td>Requester</td>
+  <td>Closure confirmation</td>
+</tr>
+<tr>
+  <td>Pool Assignment</td>
+  <td>Pool users</td>
+  <td>Opportunity notification</td>
+</tr>
+<tr>
+  <td>Account Disabled</td>
+  <td>User</td>
+  <td>Deactivation notice</td>
+</tr>
+<tr>
+  <td>Account Reactivated</td>
+  <td>User</td>
+  <td>Reactivation notice</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="73-smtp-configuration">7.3 SMTP Configuration</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>SMTP Provider</td>
+  <td><strong>LIVE</strong> – Gmail SMTP</td>
+</tr>
+<tr>
+  <td>Configuration</td>
+  <td>Via environment variables</td>
+</tr>
+<tr>
+  <td>Fallback</td>
+  <td>Logs to console if not configured</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Environment Variables:</strong>
+- <code>SMTP_HOST</code> – SMTP server hostname
+- <code>SMTP_PORT</code> – SMTP port (587 for TLS)
+- <code>SMTP_USER</code> – Authentication username
+- <code>SMTP_PASSWORD</code> – Authentication password
+- <code>SMTP_FROM</code> – From email address</p>
+
+<h2 id="74-satisfaction-survey-rules">7.4 Satisfaction Survey Rules</h2>
+
+<h3 id="when-surveys-are-sent">When Surveys ARE Sent</h3>
+
+<ul>
+<li>Resolver delivers work (status → Delivered)</li>
+<li>Resolver submits for review (status → Pending, then → Delivered)</li>
+</ul>
+
+<h3 id="when-surveys-are-not-sent">When Surveys are NOT Sent</h3>
+
+<ul>
+<li>❌ Requester cancels ticket</li>
+<li>❌ Admin cancels ticket</li>
+<li>❌ Ticket reopened and canceled again (no duplicate)</li>
+</ul>
+
+<h3 id="survey-flow">Survey Flow</h3>
+
+<ol>
+<li>Resolver delivers → System creates <code>rating_surveys</code> record with unique token</li>
+<li>Email sent to requester with survey link</li>
+<li>Requester clicks link → Rating page (1-5 stars + optional feedback)</li>
+<li>Survey submitted → Marked as completed</li>
+<li>Rating stored in <code>ratings</code> collection, linked to order and resolver</li>
+</ol>
+
+<hr />
+
+<h1 id="8-reports">8. Reports</h1>
+
+<h2 id="81-canned-reports">8.1 Canned Reports</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Report ID</th>
+  <th>Name</th>
+  <th>Description</th>
+  <th>Chart Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>tickets_created</code></td>
+  <td>Tickets Created</td>
+  <td>Volume over time</td>
+  <td>Line/Bar</td>
+</tr>
+<tr>
+  <td><code>tickets_closed</code></td>
+  <td>Tickets Closed</td>
+  <td>Volume over time</td>
+  <td>Line/Bar</td>
+</tr>
+<tr>
+  <td><code>open_ticket_aging</code></td>
+  <td>Open Ticket Aging</td>
+  <td>Age buckets (0-24h, 1-3d, etc.)</td>
+  <td>Bar</td>
+</tr>
+<tr>
+  <td><code>avg_first_response</code></td>
+  <td>Avg Time to First Response</td>
+  <td>Performance metric</td>
+  <td>Gauge</td>
+</tr>
+<tr>
+  <td><code>avg_resolution_time</code></td>
+  <td>Avg Time to Resolution</td>
+  <td>Performance metric</td>
+  <td>Gauge</td>
+</tr>
+<tr>
+  <td><code>tickets_by_category</code></td>
+  <td>Tickets by Category</td>
+  <td>L1/L2 breakdown</td>
+  <td>Pie</td>
+</tr>
+<tr>
+  <td><code>tickets_by_status</code></td>
+  <td>Tickets by Status</td>
+  <td>Current distribution</td>
+  <td>Pie</td>
+</tr>
+<tr>
+  <td><code>tickets_by_priority</code></td>
+  <td>Tickets by Priority</td>
+  <td>Priority distribution</td>
+  <td>Pie</td>
+</tr>
+<tr>
+  <td><code>tickets_by_team</code></td>
+  <td>Tickets by Team</td>
+  <td>Team workload</td>
+  <td>Bar</td>
+</tr>
+<tr>
+  <td><code>editor_performance</code></td>
+  <td>Editor Performance</td>
+  <td>Per-assignee metrics</td>
+  <td>Table</td>
+</tr>
+<tr>
+  <td><code>sla_compliance</code></td>
+  <td>SLA Compliance</td>
+  <td>On-track vs breached</td>
+  <td>Gauge</td>
+</tr>
+<tr>
+  <td><code>pool_metrics</code></td>
+  <td>Pool Metrics</td>
+  <td>Pickup rates, times</td>
+  <td>Table</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="82-role-based-access">8.2 Role-Based Access</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Role</th>
+  <th>Access Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Administrator</td>
+  <td>All reports, all filters, all exports</td>
+</tr>
+<tr>
+  <td>Operator</td>
+  <td>All reports, all filters, all exports</td>
+</tr>
+<tr>
+  <td>Standard User</td>
+  <td>Limited reports (own tickets only), no export</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="83-export-formats">8.3 Export Formats</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Format</th>
+  <th>Status</th>
+  <th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>CSV</strong></td>
+  <td>✅ Working</td>
+  <td>Server-side generation</td>
+</tr>
+<tr>
+  <td><strong>PDF</strong></td>
+  <td>✅ Working</td>
+  <td>Client-side via jsPDF</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>API Endpoint:</strong> <code>GET /api/reports/{report_id}?format=csv</code> or <code>?format=pdf</code></p>
+
+<hr />
+
+<h1 id="9-integrations">9. Integrations</h1>
+
+<h2 id="91-webhookapi-status">9.1 Webhook/API Status</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Integration</th>
+  <th>Status</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>GoHighLevel (GHL) Payment</strong></td>
+  <td>⚠️ <strong>MOCKED</strong></td>
+  <td><code>/api/webhooks/ghl-payment-mock</code> simulates payment</td>
+</tr>
+<tr>
+  <td><strong>SMTP (Gmail)</strong></td>
+  <td>✅ <strong>LIVE</strong></td>
+  <td>Real email delivery</td>
+</tr>
+<tr>
+  <td><strong>Custom Webhooks</strong></td>
+  <td>✅ <strong>LIVE</strong></td>
+  <td>Admin-configurable outbound webhooks</td>
+</tr>
+<tr>
+  <td><strong>API Keys</strong></td>
+  <td>✅ <strong>LIVE</strong></td>
+  <td>Issue keys for external integrations</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="92-ghl-payment-webhook">9.2 GHL Payment Webhook</h2>
+
+<p>The GHL payment integration is currently <strong>MOCKED</strong>:</p>
+
+<ul>
+<li>Endpoint: <code>POST /api/webhooks/ghl-payment-mock</code></li>
+<li>Behavior: Immediately marks payment as received</li>
+<li>Next Step: Replace with real GHL webhook listener when ready</li>
+</ul>
+
+<h2 id="93-api-key-module">9.3 API Key Module</h2>
+
+<p>Administrators can:
+- Create API keys for external systems
+- Set permissions per key
+- Revoke keys as needed</p>
+
+<p><strong>Note:</strong> Usage analytics (charts/dashboard) not yet implemented.</p>
+
+<h2 id="94-outbound-webhooks">9.4 Outbound Webhooks</h2>
+
+<p>Configure webhooks to notify external systems:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Event</th>
+  <th>Payload Includes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ticket Created</td>
+  <td>Ticket details, requester info</td>
+</tr>
+<tr>
+  <td>Status Changed</td>
+  <td>Ticket ID, old status, new status</td>
+</tr>
+<tr>
+  <td>Ticket Delivered</td>
+  <td>Ticket details, resolution notes</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1 id="10-admin-operations">10. Admin Operations</h1>
+
+<h2 id="101-data-reset-procedures">10.1 Data Reset Procedures</h2>
+
+<h3 id="uat-reset-script">UAT Reset Script</h3>
+
+<p>Location: <code>/app/backend/scripts/uat_reset.py</code></p>
+
+<p><strong>What it clears (operational data):</strong>
+- Tickets (orders)
+- Order messages
+- Order files
+- Notifications
+- Activity logs
+- Escalation history
+- Workflow executions
+- Announcements
+- Bug reports / Feature requests
+- Ratings / Surveys</p>
+
+<p><strong>What it preserves (configuration):</strong>
+- Users
+- Roles
+- Account Types
+- Teams
+- Specialties
+- Categories (L1/L2)
+- Workflows
+- SLA Policies
+- SMTP Config
+- Settings</p>
+
+<h3 id="running-the-reset">Running the Reset</h3>
+
+<div class="codehilite">
+<pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/app/backend
+python3<span class="w"> </span>scripts/uat_reset.py
+</code></pre>
+</div>
+
+<h2 id="102-backup-strategy">10.2 Backup Strategy</h2>
+
+<p><strong>Backup Location:</strong> <code>/app/backups/</code></p>
+
+<p>Backups are created:
+- Before UAT resets
+- As JSON files per collection
+- With timestamp in folder name</p>
+
+<h2 id="103-logs-module">10.3 Logs Module</h2>
+
+<p>The Logs module (<code>/logs</code>) provides:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Feature</th>
+  <th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Live Stream</td>
+  <td>Polls for new logs every 5 seconds</td>
+</tr>
+<tr>
+  <td>Filtering</td>
+  <td>By user, action type, date range</td>
+</tr>
+<tr>
+  <td>Export</td>
+  <td>CSV download of filtered results</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>What's Logged:</strong>
+- User actions (login, logout, profile updates)
+- Ticket actions (create, pick, deliver, etc.)
+- Admin actions (user management, settings changes)
+- Workflow executions</p>
+
+<hr />
+
+<h1 id="11-design-rationale-why-we-built-it-this-way">11. Design Rationale – Why We Built It This Way</h1>
+
+<h2 id="111-why-pools-exist">11.1 Why Pools Exist</h2>
+
+<p><strong>Problem:</strong> In service delivery businesses, work needs to be distributed fairly across different tiers of service providers, while giving premium partners first access to opportunities.</p>
+
+<p><strong>Solution:</strong> The two-tier pool system ensures:
+- <strong>Partners</strong> (who pay subscription fees) get priority access to new work
+- <strong>Vendors</strong> (extended workforce) handle overflow after 24 hours
+- <strong>No work gets stuck</strong> – automatic promotion ensures tickets move forward
+- <strong>Specialty matching</strong> ensures the right skills are applied</p>
+
+<p><strong>Why 24 hours?</strong> Based on business analysis: most partners who will pick up work do so within the first day. After that, the ticket likely needs the extended workforce.</p>
+
+<h2 id="112-why-iam-uses-minimal-roles-overrides">11.2 Why IAM Uses Minimal Roles + Overrides</h2>
+
+<p><strong>Problem:</strong> Complex role systems become unmanageable. Every new permission requires defining it across dozens of roles.</p>
+
+<p><strong>Solution:</strong> Three simple roles (Admin, Operator, Standard User) cover 95% of use cases. For edge cases, user-level overrides provide flexibility without role proliferation.</p>
+
+<p><strong>Benefits:</strong>
+- Easy to understand (3 roles vs 15+)
+- Easy to audit (who has what access)
+- Flexible where needed (individual overrides)</p>
+
+<h2 id="113-why-survey-triggers-only-on-delivery">11.3 Why Survey Triggers Only on Delivery</h2>
+
+<p><strong>Problem:</strong> Surveys sent when requesters cancel create bad experiences and skewed data.</p>
+
+<p><strong>Solution:</strong> Surveys are ONLY sent when the resolver delivers work:
+- If requester cancels → No survey (they didn't receive service)
+- If admin cancels → No survey (operational decision, not quality issue)
+- If delivered → Survey sent (requester experienced the service)</p>
+
+<p>This ensures satisfaction data reflects actual service quality.</p>
+
+<h2 id="114-why-specialty-based-routing">11.4 Why Specialty-Based Routing</h2>
+
+<p><strong>Problem:</strong> Random assignment leads to poor quality and inefficiency.</p>
+
+<p><strong>Solution:</strong> Each category is linked to a specialty. Tickets are only visible to users with matching specialties.</p>
+
+<p><strong>Benefits:</strong>
+- Work goes to qualified people
+- Users only see relevant opportunities
+- Reduces "cherry-picking" of easy tickets</p>
+
+<h2 id="115-why-configurable-pool-rules">11.5 Why Configurable Pool Rules</h2>
+
+<p><strong>Problem:</strong> Business rules change. Hard-coded pool logic requires developer intervention for every change.</p>
+
+<p><strong>Solution:</strong> Pool eligibility is stored in the database and editable via UI:
+- Admin can add/remove account types from pools
+- Admin can enable/disable pool access per account type
+- Changes take effect immediately</p>
+
+<hr />
+
+<h1 id="12-known-issues-tech-debt-open-items">12. Known Issues / Tech Debt / Open Items</h1>
+
+<h2 id="121-partially-implemented-features">12.1 Partially Implemented Features</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Feature</th>
+  <th>Status</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Form Nodes in Workflows</td>
+  <td>⚠️ Partial</td>
+  <td>Node type exists, runtime UI limited</td>
+</tr>
+<tr>
+  <td>Workflow Preview/Simulation</td>
+  <td>❌ Not Built</td>
+  <td>Planned feature</td>
+</tr>
+<tr>
+  <td>API Key Analytics</td>
+  <td>⚠️ Partial</td>
+  <td>Usage logged, no charts</td>
+</tr>
+<tr>
+  <td>Bulk Operations</td>
+  <td>❌ Not Built</td>
+  <td>Bulk restore/delete tickets</td>
+</tr>
+<tr>
+  <td>Email Preferences</td>
+  <td>❌ Not Built</td>
+  <td>User-level email opt-out</td>
+</tr>
+<tr>
+  <td>Backup Codes for OTP</td>
+  <td>❌ Not Built</td>
+  <td>Recovery codes for 2FA</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="122-technical-debt">12.2 Technical Debt</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Description</th>
+  <th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Large Files</td>
+  <td><code>orders.py</code>, <code>users.py</code>, <code>IAMPage.js</code> exceed 500 lines</td>
+  <td>Maintainability</td>
+</tr>
+<tr>
+  <td>Pool Logic</td>
+  <td>Complex routing in <code>orders.py</code> should be extracted</td>
+  <td>Testability</td>
+</tr>
+<tr>
+  <td>Legacy Compatibility</td>
+  <td>Code handles both <code>specialty_id</code> and <code>specialty_ids</code></td>
+  <td>Confusion</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="123-mocked-integrations">12.3 Mocked Integrations</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Integration</th>
+  <th>Current State</th>
+  <th>To Be Done</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>GHL Payment</td>
+  <td>Mocked webhook</td>
+  <td>Real GHL integration</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="124-known-bugs">12.4 Known Bugs</h2>
+
+<p><strong>None identified</strong> – Clean UAT baseline established.</p>
+
+<hr />
+
+<h1 id="appendix-a-test-credentials">Appendix A: Test Credentials</h1>
+
+<table>
+<thead>
+<tr>
+  <th>Role</th>
+  <th>Email</th>
+  <th>Password</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Administrator</td>
+  <td>admin@redribbonops.com</td>
+  <td>Admin123!</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Note:</strong> Create additional test users via IAM page for role-specific testing.</p>
+
+<hr />
+
+<h1 id="appendix-b-api-quick-reference">Appendix B: API Quick Reference</h1>
+
+<h2 id="authentication">Authentication</h2>
+
+<pre><code>POST /api/auth/login
+POST /api/auth/logout
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+</code></pre>
+
+<h2 id="tickets">Tickets</h2>
+
+<pre><code>GET    /api/orders
+POST   /api/orders
+GET    /api/orders/{id}
+PATCH  /api/orders/{id}
+DELETE /api/orders/{id}
+POST   /api/orders/{id}/pick
+POST   /api/orders/{id}/deliver
+POST   /api/orders/{id}/reassign
+POST   /api/orders/{id}/force-pool-2
+</code></pre>
+
+<h2 id="pools">Pools</h2>
+
+<pre><code>GET    /api/orders/pool/1
+GET    /api/orders/pool/2
+GET    /api/pool-picker-rules
+POST   /api/pool-picker-rules
+</code></pre>
+
+<h2 id="users">Users</h2>
+
+<pre><code>GET    /api/users
+POST   /api/users
+GET    /api/users/{id}
+PATCH  /api/users/{id}
+DELETE /api/users/{id}
+</code></pre>
+
+<hr />
+
+<p><strong>End of Document</strong></p>
+
+<p><em>Red Pulse System Documentation Pack v1.0</em>
+<em>Generated: December 2025</em></p>
+
+</body>
+</html>
