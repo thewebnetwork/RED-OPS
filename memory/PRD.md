@@ -3,14 +3,45 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 4.0 (Complete i18n Translation Support)
+## Current Version: 4.1 (UAT Clean Baseline)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://translate-redops.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 - Complete Application Translations ✅
+## LATEST: UAT Data Reset & Build Inventory ✅
+
+### Data Reset Complete
+All operational data has been cleared for UAT testing:
+
+| Collection | Status |
+|------------|--------|
+| Tickets (orders) | ✅ 0 (backed up 32) |
+| Order messages | ✅ 0 (backed up 30) |
+| Order files | ✅ 0 (backed up 4) |
+| Notifications | ✅ 0 (backed up 51) |
+| Announcements | ✅ 0 |
+| Activity logs | ✅ 0 (backed up 19) |
+| Bug reports | ✅ 0 (backed up 13) |
+| Feature requests | ✅ 0 (backed up 4) |
+| Pool queues | ✅ Empty |
+
+**Backup Location:** `/app/backups/uat_reset_final/`
+
+### Configuration Preserved
+- Users (1 admin)
+- Roles, Account Types, Teams, Specialties
+- Categories L1/L2
+- Workflows, SLA Policies, Escalation Policies
+- SMTP Config, Integrations, Settings
+
+### Build Inventory Document
+Full system inventory for UAT reference: `/app/memory/Build_Inventory_Snapshot.md`
+
+---
+
+## P0 - Complete Application Translations ✅
 
 ### Overview
 Full internationalization (i18n) support with comprehensive translations for Spanish and Portuguese. All UI text is now translatable, and administrators can review/correct translations through a new Translation Editor page.
