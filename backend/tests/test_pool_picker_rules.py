@@ -256,7 +256,7 @@ class TestPoolRoutingUsesConfig:
         })
         assert login_response.status_code == 200, f"Admin login failed: {login_response.text}"
         
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
         yield
@@ -315,7 +315,7 @@ class TestUserCanPickOverride:
         })
         assert login_response.status_code == 200, f"Admin login failed: {login_response.text}"
         
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         self.test_user_id = None
         
@@ -428,7 +428,7 @@ class TestPoolAccessControlConfigDriven:
         })
         assert login_response.status_code == 200
         
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
         yield
