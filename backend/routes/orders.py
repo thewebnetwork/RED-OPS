@@ -322,9 +322,9 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
             "routing_specialty_name": routing_specialty_name,
             "pool1_expires_at": None,
             "skipped_pool_1": True,
-            "skip_reason": "No eligible Partners with matching specialty",
-            "eligible_vendor_count": len(eligible_vendors),
-            "eligible_vendors": eligible_vendors
+            "skip_reason": "No eligible Pool 1 users (Partner/Internal Staff) with matching specialty",
+            "eligible_pool2_count": len(eligible_pool2_users),
+            "eligible_pool2_users": eligible_pool2_users
         }
 
 
@@ -332,16 +332,18 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
     """
     Send notifications to eligible pool users (in-app and email).
     Only notifies users matching the ticket's specialty.
+    Pool 1 = Partners + Internal Staff
+    Pool 2 = Vendors/Freelancers
     """
     pool_name = "Opportunity Ribbon (Pool 1)" if pool_stage == "POOL_1" else "Opportunity Pool (Pool 2)"
     
-    if pool_stage == "POOL_1" and routing_info.get("eligible_partners"):
-        # Notify matching Partners
-        for partner in routing_info["eligible_partners"]:
+    if pool_stage == "POOL_1" and routing_info.get("eligible_pool1_users"):
+        # Notify matching Pool 1 users (Partners + Internal Staff)
+        for user in routing_info["eligible_pool1_users"]:
             # In-app notification
             await create_notification(
                 db,
-                partner["id"],
+                user["id"],
                 "pool_ticket",
                 f"New opportunity in {pool_name}",
                 f"New opportunity available: {order['order_code']} - {order.get('title', 'Untitled')}. Please login to view.",
@@ -349,11 +351,11 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
             )
             
             # Email notification
-            if partner.get("email"):
+            if user.get("email"):
                 background_tasks.add_task(
                     send_pool_assignment_email,
-                    partner["email"],
-                    partner.get("name", "Partner"),
+                    user["email"],
+                    user.get("name", "Team Member"),
                     order["order_code"],
                     order.get("title", ""),
                     order.get("priority", "Normal"),
@@ -362,13 +364,13 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
                     order["id"]
                 )
     
-    elif pool_stage == "POOL_2" and routing_info.get("eligible_vendors"):
-        # Notify matching Vendors/Freelancers
-        for vendor in routing_info["eligible_vendors"]:
+    elif pool_stage == "POOL_2" and routing_info.get("eligible_pool2_users"):
+        # Notify matching Pool 2 users (Vendors/Freelancers)
+        for user in routing_info["eligible_pool2_users"]:
             # In-app notification
             await create_notification(
                 db,
-                vendor["id"],
+                user["id"],
                 "pool_ticket",
                 f"New opportunity in {pool_name}",
                 f"New opportunity available: {order['order_code']} - {order.get('title', 'Untitled')}. Please login to view.",
@@ -376,7 +378,7 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
             )
             
             # Email notification
-            if vendor.get("email"):
+            if user.get("email"):
                 background_tasks.add_task(
                     send_pool_assignment_email,
                     vendor["email"],
