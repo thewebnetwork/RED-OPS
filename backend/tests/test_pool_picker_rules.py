@@ -154,9 +154,10 @@ class TestPoolPickerRulesAPI:
     
     def test_07_patch_pool_picker_rule_update_allowed_pools(self):
         """PATCH /api/pool-picker-rules/{account_type} updates allowed_pools"""
-        # Update Vendor/Freelancer to also access Pool 1
+        # Update Vendor/Freelancer to also access Pool 1 (URL encode the slash)
+        account_type = quote("Vendor/Freelancer", safe='')
         response = self.session.patch(
-            f"{BASE_URL}/api/pool-picker-rules/Vendor/Freelancer",
+            f"{BASE_URL}/api/pool-picker-rules/{account_type}",
             json={"can_pick": True, "allowed_pools": ["POOL_1", "POOL_2"]}
         )
         
