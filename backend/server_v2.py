@@ -40,6 +40,7 @@ from routes import (
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
+from routes.documentation import router as documentation_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
@@ -175,6 +176,7 @@ app.include_router(subscription_plans_router, prefix="/api")
 app.include_router(sla_policies_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(iam_router, prefix="/api")
+app.include_router(documentation_router, prefix="/api")
 
 
 @app.get("/")
