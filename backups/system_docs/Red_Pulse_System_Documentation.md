@@ -643,7 +643,7 @@ python3 scripts/seed_categories.py
 
 # 10. Integrations
 
-## 9.1 Webhook/API Status
+## 10.1 Webhook/API Status
 
 | Integration | Status | Notes |
 |-------------|--------|-------|
