@@ -396,6 +396,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/settings/pool-picker-rules" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <PoolPickerRulesPage />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/sla" 
         element={<Navigate to="/sla-policies" />}
       />
