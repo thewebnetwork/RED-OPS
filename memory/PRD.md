@@ -3,14 +3,43 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.7 (Multi-Specialty Support)
+## Current Version: 3.8 (Pool 1 = Partners + Internal Staff)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://rulebook-redops.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 - Multi-Specialty Support for Users ✅
+## LATEST: Pool 1 Routing Fix - Partners + Internal Staff ✅
+
+### Pool Definition Update
+- **Pool 1:** Partners + Internal Staff (both account types can see/pick Pool 1 tickets)
+- **Pool 2:** Vendors/Freelancers
+
+### Routing Logic
+1. When ticket becomes Open, determine `routing_specialty_id` from category
+2. Query eligible Pool 1 candidates:
+   - `account_type IN ('Partner', 'Internal Staff')`
+   - User has ANY specialty matching `routing_specialty_id`
+   - `active = true`
+3. If eligible Pool 1 count > 0 → `pool_stage = POOL_1` (24h window)
+4. If eligible Pool 1 count = 0 → Skip Pool 1 → `pool_stage = POOL_2` immediately
+5. After 24h unpicked → Promote to Pool 2
+
+### Access Control
+- Pool 1: Admins, Operators, Partners, Internal Staff
+- Pool 2: Admins, Operators, Vendors/Freelancers
+
+### Bug Fixed
+- `notify_pool_users()`: Fixed variable name bug in Pool 2 email notifications
+
+### Test Results
+- RRG-000099: Pool 1 (Internal Staff with Administrative Assistant specialty)
+- RRG-000100: Pool 2 direct (no Pool 1 users with matching specialty)
+
+---
+
+## P0 - Multi-Specialty Support for Users ✅
 
 ### A) Data Model Changes ✅
 - **From:** Single `specialty_id` (one-to-one)
