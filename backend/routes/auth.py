@@ -331,7 +331,7 @@ async def verify_reset_token(token: str):
 
 # ============== FORCE PASSWORD CHANGE ==============
 
-@router.post("/change-password")
+@router.post("/force-change-password")
 async def force_change_password(
     request: ForcePasswordChangeRequest,
     current_user: dict = Depends(get_current_user)
