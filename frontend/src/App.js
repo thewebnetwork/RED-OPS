@@ -387,6 +387,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/settings/documentation" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <DocumentationPage />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/sla" 
         element={<Navigate to="/sla-policies" />}
       />
