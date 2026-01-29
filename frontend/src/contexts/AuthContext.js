@@ -41,6 +41,15 @@ export function AuthProvider({ children }) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     setToken(newToken);
     setUser(userData);
+    
+    // Store flags for post-login checks
+    if (userData.force_password_change) {
+      localStorage.setItem('requires_password_change', 'true');
+    }
+    if (userData.force_otp_setup && !userData.otp_verified) {
+      localStorage.setItem('requires_otp_setup', 'true');
+    }
+    
     return userData;
   };
 
