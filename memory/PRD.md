@@ -6,7 +6,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ## Current Version: 3.9 (Configurable Pool Picker Rules)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
-**Preview URL:** https://rulebook-redops.preview.emergentagent.com
+**Preview URL:** https://translate-redops.preview.emergentagent.com
 
 ---
 
