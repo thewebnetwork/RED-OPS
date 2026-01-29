@@ -18,10 +18,11 @@
 6. [Workflow Engine](#6-workflow-engine)
 7. [Notifications & Email](#7-notifications--email)
 8. [Reports](#8-reports)
-9. [Integrations](#9-integrations)
-10. [Admin Operations](#10-admin-operations)
-11. [Design Rationale – Why We Built It This Way](#11-design-rationale--why-we-built-it-this-way)
-12. [Known Issues / Tech Debt / Open Items](#12-known-issues--tech-debt--open-items)
+9. [Categories & Subcategories](#9-categories--subcategories)
+10. [Integrations](#10-integrations)
+11. [Admin Operations](#11-admin-operations)
+12. [Design Rationale – Why We Built It This Way](#12-design-rationale--why-we-built-it-this-way)
+13. [Known Issues / Tech Debt / Open Items](#13-known-issues--tech-debt--open-items)
 
 ---
 
