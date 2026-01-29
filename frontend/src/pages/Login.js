@@ -27,8 +27,33 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(email, password);
+      const userData = await login(email, password);
       toast.success(t('auth.loginTitle') + '!');
+      
+      // Check for force password change
+      if (userData.force_password_change) {
+        navigate('/force-password-change');
+        return;
+      }
+      
+      // Check for OTP setup required
+      if (userData.force_otp_setup && !userData.otp_verified) {
+        navigate('/setup-otp');
+        return;
+      }
+      
+      // Check if OTP verification is needed for this session
+      if (userData.otp_verified) {
+        // Check if device is trusted
+        const trustExpiry = localStorage.getItem('otp_trust_expiry');
+        const isTrusted = trustExpiry && Date.now() < parseInt(trustExpiry);
+        
+        if (!isTrusted) {
+          navigate('/verify-otp');
+          return;
+        }
+      }
+      
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('errors.generic'));
