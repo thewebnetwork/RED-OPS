@@ -326,3 +326,165 @@ async def verify_reset_token(token: str):
     user = await db.users.find_one({"id": reset_record["user_id"]}, {"_id": 0, "email": 1})
     
     return {"valid": True, "email": user["email"] if user else None}
+
+
+
+# ============== FORCE PASSWORD CHANGE ==============
+
+@router.post("/change-password")
+async def force_change_password(
+    request: ForcePasswordChangeRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Change password for users who are forced to change on first login"""
+    # Validate password strength
+    password = request.new_password
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    if not any(c.isupper() for c in password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+    if not any(c.islower() for c in password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
+    if not any(c.isdigit() for c in password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number")
+    
+    # Update password and clear force_password_change flag
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "password": hash_password(password),
+            "force_password_change": False,
+            "password_changed_at": get_utc_now()
+        }}
+    )
+    
+    return {"message": "Password changed successfully"}
+
+
+# ============== OTP/2FA ENDPOINTS ==============
+
+@router.get("/otp/setup")
+async def setup_otp(
+    current_user: dict = Depends(get_current_user),
+    regenerate: bool = Query(False, description="Generate a new secret")
+):
+    """Get OTP setup data (secret and QR URI)"""
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
+    
+    # Generate or retrieve OTP secret
+    if regenerate or not user.get("otp_secret"):
+        otp_secret = pyotp.random_base32()
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"otp_secret": otp_secret, "otp_verified": False}}
+        )
+    else:
+        otp_secret = user.get("otp_secret")
+    
+    # Generate TOTP URI for QR code
+    totp = pyotp.TOTP(otp_secret)
+    uri = totp.provisioning_uri(
+        name=current_user["email"],
+        issuer_name="Red Ops"
+    )
+    
+    return {
+        "secret": otp_secret,
+        "uri": uri
+    }
+
+
+@router.post("/otp/verify")
+async def verify_otp_setup(
+    request: OTPVerifyRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Verify OTP code during initial setup"""
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
+    
+    if not user.get("otp_secret"):
+        raise HTTPException(status_code=400, detail="OTP not configured. Please setup OTP first.")
+    
+    totp = pyotp.TOTP(user["otp_secret"])
+    
+    if not totp.verify(request.code, valid_window=1):
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+    
+    # Mark OTP as verified and clear force_otp_setup
+    update_data = {
+        "otp_verified": True,
+        "force_otp_setup": False,
+        "otp_verified_at": get_utc_now()
+    }
+    
+    # If trust device, generate a trust token
+    if request.trust_device:
+        trust_token = secrets.token_urlsafe(32)
+        trust_expiry = datetime.now(timezone.utc) + timedelta(days=30)
+        update_data["trusted_devices"] = user.get("trusted_devices", []) + [{
+            "token": trust_token,
+            "expires_at": trust_expiry.isoformat(),
+            "created_at": get_utc_now()
+        }]
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Two-factor authentication enabled successfully"}
+
+
+@router.post("/otp/verify-login")
+async def verify_otp_login(
+    request: OTPVerifyRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Verify OTP code during login (for users who already have OTP enabled)"""
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
+    
+    if not user.get("otp_secret") or not user.get("otp_verified"):
+        raise HTTPException(status_code=400, detail="OTP not configured for this account")
+    
+    totp = pyotp.TOTP(user["otp_secret"])
+    
+    if not totp.verify(request.code, valid_window=1):
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+    
+    # If trust device, add to trusted devices list
+    if request.trust_device:
+        trust_token = secrets.token_urlsafe(32)
+        trust_expiry = datetime.now(timezone.utc) + timedelta(days=30)
+        trusted_devices = user.get("trusted_devices", [])
+        trusted_devices.append({
+            "token": trust_token,
+            "expires_at": trust_expiry.isoformat(),
+            "created_at": get_utc_now()
+        })
+        
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"trusted_devices": trusted_devices}}
+        )
+    
+    return {"message": "OTP verification successful"}
+
+
+@router.delete("/otp/disable")
+async def disable_otp(
+    current_user: dict = Depends(get_current_user)
+):
+    """Disable OTP/2FA for the current user (admin only)"""
+    if current_user["role"] not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Only administrators can disable OTP")
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "otp_secret": None,
+            "otp_verified": False,
+            "trusted_devices": []
+        }}
+    )
+    
+    return {"message": "Two-factor authentication disabled"}
