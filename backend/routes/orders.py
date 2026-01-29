@@ -908,11 +908,19 @@ async def get_pool_tickets(
         
         # Apply specialty filtering for non-admin users
         if role not in ["Administrator", "Operator"]:
-            # Filter by routing_specialty_id (new system)
+            # Multi-specialty filtering: user is eligible if ANY of their specialties match
             routing_specialty = order.get("routing_specialty_id")
-            if routing_specialty and user_specialty_id:
-                if routing_specialty != user_specialty_id:
-                    continue  # User specialty doesn't match ticket routing specialty
+            
+            # Get user's specialty IDs (multi-specialty support)
+            user_specialty_ids = current_user.get("specialty_ids", [])
+            # Fallback to legacy single specialty
+            if not user_specialty_ids and user_specialty_id:
+                user_specialty_ids = [user_specialty_id]
+            
+            if routing_specialty and user_specialty_ids:
+                # User must have at least one specialty matching the ticket's routing specialty
+                if routing_specialty not in user_specialty_ids:
+                    continue  # None of user's specialties match ticket routing specialty
             
             # Additional filtering for support tickets
             request_type = order.get("request_type", "").lower()
@@ -926,8 +934,14 @@ async def get_pool_tickets(
                 "bug" in category_l1_name
             )
             
-            user_specialty_name = (user_specialty.get("name", "") if user_specialty else "").lower()
-            has_support_specialty = "support" in user_specialty_name
+            # Check if user has any specialty with "support" in the name
+            has_support_specialty = False
+            if user_specialty_ids:
+                for spec_id in user_specialty_ids:
+                    spec = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "name": 1})
+                    if spec and "support" in spec.get("name", "").lower():
+                        has_support_specialty = True
+                        break
             
             if is_support_ticket and not has_support_specialty:
                 continue
