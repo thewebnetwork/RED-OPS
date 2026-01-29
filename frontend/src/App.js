@@ -73,7 +73,10 @@ function PrivateRoute({ children, roles }) {
   if (user?.otp_verified && location.pathname !== '/verify-otp') {
     const trustExpiry = localStorage.getItem('otp_trust_expiry');
     const otpSessionVerified = sessionStorage.getItem('otp_session_verified');
-    const isTrusted = trustExpiry && Date.now() < parseInt(trustExpiry);
+    // Trust check - compare timestamps
+    const trustExpiryTime = trustExpiry ? parseInt(trustExpiry, 10) : 0;
+    const currentTime = new Date().getTime();
+    const isTrusted = trustExpiryTime > currentTime;
     
     if (!isTrusted && !otpSessionVerified) {
       return <Navigate to="/verify-otp" replace />;
