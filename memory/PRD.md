@@ -3,16 +3,55 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.5 (System Logic Snapshot + Security Features)
+## Current Version: 3.6 (Documentation Download + Smart Pool Routing)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://rulebook-redops.preview.emergentagent.com
 
 ---
 
-## LATEST: System Logic Snapshot Document ✅
+## LATEST: P0 Features - Documentation Download + Pool Routing Fix ✅
 
-### Documentation Created
+### A) Documentation Download (Admin-only) ✅
+- **Location:** Settings → System Documentation
+- **Features:**
+  - View rendered markdown content inline
+  - Download as .md file
+  - Download as PDF (client-side generation via jspdf)
+  - Last updated timestamp displayed
+- **Access Control:** Administrator role only (non-admins get 403)
+- **Endpoints:**
+  - `GET /api/documentation/system-logic-snapshot` - Get markdown content
+  - `GET /api/documentation/system-logic-snapshot/download?format=md` - Download .md
+  - `GET /api/documentation/system-logic-snapshot/download?format=pdf` - Get content for PDF
+- **Files:**
+  - Backend: `/app/backend/routes/documentation.py`
+  - Frontend: `/app/frontend/src/pages/DocumentationPage.js`
+  - Source: `/app/memory/System_Logic_Snapshot.md`
+
+### B) Smart Pool Routing Logic ✅
+- **Problem Solved:** Tickets were routing to Pool 1 even when no eligible Partners existed
+- **New Logic:**
+  1. When ticket becomes Open, determine `routing_specialty_id` from category L2/L1
+  2. Query eligible Partners (account_type=Partner, matching specialty, active=true)
+  3. If eligible Partners > 0 → `pool_stage = POOL_1`, set `pool1_expires_at` = now + 24h
+  4. If eligible Partners = 0 → Skip Pool 1, `pool_stage = POOL_2` immediately
+  5. After 24h in Pool 1, automatically promote to Pool 2
+- **New Order Fields:**
+  - `pool_stage`: "POOL_1" or "POOL_2"
+  - `routing_specialty_id`: Specialty ID for routing
+  - `routing_specialty_name`: Specialty name for display
+  - `pool1_expires_at`: When Pool 1 access expires
+- **Notifications:** Only users matching the ticket's specialty receive notifications
+- **Files Modified:**
+  - `/app/backend/routes/orders.py` - Added `determine_pool_routing()` and `notify_pool_users()`
+  - `/app/backend/utils/helpers.py` - Added pool fields to `normalize_order()`
+  - `/app/backend/routes/categories.py` - Added `specialty_id` to CategoryL2Update
+
+---
+
+## System Logic Snapshot Document ✅
+
 A comprehensive **System Logic Snapshot** has been created at `/app/memory/System_Logic_Snapshot.md` for UAT preparation.
 
 **Contents:**
