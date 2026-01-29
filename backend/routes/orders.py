@@ -435,24 +435,34 @@ async def create_order(
         "delivered_at": None,
         "last_responded_at": None,
         "review_started_at": None,
-        "last_requester_message_at": None
+        "last_requester_message_at": None,
+        # Pool routing fields (will be populated below for non-draft orders)
+        "pool_stage": None,
+        "routing_specialty_id": None,
+        "routing_specialty_name": None,
+        "pool1_expires_at": None,
+        "pool_entered_at": None
     }
+    
+    # Only set pool routing for non-draft orders
+    routing_info = None
+    if not is_draft:
+        # Determine smart pool routing
+        routing_info = await determine_pool_routing(order_data.category_l2_id, order_data.category_l1_id)
+        order["pool_stage"] = routing_info["pool_stage"]
+        order["routing_specialty_id"] = routing_info.get("routing_specialty_id")
+        order["routing_specialty_name"] = routing_info.get("routing_specialty_name")
+        order["pool1_expires_at"] = routing_info.get("pool1_expires_at")
+        order["pool_entered_at"] = created_at.isoformat()
+        
+        # Log the routing decision
+        if routing_info.get("skipped_pool_1"):
+            logging.info(f"Order {order_code} skipped Pool 1: {routing_info.get('skip_reason')}")
+    
     await db.orders.insert_one(order)
     
     # Only notify/trigger workflows for non-draft orders
     if not is_draft:
-        # Notify editors
-        editors = await db.users.find({"role": "Editor", "active": True}, {"_id": 0}).to_list(100)
-        for editor in editors:
-            await create_notification(
-                db,
-                editor['id'],
-                "new_order",
-                "New request available",
-                f"New editing request {order_code} '{order_data.title}' is available for pickup",
-                order['id']
-            )
-        
         # Send email notification to requester
         background_tasks.add_task(
             send_ticket_created_email,
@@ -474,7 +484,8 @@ async def create_order(
             "requester_email": current_user["email"],
             "category": cat_l2_name or cat_l1_name,
             "priority": order_data.priority,
-            "status": "Open"
+            "status": "Open",
+            "pool_stage": routing_info["pool_stage"] if routing_info else None
         })
         
         # Execute workflows triggered by order.created
@@ -487,24 +498,9 @@ async def create_order(
                 })
         background_tasks.add_task(run_workflows)
         
-        # Notify Pool 1 (Partners) about new ticket availability
-        async def notify_pool_1():
-            partners = await db.users.find(
-                {"account_type": "Partner", "active": True}, 
-                {"_id": 0, "email": 1, "name": 1}
-            ).to_list(100)
-            for partner in partners:
-                await send_pool_assignment_email(
-                    partner["email"],
-                    partner["name"],
-                    order_code,
-                    order_data.title,
-                    order_data.priority,
-                    cat_l2_name or cat_l1_name or "General",
-                    "Partner Pool (Pool 1)",
-                    order["id"]
-                )
-        background_tasks.add_task(notify_pool_1)
+        # Notify eligible pool users (only those matching the specialty)
+        if routing_info:
+            await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
     
     return OrderResponse(
         **{k: v for k, v in order.items() if k != '_id'},
