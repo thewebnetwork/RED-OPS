@@ -41,6 +41,7 @@ import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
 import VerifyOTP from "./pages/VerifyOTP";
 import DocumentationPage from "./pages/DocumentationPage";
+import PoolPickerRulesPage from "./pages/PoolPickerRulesPage";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
