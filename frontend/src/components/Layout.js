@@ -167,7 +167,7 @@ export default function Layout({ children }) {
                   }`}
                 >
                   <item.icon size={18} strokeWidth={1.5} />
-                  {item.label || t(item.labelKey)}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
