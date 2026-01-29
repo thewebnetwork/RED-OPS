@@ -49,6 +49,7 @@ class UserCreate(BaseModel):
     force_password_change: bool = True
     force_otp_setup: bool = True
     send_welcome_email: bool = True  # Send welcome email with temp password
+    can_pick: bool = True  # Whether user can pick from pools (user-level override)
     
     @field_validator('specialty_ids', mode='before')
     @classmethod
@@ -73,6 +74,7 @@ class UserUpdate(BaseModel):
     specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None
+    can_pick: Optional[bool] = None  # Whether user can pick from pools
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     active: Optional[bool] = None
     force_password_change: Optional[bool] = None
