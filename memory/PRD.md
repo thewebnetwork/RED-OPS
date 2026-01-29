@@ -3,14 +3,77 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.9 (Configurable Pool Picker Rules)
+## Current Version: 4.0 (Complete i18n Translation Support)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://translate-redops.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 - Configurable Pool Eligibility Rules ✅
+## LATEST: P0 - Complete Application Translations ✅
+
+### Overview
+Full internationalization (i18n) support with comprehensive translations for Spanish and Portuguese. All UI text is now translatable, and administrators can review/correct translations through a new Translation Editor page.
+
+### Languages Supported
+| Language | Code | Status |
+|----------|------|--------|
+| English | en | ✅ Complete (700+ keys) |
+| Spanish (España) | es | ✅ Complete (700+ keys) |
+| Portuguese (Brasil) | pt | ✅ Complete (700+ keys) |
+
+### Features Implemented
+1. **Comprehensive Translation Files** - All three JSON files (`en.json`, `es.json`, `pt.json`) updated with 700+ translation keys covering:
+   - Authentication (login, password reset)
+   - Navigation (sidebar items)
+   - Dashboard (KPIs, SLA status, ticket sections)
+   - Orders and tickets
+   - User management (IAM)
+   - Settings pages
+   - Workflows
+   - Forms and actions
+   - Error messages
+   - Success notifications
+
+2. **Translation Editor Page** (`/settings/translations`)
+   - Admin-only access
+   - Language selector (Spanish/Portuguese)
+   - Search functionality to find specific keys
+   - Side-by-side English reference and target translation
+   - Inline editing capability
+   - Save button (logs changes for manual update)
+
+3. **Updated Components**
+   - Sidebar navigation: All items use translation keys
+   - Dashboard: All hardcoded strings replaced with t() calls
+   - Settings Hub: Added Translation Editor card
+
+### New Translation Keys Added
+- `nav.reportIssue` - "Report an Issue"
+- `nav.opportunityRibbon` - "Opportunity Ribbon"  
+- `nav.deletedTickets` - "Deleted Tickets"
+- `settings.translations.*` - Translation Editor page strings
+
+### Files Modified/Created
+- `/app/frontend/src/i18n/locales/en.json` - Comprehensive English translations
+- `/app/frontend/src/i18n/locales/es.json` - Complete Spanish translations
+- `/app/frontend/src/i18n/locales/pt.json` - Complete Portuguese translations
+- `/app/frontend/src/pages/TranslationEditorPage.js` - **NEW** Translation editor UI
+- `/app/frontend/src/pages/SettingsHub.js` - Added Translation Editor link
+- `/app/frontend/src/components/Layout.js` - All nav items use labelKey
+- `/app/frontend/src/pages/Dashboard.js` - Replaced hardcoded strings with t()
+- `/app/frontend/src/App.js` - Added route for TranslationEditorPage
+
+### Testing Status
+- ✅ Login page translations verified (EN/ES/PT)
+- ✅ Dashboard translations verified
+- ✅ Sidebar navigation fully translated
+- ✅ Translation Editor page functional
+- ✅ Language switcher persists selection
+
+---
+
+## P0 - Configurable Pool Eligibility Rules ✅
 
 ### Overview
 Pool eligibility is now admin-configurable instead of hard-coded. Admins can control which account types can pick from which pools.
