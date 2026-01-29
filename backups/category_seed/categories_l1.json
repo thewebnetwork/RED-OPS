@@ -1,0 +1,590 @@
+[
+  {
+    "id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+    "name": "Marketing & Creative",
+    "icon": "Palette",
+    "description": "Category for Marketing & Creative",
+    "translations": {
+      "en": "Marketing & Creative",
+      "es": "Marketing & Creative",
+      "pt": "Marketing & Creative"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.656111+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+    "name": "Graphic Design",
+    "icon": "PenTool",
+    "description": "Category for Graphic Design",
+    "translations": {
+      "en": "Graphic Design",
+      "es": "Graphic Design",
+      "pt": "Graphic Design"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.659063+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "b3f74826-1410-4272-a20d-a190844a5898",
+    "name": "Copywriting & Content",
+    "icon": "FileText",
+    "description": "Category for Copywriting & Content",
+    "translations": {
+      "en": "Copywriting & Content",
+      "es": "Copywriting & Content",
+      "pt": "Copywriting & Content"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.661591+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+    "name": "Digital Marketing",
+    "icon": "Globe",
+    "description": "Category for Digital Marketing",
+    "translations": {
+      "en": "Digital Marketing",
+      "es": "Digital Marketing",
+      "pt": "Digital Marketing"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.664172+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+    "name": "Social Media",
+    "icon": "Share2",
+    "description": "Category for Social Media",
+    "translations": {
+      "en": "Social Media",
+      "es": "Social Media",
+      "pt": "Social Media"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.667248+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+    "name": "Email Marketing",
+    "icon": "Mail",
+    "description": "Category for Email Marketing",
+    "translations": {
+      "en": "Email Marketing",
+      "es": "Email Marketing",
+      "pt": "Email Marketing"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.669182+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+    "name": "Video Production",
+    "icon": "Video",
+    "description": "Category for Video Production",
+    "translations": {
+      "en": "Video Production",
+      "es": "Video Production",
+      "pt": "Video Production"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.671012+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+    "name": "Photography",
+    "icon": "Camera",
+    "description": "Category for Photography",
+    "translations": {
+      "en": "Photography",
+      "es": "Photography",
+      "pt": "Photography"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.673711+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "6e263e20-5b89-4c83-9528-17343766d515",
+    "name": "Audio & Podcast",
+    "icon": "Mic",
+    "description": "Category for Audio & Podcast",
+    "translations": {
+      "en": "Audio & Podcast",
+      "es": "Audio & Podcast",
+      "pt": "Audio & Podcast"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.675720+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "5820a855-88f6-4146-8372-03e267a53142",
+    "name": "Residential Listings",
+    "icon": "Home",
+    "description": "Category for Residential Listings",
+    "translations": {
+      "en": "Residential Listings",
+      "es": "Residential Listings",
+      "pt": "Residential Listings"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.677441+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+    "name": "Residential Sales Support",
+    "icon": "Key",
+    "description": "Category for Residential Sales Support",
+    "translations": {
+      "en": "Residential Sales Support",
+      "es": "Residential Sales Support",
+      "pt": "Residential Sales Support"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.679685+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+    "name": "Property Staging",
+    "icon": "Sofa",
+    "description": "Category for Property Staging",
+    "translations": {
+      "en": "Property Staging",
+      "es": "Property Staging",
+      "pt": "Property Staging"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.682032+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+    "name": "Commercial Listings",
+    "icon": "Building2",
+    "description": "Category for Commercial Listings",
+    "translations": {
+      "en": "Commercial Listings",
+      "es": "Commercial Listings",
+      "pt": "Commercial Listings"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.683583+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+    "name": "Commercial Leasing",
+    "icon": "FileSignature",
+    "description": "Category for Commercial Leasing",
+    "translations": {
+      "en": "Commercial Leasing",
+      "es": "Commercial Leasing",
+      "pt": "Commercial Leasing"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.686000+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+    "name": "Commercial Due Diligence",
+    "icon": "ClipboardCheck",
+    "description": "Category for Commercial Due Diligence",
+    "translations": {
+      "en": "Commercial Due Diligence",
+      "es": "Commercial Due Diligence",
+      "pt": "Commercial Due Diligence"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.688028+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "bf282860-85d8-4eea-8157-b113af55c286",
+    "name": "Sales Operations",
+    "icon": "TrendingUp",
+    "description": "Category for Sales Operations",
+    "translations": {
+      "en": "Sales Operations",
+      "es": "Sales Operations",
+      "pt": "Sales Operations"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.689851+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+    "name": "CRM & Automations",
+    "icon": "Workflow",
+    "description": "Category for CRM & Automations",
+    "translations": {
+      "en": "CRM & Automations",
+      "es": "CRM & Automations",
+      "pt": "CRM & Automations"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.692087+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "39233e10-329c-43da-b2a1-cf660f434afc",
+    "name": "Lead Generation",
+    "icon": "UserPlus",
+    "description": "Category for Lead Generation",
+    "translations": {
+      "en": "Lead Generation",
+      "es": "Lead Generation",
+      "pt": "Lead Generation"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.694153+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+    "name": "Customer Support",
+    "icon": "Headphones",
+    "description": "Category for Customer Support",
+    "translations": {
+      "en": "Customer Support",
+      "es": "Customer Support",
+      "pt": "Customer Support"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.695851+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+    "name": "Client Services",
+    "icon": "Users",
+    "description": "Category for Client Services",
+    "translations": {
+      "en": "Client Services",
+      "es": "Client Services",
+      "pt": "Client Services"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.698769+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+    "name": "IT Support",
+    "icon": "Monitor",
+    "description": "Category for IT Support",
+    "translations": {
+      "en": "IT Support",
+      "es": "IT Support",
+      "pt": "IT Support"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.700607+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+    "name": "Hardware & Devices",
+    "icon": "Laptop",
+    "description": "Category for Hardware & Devices",
+    "translations": {
+      "en": "Hardware & Devices",
+      "es": "Hardware & Devices",
+      "pt": "Hardware & Devices"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.703481+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+    "name": "Security & Access",
+    "icon": "Shield",
+    "description": "Category for Security & Access",
+    "translations": {
+      "en": "Security & Access",
+      "es": "Security & Access",
+      "pt": "Security & Access"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.705357+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+    "name": "Accounts Payable",
+    "icon": "CreditCard",
+    "description": "Category for Accounts Payable",
+    "translations": {
+      "en": "Accounts Payable",
+      "es": "Accounts Payable",
+      "pt": "Accounts Payable"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.707511+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+    "name": "Accounts Receivable",
+    "icon": "Receipt",
+    "description": "Category for Accounts Receivable",
+    "translations": {
+      "en": "Accounts Receivable",
+      "es": "Accounts Receivable",
+      "pt": "Accounts Receivable"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.709380+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "26da23e0-577c-4afc-8951-196c566dce04",
+    "name": "Expense & Reimbursement",
+    "icon": "Wallet",
+    "description": "Category for Expense & Reimbursement",
+    "translations": {
+      "en": "Expense & Reimbursement",
+      "es": "Expense & Reimbursement",
+      "pt": "Expense & Reimbursement"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.711255+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "7fc177c3-fb20-477f-8582-7d026c792516",
+    "name": "Payroll",
+    "icon": "Banknote",
+    "description": "Category for Payroll",
+    "translations": {
+      "en": "Payroll",
+      "es": "Payroll",
+      "pt": "Payroll"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.713740+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+    "name": "Hiring & Recruiting",
+    "icon": "Briefcase",
+    "description": "Category for Hiring & Recruiting",
+    "translations": {
+      "en": "Hiring & Recruiting",
+      "es": "Hiring & Recruiting",
+      "pt": "Hiring & Recruiting"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.716872+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+    "name": "Onboarding",
+    "icon": "UserCheck",
+    "description": "Category for Onboarding",
+    "translations": {
+      "en": "Onboarding",
+      "es": "Onboarding",
+      "pt": "Onboarding"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.719357+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+    "name": "Employee Services",
+    "icon": "HeartHandshake",
+    "description": "Category for Employee Services",
+    "translations": {
+      "en": "Employee Services",
+      "es": "Employee Services",
+      "pt": "Employee Services"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.722007+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+    "name": "Offboarding",
+    "icon": "LogOut",
+    "description": "Category for Offboarding",
+    "translations": {
+      "en": "Offboarding",
+      "es": "Offboarding",
+      "pt": "Offboarding"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.725146+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+    "name": "Contracts & Agreements",
+    "icon": "FileCheck",
+    "description": "Category for Contracts & Agreements",
+    "translations": {
+      "en": "Contracts & Agreements",
+      "es": "Contracts & Agreements",
+      "pt": "Contracts & Agreements"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.727877+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+    "name": "Compliance & Risk",
+    "icon": "AlertTriangle",
+    "description": "Category for Compliance & Risk",
+    "translations": {
+      "en": "Compliance & Risk",
+      "es": "Compliance & Risk",
+      "pt": "Compliance & Risk"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.730602+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+    "name": "Facilities & Office",
+    "icon": "Building",
+    "description": "Category for Facilities & Office",
+    "translations": {
+      "en": "Facilities & Office",
+      "es": "Facilities & Office",
+      "pt": "Facilities & Office"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.733401+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+    "name": "Procurement",
+    "icon": "ShoppingCart",
+    "description": "Category for Procurement",
+    "translations": {
+      "en": "Procurement",
+      "es": "Procurement",
+      "pt": "Procurement"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.736511+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+    "name": "Roofing & Exterior",
+    "icon": "Warehouse",
+    "description": "Category for Roofing & Exterior",
+    "translations": {
+      "en": "Roofing & Exterior",
+      "es": "Roofing & Exterior",
+      "pt": "Roofing & Exterior"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.738570+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+    "name": "Plumbing",
+    "icon": "Droplet",
+    "description": "Category for Plumbing",
+    "translations": {
+      "en": "Plumbing",
+      "es": "Plumbing",
+      "pt": "Plumbing"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.740934+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+    "name": "Electrical",
+    "icon": "Zap",
+    "description": "Category for Electrical",
+    "translations": {
+      "en": "Electrical",
+      "es": "Electrical",
+      "pt": "Electrical"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.743029+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+    "name": "HVAC",
+    "icon": "Wind",
+    "description": "Category for HVAC",
+    "translations": {
+      "en": "HVAC",
+      "es": "HVAC",
+      "pt": "HVAC"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.746230+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+    "name": "Handyman & General",
+    "icon": "Hammer",
+    "description": "Category for Handyman & General",
+    "translations": {
+      "en": "Handyman & General",
+      "es": "Handyman & General",
+      "pt": "Handyman & General"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.748896+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+    "name": "Project Requests",
+    "icon": "FolderKanban",
+    "description": "Category for Project Requests",
+    "translations": {
+      "en": "Project Requests",
+      "es": "Project Requests",
+      "pt": "Project Requests"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.751594+00:00",
+    "enable_workflow": true
+  },
+  {
+    "id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+    "name": "Process Improvement",
+    "icon": "Settings2",
+    "description": "Category for Process Improvement",
+    "translations": {
+      "en": "Process Improvement",
+      "es": "Process Improvement",
+      "pt": "Process Improvement"
+    },
+    "active": true,
+    "created_at": "2026-01-29T16:37:27.753461+00:00",
+    "enable_workflow": true
+  }
+]

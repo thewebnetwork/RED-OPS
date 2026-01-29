@@ -1,0 +1,5836 @@
+{
+  "generated_at": "2026-01-29T16:37:27.766210+00:00",
+  "l1_count": 42,
+  "l2_count": 403,
+  "categories_l1": [
+    {
+      "id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "name": "Marketing & Creative",
+      "icon": "Palette",
+      "description": "Category for Marketing & Creative",
+      "translations": {
+        "en": "Marketing & Creative",
+        "es": "Marketing & Creative",
+        "pt": "Marketing & Creative"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.656111+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "name": "Graphic Design",
+      "icon": "PenTool",
+      "description": "Category for Graphic Design",
+      "translations": {
+        "en": "Graphic Design",
+        "es": "Graphic Design",
+        "pt": "Graphic Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.659063+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "name": "Copywriting & Content",
+      "icon": "FileText",
+      "description": "Category for Copywriting & Content",
+      "translations": {
+        "en": "Copywriting & Content",
+        "es": "Copywriting & Content",
+        "pt": "Copywriting & Content"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.661591+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "name": "Digital Marketing",
+      "icon": "Globe",
+      "description": "Category for Digital Marketing",
+      "translations": {
+        "en": "Digital Marketing",
+        "es": "Digital Marketing",
+        "pt": "Digital Marketing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.664172+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "name": "Social Media",
+      "icon": "Share2",
+      "description": "Category for Social Media",
+      "translations": {
+        "en": "Social Media",
+        "es": "Social Media",
+        "pt": "Social Media"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667248+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "name": "Email Marketing",
+      "icon": "Mail",
+      "description": "Category for Email Marketing",
+      "translations": {
+        "en": "Email Marketing",
+        "es": "Email Marketing",
+        "pt": "Email Marketing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669182+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "name": "Video Production",
+      "icon": "Video",
+      "description": "Category for Video Production",
+      "translations": {
+        "en": "Video Production",
+        "es": "Video Production",
+        "pt": "Video Production"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671012+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "name": "Photography",
+      "icon": "Camera",
+      "description": "Category for Photography",
+      "translations": {
+        "en": "Photography",
+        "es": "Photography",
+        "pt": "Photography"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.673711+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "name": "Audio & Podcast",
+      "icon": "Mic",
+      "description": "Category for Audio & Podcast",
+      "translations": {
+        "en": "Audio & Podcast",
+        "es": "Audio & Podcast",
+        "pt": "Audio & Podcast"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.675720+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "5820a855-88f6-4146-8372-03e267a53142",
+      "name": "Residential Listings",
+      "icon": "Home",
+      "description": "Category for Residential Listings",
+      "translations": {
+        "en": "Residential Listings",
+        "es": "Residential Listings",
+        "pt": "Residential Listings"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677441+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "name": "Residential Sales Support",
+      "icon": "Key",
+      "description": "Category for Residential Sales Support",
+      "translations": {
+        "en": "Residential Sales Support",
+        "es": "Residential Sales Support",
+        "pt": "Residential Sales Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.679685+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "name": "Property Staging",
+      "icon": "Sofa",
+      "description": "Category for Property Staging",
+      "translations": {
+        "en": "Property Staging",
+        "es": "Property Staging",
+        "pt": "Property Staging"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682032+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "name": "Commercial Listings",
+      "icon": "Building2",
+      "description": "Category for Commercial Listings",
+      "translations": {
+        "en": "Commercial Listings",
+        "es": "Commercial Listings",
+        "pt": "Commercial Listings"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.683583+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "name": "Commercial Leasing",
+      "icon": "FileSignature",
+      "description": "Category for Commercial Leasing",
+      "translations": {
+        "en": "Commercial Leasing",
+        "es": "Commercial Leasing",
+        "pt": "Commercial Leasing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.686000+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "name": "Commercial Due Diligence",
+      "icon": "ClipboardCheck",
+      "description": "Category for Commercial Due Diligence",
+      "translations": {
+        "en": "Commercial Due Diligence",
+        "es": "Commercial Due Diligence",
+        "pt": "Commercial Due Diligence"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688028+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "name": "Sales Operations",
+      "icon": "TrendingUp",
+      "description": "Category for Sales Operations",
+      "translations": {
+        "en": "Sales Operations",
+        "es": "Sales Operations",
+        "pt": "Sales Operations"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.689851+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "name": "CRM & Automations",
+      "icon": "Workflow",
+      "description": "Category for CRM & Automations",
+      "translations": {
+        "en": "CRM & Automations",
+        "es": "CRM & Automations",
+        "pt": "CRM & Automations"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.692087+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "name": "Lead Generation",
+      "icon": "UserPlus",
+      "description": "Category for Lead Generation",
+      "translations": {
+        "en": "Lead Generation",
+        "es": "Lead Generation",
+        "pt": "Lead Generation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.694153+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "name": "Customer Support",
+      "icon": "Headphones",
+      "description": "Category for Customer Support",
+      "translations": {
+        "en": "Customer Support",
+        "es": "Customer Support",
+        "pt": "Customer Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695851+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "name": "Client Services",
+      "icon": "Users",
+      "description": "Category for Client Services",
+      "translations": {
+        "en": "Client Services",
+        "es": "Client Services",
+        "pt": "Client Services"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.698769+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "name": "IT Support",
+      "icon": "Monitor",
+      "description": "Category for IT Support",
+      "translations": {
+        "en": "IT Support",
+        "es": "IT Support",
+        "pt": "IT Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.700607+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "name": "Hardware & Devices",
+      "icon": "Laptop",
+      "description": "Category for Hardware & Devices",
+      "translations": {
+        "en": "Hardware & Devices",
+        "es": "Hardware & Devices",
+        "pt": "Hardware & Devices"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.703481+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "name": "Security & Access",
+      "icon": "Shield",
+      "description": "Category for Security & Access",
+      "translations": {
+        "en": "Security & Access",
+        "es": "Security & Access",
+        "pt": "Security & Access"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705357+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "name": "Accounts Payable",
+      "icon": "CreditCard",
+      "description": "Category for Accounts Payable",
+      "translations": {
+        "en": "Accounts Payable",
+        "es": "Accounts Payable",
+        "pt": "Accounts Payable"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.707511+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "name": "Accounts Receivable",
+      "icon": "Receipt",
+      "description": "Category for Accounts Receivable",
+      "translations": {
+        "en": "Accounts Receivable",
+        "es": "Accounts Receivable",
+        "pt": "Accounts Receivable"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709380+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "name": "Expense & Reimbursement",
+      "icon": "Wallet",
+      "description": "Category for Expense & Reimbursement",
+      "translations": {
+        "en": "Expense & Reimbursement",
+        "es": "Expense & Reimbursement",
+        "pt": "Expense & Reimbursement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.711255+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "name": "Payroll",
+      "icon": "Banknote",
+      "description": "Category for Payroll",
+      "translations": {
+        "en": "Payroll",
+        "es": "Payroll",
+        "pt": "Payroll"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.713740+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "name": "Hiring & Recruiting",
+      "icon": "Briefcase",
+      "description": "Category for Hiring & Recruiting",
+      "translations": {
+        "en": "Hiring & Recruiting",
+        "es": "Hiring & Recruiting",
+        "pt": "Hiring & Recruiting"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.716872+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "name": "Onboarding",
+      "icon": "UserCheck",
+      "description": "Category for Onboarding",
+      "translations": {
+        "en": "Onboarding",
+        "es": "Onboarding",
+        "pt": "Onboarding"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.719357+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "name": "Employee Services",
+      "icon": "HeartHandshake",
+      "description": "Category for Employee Services",
+      "translations": {
+        "en": "Employee Services",
+        "es": "Employee Services",
+        "pt": "Employee Services"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.722007+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "name": "Offboarding",
+      "icon": "LogOut",
+      "description": "Category for Offboarding",
+      "translations": {
+        "en": "Offboarding",
+        "es": "Offboarding",
+        "pt": "Offboarding"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.725146+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "name": "Contracts & Agreements",
+      "icon": "FileCheck",
+      "description": "Category for Contracts & Agreements",
+      "translations": {
+        "en": "Contracts & Agreements",
+        "es": "Contracts & Agreements",
+        "pt": "Contracts & Agreements"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.727877+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "name": "Compliance & Risk",
+      "icon": "AlertTriangle",
+      "description": "Category for Compliance & Risk",
+      "translations": {
+        "en": "Compliance & Risk",
+        "es": "Compliance & Risk",
+        "pt": "Compliance & Risk"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.730602+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "name": "Facilities & Office",
+      "icon": "Building",
+      "description": "Category for Facilities & Office",
+      "translations": {
+        "en": "Facilities & Office",
+        "es": "Facilities & Office",
+        "pt": "Facilities & Office"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.733401+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "name": "Procurement",
+      "icon": "ShoppingCart",
+      "description": "Category for Procurement",
+      "translations": {
+        "en": "Procurement",
+        "es": "Procurement",
+        "pt": "Procurement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.736511+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "name": "Roofing & Exterior",
+      "icon": "Warehouse",
+      "description": "Category for Roofing & Exterior",
+      "translations": {
+        "en": "Roofing & Exterior",
+        "es": "Roofing & Exterior",
+        "pt": "Roofing & Exterior"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.738570+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "name": "Plumbing",
+      "icon": "Droplet",
+      "description": "Category for Plumbing",
+      "translations": {
+        "en": "Plumbing",
+        "es": "Plumbing",
+        "pt": "Plumbing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.740934+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "name": "Electrical",
+      "icon": "Zap",
+      "description": "Category for Electrical",
+      "translations": {
+        "en": "Electrical",
+        "es": "Electrical",
+        "pt": "Electrical"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.743029+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "name": "HVAC",
+      "icon": "Wind",
+      "description": "Category for HVAC",
+      "translations": {
+        "en": "HVAC",
+        "es": "HVAC",
+        "pt": "HVAC"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.746230+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "name": "Handyman & General",
+      "icon": "Hammer",
+      "description": "Category for Handyman & General",
+      "translations": {
+        "en": "Handyman & General",
+        "es": "Handyman & General",
+        "pt": "Handyman & General"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.748896+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "name": "Project Requests",
+      "icon": "FolderKanban",
+      "description": "Category for Project Requests",
+      "translations": {
+        "en": "Project Requests",
+        "es": "Project Requests",
+        "pt": "Project Requests"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751594+00:00",
+      "enable_workflow": true
+    },
+    {
+      "id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "name": "Process Improvement",
+      "icon": "Settings2",
+      "description": "Category for Process Improvement",
+      "translations": {
+        "en": "Process Improvement",
+        "es": "Process Improvement",
+        "pt": "Process Improvement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.753461+00:00",
+      "enable_workflow": true
+    }
+  ],
+  "categories_l2": [
+    {
+      "id": "e2233e75-04b1-43d7-a1de-9409edcc9c14",
+      "name": "Brand Strategy & Guidelines",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Brand Strategy & Guidelines",
+      "translations": {
+        "en": "Brand Strategy & Guidelines",
+        "es": "Brand Strategy & Guidelines",
+        "pt": "Brand Strategy & Guidelines"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.656725+00:00"
+    },
+    {
+      "id": "75b27f1a-9116-474e-9478-7b0f8256c3eb",
+      "name": "Campaign Planning",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Campaign Planning",
+      "translations": {
+        "en": "Campaign Planning",
+        "es": "Campaign Planning",
+        "pt": "Campaign Planning"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.657053+00:00"
+    },
+    {
+      "id": "33bac09a-e2f3-40f7-a228-05ecb62d842a",
+      "name": "Creative Brief Development",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Creative Brief Development",
+      "translations": {
+        "en": "Creative Brief Development",
+        "es": "Creative Brief Development",
+        "pt": "Creative Brief Development"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.657309+00:00"
+    },
+    {
+      "id": "1da4b66a-1379-48c2-bb6e-7a0240cbc1a6",
+      "name": "Brand Asset Request",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Brand Asset Request",
+      "translations": {
+        "en": "Brand Asset Request",
+        "es": "Brand Asset Request",
+        "pt": "Brand Asset Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.657573+00:00"
+    },
+    {
+      "id": "ceda5dce-6135-45a9-a880-63252de49029",
+      "name": "Marketing Collateral",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Marketing Collateral",
+      "translations": {
+        "en": "Marketing Collateral",
+        "es": "Marketing Collateral",
+        "pt": "Marketing Collateral"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.657789+00:00"
+    },
+    {
+      "id": "04c07d1a-2c0e-4070-b9e1-d72d8bd57535",
+      "name": "Print Materials",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Print Materials",
+      "translations": {
+        "en": "Print Materials",
+        "es": "Print Materials",
+        "pt": "Print Materials"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.658083+00:00"
+    },
+    {
+      "id": "6c1dd44c-4d25-4f82-bcb5-691246aea44c",
+      "name": "Promotional Items",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Promotional Items",
+      "translations": {
+        "en": "Promotional Items",
+        "es": "Promotional Items",
+        "pt": "Promotional Items"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.658291+00:00"
+    },
+    {
+      "id": "543fd864-de52-420c-9bac-7542b1f8ae7f",
+      "name": "Signage Request",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Signage Request",
+      "translations": {
+        "en": "Signage Request",
+        "es": "Signage Request",
+        "pt": "Signage Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.658496+00:00"
+    },
+    {
+      "id": "1e4b4761-b917-472c-92ff-85b3f7a798ae",
+      "name": "Logo Usage Request",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Logo Usage Request",
+      "translations": {
+        "en": "Logo Usage Request",
+        "es": "Logo Usage Request",
+        "pt": "Logo Usage Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.658694+00:00"
+    },
+    {
+      "id": "a953efc6-0bf4-4c12-8e3e-7780dbffee2c",
+      "name": "Brand Approval",
+      "parent_id": "b52fbfe5-e1a8-4b3e-9889-0347f7430f0d",
+      "description": "Subcategory for Brand Approval",
+      "translations": {
+        "en": "Brand Approval",
+        "es": "Brand Approval",
+        "pt": "Brand Approval"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.658877+00:00"
+    },
+    {
+      "id": "f9c490c8-e0d0-4c0a-930f-1734958bb9ab",
+      "name": "Social Media Graphics",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Social Media Graphics",
+      "translations": {
+        "en": "Social Media Graphics",
+        "es": "Social Media Graphics",
+        "pt": "Social Media Graphics"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.659258+00:00"
+    },
+    {
+      "id": "b01cff0b-326c-4b29-84e7-3ad832094316",
+      "name": "Email Graphics",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Email Graphics",
+      "translations": {
+        "en": "Email Graphics",
+        "es": "Email Graphics",
+        "pt": "Email Graphics"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.659569+00:00"
+    },
+    {
+      "id": "be8687b9-6706-4285-8123-9d225f7529e1",
+      "name": "Presentation Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Presentation Design",
+      "translations": {
+        "en": "Presentation Design",
+        "es": "Presentation Design",
+        "pt": "Presentation Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.659771+00:00"
+    },
+    {
+      "id": "cd5ee6d9-773a-49e4-b5c1-8856780e5a64",
+      "name": "Infographic Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Infographic Design",
+      "translations": {
+        "en": "Infographic Design",
+        "es": "Infographic Design",
+        "pt": "Infographic Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.659967+00:00"
+    },
+    {
+      "id": "f6566a19-9490-4e50-9dbe-709631663f92",
+      "name": "Banner Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Banner Design",
+      "translations": {
+        "en": "Banner Design",
+        "es": "Banner Design",
+        "pt": "Banner Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.660141+00:00"
+    },
+    {
+      "id": "d94d56e5-347f-4fd1-bd36-f038b9f480b1",
+      "name": "Flyer Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Flyer Design",
+      "translations": {
+        "en": "Flyer Design",
+        "es": "Flyer Design",
+        "pt": "Flyer Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.660304+00:00"
+    },
+    {
+      "id": "4f7c3fa5-ee52-4756-bc37-4e01a68fa5ad",
+      "name": "Brochure Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Brochure Design",
+      "translations": {
+        "en": "Brochure Design",
+        "es": "Brochure Design",
+        "pt": "Brochure Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.660480+00:00"
+    },
+    {
+      "id": "ee8fc76c-c694-4423-b8da-da704aceaf51",
+      "name": "Business Card Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Business Card Design",
+      "translations": {
+        "en": "Business Card Design",
+        "es": "Business Card Design",
+        "pt": "Business Card Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.660649+00:00"
+    },
+    {
+      "id": "3b88a986-7e5f-4e2b-8b90-f4ce6b91b475",
+      "name": "Postcard Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Postcard Design",
+      "translations": {
+        "en": "Postcard Design",
+        "es": "Postcard Design",
+        "pt": "Postcard Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.660815+00:00"
+    },
+    {
+      "id": "09cb2b12-7e35-4168-a43f-a8ba72130e0d",
+      "name": "Ad Creative Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Ad Creative Design",
+      "translations": {
+        "en": "Ad Creative Design",
+        "es": "Ad Creative Design",
+        "pt": "Ad Creative Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.661055+00:00"
+    },
+    {
+      "id": "5902fd76-f798-4af3-af3c-89902f9950bc",
+      "name": "Illustration Request",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Illustration Request",
+      "translations": {
+        "en": "Illustration Request",
+        "es": "Illustration Request",
+        "pt": "Illustration Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.661246+00:00"
+    },
+    {
+      "id": "f67376d2-51ec-47d8-b945-62337e2b2410",
+      "name": "Icon Design",
+      "parent_id": "34f20a3c-1196-423a-a771-3a8e3f8ed39f",
+      "description": "Subcategory for Icon Design",
+      "translations": {
+        "en": "Icon Design",
+        "es": "Icon Design",
+        "pt": "Icon Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.661421+00:00"
+    },
+    {
+      "id": "8221aaed-10d7-47e6-bee0-5051ca4bc6c1",
+      "name": "Blog Post Writing",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Blog Post Writing",
+      "translations": {
+        "en": "Blog Post Writing",
+        "es": "Blog Post Writing",
+        "pt": "Blog Post Writing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.661764+00:00"
+    },
+    {
+      "id": "47a78e0b-c26b-44d4-b17b-4f2b79d34440",
+      "name": "Article Writing",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Article Writing",
+      "translations": {
+        "en": "Article Writing",
+        "es": "Article Writing",
+        "pt": "Article Writing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662010+00:00"
+    },
+    {
+      "id": "af1dbf76-91e0-447b-8927-1f00bb7db095",
+      "name": "Press Release",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Press Release",
+      "translations": {
+        "en": "Press Release",
+        "es": "Press Release",
+        "pt": "Press Release"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662238+00:00"
+    },
+    {
+      "id": "f203e153-652b-4d9c-af01-dcab4ef3231a",
+      "name": "Email Copy",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Email Copy",
+      "translations": {
+        "en": "Email Copy",
+        "es": "Email Copy",
+        "pt": "Email Copy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662419+00:00"
+    },
+    {
+      "id": "aebc5da7-cc05-46a8-8f93-976d2edb2f4a",
+      "name": "Landing Page Copy",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Landing Page Copy",
+      "translations": {
+        "en": "Landing Page Copy",
+        "es": "Landing Page Copy",
+        "pt": "Landing Page Copy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662598+00:00"
+    },
+    {
+      "id": "98ac70b0-3eb5-48a4-a25c-ecd72f0d4273",
+      "name": "Ad Copy",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Ad Copy",
+      "translations": {
+        "en": "Ad Copy",
+        "es": "Ad Copy",
+        "pt": "Ad Copy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662776+00:00"
+    },
+    {
+      "id": "8c4155dd-6ce6-49fc-9920-13749e13e269",
+      "name": "Social Media Copy",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Social Media Copy",
+      "translations": {
+        "en": "Social Media Copy",
+        "es": "Social Media Copy",
+        "pt": "Social Media Copy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.662947+00:00"
+    },
+    {
+      "id": "d13f6a11-6f24-4a77-90ee-e5d29d62271d",
+      "name": "Product Description",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Product Description",
+      "translations": {
+        "en": "Product Description",
+        "es": "Product Description",
+        "pt": "Product Description"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.663121+00:00"
+    },
+    {
+      "id": "5a602dee-2138-4773-aa26-f6b03fe10c34",
+      "name": "Website Copy",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Website Copy",
+      "translations": {
+        "en": "Website Copy",
+        "es": "Website Copy",
+        "pt": "Website Copy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.663288+00:00"
+    },
+    {
+      "id": "687d3061-2f3b-464d-87f9-068bda1e26bf",
+      "name": "Script Writing",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Script Writing",
+      "translations": {
+        "en": "Script Writing",
+        "es": "Script Writing",
+        "pt": "Script Writing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.663456+00:00"
+    },
+    {
+      "id": "385904a3-5caf-4c40-9960-4991437b5cf5",
+      "name": "Newsletter Content",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Newsletter Content",
+      "translations": {
+        "en": "Newsletter Content",
+        "es": "Newsletter Content",
+        "pt": "Newsletter Content"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.663619+00:00"
+    },
+    {
+      "id": "b58912a1-ffd6-4d94-9c1a-41d6d59e27b9",
+      "name": "Case Study Writing",
+      "parent_id": "b3f74826-1410-4272-a20d-a190844a5898",
+      "description": "Subcategory for Case Study Writing",
+      "translations": {
+        "en": "Case Study Writing",
+        "es": "Case Study Writing",
+        "pt": "Case Study Writing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.663874+00:00"
+    },
+    {
+      "id": "2aff9568-b2d3-482d-9b95-89864efa2fee",
+      "name": "SEO Strategy",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for SEO Strategy",
+      "translations": {
+        "en": "SEO Strategy",
+        "es": "SEO Strategy",
+        "pt": "SEO Strategy"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.664410+00:00"
+    },
+    {
+      "id": "1cf740a9-990a-42ad-b7e9-aab6dd468e57",
+      "name": "SEO Audit Request",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for SEO Audit Request",
+      "translations": {
+        "en": "SEO Audit Request",
+        "es": "SEO Audit Request",
+        "pt": "SEO Audit Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.664654+00:00"
+    },
+    {
+      "id": "ab438ff8-9530-4ff8-b08e-f05848a96dcd",
+      "name": "Keyword Research",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Keyword Research",
+      "translations": {
+        "en": "Keyword Research",
+        "es": "Keyword Research",
+        "pt": "Keyword Research"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.664859+00:00"
+    },
+    {
+      "id": "31243ad3-044a-4449-97f9-6557e1868a89",
+      "name": "Link Building Request",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Link Building Request",
+      "translations": {
+        "en": "Link Building Request",
+        "es": "Link Building Request",
+        "pt": "Link Building Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.665076+00:00"
+    },
+    {
+      "id": "ed04d3ec-e143-4373-b85b-0aa32cb27b04",
+      "name": "Local SEO Setup",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Local SEO Setup",
+      "translations": {
+        "en": "Local SEO Setup",
+        "es": "Local SEO Setup",
+        "pt": "Local SEO Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.665256+00:00"
+    },
+    {
+      "id": "4679a5ce-ad58-46f9-ad1c-d1afa6e9a2e9",
+      "name": "Google Business Profile",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Google Business Profile",
+      "translations": {
+        "en": "Google Business Profile",
+        "es": "Google Business Profile",
+        "pt": "Google Business Profile"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.665488+00:00"
+    },
+    {
+      "id": "868bf16e-a851-4b5a-9fe0-5753155c2968",
+      "name": "PPC Campaign Setup",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for PPC Campaign Setup",
+      "translations": {
+        "en": "PPC Campaign Setup",
+        "es": "PPC Campaign Setup",
+        "pt": "PPC Campaign Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.665806+00:00"
+    },
+    {
+      "id": "049e39bc-3e32-4668-b070-aa40f9a9af5c",
+      "name": "PPC Optimization",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for PPC Optimization",
+      "translations": {
+        "en": "PPC Optimization",
+        "es": "PPC Optimization",
+        "pt": "PPC Optimization"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.666019+00:00"
+    },
+    {
+      "id": "8cfdf948-b3cc-4f1f-9ef5-2eee238f922c",
+      "name": "Display Advertising",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Display Advertising",
+      "translations": {
+        "en": "Display Advertising",
+        "es": "Display Advertising",
+        "pt": "Display Advertising"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.666234+00:00"
+    },
+    {
+      "id": "23f4b28d-e0fd-4882-8e79-d079026e6812",
+      "name": "Retargeting Campaign",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Retargeting Campaign",
+      "translations": {
+        "en": "Retargeting Campaign",
+        "es": "Retargeting Campaign",
+        "pt": "Retargeting Campaign"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.666429+00:00"
+    },
+    {
+      "id": "b0a986e0-78b1-4c35-a043-5a15c58fdcfb",
+      "name": "Analytics Setup",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Analytics Setup",
+      "translations": {
+        "en": "Analytics Setup",
+        "es": "Analytics Setup",
+        "pt": "Analytics Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.666847+00:00"
+    },
+    {
+      "id": "f6b0a4b6-c7df-4196-b868-b8d41c461509",
+      "name": "Conversion Tracking",
+      "parent_id": "db8fd7eb-fe9c-4514-9d3a-cd2059512ea2",
+      "description": "Subcategory for Conversion Tracking",
+      "translations": {
+        "en": "Conversion Tracking",
+        "es": "Conversion Tracking",
+        "pt": "Conversion Tracking"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667065+00:00"
+    },
+    {
+      "id": "61870f16-c2d9-42e1-becb-42c3b9cad031",
+      "name": "Social Strategy Development",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Social Strategy Development",
+      "translations": {
+        "en": "Social Strategy Development",
+        "es": "Social Strategy Development",
+        "pt": "Social Strategy Development"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667446+00:00"
+    },
+    {
+      "id": "1c21882f-b7c5-4fab-9cea-2b3a86c06209",
+      "name": "Content Calendar",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Content Calendar",
+      "translations": {
+        "en": "Content Calendar",
+        "es": "Content Calendar",
+        "pt": "Content Calendar"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667643+00:00"
+    },
+    {
+      "id": "0a8714a1-cda2-4614-b686-481a04641640",
+      "name": "Post Scheduling",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Post Scheduling",
+      "translations": {
+        "en": "Post Scheduling",
+        "es": "Post Scheduling",
+        "pt": "Post Scheduling"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667822+00:00"
+    },
+    {
+      "id": "b7459034-437e-4f7e-ac38-cb69de21794f",
+      "name": "Community Management",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Community Management",
+      "translations": {
+        "en": "Community Management",
+        "es": "Community Management",
+        "pt": "Community Management"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.667991+00:00"
+    },
+    {
+      "id": "0c7802a9-bd7c-4f5b-85e8-7158f9e7c5f3",
+      "name": "Influencer Outreach",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Influencer Outreach",
+      "translations": {
+        "en": "Influencer Outreach",
+        "es": "Influencer Outreach",
+        "pt": "Influencer Outreach"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.668158+00:00"
+    },
+    {
+      "id": "41b1832d-e2e7-495d-950e-44c83dcc8590",
+      "name": "Social Ad Campaign",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Social Ad Campaign",
+      "translations": {
+        "en": "Social Ad Campaign",
+        "es": "Social Ad Campaign",
+        "pt": "Social Ad Campaign"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.668325+00:00"
+    },
+    {
+      "id": "43b13f24-7678-4276-808f-6ac44388c3ed",
+      "name": "Platform Setup",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Platform Setup",
+      "translations": {
+        "en": "Platform Setup",
+        "es": "Platform Setup",
+        "pt": "Platform Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.668504+00:00"
+    },
+    {
+      "id": "ef0f8a65-c1ba-4ad1-a532-665fe93f16e6",
+      "name": "Social Listening",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Social Listening",
+      "translations": {
+        "en": "Social Listening",
+        "es": "Social Listening",
+        "pt": "Social Listening"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.668676+00:00"
+    },
+    {
+      "id": "4c9a5cb5-b8f2-4086-8e36-c4ec1a0d5a9a",
+      "name": "Engagement Report",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Engagement Report",
+      "translations": {
+        "en": "Engagement Report",
+        "es": "Engagement Report",
+        "pt": "Engagement Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.668843+00:00"
+    },
+    {
+      "id": "a0c9250c-6b50-4b59-947e-894608061972",
+      "name": "Crisis Response",
+      "parent_id": "1e502dc3-4fc4-41bd-8c87-10b3509300da",
+      "description": "Subcategory for Crisis Response",
+      "translations": {
+        "en": "Crisis Response",
+        "es": "Crisis Response",
+        "pt": "Crisis Response"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669015+00:00"
+    },
+    {
+      "id": "12817ab9-e8e0-4d7a-8e8d-17c4d53eba35",
+      "name": "Email Campaign Setup",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Email Campaign Setup",
+      "translations": {
+        "en": "Email Campaign Setup",
+        "es": "Email Campaign Setup",
+        "pt": "Email Campaign Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669362+00:00"
+    },
+    {
+      "id": "9ecb431f-307d-48c1-9225-cd1a38037a0c",
+      "name": "Email Template Design",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Email Template Design",
+      "translations": {
+        "en": "Email Template Design",
+        "es": "Email Template Design",
+        "pt": "Email Template Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669542+00:00"
+    },
+    {
+      "id": "6017372e-d98b-4741-9181-72d70419d3ff",
+      "name": "Newsletter Setup",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Newsletter Setup",
+      "translations": {
+        "en": "Newsletter Setup",
+        "es": "Newsletter Setup",
+        "pt": "Newsletter Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669707+00:00"
+    },
+    {
+      "id": "56bd6d43-d695-4e1c-9ead-bca89c71e5a9",
+      "name": "Drip Campaign Creation",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Drip Campaign Creation",
+      "translations": {
+        "en": "Drip Campaign Creation",
+        "es": "Drip Campaign Creation",
+        "pt": "Drip Campaign Creation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.669869+00:00"
+    },
+    {
+      "id": "63470d55-2c9a-47a6-9cf9-ae342ba4660b",
+      "name": "Email List Management",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Email List Management",
+      "translations": {
+        "en": "Email List Management",
+        "es": "Email List Management",
+        "pt": "Email List Management"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670040+00:00"
+    },
+    {
+      "id": "2504adcc-a118-4c82-8faf-54e17a76fc6e",
+      "name": "A/B Testing Setup",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for A/B Testing Setup",
+      "translations": {
+        "en": "A/B Testing Setup",
+        "es": "A/B Testing Setup",
+        "pt": "A/B Testing Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670201+00:00"
+    },
+    {
+      "id": "ae70779b-0846-4ea1-a029-41e758fccefc",
+      "name": "Email Automation",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Email Automation",
+      "translations": {
+        "en": "Email Automation",
+        "es": "Email Automation",
+        "pt": "Email Automation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670362+00:00"
+    },
+    {
+      "id": "f3dccabf-6994-44e8-89ab-116eb71fcadd",
+      "name": "Deliverability Issue",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Deliverability Issue",
+      "translations": {
+        "en": "Deliverability Issue",
+        "es": "Deliverability Issue",
+        "pt": "Deliverability Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670528+00:00"
+    },
+    {
+      "id": "c3e920f0-e277-42cf-bc6c-ec828ba06afc",
+      "name": "Unsubscribe Request",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Unsubscribe Request",
+      "translations": {
+        "en": "Unsubscribe Request",
+        "es": "Unsubscribe Request",
+        "pt": "Unsubscribe Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670687+00:00"
+    },
+    {
+      "id": "f8ca0bca-b69a-4284-905d-4cf5082b1580",
+      "name": "Email Analytics",
+      "parent_id": "6ab047e7-3e0e-478e-8e86-2c33971d37b1",
+      "description": "Subcategory for Email Analytics",
+      "translations": {
+        "en": "Email Analytics",
+        "es": "Email Analytics",
+        "pt": "Email Analytics"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.670849+00:00"
+    },
+    {
+      "id": "2796538d-960e-40d6-88d2-470b708cee3f",
+      "name": "Video Shoot Request",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Video Shoot Request",
+      "translations": {
+        "en": "Video Shoot Request",
+        "es": "Video Shoot Request",
+        "pt": "Video Shoot Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671181+00:00"
+    },
+    {
+      "id": "b84f94a3-4dd5-4974-be18-c4c3a3617df3",
+      "name": "Video Editing",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Video Editing",
+      "translations": {
+        "en": "Video Editing",
+        "es": "Video Editing",
+        "pt": "Video Editing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671369+00:00"
+    },
+    {
+      "id": "cf0a1920-6683-4a55-a6df-54013519bfb9",
+      "name": "Motion Graphics",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Motion Graphics",
+      "translations": {
+        "en": "Motion Graphics",
+        "es": "Motion Graphics",
+        "pt": "Motion Graphics"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671594+00:00"
+    },
+    {
+      "id": "d43f6f70-2caa-4c37-9969-636ca1a778bb",
+      "name": "Animation Request",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Animation Request",
+      "translations": {
+        "en": "Animation Request",
+        "es": "Animation Request",
+        "pt": "Animation Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671775+00:00"
+    },
+    {
+      "id": "3daa349d-ff45-49a4-8423-33a74211bd2c",
+      "name": "Color Correction",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Color Correction",
+      "translations": {
+        "en": "Color Correction",
+        "es": "Color Correction",
+        "pt": "Color Correction"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.671936+00:00"
+    },
+    {
+      "id": "245e903a-5d78-4804-b730-4e55d3d6ea0d",
+      "name": "Audio Mixing",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Audio Mixing",
+      "translations": {
+        "en": "Audio Mixing",
+        "es": "Audio Mixing",
+        "pt": "Audio Mixing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.672114+00:00"
+    },
+    {
+      "id": "11a13b41-9225-4aa3-baa5-ee94ecdf4e2d",
+      "name": "Subtitles/Captions",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Subtitles/Captions",
+      "translations": {
+        "en": "Subtitles/Captions",
+        "es": "Subtitles/Captions",
+        "pt": "Subtitles/Captions"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.672302+00:00"
+    },
+    {
+      "id": "996e545d-00a4-4689-ad42-c99a353b241a",
+      "name": "Video Thumbnail",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Video Thumbnail",
+      "translations": {
+        "en": "Video Thumbnail",
+        "es": "Video Thumbnail",
+        "pt": "Video Thumbnail"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.672520+00:00"
+    },
+    {
+      "id": "9a352f45-a191-434f-9f2b-118689ef4343",
+      "name": "YouTube Optimization",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for YouTube Optimization",
+      "translations": {
+        "en": "YouTube Optimization",
+        "es": "YouTube Optimization",
+        "pt": "YouTube Optimization"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.672699+00:00"
+    },
+    {
+      "id": "576ab220-0c17-4fae-bf57-d92dff9a60e5",
+      "name": "Video Compression",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Video Compression",
+      "translations": {
+        "en": "Video Compression",
+        "es": "Video Compression",
+        "pt": "Video Compression"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.672862+00:00"
+    },
+    {
+      "id": "fed96508-cf26-41ee-a0bf-525f8ec26ff3",
+      "name": "Format Conversion",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Format Conversion",
+      "translations": {
+        "en": "Format Conversion",
+        "es": "Format Conversion",
+        "pt": "Format Conversion"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.673043+00:00"
+    },
+    {
+      "id": "d9f95bb6-9988-4c36-81a1-0916fc4b426c",
+      "name": "Video Revision",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for Video Revision",
+      "translations": {
+        "en": "Video Revision",
+        "es": "Video Revision",
+        "pt": "Video Revision"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.673214+00:00"
+    },
+    {
+      "id": "7bb05fd6-f7dd-428e-8e3a-8576da5521f6",
+      "name": "B-Roll Request",
+      "parent_id": "34a9ef7e-37a1-4408-8165-47e764d4cfa1",
+      "description": "Subcategory for B-Roll Request",
+      "translations": {
+        "en": "B-Roll Request",
+        "es": "B-Roll Request",
+        "pt": "B-Roll Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.673525+00:00"
+    },
+    {
+      "id": "6c889e81-0d98-4e21-b73b-1369530b6d3c",
+      "name": "Photo Shoot Request",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Photo Shoot Request",
+      "translations": {
+        "en": "Photo Shoot Request",
+        "es": "Photo Shoot Request",
+        "pt": "Photo Shoot Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.673889+00:00"
+    },
+    {
+      "id": "1cf8b323-ca1e-46d8-98a4-601cae5bbc09",
+      "name": "Product Photography",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Product Photography",
+      "translations": {
+        "en": "Product Photography",
+        "es": "Product Photography",
+        "pt": "Product Photography"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674083+00:00"
+    },
+    {
+      "id": "a5973cd5-b7f7-4de0-abe4-ac08540602e2",
+      "name": "Headshot Session",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Headshot Session",
+      "translations": {
+        "en": "Headshot Session",
+        "es": "Headshot Session",
+        "pt": "Headshot Session"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674289+00:00"
+    },
+    {
+      "id": "5ffa1e10-b7a5-4ae9-8466-4aca79e1a02f",
+      "name": "Event Photography",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Event Photography",
+      "translations": {
+        "en": "Event Photography",
+        "es": "Event Photography",
+        "pt": "Event Photography"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674463+00:00"
+    },
+    {
+      "id": "f6714b01-d382-40f7-bc70-561d437a0e10",
+      "name": "Photo Editing",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Photo Editing",
+      "translations": {
+        "en": "Photo Editing",
+        "es": "Photo Editing",
+        "pt": "Photo Editing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674636+00:00"
+    },
+    {
+      "id": "e0064403-028f-4760-8d7d-a36673b86974",
+      "name": "Photo Retouching",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Photo Retouching",
+      "translations": {
+        "en": "Photo Retouching",
+        "es": "Photo Retouching",
+        "pt": "Photo Retouching"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674797+00:00"
+    },
+    {
+      "id": "143b00b9-d851-44c2-8f93-8f3d07254117",
+      "name": "Image Cropping/Resizing",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Image Cropping/Resizing",
+      "translations": {
+        "en": "Image Cropping/Resizing",
+        "es": "Image Cropping/Resizing",
+        "pt": "Image Cropping/Resizing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.674968+00:00"
+    },
+    {
+      "id": "1f3875bd-d648-4051-9acc-fa0d1e6f4f9a",
+      "name": "Stock Photo Request",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Stock Photo Request",
+      "translations": {
+        "en": "Stock Photo Request",
+        "es": "Stock Photo Request",
+        "pt": "Stock Photo Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.675153+00:00"
+    },
+    {
+      "id": "bdb1f48d-8641-4bf0-b628-5108c0ee276a",
+      "name": "Photo Selection",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Photo Selection",
+      "translations": {
+        "en": "Photo Selection",
+        "es": "Photo Selection",
+        "pt": "Photo Selection"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.675323+00:00"
+    },
+    {
+      "id": "c72473bd-f701-45b1-8b45-3432d47db8bd",
+      "name": "Photo Archive Access",
+      "parent_id": "2e3a9b29-39ec-4cca-9d25-603c376aa3f3",
+      "description": "Subcategory for Photo Archive Access",
+      "translations": {
+        "en": "Photo Archive Access",
+        "es": "Photo Archive Access",
+        "pt": "Photo Archive Access"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.675504+00:00"
+    },
+    {
+      "id": "32b53d0a-b07d-4192-b753-3d4a8bc827d4",
+      "name": "Podcast Recording",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Podcast Recording",
+      "translations": {
+        "en": "Podcast Recording",
+        "es": "Podcast Recording",
+        "pt": "Podcast Recording"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.675913+00:00"
+    },
+    {
+      "id": "4fd4d599-1087-4edd-b8f6-b3a0ee8c481b",
+      "name": "Audio Editing",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Audio Editing",
+      "translations": {
+        "en": "Audio Editing",
+        "es": "Audio Editing",
+        "pt": "Audio Editing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.676196+00:00"
+    },
+    {
+      "id": "3ea3fc5a-dbef-4bfc-9c7f-564324de090f",
+      "name": "Voiceover Recording",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Voiceover Recording",
+      "translations": {
+        "en": "Voiceover Recording",
+        "es": "Voiceover Recording",
+        "pt": "Voiceover Recording"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.676377+00:00"
+    },
+    {
+      "id": "257f10f8-8f10-4406-8f17-d84a2ee324b0",
+      "name": "Sound Design",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Sound Design",
+      "translations": {
+        "en": "Sound Design",
+        "es": "Sound Design",
+        "pt": "Sound Design"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.676547+00:00"
+    },
+    {
+      "id": "af03e862-ac6b-4f53-899d-221c5d49308f",
+      "name": "Music Licensing",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Music Licensing",
+      "translations": {
+        "en": "Music Licensing",
+        "es": "Music Licensing",
+        "pt": "Music Licensing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.676770+00:00"
+    },
+    {
+      "id": "2af38c2b-13bb-434d-bb6e-58153e82e958",
+      "name": "Audio Transcription",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Audio Transcription",
+      "translations": {
+        "en": "Audio Transcription",
+        "es": "Audio Transcription",
+        "pt": "Audio Transcription"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.676938+00:00"
+    },
+    {
+      "id": "3ed3faa0-468c-4fb9-9217-205f53020188",
+      "name": "Podcast Distribution",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Podcast Distribution",
+      "translations": {
+        "en": "Podcast Distribution",
+        "es": "Podcast Distribution",
+        "pt": "Podcast Distribution"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677106+00:00"
+    },
+    {
+      "id": "e70f6867-af0e-4f50-b7a3-fa32424be250",
+      "name": "Audio Format Conversion",
+      "parent_id": "6e263e20-5b89-4c83-9528-17343766d515",
+      "description": "Subcategory for Audio Format Conversion",
+      "translations": {
+        "en": "Audio Format Conversion",
+        "es": "Audio Format Conversion",
+        "pt": "Audio Format Conversion"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677271+00:00"
+    },
+    {
+      "id": "ee1aba42-5e6c-44b2-bb17-250a193aeafa",
+      "name": "New Listing Setup",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for New Listing Setup",
+      "translations": {
+        "en": "New Listing Setup",
+        "es": "New Listing Setup",
+        "pt": "New Listing Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677617+00:00"
+    },
+    {
+      "id": "6b028a85-d0b8-4db1-ac95-66551f430bf1",
+      "name": "Listing Photos Request",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Listing Photos Request",
+      "translations": {
+        "en": "Listing Photos Request",
+        "es": "Listing Photos Request",
+        "pt": "Listing Photos Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677775+00:00"
+    },
+    {
+      "id": "69cddc8f-322c-4193-b6c9-846244389e4e",
+      "name": "Listing Video Request",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Listing Video Request",
+      "translations": {
+        "en": "Listing Video Request",
+        "es": "Listing Video Request",
+        "pt": "Listing Video Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.677932+00:00"
+    },
+    {
+      "id": "31e14a25-87ea-40c1-b12c-c515a641d40a",
+      "name": "Virtual Tour Setup",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Virtual Tour Setup",
+      "translations": {
+        "en": "Virtual Tour Setup",
+        "es": "Virtual Tour Setup",
+        "pt": "Virtual Tour Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678096+00:00"
+    },
+    {
+      "id": "53fbaacf-07eb-4542-87de-98f83193ccab",
+      "name": "3D Tour/Matterport",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for 3D Tour/Matterport",
+      "translations": {
+        "en": "3D Tour/Matterport",
+        "es": "3D Tour/Matterport",
+        "pt": "3D Tour/Matterport"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678255+00:00"
+    },
+    {
+      "id": "65e63c42-beff-454e-a550-f219799ffcbf",
+      "name": "Listing Description",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Listing Description",
+      "translations": {
+        "en": "Listing Description",
+        "es": "Listing Description",
+        "pt": "Listing Description"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678410+00:00"
+    },
+    {
+      "id": "68269fa5-6a64-4cf9-9d55-057d152f1023",
+      "name": "MLS Upload",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for MLS Upload",
+      "translations": {
+        "en": "MLS Upload",
+        "es": "MLS Upload",
+        "pt": "MLS Upload"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678590+00:00"
+    },
+    {
+      "id": "680bee89-dc9a-4faf-902d-3a6f15c349f1",
+      "name": "Listing Update",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Listing Update",
+      "translations": {
+        "en": "Listing Update",
+        "es": "Listing Update",
+        "pt": "Listing Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678747+00:00"
+    },
+    {
+      "id": "5c67a9bd-7cb4-49e8-bce2-c4841e27b548",
+      "name": "Price Change Request",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Price Change Request",
+      "translations": {
+        "en": "Price Change Request",
+        "es": "Price Change Request",
+        "pt": "Price Change Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.678907+00:00"
+    },
+    {
+      "id": "33bd65cc-171b-4ef3-8c31-0d2c291064f0",
+      "name": "Listing Status Change",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Listing Status Change",
+      "translations": {
+        "en": "Listing Status Change",
+        "es": "Listing Status Change",
+        "pt": "Listing Status Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.679081+00:00"
+    },
+    {
+      "id": "7e0b4621-f476-44a5-bdd6-e106cd9f51af",
+      "name": "Coming Soon Setup",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Coming Soon Setup",
+      "translations": {
+        "en": "Coming Soon Setup",
+        "es": "Coming Soon Setup",
+        "pt": "Coming Soon Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.679323+00:00"
+    },
+    {
+      "id": "91745aac-bc75-4f3a-b0b5-6d0c9e39b008",
+      "name": "Pocket Listing Setup",
+      "parent_id": "5820a855-88f6-4146-8372-03e267a53142",
+      "description": "Subcategory for Pocket Listing Setup",
+      "translations": {
+        "en": "Pocket Listing Setup",
+        "es": "Pocket Listing Setup",
+        "pt": "Pocket Listing Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.679518+00:00"
+    },
+    {
+      "id": "64bcc5a0-94de-4572-96f1-8faaa97c7a85",
+      "name": "Showing Request",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Showing Request",
+      "translations": {
+        "en": "Showing Request",
+        "es": "Showing Request",
+        "pt": "Showing Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.679856+00:00"
+    },
+    {
+      "id": "f7f3b8bd-60fb-49b7-b407-a2c5e75bef31",
+      "name": "Open House Setup",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Open House Setup",
+      "translations": {
+        "en": "Open House Setup",
+        "es": "Open House Setup",
+        "pt": "Open House Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680030+00:00"
+    },
+    {
+      "id": "09410d68-e7da-4939-b9d5-25b6958202ac",
+      "name": "Open House Materials",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Open House Materials",
+      "translations": {
+        "en": "Open House Materials",
+        "es": "Open House Materials",
+        "pt": "Open House Materials"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680196+00:00"
+    },
+    {
+      "id": "63d0d556-3c4e-471d-a39e-dc4b7baf2f22",
+      "name": "Buyer Presentation",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Buyer Presentation",
+      "translations": {
+        "en": "Buyer Presentation",
+        "es": "Buyer Presentation",
+        "pt": "Buyer Presentation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680357+00:00"
+    },
+    {
+      "id": "a60b2206-2af6-4e09-9579-317ba5cd0114",
+      "name": "Seller Presentation",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Seller Presentation",
+      "translations": {
+        "en": "Seller Presentation",
+        "es": "Seller Presentation",
+        "pt": "Seller Presentation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680573+00:00"
+    },
+    {
+      "id": "a2277c77-8dfd-4072-9026-28f5093273f2",
+      "name": "CMA Request",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for CMA Request",
+      "translations": {
+        "en": "CMA Request",
+        "es": "CMA Request",
+        "pt": "CMA Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680739+00:00"
+    },
+    {
+      "id": "71f1a535-f454-48d5-a5b0-19e1cc77742e",
+      "name": "Market Analysis",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Market Analysis",
+      "translations": {
+        "en": "Market Analysis",
+        "es": "Market Analysis",
+        "pt": "Market Analysis"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.680915+00:00"
+    },
+    {
+      "id": "8f6ccb01-6076-4239-97a5-dda16a53f1a3",
+      "name": "Offer Preparation",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Offer Preparation",
+      "translations": {
+        "en": "Offer Preparation",
+        "es": "Offer Preparation",
+        "pt": "Offer Preparation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.681090+00:00"
+    },
+    {
+      "id": "bff3d150-5af9-465d-b45d-eee2ea8d341b",
+      "name": "Counter Offer Support",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Counter Offer Support",
+      "translations": {
+        "en": "Counter Offer Support",
+        "es": "Counter Offer Support",
+        "pt": "Counter Offer Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.681252+00:00"
+    },
+    {
+      "id": "cb22b579-e039-4583-9b9f-d7c24109d2b3",
+      "name": "Contract Review Support",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Contract Review Support",
+      "translations": {
+        "en": "Contract Review Support",
+        "es": "Contract Review Support",
+        "pt": "Contract Review Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.681411+00:00"
+    },
+    {
+      "id": "d43bfb3b-df57-422e-9866-46a9e8594441",
+      "name": "Closing Coordination",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Closing Coordination",
+      "translations": {
+        "en": "Closing Coordination",
+        "es": "Closing Coordination",
+        "pt": "Closing Coordination"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.681690+00:00"
+    },
+    {
+      "id": "c22c0467-2d3f-4a5b-8177-177a2c1024bc",
+      "name": "Post-Sale Follow-up",
+      "parent_id": "09f3a427-17f0-4462-b6b7-ad42c083467b",
+      "description": "Subcategory for Post-Sale Follow-up",
+      "translations": {
+        "en": "Post-Sale Follow-up",
+        "es": "Post-Sale Follow-up",
+        "pt": "Post-Sale Follow-up"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.681855+00:00"
+    },
+    {
+      "id": "8793171b-bfb2-4c53-9ccf-108c7af39abe",
+      "name": "Staging Consultation",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Staging Consultation",
+      "translations": {
+        "en": "Staging Consultation",
+        "es": "Staging Consultation",
+        "pt": "Staging Consultation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682202+00:00"
+    },
+    {
+      "id": "5f58aba7-d76c-478b-8d64-28e635296cd9",
+      "name": "Staging Quote Request",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Staging Quote Request",
+      "translations": {
+        "en": "Staging Quote Request",
+        "es": "Staging Quote Request",
+        "pt": "Staging Quote Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682486+00:00"
+    },
+    {
+      "id": "12aaa2e4-d2cd-4b76-a5eb-466b74cf654d",
+      "name": "Furniture Rental",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Furniture Rental",
+      "translations": {
+        "en": "Furniture Rental",
+        "es": "Furniture Rental",
+        "pt": "Furniture Rental"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682656+00:00"
+    },
+    {
+      "id": "11dd515c-20ce-48d8-898f-20d730781518",
+      "name": "Staging Coordination",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Staging Coordination",
+      "translations": {
+        "en": "Staging Coordination",
+        "es": "Staging Coordination",
+        "pt": "Staging Coordination"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682819+00:00"
+    },
+    {
+      "id": "868f1953-b786-4706-82d7-6986c34374dc",
+      "name": "Destaging Request",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Destaging Request",
+      "translations": {
+        "en": "Destaging Request",
+        "es": "Destaging Request",
+        "pt": "Destaging Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.682975+00:00"
+    },
+    {
+      "id": "f23e6435-a8bc-4a69-b263-c5078d806a43",
+      "name": "Virtual Staging",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Virtual Staging",
+      "translations": {
+        "en": "Virtual Staging",
+        "es": "Virtual Staging",
+        "pt": "Virtual Staging"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.683138+00:00"
+    },
+    {
+      "id": "3785e73d-45d4-4660-8b79-2bd95d63325d",
+      "name": "Staging Photos",
+      "parent_id": "44a7a62d-0d08-4fef-9df8-669f9bd2bf78",
+      "description": "Subcategory for Staging Photos",
+      "translations": {
+        "en": "Staging Photos",
+        "es": "Staging Photos",
+        "pt": "Staging Photos"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.683296+00:00"
+    },
+    {
+      "id": "cb8badb9-1e8a-456a-b790-3a445336ae48",
+      "name": "Commercial Listing Setup",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Commercial Listing Setup",
+      "translations": {
+        "en": "Commercial Listing Setup",
+        "es": "Commercial Listing Setup",
+        "pt": "Commercial Listing Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.683776+00:00"
+    },
+    {
+      "id": "8083335d-d696-4d8c-8974-d12a2925d2e2",
+      "name": "Property Information Package",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Property Information Package",
+      "translations": {
+        "en": "Property Information Package",
+        "es": "Property Information Package",
+        "pt": "Property Information Package"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.683975+00:00"
+    },
+    {
+      "id": "6e382bd6-c8cc-466a-9a96-fe3c5ffae639",
+      "name": "Marketing Package",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Marketing Package",
+      "translations": {
+        "en": "Marketing Package",
+        "es": "Marketing Package",
+        "pt": "Marketing Package"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.684241+00:00"
+    },
+    {
+      "id": "00d84db5-df2f-4535-9b7c-97e83bc521d6",
+      "name": "LoopNet Listing",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for LoopNet Listing",
+      "translations": {
+        "en": "LoopNet Listing",
+        "es": "LoopNet Listing",
+        "pt": "LoopNet Listing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.684569+00:00"
+    },
+    {
+      "id": "e8751ee5-29d4-42ef-ac5b-b12e94d30cbe",
+      "name": "CoStar Listing",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for CoStar Listing",
+      "translations": {
+        "en": "CoStar Listing",
+        "es": "CoStar Listing",
+        "pt": "CoStar Listing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.684777+00:00"
+    },
+    {
+      "id": "0ec2933c-0809-40e5-b394-06a223e53937",
+      "name": "Commercial Photos",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Commercial Photos",
+      "translations": {
+        "en": "Commercial Photos",
+        "es": "Commercial Photos",
+        "pt": "Commercial Photos"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.684977+00:00"
+    },
+    {
+      "id": "08ba040c-e89f-447c-9f11-d90c12ba1e8e",
+      "name": "Commercial Video",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Commercial Video",
+      "translations": {
+        "en": "Commercial Video",
+        "es": "Commercial Video",
+        "pt": "Commercial Video"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.685192+00:00"
+    },
+    {
+      "id": "ad301097-ba77-470d-914e-5cc1646a5fd0",
+      "name": "Aerial/Drone Photography",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Aerial/Drone Photography",
+      "translations": {
+        "en": "Aerial/Drone Photography",
+        "es": "Aerial/Drone Photography",
+        "pt": "Aerial/Drone Photography"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.685371+00:00"
+    },
+    {
+      "id": "22a91768-27fe-48bc-8aae-73ceb7c4af50",
+      "name": "Floor Plan Request",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Floor Plan Request",
+      "translations": {
+        "en": "Floor Plan Request",
+        "es": "Floor Plan Request",
+        "pt": "Floor Plan Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.685559+00:00"
+    },
+    {
+      "id": "41887f02-eaef-4b8d-abf7-cbc1a3ba8dd7",
+      "name": "Site Plan Request",
+      "parent_id": "ff0f4719-04fa-4e43-b464-e204b8c94476",
+      "description": "Subcategory for Site Plan Request",
+      "translations": {
+        "en": "Site Plan Request",
+        "es": "Site Plan Request",
+        "pt": "Site Plan Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.685747+00:00"
+    },
+    {
+      "id": "4a914c2c-0596-4fb4-ae10-ddea94cd41f8",
+      "name": "Lease Proposal",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Lease Proposal",
+      "translations": {
+        "en": "Lease Proposal",
+        "es": "Lease Proposal",
+        "pt": "Lease Proposal"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.686190+00:00"
+    },
+    {
+      "id": "e7298e5b-a47f-4c07-8d02-ab53c76ad252",
+      "name": "LOI Preparation",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for LOI Preparation",
+      "translations": {
+        "en": "LOI Preparation",
+        "es": "LOI Preparation",
+        "pt": "LOI Preparation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.686450+00:00"
+    },
+    {
+      "id": "629db50d-8e65-417d-ab9a-f9701b81ac2f",
+      "name": "Lease Abstract",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Lease Abstract",
+      "translations": {
+        "en": "Lease Abstract",
+        "es": "Lease Abstract",
+        "pt": "Lease Abstract"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.686653+00:00"
+    },
+    {
+      "id": "5805dc59-a691-4e31-b349-284f04798f21",
+      "name": "Rent Roll Analysis",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Rent Roll Analysis",
+      "translations": {
+        "en": "Rent Roll Analysis",
+        "es": "Rent Roll Analysis",
+        "pt": "Rent Roll Analysis"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.686860+00:00"
+    },
+    {
+      "id": "aedc5630-2d2b-4c5e-a6ba-e770b5908ff7",
+      "name": "Tenant Improvement",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Tenant Improvement",
+      "translations": {
+        "en": "Tenant Improvement",
+        "es": "Tenant Improvement",
+        "pt": "Tenant Improvement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687038+00:00"
+    },
+    {
+      "id": "0d1e34c4-590a-4622-9d57-367cc19d7482",
+      "name": "Lease Renewal",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Lease Renewal",
+      "translations": {
+        "en": "Lease Renewal",
+        "es": "Lease Renewal",
+        "pt": "Lease Renewal"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687199+00:00"
+    },
+    {
+      "id": "43ed6eb2-a253-44ee-a4e9-b2e96a6c901d",
+      "name": "Lease Amendment",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Lease Amendment",
+      "translations": {
+        "en": "Lease Amendment",
+        "es": "Lease Amendment",
+        "pt": "Lease Amendment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687357+00:00"
+    },
+    {
+      "id": "abd7fab6-5c96-4a21-9c42-b0ccff94c123",
+      "name": "Tenant Coordination",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Tenant Coordination",
+      "translations": {
+        "en": "Tenant Coordination",
+        "es": "Tenant Coordination",
+        "pt": "Tenant Coordination"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687534+00:00"
+    },
+    {
+      "id": "fb5c3c7d-e71a-4eaf-968e-c751b04b0126",
+      "name": "Move-In Coordination",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Move-In Coordination",
+      "translations": {
+        "en": "Move-In Coordination",
+        "es": "Move-In Coordination",
+        "pt": "Move-In Coordination"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687698+00:00"
+    },
+    {
+      "id": "833d8aaf-59fc-47de-9815-2d87758e425e",
+      "name": "Move-Out Coordination",
+      "parent_id": "68bfb059-dce8-4049-856c-683fcd1357b3",
+      "description": "Subcategory for Move-Out Coordination",
+      "translations": {
+        "en": "Move-Out Coordination",
+        "es": "Move-Out Coordination",
+        "pt": "Move-Out Coordination"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.687855+00:00"
+    },
+    {
+      "id": "9fa23bfc-8355-46df-88ad-a6f1874f08bf",
+      "name": "Property Condition Report",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Property Condition Report",
+      "translations": {
+        "en": "Property Condition Report",
+        "es": "Property Condition Report",
+        "pt": "Property Condition Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688223+00:00"
+    },
+    {
+      "id": "4b74b681-5f07-46d2-98dd-0414643be75f",
+      "name": "Environmental Assessment",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Environmental Assessment",
+      "translations": {
+        "en": "Environmental Assessment",
+        "es": "Environmental Assessment",
+        "pt": "Environmental Assessment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688426+00:00"
+    },
+    {
+      "id": "97de3802-34f4-4484-97e0-9f8d0f234c9a",
+      "name": "Survey Request",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Survey Request",
+      "translations": {
+        "en": "Survey Request",
+        "es": "Survey Request",
+        "pt": "Survey Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688614+00:00"
+    },
+    {
+      "id": "f1f4b3f6-4d6f-437f-8dfb-c5c9c0cd7a5e",
+      "name": "Title Review",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Title Review",
+      "translations": {
+        "en": "Title Review",
+        "es": "Title Review",
+        "pt": "Title Review"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688773+00:00"
+    },
+    {
+      "id": "ed7aec24-3230-4064-9f0b-909799d83b2f",
+      "name": "Zoning Analysis",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Zoning Analysis",
+      "translations": {
+        "en": "Zoning Analysis",
+        "es": "Zoning Analysis",
+        "pt": "Zoning Analysis"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.688932+00:00"
+    },
+    {
+      "id": "ae0f1609-3d18-4f6d-935b-6099cf9380a1",
+      "name": "Financial Underwriting",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Financial Underwriting",
+      "translations": {
+        "en": "Financial Underwriting",
+        "es": "Financial Underwriting",
+        "pt": "Financial Underwriting"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.689097+00:00"
+    },
+    {
+      "id": "faef73af-0ca3-43e1-bd4b-880b277eeb01",
+      "name": "Rent Comp Analysis",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Rent Comp Analysis",
+      "translations": {
+        "en": "Rent Comp Analysis",
+        "es": "Rent Comp Analysis",
+        "pt": "Rent Comp Analysis"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.689252+00:00"
+    },
+    {
+      "id": "0935717b-8092-4239-9bd6-2c3059d38325",
+      "name": "Market Study",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Market Study",
+      "translations": {
+        "en": "Market Study",
+        "es": "Market Study",
+        "pt": "Market Study"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.689426+00:00"
+    },
+    {
+      "id": "71487578-bdf1-4ebf-a54f-83c8ddb19583",
+      "name": "Investment Memo",
+      "parent_id": "8e089669-a974-4026-b10c-eb83cf8599ad",
+      "description": "Subcategory for Investment Memo",
+      "translations": {
+        "en": "Investment Memo",
+        "es": "Investment Memo",
+        "pt": "Investment Memo"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.689680+00:00"
+    },
+    {
+      "id": "2a58ef3d-f3ce-4346-a6bf-381366d0f474",
+      "name": "Lead Assignment",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Lead Assignment",
+      "translations": {
+        "en": "Lead Assignment",
+        "es": "Lead Assignment",
+        "pt": "Lead Assignment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.690101+00:00"
+    },
+    {
+      "id": "5374348c-3736-4f83-9a6a-ad885b598091",
+      "name": "Lead Routing Setup",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Lead Routing Setup",
+      "translations": {
+        "en": "Lead Routing Setup",
+        "es": "Lead Routing Setup",
+        "pt": "Lead Routing Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.690379+00:00"
+    },
+    {
+      "id": "ffd42636-32fa-4f92-a064-292ae7fe6ade",
+      "name": "Pipeline Report",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Pipeline Report",
+      "translations": {
+        "en": "Pipeline Report",
+        "es": "Pipeline Report",
+        "pt": "Pipeline Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.690601+00:00"
+    },
+    {
+      "id": "c527ac4f-dc50-4603-9e2a-be6ba9a0f13d",
+      "name": "Sales Forecast",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Sales Forecast",
+      "translations": {
+        "en": "Sales Forecast",
+        "es": "Sales Forecast",
+        "pt": "Sales Forecast"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.690777+00:00"
+    },
+    {
+      "id": "2cf252c9-cc0a-4a32-b57f-e3844271afc8",
+      "name": "Commission Calculation",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Commission Calculation",
+      "translations": {
+        "en": "Commission Calculation",
+        "es": "Commission Calculation",
+        "pt": "Commission Calculation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.690948+00:00"
+    },
+    {
+      "id": "7889ca20-e264-4356-be8c-03b033796e90",
+      "name": "Territory Update",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Territory Update",
+      "translations": {
+        "en": "Territory Update",
+        "es": "Territory Update",
+        "pt": "Territory Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.691115+00:00"
+    },
+    {
+      "id": "8bdf1591-1c52-4835-9e8e-3d7bd393d457",
+      "name": "Sales Tool Access",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Sales Tool Access",
+      "translations": {
+        "en": "Sales Tool Access",
+        "es": "Sales Tool Access",
+        "pt": "Sales Tool Access"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.691277+00:00"
+    },
+    {
+      "id": "d50e6d1e-6f3d-4264-ae79-76dce022df1c",
+      "name": "CRM Training Request",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for CRM Training Request",
+      "translations": {
+        "en": "CRM Training Request",
+        "es": "CRM Training Request",
+        "pt": "CRM Training Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.691443+00:00"
+    },
+    {
+      "id": "7e958558-fa69-40e6-a94c-c99837b88ce7",
+      "name": "Sales Collateral",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Sales Collateral",
+      "translations": {
+        "en": "Sales Collateral",
+        "es": "Sales Collateral",
+        "pt": "Sales Collateral"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.691680+00:00"
+    },
+    {
+      "id": "41c78c3e-ed47-4228-92f1-662b9c535e3b",
+      "name": "Competitive Analysis",
+      "parent_id": "bf282860-85d8-4eea-8157-b113af55c286",
+      "description": "Subcategory for Competitive Analysis",
+      "translations": {
+        "en": "Competitive Analysis",
+        "es": "Competitive Analysis",
+        "pt": "Competitive Analysis"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.691905+00:00"
+    },
+    {
+      "id": "9f3c6d26-d435-46b0-8ee6-6cb2bf495805",
+      "name": "CRM Data Entry",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for CRM Data Entry",
+      "translations": {
+        "en": "CRM Data Entry",
+        "es": "CRM Data Entry",
+        "pt": "CRM Data Entry"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.692271+00:00"
+    },
+    {
+      "id": "13876710-82f6-4857-817e-748827a991f1",
+      "name": "Contact Import",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Contact Import",
+      "translations": {
+        "en": "Contact Import",
+        "es": "Contact Import",
+        "pt": "Contact Import"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.692482+00:00"
+    },
+    {
+      "id": "1cc354fd-2da2-4aab-817b-8a0dd7ac2f67",
+      "name": "Contact Merge/Dedupe",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Contact Merge/Dedupe",
+      "translations": {
+        "en": "Contact Merge/Dedupe",
+        "es": "Contact Merge/Dedupe",
+        "pt": "Contact Merge/Dedupe"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.692664+00:00"
+    },
+    {
+      "id": "81e08d48-af99-443b-9089-d9a046bf523e",
+      "name": "Automation Setup",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Automation Setup",
+      "translations": {
+        "en": "Automation Setup",
+        "es": "Automation Setup",
+        "pt": "Automation Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.692834+00:00"
+    },
+    {
+      "id": "c9b9a179-605f-48ca-b9c4-125b2d162eb0",
+      "name": "Workflow Creation",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Workflow Creation",
+      "translations": {
+        "en": "Workflow Creation",
+        "es": "Workflow Creation",
+        "pt": "Workflow Creation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693007+00:00"
+    },
+    {
+      "id": "9ada7a66-cede-4314-991b-ac41621bcbb9",
+      "name": "Drip Campaign Setup",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Drip Campaign Setup",
+      "translations": {
+        "en": "Drip Campaign Setup",
+        "es": "Drip Campaign Setup",
+        "pt": "Drip Campaign Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693172+00:00"
+    },
+    {
+      "id": "492c250a-5018-4996-b456-93798b8ce77c",
+      "name": "Task Automation",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Task Automation",
+      "translations": {
+        "en": "Task Automation",
+        "es": "Task Automation",
+        "pt": "Task Automation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693334+00:00"
+    },
+    {
+      "id": "c6b029c9-9cb0-4dd6-9388-5b2c72edc2da",
+      "name": "Notification Setup",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Notification Setup",
+      "translations": {
+        "en": "Notification Setup",
+        "es": "Notification Setup",
+        "pt": "Notification Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693524+00:00"
+    },
+    {
+      "id": "fcfb26ea-c6ff-4ed9-959d-501007facfae",
+      "name": "Integration Request",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for Integration Request",
+      "translations": {
+        "en": "Integration Request",
+        "es": "Integration Request",
+        "pt": "Integration Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693786+00:00"
+    },
+    {
+      "id": "e42d4933-ca0a-4239-99a1-62be22020712",
+      "name": "CRM Bug Report",
+      "parent_id": "bb657677-ef36-4c93-89a2-01b5c4f454c1",
+      "description": "Subcategory for CRM Bug Report",
+      "translations": {
+        "en": "CRM Bug Report",
+        "es": "CRM Bug Report",
+        "pt": "CRM Bug Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.693980+00:00"
+    },
+    {
+      "id": "e1a0ecf0-5291-46b6-8c9d-e30fc25dbfd8",
+      "name": "Lead Source Setup",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Lead Source Setup",
+      "translations": {
+        "en": "Lead Source Setup",
+        "es": "Lead Source Setup",
+        "pt": "Lead Source Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.694323+00:00"
+    },
+    {
+      "id": "f2fb11a2-7e94-42ba-9b5a-e5d04a8333cc",
+      "name": "Landing Page Request",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Landing Page Request",
+      "translations": {
+        "en": "Landing Page Request",
+        "es": "Landing Page Request",
+        "pt": "Landing Page Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.694639+00:00"
+    },
+    {
+      "id": "8e5a7007-8638-487c-9680-860ee23b7358",
+      "name": "Lead Magnet Creation",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Lead Magnet Creation",
+      "translations": {
+        "en": "Lead Magnet Creation",
+        "es": "Lead Magnet Creation",
+        "pt": "Lead Magnet Creation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.694847+00:00"
+    },
+    {
+      "id": "8c2d1042-ebfc-4f38-a643-fe6e05a130bc",
+      "name": "Webinar Setup",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Webinar Setup",
+      "translations": {
+        "en": "Webinar Setup",
+        "es": "Webinar Setup",
+        "pt": "Webinar Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695024+00:00"
+    },
+    {
+      "id": "c933cea2-6e5a-4884-b52e-0911c07c59f8",
+      "name": "Lead Scoring Setup",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Lead Scoring Setup",
+      "translations": {
+        "en": "Lead Scoring Setup",
+        "es": "Lead Scoring Setup",
+        "pt": "Lead Scoring Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695188+00:00"
+    },
+    {
+      "id": "20bda116-45ad-4a83-a57f-1778c78c91bd",
+      "name": "Lead Qualification",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Lead Qualification",
+      "translations": {
+        "en": "Lead Qualification",
+        "es": "Lead Qualification",
+        "pt": "Lead Qualification"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695344+00:00"
+    },
+    {
+      "id": "0bc379f6-3d6a-4b94-b007-c69a7bd4df53",
+      "name": "Lead Nurture Campaign",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Lead Nurture Campaign",
+      "translations": {
+        "en": "Lead Nurture Campaign",
+        "es": "Lead Nurture Campaign",
+        "pt": "Lead Nurture Campaign"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695516+00:00"
+    },
+    {
+      "id": "8ca5538d-048b-4dec-8aab-bf4f46e10a83",
+      "name": "Referral Program",
+      "parent_id": "39233e10-329c-43da-b2a1-cf660f434afc",
+      "description": "Subcategory for Referral Program",
+      "translations": {
+        "en": "Referral Program",
+        "es": "Referral Program",
+        "pt": "Referral Program"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.695687+00:00"
+    },
+    {
+      "id": "d2073768-97ba-443e-b954-1cdaa3a592f1",
+      "name": "General Inquiry",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for General Inquiry",
+      "translations": {
+        "en": "General Inquiry",
+        "es": "General Inquiry",
+        "pt": "General Inquiry"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.696082+00:00"
+    },
+    {
+      "id": "8c3bad10-7e19-461c-b3c6-feb55c0f5c2b",
+      "name": "Service Complaint",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Service Complaint",
+      "translations": {
+        "en": "Service Complaint",
+        "es": "Service Complaint",
+        "pt": "Service Complaint"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.696278+00:00"
+    },
+    {
+      "id": "1fb31c42-d4aa-4c53-a48b-1298e2e8907a",
+      "name": "Billing Question",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Billing Question",
+      "translations": {
+        "en": "Billing Question",
+        "es": "Billing Question",
+        "pt": "Billing Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.696541+00:00"
+    },
+    {
+      "id": "495fe48b-f101-4fc5-837f-cab4ba645f51",
+      "name": "Account Access Issue",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Account Access Issue",
+      "translations": {
+        "en": "Account Access Issue",
+        "es": "Account Access Issue",
+        "pt": "Account Access Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.696847+00:00"
+    },
+    {
+      "id": "13d1054a-44bd-4c47-8cdc-88c0c6d068df",
+      "name": "Product Question",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Product Question",
+      "translations": {
+        "en": "Product Question",
+        "es": "Product Question",
+        "pt": "Product Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.697149+00:00"
+    },
+    {
+      "id": "4d37a75a-a871-4163-881b-f794dc3e6a75",
+      "name": "Feature Request",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Feature Request",
+      "translations": {
+        "en": "Feature Request",
+        "es": "Feature Request",
+        "pt": "Feature Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.697423+00:00"
+    },
+    {
+      "id": "99da10db-ca45-4768-ba66-997a8a2a7fc3",
+      "name": "Bug Report",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Bug Report",
+      "translations": {
+        "en": "Bug Report",
+        "es": "Bug Report",
+        "pt": "Bug Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.697713+00:00"
+    },
+    {
+      "id": "94817811-4ac2-4ec2-a8ab-fda38eb19540",
+      "name": "Escalation Request",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Escalation Request",
+      "translations": {
+        "en": "Escalation Request",
+        "es": "Escalation Request",
+        "pt": "Escalation Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.697982+00:00"
+    },
+    {
+      "id": "cc1e40c4-0d97-4211-bc5c-770e415fba40",
+      "name": "Feedback Submission",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Feedback Submission",
+      "translations": {
+        "en": "Feedback Submission",
+        "es": "Feedback Submission",
+        "pt": "Feedback Submission"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.698245+00:00"
+    },
+    {
+      "id": "b399cb27-6ca2-49d9-9038-efe8275b5b53",
+      "name": "Survey Response",
+      "parent_id": "5c5e6212-7293-4f5c-a09b-72acb27ef950",
+      "description": "Subcategory for Survey Response",
+      "translations": {
+        "en": "Survey Response",
+        "es": "Survey Response",
+        "pt": "Survey Response"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.698503+00:00"
+    },
+    {
+      "id": "335b7cd2-e27f-4823-aea6-0aad76de7842",
+      "name": "Client Onboarding",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Client Onboarding",
+      "translations": {
+        "en": "Client Onboarding",
+        "es": "Client Onboarding",
+        "pt": "Client Onboarding"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.698969+00:00"
+    },
+    {
+      "id": "de7e9993-dfa1-488a-be21-d450afc7de5b",
+      "name": "Account Setup",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Account Setup",
+      "translations": {
+        "en": "Account Setup",
+        "es": "Account Setup",
+        "pt": "Account Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699145+00:00"
+    },
+    {
+      "id": "60f3011b-ed38-4872-95cd-ee614a7e1f96",
+      "name": "Training Request",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Training Request",
+      "translations": {
+        "en": "Training Request",
+        "es": "Training Request",
+        "pt": "Training Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699307+00:00"
+    },
+    {
+      "id": "0e25e33a-62d2-4d3e-8679-55db0befa874",
+      "name": "Service Upgrade",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Service Upgrade",
+      "translations": {
+        "en": "Service Upgrade",
+        "es": "Service Upgrade",
+        "pt": "Service Upgrade"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699508+00:00"
+    },
+    {
+      "id": "30b6fee0-5c76-4db3-94c4-0dfebea3b300",
+      "name": "Service Downgrade",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Service Downgrade",
+      "translations": {
+        "en": "Service Downgrade",
+        "es": "Service Downgrade",
+        "pt": "Service Downgrade"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699674+00:00"
+    },
+    {
+      "id": "bf762ad1-0847-4402-acff-5df72e30bdca",
+      "name": "Service Cancellation",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Service Cancellation",
+      "translations": {
+        "en": "Service Cancellation",
+        "es": "Service Cancellation",
+        "pt": "Service Cancellation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699836+00:00"
+    },
+    {
+      "id": "c98342c2-1f58-4290-8875-2454c21960ab",
+      "name": "Contract Renewal",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Contract Renewal",
+      "translations": {
+        "en": "Contract Renewal",
+        "es": "Contract Renewal",
+        "pt": "Contract Renewal"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.699994+00:00"
+    },
+    {
+      "id": "978be2d6-247f-4d2e-8d0b-3ba373f827dc",
+      "name": "Quarterly Review Request",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Quarterly Review Request",
+      "translations": {
+        "en": "Quarterly Review Request",
+        "es": "Quarterly Review Request",
+        "pt": "Quarterly Review Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.700266+00:00"
+    },
+    {
+      "id": "6ffc8d2a-8c0c-47ca-99f7-c0b3112c8d01",
+      "name": "Success Plan Update",
+      "parent_id": "2bdfc207-adbd-4b9d-9816-58de2822be0a",
+      "description": "Subcategory for Success Plan Update",
+      "translations": {
+        "en": "Success Plan Update",
+        "es": "Success Plan Update",
+        "pt": "Success Plan Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.700443+00:00"
+    },
+    {
+      "id": "7cbc02d6-56c5-473c-9785-a44a06e12e05",
+      "name": "Password Reset",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Password Reset",
+      "translations": {
+        "en": "Password Reset",
+        "es": "Password Reset",
+        "pt": "Password Reset"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.700783+00:00"
+    },
+    {
+      "id": "f326fbb2-c450-4d83-a240-6baa14db0c35",
+      "name": "Account Lockout",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Account Lockout",
+      "translations": {
+        "en": "Account Lockout",
+        "es": "Account Lockout",
+        "pt": "Account Lockout"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.700968+00:00"
+    },
+    {
+      "id": "6ceb08ff-24e7-40db-b639-796404f3364b",
+      "name": "New User Setup",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for New User Setup",
+      "translations": {
+        "en": "New User Setup",
+        "es": "New User Setup",
+        "pt": "New User Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.701133+00:00"
+    },
+    {
+      "id": "13ea77a1-fb62-4154-9efb-08650ac911f1",
+      "name": "User Deactivation",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for User Deactivation",
+      "translations": {
+        "en": "User Deactivation",
+        "es": "User Deactivation",
+        "pt": "User Deactivation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.701289+00:00"
+    },
+    {
+      "id": "c5146ff8-9df1-4fbb-ae9e-ba4dacf0e139",
+      "name": "Email Issue",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Email Issue",
+      "translations": {
+        "en": "Email Issue",
+        "es": "Email Issue",
+        "pt": "Email Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.701448+00:00"
+    },
+    {
+      "id": "c3ac99e7-d7fa-4743-884a-328a6a23c11e",
+      "name": "Software Installation",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Software Installation",
+      "translations": {
+        "en": "Software Installation",
+        "es": "Software Installation",
+        "pt": "Software Installation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.701601+00:00"
+    },
+    {
+      "id": "0c89f13a-6e2a-4d9c-9462-9835dd3282c8",
+      "name": "Software Update",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Software Update",
+      "translations": {
+        "en": "Software Update",
+        "es": "Software Update",
+        "pt": "Software Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.701816+00:00"
+    },
+    {
+      "id": "dbb3baf5-fa25-4706-bd41-7fe7c30eb771",
+      "name": "VPN Access",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for VPN Access",
+      "translations": {
+        "en": "VPN Access",
+        "es": "VPN Access",
+        "pt": "VPN Access"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.702112+00:00"
+    },
+    {
+      "id": "3c10ae12-a2ec-43a4-ae2f-1fb361601830",
+      "name": "Remote Access Setup",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Remote Access Setup",
+      "translations": {
+        "en": "Remote Access Setup",
+        "es": "Remote Access Setup",
+        "pt": "Remote Access Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.702369+00:00"
+    },
+    {
+      "id": "fb60e2c3-47a4-4ae2-9223-9f5562bb02fb",
+      "name": "Printer Issue",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Printer Issue",
+      "translations": {
+        "en": "Printer Issue",
+        "es": "Printer Issue",
+        "pt": "Printer Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.702646+00:00"
+    },
+    {
+      "id": "e5d2f573-f5d4-4386-8cdb-8f157986b0d3",
+      "name": "Network Issue",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Network Issue",
+      "translations": {
+        "en": "Network Issue",
+        "es": "Network Issue",
+        "pt": "Network Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.702926+00:00"
+    },
+    {
+      "id": "c2e567e1-7fb6-4eec-b485-ce8f31503262",
+      "name": "Internet Connectivity",
+      "parent_id": "275bc4ff-c8f4-40be-aaa2-7594a9dd9f77",
+      "description": "Subcategory for Internet Connectivity",
+      "translations": {
+        "en": "Internet Connectivity",
+        "es": "Internet Connectivity",
+        "pt": "Internet Connectivity"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.703199+00:00"
+    },
+    {
+      "id": "8fa3bea1-26c1-4f3c-bc7f-32b7aeac1faa",
+      "name": "New Laptop Request",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for New Laptop Request",
+      "translations": {
+        "en": "New Laptop Request",
+        "es": "New Laptop Request",
+        "pt": "New Laptop Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.703757+00:00"
+    },
+    {
+      "id": "0c5726a8-5f64-43cb-acbb-f3a3a4f3e907",
+      "name": "Laptop Repair",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Laptop Repair",
+      "translations": {
+        "en": "Laptop Repair",
+        "es": "Laptop Repair",
+        "pt": "Laptop Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704017+00:00"
+    },
+    {
+      "id": "a8c4bb48-4c75-435b-b017-2f511de66c52",
+      "name": "Monitor Request",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Monitor Request",
+      "translations": {
+        "en": "Monitor Request",
+        "es": "Monitor Request",
+        "pt": "Monitor Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704210+00:00"
+    },
+    {
+      "id": "e9ac0e17-4c40-4b8d-be79-607cbfd9c961",
+      "name": "Keyboard/Mouse Request",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Keyboard/Mouse Request",
+      "translations": {
+        "en": "Keyboard/Mouse Request",
+        "es": "Keyboard/Mouse Request",
+        "pt": "Keyboard/Mouse Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704373+00:00"
+    },
+    {
+      "id": "bb7602ea-3d03-4c97-8c9a-daca1b52877f",
+      "name": "Phone Setup",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Phone Setup",
+      "translations": {
+        "en": "Phone Setup",
+        "es": "Phone Setup",
+        "pt": "Phone Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704547+00:00"
+    },
+    {
+      "id": "71939746-69ee-4189-aca0-f669f3d9d20d",
+      "name": "Tablet Request",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Tablet Request",
+      "translations": {
+        "en": "Tablet Request",
+        "es": "Tablet Request",
+        "pt": "Tablet Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704704+00:00"
+    },
+    {
+      "id": "6be94031-d474-4798-969a-7d1977b86b53",
+      "name": "Hardware Return",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Hardware Return",
+      "translations": {
+        "en": "Hardware Return",
+        "es": "Hardware Return",
+        "pt": "Hardware Return"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.704861+00:00"
+    },
+    {
+      "id": "dede595c-72ed-4d37-a10a-9773402ae4a6",
+      "name": "Equipment Inventory",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Equipment Inventory",
+      "translations": {
+        "en": "Equipment Inventory",
+        "es": "Equipment Inventory",
+        "pt": "Equipment Inventory"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705041+00:00"
+    },
+    {
+      "id": "d7a3d4fc-8985-408d-91af-0839bcef5e3b",
+      "name": "Device Refresh",
+      "parent_id": "3f1453c1-d33f-4c77-8cbb-f882083c2ce0",
+      "description": "Subcategory for Device Refresh",
+      "translations": {
+        "en": "Device Refresh",
+        "es": "Device Refresh",
+        "pt": "Device Refresh"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705200+00:00"
+    },
+    {
+      "id": "8502310f-1152-468d-bfde-62e9da1286b9",
+      "name": "Access Request",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Access Request",
+      "translations": {
+        "en": "Access Request",
+        "es": "Access Request",
+        "pt": "Access Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705554+00:00"
+    },
+    {
+      "id": "2f211bde-6637-4e16-9803-d40b8b4f8e6d",
+      "name": "Permission Change",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Permission Change",
+      "translations": {
+        "en": "Permission Change",
+        "es": "Permission Change",
+        "pt": "Permission Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705722+00:00"
+    },
+    {
+      "id": "f169cb2f-ff3f-4387-84a1-eeb7e9f9d326",
+      "name": "Security Concern",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Security Concern",
+      "translations": {
+        "en": "Security Concern",
+        "es": "Security Concern",
+        "pt": "Security Concern"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.705884+00:00"
+    },
+    {
+      "id": "dc04bde6-11f6-408a-affa-17ced0dae7de",
+      "name": "Suspicious Email Report",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Suspicious Email Report",
+      "translations": {
+        "en": "Suspicious Email Report",
+        "es": "Suspicious Email Report",
+        "pt": "Suspicious Email Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.706053+00:00"
+    },
+    {
+      "id": "1860e1c9-319c-4032-b2e4-a2c1c84612f0",
+      "name": "Data Breach Report",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Data Breach Report",
+      "translations": {
+        "en": "Data Breach Report",
+        "es": "Data Breach Report",
+        "pt": "Data Breach Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.706299+00:00"
+    },
+    {
+      "id": "eb11eacf-d880-480c-a646-5e7d1390017d",
+      "name": "MFA Setup",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for MFA Setup",
+      "translations": {
+        "en": "MFA Setup",
+        "es": "MFA Setup",
+        "pt": "MFA Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.706482+00:00"
+    },
+    {
+      "id": "5274cbc7-9fea-45b2-b830-6214ac4640de",
+      "name": "Security Training",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Security Training",
+      "translations": {
+        "en": "Security Training",
+        "es": "Security Training",
+        "pt": "Security Training"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.706698+00:00"
+    },
+    {
+      "id": "33dcb4a2-9696-4252-a628-3896a9186a00",
+      "name": "Security Audit Request",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Security Audit Request",
+      "translations": {
+        "en": "Security Audit Request",
+        "es": "Security Audit Request",
+        "pt": "Security Audit Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.706922+00:00"
+    },
+    {
+      "id": "15945a42-0577-4fc0-b6ff-67dbc72ca904",
+      "name": "Compliance Check",
+      "parent_id": "a26b40e1-ba2b-48dd-89ad-dfcd715de4bd",
+      "description": "Subcategory for Compliance Check",
+      "translations": {
+        "en": "Compliance Check",
+        "es": "Compliance Check",
+        "pt": "Compliance Check"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.707206+00:00"
+    },
+    {
+      "id": "3ce5743a-8dad-4570-b78d-a4fb9c5b5c0d",
+      "name": "Invoice Submission",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Invoice Submission",
+      "translations": {
+        "en": "Invoice Submission",
+        "es": "Invoice Submission",
+        "pt": "Invoice Submission"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.707728+00:00"
+    },
+    {
+      "id": "bac3c72a-6afc-4b43-ae0e-59b7efad73f7",
+      "name": "Invoice Question",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Invoice Question",
+      "translations": {
+        "en": "Invoice Question",
+        "es": "Invoice Question",
+        "pt": "Invoice Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.707948+00:00"
+    },
+    {
+      "id": "05e20506-bfa2-4e28-81f3-3133b5a5b83d",
+      "name": "Payment Status",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Payment Status",
+      "translations": {
+        "en": "Payment Status",
+        "es": "Payment Status",
+        "pt": "Payment Status"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.708151+00:00"
+    },
+    {
+      "id": "9e73c5de-53e8-4760-ba50-e7c722698e34",
+      "name": "Payment Dispute",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Payment Dispute",
+      "translations": {
+        "en": "Payment Dispute",
+        "es": "Payment Dispute",
+        "pt": "Payment Dispute"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.708324+00:00"
+    },
+    {
+      "id": "164c8beb-f833-47c3-af62-4395437660bc",
+      "name": "Vendor Setup",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Vendor Setup",
+      "translations": {
+        "en": "Vendor Setup",
+        "es": "Vendor Setup",
+        "pt": "Vendor Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.708514+00:00"
+    },
+    {
+      "id": "db54956a-87f5-42cc-94b1-9749ecc24b61",
+      "name": "Vendor Update",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Vendor Update",
+      "translations": {
+        "en": "Vendor Update",
+        "es": "Vendor Update",
+        "pt": "Vendor Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.708685+00:00"
+    },
+    {
+      "id": "543d3ef0-8835-44a8-8706-91ba0a1e5f7f",
+      "name": "1099 Request",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for 1099 Request",
+      "translations": {
+        "en": "1099 Request",
+        "es": "1099 Request",
+        "pt": "1099 Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.708853+00:00"
+    },
+    {
+      "id": "1cd8b974-e0e8-4cc6-ac08-f9a6195ee16c",
+      "name": "Check Request",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Check Request",
+      "translations": {
+        "en": "Check Request",
+        "es": "Check Request",
+        "pt": "Check Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709028+00:00"
+    },
+    {
+      "id": "543749d7-6ee3-4fda-9567-8da928064b39",
+      "name": "Wire Transfer Request",
+      "parent_id": "56a30071-4afe-46e2-aead-2ca8d142d194",
+      "description": "Subcategory for Wire Transfer Request",
+      "translations": {
+        "en": "Wire Transfer Request",
+        "es": "Wire Transfer Request",
+        "pt": "Wire Transfer Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709205+00:00"
+    },
+    {
+      "id": "b55fc6a0-13ca-4982-9fbf-44a7c98446b4",
+      "name": "Invoice Request",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Invoice Request",
+      "translations": {
+        "en": "Invoice Request",
+        "es": "Invoice Request",
+        "pt": "Invoice Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709574+00:00"
+    },
+    {
+      "id": "5771d404-dbaa-4563-9856-9a8ebae7af84",
+      "name": "Payment Received",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Payment Received",
+      "translations": {
+        "en": "Payment Received",
+        "es": "Payment Received",
+        "pt": "Payment Received"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709771+00:00"
+    },
+    {
+      "id": "b453fdbf-5663-4b42-a0be-575a03954fe0",
+      "name": "Collection Follow-up",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Collection Follow-up",
+      "translations": {
+        "en": "Collection Follow-up",
+        "es": "Collection Follow-up",
+        "pt": "Collection Follow-up"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.709944+00:00"
+    },
+    {
+      "id": "b5277b12-7ab9-4012-8664-4adfccf515b9",
+      "name": "Credit Memo Request",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Credit Memo Request",
+      "translations": {
+        "en": "Credit Memo Request",
+        "es": "Credit Memo Request",
+        "pt": "Credit Memo Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.710122+00:00"
+    },
+    {
+      "id": "54b8521d-ee82-4c49-98e1-13ff31e7a500",
+      "name": "Refund Request",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Refund Request",
+      "translations": {
+        "en": "Refund Request",
+        "es": "Refund Request",
+        "pt": "Refund Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.710300+00:00"
+    },
+    {
+      "id": "d0476228-783a-49cf-b513-0f007cba5f8e",
+      "name": "Statement Request",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Statement Request",
+      "translations": {
+        "en": "Statement Request",
+        "es": "Statement Request",
+        "pt": "Statement Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.710474+00:00"
+    },
+    {
+      "id": "1b98d929-1c36-445d-bdca-c014349a4592",
+      "name": "Payment Plan Setup",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Payment Plan Setup",
+      "translations": {
+        "en": "Payment Plan Setup",
+        "es": "Payment Plan Setup",
+        "pt": "Payment Plan Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.710642+00:00"
+    },
+    {
+      "id": "2dbdc774-f774-4300-952a-f746f7b642c7",
+      "name": "Client Billing Issue",
+      "parent_id": "2793c073-8144-4f64-afe0-51ba0e0a1a3f",
+      "description": "Subcategory for Client Billing Issue",
+      "translations": {
+        "en": "Client Billing Issue",
+        "es": "Client Billing Issue",
+        "pt": "Client Billing Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.710950+00:00"
+    },
+    {
+      "id": "a13f893f-d935-4a82-a241-ac9f5326641b",
+      "name": "Expense Report",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Expense Report",
+      "translations": {
+        "en": "Expense Report",
+        "es": "Expense Report",
+        "pt": "Expense Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.711578+00:00"
+    },
+    {
+      "id": "78a21794-26d3-4e8a-a013-5cc21f6b4155",
+      "name": "Travel Reimbursement",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Travel Reimbursement",
+      "translations": {
+        "en": "Travel Reimbursement",
+        "es": "Travel Reimbursement",
+        "pt": "Travel Reimbursement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.711850+00:00"
+    },
+    {
+      "id": "4ee58daa-f2bd-431a-b82f-90eb2dc07353",
+      "name": "Mileage Reimbursement",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Mileage Reimbursement",
+      "translations": {
+        "en": "Mileage Reimbursement",
+        "es": "Mileage Reimbursement",
+        "pt": "Mileage Reimbursement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.712129+00:00"
+    },
+    {
+      "id": "68bf2a9d-191c-465a-b421-0e8bc5dc4cbc",
+      "name": "Receipt Missing",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Receipt Missing",
+      "translations": {
+        "en": "Receipt Missing",
+        "es": "Receipt Missing",
+        "pt": "Receipt Missing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.712390+00:00"
+    },
+    {
+      "id": "5dd1ac1a-158d-4fb8-a6ee-86aaecead387",
+      "name": "Corporate Card Issue",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Corporate Card Issue",
+      "translations": {
+        "en": "Corporate Card Issue",
+        "es": "Corporate Card Issue",
+        "pt": "Corporate Card Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.712678+00:00"
+    },
+    {
+      "id": "b7e04fa2-d3b6-4162-bd1a-ac2b0012eaef",
+      "name": "Budget Question",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Budget Question",
+      "translations": {
+        "en": "Budget Question",
+        "es": "Budget Question",
+        "pt": "Budget Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.712936+00:00"
+    },
+    {
+      "id": "e04ced76-8d6e-491a-a473-0e3cee55e52e",
+      "name": "Cost Approval",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Cost Approval",
+      "translations": {
+        "en": "Cost Approval",
+        "es": "Cost Approval",
+        "pt": "Cost Approval"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.713206+00:00"
+    },
+    {
+      "id": "d54b5dbc-70af-4606-8b20-fc885a7b5513",
+      "name": "Petty Cash Request",
+      "parent_id": "26da23e0-577c-4afc-8951-196c566dce04",
+      "description": "Subcategory for Petty Cash Request",
+      "translations": {
+        "en": "Petty Cash Request",
+        "es": "Petty Cash Request",
+        "pt": "Petty Cash Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.713479+00:00"
+    },
+    {
+      "id": "c11fe9fd-ba44-400d-a4a4-19e382a7f5fa",
+      "name": "Paycheck Question",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Paycheck Question",
+      "translations": {
+        "en": "Paycheck Question",
+        "es": "Paycheck Question",
+        "pt": "Paycheck Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.714057+00:00"
+    },
+    {
+      "id": "aefde355-b253-4827-a98d-f45c12600456",
+      "name": "Direct Deposit Setup",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Direct Deposit Setup",
+      "translations": {
+        "en": "Direct Deposit Setup",
+        "es": "Direct Deposit Setup",
+        "pt": "Direct Deposit Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.714387+00:00"
+    },
+    {
+      "id": "a152b5e3-389b-4a21-8427-c68b941473bb",
+      "name": "Tax Withholding Change",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Tax Withholding Change",
+      "translations": {
+        "en": "Tax Withholding Change",
+        "es": "Tax Withholding Change",
+        "pt": "Tax Withholding Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.714685+00:00"
+    },
+    {
+      "id": "30bb3cd4-1f2b-4d29-9ccc-f13cef324fb2",
+      "name": "W-2 Request",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for W-2 Request",
+      "translations": {
+        "en": "W-2 Request",
+        "es": "W-2 Request",
+        "pt": "W-2 Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.714947+00:00"
+    },
+    {
+      "id": "928f3f15-0c83-4ad8-b95b-f0f13f7fefab",
+      "name": "Pay Stub Request",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Pay Stub Request",
+      "translations": {
+        "en": "Pay Stub Request",
+        "es": "Pay Stub Request",
+        "pt": "Pay Stub Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.715216+00:00"
+    },
+    {
+      "id": "10af57d8-357d-4f00-845d-f45a4b610a10",
+      "name": "Commission Question",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Commission Question",
+      "translations": {
+        "en": "Commission Question",
+        "es": "Commission Question",
+        "pt": "Commission Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.715493+00:00"
+    },
+    {
+      "id": "f1a09591-0a54-4e3c-a515-6a0e00579126",
+      "name": "Bonus Question",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Bonus Question",
+      "translations": {
+        "en": "Bonus Question",
+        "es": "Bonus Question",
+        "pt": "Bonus Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.715754+00:00"
+    },
+    {
+      "id": "c0d50079-8f93-454d-81c9-3b5169967370",
+      "name": "Time Off Balance",
+      "parent_id": "7fc177c3-fb20-477f-8582-7d026c792516",
+      "description": "Subcategory for Time Off Balance",
+      "translations": {
+        "en": "Time Off Balance",
+        "es": "Time Off Balance",
+        "pt": "Time Off Balance"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.716574+00:00"
+    },
+    {
+      "id": "662b7553-f798-40eb-afea-64b13eac283c",
+      "name": "Job Posting Request",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Job Posting Request",
+      "translations": {
+        "en": "Job Posting Request",
+        "es": "Job Posting Request",
+        "pt": "Job Posting Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.717179+00:00"
+    },
+    {
+      "id": "f1845fc4-3f41-48de-a0dc-2a258bb325b0",
+      "name": "Candidate Referral",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Candidate Referral",
+      "translations": {
+        "en": "Candidate Referral",
+        "es": "Candidate Referral",
+        "pt": "Candidate Referral"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.717491+00:00"
+    },
+    {
+      "id": "c4a750fe-fd67-496f-aad4-9b40a4741ab5",
+      "name": "Interview Schedule",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Interview Schedule",
+      "translations": {
+        "en": "Interview Schedule",
+        "es": "Interview Schedule",
+        "pt": "Interview Schedule"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.717762+00:00"
+    },
+    {
+      "id": "56cb9862-d5ce-47ca-8a9b-eaf29e2842c7",
+      "name": "Offer Letter Request",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Offer Letter Request",
+      "translations": {
+        "en": "Offer Letter Request",
+        "es": "Offer Letter Request",
+        "pt": "Offer Letter Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.718036+00:00"
+    },
+    {
+      "id": "a7ea3460-2504-427e-8e06-c1f67995a93e",
+      "name": "Background Check",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Background Check",
+      "translations": {
+        "en": "Background Check",
+        "es": "Background Check",
+        "pt": "Background Check"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.718295+00:00"
+    },
+    {
+      "id": "c3ded8f1-ea11-410f-9db5-becaed965b30",
+      "name": "Reference Check",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Reference Check",
+      "translations": {
+        "en": "Reference Check",
+        "es": "Reference Check",
+        "pt": "Reference Check"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.718574+00:00"
+    },
+    {
+      "id": "5e275960-523b-40ce-96ed-0060cc93ed92",
+      "name": "Hiring Manager Support",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Hiring Manager Support",
+      "translations": {
+        "en": "Hiring Manager Support",
+        "es": "Hiring Manager Support",
+        "pt": "Hiring Manager Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.718829+00:00"
+    },
+    {
+      "id": "20b9d436-52ea-4a55-bef5-72cff542d7c4",
+      "name": "Job Description Update",
+      "parent_id": "9237bb56-5556-48fe-ba5e-8259e7444063",
+      "description": "Subcategory for Job Description Update",
+      "translations": {
+        "en": "Job Description Update",
+        "es": "Job Description Update",
+        "pt": "Job Description Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.719101+00:00"
+    },
+    {
+      "id": "7e05956c-7a27-4703-87a0-7d003d1f9d93",
+      "name": "New Hire Setup",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for New Hire Setup",
+      "translations": {
+        "en": "New Hire Setup",
+        "es": "New Hire Setup",
+        "pt": "New Hire Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.719629+00:00"
+    },
+    {
+      "id": "9055e9e9-761d-4aad-841f-f3c82e46a6d4",
+      "name": "Equipment Request",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for Equipment Request",
+      "translations": {
+        "en": "Equipment Request",
+        "es": "Equipment Request",
+        "pt": "Equipment Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.719882+00:00"
+    },
+    {
+      "id": "357ce4c3-016e-4425-a138-132bb30585fb",
+      "name": "System Access Setup",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for System Access Setup",
+      "translations": {
+        "en": "System Access Setup",
+        "es": "System Access Setup",
+        "pt": "System Access Setup"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.720208+00:00"
+    },
+    {
+      "id": "57750f6b-a937-4486-a3cc-e58baf258c26",
+      "name": "Orientation Schedule",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for Orientation Schedule",
+      "translations": {
+        "en": "Orientation Schedule",
+        "es": "Orientation Schedule",
+        "pt": "Orientation Schedule"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.720584+00:00"
+    },
+    {
+      "id": "b5d18901-9c4b-49f2-af9e-2d89accc358f",
+      "name": "Training Assignment",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for Training Assignment",
+      "translations": {
+        "en": "Training Assignment",
+        "es": "Training Assignment",
+        "pt": "Training Assignment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.720892+00:00"
+    },
+    {
+      "id": "44d5fca2-8ed4-43c9-96f3-45e99e8ce089",
+      "name": "Benefits Enrollment",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for Benefits Enrollment",
+      "translations": {
+        "en": "Benefits Enrollment",
+        "es": "Benefits Enrollment",
+        "pt": "Benefits Enrollment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.721174+00:00"
+    },
+    {
+      "id": "4ffc3988-72e2-4974-81bd-daa0a8ae737f",
+      "name": "I-9 Verification",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for I-9 Verification",
+      "translations": {
+        "en": "I-9 Verification",
+        "es": "I-9 Verification",
+        "pt": "I-9 Verification"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.721470+00:00"
+    },
+    {
+      "id": "d621a88e-b972-43ee-aaab-21263c505869",
+      "name": "Badge/Key Request",
+      "parent_id": "aa63dd9f-2b60-4d84-9c23-58ef20cad4a1",
+      "description": "Subcategory for Badge/Key Request",
+      "translations": {
+        "en": "Badge/Key Request",
+        "es": "Badge/Key Request",
+        "pt": "Badge/Key Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.721738+00:00"
+    },
+    {
+      "id": "0ec085c9-6816-4bd7-88ec-cdbff1db962f",
+      "name": "Time Off Request",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Time Off Request",
+      "translations": {
+        "en": "Time Off Request",
+        "es": "Time Off Request",
+        "pt": "Time Off Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.722278+00:00"
+    },
+    {
+      "id": "44951d67-7263-4da2-9dd6-0add72433eb9",
+      "name": "Leave of Absence",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Leave of Absence",
+      "translations": {
+        "en": "Leave of Absence",
+        "es": "Leave of Absence",
+        "pt": "Leave of Absence"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.722635+00:00"
+    },
+    {
+      "id": "7b7f8405-4643-4b9a-9e1f-3e9edbead9b8",
+      "name": "Address Change",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Address Change",
+      "translations": {
+        "en": "Address Change",
+        "es": "Address Change",
+        "pt": "Address Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.722918+00:00"
+    },
+    {
+      "id": "095ff498-627e-4aec-8405-e6ac1ad31fee",
+      "name": "Emergency Contact Update",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Emergency Contact Update",
+      "translations": {
+        "en": "Emergency Contact Update",
+        "es": "Emergency Contact Update",
+        "pt": "Emergency Contact Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.723193+00:00"
+    },
+    {
+      "id": "a7a6744a-a91c-42d1-87a7-780074980d22",
+      "name": "Benefits Question",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Benefits Question",
+      "translations": {
+        "en": "Benefits Question",
+        "es": "Benefits Question",
+        "pt": "Benefits Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.723471+00:00"
+    },
+    {
+      "id": "536d992d-7468-4e81-b6d6-7e23d634bf4b",
+      "name": "401k Question",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for 401k Question",
+      "translations": {
+        "en": "401k Question",
+        "es": "401k Question",
+        "pt": "401k Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.723730+00:00"
+    },
+    {
+      "id": "b7cc0ea6-b115-4064-8a68-6d8fdffb0878",
+      "name": "Health Insurance",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Health Insurance",
+      "translations": {
+        "en": "Health Insurance",
+        "es": "Health Insurance",
+        "pt": "Health Insurance"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.723994+00:00"
+    },
+    {
+      "id": "a0f8e247-11e7-4fbb-832b-2ab818fdb01b",
+      "name": "Life Event Update",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Life Event Update",
+      "translations": {
+        "en": "Life Event Update",
+        "es": "Life Event Update",
+        "pt": "Life Event Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.724320+00:00"
+    },
+    {
+      "id": "ad8b2070-53a0-4b8b-92af-07a0697e7f98",
+      "name": "Performance Review",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Performance Review",
+      "translations": {
+        "en": "Performance Review",
+        "es": "Performance Review",
+        "pt": "Performance Review"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.724612+00:00"
+    },
+    {
+      "id": "a4c8b2ce-4795-4eec-b074-84df3e6b1abd",
+      "name": "Career Development",
+      "parent_id": "c2ce7621-0562-47ed-ae76-4804a13967c8",
+      "description": "Subcategory for Career Development",
+      "translations": {
+        "en": "Career Development",
+        "es": "Career Development",
+        "pt": "Career Development"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.724879+00:00"
+    },
+    {
+      "id": "c20abc9d-b1fb-4ad7-b974-98251b6d51f8",
+      "name": "Resignation Processing",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Resignation Processing",
+      "translations": {
+        "en": "Resignation Processing",
+        "es": "Resignation Processing",
+        "pt": "Resignation Processing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.725418+00:00"
+    },
+    {
+      "id": "bf1c96b3-9573-4c98-afdf-19abc84715e6",
+      "name": "Exit Interview",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Exit Interview",
+      "translations": {
+        "en": "Exit Interview",
+        "es": "Exit Interview",
+        "pt": "Exit Interview"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.725766+00:00"
+    },
+    {
+      "id": "841e4818-4e73-4ff3-a24d-2b02153f745f",
+      "name": "Equipment Return",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Equipment Return",
+      "translations": {
+        "en": "Equipment Return",
+        "es": "Equipment Return",
+        "pt": "Equipment Return"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.726047+00:00"
+    },
+    {
+      "id": "2efbdf65-65f2-4a09-a544-6675f6fccc4b",
+      "name": "Access Revocation",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Access Revocation",
+      "translations": {
+        "en": "Access Revocation",
+        "es": "Access Revocation",
+        "pt": "Access Revocation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.726317+00:00"
+    },
+    {
+      "id": "690b16aa-2863-439b-8699-ec55c461107b",
+      "name": "Final Paycheck",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Final Paycheck",
+      "translations": {
+        "en": "Final Paycheck",
+        "es": "Final Paycheck",
+        "pt": "Final Paycheck"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.726683+00:00"
+    },
+    {
+      "id": "8f1557a7-72e9-4205-a9f8-093e1b8a5e3d",
+      "name": "COBRA Information",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for COBRA Information",
+      "translations": {
+        "en": "COBRA Information",
+        "es": "COBRA Information",
+        "pt": "COBRA Information"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.726963+00:00"
+    },
+    {
+      "id": "0e54ca3f-7895-45b9-b751-7e8a6c3b752a",
+      "name": "Reference Letter Request",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Reference Letter Request",
+      "translations": {
+        "en": "Reference Letter Request",
+        "es": "Reference Letter Request",
+        "pt": "Reference Letter Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.727245+00:00"
+    },
+    {
+      "id": "2b745db4-5a29-4bcb-b8b8-2867e27876b5",
+      "name": "Separation Agreement",
+      "parent_id": "8734edb9-b963-496e-90b1-0047876f7c2f",
+      "description": "Subcategory for Separation Agreement",
+      "translations": {
+        "en": "Separation Agreement",
+        "es": "Separation Agreement",
+        "pt": "Separation Agreement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.727599+00:00"
+    },
+    {
+      "id": "2ffe2867-fcf6-4e2b-8760-f7201f16302a",
+      "name": "Contract Review Request",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Contract Review Request",
+      "translations": {
+        "en": "Contract Review Request",
+        "es": "Contract Review Request",
+        "pt": "Contract Review Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.728159+00:00"
+    },
+    {
+      "id": "14807a2c-8383-46c1-8ffa-1f4ea0c24fb8",
+      "name": "NDA Request",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for NDA Request",
+      "translations": {
+        "en": "NDA Request",
+        "es": "NDA Request",
+        "pt": "NDA Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.728424+00:00"
+    },
+    {
+      "id": "5f66f3b1-a624-4ba9-ba70-1afead082ed1",
+      "name": "Vendor Agreement",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Vendor Agreement",
+      "translations": {
+        "en": "Vendor Agreement",
+        "es": "Vendor Agreement",
+        "pt": "Vendor Agreement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.728710+00:00"
+    },
+    {
+      "id": "3b7887db-bc72-43b6-9359-12375969aaa0",
+      "name": "Client Agreement",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Client Agreement",
+      "translations": {
+        "en": "Client Agreement",
+        "es": "Client Agreement",
+        "pt": "Client Agreement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.728976+00:00"
+    },
+    {
+      "id": "7a074068-6f46-497b-bd45-8d6d399917d4",
+      "name": "Employment Agreement",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Employment Agreement",
+      "translations": {
+        "en": "Employment Agreement",
+        "es": "Employment Agreement",
+        "pt": "Employment Agreement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.729238+00:00"
+    },
+    {
+      "id": "9a30aa52-4cd5-4668-bed3-edbdcf8131ba",
+      "name": "Amendment Request",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Amendment Request",
+      "translations": {
+        "en": "Amendment Request",
+        "es": "Amendment Request",
+        "pt": "Amendment Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.729518+00:00"
+    },
+    {
+      "id": "369acb27-60db-49f1-89a9-6753fed06ae8",
+      "name": "Contract Renewal",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Contract Renewal",
+      "translations": {
+        "en": "Contract Renewal",
+        "es": "Contract Renewal",
+        "pt": "Contract Renewal"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.729784+00:00"
+    },
+    {
+      "id": "7f44eb1c-93c3-4e0d-83cc-0b9589a86079",
+      "name": "Signature Request",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Signature Request",
+      "translations": {
+        "en": "Signature Request",
+        "es": "Signature Request",
+        "pt": "Signature Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.730049+00:00"
+    },
+    {
+      "id": "f0570967-b9b5-4e2f-b370-bd8a99fe0621",
+      "name": "Contract Question",
+      "parent_id": "a20cfd47-8b80-42f7-86c4-723d5289a123",
+      "description": "Subcategory for Contract Question",
+      "translations": {
+        "en": "Contract Question",
+        "es": "Contract Question",
+        "pt": "Contract Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.730317+00:00"
+    },
+    {
+      "id": "2606db5a-10d3-44bc-894c-9f9dc8b816cc",
+      "name": "Compliance Question",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Compliance Question",
+      "translations": {
+        "en": "Compliance Question",
+        "es": "Compliance Question",
+        "pt": "Compliance Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.730878+00:00"
+    },
+    {
+      "id": "e57b1a86-dac8-45fc-9144-e6cf27370189",
+      "name": "Regulatory Filing",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Regulatory Filing",
+      "translations": {
+        "en": "Regulatory Filing",
+        "es": "Regulatory Filing",
+        "pt": "Regulatory Filing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.731146+00:00"
+    },
+    {
+      "id": "4e485151-96eb-441e-9b8e-c8aefca78b24",
+      "name": "Audit Support",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Audit Support",
+      "translations": {
+        "en": "Audit Support",
+        "es": "Audit Support",
+        "pt": "Audit Support"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.731414+00:00"
+    },
+    {
+      "id": "245efc93-8129-4898-ad8e-2d727501dcbc",
+      "name": "Risk Assessment",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Risk Assessment",
+      "translations": {
+        "en": "Risk Assessment",
+        "es": "Risk Assessment",
+        "pt": "Risk Assessment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.731695+00:00"
+    },
+    {
+      "id": "dab6550a-bf1a-4c83-88c7-9b42de61d9c3",
+      "name": "Policy Question",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Policy Question",
+      "translations": {
+        "en": "Policy Question",
+        "es": "Policy Question",
+        "pt": "Policy Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.731951+00:00"
+    },
+    {
+      "id": "bf9387c0-319c-49b8-9266-599f800b1eb9",
+      "name": "Privacy Request",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Privacy Request",
+      "translations": {
+        "en": "Privacy Request",
+        "es": "Privacy Request",
+        "pt": "Privacy Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.732218+00:00"
+    },
+    {
+      "id": "1a5fd85b-21ce-4bf2-b70c-c8daf6df0167",
+      "name": "Data Subject Request",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Data Subject Request",
+      "translations": {
+        "en": "Data Subject Request",
+        "es": "Data Subject Request",
+        "pt": "Data Subject Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.732529+00:00"
+    },
+    {
+      "id": "286133bf-f42e-41fd-91e4-007317844c0f",
+      "name": "Incident Report",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Incident Report",
+      "translations": {
+        "en": "Incident Report",
+        "es": "Incident Report",
+        "pt": "Incident Report"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.732859+00:00"
+    },
+    {
+      "id": "cbba55c7-6625-4682-ba6c-c2a80403f408",
+      "name": "Insurance Question",
+      "parent_id": "0bc850a3-ef3a-48fd-b465-688828827ef3",
+      "description": "Subcategory for Insurance Question",
+      "translations": {
+        "en": "Insurance Question",
+        "es": "Insurance Question",
+        "pt": "Insurance Question"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.733193+00:00"
+    },
+    {
+      "id": "71f294f7-6b6d-4e17-b1d9-bf5f6f21b0f9",
+      "name": "Meeting Room Booking",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Meeting Room Booking",
+      "translations": {
+        "en": "Meeting Room Booking",
+        "es": "Meeting Room Booking",
+        "pt": "Meeting Room Booking"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.733605+00:00"
+    },
+    {
+      "id": "fcce00f4-200f-44e3-819e-48edebda6676",
+      "name": "Desk/Space Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Desk/Space Request",
+      "translations": {
+        "en": "Desk/Space Request",
+        "es": "Desk/Space Request",
+        "pt": "Desk/Space Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.733799+00:00"
+    },
+    {
+      "id": "a73b9b66-6d64-4d5a-9c1d-096806004d99",
+      "name": "Parking Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Parking Request",
+      "translations": {
+        "en": "Parking Request",
+        "es": "Parking Request",
+        "pt": "Parking Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.734037+00:00"
+    },
+    {
+      "id": "b63038ac-5848-47d9-a058-63d1ae317242",
+      "name": "Building Access",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Building Access",
+      "translations": {
+        "en": "Building Access",
+        "es": "Building Access",
+        "pt": "Building Access"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.734309+00:00"
+    },
+    {
+      "id": "ee4bbb41-b2c7-43dc-a201-ec2edec488e4",
+      "name": "Office Supplies",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Office Supplies",
+      "translations": {
+        "en": "Office Supplies",
+        "es": "Office Supplies",
+        "pt": "Office Supplies"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.734628+00:00"
+    },
+    {
+      "id": "24d96ff3-b4b8-48d7-a371-e108e0337d1a",
+      "name": "Furniture Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Furniture Request",
+      "translations": {
+        "en": "Furniture Request",
+        "es": "Furniture Request",
+        "pt": "Furniture Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.735089+00:00"
+    },
+    {
+      "id": "fd8be061-0fa4-439f-8210-a3c9c9f5ebc5",
+      "name": "Climate Control Issue",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Climate Control Issue",
+      "translations": {
+        "en": "Climate Control Issue",
+        "es": "Climate Control Issue",
+        "pt": "Climate Control Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.735498+00:00"
+    },
+    {
+      "id": "4c6ff489-df0a-41a1-9f3e-e0cc6c708c93",
+      "name": "Cleaning Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Cleaning Request",
+      "translations": {
+        "en": "Cleaning Request",
+        "es": "Cleaning Request",
+        "pt": "Cleaning Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.735730+00:00"
+    },
+    {
+      "id": "0c811e20-79e8-4e32-a381-d2d0e0108f32",
+      "name": "Maintenance Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Maintenance Request",
+      "translations": {
+        "en": "Maintenance Request",
+        "es": "Maintenance Request",
+        "pt": "Maintenance Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.735926+00:00"
+    },
+    {
+      "id": "90a2058d-55dd-4d1c-9177-7c14290cbd54",
+      "name": "Moving Request",
+      "parent_id": "97d1ea19-7740-433f-aca2-5fd2765b270d",
+      "description": "Subcategory for Moving Request",
+      "translations": {
+        "en": "Moving Request",
+        "es": "Moving Request",
+        "pt": "Moving Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.736143+00:00"
+    },
+    {
+      "id": "1cbe1a42-8b2f-4b3b-9c71-5d5f9fc6269e",
+      "name": "Purchase Request",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Purchase Request",
+      "translations": {
+        "en": "Purchase Request",
+        "es": "Purchase Request",
+        "pt": "Purchase Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.736838+00:00"
+    },
+    {
+      "id": "c675e43c-1b1c-46b6-ba42-fc2b7a8437f4",
+      "name": "Vendor Evaluation",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Vendor Evaluation",
+      "translations": {
+        "en": "Vendor Evaluation",
+        "es": "Vendor Evaluation",
+        "pt": "Vendor Evaluation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.737112+00:00"
+    },
+    {
+      "id": "23dce5d5-9e67-4a28-9dc4-506047651642",
+      "name": "Quote Request",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Quote Request",
+      "translations": {
+        "en": "Quote Request",
+        "es": "Quote Request",
+        "pt": "Quote Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.737321+00:00"
+    },
+    {
+      "id": "12eaf3ab-70b3-4080-92eb-af7fd820111f",
+      "name": "PO Request",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for PO Request",
+      "translations": {
+        "en": "PO Request",
+        "es": "PO Request",
+        "pt": "PO Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.737524+00:00"
+    },
+    {
+      "id": "7b0313b5-166d-48fd-b502-e25d2c4960b3",
+      "name": "Subscription Request",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Subscription Request",
+      "translations": {
+        "en": "Subscription Request",
+        "es": "Subscription Request",
+        "pt": "Subscription Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.737705+00:00"
+    },
+    {
+      "id": "8dfe8a12-f24c-4e8d-80d5-d4e149313f6a",
+      "name": "Software Purchase",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Software Purchase",
+      "translations": {
+        "en": "Software Purchase",
+        "es": "Software Purchase",
+        "pt": "Software Purchase"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.737881+00:00"
+    },
+    {
+      "id": "f5ae57b3-f899-45cb-8c3c-c93681f8d0e9",
+      "name": "Equipment Purchase",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Equipment Purchase",
+      "translations": {
+        "en": "Equipment Purchase",
+        "es": "Equipment Purchase",
+        "pt": "Equipment Purchase"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.738064+00:00"
+    },
+    {
+      "id": "e8b93a0c-3695-46a3-8a82-d74ae627e526",
+      "name": "Service Contract",
+      "parent_id": "425f1f72-9046-4f78-88f7-5ec82cf4a24d",
+      "description": "Subcategory for Service Contract",
+      "translations": {
+        "en": "Service Contract",
+        "es": "Service Contract",
+        "pt": "Service Contract"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.738237+00:00"
+    },
+    {
+      "id": "b50f6d43-2eca-419c-b682-f8d672c88baa",
+      "name": "Roof Inspection",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Roof Inspection",
+      "translations": {
+        "en": "Roof Inspection",
+        "es": "Roof Inspection",
+        "pt": "Roof Inspection"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.738828+00:00"
+    },
+    {
+      "id": "f405d690-178f-47f3-81cb-555a355528cc",
+      "name": "Roof Repair",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Roof Repair",
+      "translations": {
+        "en": "Roof Repair",
+        "es": "Roof Repair",
+        "pt": "Roof Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.739148+00:00"
+    },
+    {
+      "id": "a1b23556-2a1c-4ec8-ad51-65ebc7e49d8d",
+      "name": "Roof Replacement",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Roof Replacement",
+      "translations": {
+        "en": "Roof Replacement",
+        "es": "Roof Replacement",
+        "pt": "Roof Replacement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.739343+00:00"
+    },
+    {
+      "id": "f9380d58-2977-4261-8ba1-9a69c7119fd1",
+      "name": "Gutter Cleaning",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Gutter Cleaning",
+      "translations": {
+        "en": "Gutter Cleaning",
+        "es": "Gutter Cleaning",
+        "pt": "Gutter Cleaning"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.739537+00:00"
+    },
+    {
+      "id": "d351d76b-78db-4a08-89e4-2935509b26b4",
+      "name": "Gutter Repair",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Gutter Repair",
+      "translations": {
+        "en": "Gutter Repair",
+        "es": "Gutter Repair",
+        "pt": "Gutter Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.739723+00:00"
+    },
+    {
+      "id": "e98effe4-b632-461b-b04b-2c70e3eb9798",
+      "name": "Siding Repair",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Siding Repair",
+      "translations": {
+        "en": "Siding Repair",
+        "es": "Siding Repair",
+        "pt": "Siding Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.739897+00:00"
+    },
+    {
+      "id": "a323b82b-f3e6-4164-8968-76b9308220fd",
+      "name": "Exterior Painting",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Exterior Painting",
+      "translations": {
+        "en": "Exterior Painting",
+        "es": "Exterior Painting",
+        "pt": "Exterior Painting"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.740087+00:00"
+    },
+    {
+      "id": "2c3ca3e4-515d-479e-a0cf-f46c36438da6",
+      "name": "Pressure Washing",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Pressure Washing",
+      "translations": {
+        "en": "Pressure Washing",
+        "es": "Pressure Washing",
+        "pt": "Pressure Washing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.740268+00:00"
+    },
+    {
+      "id": "0679ada8-5a7f-4763-b951-8a9c8409fa53",
+      "name": "Window Replacement",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Window Replacement",
+      "translations": {
+        "en": "Window Replacement",
+        "es": "Window Replacement",
+        "pt": "Window Replacement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.740549+00:00"
+    },
+    {
+      "id": "0805441a-75d6-4d84-84ce-f8d10eb52627",
+      "name": "Door Replacement",
+      "parent_id": "0dcb0ecb-7730-427a-99a9-9170d2659ed9",
+      "description": "Subcategory for Door Replacement",
+      "translations": {
+        "en": "Door Replacement",
+        "es": "Door Replacement",
+        "pt": "Door Replacement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.740745+00:00"
+    },
+    {
+      "id": "2faa9319-7ad2-4dd9-8cd2-9189c5ebb3a6",
+      "name": "Leak Repair",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Leak Repair",
+      "translations": {
+        "en": "Leak Repair",
+        "es": "Leak Repair",
+        "pt": "Leak Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.741135+00:00"
+    },
+    {
+      "id": "836fdf3d-7ad6-43b9-9c9e-9b674b1c23e9",
+      "name": "Drain Cleaning",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Drain Cleaning",
+      "translations": {
+        "en": "Drain Cleaning",
+        "es": "Drain Cleaning",
+        "pt": "Drain Cleaning"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.741342+00:00"
+    },
+    {
+      "id": "156d5152-b952-41f1-8475-be012f9a92fd",
+      "name": "Water Heater",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Water Heater",
+      "translations": {
+        "en": "Water Heater",
+        "es": "Water Heater",
+        "pt": "Water Heater"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.741534+00:00"
+    },
+    {
+      "id": "14edb346-daea-46b0-889f-39aa0d838cd1",
+      "name": "Toilet Repair",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Toilet Repair",
+      "translations": {
+        "en": "Toilet Repair",
+        "es": "Toilet Repair",
+        "pt": "Toilet Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.741748+00:00"
+    },
+    {
+      "id": "65a4b78e-926b-4e62-827c-a4f2e00d66d8",
+      "name": "Faucet Repair",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Faucet Repair",
+      "translations": {
+        "en": "Faucet Repair",
+        "es": "Faucet Repair",
+        "pt": "Faucet Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.741965+00:00"
+    },
+    {
+      "id": "d6107b42-5668-492d-a64e-e8d76e4f55ac",
+      "name": "Pipe Repair",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Pipe Repair",
+      "translations": {
+        "en": "Pipe Repair",
+        "es": "Pipe Repair",
+        "pt": "Pipe Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.742145+00:00"
+    },
+    {
+      "id": "e4ae600f-a771-471f-b10a-f43208e8e61d",
+      "name": "Sewer Line",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Sewer Line",
+      "translations": {
+        "en": "Sewer Line",
+        "es": "Sewer Line",
+        "pt": "Sewer Line"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.742323+00:00"
+    },
+    {
+      "id": "5a14030f-a19c-4412-a9c1-da6f4ed4b4e7",
+      "name": "Water Pressure Issue",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Water Pressure Issue",
+      "translations": {
+        "en": "Water Pressure Issue",
+        "es": "Water Pressure Issue",
+        "pt": "Water Pressure Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.742518+00:00"
+    },
+    {
+      "id": "463a8465-340d-4d9a-a4a3-9fe398bc216a",
+      "name": "Garbage Disposal",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Garbage Disposal",
+      "translations": {
+        "en": "Garbage Disposal",
+        "es": "Garbage Disposal",
+        "pt": "Garbage Disposal"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.742687+00:00"
+    },
+    {
+      "id": "8eca6ce9-a0b8-409c-bfca-904cf3d97d91",
+      "name": "Plumbing Inspection",
+      "parent_id": "62553e07-98b4-4d57-a8b1-fabc31a5a528",
+      "description": "Subcategory for Plumbing Inspection",
+      "translations": {
+        "en": "Plumbing Inspection",
+        "es": "Plumbing Inspection",
+        "pt": "Plumbing Inspection"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.742852+00:00"
+    },
+    {
+      "id": "278657ba-17ed-49cb-b8e9-16e564f71dda",
+      "name": "Electrical Repair",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Electrical Repair",
+      "translations": {
+        "en": "Electrical Repair",
+        "es": "Electrical Repair",
+        "pt": "Electrical Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.743480+00:00"
+    },
+    {
+      "id": "498e3fd5-de94-47c1-9295-4c94e4844676",
+      "name": "Outlet Installation",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Outlet Installation",
+      "translations": {
+        "en": "Outlet Installation",
+        "es": "Outlet Installation",
+        "pt": "Outlet Installation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.743785+00:00"
+    },
+    {
+      "id": "d2cd9800-e671-4b41-b85e-9b3849111730",
+      "name": "Light Fixture",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Light Fixture",
+      "translations": {
+        "en": "Light Fixture",
+        "es": "Light Fixture",
+        "pt": "Light Fixture"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.744075+00:00"
+    },
+    {
+      "id": "e9b762b5-203b-4a3d-9e42-756b40061197",
+      "name": "Circuit Breaker",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Circuit Breaker",
+      "translations": {
+        "en": "Circuit Breaker",
+        "es": "Circuit Breaker",
+        "pt": "Circuit Breaker"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.744338+00:00"
+    },
+    {
+      "id": "1dcf4077-4a5c-4a35-8661-53a0a0e52c94",
+      "name": "Panel Upgrade",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Panel Upgrade",
+      "translations": {
+        "en": "Panel Upgrade",
+        "es": "Panel Upgrade",
+        "pt": "Panel Upgrade"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.744677+00:00"
+    },
+    {
+      "id": "3df8c572-f333-4a24-9252-d0ab68994b1e",
+      "name": "Wiring Issue",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Wiring Issue",
+      "translations": {
+        "en": "Wiring Issue",
+        "es": "Wiring Issue",
+        "pt": "Wiring Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.744946+00:00"
+    },
+    {
+      "id": "a2a5ab93-8428-4d7f-a484-26216276f4dd",
+      "name": "Ceiling Fan",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Ceiling Fan",
+      "translations": {
+        "en": "Ceiling Fan",
+        "es": "Ceiling Fan",
+        "pt": "Ceiling Fan"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.745202+00:00"
+    },
+    {
+      "id": "148ad3d7-5b37-46dc-ae92-7227fd704518",
+      "name": "Smart Home Install",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Smart Home Install",
+      "translations": {
+        "en": "Smart Home Install",
+        "es": "Smart Home Install",
+        "pt": "Smart Home Install"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.745460+00:00"
+    },
+    {
+      "id": "9b497ac2-d570-454f-b768-e4d26460f44e",
+      "name": "Electrical Inspection",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Electrical Inspection",
+      "translations": {
+        "en": "Electrical Inspection",
+        "es": "Electrical Inspection",
+        "pt": "Electrical Inspection"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.745708+00:00"
+    },
+    {
+      "id": "4e01ac6f-5073-4859-9cba-92180df598d4",
+      "name": "Generator Service",
+      "parent_id": "ef2740a1-3cc2-4624-8b2f-5df2d88612a3",
+      "description": "Subcategory for Generator Service",
+      "translations": {
+        "en": "Generator Service",
+        "es": "Generator Service",
+        "pt": "Generator Service"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.745960+00:00"
+    },
+    {
+      "id": "f9ad37b6-4ed8-4b90-96b3-bee099eecf41",
+      "name": "AC Repair",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for AC Repair",
+      "translations": {
+        "en": "AC Repair",
+        "es": "AC Repair",
+        "pt": "AC Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.746503+00:00"
+    },
+    {
+      "id": "fa005c9a-67a2-4cf8-a169-4cf36c3c9657",
+      "name": "Heating Repair",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Heating Repair",
+      "translations": {
+        "en": "Heating Repair",
+        "es": "Heating Repair",
+        "pt": "Heating Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.746753+00:00"
+    },
+    {
+      "id": "734ffa3e-c883-48c2-a54f-7abfe6283585",
+      "name": "HVAC Inspection",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for HVAC Inspection",
+      "translations": {
+        "en": "HVAC Inspection",
+        "es": "HVAC Inspection",
+        "pt": "HVAC Inspection"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.747002+00:00"
+    },
+    {
+      "id": "fc9458d9-3745-4d39-a50c-9f93d25a3c4e",
+      "name": "Filter Replacement",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Filter Replacement",
+      "translations": {
+        "en": "Filter Replacement",
+        "es": "Filter Replacement",
+        "pt": "Filter Replacement"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.747248+00:00"
+    },
+    {
+      "id": "6c67ba6f-253f-4e14-a145-d00ad436c9f9",
+      "name": "Thermostat Issue",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Thermostat Issue",
+      "translations": {
+        "en": "Thermostat Issue",
+        "es": "Thermostat Issue",
+        "pt": "Thermostat Issue"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.747516+00:00"
+    },
+    {
+      "id": "c25447f6-43f3-4163-b07a-1de01e44b431",
+      "name": "Duct Cleaning",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Duct Cleaning",
+      "translations": {
+        "en": "Duct Cleaning",
+        "es": "Duct Cleaning",
+        "pt": "Duct Cleaning"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.747768+00:00"
+    },
+    {
+      "id": "13bb1d39-5246-43b2-b2e2-aae64882e47e",
+      "name": "HVAC Installation",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for HVAC Installation",
+      "translations": {
+        "en": "HVAC Installation",
+        "es": "HVAC Installation",
+        "pt": "HVAC Installation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.748021+00:00"
+    },
+    {
+      "id": "df098615-0a5d-4624-a834-54d185e0da1c",
+      "name": "Mini Split Service",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Mini Split Service",
+      "translations": {
+        "en": "Mini Split Service",
+        "es": "Mini Split Service",
+        "pt": "Mini Split Service"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.748267+00:00"
+    },
+    {
+      "id": "38c61c62-2b7e-48c7-8143-ed351e16c94a",
+      "name": "Heat Pump Service",
+      "parent_id": "52d7b255-7945-4054-adb9-72535e0a8ac1",
+      "description": "Subcategory for Heat Pump Service",
+      "translations": {
+        "en": "Heat Pump Service",
+        "es": "Heat Pump Service",
+        "pt": "Heat Pump Service"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.748568+00:00"
+    },
+    {
+      "id": "eefc3bb3-7fbc-4a81-97bd-d95b64a6e16b",
+      "name": "General Repair",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for General Repair",
+      "translations": {
+        "en": "General Repair",
+        "es": "General Repair",
+        "pt": "General Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.749199+00:00"
+    },
+    {
+      "id": "e5936b33-7790-4019-a31b-afec9488f400",
+      "name": "Drywall Repair",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Drywall Repair",
+      "translations": {
+        "en": "Drywall Repair",
+        "es": "Drywall Repair",
+        "pt": "Drywall Repair"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.749479+00:00"
+    },
+    {
+      "id": "2055b5ec-1d59-4640-a4c6-1b695442fbd0",
+      "name": "Painting Touch-up",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Painting Touch-up",
+      "translations": {
+        "en": "Painting Touch-up",
+        "es": "Painting Touch-up",
+        "pt": "Painting Touch-up"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.749795+00:00"
+    },
+    {
+      "id": "26387878-6563-45b5-91b9-99740fd10d1a",
+      "name": "Door Adjustment",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Door Adjustment",
+      "translations": {
+        "en": "Door Adjustment",
+        "es": "Door Adjustment",
+        "pt": "Door Adjustment"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.750062+00:00"
+    },
+    {
+      "id": "bafcd132-5edc-438f-b5ba-c2e38f9ed26a",
+      "name": "Lock Change",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Lock Change",
+      "translations": {
+        "en": "Lock Change",
+        "es": "Lock Change",
+        "pt": "Lock Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.750314+00:00"
+    },
+    {
+      "id": "098afcf4-432e-4ee9-9929-5a7db5f02331",
+      "name": "Shelf Installation",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Shelf Installation",
+      "translations": {
+        "en": "Shelf Installation",
+        "es": "Shelf Installation",
+        "pt": "Shelf Installation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.750575+00:00"
+    },
+    {
+      "id": "6a18bebf-d468-45af-8275-c09ba0f53688",
+      "name": "TV Mounting",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for TV Mounting",
+      "translations": {
+        "en": "TV Mounting",
+        "es": "TV Mounting",
+        "pt": "TV Mounting"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.750834+00:00"
+    },
+    {
+      "id": "c02aa8e6-7df3-4419-82a2-0deab2b0bd3f",
+      "name": "Furniture Assembly",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Furniture Assembly",
+      "translations": {
+        "en": "Furniture Assembly",
+        "es": "Furniture Assembly",
+        "pt": "Furniture Assembly"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751061+00:00"
+    },
+    {
+      "id": "cac62a8e-ba8a-4f32-b6c1-2c6c8852b4f7",
+      "name": "Picture Hanging",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Picture Hanging",
+      "translations": {
+        "en": "Picture Hanging",
+        "es": "Picture Hanging",
+        "pt": "Picture Hanging"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751242+00:00"
+    },
+    {
+      "id": "bff5fec0-5820-4e59-9afc-760fdbcb864a",
+      "name": "Caulking/Sealing",
+      "parent_id": "a11f97b0-7aee-4849-a3ad-d62cd683f3e7",
+      "description": "Subcategory for Caulking/Sealing",
+      "translations": {
+        "en": "Caulking/Sealing",
+        "es": "Caulking/Sealing",
+        "pt": "Caulking/Sealing"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751408+00:00"
+    },
+    {
+      "id": "972b9372-0b71-4a67-a246-3b2b6e95c35c",
+      "name": "New Project Request",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for New Project Request",
+      "translations": {
+        "en": "New Project Request",
+        "es": "New Project Request",
+        "pt": "New Project Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751781+00:00"
+    },
+    {
+      "id": "353c8926-f31e-49e1-b66d-c57de5c57d2c",
+      "name": "Project Scope Change",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Project Scope Change",
+      "translations": {
+        "en": "Project Scope Change",
+        "es": "Project Scope Change",
+        "pt": "Project Scope Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.751959+00:00"
+    },
+    {
+      "id": "bd0c1c44-7b1d-4233-8bde-ec22f2f1b141",
+      "name": "Resource Request",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Resource Request",
+      "translations": {
+        "en": "Resource Request",
+        "es": "Resource Request",
+        "pt": "Resource Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752129+00:00"
+    },
+    {
+      "id": "48312ea5-4d9e-4ed9-8f86-cd581700b854",
+      "name": "Budget Request",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Budget Request",
+      "translations": {
+        "en": "Budget Request",
+        "es": "Budget Request",
+        "pt": "Budget Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752297+00:00"
+    },
+    {
+      "id": "99438598-d891-45c7-9afa-29b320cdd1fd",
+      "name": "Timeline Change",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Timeline Change",
+      "translations": {
+        "en": "Timeline Change",
+        "es": "Timeline Change",
+        "pt": "Timeline Change"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752475+00:00"
+    },
+    {
+      "id": "c6b7d016-1549-4048-be18-32f46ca27f7b",
+      "name": "Project Status Update",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Project Status Update",
+      "translations": {
+        "en": "Project Status Update",
+        "es": "Project Status Update",
+        "pt": "Project Status Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752648+00:00"
+    },
+    {
+      "id": "03f23f6f-ed5e-467c-8739-f8e707a500bc",
+      "name": "Project Closure",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Project Closure",
+      "translations": {
+        "en": "Project Closure",
+        "es": "Project Closure",
+        "pt": "Project Closure"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752809+00:00"
+    },
+    {
+      "id": "9f3165ac-ccba-4c6b-aab2-50dbe28d7f11",
+      "name": "Lessons Learned",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Lessons Learned",
+      "translations": {
+        "en": "Lessons Learned",
+        "es": "Lessons Learned",
+        "pt": "Lessons Learned"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.752978+00:00"
+    },
+    {
+      "id": "4b5acc1e-e87d-491e-9207-68a555ae9e75",
+      "name": "Project Documentation",
+      "parent_id": "3434d021-38f4-4ef0-bb94-1becd677c025",
+      "description": "Subcategory for Project Documentation",
+      "translations": {
+        "en": "Project Documentation",
+        "es": "Project Documentation",
+        "pt": "Project Documentation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.753142+00:00"
+    },
+    {
+      "id": "7dde6980-62f5-482d-b5ea-f27ced077826",
+      "name": "Process Review Request",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Process Review Request",
+      "translations": {
+        "en": "Process Review Request",
+        "es": "Process Review Request",
+        "pt": "Process Review Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.753672+00:00"
+    },
+    {
+      "id": "ff5beeba-99c5-4224-9605-6d9e805e4d0f",
+      "name": "Automation Request",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Automation Request",
+      "translations": {
+        "en": "Automation Request",
+        "es": "Automation Request",
+        "pt": "Automation Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.753873+00:00"
+    },
+    {
+      "id": "f42e2729-5449-49ee-a57e-0f029fe0b4f9",
+      "name": "Template Request",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Template Request",
+      "translations": {
+        "en": "Template Request",
+        "es": "Template Request",
+        "pt": "Template Request"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.754100+00:00"
+    },
+    {
+      "id": "1e138a27-8a46-4aca-b382-c5a17485c940",
+      "name": "Training Material",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Training Material",
+      "translations": {
+        "en": "Training Material",
+        "es": "Training Material",
+        "pt": "Training Material"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.754302+00:00"
+    },
+    {
+      "id": "b109e336-818b-4210-ae61-bcf280afb8d8",
+      "name": "Documentation Update",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Documentation Update",
+      "translations": {
+        "en": "Documentation Update",
+        "es": "Documentation Update",
+        "pt": "Documentation Update"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.754476+00:00"
+    },
+    {
+      "id": "72c94780-2bff-4a46-82f2-5ba2601af4e1",
+      "name": "SOP Creation",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for SOP Creation",
+      "translations": {
+        "en": "SOP Creation",
+        "es": "SOP Creation",
+        "pt": "SOP Creation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.754731+00:00"
+    },
+    {
+      "id": "306b066b-b949-4d3f-ae4b-5672989a2a42",
+      "name": "Workflow Optimization",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Workflow Optimization",
+      "translations": {
+        "en": "Workflow Optimization",
+        "es": "Workflow Optimization",
+        "pt": "Workflow Optimization"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.754996+00:00"
+    },
+    {
+      "id": "18a0ff4f-fad6-471e-90f4-e4bc4e479f99",
+      "name": "Tool Evaluation",
+      "parent_id": "70d57f4b-449b-4c5f-830c-010a9428100a",
+      "description": "Subcategory for Tool Evaluation",
+      "translations": {
+        "en": "Tool Evaluation",
+        "es": "Tool Evaluation",
+        "pt": "Tool Evaluation"
+      },
+      "active": true,
+      "created_at": "2026-01-29T16:37:27.755251+00:00"
+    }
+  ]
+}
