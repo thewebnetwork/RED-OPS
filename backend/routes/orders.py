@@ -824,11 +824,11 @@ async def get_pool_tickets(
 ):
     """
     Get tickets in a specific pool filtered by user's specialty.
-    Pool 1 = Partner pool (first 24 hours OR until no eligible partners)
-    Pool 2 = Vendor/Freelancer pool (after 24 hours OR if no partners for specialty)
+    Pool 1 = Partner + Internal Staff pool (first 24 hours OR until no eligible users)
+    Pool 2 = Vendor/Freelancer pool (after 24 hours OR if no Pool 1 users for specialty)
     
     Filtering rules:
-    - Partners/Vendors only see tickets matching their routing_specialty_id
+    - Pool 1/2 users only see tickets matching their routing_specialty_id (multi-specialty ANY match)
     - Support/Issue tickets are excluded unless user has support specialty
     - Admins/Operators see all tickets
     """
@@ -837,8 +837,10 @@ async def get_pool_tickets(
     user_specialty_id = current_user.get("specialty_id")
     
     # Access control
+    # Pool 1 = Partners + Internal Staff
+    # Pool 2 = Vendors/Freelancers
     if pool_number == 1:
-        if role not in ["Administrator", "Operator"] and account_type != "Partner":
+        if role not in ["Administrator", "Operator"] and account_type not in ["Partner", "Internal Staff"]:
             raise HTTPException(status_code=403, detail="Access denied to Pool 1")
     elif pool_number == 2:
         if role not in ["Administrator", "Operator"] and account_type != "Vendor/Freelancer":
