@@ -41,7 +41,7 @@ class TestPool1RoutingFix:
             "password": password
         })
         if response.status_code == 200:
-            return response.json().get("access_token")
+            return response.json().get("token")
         return None
     
     def test_01_internal_staff_user_exists_with_correct_account_type(self):
@@ -296,7 +296,7 @@ class TestPool1RoutingEdgeCases:
             "password": password
         })
         if response.status_code == 200:
-            return response.json().get("access_token")
+            return response.json().get("token")
         return None
     
     def test_13_internal_staff_login_returns_correct_account_type(self):
