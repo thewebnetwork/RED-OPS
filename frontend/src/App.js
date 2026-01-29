@@ -43,6 +43,7 @@ import VerifyOTP from "./pages/VerifyOTP";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -54,6 +55,29 @@ function PrivateRoute({ children, roles }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
+  }
+
+  // Check if user needs to change password (force redirect)
+  if (user?.force_password_change && location.pathname !== '/force-password-change') {
+    return <Navigate to="/force-password-change" replace />;
+  }
+
+  // Check if user needs to setup OTP (after password change is done)
+  if (user?.force_otp_setup && !user?.otp_verified && 
+      !user?.force_password_change && 
+      location.pathname !== '/setup-otp') {
+    return <Navigate to="/setup-otp" replace />;
+  }
+
+  // Check if OTP verification is required for this session
+  if (user?.otp_verified && location.pathname !== '/verify-otp') {
+    const trustExpiry = localStorage.getItem('otp_trust_expiry');
+    const otpSessionVerified = sessionStorage.getItem('otp_session_verified');
+    const isTrusted = trustExpiry && Date.now() < parseInt(trustExpiry);
+    
+    if (!isTrusted && !otpSessionVerified) {
+      return <Navigate to="/verify-otp" replace />;
+    }
   }
 
   if (roles && !roles.includes(user?.role)) {
