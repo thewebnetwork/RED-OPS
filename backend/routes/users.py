@@ -124,6 +124,7 @@ class UserResponse(BaseModel):
     force_password_change: bool = False
     force_otp_setup: bool = False
     otp_verified: bool = False
+    can_pick: bool = True  # Whether user can pick from pools
     created_at: str
 
 
