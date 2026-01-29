@@ -6,7 +6,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ## Current Version: 3.4 (Live Email Notifications - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
-**Preview URL:** https://fulfillio.preview.emergentagent.com
+**Preview URL:** https://rulebook-redops.preview.emergentagent.com
 
 ---
 

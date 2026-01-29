@@ -18,7 +18,7 @@ import requests
 import os
 import io
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://fulfillio.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://rulebook-redops.preview.emergentagent.com')
 
 # Test credentials
 ADMIN_EMAIL = "admin@redribbonops.com"

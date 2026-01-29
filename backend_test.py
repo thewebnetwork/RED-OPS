@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class RedRibbonOpsAPITester:
-    def __init__(self, base_url="https://fulfillio.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://rulebook-redops.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.editor_token = None
