@@ -10,7 +10,8 @@ import {
   Plug, 
   Palette,
   ChevronRight,
-  FileText
+  FileText,
+  Users
 } from 'lucide-react';
 
 const settingsModules = [
@@ -21,6 +22,14 @@ const settingsModules = [
     icon: FileText,
     path: '/settings/documentation',
     color: 'bg-slate-100 text-slate-600'
+  },
+  {
+    id: 'pool-picker-rules',
+    name: 'Pool Picker Rules',
+    description: 'Configure which account types can pick from Pool 1 and Pool 2',
+    icon: Users,
+    path: '/settings/pool-picker-rules',
+    color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'ui-customizations',
