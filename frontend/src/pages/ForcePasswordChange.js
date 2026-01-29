@@ -52,6 +52,7 @@ export default function ForcePasswordChange() {
       
       // Update user state to reflect password change completed
       updateUser({ force_password_change: false });
+      localStorage.removeItem('requires_password_change');
       toast.success('Password changed successfully!');
       
       // Check if OTP setup is also required
@@ -68,6 +69,8 @@ export default function ForcePasswordChange() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('requires_password_change');
+    localStorage.removeItem('requires_otp_setup');
     logout();
     navigate('/login');
   };
