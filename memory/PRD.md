@@ -3,14 +3,43 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.3 (Admin Soft-Delete & SLA Templates - Jan 28, 2026)
+## Current Version: 3.4 (Live Email Notifications - Jan 28, 2026)
 **Last Updated:** January 28, 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://fulfillio.preview.emergentagent.com
 
 ---
 
-## P0 - Admin Ticket Soft-Delete (Latest) ✅
+## P1 - Live Email Notifications for Ticket Status Changes (Latest) ✅
+
+### A) Email Types Implemented ✅
+| Email Type | Trigger | Recipients |
+|------------|---------|------------|
+| ticket_created | Order creation | Requester |
+| ticket_picked_up | Order picked from pool | Requester |
+| ticket_assigned | Order assigned to resolver | Resolver |
+| ticket_status_changed | Status → In Progress/Pending/Delivered/Closed | Requester |
+| ticket_pending_review | Status → Pending | Requester (action required) |
+| ticket_closed | Ticket closed by admin/requester | Requester (if closed by admin) |
+| ticket_reopened | Ticket reopened by admin | Requester + Editor |
+| ticket_reassigned | Ticket reassigned | Old Editor + New Resolver + Requester |
+| ticket_cancelled | Ticket cancelled | Resolver + Admins |
+
+### B) Email Features ✅
+- **HTML Formatting:** Professional templates with Red Ops branding
+- **Status-Specific Colors:** Visual status indicators in emails (blue for Open, amber for In Progress, purple for Pending, green for Delivered, gray for Closed)
+- **Direct Links:** Each email includes link to view ticket in Red Ops
+- **SMTP:** Live Gmail configuration (admin@redribbongroup.ca)
+
+### C) Implementation Details ✅
+- **notify_status_change()**: Enhanced to send emails alongside in-app notifications
+- **close_order()**: Sends email to requester when admin closes ticket
+- **reopen_order()**: Sends email to requester and editor
+- **reassign_order()**: Sends email to all affected parties
+
+---
+
+## P0 - Admin Ticket Soft-Delete ✅
 
 ### A) Soft-Delete Functionality ✅
 - **Delete Button:** Visible on Order Detail page for Administrators only
