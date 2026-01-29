@@ -369,7 +369,7 @@ function AdminDashboard() {
               <OrderCard key={order.id} order={order} t={t} />
             ))}
             {myWork.delivered.length === 0 && (
-              <p className="text-center text-slate-500 py-8">No delivered tickets yet</p>
+              <p className="text-center text-slate-500 py-8">{t('dashboard.noDelivered')}</p>
             )}
           </div>
         </CardContent>
