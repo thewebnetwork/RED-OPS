@@ -187,7 +187,10 @@ export default function IAMPage() {
       setUserForm({
         name: user.name, email: user.email, password: '',
         role: user.role, account_type: user.account_type || 'Internal Staff',
-        specialty_id: user.specialty_id || '', team_id: user.team_id || '',
+        // Multi-specialty support
+        specialty_ids: user.specialty_ids || (user.specialty_id ? [user.specialty_id] : []),
+        primary_specialty_id: user.primary_specialty_id || user.specialty_id || '',
+        team_id: user.team_id || '',
         subscription_plan_id: user.subscription_plan_id || '',
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false,
@@ -199,7 +202,7 @@ export default function IAMPage() {
       const tempPassword = generatePassword();
       setUserForm({ 
         name: '', email: '', password: tempPassword, role: 'Standard User', 
-        account_type: 'Internal Staff', specialty_id: '', team_id: '', 
+        account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', 
         subscription_plan_id: '', force_password_change: true, force_otp_setup: true,
         send_welcome_email: true
       });
@@ -210,7 +213,8 @@ export default function IAMPage() {
   const saveUser = async () => {
     if (!userForm.name || !userForm.email) { toast.error('Name and email required'); return; }
     if (!editingUser && !userForm.password) { toast.error('Password required for new users'); return; }
-    if (!userForm.specialty_id) { toast.error('Specialty is required'); return; }
+    // Multi-specialty validation
+    if (!userForm.specialty_ids || userForm.specialty_ids.length === 0) { toast.error('At least one specialty is required'); return; }
     if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
 
     try {
@@ -218,7 +222,9 @@ export default function IAMPage() {
         ...userForm, 
         team_id: userForm.team_id || null, 
         subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null,
-        send_welcome_email: !editingUser ? userForm.send_welcome_email : false
+        send_welcome_email: !editingUser ? userForm.send_welcome_email : false,
+        // Ensure primary_specialty_id is set
+        primary_specialty_id: userForm.primary_specialty_id || (userForm.specialty_ids.length > 0 ? userForm.specialty_ids[0] : null)
       };
       if (editingUser) {
         if (!data.password) delete data.password;
