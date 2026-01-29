@@ -40,6 +40,7 @@ import DeletedTickets from "./pages/DeletedTickets";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
 import VerifyOTP from "./pages/VerifyOTP";
+import DocumentationPage from "./pages/DocumentationPage";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
