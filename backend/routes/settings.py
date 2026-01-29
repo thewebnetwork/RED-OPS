@@ -974,7 +974,7 @@ async def get_pool_picker_rules(current_user: dict = Depends(require_roles(["Adm
     return PoolPickerRulesResponse(rules=rules)
 
 
-@router.patch("/pool-picker-rules/{account_type}")
+@router.patch("/pool-picker-rules/{account_type:path}")
 async def update_pool_picker_rule(
     account_type: str,
     rule_data: PoolPickerRuleUpdate,
