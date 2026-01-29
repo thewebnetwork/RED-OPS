@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="11" failures="5" skipped="2" tests="18" time="5.161" timestamp="2026-01-29T03:53:46.425480+00:00" hostname="agent-env-385d8e7f-0cfc-40f5-bf1a-12fddc4c203d"><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_01_get_pool_picker_rules_returns_all_account_types" time="0.334"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_02_default_rules_partner_pool_1_only" time="0.265"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_03_default_rules_internal_staff_pool_1_only" time="0.258"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_04_default_rules_vendor_pool_2_only" time="0.262"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_05_default_rules_media_client_disabled" time="0.262"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_06_patch_pool_picker_rule_update_can_pick" time="0.260"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_07_patch_pool_picker_rule_update_allowed_pools" time="0.263"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_08_patch_invalid_account_type_returns_400" time="0.260"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_09_patch_invalid_pool_returns_400" time="0.264"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_10_reset_defaults_restores_original_rules" time="0.263"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolPickerRulesAPI" name="test_11_non_admin_cannot_access_pool_picker_rules" time="0.265"><error message="failed on setup with &quot;AssertionError: No access token returned&#10;assert None&quot;">backend/tests/test_pool_picker_rules.py:45: in setup
+    assert token, "No access token returned"
+E   AssertionError: No access token returned
+E   assert None</error></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolRoutingUsesConfig" name="test_12_pool_routing_respects_config_for_pool_1" time="0.279"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">backend/tests/test_pool_picker_rules.py:269: in test_12_pool_routing_respects_config_for_pool_1
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolRoutingUsesConfig" name="test_13_pool_routing_respects_config_for_pool_2" time="0.283"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">backend/tests/test_pool_picker_rules.py:287: in test_13_pool_routing_respects_config_for_pool_2
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestUserCanPickOverride" name="test_14_user_create_includes_can_pick_field" time="0.272"><skipped type="pytest.skip" message="No specialties available for test">/app/backend/tests/test_pool_picker_rules.py:333: No specialties available for test</skipped></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestUserCanPickOverride" name="test_15_user_update_can_pick_field" time="0.267"><skipped type="pytest.skip" message="No specialties available for test">/app/backend/tests/test_pool_picker_rules.py:364: No specialties available for test</skipped></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestUserCanPickOverride" name="test_16_user_response_includes_can_pick_default_true" time="0.270"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">backend/tests/test_pool_picker_rules.py:399: in test_16_user_response_includes_can_pick_default_true
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolAccessControlConfigDriven" name="test_17_changing_config_affects_pool_eligibility" time="0.318"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">backend/tests/test_pool_picker_rules.py:441: in test_17_changing_config_affects_pool_eligibility
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_pool_picker_rules.TestPoolAccessControlConfigDriven" name="test_18_disabling_account_type_removes_pool_access" time="0.320"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">backend/tests/test_pool_picker_rules.py:474: in test_18_disabling_account_type_removes_pool_access
+    assert update_response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase></testsuite></testsuites>
