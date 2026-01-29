@@ -149,18 +149,47 @@ def get_effective_permissions(role: str, overrides: Optional[Dict] = None) -> Di
 
 
 async def build_user_response(user: dict) -> UserResponse:
-    """Build UserResponse with related info"""
+    """Build UserResponse with related info - supports multi-specialty"""
     # Get team name
     team_name = None
     if user.get("team_id"):
         team = await db.teams.find_one({"id": user["team_id"]}, {"_id": 0, "name": 1})
         team_name = team["name"] if team else None
     
-    # Get specialty name
-    specialty_name = user.get("specialty_name")
-    if not specialty_name and user.get("specialty_id"):
-        specialty = await db.specialties.find_one({"id": user["specialty_id"]}, {"_id": 0, "name": 1})
-        specialty_name = specialty["name"] if specialty else None
+    # Handle multi-specialty (new) and legacy single specialty
+    specialty_ids = user.get("specialty_ids", [])
+    primary_specialty_id = user.get("primary_specialty_id")
+    
+    # Migration: if user has old specialty_id but no specialty_ids, convert
+    if not specialty_ids and user.get("specialty_id"):
+        specialty_ids = [user["specialty_id"]]
+        primary_specialty_id = user["specialty_id"]
+    
+    # Build specialties list with names
+    specialties = []
+    for spec_id in specialty_ids:
+        specialty = await db.specialties.find_one({"id": spec_id}, {"_id": 0, "id": 1, "name": 1})
+        if specialty:
+            specialties.append(SpecialtyInfo(
+                id=specialty["id"],
+                name=specialty["name"],
+                is_primary=(spec_id == primary_specialty_id)
+            ))
+    
+    # For backwards compatibility: specialty_id returns primary or first
+    legacy_specialty_id = primary_specialty_id or (specialty_ids[0] if specialty_ids else None)
+    legacy_specialty_name = None
+    if legacy_specialty_id:
+        for s in specialties:
+            if s.id == legacy_specialty_id:
+                legacy_specialty_name = s.name
+                break
+        # Fallback to user's stored name or look up
+        if not legacy_specialty_name:
+            legacy_specialty_name = user.get("specialty_name")
+        if not legacy_specialty_name:
+            spec = await db.specialties.find_one({"id": legacy_specialty_id}, {"_id": 0, "name": 1})
+            legacy_specialty_name = spec["name"] if spec else None
     
     # Get subscription plan name (also populate legacy access_tier fields)
     subscription_plan_name = user.get("subscription_plan_name")
@@ -184,8 +213,13 @@ async def build_user_response(user: dict) -> UserResponse:
         email=user["email"],
         role=user["role"],
         account_type=user.get("account_type"),
-        specialty_id=user.get("specialty_id"),
-        specialty_name=specialty_name,
+        # Multi-specialty fields
+        specialty_ids=specialty_ids,
+        specialties=specialties,
+        primary_specialty_id=primary_specialty_id,
+        # Legacy single specialty fields (for backwards compatibility)
+        specialty_id=legacy_specialty_id,
+        specialty_name=legacy_specialty_name,
         team_id=user.get("team_id"),
         team_name=team_name,
         subscription_plan_id=subscription_plan_id,
