@@ -301,12 +301,17 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
     else:
         # No eligible Partners -> Skip Pool 1, go directly to Pool 2
         # Query Pool 2 eligible users (Vendors/Freelancers with matching specialty)
+        # Now supports multi-specialty: user is eligible if ANY of their specialties match
         vendor_query = {
             "account_type": "Vendor/Freelancer",
             "active": True
         }
         if routing_specialty_id:
-            vendor_query["specialty_id"] = routing_specialty_id
+            # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
+            vendor_query["$or"] = [
+                {"specialty_ids": routing_specialty_id},
+                {"specialty_id": routing_specialty_id}
+            ]
         
         eligible_vendors = await db.users.find(vendor_query, {"_id": 0}).to_list(100)
         
