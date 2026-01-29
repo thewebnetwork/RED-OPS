@@ -888,14 +888,16 @@ export default function IAMPage() {
                 onValueChange={(v) => {
                   // When team changes, check if current specialty is still valid
                   const newTeam = teams.find(t => t.id === v);
-                  let newSpecialtyId = userForm.specialty_id;
+                  let newSpecialtyIds = userForm.specialty_ids || [];
                   if (newTeam && newTeam.related_specialty_ids && newTeam.related_specialty_ids.length > 0) {
-                    // If current specialty is not in the team's related specialties, clear it
-                    if (!newTeam.related_specialty_ids.includes(userForm.specialty_id)) {
-                      newSpecialtyId = '';
-                    }
+                    // Filter current specialties to only include those in team's related specialties
+                    newSpecialtyIds = newSpecialtyIds.filter(sid => newTeam.related_specialty_ids.includes(sid));
                   }
-                  setUserForm({ ...userForm, team_id: v || '', specialty_id: newSpecialtyId });
+                  let newPrimaryId = userForm.primary_specialty_id;
+                  if (newPrimaryId && !newSpecialtyIds.includes(newPrimaryId)) {
+                    newPrimaryId = newSpecialtyIds.length > 0 ? newSpecialtyIds[0] : '';
+                  }
+                  setUserForm({ ...userForm, team_id: v || '', specialty_ids: newSpecialtyIds, primary_specialty_id: newPrimaryId });
                 }}
                 placeholder="Select team (optional)..."
                 searchPlaceholder="Search teams..."
@@ -910,16 +912,64 @@ export default function IAMPage() {
             </div>
 
             <div>
-              <Label>Specialty *</Label>
-              <SearchableSelect
-                options={filteredSpecialtyOptions}
-                value={userForm.specialty_id}
-                onValueChange={(v) => setUserForm({ ...userForm, specialty_id: v })}
-                placeholder="Select specialty..."
-                searchPlaceholder="Search specialties..."
-                emptyText="No specialties found"
-                data-testid="user-specialty-select"
-              />
+              <Label>Specialties * (Select multiple)</Label>
+              <div className="border rounded-md p-2 mt-1 max-h-48 overflow-y-auto space-y-1 bg-white">
+                {filteredSpecialtyOptions.length === 0 ? (
+                  <p className="text-sm text-slate-500 p-2 text-center">No specialties available</p>
+                ) : (
+                  filteredSpecialtyOptions.map(spec => (
+                    <label 
+                      key={spec.value} 
+                      className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-slate-50 ${
+                        userForm.specialty_ids.includes(spec.value) ? 'bg-rose-50 border border-rose-200' : ''
+                      }`}
+                    >
+                      <Checkbox 
+                        checked={userForm.specialty_ids.includes(spec.value)}
+                        onCheckedChange={(checked) => {
+                          const newIds = checked 
+                            ? [...userForm.specialty_ids, spec.value]
+                            : userForm.specialty_ids.filter(id => id !== spec.value);
+                          // Update primary if it was removed
+                          let newPrimaryId = userForm.primary_specialty_id;
+                          if (!checked && spec.value === userForm.primary_specialty_id) {
+                            newPrimaryId = newIds.length > 0 ? newIds[0] : '';
+                          }
+                          // Set primary to first if not set
+                          if (checked && !newPrimaryId) {
+                            newPrimaryId = spec.value;
+                          }
+                          setUserForm({ ...userForm, specialty_ids: newIds, primary_specialty_id: newPrimaryId });
+                        }}
+                      />
+                      <span className="text-sm flex-1">{spec.label}</span>
+                      {userForm.specialty_ids.includes(spec.value) && (
+                        <Badge 
+                          variant={userForm.primary_specialty_id === spec.value ? "default" : "outline"} 
+                          className={`text-xs cursor-pointer ${userForm.primary_specialty_id === spec.value ? 'bg-rose-600' : ''}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setUserForm({ ...userForm, primary_specialty_id: spec.value });
+                          }}
+                        >
+                          {userForm.primary_specialty_id === spec.value ? 'Primary' : 'Set Primary'}
+                        </Badge>
+                      )}
+                    </label>
+                  ))
+                )}
+              </div>
+              {userForm.specialty_ids.length > 0 && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Selected: {userForm.specialty_ids.length} specialt{userForm.specialty_ids.length === 1 ? 'y' : 'ies'}
+                  {userForm.primary_specialty_id && (
+                    <span className="text-rose-600 ml-1">
+                      • Primary: {specialties.find(s => s.id === userForm.primary_specialty_id)?.name}
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
 
             {userForm.account_type === 'Partner' && (
