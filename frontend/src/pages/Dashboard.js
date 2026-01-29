@@ -287,7 +287,7 @@ function AdminDashboard() {
         <KPICard label={t('dashboard.pendingReview')} value={stats.pending_count} icon={AlertCircle} color="bg-purple-500" />
         <KPICard label={t('orders.status.delivered')} value={stats.delivered_count} icon={CheckCircle2} color="bg-green-500" />
         <Link to="/my-tickets">
-          <KPICard label="My Submitted Tickets" value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
+          <KPICard label={t('dashboard.mySubmittedTickets')} value={myWork.my_submitted_count} icon={Send} color="bg-indigo-500" />
         </Link>
       </div>
 
