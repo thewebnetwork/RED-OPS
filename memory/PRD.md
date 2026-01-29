@@ -3,14 +3,48 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.6 (Documentation Download + Smart Pool Routing)
+## Current Version: 3.7 (Multi-Specialty Support)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://rulebook-redops.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 Features - Documentation Download + Pool Routing Fix ✅
+## LATEST: P0 - Multi-Specialty Support for Users ✅
+
+### A) Data Model Changes ✅
+- **From:** Single `specialty_id` (one-to-one)
+- **To:** Multiple specialties via `specialty_ids` array (many-to-many)
+- **New User Fields:**
+  - `specialty_ids`: Array of specialty IDs
+  - `primary_specialty_id`: Which specialty is marked as primary
+  - `specialties`: Array of objects with `{id, name, is_primary}`
+- **Backwards Compatibility:** Legacy `specialty_id` and `specialty_name` still returned (set to primary or first specialty)
+
+### B) User Create/Edit UI ✅
+- **Multi-select:** Specialty field is now a scrollable checklist with checkboxes
+- **Primary Badge:** Can mark one specialty as "Primary" using "Set Primary" badges
+- **Selection Indicator:** Shows "Selected: N specialties • Primary: [name]"
+- **Validation:** At least one specialty is required
+
+### C) Routing & Pool Logic Updated ✅
+- **ANY Match Rule:** User is eligible for Pool 1/Pool 2 if ANY of their specialties match the ticket's routing specialty
+- **Query:** `$or: [{specialty_ids: routing_specialty_id}, {specialty_id: routing_specialty_id}]`
+- **Notifications:** Only users with a matching specialty receive pool notifications
+
+### D) Migration Endpoint ✅
+- **Endpoint:** `POST /api/users/migrate/single-to-multi-specialty`
+- **Function:** Converts users with `specialty_id` to `specialty_ids` array
+- **Status:** 39 users already migrated
+
+### E) Files Modified
+- `/app/backend/routes/users.py` - UserCreate, UserUpdate, UserResponse models updated
+- `/app/backend/routes/orders.py` - Pool routing uses multi-specialty queries
+- `/app/frontend/src/pages/IAMPage.js` - Multi-select specialty UI
+
+---
+
+## P0 Features - Documentation Download + Pool Routing Fix ✅
 
 ### A) Documentation Download (Admin-only) ✅
 - **Location:** Settings → System Documentation
