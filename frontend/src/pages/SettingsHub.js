@@ -9,10 +9,19 @@ import {
   Shield, 
   Plug, 
   Palette,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 
 const settingsModules = [
+  {
+    id: 'documentation',
+    name: 'System Documentation',
+    description: 'View and download system logic snapshot for UAT reference',
+    icon: FileText,
+    path: '/settings/documentation',
+    color: 'bg-slate-100 text-slate-600'
+  },
   {
     id: 'ui-customizations',
     name: 'UI Customizations',
