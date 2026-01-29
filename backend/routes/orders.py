@@ -529,26 +529,28 @@ async def submit_draft(
     now = get_utc_now_dt()
     sla_deadline = calculate_sla_deadline(now)
     
-    await db.orders.update_one(
-        {"id": order_id},
-        {"$set": {
-            "status": "Open",
-            "sla_deadline": sla_deadline.isoformat(),
-            "updated_at": now.isoformat()
-        }}
-    )
+    # Determine smart pool routing
+    routing_info = await determine_pool_routing(order.get("category_l2_id"), order.get("category_l1_id"))
     
-    # Now notify editors since the order is officially submitted
-    editors = await db.users.find({"role": "Editor", "active": True}, {"_id": 0}).to_list(100)
-    for editor in editors:
-        await create_notification(
-            db,
-            editor['id'],
-            "new_order",
-            "New request available",
-            f"New editing request {order['order_code']} '{order['title']}' is available for pickup",
-            order['id']
-        )
+    update_data = {
+        "status": "Open",
+        "sla_deadline": sla_deadline.isoformat(),
+        "updated_at": now.isoformat(),
+        "pool_stage": routing_info["pool_stage"],
+        "routing_specialty_id": routing_info.get("routing_specialty_id"),
+        "routing_specialty_name": routing_info.get("routing_specialty_name"),
+        "pool1_expires_at": routing_info.get("pool1_expires_at"),
+        "pool_entered_at": now.isoformat()
+    }
+    
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    
+    # Update the order dict for notifications
+    order.update(update_data)
+    
+    # Log the routing decision
+    if routing_info.get("skipped_pool_1"):
+        logging.info(f"Order {order['order_code']} (submitted draft) skipped Pool 1: {routing_info.get('skip_reason')}")
     
     # Trigger webhooks for order.submitted (and order.created for backwards compat)
     background_tasks.add_task(trigger_webhooks, "order.created", {
@@ -559,7 +561,8 @@ async def submit_draft(
         "requester_email": order["requester_email"],
         "category": order.get("category_l2_name") or order.get("category_l1_name"),
         "priority": order["priority"],
-        "status": "Open"
+        "status": "Open",
+        "pool_stage": routing_info["pool_stage"]
     })
     
     # Execute workflows triggered by order.created
@@ -572,6 +575,9 @@ async def submit_draft(
                 "user": current_user
             })
     background_tasks.add_task(run_workflows)
+    
+    # Notify eligible pool users (only those matching the specialty)
+    await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     updated_order = normalize_order(updated_order)
