@@ -100,6 +100,12 @@ function AppRoutes() {
           </PublicRoute>
         } 
       />
+      {/* Force password change - requires auth but not full session */}
+      <Route path="/force-password-change" element={<ForcePasswordChange />} />
+      {/* OTP Setup - requires auth but not full session */}
+      <Route path="/setup-otp" element={<SetupOTP />} />
+      {/* OTP Verify - requires auth but not full session */}
+      <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route 
         path="/reset-password" 
         element={
