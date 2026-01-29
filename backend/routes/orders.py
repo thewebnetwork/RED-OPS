@@ -234,6 +234,150 @@ async def notify_status_change(order: dict, old_status: str, new_status: str, ch
                 logging.error(f"Failed to send status change email to editor: {e}")
 
 
+async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None):
+    """
+    Determine the correct pool stage based on whether eligible Partners exist for the ticket's specialty.
+    
+    Returns:
+        dict with pool_stage, routing_specialty_id, routing_specialty_name, pool1_expires_at, eligible_users
+    """
+    from datetime import timedelta
+    
+    routing_specialty_id = None
+    routing_specialty_name = None
+    
+    # Step 1: Determine routing_specialty_id from category mapping
+    # First check L2 category for specialty mapping
+    if category_l2_id:
+        l2_cat = await db.categories_l2.find_one({"id": category_l2_id}, {"_id": 0})
+        if l2_cat and l2_cat.get("specialty_id"):
+            routing_specialty_id = l2_cat.get("specialty_id")
+    
+    # Fallback to L1 category specialty if L2 doesn't have one
+    if not routing_specialty_id and category_l1_id:
+        l1_cat = await db.categories_l1.find_one({"id": category_l1_id}, {"_id": 0})
+        if l1_cat and l1_cat.get("specialty_id"):
+            routing_specialty_id = l1_cat.get("specialty_id")
+    
+    # Get specialty name if we have a routing specialty
+    if routing_specialty_id:
+        specialty = await db.specialties.find_one({"id": routing_specialty_id}, {"_id": 0})
+        if specialty:
+            routing_specialty_name = specialty.get("name")
+    
+    # Step 2: Query eligible Pool 1 candidates (Partners with matching specialty)
+    partner_query = {
+        "account_type": "Partner",
+        "active": True
+    }
+    
+    # If we have a routing specialty, filter by it
+    if routing_specialty_id:
+        partner_query["specialty_id"] = routing_specialty_id
+    
+    eligible_partners = await db.users.find(partner_query, {"_id": 0}).to_list(100)
+    partner_count = len(eligible_partners)
+    
+    now = datetime.now(timezone.utc)
+    
+    # Step 3: Determine pool stage
+    if partner_count > 0:
+        # Eligible Partners exist -> Pool 1 for 24 hours
+        pool1_expires_at = now + timedelta(hours=24)
+        return {
+            "pool_stage": "POOL_1",
+            "routing_specialty_id": routing_specialty_id,
+            "routing_specialty_name": routing_specialty_name,
+            "pool1_expires_at": pool1_expires_at.isoformat(),
+            "eligible_partner_count": partner_count,
+            "eligible_partners": eligible_partners
+        }
+    else:
+        # No eligible Partners -> Skip Pool 1, go directly to Pool 2
+        # Query Pool 2 eligible users (Vendors/Freelancers with matching specialty)
+        vendor_query = {
+            "account_type": "Vendor/Freelancer",
+            "active": True
+        }
+        if routing_specialty_id:
+            vendor_query["specialty_id"] = routing_specialty_id
+        
+        eligible_vendors = await db.users.find(vendor_query, {"_id": 0}).to_list(100)
+        
+        return {
+            "pool_stage": "POOL_2",
+            "routing_specialty_id": routing_specialty_id,
+            "routing_specialty_name": routing_specialty_name,
+            "pool1_expires_at": None,
+            "skipped_pool_1": True,
+            "skip_reason": "No eligible Partners with matching specialty",
+            "eligible_vendor_count": len(eligible_vendors),
+            "eligible_vendors": eligible_vendors
+        }
+
+
+async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, background_tasks):
+    """
+    Send notifications to eligible pool users (in-app and email).
+    Only notifies users matching the ticket's specialty.
+    """
+    pool_name = "Opportunity Ribbon (Pool 1)" if pool_stage == "POOL_1" else "Opportunity Pool (Pool 2)"
+    
+    if pool_stage == "POOL_1" and routing_info.get("eligible_partners"):
+        # Notify matching Partners
+        for partner in routing_info["eligible_partners"]:
+            # In-app notification
+            await create_notification(
+                db,
+                partner["id"],
+                "pool_ticket",
+                f"New opportunity in {pool_name}",
+                f"New opportunity available: {order['order_code']} - {order.get('title', 'Untitled')}. Please login to view.",
+                order["id"]
+            )
+            
+            # Email notification
+            if partner.get("email"):
+                background_tasks.add_task(
+                    send_pool_assignment_email,
+                    partner["email"],
+                    partner.get("name", "Partner"),
+                    order["order_code"],
+                    order.get("title", ""),
+                    order.get("priority", "Normal"),
+                    order.get("category_l2_name") or order.get("category_l1_name") or "General",
+                    pool_name,
+                    order["id"]
+                )
+    
+    elif pool_stage == "POOL_2" and routing_info.get("eligible_vendors"):
+        # Notify matching Vendors/Freelancers
+        for vendor in routing_info["eligible_vendors"]:
+            # In-app notification
+            await create_notification(
+                db,
+                vendor["id"],
+                "pool_ticket",
+                f"New opportunity in {pool_name}",
+                f"New opportunity available: {order['order_code']} - {order.get('title', 'Untitled')}. Please login to view.",
+                order["id"]
+            )
+            
+            # Email notification
+            if vendor.get("email"):
+                background_tasks.add_task(
+                    send_pool_assignment_email,
+                    vendor["email"],
+                    vendor.get("name", "Team Member"),
+                    order["order_code"],
+                    order.get("title", ""),
+                    order.get("priority", "Normal"),
+                    order.get("category_l2_name") or order.get("category_l1_name") or "General",
+                    pool_name,
+                    order["id"]
+                )
+
+
 # ============== ORDER CRUD ROUTES ==============
 
 @router.post("", response_model=OrderResponse)
