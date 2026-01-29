@@ -1,0 +1,43 @@
+id,name,icon,description,active
+b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Marketing & Creative,Palette,Category for Marketing & Creative,True
+34f20a3c-1196-423a-a771-3a8e3f8ed39f,Graphic Design,PenTool,Category for Graphic Design,True
+b3f74826-1410-4272-a20d-a190844a5898,Copywriting & Content,FileText,Category for Copywriting & Content,True
+db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Digital Marketing,Globe,Category for Digital Marketing,True
+1e502dc3-4fc4-41bd-8c87-10b3509300da,Social Media,Share2,Category for Social Media,True
+6ab047e7-3e0e-478e-8e86-2c33971d37b1,Email Marketing,Mail,Category for Email Marketing,True
+34a9ef7e-37a1-4408-8165-47e764d4cfa1,Video Production,Video,Category for Video Production,True
+2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Photography,Camera,Category for Photography,True
+6e263e20-5b89-4c83-9528-17343766d515,Audio & Podcast,Mic,Category for Audio & Podcast,True
+5820a855-88f6-4146-8372-03e267a53142,Residential Listings,Home,Category for Residential Listings,True
+09f3a427-17f0-4462-b6b7-ad42c083467b,Residential Sales Support,Key,Category for Residential Sales Support,True
+44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Property Staging,Sofa,Category for Property Staging,True
+ff0f4719-04fa-4e43-b464-e204b8c94476,Commercial Listings,Building2,Category for Commercial Listings,True
+68bfb059-dce8-4049-856c-683fcd1357b3,Commercial Leasing,FileSignature,Category for Commercial Leasing,True
+8e089669-a974-4026-b10c-eb83cf8599ad,Commercial Due Diligence,ClipboardCheck,Category for Commercial Due Diligence,True
+bf282860-85d8-4eea-8157-b113af55c286,Sales Operations,TrendingUp,Category for Sales Operations,True
+bb657677-ef36-4c93-89a2-01b5c4f454c1,CRM & Automations,Workflow,Category for CRM & Automations,True
+39233e10-329c-43da-b2a1-cf660f434afc,Lead Generation,UserPlus,Category for Lead Generation,True
+5c5e6212-7293-4f5c-a09b-72acb27ef950,Customer Support,Headphones,Category for Customer Support,True
+2bdfc207-adbd-4b9d-9816-58de2822be0a,Client Services,Users,Category for Client Services,True
+275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,IT Support,Monitor,Category for IT Support,True
+3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Hardware & Devices,Laptop,Category for Hardware & Devices,True
+a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Security & Access,Shield,Category for Security & Access,True
+56a30071-4afe-46e2-aead-2ca8d142d194,Accounts Payable,CreditCard,Category for Accounts Payable,True
+2793c073-8144-4f64-afe0-51ba0e0a1a3f,Accounts Receivable,Receipt,Category for Accounts Receivable,True
+26da23e0-577c-4afc-8951-196c566dce04,Expense & Reimbursement,Wallet,Category for Expense & Reimbursement,True
+7fc177c3-fb20-477f-8582-7d026c792516,Payroll,Banknote,Category for Payroll,True
+9237bb56-5556-48fe-ba5e-8259e7444063,Hiring & Recruiting,Briefcase,Category for Hiring & Recruiting,True
+aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Onboarding,UserCheck,Category for Onboarding,True
+c2ce7621-0562-47ed-ae76-4804a13967c8,Employee Services,HeartHandshake,Category for Employee Services,True
+8734edb9-b963-496e-90b1-0047876f7c2f,Offboarding,LogOut,Category for Offboarding,True
+a20cfd47-8b80-42f7-86c4-723d5289a123,Contracts & Agreements,FileCheck,Category for Contracts & Agreements,True
+0bc850a3-ef3a-48fd-b465-688828827ef3,Compliance & Risk,AlertTriangle,Category for Compliance & Risk,True
+97d1ea19-7740-433f-aca2-5fd2765b270d,Facilities & Office,Building,Category for Facilities & Office,True
+425f1f72-9046-4f78-88f7-5ec82cf4a24d,Procurement,ShoppingCart,Category for Procurement,True
+0dcb0ecb-7730-427a-99a9-9170d2659ed9,Roofing & Exterior,Warehouse,Category for Roofing & Exterior,True
+62553e07-98b4-4d57-a8b1-fabc31a5a528,Plumbing,Droplet,Category for Plumbing,True
+ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Electrical,Zap,Category for Electrical,True
+52d7b255-7945-4054-adb9-72535e0a8ac1,HVAC,Wind,Category for HVAC,True
+a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Handyman & General,Hammer,Category for Handyman & General,True
+3434d021-38f4-4ef0-bb94-1becd677c025,Project Requests,FolderKanban,Category for Project Requests,True
+70d57f4b-449b-4c5f-830c-010a9428100a,Process Improvement,Settings2,Category for Process Improvement,True

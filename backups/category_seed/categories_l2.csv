@@ -1,0 +1,404 @@
+id,name,parent_id,description,active
+e2233e75-04b1-43d7-a1de-9409edcc9c14,Brand Strategy & Guidelines,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Brand Strategy & Guidelines,True
+75b27f1a-9116-474e-9478-7b0f8256c3eb,Campaign Planning,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Campaign Planning,True
+33bac09a-e2f3-40f7-a228-05ecb62d842a,Creative Brief Development,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Creative Brief Development,True
+1da4b66a-1379-48c2-bb6e-7a0240cbc1a6,Brand Asset Request,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Brand Asset Request,True
+ceda5dce-6135-45a9-a880-63252de49029,Marketing Collateral,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Marketing Collateral,True
+04c07d1a-2c0e-4070-b9e1-d72d8bd57535,Print Materials,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Print Materials,True
+6c1dd44c-4d25-4f82-bcb5-691246aea44c,Promotional Items,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Promotional Items,True
+543fd864-de52-420c-9bac-7542b1f8ae7f,Signage Request,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Signage Request,True
+1e4b4761-b917-472c-92ff-85b3f7a798ae,Logo Usage Request,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Logo Usage Request,True
+a953efc6-0bf4-4c12-8e3e-7780dbffee2c,Brand Approval,b52fbfe5-e1a8-4b3e-9889-0347f7430f0d,Subcategory for Brand Approval,True
+f9c490c8-e0d0-4c0a-930f-1734958bb9ab,Social Media Graphics,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Social Media Graphics,True
+b01cff0b-326c-4b29-84e7-3ad832094316,Email Graphics,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Email Graphics,True
+be8687b9-6706-4285-8123-9d225f7529e1,Presentation Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Presentation Design,True
+cd5ee6d9-773a-49e4-b5c1-8856780e5a64,Infographic Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Infographic Design,True
+f6566a19-9490-4e50-9dbe-709631663f92,Banner Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Banner Design,True
+d94d56e5-347f-4fd1-bd36-f038b9f480b1,Flyer Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Flyer Design,True
+4f7c3fa5-ee52-4756-bc37-4e01a68fa5ad,Brochure Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Brochure Design,True
+ee8fc76c-c694-4423-b8da-da704aceaf51,Business Card Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Business Card Design,True
+3b88a986-7e5f-4e2b-8b90-f4ce6b91b475,Postcard Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Postcard Design,True
+09cb2b12-7e35-4168-a43f-a8ba72130e0d,Ad Creative Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Ad Creative Design,True
+5902fd76-f798-4af3-af3c-89902f9950bc,Illustration Request,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Illustration Request,True
+f67376d2-51ec-47d8-b945-62337e2b2410,Icon Design,34f20a3c-1196-423a-a771-3a8e3f8ed39f,Subcategory for Icon Design,True
+8221aaed-10d7-47e6-bee0-5051ca4bc6c1,Blog Post Writing,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Blog Post Writing,True
+47a78e0b-c26b-44d4-b17b-4f2b79d34440,Article Writing,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Article Writing,True
+af1dbf76-91e0-447b-8927-1f00bb7db095,Press Release,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Press Release,True
+f203e153-652b-4d9c-af01-dcab4ef3231a,Email Copy,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Email Copy,True
+aebc5da7-cc05-46a8-8f93-976d2edb2f4a,Landing Page Copy,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Landing Page Copy,True
+98ac70b0-3eb5-48a4-a25c-ecd72f0d4273,Ad Copy,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Ad Copy,True
+8c4155dd-6ce6-49fc-9920-13749e13e269,Social Media Copy,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Social Media Copy,True
+d13f6a11-6f24-4a77-90ee-e5d29d62271d,Product Description,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Product Description,True
+5a602dee-2138-4773-aa26-f6b03fe10c34,Website Copy,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Website Copy,True
+687d3061-2f3b-464d-87f9-068bda1e26bf,Script Writing,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Script Writing,True
+385904a3-5caf-4c40-9960-4991437b5cf5,Newsletter Content,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Newsletter Content,True
+b58912a1-ffd6-4d94-9c1a-41d6d59e27b9,Case Study Writing,b3f74826-1410-4272-a20d-a190844a5898,Subcategory for Case Study Writing,True
+2aff9568-b2d3-482d-9b95-89864efa2fee,SEO Strategy,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for SEO Strategy,True
+1cf740a9-990a-42ad-b7e9-aab6dd468e57,SEO Audit Request,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for SEO Audit Request,True
+ab438ff8-9530-4ff8-b08e-f05848a96dcd,Keyword Research,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Keyword Research,True
+31243ad3-044a-4449-97f9-6557e1868a89,Link Building Request,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Link Building Request,True
+ed04d3ec-e143-4373-b85b-0aa32cb27b04,Local SEO Setup,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Local SEO Setup,True
+4679a5ce-ad58-46f9-ad1c-d1afa6e9a2e9,Google Business Profile,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Google Business Profile,True
+868bf16e-a851-4b5a-9fe0-5753155c2968,PPC Campaign Setup,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for PPC Campaign Setup,True
+049e39bc-3e32-4668-b070-aa40f9a9af5c,PPC Optimization,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for PPC Optimization,True
+8cfdf948-b3cc-4f1f-9ef5-2eee238f922c,Display Advertising,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Display Advertising,True
+23f4b28d-e0fd-4882-8e79-d079026e6812,Retargeting Campaign,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Retargeting Campaign,True
+b0a986e0-78b1-4c35-a043-5a15c58fdcfb,Analytics Setup,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Analytics Setup,True
+f6b0a4b6-c7df-4196-b868-b8d41c461509,Conversion Tracking,db8fd7eb-fe9c-4514-9d3a-cd2059512ea2,Subcategory for Conversion Tracking,True
+61870f16-c2d9-42e1-becb-42c3b9cad031,Social Strategy Development,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Social Strategy Development,True
+1c21882f-b7c5-4fab-9cea-2b3a86c06209,Content Calendar,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Content Calendar,True
+0a8714a1-cda2-4614-b686-481a04641640,Post Scheduling,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Post Scheduling,True
+b7459034-437e-4f7e-ac38-cb69de21794f,Community Management,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Community Management,True
+0c7802a9-bd7c-4f5b-85e8-7158f9e7c5f3,Influencer Outreach,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Influencer Outreach,True
+41b1832d-e2e7-495d-950e-44c83dcc8590,Social Ad Campaign,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Social Ad Campaign,True
+43b13f24-7678-4276-808f-6ac44388c3ed,Platform Setup,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Platform Setup,True
+ef0f8a65-c1ba-4ad1-a532-665fe93f16e6,Social Listening,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Social Listening,True
+4c9a5cb5-b8f2-4086-8e36-c4ec1a0d5a9a,Engagement Report,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Engagement Report,True
+a0c9250c-6b50-4b59-947e-894608061972,Crisis Response,1e502dc3-4fc4-41bd-8c87-10b3509300da,Subcategory for Crisis Response,True
+12817ab9-e8e0-4d7a-8e8d-17c4d53eba35,Email Campaign Setup,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Email Campaign Setup,True
+9ecb431f-307d-48c1-9225-cd1a38037a0c,Email Template Design,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Email Template Design,True
+6017372e-d98b-4741-9181-72d70419d3ff,Newsletter Setup,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Newsletter Setup,True
+56bd6d43-d695-4e1c-9ead-bca89c71e5a9,Drip Campaign Creation,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Drip Campaign Creation,True
+63470d55-2c9a-47a6-9cf9-ae342ba4660b,Email List Management,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Email List Management,True
+2504adcc-a118-4c82-8faf-54e17a76fc6e,A/B Testing Setup,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for A/B Testing Setup,True
+ae70779b-0846-4ea1-a029-41e758fccefc,Email Automation,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Email Automation,True
+f3dccabf-6994-44e8-89ab-116eb71fcadd,Deliverability Issue,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Deliverability Issue,True
+c3e920f0-e277-42cf-bc6c-ec828ba06afc,Unsubscribe Request,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Unsubscribe Request,True
+f8ca0bca-b69a-4284-905d-4cf5082b1580,Email Analytics,6ab047e7-3e0e-478e-8e86-2c33971d37b1,Subcategory for Email Analytics,True
+2796538d-960e-40d6-88d2-470b708cee3f,Video Shoot Request,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Video Shoot Request,True
+b84f94a3-4dd5-4974-be18-c4c3a3617df3,Video Editing,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Video Editing,True
+cf0a1920-6683-4a55-a6df-54013519bfb9,Motion Graphics,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Motion Graphics,True
+d43f6f70-2caa-4c37-9969-636ca1a778bb,Animation Request,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Animation Request,True
+3daa349d-ff45-49a4-8423-33a74211bd2c,Color Correction,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Color Correction,True
+245e903a-5d78-4804-b730-4e55d3d6ea0d,Audio Mixing,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Audio Mixing,True
+11a13b41-9225-4aa3-baa5-ee94ecdf4e2d,Subtitles/Captions,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Subtitles/Captions,True
+996e545d-00a4-4689-ad42-c99a353b241a,Video Thumbnail,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Video Thumbnail,True
+9a352f45-a191-434f-9f2b-118689ef4343,YouTube Optimization,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for YouTube Optimization,True
+576ab220-0c17-4fae-bf57-d92dff9a60e5,Video Compression,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Video Compression,True
+fed96508-cf26-41ee-a0bf-525f8ec26ff3,Format Conversion,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Format Conversion,True
+d9f95bb6-9988-4c36-81a1-0916fc4b426c,Video Revision,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for Video Revision,True
+7bb05fd6-f7dd-428e-8e3a-8576da5521f6,B-Roll Request,34a9ef7e-37a1-4408-8165-47e764d4cfa1,Subcategory for B-Roll Request,True
+6c889e81-0d98-4e21-b73b-1369530b6d3c,Photo Shoot Request,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Photo Shoot Request,True
+1cf8b323-ca1e-46d8-98a4-601cae5bbc09,Product Photography,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Product Photography,True
+a5973cd5-b7f7-4de0-abe4-ac08540602e2,Headshot Session,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Headshot Session,True
+5ffa1e10-b7a5-4ae9-8466-4aca79e1a02f,Event Photography,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Event Photography,True
+f6714b01-d382-40f7-bc70-561d437a0e10,Photo Editing,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Photo Editing,True
+e0064403-028f-4760-8d7d-a36673b86974,Photo Retouching,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Photo Retouching,True
+143b00b9-d851-44c2-8f93-8f3d07254117,Image Cropping/Resizing,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Image Cropping/Resizing,True
+1f3875bd-d648-4051-9acc-fa0d1e6f4f9a,Stock Photo Request,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Stock Photo Request,True
+bdb1f48d-8641-4bf0-b628-5108c0ee276a,Photo Selection,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Photo Selection,True
+c72473bd-f701-45b1-8b45-3432d47db8bd,Photo Archive Access,2e3a9b29-39ec-4cca-9d25-603c376aa3f3,Subcategory for Photo Archive Access,True
+32b53d0a-b07d-4192-b753-3d4a8bc827d4,Podcast Recording,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Podcast Recording,True
+4fd4d599-1087-4edd-b8f6-b3a0ee8c481b,Audio Editing,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Audio Editing,True
+3ea3fc5a-dbef-4bfc-9c7f-564324de090f,Voiceover Recording,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Voiceover Recording,True
+257f10f8-8f10-4406-8f17-d84a2ee324b0,Sound Design,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Sound Design,True
+af03e862-ac6b-4f53-899d-221c5d49308f,Music Licensing,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Music Licensing,True
+2af38c2b-13bb-434d-bb6e-58153e82e958,Audio Transcription,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Audio Transcription,True
+3ed3faa0-468c-4fb9-9217-205f53020188,Podcast Distribution,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Podcast Distribution,True
+e70f6867-af0e-4f50-b7a3-fa32424be250,Audio Format Conversion,6e263e20-5b89-4c83-9528-17343766d515,Subcategory for Audio Format Conversion,True
+ee1aba42-5e6c-44b2-bb17-250a193aeafa,New Listing Setup,5820a855-88f6-4146-8372-03e267a53142,Subcategory for New Listing Setup,True
+6b028a85-d0b8-4db1-ac95-66551f430bf1,Listing Photos Request,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Listing Photos Request,True
+69cddc8f-322c-4193-b6c9-846244389e4e,Listing Video Request,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Listing Video Request,True
+31e14a25-87ea-40c1-b12c-c515a641d40a,Virtual Tour Setup,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Virtual Tour Setup,True
+53fbaacf-07eb-4542-87de-98f83193ccab,3D Tour/Matterport,5820a855-88f6-4146-8372-03e267a53142,Subcategory for 3D Tour/Matterport,True
+65e63c42-beff-454e-a550-f219799ffcbf,Listing Description,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Listing Description,True
+68269fa5-6a64-4cf9-9d55-057d152f1023,MLS Upload,5820a855-88f6-4146-8372-03e267a53142,Subcategory for MLS Upload,True
+680bee89-dc9a-4faf-902d-3a6f15c349f1,Listing Update,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Listing Update,True
+5c67a9bd-7cb4-49e8-bce2-c4841e27b548,Price Change Request,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Price Change Request,True
+33bd65cc-171b-4ef3-8c31-0d2c291064f0,Listing Status Change,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Listing Status Change,True
+7e0b4621-f476-44a5-bdd6-e106cd9f51af,Coming Soon Setup,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Coming Soon Setup,True
+91745aac-bc75-4f3a-b0b5-6d0c9e39b008,Pocket Listing Setup,5820a855-88f6-4146-8372-03e267a53142,Subcategory for Pocket Listing Setup,True
+64bcc5a0-94de-4572-96f1-8faaa97c7a85,Showing Request,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Showing Request,True
+f7f3b8bd-60fb-49b7-b407-a2c5e75bef31,Open House Setup,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Open House Setup,True
+09410d68-e7da-4939-b9d5-25b6958202ac,Open House Materials,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Open House Materials,True
+63d0d556-3c4e-471d-a39e-dc4b7baf2f22,Buyer Presentation,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Buyer Presentation,True
+a60b2206-2af6-4e09-9579-317ba5cd0114,Seller Presentation,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Seller Presentation,True
+a2277c77-8dfd-4072-9026-28f5093273f2,CMA Request,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for CMA Request,True
+71f1a535-f454-48d5-a5b0-19e1cc77742e,Market Analysis,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Market Analysis,True
+8f6ccb01-6076-4239-97a5-dda16a53f1a3,Offer Preparation,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Offer Preparation,True
+bff3d150-5af9-465d-b45d-eee2ea8d341b,Counter Offer Support,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Counter Offer Support,True
+cb22b579-e039-4583-9b9f-d7c24109d2b3,Contract Review Support,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Contract Review Support,True
+d43bfb3b-df57-422e-9866-46a9e8594441,Closing Coordination,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Closing Coordination,True
+c22c0467-2d3f-4a5b-8177-177a2c1024bc,Post-Sale Follow-up,09f3a427-17f0-4462-b6b7-ad42c083467b,Subcategory for Post-Sale Follow-up,True
+8793171b-bfb2-4c53-9ccf-108c7af39abe,Staging Consultation,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Staging Consultation,True
+5f58aba7-d76c-478b-8d64-28e635296cd9,Staging Quote Request,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Staging Quote Request,True
+12aaa2e4-d2cd-4b76-a5eb-466b74cf654d,Furniture Rental,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Furniture Rental,True
+11dd515c-20ce-48d8-898f-20d730781518,Staging Coordination,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Staging Coordination,True
+868f1953-b786-4706-82d7-6986c34374dc,Destaging Request,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Destaging Request,True
+f23e6435-a8bc-4a69-b263-c5078d806a43,Virtual Staging,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Virtual Staging,True
+3785e73d-45d4-4660-8b79-2bd95d63325d,Staging Photos,44a7a62d-0d08-4fef-9df8-669f9bd2bf78,Subcategory for Staging Photos,True
+cb8badb9-1e8a-456a-b790-3a445336ae48,Commercial Listing Setup,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Commercial Listing Setup,True
+8083335d-d696-4d8c-8974-d12a2925d2e2,Property Information Package,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Property Information Package,True
+6e382bd6-c8cc-466a-9a96-fe3c5ffae639,Marketing Package,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Marketing Package,True
+00d84db5-df2f-4535-9b7c-97e83bc521d6,LoopNet Listing,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for LoopNet Listing,True
+e8751ee5-29d4-42ef-ac5b-b12e94d30cbe,CoStar Listing,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for CoStar Listing,True
+0ec2933c-0809-40e5-b394-06a223e53937,Commercial Photos,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Commercial Photos,True
+08ba040c-e89f-447c-9f11-d90c12ba1e8e,Commercial Video,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Commercial Video,True
+ad301097-ba77-470d-914e-5cc1646a5fd0,Aerial/Drone Photography,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Aerial/Drone Photography,True
+22a91768-27fe-48bc-8aae-73ceb7c4af50,Floor Plan Request,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Floor Plan Request,True
+41887f02-eaef-4b8d-abf7-cbc1a3ba8dd7,Site Plan Request,ff0f4719-04fa-4e43-b464-e204b8c94476,Subcategory for Site Plan Request,True
+4a914c2c-0596-4fb4-ae10-ddea94cd41f8,Lease Proposal,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Lease Proposal,True
+e7298e5b-a47f-4c07-8d02-ab53c76ad252,LOI Preparation,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for LOI Preparation,True
+629db50d-8e65-417d-ab9a-f9701b81ac2f,Lease Abstract,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Lease Abstract,True
+5805dc59-a691-4e31-b349-284f04798f21,Rent Roll Analysis,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Rent Roll Analysis,True
+aedc5630-2d2b-4c5e-a6ba-e770b5908ff7,Tenant Improvement,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Tenant Improvement,True
+0d1e34c4-590a-4622-9d57-367cc19d7482,Lease Renewal,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Lease Renewal,True
+43ed6eb2-a253-44ee-a4e9-b2e96a6c901d,Lease Amendment,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Lease Amendment,True
+abd7fab6-5c96-4a21-9c42-b0ccff94c123,Tenant Coordination,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Tenant Coordination,True
+fb5c3c7d-e71a-4eaf-968e-c751b04b0126,Move-In Coordination,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Move-In Coordination,True
+833d8aaf-59fc-47de-9815-2d87758e425e,Move-Out Coordination,68bfb059-dce8-4049-856c-683fcd1357b3,Subcategory for Move-Out Coordination,True
+9fa23bfc-8355-46df-88ad-a6f1874f08bf,Property Condition Report,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Property Condition Report,True
+4b74b681-5f07-46d2-98dd-0414643be75f,Environmental Assessment,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Environmental Assessment,True
+97de3802-34f4-4484-97e0-9f8d0f234c9a,Survey Request,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Survey Request,True
+f1f4b3f6-4d6f-437f-8dfb-c5c9c0cd7a5e,Title Review,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Title Review,True
+ed7aec24-3230-4064-9f0b-909799d83b2f,Zoning Analysis,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Zoning Analysis,True
+ae0f1609-3d18-4f6d-935b-6099cf9380a1,Financial Underwriting,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Financial Underwriting,True
+faef73af-0ca3-43e1-bd4b-880b277eeb01,Rent Comp Analysis,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Rent Comp Analysis,True
+0935717b-8092-4239-9bd6-2c3059d38325,Market Study,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Market Study,True
+71487578-bdf1-4ebf-a54f-83c8ddb19583,Investment Memo,8e089669-a974-4026-b10c-eb83cf8599ad,Subcategory for Investment Memo,True
+2a58ef3d-f3ce-4346-a6bf-381366d0f474,Lead Assignment,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Lead Assignment,True
+5374348c-3736-4f83-9a6a-ad885b598091,Lead Routing Setup,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Lead Routing Setup,True
+ffd42636-32fa-4f92-a064-292ae7fe6ade,Pipeline Report,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Pipeline Report,True
+c527ac4f-dc50-4603-9e2a-be6ba9a0f13d,Sales Forecast,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Sales Forecast,True
+2cf252c9-cc0a-4a32-b57f-e3844271afc8,Commission Calculation,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Commission Calculation,True
+7889ca20-e264-4356-be8c-03b033796e90,Territory Update,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Territory Update,True
+8bdf1591-1c52-4835-9e8e-3d7bd393d457,Sales Tool Access,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Sales Tool Access,True
+d50e6d1e-6f3d-4264-ae79-76dce022df1c,CRM Training Request,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for CRM Training Request,True
+7e958558-fa69-40e6-a94c-c99837b88ce7,Sales Collateral,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Sales Collateral,True
+41c78c3e-ed47-4228-92f1-662b9c535e3b,Competitive Analysis,bf282860-85d8-4eea-8157-b113af55c286,Subcategory for Competitive Analysis,True
+9f3c6d26-d435-46b0-8ee6-6cb2bf495805,CRM Data Entry,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for CRM Data Entry,True
+13876710-82f6-4857-817e-748827a991f1,Contact Import,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Contact Import,True
+1cc354fd-2da2-4aab-817b-8a0dd7ac2f67,Contact Merge/Dedupe,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Contact Merge/Dedupe,True
+81e08d48-af99-443b-9089-d9a046bf523e,Automation Setup,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Automation Setup,True
+c9b9a179-605f-48ca-b9c4-125b2d162eb0,Workflow Creation,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Workflow Creation,True
+9ada7a66-cede-4314-991b-ac41621bcbb9,Drip Campaign Setup,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Drip Campaign Setup,True
+492c250a-5018-4996-b456-93798b8ce77c,Task Automation,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Task Automation,True
+c6b029c9-9cb0-4dd6-9388-5b2c72edc2da,Notification Setup,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Notification Setup,True
+fcfb26ea-c6ff-4ed9-959d-501007facfae,Integration Request,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for Integration Request,True
+e42d4933-ca0a-4239-99a1-62be22020712,CRM Bug Report,bb657677-ef36-4c93-89a2-01b5c4f454c1,Subcategory for CRM Bug Report,True
+e1a0ecf0-5291-46b6-8c9d-e30fc25dbfd8,Lead Source Setup,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Lead Source Setup,True
+f2fb11a2-7e94-42ba-9b5a-e5d04a8333cc,Landing Page Request,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Landing Page Request,True
+8e5a7007-8638-487c-9680-860ee23b7358,Lead Magnet Creation,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Lead Magnet Creation,True
+8c2d1042-ebfc-4f38-a643-fe6e05a130bc,Webinar Setup,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Webinar Setup,True
+c933cea2-6e5a-4884-b52e-0911c07c59f8,Lead Scoring Setup,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Lead Scoring Setup,True
+20bda116-45ad-4a83-a57f-1778c78c91bd,Lead Qualification,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Lead Qualification,True
+0bc379f6-3d6a-4b94-b007-c69a7bd4df53,Lead Nurture Campaign,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Lead Nurture Campaign,True
+8ca5538d-048b-4dec-8aab-bf4f46e10a83,Referral Program,39233e10-329c-43da-b2a1-cf660f434afc,Subcategory for Referral Program,True
+d2073768-97ba-443e-b954-1cdaa3a592f1,General Inquiry,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for General Inquiry,True
+8c3bad10-7e19-461c-b3c6-feb55c0f5c2b,Service Complaint,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Service Complaint,True
+1fb31c42-d4aa-4c53-a48b-1298e2e8907a,Billing Question,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Billing Question,True
+495fe48b-f101-4fc5-837f-cab4ba645f51,Account Access Issue,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Account Access Issue,True
+13d1054a-44bd-4c47-8cdc-88c0c6d068df,Product Question,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Product Question,True
+4d37a75a-a871-4163-881b-f794dc3e6a75,Feature Request,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Feature Request,True
+99da10db-ca45-4768-ba66-997a8a2a7fc3,Bug Report,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Bug Report,True
+94817811-4ac2-4ec2-a8ab-fda38eb19540,Escalation Request,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Escalation Request,True
+cc1e40c4-0d97-4211-bc5c-770e415fba40,Feedback Submission,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Feedback Submission,True
+b399cb27-6ca2-49d9-9038-efe8275b5b53,Survey Response,5c5e6212-7293-4f5c-a09b-72acb27ef950,Subcategory for Survey Response,True
+335b7cd2-e27f-4823-aea6-0aad76de7842,Client Onboarding,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Client Onboarding,True
+de7e9993-dfa1-488a-be21-d450afc7de5b,Account Setup,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Account Setup,True
+60f3011b-ed38-4872-95cd-ee614a7e1f96,Training Request,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Training Request,True
+0e25e33a-62d2-4d3e-8679-55db0befa874,Service Upgrade,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Service Upgrade,True
+30b6fee0-5c76-4db3-94c4-0dfebea3b300,Service Downgrade,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Service Downgrade,True
+bf762ad1-0847-4402-acff-5df72e30bdca,Service Cancellation,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Service Cancellation,True
+c98342c2-1f58-4290-8875-2454c21960ab,Contract Renewal,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Contract Renewal,True
+978be2d6-247f-4d2e-8d0b-3ba373f827dc,Quarterly Review Request,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Quarterly Review Request,True
+6ffc8d2a-8c0c-47ca-99f7-c0b3112c8d01,Success Plan Update,2bdfc207-adbd-4b9d-9816-58de2822be0a,Subcategory for Success Plan Update,True
+7cbc02d6-56c5-473c-9785-a44a06e12e05,Password Reset,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Password Reset,True
+f326fbb2-c450-4d83-a240-6baa14db0c35,Account Lockout,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Account Lockout,True
+6ceb08ff-24e7-40db-b639-796404f3364b,New User Setup,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for New User Setup,True
+13ea77a1-fb62-4154-9efb-08650ac911f1,User Deactivation,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for User Deactivation,True
+c5146ff8-9df1-4fbb-ae9e-ba4dacf0e139,Email Issue,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Email Issue,True
+c3ac99e7-d7fa-4743-884a-328a6a23c11e,Software Installation,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Software Installation,True
+0c89f13a-6e2a-4d9c-9462-9835dd3282c8,Software Update,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Software Update,True
+dbb3baf5-fa25-4706-bd41-7fe7c30eb771,VPN Access,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for VPN Access,True
+3c10ae12-a2ec-43a4-ae2f-1fb361601830,Remote Access Setup,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Remote Access Setup,True
+fb60e2c3-47a4-4ae2-9223-9f5562bb02fb,Printer Issue,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Printer Issue,True
+e5d2f573-f5d4-4386-8cdb-8f157986b0d3,Network Issue,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Network Issue,True
+c2e567e1-7fb6-4eec-b485-ce8f31503262,Internet Connectivity,275bc4ff-c8f4-40be-aaa2-7594a9dd9f77,Subcategory for Internet Connectivity,True
+8fa3bea1-26c1-4f3c-bc7f-32b7aeac1faa,New Laptop Request,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for New Laptop Request,True
+0c5726a8-5f64-43cb-acbb-f3a3a4f3e907,Laptop Repair,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Laptop Repair,True
+a8c4bb48-4c75-435b-b017-2f511de66c52,Monitor Request,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Monitor Request,True
+e9ac0e17-4c40-4b8d-be79-607cbfd9c961,Keyboard/Mouse Request,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Keyboard/Mouse Request,True
+bb7602ea-3d03-4c97-8c9a-daca1b52877f,Phone Setup,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Phone Setup,True
+71939746-69ee-4189-aca0-f669f3d9d20d,Tablet Request,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Tablet Request,True
+6be94031-d474-4798-969a-7d1977b86b53,Hardware Return,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Hardware Return,True
+dede595c-72ed-4d37-a10a-9773402ae4a6,Equipment Inventory,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Equipment Inventory,True
+d7a3d4fc-8985-408d-91af-0839bcef5e3b,Device Refresh,3f1453c1-d33f-4c77-8cbb-f882083c2ce0,Subcategory for Device Refresh,True
+8502310f-1152-468d-bfde-62e9da1286b9,Access Request,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Access Request,True
+2f211bde-6637-4e16-9803-d40b8b4f8e6d,Permission Change,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Permission Change,True
+f169cb2f-ff3f-4387-84a1-eeb7e9f9d326,Security Concern,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Security Concern,True
+dc04bde6-11f6-408a-affa-17ced0dae7de,Suspicious Email Report,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Suspicious Email Report,True
+1860e1c9-319c-4032-b2e4-a2c1c84612f0,Data Breach Report,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Data Breach Report,True
+eb11eacf-d880-480c-a646-5e7d1390017d,MFA Setup,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for MFA Setup,True
+5274cbc7-9fea-45b2-b830-6214ac4640de,Security Training,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Security Training,True
+33dcb4a2-9696-4252-a628-3896a9186a00,Security Audit Request,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Security Audit Request,True
+15945a42-0577-4fc0-b6ff-67dbc72ca904,Compliance Check,a26b40e1-ba2b-48dd-89ad-dfcd715de4bd,Subcategory for Compliance Check,True
+3ce5743a-8dad-4570-b78d-a4fb9c5b5c0d,Invoice Submission,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Invoice Submission,True
+bac3c72a-6afc-4b43-ae0e-59b7efad73f7,Invoice Question,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Invoice Question,True
+05e20506-bfa2-4e28-81f3-3133b5a5b83d,Payment Status,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Payment Status,True
+9e73c5de-53e8-4760-ba50-e7c722698e34,Payment Dispute,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Payment Dispute,True
+164c8beb-f833-47c3-af62-4395437660bc,Vendor Setup,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Vendor Setup,True
+db54956a-87f5-42cc-94b1-9749ecc24b61,Vendor Update,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Vendor Update,True
+543d3ef0-8835-44a8-8706-91ba0a1e5f7f,1099 Request,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for 1099 Request,True
+1cd8b974-e0e8-4cc6-ac08-f9a6195ee16c,Check Request,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Check Request,True
+543749d7-6ee3-4fda-9567-8da928064b39,Wire Transfer Request,56a30071-4afe-46e2-aead-2ca8d142d194,Subcategory for Wire Transfer Request,True
+b55fc6a0-13ca-4982-9fbf-44a7c98446b4,Invoice Request,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Invoice Request,True
+5771d404-dbaa-4563-9856-9a8ebae7af84,Payment Received,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Payment Received,True
+b453fdbf-5663-4b42-a0be-575a03954fe0,Collection Follow-up,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Collection Follow-up,True
+b5277b12-7ab9-4012-8664-4adfccf515b9,Credit Memo Request,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Credit Memo Request,True
+54b8521d-ee82-4c49-98e1-13ff31e7a500,Refund Request,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Refund Request,True
+d0476228-783a-49cf-b513-0f007cba5f8e,Statement Request,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Statement Request,True
+1b98d929-1c36-445d-bdca-c014349a4592,Payment Plan Setup,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Payment Plan Setup,True
+2dbdc774-f774-4300-952a-f746f7b642c7,Client Billing Issue,2793c073-8144-4f64-afe0-51ba0e0a1a3f,Subcategory for Client Billing Issue,True
+a13f893f-d935-4a82-a241-ac9f5326641b,Expense Report,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Expense Report,True
+78a21794-26d3-4e8a-a013-5cc21f6b4155,Travel Reimbursement,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Travel Reimbursement,True
+4ee58daa-f2bd-431a-b82f-90eb2dc07353,Mileage Reimbursement,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Mileage Reimbursement,True
+68bf2a9d-191c-465a-b421-0e8bc5dc4cbc,Receipt Missing,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Receipt Missing,True
+5dd1ac1a-158d-4fb8-a6ee-86aaecead387,Corporate Card Issue,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Corporate Card Issue,True
+b7e04fa2-d3b6-4162-bd1a-ac2b0012eaef,Budget Question,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Budget Question,True
+e04ced76-8d6e-491a-a473-0e3cee55e52e,Cost Approval,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Cost Approval,True
+d54b5dbc-70af-4606-8b20-fc885a7b5513,Petty Cash Request,26da23e0-577c-4afc-8951-196c566dce04,Subcategory for Petty Cash Request,True
+c11fe9fd-ba44-400d-a4a4-19e382a7f5fa,Paycheck Question,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Paycheck Question,True
+aefde355-b253-4827-a98d-f45c12600456,Direct Deposit Setup,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Direct Deposit Setup,True
+a152b5e3-389b-4a21-8427-c68b941473bb,Tax Withholding Change,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Tax Withholding Change,True
+30bb3cd4-1f2b-4d29-9ccc-f13cef324fb2,W-2 Request,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for W-2 Request,True
+928f3f15-0c83-4ad8-b95b-f0f13f7fefab,Pay Stub Request,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Pay Stub Request,True
+10af57d8-357d-4f00-845d-f45a4b610a10,Commission Question,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Commission Question,True
+f1a09591-0a54-4e3c-a515-6a0e00579126,Bonus Question,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Bonus Question,True
+c0d50079-8f93-454d-81c9-3b5169967370,Time Off Balance,7fc177c3-fb20-477f-8582-7d026c792516,Subcategory for Time Off Balance,True
+662b7553-f798-40eb-afea-64b13eac283c,Job Posting Request,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Job Posting Request,True
+f1845fc4-3f41-48de-a0dc-2a258bb325b0,Candidate Referral,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Candidate Referral,True
+c4a750fe-fd67-496f-aad4-9b40a4741ab5,Interview Schedule,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Interview Schedule,True
+56cb9862-d5ce-47ca-8a9b-eaf29e2842c7,Offer Letter Request,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Offer Letter Request,True
+a7ea3460-2504-427e-8e06-c1f67995a93e,Background Check,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Background Check,True
+c3ded8f1-ea11-410f-9db5-becaed965b30,Reference Check,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Reference Check,True
+5e275960-523b-40ce-96ed-0060cc93ed92,Hiring Manager Support,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Hiring Manager Support,True
+20b9d436-52ea-4a55-bef5-72cff542d7c4,Job Description Update,9237bb56-5556-48fe-ba5e-8259e7444063,Subcategory for Job Description Update,True
+7e05956c-7a27-4703-87a0-7d003d1f9d93,New Hire Setup,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for New Hire Setup,True
+9055e9e9-761d-4aad-841f-f3c82e46a6d4,Equipment Request,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for Equipment Request,True
+357ce4c3-016e-4425-a138-132bb30585fb,System Access Setup,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for System Access Setup,True
+57750f6b-a937-4486-a3cc-e58baf258c26,Orientation Schedule,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for Orientation Schedule,True
+b5d18901-9c4b-49f2-af9e-2d89accc358f,Training Assignment,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for Training Assignment,True
+44d5fca2-8ed4-43c9-96f3-45e99e8ce089,Benefits Enrollment,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for Benefits Enrollment,True
+4ffc3988-72e2-4974-81bd-daa0a8ae737f,I-9 Verification,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for I-9 Verification,True
+d621a88e-b972-43ee-aaab-21263c505869,Badge/Key Request,aa63dd9f-2b60-4d84-9c23-58ef20cad4a1,Subcategory for Badge/Key Request,True
+0ec085c9-6816-4bd7-88ec-cdbff1db962f,Time Off Request,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Time Off Request,True
+44951d67-7263-4da2-9dd6-0add72433eb9,Leave of Absence,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Leave of Absence,True
+7b7f8405-4643-4b9a-9e1f-3e9edbead9b8,Address Change,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Address Change,True
+095ff498-627e-4aec-8405-e6ac1ad31fee,Emergency Contact Update,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Emergency Contact Update,True
+a7a6744a-a91c-42d1-87a7-780074980d22,Benefits Question,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Benefits Question,True
+536d992d-7468-4e81-b6d6-7e23d634bf4b,401k Question,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for 401k Question,True
+b7cc0ea6-b115-4064-8a68-6d8fdffb0878,Health Insurance,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Health Insurance,True
+a0f8e247-11e7-4fbb-832b-2ab818fdb01b,Life Event Update,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Life Event Update,True
+ad8b2070-53a0-4b8b-92af-07a0697e7f98,Performance Review,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Performance Review,True
+a4c8b2ce-4795-4eec-b074-84df3e6b1abd,Career Development,c2ce7621-0562-47ed-ae76-4804a13967c8,Subcategory for Career Development,True
+c20abc9d-b1fb-4ad7-b974-98251b6d51f8,Resignation Processing,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Resignation Processing,True
+bf1c96b3-9573-4c98-afdf-19abc84715e6,Exit Interview,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Exit Interview,True
+841e4818-4e73-4ff3-a24d-2b02153f745f,Equipment Return,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Equipment Return,True
+2efbdf65-65f2-4a09-a544-6675f6fccc4b,Access Revocation,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Access Revocation,True
+690b16aa-2863-439b-8699-ec55c461107b,Final Paycheck,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Final Paycheck,True
+8f1557a7-72e9-4205-a9f8-093e1b8a5e3d,COBRA Information,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for COBRA Information,True
+0e54ca3f-7895-45b9-b751-7e8a6c3b752a,Reference Letter Request,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Reference Letter Request,True
+2b745db4-5a29-4bcb-b8b8-2867e27876b5,Separation Agreement,8734edb9-b963-496e-90b1-0047876f7c2f,Subcategory for Separation Agreement,True
+2ffe2867-fcf6-4e2b-8760-f7201f16302a,Contract Review Request,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Contract Review Request,True
+14807a2c-8383-46c1-8ffa-1f4ea0c24fb8,NDA Request,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for NDA Request,True
+5f66f3b1-a624-4ba9-ba70-1afead082ed1,Vendor Agreement,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Vendor Agreement,True
+3b7887db-bc72-43b6-9359-12375969aaa0,Client Agreement,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Client Agreement,True
+7a074068-6f46-497b-bd45-8d6d399917d4,Employment Agreement,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Employment Agreement,True
+9a30aa52-4cd5-4668-bed3-edbdcf8131ba,Amendment Request,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Amendment Request,True
+369acb27-60db-49f1-89a9-6753fed06ae8,Contract Renewal,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Contract Renewal,True
+7f44eb1c-93c3-4e0d-83cc-0b9589a86079,Signature Request,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Signature Request,True
+f0570967-b9b5-4e2f-b370-bd8a99fe0621,Contract Question,a20cfd47-8b80-42f7-86c4-723d5289a123,Subcategory for Contract Question,True
+2606db5a-10d3-44bc-894c-9f9dc8b816cc,Compliance Question,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Compliance Question,True
+e57b1a86-dac8-45fc-9144-e6cf27370189,Regulatory Filing,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Regulatory Filing,True
+4e485151-96eb-441e-9b8e-c8aefca78b24,Audit Support,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Audit Support,True
+245efc93-8129-4898-ad8e-2d727501dcbc,Risk Assessment,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Risk Assessment,True
+dab6550a-bf1a-4c83-88c7-9b42de61d9c3,Policy Question,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Policy Question,True
+bf9387c0-319c-49b8-9266-599f800b1eb9,Privacy Request,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Privacy Request,True
+1a5fd85b-21ce-4bf2-b70c-c8daf6df0167,Data Subject Request,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Data Subject Request,True
+286133bf-f42e-41fd-91e4-007317844c0f,Incident Report,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Incident Report,True
+cbba55c7-6625-4682-ba6c-c2a80403f408,Insurance Question,0bc850a3-ef3a-48fd-b465-688828827ef3,Subcategory for Insurance Question,True
+71f294f7-6b6d-4e17-b1d9-bf5f6f21b0f9,Meeting Room Booking,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Meeting Room Booking,True
+fcce00f4-200f-44e3-819e-48edebda6676,Desk/Space Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Desk/Space Request,True
+a73b9b66-6d64-4d5a-9c1d-096806004d99,Parking Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Parking Request,True
+b63038ac-5848-47d9-a058-63d1ae317242,Building Access,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Building Access,True
+ee4bbb41-b2c7-43dc-a201-ec2edec488e4,Office Supplies,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Office Supplies,True
+24d96ff3-b4b8-48d7-a371-e108e0337d1a,Furniture Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Furniture Request,True
+fd8be061-0fa4-439f-8210-a3c9c9f5ebc5,Climate Control Issue,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Climate Control Issue,True
+4c6ff489-df0a-41a1-9f3e-e0cc6c708c93,Cleaning Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Cleaning Request,True
+0c811e20-79e8-4e32-a381-d2d0e0108f32,Maintenance Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Maintenance Request,True
+90a2058d-55dd-4d1c-9177-7c14290cbd54,Moving Request,97d1ea19-7740-433f-aca2-5fd2765b270d,Subcategory for Moving Request,True
+1cbe1a42-8b2f-4b3b-9c71-5d5f9fc6269e,Purchase Request,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Purchase Request,True
+c675e43c-1b1c-46b6-ba42-fc2b7a8437f4,Vendor Evaluation,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Vendor Evaluation,True
+23dce5d5-9e67-4a28-9dc4-506047651642,Quote Request,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Quote Request,True
+12eaf3ab-70b3-4080-92eb-af7fd820111f,PO Request,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for PO Request,True
+7b0313b5-166d-48fd-b502-e25d2c4960b3,Subscription Request,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Subscription Request,True
+8dfe8a12-f24c-4e8d-80d5-d4e149313f6a,Software Purchase,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Software Purchase,True
+f5ae57b3-f899-45cb-8c3c-c93681f8d0e9,Equipment Purchase,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Equipment Purchase,True
+e8b93a0c-3695-46a3-8a82-d74ae627e526,Service Contract,425f1f72-9046-4f78-88f7-5ec82cf4a24d,Subcategory for Service Contract,True
+b50f6d43-2eca-419c-b682-f8d672c88baa,Roof Inspection,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Roof Inspection,True
+f405d690-178f-47f3-81cb-555a355528cc,Roof Repair,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Roof Repair,True
+a1b23556-2a1c-4ec8-ad51-65ebc7e49d8d,Roof Replacement,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Roof Replacement,True
+f9380d58-2977-4261-8ba1-9a69c7119fd1,Gutter Cleaning,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Gutter Cleaning,True
+d351d76b-78db-4a08-89e4-2935509b26b4,Gutter Repair,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Gutter Repair,True
+e98effe4-b632-461b-b04b-2c70e3eb9798,Siding Repair,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Siding Repair,True
+a323b82b-f3e6-4164-8968-76b9308220fd,Exterior Painting,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Exterior Painting,True
+2c3ca3e4-515d-479e-a0cf-f46c36438da6,Pressure Washing,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Pressure Washing,True
+0679ada8-5a7f-4763-b951-8a9c8409fa53,Window Replacement,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Window Replacement,True
+0805441a-75d6-4d84-84ce-f8d10eb52627,Door Replacement,0dcb0ecb-7730-427a-99a9-9170d2659ed9,Subcategory for Door Replacement,True
+2faa9319-7ad2-4dd9-8cd2-9189c5ebb3a6,Leak Repair,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Leak Repair,True
+836fdf3d-7ad6-43b9-9c9e-9b674b1c23e9,Drain Cleaning,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Drain Cleaning,True
+156d5152-b952-41f1-8475-be012f9a92fd,Water Heater,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Water Heater,True
+14edb346-daea-46b0-889f-39aa0d838cd1,Toilet Repair,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Toilet Repair,True
+65a4b78e-926b-4e62-827c-a4f2e00d66d8,Faucet Repair,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Faucet Repair,True
+d6107b42-5668-492d-a64e-e8d76e4f55ac,Pipe Repair,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Pipe Repair,True
+e4ae600f-a771-471f-b10a-f43208e8e61d,Sewer Line,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Sewer Line,True
+5a14030f-a19c-4412-a9c1-da6f4ed4b4e7,Water Pressure Issue,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Water Pressure Issue,True
+463a8465-340d-4d9a-a4a3-9fe398bc216a,Garbage Disposal,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Garbage Disposal,True
+8eca6ce9-a0b8-409c-bfca-904cf3d97d91,Plumbing Inspection,62553e07-98b4-4d57-a8b1-fabc31a5a528,Subcategory for Plumbing Inspection,True
+278657ba-17ed-49cb-b8e9-16e564f71dda,Electrical Repair,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Electrical Repair,True
+498e3fd5-de94-47c1-9295-4c94e4844676,Outlet Installation,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Outlet Installation,True
+d2cd9800-e671-4b41-b85e-9b3849111730,Light Fixture,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Light Fixture,True
+e9b762b5-203b-4a3d-9e42-756b40061197,Circuit Breaker,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Circuit Breaker,True
+1dcf4077-4a5c-4a35-8661-53a0a0e52c94,Panel Upgrade,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Panel Upgrade,True
+3df8c572-f333-4a24-9252-d0ab68994b1e,Wiring Issue,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Wiring Issue,True
+a2a5ab93-8428-4d7f-a484-26216276f4dd,Ceiling Fan,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Ceiling Fan,True
+148ad3d7-5b37-46dc-ae92-7227fd704518,Smart Home Install,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Smart Home Install,True
+9b497ac2-d570-454f-b768-e4d26460f44e,Electrical Inspection,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Electrical Inspection,True
+4e01ac6f-5073-4859-9cba-92180df598d4,Generator Service,ef2740a1-3cc2-4624-8b2f-5df2d88612a3,Subcategory for Generator Service,True
+f9ad37b6-4ed8-4b90-96b3-bee099eecf41,AC Repair,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for AC Repair,True
+fa005c9a-67a2-4cf8-a169-4cf36c3c9657,Heating Repair,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Heating Repair,True
+734ffa3e-c883-48c2-a54f-7abfe6283585,HVAC Inspection,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for HVAC Inspection,True
+fc9458d9-3745-4d39-a50c-9f93d25a3c4e,Filter Replacement,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Filter Replacement,True
+6c67ba6f-253f-4e14-a145-d00ad436c9f9,Thermostat Issue,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Thermostat Issue,True
+c25447f6-43f3-4163-b07a-1de01e44b431,Duct Cleaning,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Duct Cleaning,True
+13bb1d39-5246-43b2-b2e2-aae64882e47e,HVAC Installation,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for HVAC Installation,True
+df098615-0a5d-4624-a834-54d185e0da1c,Mini Split Service,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Mini Split Service,True
+38c61c62-2b7e-48c7-8143-ed351e16c94a,Heat Pump Service,52d7b255-7945-4054-adb9-72535e0a8ac1,Subcategory for Heat Pump Service,True
+eefc3bb3-7fbc-4a81-97bd-d95b64a6e16b,General Repair,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for General Repair,True
+e5936b33-7790-4019-a31b-afec9488f400,Drywall Repair,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Drywall Repair,True
+2055b5ec-1d59-4640-a4c6-1b695442fbd0,Painting Touch-up,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Painting Touch-up,True
+26387878-6563-45b5-91b9-99740fd10d1a,Door Adjustment,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Door Adjustment,True
+bafcd132-5edc-438f-b5ba-c2e38f9ed26a,Lock Change,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Lock Change,True
+098afcf4-432e-4ee9-9929-5a7db5f02331,Shelf Installation,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Shelf Installation,True
+6a18bebf-d468-45af-8275-c09ba0f53688,TV Mounting,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for TV Mounting,True
+c02aa8e6-7df3-4419-82a2-0deab2b0bd3f,Furniture Assembly,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Furniture Assembly,True
+cac62a8e-ba8a-4f32-b6c1-2c6c8852b4f7,Picture Hanging,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Picture Hanging,True
+bff5fec0-5820-4e59-9afc-760fdbcb864a,Caulking/Sealing,a11f97b0-7aee-4849-a3ad-d62cd683f3e7,Subcategory for Caulking/Sealing,True
+972b9372-0b71-4a67-a246-3b2b6e95c35c,New Project Request,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for New Project Request,True
+353c8926-f31e-49e1-b66d-c57de5c57d2c,Project Scope Change,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Project Scope Change,True
+bd0c1c44-7b1d-4233-8bde-ec22f2f1b141,Resource Request,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Resource Request,True
+48312ea5-4d9e-4ed9-8f86-cd581700b854,Budget Request,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Budget Request,True
+99438598-d891-45c7-9afa-29b320cdd1fd,Timeline Change,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Timeline Change,True
+c6b7d016-1549-4048-be18-32f46ca27f7b,Project Status Update,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Project Status Update,True
+03f23f6f-ed5e-467c-8739-f8e707a500bc,Project Closure,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Project Closure,True
+9f3165ac-ccba-4c6b-aab2-50dbe28d7f11,Lessons Learned,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Lessons Learned,True
+4b5acc1e-e87d-491e-9207-68a555ae9e75,Project Documentation,3434d021-38f4-4ef0-bb94-1becd677c025,Subcategory for Project Documentation,True
+7dde6980-62f5-482d-b5ea-f27ced077826,Process Review Request,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Process Review Request,True
+ff5beeba-99c5-4224-9605-6d9e805e4d0f,Automation Request,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Automation Request,True
+f42e2729-5449-49ee-a57e-0f029fe0b4f9,Template Request,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Template Request,True
+1e138a27-8a46-4aca-b382-c5a17485c940,Training Material,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Training Material,True
+b109e336-818b-4210-ae61-bcf280afb8d8,Documentation Update,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Documentation Update,True
+72c94780-2bff-4a46-82f2-5ba2601af4e1,SOP Creation,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for SOP Creation,True
+306b066b-b949-4d3f-ae4b-5672989a2a42,Workflow Optimization,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Workflow Optimization,True
+18a0ff4f-fad6-471e-90f4-e4bc4e479f99,Tool Evaluation,70d57f4b-449b-4c5f-830c-010a9428100a,Subcategory for Tool Evaluation,True
