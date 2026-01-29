@@ -294,15 +294,15 @@ function AdminDashboard() {
       {/* SLA Status KPIs - Linked to SLA Module */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-slate-900">SLA Status</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t('dashboard.slaStatus')}</h2>
           <Link to="/sla-policies" className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
-            View Details <ArrowRight size={14} />
+            {t('dashboard.viewAll')} <ArrowRight size={14} />
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link to="/sla-policies?tab=monitoring&status=on_track">
             <KPICard 
-              label="On Track" 
+              label={t('dashboard.onTrack')} 
               value={slaStats.on_track} 
               icon={CheckCircle2} 
               color="bg-emerald-500" 
@@ -310,7 +310,7 @@ function AdminDashboard() {
           </Link>
           <Link to="/sla-policies?tab=monitoring&status=at_risk">
             <KPICard 
-              label="At Risk" 
+              label={t('dashboard.atRisk')} 
               value={slaStats.at_risk} 
               icon={Clock} 
               color="bg-amber-500" 
@@ -318,7 +318,7 @@ function AdminDashboard() {
           </Link>
           <Link to="/sla-policies?tab=monitoring&status=breached">
             <KPICard 
-              label="Breached" 
+              label={t('dashboard.breached')} 
               value={slaStats.breached} 
               icon={AlertTriangle} 
               color="bg-red-500" 
@@ -326,7 +326,7 @@ function AdminDashboard() {
           </Link>
           <Link to="/sla-policies?tab=history">
             <KPICard 
-              label="Unacknowledged" 
+              label={t('dashboard.unacknowledged')} 
               value={slaStats.unacknowledged} 
               icon={AlertCircle} 
               color="bg-orange-500" 
@@ -340,7 +340,7 @@ function AdminDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Clock size={20} className="text-amber-500" />
-            Tickets I&apos;m Working On ({myWork.working_on.length})
+            {t('dashboard.ticketsWorkingOn')} ({myWork.working_on.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
@@ -349,7 +349,7 @@ function AdminDashboard() {
               <OrderCard key={order.id} order={order} t={t} />
             ))}
             {myWork.working_on.length === 0 && (
-              <p className="text-center text-slate-500 py-8">No tickets currently assigned to you</p>
+              <p className="text-center text-slate-500 py-8">{t('dashboard.noOrdersInProgress')}</p>
             )}
           </div>
         </CardContent>
@@ -360,7 +360,7 @@ function AdminDashboard() {
         <CardHeader className="border-b border-slate-100 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 size={20} className="text-green-500" />
-            Tickets Delivered ({myWork.delivered.length})
+            {t('dashboard.ticketsDelivered')} ({myWork.delivered.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
