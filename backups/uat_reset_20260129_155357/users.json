@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "697b78a6abd14c4bc0985e33",
+    "name": "System Admin",
+    "email": "admin@redribbonops.com",
+    "password": "$2b$12$1ygHU1fQgaPeL4IsmHAYQeAXhpuovdM6V3v26SvS.Z4jBtvBVfvHq",
+    "role": "Administrator",
+    "account_type": "Internal Staff",
+    "active": true,
+    "specialty_ids": [],
+    "can_pick": true,
+    "force_password_change": false,
+    "force_otp_setup": false,
+    "otp_enabled": false,
+    "created_at": "2026-01-29T15:11:34.463000",
+    "id": "f168e829-87d4-4cc4-82e2-acee2080cda2"
+  }
+]
