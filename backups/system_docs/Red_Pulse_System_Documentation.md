@@ -681,9 +681,9 @@ Configure webhooks to notify external systems:
 
 ---
 
-# 10. Admin Operations
+# 11. Admin Operations
 
-## 10.1 Data Reset Procedures
+## 11.1 Data Reset Procedures
 
 ### UAT Reset Script
 
@@ -720,7 +720,7 @@ cd /app/backend
 python3 scripts/uat_reset.py
 ```
 
-## 10.2 Backup Strategy
+## 11.2 Backup Strategy
 
 **Backup Location:** `/app/backups/`
 
@@ -729,7 +729,7 @@ Backups are created:
 - As JSON files per collection
 - With timestamp in folder name
 
-## 10.3 Logs Module
+## 11.3 Logs Module
 
 The Logs module (`/logs`) provides:
 
