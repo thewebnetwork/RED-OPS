@@ -263,7 +263,7 @@ async def get_permission_modules(current_user: dict = Depends(require_roles(["Ad
 
 @router.post("", response_model=UserResponse)
 async def create_user(user_data: UserCreate, current_user: dict = Depends(require_roles(["Administrator"]))):
-    """Create a new user (Admin only)"""
+    """Create a new user (Admin only) - supports multiple specialties"""
     from services.email import send_account_created_email
     
     existing = await db.users.find_one({"email": user_data.email.lower()})
@@ -278,10 +278,36 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
     if user_data.account_type not in ACCOUNT_TYPES:
         raise HTTPException(status_code=400, detail=f"Invalid account type. Must be one of: {', '.join(ACCOUNT_TYPES)}")
     
-    # Verify specialty exists (required)
-    specialty = await db.specialties.find_one({"id": user_data.specialty_id, "active": True})
-    if not specialty:
-        raise HTTPException(status_code=400, detail="Invalid or inactive specialty")
+    # Handle multi-specialty vs legacy single specialty
+    specialty_ids = user_data.specialty_ids or []
+    primary_specialty_id = user_data.primary_specialty_id
+    
+    # Backwards compatibility: if specialty_id provided but not specialty_ids, use it
+    if not specialty_ids and user_data.specialty_id:
+        specialty_ids = [user_data.specialty_id]
+        primary_specialty_id = user_data.specialty_id
+    
+    # Require at least one specialty
+    if not specialty_ids:
+        raise HTTPException(status_code=400, detail="At least one specialty is required")
+    
+    # Verify all specialties exist
+    specialty_names = []
+    for spec_id in specialty_ids:
+        specialty = await db.specialties.find_one({"id": spec_id, "active": True})
+        if not specialty:
+            raise HTTPException(status_code=400, detail=f"Invalid or inactive specialty: {spec_id}")
+        specialty_names.append(specialty["name"])
+    
+    # Set primary if not specified
+    if not primary_specialty_id:
+        primary_specialty_id = specialty_ids[0]
+    elif primary_specialty_id not in specialty_ids:
+        raise HTTPException(status_code=400, detail="Primary specialty must be one of the selected specialties")
+    
+    # Get primary specialty name for legacy field
+    primary_specialty = await db.specialties.find_one({"id": primary_specialty_id}, {"_id": 0, "name": 1})
+    primary_specialty_name = primary_specialty["name"] if primary_specialty else specialty_names[0]
     
     # Verify team exists if provided
     team_name = None
@@ -311,8 +337,12 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "password": hash_password(user_data.password),
         "role": user_data.role,
         "account_type": user_data.account_type,
-        "specialty_id": user_data.specialty_id,
-        "specialty_name": specialty["name"],
+        # Multi-specialty fields (new)
+        "specialty_ids": specialty_ids,
+        "primary_specialty_id": primary_specialty_id,
+        # Legacy single specialty fields (for backwards compatibility)
+        "specialty_id": primary_specialty_id,
+        "specialty_name": primary_specialty_name,
         "team_id": user_data.team_id,
         "team_name": team_name,
         "subscription_plan_id": user_data.subscription_plan_id,
