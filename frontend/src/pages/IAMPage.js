@@ -377,18 +377,20 @@ export default function IAMPage() {
   
   const togglePermission = (module, action) => {
     setRoleForm(prev => {
-      const newPermissions = { ...prev.permissions };
+      // Deep clone all permissions to ensure React detects the change
+      const newPermissions = JSON.parse(JSON.stringify(prev.permissions || {}));
       if (!newPermissions[module]) {
         newPermissions[module] = {};
       }
-      newPermissions[module][action] = !newPermissions[module]?.[action];
+      newPermissions[module][action] = !newPermissions[module][action];
       return { ...prev, permissions: newPermissions };
     });
   };
   
   const toggleModuleAll = (module, actions) => {
     setRoleForm(prev => {
-      const newPermissions = { ...prev.permissions };
+      // Deep clone all permissions to ensure React detects the change
+      const newPermissions = JSON.parse(JSON.stringify(prev.permissions || {}));
       const currentModule = newPermissions[module] || {};
       const allEnabled = actions.every(a => currentModule[a]);
       
