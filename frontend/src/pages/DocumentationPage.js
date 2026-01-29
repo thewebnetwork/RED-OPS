@@ -360,6 +360,52 @@ export default function DocumentationPage() {
         </div>
       )}
 
+      {/* System Documentation Pack - Download Center */}
+      {docPackFiles.length > 0 && (
+        <Card className="border-emerald-200 bg-emerald-50" data-testid="doc-pack-section">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-emerald-800">
+              <Package className="h-5 w-5" />
+              System Documentation Pack
+            </CardTitle>
+            <CardDescription className="text-emerald-700">
+              Complete documentation bundle ready for download (PDF, DOCX, Markdown, HTML)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {docPackFiles.map((file) => (
+                <button
+                  key={file.filename}
+                  onClick={() => downloadDocPackFile(file)}
+                  disabled={downloadingFile === file.filename}
+                  className="flex items-center gap-3 p-4 bg-white rounded-lg border border-emerald-200 hover:border-emerald-400 hover:shadow-md transition-all text-left disabled:opacity-50"
+                  data-testid={`download-${file.format}-btn`}
+                >
+                  {downloadingFile === file.filename ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                  ) : (
+                    getFileIcon(file.format)
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-800 truncate text-sm">
+                      {file.format.toUpperCase()}
+                    </p>
+                    <p className="text-xs text-slate-500">{file.size_kb} KB</p>
+                  </div>
+                  <Download className="h-4 w-4 text-slate-400" />
+                </button>
+              ))}
+            </div>
+            {loadingDocPack && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Documentation Content */}
       <Card data-testid="documentation-content">
         <CardContent className="p-6 prose prose-slate max-w-none prose-headings:text-slate-900 prose-h1:text-2xl prose-h2:text-xl prose-h2:border-b prose-h2:pb-2 prose-h2:mb-4 prose-h3:text-lg prose-table:text-sm prose-th:bg-slate-100 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-td:border prose-th:border prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[#A2182C] prose-code:before:content-none prose-code:after:content-none">
