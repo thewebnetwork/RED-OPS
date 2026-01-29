@@ -63,6 +63,15 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
+class ForcePasswordChangeRequest(BaseModel):
+    new_password: str
+
+
+class OTPVerifyRequest(BaseModel):
+    code: str
+    trust_device: bool = False
+
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
