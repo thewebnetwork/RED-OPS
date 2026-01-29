@@ -652,7 +652,7 @@ python3 scripts/seed_categories.py
 | **Custom Webhooks** | ✅ **LIVE** | Admin-configurable outbound webhooks |
 | **API Keys** | ✅ **LIVE** | Issue keys for external integrations |
 
-## 9.2 GHL Payment Webhook
+## 10.2 GHL Payment Webhook
 
 The GHL payment integration is currently **MOCKED**:
 
@@ -660,7 +660,7 @@ The GHL payment integration is currently **MOCKED**:
 - Behavior: Immediately marks payment as received
 - Next Step: Replace with real GHL webhook listener when ready
 
-## 9.3 API Key Module
+## 10.3 API Key Module
 
 Administrators can:
 - Create API keys for external systems
@@ -669,7 +669,7 @@ Administrators can:
 
 **Note:** Usage analytics (charts/dashboard) not yet implemented.
 
-## 9.4 Outbound Webhooks
+## 10.4 Outbound Webhooks
 
 Configure webhooks to notify external systems:
 
