@@ -63,6 +63,11 @@ def normalize_order(order: dict) -> dict:
         'deleted_at': order.get('deleted_at'),
         'deleted_by_name': order.get('deleted_by_name'),
         'deletion_reason': order.get('deletion_reason'),
+        # Pool routing fields
+        'pool_stage': order.get('pool_stage'),
+        'routing_specialty_id': order.get('routing_specialty_id'),
+        'routing_specialty_name': order.get('routing_specialty_name'),
+        'pool1_expires_at': order.get('pool1_expires_at'),
     }
     return {**order, **defaults}
 
