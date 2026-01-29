@@ -46,7 +46,7 @@ export default function ForcePasswordChange() {
 
     setLoading(true);
     try {
-      await axios.post(`${API}/auth/change-password`, {
+      await axios.post(`${API}/auth/force-change-password`, {
         new_password: formData.new_password
       });
       
