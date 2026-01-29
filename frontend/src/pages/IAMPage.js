@@ -990,6 +990,10 @@ export default function IAMPage() {
 
             <div className="flex flex-col gap-3 pt-4 border-t">
               <label className="flex items-center gap-2 cursor-pointer">
+                <Switch checked={userForm.can_pick} onCheckedChange={(v) => setUserForm({ ...userForm, can_pick: v })} data-testid="can-pick-toggle" />
+                <span className="text-sm">Can pick opportunities from pools</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
                 <Switch checked={userForm.force_password_change} onCheckedChange={(v) => setUserForm({ ...userForm, force_password_change: v })} />
                 <span className="text-sm">Force password change on first login</span>
               </label>
