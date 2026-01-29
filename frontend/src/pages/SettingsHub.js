@@ -11,7 +11,8 @@ import {
   Palette,
   ChevronRight,
   FileText,
-  Users
+  Users,
+  Languages
 } from 'lucide-react';
 
 const settingsModules = [
@@ -30,6 +31,14 @@ const settingsModules = [
     icon: Users,
     path: '/settings/pool-picker-rules',
     color: 'bg-rose-100 text-rose-600'
+  },
+  {
+    id: 'translations',
+    name: 'Translation Editor',
+    description: 'Review and correct translations for Spanish and Portuguese',
+    icon: Languages,
+    path: '/settings/translations',
+    color: 'bg-indigo-100 text-indigo-600'
   },
   {
     id: 'ui-customizations',
