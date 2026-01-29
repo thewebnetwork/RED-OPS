@@ -520,7 +520,128 @@ Workflows are fully customizable via the UI. No hardcoded templates exist – al
 
 ---
 
-# 9. Integrations
+# 9. Categories & Subcategories
+
+## 9.1 Category Library Overview
+
+The platform includes a comprehensive category tree designed for marketing + real estate organizations with broad applicability.
+
+| Metric | Count |
+|--------|-------|
+| **Level 1 Categories** | 42 |
+| **Level 2 Subcategories** | 403 |
+| **Total Categories** | 445 |
+
+## 9.2 Category Families
+
+| Family | L1 Categories | Example Subcategories |
+|--------|--------------|----------------------|
+| **Marketing & Creative** | 6 | Brand Strategy, Campaign Planning, Social Media Graphics, Email Copy |
+| **Production & Media** | 3 | Video Editing, Photo Shoot, Podcast Recording |
+| **Residential Real Estate** | 3 | New Listing Setup, Showing Request, Virtual Staging |
+| **Commercial Real Estate** | 3 | Commercial Listing Setup, Lease Proposal, Property Condition Report |
+| **Sales & CRM** | 3 | Lead Assignment, CRM Data Entry, Landing Page Request |
+| **Customer Support** | 2 | General Inquiry, Client Onboarding |
+| **IT & Systems** | 3 | Password Reset, New Laptop Request, Access Request |
+| **Finance & Accounting** | 4 | Invoice Submission, Expense Report, Paycheck Question |
+| **HR & People Ops** | 4 | Job Posting Request, New Hire Setup, Time Off Request |
+| **Legal & Compliance** | 2 | Contract Review Request, Compliance Question |
+| **Operations & Admin** | 2 | Meeting Room Booking, Purchase Request |
+| **Construction & Trades** | 5 | Roof Repair, Leak Repair, Electrical Repair, AC Repair, General Repair |
+| **Projects & Initiatives** | 2 | New Project Request, Process Review Request |
+
+## 9.3 Complete L1 Category List
+
+1. Marketing & Creative
+2. Graphic Design
+3. Copywriting & Content
+4. Digital Marketing
+5. Social Media
+6. Email Marketing
+7. Video Production
+8. Photography
+9. Audio & Podcast
+10. Residential Listings
+11. Residential Sales Support
+12. Property Staging
+13. Commercial Listings
+14. Commercial Leasing
+15. Commercial Due Diligence
+16. Sales Operations
+17. CRM & Automations
+18. Lead Generation
+19. Customer Support
+20. Client Services
+21. IT Support
+22. Hardware & Devices
+23. Security & Access
+24. Accounts Payable
+25. Accounts Receivable
+26. Expense & Reimbursement
+27. Payroll
+28. Hiring & Recruiting
+29. Onboarding
+30. Employee Services
+31. Offboarding
+32. Contracts & Agreements
+33. Compliance & Risk
+34. Facilities & Office
+35. Procurement
+36. Roofing & Exterior
+37. Plumbing
+38. Electrical
+39. HVAC
+40. Handyman & General
+41. Project Requests
+42. Process Improvement
+
+## 9.4 Category Routing
+
+Categories can be linked to:
+- **Specialties** – For automatic pool routing to qualified users
+- **Workflows** – To trigger automated actions when tickets are created
+- **SLA Policies** – To apply specific response/resolution targets
+
+### Routing Logic
+1. User selects L1 category
+2. User selects L2 subcategory
+3. System looks up `specialty_id` on L2 (fallback to L1)
+4. Ticket is routed to users with matching specialty in the appropriate pool
+
+## 9.5 Admin Operations
+
+| Action | Permission | API Endpoint |
+|--------|-----------|--------------|
+| List L1 Categories | All Users | `GET /api/categories/l1` |
+| Create L1 Category | Admin | `POST /api/categories/l1` |
+| Edit L1 Category | Admin | `PATCH /api/categories/l1/{id}` |
+| Delete L1 Category | Admin | `DELETE /api/categories/l1/{id}` |
+| List L2 Subcategories | All Users | `GET /api/categories/l2?parent_id={id}` |
+| Create L2 Subcategory | Admin | `POST /api/categories/l2` |
+| Edit L2 Subcategory | Admin | `PATCH /api/categories/l2/{id}` |
+| Delete L2 Subcategory | Admin | `DELETE /api/categories/l2/{id}` |
+
+## 9.6 Data Export
+
+Category seed data is available for backup/re-import:
+
+| File | Location | Format |
+|------|----------|--------|
+| `categories_l1.json` | `/app/backups/category_seed/` | JSON |
+| `categories_l2.json` | `/app/backups/category_seed/` | JSON |
+| `categories_full.json` | `/app/backups/category_seed/` | JSON (combined) |
+| `categories_l1.csv` | `/app/backups/category_seed/` | CSV |
+| `categories_l2.csv` | `/app/backups/category_seed/` | CSV |
+
+### Re-Import Script
+```bash
+cd /app/backend
+python3 scripts/seed_categories.py
+```
+
+---
+
+# 10. Integrations
 
 ## 9.1 Webhook/API Status
 
