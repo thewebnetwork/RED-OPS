@@ -3,19 +3,30 @@ import os
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
+from typing import List
 
 from utils.auth import require_roles
 
 router = APIRouter(prefix="/documentation", tags=["Documentation"])
 
-# Path to the system logic snapshot
+# Paths
 DOCS_PATH = "/app/memory/System_Logic_Snapshot.md"
-
+SYSTEM_DOCS_DIR = "/app/backups/system_docs"
 
 class DocumentationResponse(BaseModel):
     content: str
     filename: str
     last_modified: str
+
+class DocFile(BaseModel):
+    filename: str
+    format: str
+    size_kb: float
+    path: str
+
+class SystemDocsResponse(BaseModel):
+    files: List[DocFile]
+    directory: str
 
 
 @router.get("/system-logic-snapshot")
