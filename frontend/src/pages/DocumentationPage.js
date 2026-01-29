@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { 
   FileText, 
@@ -12,7 +12,10 @@ import {
   FileDown,
   Loader2,
   AlertCircle,
-  Clock
+  Clock,
+  Package,
+  FileType,
+  File
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -26,10 +29,62 @@ export default function DocumentationPage() {
   const [lastModified, setLastModified] = useState(null);
   const [downloadingMd, setDownloadingMd] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [docPackFiles, setDocPackFiles] = useState([]);
+  const [loadingDocPack, setLoadingDocPack] = useState(false);
+  const [downloadingFile, setDownloadingFile] = useState(null);
 
   useEffect(() => {
     fetchDocumentation();
+    fetchDocPack();
   }, []);
+
+  const fetchDocPack = async () => {
+    try {
+      setLoadingDocPack(true);
+      const res = await axios.get(`${API}/api/documentation/system-docs-pack`);
+      setDocPackFiles(res.data.files || []);
+    } catch (err) {
+      console.error('Error fetching doc pack:', err);
+    } finally {
+      setLoadingDocPack(false);
+    }
+  };
+
+  const downloadDocPackFile = async (file) => {
+    try {
+      setDownloadingFile(file.filename);
+      const res = await axios.get(`${API}${file.path}`, {
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([res.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success(`${file.filename} downloaded`);
+    } catch (err) {
+      console.error('Error downloading file:', err);
+      toast.error(`Failed to download ${file.filename}`);
+    } finally {
+      setDownloadingFile(null);
+    }
+  };
+
+  const getFileIcon = (format) => {
+    switch (format) {
+      case 'pdf': return <FileDown className="h-5 w-5 text-red-500" />;
+      case 'docx': return <FileType className="h-5 w-5 text-blue-500" />;
+      case 'html': return <FileText className="h-5 w-5 text-orange-500" />;
+      case 'md': return <File className="h-5 w-5 text-slate-500" />;
+      default: return <File className="h-5 w-5 text-slate-500" />;
+    }
+  };
 
   const fetchDocumentation = async () => {
     try {
