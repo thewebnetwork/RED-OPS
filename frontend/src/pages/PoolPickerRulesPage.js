@@ -85,7 +85,7 @@ export default function PoolPickerRulesPage() {
     try {
       setSaving(true);
       for (const rule of rules) {
-        await axios.patch(`${API}/api/settings/pool-picker-rules/${rule.account_type}`, {
+        await axios.patch(`${API}/api/pool-picker-rules/${rule.account_type}`, {
           can_pick: rule.can_pick,
           allowed_pools: rule.allowed_pools
         });
@@ -105,7 +105,7 @@ export default function PoolPickerRulesPage() {
     
     try {
       setSaving(true);
-      await axios.post(`${API}/api/settings/pool-picker-rules/reset-defaults`);
+      await axios.post(`${API}/api/pool-picker-rules/reset-defaults`);
       toast.success('Pool picker rules reset to defaults');
       await fetchRules();
     } catch (err) {
