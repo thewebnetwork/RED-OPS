@@ -234,10 +234,75 @@ async def notify_status_change(order: dict, old_status: str, new_status: str, ch
                 logging.error(f"Failed to send status change email to editor: {e}")
 
 
+async def get_pool_picker_config() -> dict:
+    """Get pool picker rules configuration from database, with defaults fallback"""
+    DEFAULT_RULES = {
+        "Partner": {"can_pick": True, "allowed_pools": ["POOL_1"]},
+        "Internal Staff": {"can_pick": True, "allowed_pools": ["POOL_1"]},
+        "Vendor/Freelancer": {"can_pick": True, "allowed_pools": ["POOL_2"]},
+        "Media Client": {"can_pick": False, "allowed_pools": []}
+    }
+    
+    rules = {}
+    for account_type in ["Partner", "Internal Staff", "Vendor/Freelancer", "Media Client"]:
+        rule = await db.pool_picker_rules.find_one({"account_type": account_type}, {"_id": 0})
+        if rule:
+            rules[account_type] = {
+                "can_pick": rule.get("can_pick", DEFAULT_RULES.get(account_type, {}).get("can_pick", False)),
+                "allowed_pools": rule.get("allowed_pools", DEFAULT_RULES.get(account_type, {}).get("allowed_pools", []))
+            }
+        else:
+            rules[account_type] = DEFAULT_RULES.get(account_type, {"can_pick": False, "allowed_pools": []})
+    return rules
+
+
+async def get_eligible_pool_users(pool_name: str, routing_specialty_id: str = None) -> list:
+    """
+    Get users eligible to pick from a specific pool based on:
+    - Pool picker config (account_type allowed for pool)
+    - User-level can_pick flag
+    - Specialty match (if routing_specialty_id provided)
+    - User is active
+    """
+    # Get pool picker rules
+    rules = await get_pool_picker_config()
+    
+    # Find account types that can pick from this pool
+    allowed_account_types = [
+        account_type for account_type, config in rules.items()
+        if config.get("can_pick", False) and pool_name in config.get("allowed_pools", [])
+    ]
+    
+    if not allowed_account_types:
+        return []
+    
+    # Build query
+    query = {
+        "account_type": {"$in": allowed_account_types},
+        "active": True,
+        "can_pick": {"$ne": False}  # User-level override (defaults to True if not set)
+    }
+    
+    # Add specialty filter if routing_specialty_id provided
+    if routing_specialty_id:
+        query["$or"] = [
+            {"specialty_ids": routing_specialty_id},
+            {"specialty_id": routing_specialty_id}
+        ]
+    
+    eligible_users = await db.users.find(query, {"_id": 0}).to_list(100)
+    return eligible_users
+
+
 async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None):
     """
-    Determine the correct pool stage based on whether eligible Partners exist for the ticket's specialty.
+    Determine the correct pool stage based on configurable pool picker rules.
     Uses multi-specialty matching (ANY match rule).
+    
+    Pool eligibility is determined by:
+    1. Pool picker rules config (per account type)
+    2. User-level can_pick flag
+    3. Specialty matching
     
     Returns:
         dict with pool_stage, routing_specialty_id, routing_specialty_name, pool1_expires_at, eligible_users
@@ -248,7 +313,6 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
     routing_specialty_name = None
     
     # Step 1: Determine routing_specialty_id from category mapping
-    # First check L2 category for specialty mapping
     if category_l2_id:
         l2_cat = await db.categories_l2.find_one({"id": category_l2_id}, {"_id": 0})
         if l2_cat and l2_cat.get("specialty_id"):
@@ -266,30 +330,15 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
         if specialty:
             routing_specialty_name = specialty.get("name")
     
-    # Step 2: Query eligible Pool 1 candidates (Partners + Internal Staff with matching specialty)
-    # Pool 1 includes BOTH account_type = Partner AND account_type = Internal Staff
-    # Uses multi-specialty: user is eligible if ANY of their specialties match
-    pool1_query = {
-        "account_type": {"$in": ["Partner", "Internal Staff"]},
-        "active": True
-    }
-    
-    # If we have a routing specialty, filter by it (ANY match rule)
-    if routing_specialty_id:
-        # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
-        pool1_query["$or"] = [
-            {"specialty_ids": routing_specialty_id},
-            {"specialty_id": routing_specialty_id}
-        ]
-    
-    eligible_pool1_users = await db.users.find(pool1_query, {"_id": 0}).to_list(100)
+    # Step 2: Query eligible Pool 1 candidates using config-driven rules
+    eligible_pool1_users = await get_eligible_pool_users("POOL_1", routing_specialty_id)
     pool1_count = len(eligible_pool1_users)
     
     now = datetime.now(timezone.utc)
     
     # Step 3: Determine pool stage
     if pool1_count > 0:
-        # Eligible Pool 1 users exist (Partners + Internal Staff) -> Pool 1 for 24 hours
+        # Eligible Pool 1 users exist -> Pool 1 for 24 hours
         pool1_expires_at = now + timedelta(hours=24)
         return {
             "pool_stage": "POOL_1",
@@ -301,20 +350,7 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
         }
     else:
         # No eligible Pool 1 users -> Skip Pool 1, go directly to Pool 2
-        # Query Pool 2 eligible users (Vendors/Freelancers with matching specialty)
-        # Uses multi-specialty: user is eligible if ANY of their specialties match
-        pool2_query = {
-            "account_type": "Vendor/Freelancer",
-            "active": True
-        }
-        if routing_specialty_id:
-            # Match if specialty_ids array contains the routing specialty OR legacy specialty_id matches
-            pool2_query["$or"] = [
-                {"specialty_ids": routing_specialty_id},
-                {"specialty_id": routing_specialty_id}
-            ]
-        
-        eligible_pool2_users = await db.users.find(pool2_query, {"_id": 0}).to_list(100)
+        eligible_pool2_users = await get_eligible_pool_users("POOL_2", routing_specialty_id)
         
         return {
             "pool_stage": "POOL_2",
@@ -322,7 +358,7 @@ async def determine_pool_routing(category_l2_id: str, category_l1_id: str = None
             "routing_specialty_name": routing_specialty_name,
             "pool1_expires_at": None,
             "skipped_pool_1": True,
-            "skip_reason": "No eligible Pool 1 users (Partner/Internal Staff) with matching specialty",
+            "skip_reason": "No eligible Pool 1 pickers (based on config + specialty match)",
             "eligible_pool2_count": len(eligible_pool2_users),
             "eligible_pool2_users": eligible_pool2_users
         }
