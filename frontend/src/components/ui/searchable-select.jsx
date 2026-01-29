@@ -194,7 +194,7 @@ export function SearchableMultiSelect({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -243,7 +243,7 @@ export function SearchableMultiSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" sideOffset={4}>
         <div className="flex items-center border-b px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <input
@@ -253,7 +253,7 @@ export function SearchableMultiSelect({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="max-h-[300px] overflow-y-auto p-1">
+        <div className="max-h-[200px] overflow-y-auto p-1">
           {filteredOptions.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               {emptyText}
