@@ -17,6 +17,7 @@ import pytest
 import requests
 import os
 import uuid
+from urllib.parse import quote
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://rulebook-redops.preview.emergentagent.com').rstrip('/')
 
