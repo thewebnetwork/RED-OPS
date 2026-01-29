@@ -805,9 +805,9 @@ This ensures satisfaction data reflects actual service quality.
 
 ---
 
-# 12. Known Issues / Tech Debt / Open Items
+# 13. Known Issues / Tech Debt / Open Items
 
-## 12.1 Partially Implemented Features
+## 13.1 Partially Implemented Features
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -818,7 +818,7 @@ This ensures satisfaction data reflects actual service quality.
 | Email Preferences | ❌ Not Built | User-level email opt-out |
 | Backup Codes for OTP | ❌ Not Built | Recovery codes for 2FA |
 
-## 12.2 Technical Debt
+## 13.2 Technical Debt
 
 | Item | Description | Impact |
 |------|-------------|--------|
@@ -826,13 +826,13 @@ This ensures satisfaction data reflects actual service quality.
 | Pool Logic | Complex routing in `orders.py` should be extracted | Testability |
 | Legacy Compatibility | Code handles both `specialty_id` and `specialty_ids` | Confusion |
 
-## 12.3 Mocked Integrations
+## 13.3 Mocked Integrations
 
 | Integration | Current State | To Be Done |
 |-------------|---------------|------------|
 | GHL Payment | Mocked webhook | Real GHL integration |
 
-## 12.4 Known Bugs
+## 13.4 Known Bugs
 
 **None identified** – Clean UAT baseline established.
 
