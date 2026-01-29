@@ -3,14 +3,68 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 3.4 (Live Email Notifications - Jan 28, 2026)
-**Last Updated:** January 28, 2026
+## Current Version: 3.5 (System Logic Snapshot + Security Features)
+**Last Updated:** December 2025
 **Platform Name:** Red Ops
 **Preview URL:** https://rulebook-redops.preview.emergentagent.com
 
 ---
 
-## P1 - Live Email Notifications for Ticket Status Changes (Latest) ✅
+## LATEST: System Logic Snapshot Document ✅
+
+### Documentation Created
+A comprehensive **System Logic Snapshot** has been created at `/app/memory/System_Logic_Snapshot.md` for UAT preparation.
+
+**Contents:**
+1. Core Ticket Lifecycle + Status Rules (all statuses, transitions, permissions, required fields)
+2. Routing Logic (Pool 1/Pool 2 conditions, specialty filtering, reassignment)
+3. Workflow Engine Logic (triggers, actions, conditions, category evaluation)
+4. IAM Logic (role permissions, overrides, account types, module restrictions)
+5. Notifications + Email + Surveys (in-app events, email triggers, survey logic)
+6. Reports Module (data sources, role access, export formats)
+7. Test Harness / Data Reset (reset procedures, preservation guidelines)
+
+---
+
+## P0 - Force Password Change & OTP/2FA Security Flow ✅
+
+### A) Forced Password Change ✅
+- **Trigger:** `force_password_change = true` flag on user
+- **Flow:** User redirected to `/force-password-change` after login
+- **Page:** `ForcePasswordChange.js` - Clean form with password requirements
+- **Requirements:**
+  - 8+ characters
+  - At least 1 uppercase letter
+  - At least 1 lowercase letter
+  - At least 1 number
+- **Endpoint:** `POST /api/auth/force-change-password`
+- **Result:** Flag cleared, user proceeds to app (or OTP setup if required)
+
+### B) Two-Factor Authentication (OTP) Setup ✅
+- **Trigger:** `force_otp_setup = true` flag on user
+- **Flow:** After password change (if required), user redirected to `/setup-otp`
+- **Page:** `SetupOTP.js` - QR code display with manual secret option
+- **Dependencies:** `pyotp` (backend), `qrcode.react` (frontend)
+- **Endpoints:**
+  - `GET /api/auth/otp/setup` - Get QR code URI and secret
+  - `POST /api/auth/otp/verify` - Verify OTP code during setup
+- **Trust Device:** 30-day trust option to skip OTP on trusted devices
+- **Result:** `otp_verified = true`, `force_otp_setup = false`
+
+### C) OTP Login Verification ✅
+- **Trigger:** User has `otp_verified = true` (OTP enabled)
+- **Page:** `VerifyOTP.js` - 6-digit code entry
+- **Endpoint:** `POST /api/auth/otp/verify-login`
+- **Trust Device:** Option to remember device for 30 days
+
+### D) Admin Controls ✅
+- **User Creation:** Toggles for "Force Password Change" and "Force OTP Setup"
+- **User Edit:** Can set/clear flags at any time
+- **Disable OTP:** `DELETE /api/auth/otp/disable` (Admin only)
+
+---
+
+## P1 - Live Email Notifications for Ticket Status Changes ✅
 
 ### A) Email Types Implemented ✅
 | Email Type | Trigger | Recipients |
