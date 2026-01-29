@@ -365,14 +365,14 @@ class TestUserCanPickOverride:
         else:
             pytest.skip("No specialties available for test")
         
-        # Create a test user
+        # Create a test user (use Internal Staff to avoid subscription plan requirement)
         test_email = f"test_canpick_update_{uuid.uuid4().hex[:8]}@test.com"
         create_response = self.session.post(f"{BASE_URL}/api/users", json={
             "name": "Test Can Pick Update User",
             "email": test_email,
             "password": "TestPass123!",
             "role": "Standard User",
-            "account_type": "Partner",
+            "account_type": "Internal Staff",
             "specialty_ids": [specialty_id],
             "can_pick": True,
             "send_welcome_email": False
