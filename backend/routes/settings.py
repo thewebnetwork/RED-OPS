@@ -913,3 +913,136 @@ Red Ops Platform"""
         "from": config['from_addr'],
         "smtp_host": config['host']
     }
+
+
+
+# ============== POOL PICKER RULES CONFIGURATION ==============
+
+class PoolPickerRuleUpdate(BaseModel):
+    """Update pool picker rules for an account type"""
+    can_pick: bool = True
+    allowed_pools: List[str] = []  # ["POOL_1", "POOL_2"]
+
+
+class PoolPickerRule(BaseModel):
+    """Pool picker rule for an account type"""
+    account_type: str
+    can_pick: bool
+    allowed_pools: List[str]
+
+
+class PoolPickerRulesResponse(BaseModel):
+    """Response containing all pool picker rules"""
+    rules: List[PoolPickerRule]
+
+
+# Default pool picker rules (matching current behavior)
+DEFAULT_POOL_PICKER_RULES = {
+    "Partner": {"can_pick": True, "allowed_pools": ["POOL_1"]},
+    "Internal Staff": {"can_pick": True, "allowed_pools": ["POOL_1"]},
+    "Vendor/Freelancer": {"can_pick": True, "allowed_pools": ["POOL_2"]},
+    "Media Client": {"can_pick": False, "allowed_pools": []}
+}
+
+ACCOUNT_TYPES = ["Partner", "Internal Staff", "Vendor/Freelancer", "Media Client"]
+
+
+async def get_pool_picker_rules_dict() -> dict:
+    """Get pool picker rules as a dictionary, initializing defaults if needed"""
+    rules = {}
+    for account_type in ACCOUNT_TYPES:
+        rule = await db.pool_picker_rules.find_one({"account_type": account_type}, {"_id": 0})
+        if rule:
+            rules[account_type] = {
+                "can_pick": rule.get("can_pick", DEFAULT_POOL_PICKER_RULES.get(account_type, {}).get("can_pick", False)),
+                "allowed_pools": rule.get("allowed_pools", DEFAULT_POOL_PICKER_RULES.get(account_type, {}).get("allowed_pools", []))
+            }
+        else:
+            # Return default
+            rules[account_type] = DEFAULT_POOL_PICKER_RULES.get(account_type, {"can_pick": False, "allowed_pools": []})
+    return rules
+
+
+@router.get("/pool-picker-rules", response_model=PoolPickerRulesResponse)
+async def get_pool_picker_rules(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """Get pool picker rules for all account types (Admin only)"""
+    rules_dict = await get_pool_picker_rules_dict()
+    rules = [
+        PoolPickerRule(account_type=account_type, **config)
+        for account_type, config in rules_dict.items()
+    ]
+    return PoolPickerRulesResponse(rules=rules)
+
+
+@router.patch("/pool-picker-rules/{account_type}")
+async def update_pool_picker_rule(
+    account_type: str,
+    rule_data: PoolPickerRuleUpdate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update pool picker rules for an account type (Admin only)"""
+    if account_type not in ACCOUNT_TYPES:
+        raise HTTPException(status_code=400, detail=f"Invalid account type. Must be one of: {', '.join(ACCOUNT_TYPES)}")
+    
+    # Validate allowed_pools
+    valid_pools = ["POOL_1", "POOL_2"]
+    for pool in rule_data.allowed_pools:
+        if pool not in valid_pools:
+            raise HTTPException(status_code=400, detail=f"Invalid pool. Must be one of: {', '.join(valid_pools)}")
+    
+    # Update or insert the rule
+    await db.pool_picker_rules.update_one(
+        {"account_type": account_type},
+        {"$set": {
+            "account_type": account_type,
+            "can_pick": rule_data.can_pick,
+            "allowed_pools": rule_data.allowed_pools,
+            "updated_at": get_utc_now(),
+            "updated_by": current_user.get("name", "Admin")
+        }},
+        upsert=True
+    )
+    
+    # Log the change
+    await db.activity_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "timestamp": get_utc_now(),
+        "level": "INFO",
+        "message": f"Pool picker rules updated for {account_type}",
+        "source": "settings",
+        "actor_id": current_user["id"],
+        "actor_name": current_user.get("name", "Admin"),
+        "details": {
+            "account_type": account_type,
+            "can_pick": rule_data.can_pick,
+            "allowed_pools": rule_data.allowed_pools
+        }
+    })
+    
+    return {
+        "message": f"Pool picker rules updated for {account_type}",
+        "account_type": account_type,
+        "can_pick": rule_data.can_pick,
+        "allowed_pools": rule_data.allowed_pools
+    }
+
+
+@router.post("/pool-picker-rules/reset-defaults")
+async def reset_pool_picker_rules_to_defaults(
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Reset all pool picker rules to default values (Admin only)"""
+    for account_type, config in DEFAULT_POOL_PICKER_RULES.items():
+        await db.pool_picker_rules.update_one(
+            {"account_type": account_type},
+            {"$set": {
+                "account_type": account_type,
+                "can_pick": config["can_pick"],
+                "allowed_pools": config["allowed_pools"],
+                "updated_at": get_utc_now(),
+                "updated_by": current_user.get("name", "Admin")
+            }},
+            upsert=True
+        )
+    
+    return {"message": "Pool picker rules reset to defaults", "defaults": DEFAULT_POOL_PICKER_RULES}
