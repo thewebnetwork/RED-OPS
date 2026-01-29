@@ -330,6 +330,75 @@ class TestPool1RoutingEdgeCases:
         
         assert user.get("account_type") == "Partner", f"Expected account_type='Partner', got '{user.get('account_type')}'"
         print(f"✓ Partner login returns correct account_type: {user.get('account_type')}")
+    
+    def test_15_pool_1_ticket_has_24h_expiry(self):
+        """Verify Pool 1 tickets have pool1_expires_at set (24h from creation)"""
+        token = self.get_auth_token(ADMIN_CREDS["email"], ADMIN_CREDS["password"])
+        assert token, "Admin login failed"
+        
+        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        
+        # Get all orders and find a Pool 1 ticket
+        response = self.session.get(f"{BASE_URL}/api/orders")
+        assert response.status_code == 200
+        
+        orders = response.json()
+        pool1_tickets = [o for o in orders if o.get("pool_stage") == "POOL_1"]
+        
+        if pool1_tickets:
+            ticket = pool1_tickets[0]
+            pool1_expires_at = ticket.get("pool1_expires_at")
+            assert pool1_expires_at is not None, f"Pool 1 ticket {ticket.get('order_code')} should have pool1_expires_at set"
+            print(f"✓ Pool 1 ticket {ticket.get('order_code')} has pool1_expires_at: {pool1_expires_at}")
+        else:
+            print("⚠ No Pool 1 tickets found to verify expiry")
+    
+    def test_16_pool_2_ticket_has_no_expiry(self):
+        """Verify Pool 2 tickets (skipped Pool 1) have no pool1_expires_at"""
+        token = self.get_auth_token(ADMIN_CREDS["email"], ADMIN_CREDS["password"])
+        assert token, "Admin login failed"
+        
+        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        
+        # Get RRG-000100 which went directly to Pool 2
+        response = self.session.get(f"{BASE_URL}/api/orders")
+        assert response.status_code == 200
+        
+        orders = response.json()
+        order_100 = next((o for o in orders if o.get("order_code") == "RRG-000100"), None)
+        
+        if order_100:
+            pool1_expires_at = order_100.get("pool1_expires_at")
+            assert pool1_expires_at is None, f"Pool 2 ticket (skipped Pool 1) should have pool1_expires_at=None, got {pool1_expires_at}"
+            print(f"✓ Pool 2 ticket RRG-000100 correctly has no pool1_expires_at")
+        else:
+            print("⚠ RRG-000100 not found")
+    
+    def test_17_verify_routing_specialty_is_set(self):
+        """Verify tickets have routing_specialty_id and routing_specialty_name set"""
+        token = self.get_auth_token(ADMIN_CREDS["email"], ADMIN_CREDS["password"])
+        assert token, "Admin login failed"
+        
+        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        
+        # Get orders
+        response = self.session.get(f"{BASE_URL}/api/orders")
+        assert response.status_code == 200
+        
+        orders = response.json()
+        
+        # Check RRG-000099 (Pool 1)
+        order_99 = next((o for o in orders if o.get("order_code") == "RRG-000099"), None)
+        if order_99:
+            assert order_99.get("routing_specialty_id") is not None, "RRG-000099 should have routing_specialty_id"
+            assert order_99.get("routing_specialty_name") == "Administrative Assistant", f"Expected 'Administrative Assistant', got '{order_99.get('routing_specialty_name')}'"
+            print(f"✓ RRG-000099 has routing specialty: {order_99.get('routing_specialty_name')}")
+        
+        # Check RRG-000100 (Pool 2)
+        order_100 = next((o for o in orders if o.get("order_code") == "RRG-000100"), None)
+        if order_100:
+            assert order_100.get("routing_specialty_id") is not None, "RRG-000100 should have routing_specialty_id"
+            print(f"✓ RRG-000100 has routing specialty ID: {order_100.get('routing_specialty_id')}")
 
 
 if __name__ == "__main__":
