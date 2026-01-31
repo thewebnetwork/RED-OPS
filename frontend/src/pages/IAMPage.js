@@ -209,6 +209,7 @@ export default function IAMPage() {
         send_welcome_email: true, can_pick: true
       });
     }
+    setUserSpecialtySearch(''); // Reset search when opening dialog
     setUserDialogOpen(true);
   };
 
