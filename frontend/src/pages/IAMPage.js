@@ -124,6 +124,7 @@ export default function IAMPage() {
   const [specialtyDialogOpen, setSpecialtyDialogOpen] = useState(false);
   const [editingSpecialty, setEditingSpecialty] = useState(null);
   const [specialtyForm, setSpecialtyForm] = useState({ name: '', description: '', color: '#6366F1' });
+  const [userSpecialtySearch, setUserSpecialtySearch] = useState(''); // Search for user form specialty selection
 
   // Subscription Plans state
   const [plans, setPlans] = useState([]);
