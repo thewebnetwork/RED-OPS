@@ -215,8 +215,15 @@ export default function IAMPage() {
   const saveUser = async () => {
     if (!userForm.name || !userForm.email) { toast.error('Name and email required'); return; }
     if (!editingUser && !userForm.password) { toast.error('Password required for new users'); return; }
-    // Multi-specialty validation
-    if (!userForm.specialty_ids || userForm.specialty_ids.length === 0) { toast.error('At least one specialty is required'); return; }
+    
+    // Specialty validation - only required for account types that can pick/execute work
+    // Media Clients are requesters, they don't need specialties
+    const requiresSpecialty = userForm.account_type !== 'Media Client';
+    if (requiresSpecialty && (!userForm.specialty_ids || userForm.specialty_ids.length === 0)) { 
+      toast.error('At least one specialty is required for this account type'); 
+      return; 
+    }
+    
     if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
 
     try {
@@ -225,8 +232,12 @@ export default function IAMPage() {
         team_id: userForm.team_id || null, 
         subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null,
         send_welcome_email: !editingUser ? userForm.send_welcome_email : false,
-        // Ensure primary_specialty_id is set
-        primary_specialty_id: userForm.primary_specialty_id || (userForm.specialty_ids.length > 0 ? userForm.specialty_ids[0] : null)
+        // Ensure primary_specialty_id is set (only if specialties selected)
+        primary_specialty_id: userForm.specialty_ids.length > 0 
+          ? (userForm.primary_specialty_id || userForm.specialty_ids[0]) 
+          : null,
+        // Ensure specialty_ids is always an array
+        specialty_ids: userForm.specialty_ids || []
       };
       if (editingUser) {
         if (!data.password) delete data.password;
