@@ -495,14 +495,20 @@ export default function IAMPage() {
     return colors[type] || 'bg-slate-100 text-slate-700';
   };
 
-  // Get specialties filtered by selected team (if team has related specialties)
+  // Get ALL specialties - NOT filtered by team (teams can suggest but not restrict)
+  // Users can have specialties that cross teams
   const getFilteredSpecialties = () => {
-    if (!userForm.team_id) return specialties;
+    return specialties; // Return all specialties regardless of team selection
+  };
+  
+  // Get team's suggested specialties (for display hint only, not restriction)
+  const getTeamSuggestedSpecialties = () => {
+    if (!userForm.team_id) return [];
     const selectedTeam = teams.find(t => t.id === userForm.team_id);
     if (!selectedTeam || !selectedTeam.related_specialty_ids || selectedTeam.related_specialty_ids.length === 0) {
-      return specialties;
+      return [];
     }
-    return specialties.filter(s => selectedTeam.related_specialty_ids.includes(s.id));
+    return selectedTeam.related_specialty_ids;
   };
 
   // Convert arrays to searchable select options
