@@ -291,11 +291,13 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         specialty_ids = [user_data.specialty_id]
         primary_specialty_id = user_data.specialty_id
     
-    # Require at least one specialty
-    if not specialty_ids:
-        raise HTTPException(status_code=400, detail="At least one specialty is required")
+    # Specialty validation - only required for account types that can pick/execute work
+    # Media Clients are requesters, they don't need specialties
+    requires_specialty = user_data.account_type != "Media Client"
+    if requires_specialty and not specialty_ids:
+        raise HTTPException(status_code=400, detail="At least one specialty is required for this account type")
     
-    # Verify all specialties exist
+    # Verify all specialties exist (if any provided)
     specialty_names = []
     for spec_id in specialty_ids:
         specialty = await db.specialties.find_one({"id": spec_id, "active": True})
@@ -303,15 +305,20 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
             raise HTTPException(status_code=400, detail=f"Invalid or inactive specialty: {spec_id}")
         specialty_names.append(specialty["name"])
     
-    # Set primary if not specified
-    if not primary_specialty_id:
-        primary_specialty_id = specialty_ids[0]
-    elif primary_specialty_id not in specialty_ids:
-        raise HTTPException(status_code=400, detail="Primary specialty must be one of the selected specialties")
+    # Set primary if not specified (only if specialties are provided)
+    if specialty_ids:
+        if not primary_specialty_id:
+            primary_specialty_id = specialty_ids[0]
+        elif primary_specialty_id not in specialty_ids:
+            raise HTTPException(status_code=400, detail="Primary specialty must be one of the selected specialties")
+    else:
+        primary_specialty_id = None
     
     # Get primary specialty name for legacy field
-    primary_specialty = await db.specialties.find_one({"id": primary_specialty_id}, {"_id": 0, "name": 1})
-    primary_specialty_name = primary_specialty["name"] if primary_specialty else specialty_names[0]
+    primary_specialty_name = None
+    if primary_specialty_id:
+        primary_specialty = await db.specialties.find_one({"id": primary_specialty_id}, {"_id": 0, "name": 1})
+        primary_specialty_name = primary_specialty["name"] if primary_specialty else (specialty_names[0] if specialty_names else None)
     
     # Verify team exists if provided
     team_name = None
