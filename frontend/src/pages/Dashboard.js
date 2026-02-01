@@ -507,16 +507,26 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
         </Button>
       </div>
 
-      {/* KPI Cards - Status */}
+      {/* KPI Cards - Status (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
-        <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={AlertCircle} color="bg-purple-500" />
-        <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
-        <AnimatedKPICard label="Closed" value={metrics.kpi.closed} icon={CheckCircle2} color="bg-slate-500" />
+        <Link to="/orders?status=Open">
+          <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
+        </Link>
+        <Link to="/orders?status=In Progress">
+          <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
+        </Link>
+        <Link to="/orders?status=Pending Review">
+          <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={AlertCircle} color="bg-purple-500" />
+        </Link>
+        <Link to="/orders?status=Delivered">
+          <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
+        </Link>
+        <Link to="/orders?status=Closed">
+          <AnimatedKPICard label="Closed" value={metrics.kpi.closed} icon={CheckCircle2} color="bg-slate-500" />
+        </Link>
       </div>
 
-      {/* SLA Status */}
+      {/* SLA Status (Clickable) */}
       <div>
         <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
           <Target size={18} />
@@ -535,7 +545,7 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
         </div>
       </div>
 
-      {/* Pool Analytics */}
+      {/* Pool Analytics (Clickable) */}
       {metrics.pool && (
         <div>
           <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
@@ -543,10 +553,18 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
             Pool Status
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <AnimatedKPICard label="Pool 1 Available" value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
-            <AnimatedKPICard label="Pool 2 Available" value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
-            <AnimatedKPICard label="Pool 1 Pickups (30d)" value={metrics.pool.pool1_pickups_30d} icon={TrendingUp} color="bg-indigo-500" />
-            <AnimatedKPICard label="Avg Pick Time P1" value={metrics.pool.avg_time_to_pick_pool1_hours} suffix="h" icon={Clock} color="bg-indigo-500" />
+            <Link to="/ribbon-board?pool=1">
+              <AnimatedKPICard label="Pool 1 Available" value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
+            </Link>
+            <Link to="/ribbon-board?pool=2">
+              <AnimatedKPICard label="Pool 2 Available" value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
+            </Link>
+            <Link to="/reports?metric=pool_pickups">
+              <AnimatedKPICard label="Pool 1 Pickups (30d)" value={metrics.pool.pool1_pickups_30d} icon={TrendingUp} color="bg-indigo-500" />
+            </Link>
+            <Link to="/reports?metric=avg_pick_time">
+              <AnimatedKPICard label="Avg Pick Time P1" value={metrics.pool.avg_time_to_pick_pool1_hours} suffix="h" icon={Clock} color="bg-indigo-500" />
+            </Link>
           </div>
         </div>
       )}
