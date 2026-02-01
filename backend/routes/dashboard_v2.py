@@ -65,8 +65,8 @@ class DashboardMetricsResponse(BaseModel):
     sla: SLAMetrics
     pool: Optional[PoolMetrics] = None
     workload: WorkloadMetrics
-    trends_7d: Dict[str, List[TrendDataPoint]]
-    trends_30d: Dict[str, List[TrendDataPoint]]
+    trends_7d: Dict[str, Any]  # Nested dict structure
+    trends_30d: Dict[str, Any]  # Nested dict structure
 
 
 # ============== HELPER FUNCTIONS ==============
