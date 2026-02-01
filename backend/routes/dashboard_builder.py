@@ -594,7 +594,9 @@ async def update_dashboard(
     
     await db.dashboards.update_one({"id": dashboard_id}, {"$set": update_data})
     
-    return {"message": "Dashboard updated successfully"}
+    # Return the updated dashboard
+    updated = await db.dashboards.find_one({"id": dashboard_id}, {"_id": 0})
+    return updated
 
 
 @router.delete("/{dashboard_id}")
