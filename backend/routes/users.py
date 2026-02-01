@@ -371,6 +371,7 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "team_name": team_name,
         "subscription_plan_id": user_data.subscription_plan_id,
         "subscription_plan_name": subscription_plan_name,
+        "dashboard_type_id": user_data.dashboard_type_id,  # Dashboard assignment
         # Legacy field for backwards compatibility
         "access_tier_id": user_data.subscription_plan_id,
         "access_tier_name": subscription_plan_name,
