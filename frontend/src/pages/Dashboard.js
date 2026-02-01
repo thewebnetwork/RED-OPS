@@ -897,15 +897,23 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
         </div>
       </div>
 
-      {/* My Ticket KPIs */}
+      {/* My Ticket KPIs (Clickable - routes to my-tickets for Media Clients) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
-        <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={Eye} color="bg-purple-500" />
-        <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
+        <Link to="/my-tickets?status=Open">
+          <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
+        </Link>
+        <Link to="/my-tickets?status=In Progress">
+          <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
+        </Link>
+        <Link to="/my-tickets?status=Pending Review">
+          <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={Eye} color="bg-purple-500" />
+        </Link>
+        <Link to="/my-tickets?status=Delivered">
+          <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
+        </Link>
       </div>
 
-      {/* SLA Overview */}
+      {/* SLA Overview (Non-clickable for Media Clients - they don't have SLA access) */}
       <div className="grid grid-cols-3 gap-4">
         <AnimatedKPICard label="On Track" value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
         <AnimatedKPICard label="At Risk" value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
@@ -914,24 +922,31 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
 
       {/* Tickets Needing Your Review */}
       {ticketLists.pendingReview.length > 0 && (
-        <Card className="border-purple-200 bg-purple-50/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-purple-900 flex items-center gap-2">
-              <Eye size={20} />
-              Tickets Pending Your Review ({ticketLists.pendingReview.length})
-            </CardTitle>
-            <CardDescription className="text-purple-700">
-              These tickets have been delivered and are waiting for your feedback
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {ticketLists.pendingReview.map(ticket => (
-                <TicketListItem key={ticket.id} ticket={ticket} t={t} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Link to="/my-tickets?filter=pending_review">
+          <Card className="border-purple-200 bg-purple-50/50 hover:shadow-md transition-shadow cursor-pointer">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-purple-900 flex items-center gap-2">
+                <Eye size={20} />
+                Tickets Pending Your Review ({ticketLists.pendingReview.length})
+              </CardTitle>
+              <CardDescription className="text-purple-700">
+                These tickets have been delivered and are waiting for your feedback
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {ticketLists.pendingReview.slice(0, 3).map(ticket => (
+                  <TicketListItem key={ticket.id} ticket={ticket} t={t} />
+                ))}
+                {ticketLists.pendingReview.length > 3 && (
+                  <p className="text-sm text-purple-600 text-center pt-2">
+                    +{ticketLists.pendingReview.length - 3} more tickets pending review
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       )}
 
       {/* Active Tickets */}
