@@ -629,12 +629,20 @@ function OperatorDashboard({ metrics, ticketLists, chartData, loading, onRefresh
         </Button>
       </div>
 
-      {/* Workload KPIs */}
+      {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        <Link to="/my-tickets?filter=working_on">
+          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+        </Link>
+        <Link to="/my-tickets?filter=waiting_on_me">
+          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+        </Link>
+        <Link to="/my-tickets?filter=pending_review">
+          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+        </Link>
+        <Link to="/my-tickets?filter=recently_delivered">
+          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        </Link>
       </div>
 
       {/* Pool Opportunities */}
