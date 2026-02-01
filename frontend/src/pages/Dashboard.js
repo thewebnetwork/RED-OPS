@@ -1150,8 +1150,10 @@ export default function Dashboard() {
 
   return (
     <div className="animate-fade-in" data-testid="dashboard-page">
-      {roleType === 'admin' && (
-        <AdminDashboard 
+      {/* Use custom dashboard if user has one assigned */}
+      {useCustomDashboard && dashboardConfig ? (
+        <DynamicDashboard
+          dashboardConfig={dashboardConfig}
           metrics={metrics}
           ticketLists={ticketLists}
           chartData={chartData}
@@ -1159,45 +1161,59 @@ export default function Dashboard() {
           onRefresh={fetchDashboardData}
           t={t}
         />
-      )}
-      {roleType === 'operator' && (
-        <OperatorDashboard 
-          metrics={metrics}
-          ticketLists={ticketLists}
-          chartData={chartData}
-          loading={loading}
-          onRefresh={fetchDashboardData}
-          t={t}
-        />
-      )}
-      {roleType === 'partner' && (
-        <PartnerDashboard 
-          metrics={metrics}
-          ticketLists={ticketLists}
-          chartData={chartData}
-          loading={loading}
-          onRefresh={fetchDashboardData}
-          t={t}
-        />
-      )}
-      {roleType === 'vendor' && (
-        <VendorDashboard 
-          metrics={metrics}
-          ticketLists={ticketLists}
-          chartData={chartData}
-          loading={loading}
-          onRefresh={fetchDashboardData}
-          t={t}
-        />
-      )}
-      {roleType === 'media_client' && (
-        <MediaClientDashboard 
-          metrics={metrics}
-          ticketLists={ticketLists}
-          loading={loading}
-          onRefresh={fetchDashboardData}
-          t={t}
-        />
+      ) : (
+        <>
+          {/* Fall back to role-based dashboards */}
+          {roleType === 'admin' && (
+            <AdminDashboard 
+              metrics={metrics}
+              ticketLists={ticketLists}
+              chartData={chartData}
+              loading={loading}
+              onRefresh={fetchDashboardData}
+              t={t}
+            />
+          )}
+          {roleType === 'operator' && (
+            <OperatorDashboard 
+              metrics={metrics}
+              ticketLists={ticketLists}
+              chartData={chartData}
+              loading={loading}
+              onRefresh={fetchDashboardData}
+              t={t}
+            />
+          )}
+          {roleType === 'partner' && (
+            <PartnerDashboard 
+              metrics={metrics}
+              ticketLists={ticketLists}
+              chartData={chartData}
+              loading={loading}
+              onRefresh={fetchDashboardData}
+              t={t}
+            />
+          )}
+          {roleType === 'vendor' && (
+            <VendorDashboard 
+              metrics={metrics}
+              ticketLists={ticketLists}
+              chartData={chartData}
+              loading={loading}
+              onRefresh={fetchDashboardData}
+              t={t}
+            />
+          )}
+          {roleType === 'media_client' && (
+            <MediaClientDashboard 
+              metrics={metrics}
+              ticketLists={ticketLists}
+              loading={loading}
+              onRefresh={fetchDashboardData}
+              t={t}
+            />
+          )}
+        </>
       )}
     </div>
   );
