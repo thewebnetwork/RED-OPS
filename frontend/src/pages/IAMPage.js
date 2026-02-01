@@ -85,6 +85,7 @@ const ROLE_TEMPLATES = {
 };
 
 export default function IAMPage() {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('users');
