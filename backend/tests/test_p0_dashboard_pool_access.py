@@ -619,8 +619,8 @@ class TestUserResponseFields:
             assert "pool_access" in user, f"User {user['email']} missing pool_access field"
             print(f"✓ User {user['email']}: can_pick={user['can_pick']}, pool_access={user['pool_access']}")
     
-    def test_auth_me_includes_pool_fields_bug(self):
-        """BUG: /auth/me response should include can_pick and pool_access but doesn't"""
+    def test_auth_me_includes_pool_fields(self):
+        """Test /auth/me response includes can_pick and pool_access"""
         token = self.get_admin_token()
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
@@ -628,18 +628,9 @@ class TestUserResponseFields:
         assert response.status_code == 200
         user = response.json()
         
-        # This is a known bug - auth/me doesn't include can_pick and pool_access
-        # The frontend needs these fields to hide/show Opportunity Ribbon
-        has_can_pick = "can_pick" in user
-        has_pool_access = "pool_access" in user
-        
-        if not has_can_pick or not has_pool_access:
-            print(f"⚠️ BUG: Auth me response missing pool fields - can_pick: {has_can_pick}, pool_access: {has_pool_access}")
-            print("   This needs to be fixed in /app/backend/routes/auth.py UserResponse model")
-            # Mark as expected failure for now
-            pytest.skip("Known bug: auth/me missing can_pick and pool_access fields")
-        else:
-            print(f"✓ Auth me response includes can_pick={user['can_pick']}, pool_access={user['pool_access']}")
+        assert "can_pick" in user, "Auth me response missing can_pick field"
+        assert "pool_access" in user, "Auth me response missing pool_access field"
+        print(f"✓ Auth me response includes can_pick={user['can_pick']}, pool_access={user['pool_access']}")
 
 
 if __name__ == "__main__":
