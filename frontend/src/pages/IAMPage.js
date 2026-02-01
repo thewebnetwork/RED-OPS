@@ -231,14 +231,13 @@ export default function IAMPage() {
       return; 
     }
     
-    if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
     if (!userForm.dashboard_type_id) { toast.error('Dashboard type is required'); return; }
 
     try {
       const data = { 
         ...userForm, 
         team_id: userForm.team_id || null, 
-        subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null,
+        subscription_plan_id: userForm.subscription_plan_id || null,
         dashboard_type_id: userForm.dashboard_type_id || null,
         send_welcome_email: !editingUser ? userForm.send_welcome_email : false,
         // Ensure primary_specialty_id is set (only if specialties selected)
@@ -1033,20 +1032,18 @@ export default function IAMPage() {
               )}
             </div>
 
-            {userForm.account_type === 'Partner' && (
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <Label className="text-purple-800">Subscription Plan *</Label>
-                <SearchableSelect
-                  options={planOptions}
-                  value={userForm.subscription_plan_id}
-                  onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v })}
-                  placeholder="Select plan..."
-                  searchPlaceholder="Search plans..."
-                  className="mt-1 border-purple-200"
-                  data-testid="user-subscription-plan-select"
-                />
-              </div>
-            )}
+            <div>
+              <Label>Subscription Plan (Service Level)</Label>
+              <p className="text-xs text-slate-500 mb-2">Select the plan type to determine available services (Core, Engage, Lead-to-Cash, etc.)</p>
+              <SearchableSelect
+                options={[{ value: '', label: 'No plan assigned' }, ...planOptions]}
+                value={userForm.subscription_plan_id || ''}
+                onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v })}
+                placeholder="Select plan..."
+                searchPlaceholder="Search plans..."
+                data-testid="user-subscription-plan-select"
+              />
+            </div>
 
             <div className="flex flex-col gap-3 pt-4 border-t">
               <label className="flex items-center gap-2 cursor-pointer">
