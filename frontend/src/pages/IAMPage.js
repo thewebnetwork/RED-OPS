@@ -232,12 +232,14 @@ export default function IAMPage() {
     }
     
     if (userForm.account_type === 'Partner' && !userForm.subscription_plan_id) { toast.error('Subscription plan required for Partners'); return; }
+    if (!userForm.dashboard_type_id) { toast.error('Dashboard type is required'); return; }
 
     try {
       const data = { 
         ...userForm, 
         team_id: userForm.team_id || null, 
         subscription_plan_id: userForm.account_type === 'Partner' ? userForm.subscription_plan_id : null,
+        dashboard_type_id: userForm.dashboard_type_id || null,
         send_welcome_email: !editingUser ? userForm.send_welcome_email : false,
         // Ensure primary_specialty_id is set (only if specialties selected)
         primary_specialty_id: userForm.specialty_ids.length > 0 
