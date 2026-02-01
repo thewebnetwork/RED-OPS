@@ -161,14 +161,15 @@ export default function IAMPage() {
 
   const fetchAllData = async () => {
     try {
-      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes, rolesRes, accountTypesRes] = await Promise.all([
+      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes, rolesRes, accountTypesRes, dashboardsRes] = await Promise.all([
         axios.get(`${API}/users`),
         axios.get(`${API}/teams`),
         axios.get(`${API}/specialties`),
         axios.get(`${API}/subscription-plans`),
         axios.get(`${API}/users/identity-config`),
         axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
-        axios.get(`${API}/iam/account-types`).catch(() => ({ data: [] }))
+        axios.get(`${API}/iam/account-types`).catch(() => ({ data: [] })),
+        axios.get(`${API}/dashboards/list`).catch(() => ({ data: { dashboards: [] } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);
@@ -177,6 +178,7 @@ export default function IAMPage() {
       setIdentityConfig(configRes.data);
       setRoles(rolesRes.data);
       setAccountTypes(accountTypesRes.data);
+      setDashboardTemplates(dashboardsRes.data.dashboards || []);
     } catch (error) {
       toast.error('Failed to fetch data');
     } finally {
