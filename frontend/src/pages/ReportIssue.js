@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Report an Issue page - Redirects to Command Center with issue type pre-selected
  */
 export default function ReportIssue() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
