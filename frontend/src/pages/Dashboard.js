@@ -1256,6 +1256,7 @@ export default function Dashboard() {
           loading={loading}
           onRefresh={fetchDashboardData}
           t={t}
+          user={user}
         />
       ) : (
         <>
