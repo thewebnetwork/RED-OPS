@@ -198,6 +198,7 @@ export default function IAMPage() {
         primary_specialty_id: user.primary_specialty_id || user.specialty_id || '',
         team_id: user.team_id || '',
         subscription_plan_id: user.subscription_plan_id || '',
+        dashboard_type_id: user.dashboard_type_id || '',
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false,
         send_welcome_email: false,
@@ -210,7 +211,7 @@ export default function IAMPage() {
       setUserForm({ 
         name: '', email: '', password: tempPassword, role: 'Standard User', 
         account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', 
-        subscription_plan_id: '', force_password_change: true, force_otp_setup: true,
+        subscription_plan_id: '', dashboard_type_id: '', force_password_change: true, force_otp_setup: true,
         send_welcome_email: true, can_pick: true
       });
     }
