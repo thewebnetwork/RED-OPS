@@ -912,6 +912,147 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
   );
 }
 
+// ============== DYNAMIC WIDGET RENDERER ==============
+
+function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, loading, onRefresh, t }) {
+  const widgets = dashboardConfig?.widgets || [];
+  
+  // Group widgets by size for responsive layout
+  const renderWidget = (widget) => {
+    const { widget_type, title, config, size } = widget;
+    const sizeClass = size === 'large' ? 'md:col-span-2' : size === 'small' ? '' : 'md:col-span-1';
+    
+    switch (widget_type) {
+      case 'kpi_card':
+        const metricKey = config?.metric;
+        const value = metricKey === 'open' ? metrics?.kpi?.open :
+                      metricKey === 'in_progress' ? metrics?.kpi?.in_progress :
+                      metricKey === 'pending_review' ? metrics?.kpi?.pending_review :
+                      metricKey === 'delivered' ? metrics?.kpi?.delivered :
+                      metricKey === 'closed' ? metrics?.kpi?.closed :
+                      metricKey === 'sla_on_track' ? metrics?.sla?.on_track :
+                      metricKey === 'sla_at_risk' ? metrics?.sla?.at_risk :
+                      metricKey === 'sla_breached' ? metrics?.sla?.breached :
+                      metricKey === 'working_on' ? metrics?.workload?.tickets_working_on :
+                      metricKey === 'waiting_on_me' ? metrics?.workload?.tickets_waiting_on_me : 0;
+        
+        const IconComponent = config?.icon === 'Inbox' ? Inbox :
+                              config?.icon === 'Clock' ? Clock :
+                              config?.icon === 'AlertCircle' ? AlertCircle :
+                              config?.icon === 'CheckCircle2' ? CheckCircle2 :
+                              config?.icon === 'Target' ? Target :
+                              config?.icon === 'AlertTriangle' ? AlertTriangle :
+                              config?.icon === 'Activity' ? Activity : BarChart3;
+        
+        return (
+          <AnimatedKPICard
+            key={widget.id}
+            label={title}
+            value={value || 0}
+            icon={IconComponent}
+            color={config?.color || 'bg-blue-500'}
+          />
+        );
+      
+      case 'ticket_list':
+        const listType = config?.list_type;
+        const tickets = listType === 'working_on' ? ticketLists.workingOn :
+                        listType === 'waiting_on_me' ? ticketLists.waitingOnMe :
+                        listType === 'pending_review' ? ticketLists.pendingReview :
+                        listType === 'recently_delivered' ? ticketLists.recentlyDelivered : [];
+        
+        return (
+          <div key={widget.id} className={sizeClass}>
+            <TicketListSection
+              title={title}
+              icon={listType === 'recently_delivered' ? CheckCircle2 : 
+                    listType === 'waiting_on_me' ? Clock : Inbox}
+              iconColor={listType === 'recently_delivered' ? 'text-emerald-500' : 
+                         listType === 'waiting_on_me' ? 'text-amber-500' : 'text-blue-500'}
+              tickets={tickets}
+              emptyMessage={`No ${title.toLowerCase()}`}
+              t={t}
+            />
+          </div>
+        );
+      
+      case 'chart':
+        const chartType = config?.chart_type;
+        if (chartType === 'ticket_volume_status' && chartData.statusVolume) {
+          return (
+            <Card key={widget.id} className={`${sizeClass} col-span-full md:col-span-1`}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BarChart3 size={18} className="text-blue-500" />
+                  {title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData.statusVolume}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9CA3AF" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="#9CA3AF" />
+                      <Tooltip />
+                      <Bar dataKey="open" stackId="a" fill={STATUS_COLORS.open} name="Open" />
+                      <Bar dataKey="in_progress" stackId="a" fill={STATUS_COLORS.in_progress} name="In Progress" />
+                      <Bar dataKey="pending" stackId="a" fill={STATUS_COLORS.pending} name="Pending" />
+                      <Bar dataKey="delivered" stackId="a" fill={STATUS_COLORS.delivered} name="Delivered" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        return null;
+      
+      default:
+        return null;
+    }
+  };
+  
+  // Separate KPI cards from other widgets
+  const kpiWidgets = widgets.filter(w => w.widget_type === 'kpi_card');
+  const otherWidgets = widgets.filter(w => w.widget_type !== 'kpi_card');
+  
+  return (
+    <div className="space-y-6" data-testid="dynamic-dashboard">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
+          <p className="text-slate-500 text-sm">{dashboardConfig?.name || 'Dashboard'}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={onRefresh} disabled={loading}>
+          <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+          {t('common.refresh')}
+        </Button>
+      </div>
+      
+      {/* KPI Cards Grid */}
+      {kpiWidgets.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {kpiWidgets.map(renderWidget)}
+        </div>
+      )}
+      
+      {/* Other Widgets */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {otherWidgets.map(renderWidget)}
+      </div>
+      
+      {/* If no widgets configured, show a message */}
+      {widgets.length === 0 && (
+        <Card className="p-8 text-center">
+          <p className="text-slate-500">No widgets configured for this dashboard.</p>
+          <p className="text-slate-400 text-sm mt-2">Contact your administrator to set up your dashboard.</p>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ============== MAIN DASHBOARD COMPONENT ==============
 
 export default function Dashboard() {
@@ -919,6 +1060,8 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState(null);
+  const [dashboardConfig, setDashboardConfig] = useState(null);
+  const [useCustomDashboard, setUseCustomDashboard] = useState(false);
   const [ticketLists, setTicketLists] = useState({
     workingOn: [],
     waitingOnMe: [],
@@ -935,6 +1078,15 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
+      // Fetch user's assigned dashboard configuration FIRST
+      const dashboardRes = await axios.get(`${API}/dashboards/user-dashboard`);
+      if (dashboardRes.data.dashboard && dashboardRes.data.assigned) {
+        setDashboardConfig(dashboardRes.data.dashboard);
+        setUseCustomDashboard(true);
+      } else {
+        setUseCustomDashboard(false);
+      }
+      
       // Fetch main metrics
       const metricsRes = await axios.get(`${API}/dashboard/v2/metrics`);
       setMetrics(metricsRes.data);
