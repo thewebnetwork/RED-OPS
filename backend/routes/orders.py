@@ -1053,9 +1053,19 @@ async def pick_order(
     # Check if user can pick orders (Partner or Vendor/Freelancer)
     account_type = current_user.get("account_type")
     role = current_user.get("role")
+    user_can_pick = current_user.get("can_pick", True)
+    user_pool_access = current_user.get("pool_access", "both")
     
-    if role not in ["Administrator", "Operator"] and account_type not in ["Partner", "Vendor/Freelancer"]:
-        raise HTTPException(status_code=403, detail="Only Partners and Vendors can pick orders")
+    # Check user-level can_pick flag
+    if not user_can_pick:
+        raise HTTPException(status_code=403, detail="You are not allowed to pick opportunities (user-level restriction)")
+    
+    # Check user-level pool_access
+    if user_pool_access == "none":
+        raise HTTPException(status_code=403, detail="You do not have access to any pools")
+    
+    if role not in ["Administrator", "Operator"] and account_type not in ["Partner", "Vendor/Freelancer", "Internal Staff"]:
+        raise HTTPException(status_code=403, detail="Only Partners, Internal Staff, and Vendors can pick orders")
     
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
@@ -1079,11 +1089,21 @@ async def pick_order(
     except:
         hours_in_pool = 0
     
-    # Partners can only pick from Pool 1 (first 24 hours)
-    # Vendors can only pick from Pool 2 (after 24 hours)
-    if account_type == "Partner" and hours_in_pool >= 24:
+    # Determine which pool the ticket is in
+    is_pool_1 = hours_in_pool < 24
+    is_pool_2 = hours_in_pool >= 24
+    
+    # Check user's pool_access against the ticket's pool
+    if user_pool_access == "pool1" and not is_pool_1:
+        raise HTTPException(status_code=403, detail="You only have access to Pool 1, but this ticket is in Pool 2")
+    if user_pool_access == "pool2" and not is_pool_2:
+        raise HTTPException(status_code=403, detail="You only have access to Pool 2, but this ticket is still in Pool 1")
+    
+    # Partners can only pick from Pool 1 (first 24 hours) unless pool_access overrides
+    # Vendors can only pick from Pool 2 (after 24 hours) unless pool_access overrides
+    if account_type == "Partner" and is_pool_2 and user_pool_access not in ["pool2", "both"]:
         raise HTTPException(status_code=400, detail="This ticket is no longer in the Partner pool")
-    if account_type == "Vendor/Freelancer" and hours_in_pool < 24:
+    if account_type == "Vendor/Freelancer" and is_pool_1 and user_pool_access not in ["pool1", "both"]:
         raise HTTPException(status_code=400, detail="This ticket is still in the Partner pool")
     
     old_status = order["status"]
@@ -1096,7 +1116,7 @@ async def pick_order(
             "editor_name": current_user["name"],
             "status": "In Progress",
             "picked_at": now,
-            "picked_from_pool": 1 if hours_in_pool < 24 else 2,
+            "picked_from_pool": 1 if is_pool_1 else 2,
             "updated_at": now
         }}
     )
