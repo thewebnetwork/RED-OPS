@@ -61,3 +61,11 @@ def require_roles(allowed_roles: list):
         
         raise HTTPException(status_code=403, detail="Permission denied")
     return role_checker
+
+
+def require_admin(user: dict = Depends(get_current_user)):
+    """Require user to be an Administrator"""
+    user_role = user.get("role", "")
+    if user_role in ["Administrator", "Admin"]:
+        return user
+    raise HTTPException(status_code=403, detail="Admin access required")
