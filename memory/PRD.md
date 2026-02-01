@@ -3,57 +3,64 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 4.4 (Dashboard Rebuild Complete)
+## Current Version: 4.5 (Multi-Dashboard System Complete)
 **Last Updated:** February 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://user-auth-36.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 Dashboard Rebuild Complete ✅
+## LATEST: P0 Multi-Dashboard System Complete ✅
 
-### Dashboard V2 Features (February 2026)
+### Dashboard Builder Features (February 2026)
 
-**Role-Based Views:**
-| Role | Dashboard Components |
-|------|---------------------|
-| **Admin** | Full KPIs, All Charts, Pool Analytics, SLA Overview, All Ticket Lists |
-| **Operator/Internal Staff** | Workload KPIs, Pool 1 & 2 Access, Personal Lists |
-| **Partner** | Workload KPIs, Pool 1 Opportunities, Personal Lists |
-| **Vendor** | Workload KPIs, Pool 2 Opportunities, Personal Lists |
-| **Media Client** | My Submitted Tickets only, Simple Status View, No Pools |
+**4 System Dashboard Templates:**
+| Template | Widgets | Default For | Description |
+|----------|---------|-------------|-------------|
+| **Admin Executive** | 19 | Administrator | Full visibility with all KPIs, analytics, pool metrics |
+| **Resolver/Operator** | 11 | Internal Staff | Work-focused with personal workload and SLA tracking |
+| **Partner/Vendor** | 9 | Partner | Opportunity-focused with pool access |
+| **Requester/Client** | 10 | Media Client | Requester view with submitted tickets only |
 
-**Animated KPI Cards:**
-- Open, In Progress, Pending Review, Delivered, Closed (Status)
-- On Track, At Risk, Breached (SLA)
-- Pool 1 Available, Pool 2 Available, Pool 1 Pickups, Avg Pick Time (Pools)
-- All cards use smooth number animation on load
+**Dashboard Assignment:**
+- New "Dashboard Type" dropdown in IAM User Create/Edit form
+- Required field - admin must explicitly assign
+- Takes effect on user's next login/refresh
 
-**Charts (Recharts with animations):**
-- Ticket Volume by Status (Area Chart - 30 days)
-- Top Categories (Bar Chart)
-- SLA Trend (Line Chart - 30 days)
-- Pool Routing Effectiveness (Pie Chart - 30 days)
+**Dashboard Builder UI (Settings → Dashboard Builder):**
+- Create custom dashboards
+- Clone existing templates
+- Drag & drop widget reordering (@dnd-kit)
+- Widget size options: Small (4 cols), Medium (6 cols), Large (12 cols)
+- Preview as different roles
+- Widget library with 7 categories
 
-**Operational Ticket Lists:**
-- Tickets I'm Working On (assigned OR picked)
-- Tickets Waiting on Me (not responded + unread messages)
-- Tickets Pending Review
-- Recently Delivered (7 days)
+**Widget Library:**
+- KPI Cards (Open, In Progress, Pending, Delivered, Closed)
+- SLA Status (On Track, At Risk, Breached)
+- Pool Status (Pool 1/2 Available, Pickups, Avg Pick Time)
+- My Workload (Working On, Waiting, Delivered 7d)
+- Charts (Status Volume, Categories, SLA Trend, Pool Routing)
+- Ticket Lists (Working On, Waiting, Pending Review, Recently Delivered)
+- Announcements
+
+**Permission-Based Widget Auto-Hide:**
+- Widgets have `required_permissions` field
+- Auto-hidden if user lacks permission
+- Preview API shows visible vs hidden widget counts
 
 **API Endpoints:**
-- `GET /api/dashboard/v2/metrics` - Role-scoped dashboard metrics
-- `GET /api/dashboard/v2/tickets/working-on` - Tickets user is working on
-- `GET /api/dashboard/v2/tickets/waiting-on-me` - Tickets needing user action
-- `GET /api/dashboard/v2/tickets/pending-review` - Tickets pending review
-- `GET /api/dashboard/v2/tickets/recently-delivered` - Recent deliveries
-- `GET /api/dashboard/v2/charts/ticket-volume-by-status` - Status chart data
-- `GET /api/dashboard/v2/charts/ticket-volume-by-category` - Category chart data
-- `GET /api/dashboard/v2/charts/pool-routing` - Pool routing data (Admin only)
+- `GET /api/dashboards/list` - List all dashboard templates
+- `POST /api/dashboards` - Create custom dashboard
+- `PUT /api/dashboards/{id}` - Update dashboard
+- `DELETE /api/dashboards/{id}` - Delete custom dashboard
+- `POST /api/dashboards/{id}/clone` - Clone dashboard
+- `GET /api/dashboards/{id}/preview?role=X` - Preview as role
+- `GET /api/dashboards/widgets` - Widget library
 
 ---
 
-## Previous: P0 Blockers Fixed + Full i18n Coverage ✅
+## Previous: P0 Dashboard Rebuild Complete ✅
 
 ### Category Seeding Complete
 | Metric | Count |
