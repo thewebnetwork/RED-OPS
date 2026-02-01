@@ -81,8 +81,8 @@ export default function Layout({ children }) {
     { path: '/my-tickets', icon: Inbox, labelKey: 'dashboard.mySubmittedTickets', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/command-center', icon: PlusCircle, labelKey: 'commandCenter.newTicket', roles: ['Administrator', 'Operator', 'Standard User'] },
     { path: '/report-issue', icon: Bug, labelKey: 'nav.reportIssue', roles: ['Administrator', 'Operator', 'Standard User'] },
-    // Opportunity Ribbon - visible to all except Media Clients (Partners get Pool 1, Vendors get Pool 2)
-    { path: '/ribbon-board', icon: Layers, labelKey: 'nav.opportunityRibbon', roles: ['Administrator', 'Operator', 'Standard User'], excludeAccountTypes: ['Media Client'] },
+    // Opportunity Ribbon - visible only if can_pick = true AND not Media Client
+    { path: '/ribbon-board', icon: Layers, labelKey: 'nav.opportunityRibbon', roles: ['Administrator', 'Operator', 'Standard User'], excludeAccountTypes: ['Media Client'], requiresCanPick: true },
     { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator'] },
     { path: '/deleted-tickets', icon: Trash2, labelKey: 'nav.deletedTickets', roles: ['Administrator'] },
     { path: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: ['Administrator', 'Operator', 'Standard User'] },
@@ -99,6 +99,10 @@ export default function Layout({ children }) {
     if (!item.roles.includes(user?.role)) return false;
     // Check account type exclusions
     if (item.excludeAccountTypes && item.excludeAccountTypes.includes(user?.account_type)) return false;
+    // Check can_pick requirement (for Opportunity Ribbon)
+    if (item.requiresCanPick && user?.can_pick === false) return false;
+    // Check pool_access - if "none", hide pool-related items
+    if (item.requiresCanPick && user?.pool_access === 'none') return false;
     return true;
   });
 
