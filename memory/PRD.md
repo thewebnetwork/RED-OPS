@@ -3,48 +3,57 @@
 ## Overview
 A comprehensive operations management platform designed as a request and fulfillment system for Partners, Media Clients, and Vendors.
 
-## Current Version: 4.3 (P0 Blockers Fixed + i18n Expanded)
+## Current Version: 4.4 (Dashboard Rebuild Complete)
 **Last Updated:** February 2026
 **Platform Name:** Red Ops
 **Preview URL:** https://user-auth-36.preview.emergentagent.com
 
 ---
 
-## LATEST: P0 Blockers Fixed + Full i18n Coverage ✅
+## LATEST: P0 Dashboard Rebuild Complete ✅
 
-### P0 IAM Page Fixes Complete (February 2026)
-| Issue | Status | Details |
-|-------|--------|---------|
-| **Searchable Specialty Dropdown** | ✅ FIXED | Search input with "Search specialties..." placeholder, filters as user types |
-| **Specialty Not Filtered by Team** | ✅ FIXED | All 257 specialties available regardless of team selection |
-| **Media Client Optional Specialty** | ✅ FIXED | No asterisk, shows "Optional for Media Clients" message |
-| **Email Already Registered Error** | ✅ FIXED | Inactive users cleaned, new users can register with unique emails |
+### Dashboard V2 Features (February 2026)
 
-### i18n Full Platform Coverage (February 2026)
-| Language | Status | Coverage |
-|----------|--------|----------|
-| **English** | ✅ Complete | 1050+ translation keys |
-| **Spanish (España)** | ✅ Complete | 1050+ translation keys |
-| **Portuguese (Brasil)** | ✅ Complete | 1050+ translation keys |
+**Role-Based Views:**
+| Role | Dashboard Components |
+|------|---------------------|
+| **Admin** | Full KPIs, All Charts, Pool Analytics, SLA Overview, All Ticket Lists |
+| **Operator/Internal Staff** | Workload KPIs, Pool 1 & 2 Access, Personal Lists |
+| **Partner** | Workload KPIs, Pool 1 Opportunities, Personal Lists |
+| **Vendor** | Workload KPIs, Pool 2 Opportunities, Personal Lists |
+| **Media Client** | My Submitted Tickets only, Simple Status View, No Pools |
 
-**i18n Features:**
-- Missing key detector in dev mode: `[MISSING: key_name]`
-- Language switcher in header (globe icon)
-- All pages now have `useTranslation` import
-- Translation Editor at Settings → Translations
+**Animated KPI Cards:**
+- Open, In Progress, Pending Review, Delivered, Closed (Status)
+- On Track, At Risk, Breached (SLA)
+- Pool 1 Available, Pool 2 Available, Pool 1 Pickups, Avg Pick Time (Pools)
+- All cards use smooth number animation on load
 
-**Sections Translated:**
-- Dashboard, Sidebar Navigation
-- Form fields, labels, buttons
-- Status labels, badges, dropdowns
-- Validation errors, toast notifications
-- Modal text, confirmations
-- IAM pages (Users, Teams, Specialties, Roles, Account Types, Plans)
-- Reports, Workflow Builder, Announcements, Logs
+**Charts (Recharts with animations):**
+- Ticket Volume by Status (Area Chart - 30 days)
+- Top Categories (Bar Chart)
+- SLA Trend (Line Chart - 30 days)
+- Pool Routing Effectiveness (Pie Chart - 30 days)
+
+**Operational Ticket Lists:**
+- Tickets I'm Working On (assigned OR picked)
+- Tickets Waiting on Me (not responded + unread messages)
+- Tickets Pending Review
+- Recently Delivered (7 days)
+
+**API Endpoints:**
+- `GET /api/dashboard/v2/metrics` - Role-scoped dashboard metrics
+- `GET /api/dashboard/v2/tickets/working-on` - Tickets user is working on
+- `GET /api/dashboard/v2/tickets/waiting-on-me` - Tickets needing user action
+- `GET /api/dashboard/v2/tickets/pending-review` - Tickets pending review
+- `GET /api/dashboard/v2/tickets/recently-delivered` - Recent deliveries
+- `GET /api/dashboard/v2/charts/ticket-volume-by-status` - Status chart data
+- `GET /api/dashboard/v2/charts/ticket-volume-by-category` - Category chart data
+- `GET /api/dashboard/v2/charts/pool-routing` - Pool routing data (Admin only)
 
 ---
 
-## Previous: Category Library Seeded + Documentation Updated ✅
+## Previous: P0 Blockers Fixed + Full i18n Coverage ✅
 
 ### Category Seeding Complete
 | Metric | Count |
