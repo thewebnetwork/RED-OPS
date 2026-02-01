@@ -51,6 +51,7 @@ class UserCreate(BaseModel):
     force_otp_setup: bool = True
     send_welcome_email: bool = True  # Send welcome email with temp password
     can_pick: bool = True  # Whether user can pick from pools (user-level override)
+    pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
     
     @field_validator('specialty_ids', mode='before')
     @classmethod
