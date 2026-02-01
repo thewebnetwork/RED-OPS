@@ -17,7 +17,7 @@ SLA_DAYS = 7
 SLA_WARNING_HOURS = 24  # Hours before SLA breach to trigger warning
 
 # Frontend URL
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://user-auth-36.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://usermgmt-portal.preview.emergentagent.com')
 
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]

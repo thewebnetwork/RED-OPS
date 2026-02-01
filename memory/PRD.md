@@ -6,7 +6,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ## Current Version: 4.5 (Multi-Dashboard System Complete)
 **Last Updated:** February 2026
 **Platform Name:** Red Ops
-**Preview URL:** https://user-auth-36.preview.emergentagent.com
+**Preview URL:** https://usermgmt-portal.preview.emergentagent.com
 
 ---
 
