@@ -208,7 +208,7 @@ async def get_status_trends(base_query: dict, days: int) -> Dict[str, List[dict]
     return trends
 
 
-async def get_sla_trends(base_query: dict, days: int) -> Dict[str, List[TrendDataPoint]]:
+async def get_sla_trends(base_query: dict, days: int) -> Dict[str, List[dict]]:
     """Get SLA status trends"""
     now = datetime.now(timezone.utc)
     
@@ -250,9 +250,9 @@ async def get_sla_trends(base_query: dict, days: int) -> Dict[str, List[TrendDat
                 except:
                     on_track += 1
         
-        on_track_data.append(TrendDataPoint(date=date.strftime("%Y-%m-%d"), value=on_track))
-        at_risk_data.append(TrendDataPoint(date=date.strftime("%Y-%m-%d"), value=at_risk))
-        breached_data.append(TrendDataPoint(date=date.strftime("%Y-%m-%d"), value=breached))
+        on_track_data.append({"date": date.strftime("%Y-%m-%d"), "value": on_track})
+        at_risk_data.append({"date": date.strftime("%Y-%m-%d"), "value": at_risk})
+        breached_data.append({"date": date.strftime("%Y-%m-%d"), "value": breached})
     
     return {
         "on_track": on_track_data,
