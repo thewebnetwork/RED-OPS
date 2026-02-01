@@ -414,6 +414,14 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/settings/dashboards" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <DashboardBuilder />
+          </PrivateRoute>
+        } 
+      />
+      <Route 
         path="/sla" 
         element={<Navigate to="/sla-policies" />}
       />
