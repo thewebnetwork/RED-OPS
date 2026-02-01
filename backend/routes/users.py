@@ -45,6 +45,7 @@ class UserCreate(BaseModel):
     specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None  # Required if account_type = Partner
+    dashboard_type_id: Optional[str] = None  # Assigned dashboard template
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     force_password_change: bool = True
     force_otp_setup: bool = True
