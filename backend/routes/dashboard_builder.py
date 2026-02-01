@@ -656,7 +656,7 @@ async def clone_dashboard(
 @router.get("/{dashboard_id}/preview")
 async def preview_dashboard_as_role(
     dashboard_id: str,
-    role: str = Query(..., description="Role to preview as (Administrator, Operator, Partner, Media Client)"),
+    role: str = Query(..., description="Role to preview as (Administrator, Operator, Standard User)"),
     current_user: dict = Depends(require_admin)
 ):
     """Preview a dashboard as a specific role (Admin only)"""
@@ -666,15 +666,13 @@ async def preview_dashboard_as_role(
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     
-    # Get role permissions
-    role_doc = await db.roles.find_one({"name": role}, {"_id": 0, "permissions": 1})
-    if not role_doc:
-        raise HTTPException(status_code=404, detail="Role not found")
+    # Get role permissions from default permissions
+    role_permissions = get_effective_permissions(role, None)
     
     # Filter widgets by role permissions
     filtered_widgets = filter_widgets_by_permissions(
         dashboard.get("widgets", []),
-        role_doc.get("permissions", {})
+        role_permissions
     )
     
     return {
