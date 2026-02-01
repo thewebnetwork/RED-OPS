@@ -25,8 +25,9 @@ class TestDashboardV2Auth:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "access_token" in data, "No access_token in response"
-        return data["access_token"]
+        # API returns 'token' not 'access_token'
+        assert "token" in data, "No token in response"
+        return data["token"]
     
     @pytest.fixture(scope="class")
     def auth_headers(self, admin_token):
@@ -241,7 +242,7 @@ class TestDashboardV2DataIntegrity:
             "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
-        return response.json()["access_token"]
+        return response.json()["token"]
     
     @pytest.fixture(scope="class")
     def auth_headers(self, admin_token):
