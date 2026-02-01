@@ -214,6 +214,13 @@ async def build_user_response(user: dict) -> UserResponse:
         user.get("permission_overrides")
     )
     
+    # Get dashboard type name
+    dashboard_type_id = user.get("dashboard_type_id")
+    dashboard_type_name = None
+    if dashboard_type_id:
+        dashboard = await db.dashboards.find_one({"id": dashboard_type_id}, {"_id": 0, "name": 1})
+        dashboard_type_name = dashboard["name"] if dashboard else None
+    
     return UserResponse(
         id=user["id"],
         name=user["name"],
@@ -231,6 +238,8 @@ async def build_user_response(user: dict) -> UserResponse:
         team_name=team_name,
         subscription_plan_id=subscription_plan_id,
         subscription_plan_name=subscription_plan_name,
+        dashboard_type_id=dashboard_type_id,
+        dashboard_type_name=dashboard_type_name,
         # Legacy fields - map to subscription plan
         access_tier_id=subscription_plan_id,
         access_tier_name=subscription_plan_name,
