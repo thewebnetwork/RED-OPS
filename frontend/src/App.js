@@ -43,6 +43,7 @@ import VerifyOTP from "./pages/VerifyOTP";
 import DocumentationPage from "./pages/DocumentationPage";
 import PoolPickerRulesPage from "./pages/PoolPickerRulesPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
+import DashboardBuilder from "./pages/DashboardBuilder";
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
