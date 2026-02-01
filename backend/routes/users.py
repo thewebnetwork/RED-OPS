@@ -547,6 +547,21 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
             update_dict["access_tier_id"] = None
             update_dict["access_tier_name"] = None
     
+    # Handle can_pick and pool_access changes
+    if "can_pick" in update_dict:
+        # If can_pick is set to False, also set pool_access to "none"
+        if update_dict["can_pick"] is False:
+            update_dict["pool_access"] = "none"
+    
+    # Handle pool_access update
+    if "pool_access" in update_dict:
+        valid_pool_access = ["none", "pool1", "pool2", "both"]
+        if update_dict["pool_access"] not in valid_pool_access:
+            raise HTTPException(status_code=400, detail=f"Invalid pool_access. Must be one of: {valid_pool_access}")
+        # If pool_access is not "none", ensure can_pick is True
+        if update_dict["pool_access"] != "none" and not update_dict.get("can_pick", user.get("can_pick", True)):
+            update_dict["can_pick"] = True
+    
     if update_dict:
         await db.users.update_one({"id": user_id}, {"$set": update_dict})
     
