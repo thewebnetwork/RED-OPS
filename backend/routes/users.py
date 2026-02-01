@@ -131,6 +131,7 @@ class UserResponse(BaseModel):
     force_otp_setup: bool = False
     otp_verified: bool = False
     can_pick: bool = True  # Whether user can pick from pools
+    pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
     created_at: str
 
 
