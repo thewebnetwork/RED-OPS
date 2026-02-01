@@ -74,6 +74,7 @@ class UserUpdate(BaseModel):
     specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None
+    dashboard_type_id: Optional[str] = None  # Assigned dashboard template
     can_pick: Optional[bool] = None  # Whether user can pick from pools
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     active: Optional[bool] = None
