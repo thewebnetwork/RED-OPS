@@ -1057,9 +1057,32 @@ export default function IAMPage() {
 
             <div className="flex flex-col gap-3 pt-4 border-t">
               <label className="flex items-center gap-2 cursor-pointer">
-                <Switch checked={userForm.can_pick} onCheckedChange={(v) => setUserForm({ ...userForm, can_pick: v })} data-testid="can-pick-toggle" />
+                <Switch checked={userForm.can_pick} onCheckedChange={(v) => setUserForm({ ...userForm, can_pick: v, pool_access: v ? userForm.pool_access : 'none' })} data-testid="can-pick-toggle" />
                 <span className="text-sm">Can pick opportunities from pools</span>
               </label>
+              
+              {/* Pool Access Dropdown - only shown when can_pick is true */}
+              {userForm.can_pick && (
+                <div className="ml-8 p-3 bg-slate-50 rounded-lg">
+                  <Label className="text-sm">Pool Access Level</Label>
+                  <p className="text-xs text-slate-500 mb-2">Which pools can this user access?</p>
+                  <Select
+                    value={userForm.pool_access || 'both'}
+                    onValueChange={(v) => setUserForm({ ...userForm, pool_access: v })}
+                  >
+                    <SelectTrigger data-testid="pool-access-select" className="mt-1">
+                      <SelectValue placeholder="Select pool access..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="both">Both Pools (Pool 1 + Pool 2)</SelectItem>
+                      <SelectItem value="pool1">Pool 1 Only</SelectItem>
+                      <SelectItem value="pool2">Pool 2 Only</SelectItem>
+                      <SelectItem value="none">No Pool Access</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
               <label className="flex items-center gap-2 cursor-pointer">
                 <Switch checked={userForm.force_password_change} onCheckedChange={(v) => setUserForm({ ...userForm, force_password_change: v })} />
                 <span className="text-sm">Force password change on first login</span>
