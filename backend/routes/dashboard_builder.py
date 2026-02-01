@@ -11,6 +11,50 @@ from utils.auth import get_current_user, require_admin
 router = APIRouter(prefix="/dashboards", tags=["Dashboard Management"])
 
 
+# ============== PERMISSION DEFAULTS ==============
+
+# These match the defaults in users.py - ideally should be imported from a shared module
+DEFAULT_PERMISSIONS = {
+    "Administrator": {
+        "dashboard": {"view": True},
+        "orders": {"view": True, "create": True, "edit": True, "delete": True, "export": True, "pick": True, "assign": True},
+        "users": {"view": True, "create": True, "edit": True, "delete": True},
+        "teams": {"view": True, "create": True, "edit": True, "delete": True},
+        "settings": {"view": True, "edit": True},
+        "reports": {"view": True, "export": True},
+    },
+    "Operator": {
+        "dashboard": {"view": True},
+        "orders": {"view": True, "create": True, "edit": True, "pick": True, "assign": True},
+        "teams": {"view": True, "create": True, "edit": True},
+        "reports": {"view": True, "export": True},
+    },
+    "Standard User": {
+        "dashboard": {"view": True},
+        "orders": {"view": True, "create": True},
+        "reports": {"view": True},
+    }
+}
+
+
+def get_effective_permissions(role: str, overrides: Optional[Dict] = None) -> Dict[str, Dict[str, bool]]:
+    """Calculate effective permissions from role defaults + overrides"""
+    base_permissions = DEFAULT_PERMISSIONS.get(role, DEFAULT_PERMISSIONS["Standard User"]).copy()
+    
+    effective = {}
+    for module, actions in base_permissions.items():
+        effective[module] = actions.copy()
+    
+    if overrides:
+        for module, actions in overrides.items():
+            if module in effective:
+                for action, value in actions.items():
+                    if action in effective[module]:
+                        effective[module][action] = value
+    
+    return effective
+
+
 # ============== MODELS ==============
 
 class WidgetConfig(BaseModel):
