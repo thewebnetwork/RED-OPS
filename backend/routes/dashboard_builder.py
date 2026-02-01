@@ -504,6 +504,12 @@ async def get_user_dashboard(current_user: dict = Depends(get_current_user)):
     
     dashboard_type_id = current_user.get("dashboard_type_id")
     
+    # Calculate effective permissions from role + overrides
+    user_permissions = get_effective_permissions(
+        current_user.get("role", "Standard User"),
+        current_user.get("permission_overrides")
+    )
+    
     if dashboard_type_id:
         # User has explicit assignment
         dashboard = await db.dashboards.find_one({"id": dashboard_type_id}, {"_id": 0})
@@ -511,7 +517,7 @@ async def get_user_dashboard(current_user: dict = Depends(get_current_user)):
             # Filter widgets by user permissions
             dashboard["widgets"] = filter_widgets_by_permissions(
                 dashboard.get("widgets", []),
-                current_user.get("permissions", {})
+                user_permissions
             )
             return {"dashboard": dashboard, "assigned": True}
     
@@ -528,10 +534,16 @@ async def get_dashboard(dashboard_id: str, current_user: dict = Depends(get_curr
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     
+    # Calculate effective permissions from role + overrides
+    user_permissions = get_effective_permissions(
+        current_user.get("role", "Standard User"),
+        current_user.get("permission_overrides")
+    )
+    
     # Filter widgets by user permissions
     dashboard["widgets"] = filter_widgets_by_permissions(
         dashboard.get("widgets", []),
-        current_user.get("permissions", {})
+        user_permissions
     )
     
     return dashboard
