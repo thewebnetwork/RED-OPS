@@ -180,6 +180,7 @@ app.include_router(reports_router, prefix="/api")
 app.include_router(iam_router, prefix="/api")
 app.include_router(documentation_router, prefix="/api")
 app.include_router(dashboard_v2_router, prefix="/api")
+app.include_router(dashboard_builder_router, prefix="/api")
 
 
 @app.get("/")
