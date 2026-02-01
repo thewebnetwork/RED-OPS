@@ -1066,6 +1066,26 @@ export default function IAMPage() {
                 </label>
               )}
             </div>
+            {/* Dashboard Type Assignment */}
+            <div>
+              <Label>Dashboard Type *</Label>
+              <p className="text-xs text-slate-500 mb-2">Select the dashboard experience for this user</p>
+              <Select
+                value={userForm.dashboard_type_id}
+                onValueChange={(v) => setUserForm({ ...userForm, dashboard_type_id: v })}
+              >
+                <SelectTrigger data-testid="dashboard-type-select">
+                  <SelectValue placeholder="Select dashboard type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {dashboardTemplates.map(d => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name} {d.is_default_for && <span className="text-slate-500">({d.is_default_for})</span>}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancel</Button>
               <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create User'}</Button>
