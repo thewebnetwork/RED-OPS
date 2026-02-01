@@ -29,7 +29,7 @@ class TestP0IAMFixes:
             "password": self.admin_password
         })
         assert login_response.status_code == 200, f"Admin login failed: {login_response.text}"
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")  # API returns 'token' not 'access_token'
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
         yield
@@ -248,7 +248,7 @@ class TestIdentityConfig:
             "password": self.admin_password
         })
         assert login_response.status_code == 200, f"Admin login failed: {login_response.text}"
-        token = login_response.json().get("access_token")
+        token = login_response.json().get("token")  # API returns 'token' not 'access_token'
         self.session.headers.update({"Authorization": f"Bearer {token}"})
     
     def test_identity_config_returns_all_options(self):
