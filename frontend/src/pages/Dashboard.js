@@ -216,7 +216,10 @@ function TicketListItem({ ticket, showWaitingReason, t }) {
 
 // ============== TICKET LIST SECTION ==============
 
-function TicketListSection({ title, icon: Icon, iconColor, tickets, showWaitingReason, emptyMessage, t, viewAllLink }) {
+function TicketListSection({ title, icon: Icon, iconColor, tickets, showWaitingReason, emptyMessage, t, viewAllLink, viewAllRoute }) {
+  // Support both viewAllLink (legacy) and viewAllRoute (new)
+  const linkTo = viewAllRoute || viewAllLink;
+  
   return (
     <Card className="border-slate-200">
       <CardHeader className="border-b border-slate-100 pb-4">
@@ -225,8 +228,8 @@ function TicketListSection({ title, icon: Icon, iconColor, tickets, showWaitingR
             <Icon size={20} className={iconColor} />
             {title} ({tickets.length})
           </CardTitle>
-          {viewAllLink && tickets.length > 0 && (
-            <Link to={viewAllLink} className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
+          {linkTo && tickets.length > 0 && (
+            <Link to={linkTo} className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
               View All <ArrowRight size={14} />
             </Link>
           )}
