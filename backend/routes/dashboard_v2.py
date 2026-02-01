@@ -171,7 +171,7 @@ async def get_trend_data(query: dict, days: int) -> List[TrendDataPoint]:
     return trends
 
 
-async def get_status_trends(base_query: dict, days: int) -> Dict[str, List[TrendDataPoint]]:
+async def get_status_trends(base_query: dict, days: int) -> Dict[str, List[dict]]:
     """Get trends by status"""
     statuses = ["Open", "In Progress", "Pending", "Delivered", "Closed"]
     trends = {}
@@ -198,10 +198,10 @@ async def get_status_trends(base_query: dict, days: int) -> Dict[str, List[Trend
                 }
             
             count = await db.orders.count_documents(query)
-            trend_data.append(TrendDataPoint(
-                date=date.strftime("%Y-%m-%d"),
-                value=count
-            ))
+            trend_data.append({
+                "date": date.strftime("%Y-%m-%d"),
+                "value": count
+            })
         
         trends[status.lower().replace(" ", "_")] = trend_data
     
