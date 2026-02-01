@@ -116,6 +116,8 @@ class UserResponse(BaseModel):
     team_name: Optional[str] = None
     subscription_plan_id: Optional[str] = None
     subscription_plan_name: Optional[str] = None
+    dashboard_type_id: Optional[str] = None  # Assigned dashboard template
+    dashboard_type_name: Optional[str] = None
     # Legacy field - maps to subscription_plan_id
     access_tier_id: Optional[str] = None
     access_tier_name: Optional[str] = None
