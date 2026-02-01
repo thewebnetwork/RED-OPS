@@ -804,36 +804,44 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
         </Button>
       </div>
 
-      {/* Workload KPIs */}
+      {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        <Link to="/my-tickets?filter=working_on">
+          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+        </Link>
+        <Link to="/my-tickets?filter=waiting_on_me">
+          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+        </Link>
+        <Link to="/my-tickets?filter=pending_review">
+          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+        </Link>
+        <Link to="/my-tickets?filter=recently_delivered">
+          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        </Link>
       </div>
 
-      {/* Pool 2 Opportunities */}
+      {/* Pool 2 Opportunities (Clickable) */}
       {metrics.pool && (
-        <Card className="border-pink-200 bg-pink-50/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-pink-500 rounded-xl flex items-center justify-center">
-                  <Layers size={28} className="text-white" />
+        <Link to="/ribbon-board?pool=2">
+          <Card className="border-pink-200 bg-pink-50/50 hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-pink-500 rounded-xl flex items-center justify-center">
+                    <Layers size={28} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-pink-900">{metrics.pool.pool2_available}</p>
+                    <p className="text-pink-700">Pool 2 Opportunities Available</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-pink-900">{metrics.pool.pool2_available}</p>
-                  <p className="text-pink-700">Pool 2 Opportunities Available</p>
-                </div>
-              </div>
-              <Link to="/ribbon?pool=2">
                 <Button className="bg-pink-600 hover:bg-pink-700 gap-2">
                   View Opportunities <ArrowRight size={16} />
                 </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       )}
 
       {/* Ticket Lists */}
@@ -845,6 +853,7 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
           tickets={ticketLists.workingOn}
           emptyMessage="No tickets in progress"
           t={t}
+          viewAllRoute="/my-tickets?filter=working_on"
         />
         <TicketListSection 
           title="Tickets Waiting on Me"
@@ -854,6 +863,7 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
           showWaitingReason={true}
           emptyMessage="No tickets need your action"
           t={t}
+          viewAllRoute="/my-tickets?filter=waiting_on_me"
         />
       </div>
     </div>
