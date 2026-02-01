@@ -6,7 +6,7 @@ A comprehensive operations management platform designed as a request and fulfill
 ## Current Version: 4.2 (UAT Ready with Category Library)
 **Last Updated:** December 2025
 **Platform Name:** Red Ops
-**Preview URL:** https://translate-redops.preview.emergentagent.com
+**Preview URL:** https://user-auth-36.preview.emergentagent.com
 
 ---
 

@@ -4,7 +4,7 @@
 **Document Version:** 1.0  
 **Platform:** Red Pulse (Red Ops)  
 **Generated:** December 2025  
-**Environment:** https://translate-redops.preview.emergentagent.com
+**Environment:** https://user-auth-36.preview.emergentagent.com
 
 ---
 
