@@ -13,10 +13,19 @@ import {
   ChevronRight,
   FileText,
   Users,
-  Languages
+  Languages,
+  LayoutDashboard
 } from 'lucide-react';
 
 const settingsModules = [
+  {
+    id: 'dashboards',
+    name: 'Dashboard Builder',
+    description: 'Create and manage dashboard templates for different user roles',
+    icon: LayoutDashboard,
+    path: '/settings/dashboards',
+    color: 'bg-rose-100 text-rose-600'
+  },
   {
     id: 'documentation',
     name: 'System Documentation',
