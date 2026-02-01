@@ -865,6 +865,7 @@ async def get_pool_tickets(
     Filtering rules:
     - Users only see tickets from pools allowed by their account type config
     - User-level can_pick must be True
+    - User-level pool_access must allow this specific pool
     - Users only see tickets matching their specialty (multi-specialty ANY match)
     - Support/Issue tickets are excluded unless user has support specialty
     - Admins/Operators see all tickets
@@ -873,6 +874,7 @@ async def get_pool_tickets(
     role = current_user.get("role")
     user_specialty_id = current_user.get("specialty_id")
     user_can_pick = current_user.get("can_pick", True)  # Default to True
+    user_pool_access = current_user.get("pool_access", "both")  # Default to both
     
     pool_name = f"POOL_{pool_number}"
     
@@ -882,7 +884,15 @@ async def get_pool_tickets(
         if not user_can_pick:
             raise HTTPException(status_code=403, detail="You are not allowed to pick opportunities (user-level restriction)")
         
-        # Check pool picker config
+        # Check user-level pool_access
+        if user_pool_access == "none":
+            raise HTTPException(status_code=403, detail="You do not have access to any pools")
+        if user_pool_access == "pool1" and pool_number != 1:
+            raise HTTPException(status_code=403, detail="You only have access to Pool 1")
+        if user_pool_access == "pool2" and pool_number != 2:
+            raise HTTPException(status_code=403, detail="You only have access to Pool 2")
+        
+        # Check pool picker config (account-type level)
         pool_config = await get_pool_picker_config()
         user_config = pool_config.get(account_type, {"can_pick": False, "allowed_pools": []})
         
