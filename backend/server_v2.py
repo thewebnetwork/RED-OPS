@@ -42,6 +42,7 @@ from routes.reports import router as reports_router
 from routes.iam import router as iam_router
 from routes.documentation import router as documentation_router
 from routes.dashboard_v2 import router as dashboard_v2_router
+from routes.dashboard_builder import router as dashboard_builder_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
