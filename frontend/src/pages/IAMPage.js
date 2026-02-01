@@ -247,7 +247,9 @@ export default function IAMPage() {
           ? (userForm.primary_specialty_id || userForm.specialty_ids[0]) 
           : null,
         // Ensure specialty_ids is always an array
-        specialty_ids: userForm.specialty_ids || []
+        specialty_ids: userForm.specialty_ids || [],
+        // Pool access - only relevant if can_pick is true
+        pool_access: userForm.can_pick ? userForm.pool_access : 'none'
       };
       if (editingUser) {
         if (!data.password) delete data.password;
