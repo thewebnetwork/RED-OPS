@@ -584,6 +584,7 @@ export default function IAMPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">User</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
@@ -600,6 +601,11 @@ export default function IAMPage() {
                       </td>
                       <td className="px-4 py-3"><Badge className={getRoleColor(user.role)}>{user.role}</Badge></td>
                       <td className="px-4 py-3">{user.account_type ? <Badge className={getAccountTypeColor(user.account_type)}>{user.account_type}</Badge> : '—'}</td>
+                      <td className="px-4 py-3">
+                        {user.subscription_plan_name ? (
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">{user.subscription_plan_name}</Badge>
+                        ) : '—'}
+                      </td>
                       <td className="px-4 py-3">
                         {/* Multi-specialty display */}
                         {user.specialties && user.specialties.length > 0 ? (
