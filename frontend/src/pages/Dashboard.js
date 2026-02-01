@@ -721,36 +721,44 @@ function PartnerDashboard({ metrics, ticketLists, chartData, loading, onRefresh,
         </Button>
       </div>
 
-      {/* Workload KPIs */}
+      {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        <Link to="/my-tickets?filter=working_on">
+          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+        </Link>
+        <Link to="/my-tickets?filter=waiting_on_me">
+          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+        </Link>
+        <Link to="/my-tickets?filter=pending_review">
+          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+        </Link>
+        <Link to="/my-tickets?filter=recently_delivered">
+          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+        </Link>
       </div>
 
-      {/* Pool 1 Opportunities */}
+      {/* Pool 1 Opportunities (Clickable) */}
       {metrics.pool && (
-        <Card className="border-indigo-200 bg-indigo-50/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center">
-                  <Layers size={28} className="text-white" />
+        <Link to="/ribbon-board?pool=1">
+          <Card className="border-indigo-200 bg-indigo-50/50 hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center">
+                    <Layers size={28} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-indigo-900">{metrics.pool.pool1_available}</p>
+                    <p className="text-indigo-700">Pool 1 Opportunities Available</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-indigo-900">{metrics.pool.pool1_available}</p>
-                  <p className="text-indigo-700">Pool 1 Opportunities Available</p>
-                </div>
-              </div>
-              <Link to="/ribbon?pool=1">
                 <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
                   View Ribbon <ArrowRight size={16} />
                 </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       )}
 
       {/* Ticket Lists */}
