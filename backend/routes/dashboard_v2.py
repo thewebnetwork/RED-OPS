@@ -163,10 +163,10 @@ async def get_trend_data(query: dict, days: int) -> List[TrendDataPoint]:
         }
         
         count = await db.orders.count_documents(day_query)
-        trends.append(TrendDataPoint(
-            date=date.strftime("%Y-%m-%d"),
-            value=count
-        ))
+        trends.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "value": count
+        })
     
     return trends
 
