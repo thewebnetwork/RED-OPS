@@ -78,6 +78,7 @@ class UserUpdate(BaseModel):
     subscription_plan_id: Optional[str] = None
     dashboard_type_id: Optional[str] = None  # Assigned dashboard template
     can_pick: Optional[bool] = None  # Whether user can pick from pools
+    pool_access: Optional[str] = None  # none, pool1, pool2, both - which pools user can access
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     active: Optional[bool] = None
     force_password_change: Optional[bool] = None
