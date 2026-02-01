@@ -914,8 +914,95 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
 
 // ============== DYNAMIC WIDGET RENDERER ==============
 
-function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, loading, onRefresh, t }) {
-  const widgets = dashboardConfig?.widgets || [];
+// Click-through routes for KPI cards based on metric type
+const getKPIClickRoute = (metricKey, userRole, accountType) => {
+  // Route mappings for different metrics
+  const routes = {
+    // Ticket status KPIs → filtered orders/tickets
+    'open': '/orders?status=Open',
+    'in_progress': '/orders?status=In Progress',
+    'pending_review': '/orders?status=Pending Review',
+    'delivered': '/orders?status=Delivered',
+    'closed': '/orders?status=Closed',
+    // SLA status KPIs → SLA filtered view
+    'sla_on_track': '/orders?sla=on_track',
+    'sla_at_risk': '/orders?sla=at_risk',
+    'sla_breached': '/orders?sla=breached',
+    // Workload KPIs
+    'working_on': '/my-tickets?filter=working_on',
+    'waiting_on_me': '/my-tickets?filter=waiting_on_me',
+    // Pool KPIs
+    'pool1_available': '/ribbon-board?pool=1',
+    'pool2_available': '/ribbon-board?pool=2',
+    'pool_pickups': '/reports?metric=pool_pickups',
+    'avg_pick_time': '/reports?metric=avg_pick_time'
+  };
+  
+  // Media clients get restricted routing
+  if (accountType === 'Media Client') {
+    const mediaClientRoutes = {
+      'open': '/my-tickets?status=Open',
+      'in_progress': '/my-tickets?status=In Progress',
+      'pending_review': '/my-tickets?status=Pending Review',
+      'delivered': '/my-tickets?status=Delivered',
+      'closed': '/my-tickets?status=Closed',
+      'working_on': '/my-tickets',
+      'waiting_on_me': '/my-tickets?filter=waiting_on_me'
+    };
+    return mediaClientRoutes[metricKey] || '/my-tickets';
+  }
+  
+  // Non-admins may have restricted access to /orders
+  if (userRole !== 'Administrator') {
+    // Redirect to my-tickets instead of /orders for non-admins
+    const nonAdminRoutes = {
+      'open': '/my-tickets?status=Open',
+      'in_progress': '/my-tickets?status=In Progress',
+      'pending_review': '/my-tickets?status=Pending Review',
+      'delivered': '/my-tickets?status=Delivered',
+      'closed': '/my-tickets?status=Closed'
+    };
+    return nonAdminRoutes[metricKey] || routes[metricKey] || null;
+  }
+  
+  return routes[metricKey] || null;
+};
+
+// Check if a widget is pool-related
+const isPoolWidget = (widget) => {
+  const poolMetrics = ['pool1_available', 'pool2_available', 'pool_pickups', 'avg_pick_time'];
+  const poolListTypes = ['pool1_tickets', 'pool2_tickets'];
+  
+  if (widget.widget_type === 'kpi_card') {
+    return poolMetrics.includes(widget.config?.metric);
+  }
+  if (widget.widget_type === 'ticket_list') {
+    return poolListTypes.includes(widget.config?.list_type);
+  }
+  return false;
+};
+
+function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, loading, onRefresh, t, user }) {
+  const navigate = useNavigate();
+  const allWidgets = dashboardConfig?.widgets || [];
+  
+  // Filter out pool widgets if user can't pick or has no pool access
+  const widgets = allWidgets.filter(widget => {
+    if (!isPoolWidget(widget)) return true;
+    // Hide pool widgets if can_pick is false or pool_access is "none"
+    if (user?.can_pick === false || user?.pool_access === 'none') return false;
+    return true;
+  });
+  
+  // Handle KPI card click
+  const handleKPIClick = (metricKey) => {
+    const route = getKPIClickRoute(metricKey, user?.role, user?.account_type);
+    if (route) {
+      navigate(route);
+    } else {
+      toast.info('This view is not available');
+    }
+  };
   
   // Group widgets by size for responsive layout
   const renderWidget = (widget) => {
@@ -951,6 +1038,7 @@ function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, lo
             value={value || 0}
             icon={IconComponent}
             color={config?.color || 'bg-blue-500'}
+            onClick={() => handleKPIClick(metricKey)}
           />
         );
       
@@ -960,6 +1048,12 @@ function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, lo
                         listType === 'waiting_on_me' ? ticketLists.waitingOnMe :
                         listType === 'pending_review' ? ticketLists.pendingReview :
                         listType === 'recently_delivered' ? ticketLists.recentlyDelivered : [];
+        
+        // Determine route for the "View All" link based on list type
+        const listRoute = listType === 'recently_delivered' ? '/my-tickets?filter=recently_delivered' :
+                          listType === 'waiting_on_me' ? '/my-tickets?filter=waiting_on_me' :
+                          listType === 'pending_review' ? '/my-tickets?filter=pending_review' :
+                          '/my-tickets';
         
         return (
           <div key={widget.id} className={sizeClass}>
@@ -972,6 +1066,7 @@ function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, lo
               tickets={tickets}
               emptyMessage={`No ${title.toLowerCase()}`}
               t={t}
+              viewAllRoute={listRoute}
             />
           </div>
         );
@@ -980,7 +1075,8 @@ function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, lo
         const chartType = config?.chart_type;
         if (chartType === 'ticket_volume_status' && chartData.statusVolume) {
           return (
-            <Card key={widget.id} className={`${sizeClass} col-span-full md:col-span-1`}>
+            <Card key={widget.id} className={`${sizeClass} col-span-full md:col-span-1 cursor-pointer hover:shadow-md transition-shadow`}
+                  onClick={() => navigate('/reports?chart=ticket_volume&range=30')}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <BarChart3 size={18} className="text-blue-500" />
