@@ -254,6 +254,7 @@ async def build_user_response(user: dict) -> UserResponse:
         force_otp_setup=user.get("force_otp_setup", False),
         otp_verified=user.get("otp_verified", False),
         can_pick=user.get("can_pick", True),  # Default to True for existing users
+        pool_access=user.get("pool_access", "both"),  # Default to both for existing users
         created_at=user["created_at"]
     )
 
