@@ -206,7 +206,7 @@ export default function TicketDetail() {
                   </SelectTrigger>
                   <SelectContent>
                     {TICKET_STATUSES.map(s => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                      <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
