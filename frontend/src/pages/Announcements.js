@@ -372,10 +372,10 @@ export default function Announcements() {
                   onCheckedChange={(v) => setForm({ ...form, is_active: v })}
                   data-testid="announcement-active-switch"
                 />
-                <Label>Active</Label>
+                <Label>{t('common.active')}</Label>
               </div>
               <div>
-                <Label>Priority (higher = shown first)</Label>
+                <Label>{t('announcements.priorityLabel')}</Label>
                 <Input 
                   type="number" 
                   min={1} 
@@ -389,7 +389,7 @@ export default function Announcements() {
             {/* Schedule */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Start At (optional)</Label>
+                <Label>{t('announcements.startAt')}</Label>
                 <Input 
                   type="datetime-local" 
                   value={form.start_at} 
@@ -397,7 +397,7 @@ export default function Announcements() {
                 />
               </div>
               <div>
-                <Label>End At (optional)</Label>
+                <Label>{t('announcements.endAt')}</Label>
                 <Input 
                   type="datetime-local" 
                   value={form.end_at} 
@@ -415,7 +415,7 @@ export default function Announcements() {
                 />
                 <Label className="flex items-center gap-2">
                   <Globe size={16} />
-                  Send to All Users
+                  {t('announcements.sendToAllUsers')}
                 </Label>
               </div>
 
@@ -424,13 +424,13 @@ export default function Announcements() {
                   {!form.send_to_all && form.target_teams.length === 0 && form.target_roles.length === 0 && form.target_specialties.length === 0 && (
                     <div className="flex items-center gap-2 text-amber-600 text-sm">
                       <AlertCircle size={16} />
-                      Select at least one team, role, or specialty
+                      {t('announcements.selectAtLeastOne')}
                     </div>
                   )}
                   
                   {/* Teams */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Users size={14} /> Target Teams</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Users size={14} /> {t('announcements.targetTeams')}</Label>
                     <div className="flex flex-wrap gap-2">
                       {teams.map((team) => (
                         <Badge 
@@ -442,7 +442,7 @@ export default function Announcements() {
                           {team.name}
                         </Badge>
                       ))}
-                      {teams.length === 0 && <span className="text-sm text-slate-400">No teams available</span>}
+                      {teams.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noTeamsAvailable')}</span>}
                     </div>
                   </div>
 
