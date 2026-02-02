@@ -596,10 +596,10 @@ export default function WorkflowEditor() {
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Settings size={18} />
-                Configure {selectedNode?.type} Node
+                {t('workflow.configureNode', { type: selectedNode?.type })}
               </SheetTitle>
               <SheetDescription>
-                Customize this node&apos;s behavior and settings
+                {t('workflow.customizeNodeBehavior')}
               </SheetDescription>
             </SheetHeader>
 
@@ -608,11 +608,11 @@ export default function WorkflowEditor() {
                 {/* Common Settings */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Node Label</Label>
+                    <Label>{t('workflow.nodeLabel')}</Label>
                     <Input
                       value={selectedNode.data?.label || ''}
                       onChange={(e) => updateNodeData('label', e.target.value)}
-                      placeholder="Enter node label"
+                      placeholder={t('workflow.enterNodeLabel')}
                       data-testid="node-label-input"
                     />
                   </div>
@@ -662,7 +662,7 @@ export default function WorkflowEditor() {
                   data-testid="delete-node-btn"
                 >
                   <Trash2 size={16} className="mr-2" />
-                  Delete Node
+                  {t('workflow.deleteNode')}
                 </Button>
               </div>
             )}
@@ -675,18 +675,18 @@ export default function WorkflowEditor() {
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Settings size={18} />
-                Workflow Settings
+                {t('workflow.workflowSettings')}
               </SheetTitle>
               <SheetDescription>
-                Configure workflow assignment and triggers
+                {t('workflow.configureAssignmentTriggers')}
               </SheetDescription>
             </SheetHeader>
 
             <div className="mt-6 space-y-6">
               {/* Assign to Roles */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Assign to Roles</Label>
-                <p className="text-xs text-slate-500">Select roles that can use this workflow</p>
+                <Label className="text-sm font-medium">{t('workflow.assignToRoles')}</Label>
+                <p className="text-xs text-slate-500">{t('workflow.selectRolesDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {roles.filter(r => r.can_pick_orders).map((role) => (
                     <div key={role.id} className="flex items-center gap-2">
