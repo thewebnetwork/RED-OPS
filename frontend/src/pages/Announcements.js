@@ -448,7 +448,7 @@ export default function Announcements() {
 
                   {/* Roles */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Shield size={14} /> Target Roles</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Shield size={14} /> {t('announcements.targetRoles')}</Label>
                     <div className="flex flex-wrap gap-2">
                       {roles.map((role) => (
                         <Badge 
@@ -460,13 +460,13 @@ export default function Announcements() {
                           {role.name}
                         </Badge>
                       ))}
-                      {roles.length === 0 && <span className="text-sm text-slate-400">No roles available</span>}
+                      {roles.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noRolesAvailable')}</span>}
                     </div>
                   </div>
 
                   {/* Specialties */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Briefcase size={14} /> Target Specialties</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Briefcase size={14} /> {t('announcements.targetSpecialties')}</Label>
                     <div className="flex flex-wrap gap-2">
                       {specialties.map((spec) => (
                         <Badge 
@@ -478,7 +478,7 @@ export default function Announcements() {
                           {spec.name}
                         </Badge>
                       ))}
-                      {specialties.length === 0 && <span className="text-sm text-slate-400">No specialties available</span>}
+                      {specialties.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noSpecialtiesAvailable')}</span>}
                     </div>
                   </div>
                 </div>
@@ -488,7 +488,7 @@ export default function Announcements() {
             {/* Colors */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Background Color</Label>
+                <Label>{t('announcements.backgroundColor')}</Label>
                 <div className="flex gap-2">
                   <Input 
                     type="color" 
@@ -503,7 +503,7 @@ export default function Announcements() {
                 </div>
               </div>
               <div>
-                <Label>Text Color</Label>
+                <Label>{t('announcements.textColor')}</Label>
                 <div className="flex gap-2">
                   <Input 
                     type="color" 
@@ -521,21 +521,21 @@ export default function Announcements() {
 
             {/* Preview */}
             <div>
-              <Label className="mb-2 block">Preview</Label>
+              <Label className="mb-2 block">{t('announcements.preview')}</Label>
               <div 
                 className="p-4 rounded-lg text-center"
                 style={{ backgroundColor: form.background_color, color: form.text_color }}
               >
-                <p className="font-medium">{form.title || 'Title'}</p>
-                <p className="text-sm opacity-90">{form.message || 'Your announcement message will appear here'}</p>
+                <p className="font-medium">{form.title || t('announcements.titleLabel')}</p>
+                <p className="text-sm opacity-90">{form.message || t('announcements.previewPlaceholder')}</p>
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button>
               <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleSave} data-testid="save-announcement-btn">
-                {editingAnnouncement ? 'Update' : 'Create'} Announcement
+                {editingAnnouncement ? t('common.update') : t('common.create')} {t('announcements.announcement')}
               </Button>
             </div>
           </div>
@@ -546,7 +546,7 @@ export default function Announcements() {
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Announcement?</AlertDialogTitle>
+            <AlertDialogTitle>{t('announcements.deleteAnnouncement')}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{deleteDialog.item?.title}&quot;? This action cannot be undone.
             </AlertDialogDescription>
