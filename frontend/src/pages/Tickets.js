@@ -78,7 +78,7 @@ export default function Tickets() {
       setClients(clientsRes.data);
       setOrders(ordersRes.data);
     } catch (error) {
-      toast.error('Failed to load tickets');
+      toast.error(t('errors.failedToLoad'));
     } finally {
       setLoading(false);
     }
