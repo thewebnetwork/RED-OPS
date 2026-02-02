@@ -232,7 +232,7 @@ export default function TicketDetail() {
               {/* Related Order */}
               {ticket.related_order_code && (
                 <div>
-                  <Label className="text-xs text-slate-500">Related Order</Label>
+                  <Label className="text-xs text-slate-500">{t('tickets.relatedOrder')}</Label>
                   <Link 
                     to={`/orders/${ticket.related_order_id}`}
                     className="flex items-center gap-2 mt-1.5 text-rose-600 hover:text-rose-700"
