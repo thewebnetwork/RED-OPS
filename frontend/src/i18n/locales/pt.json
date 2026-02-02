@@ -200,7 +200,15 @@
     "createNewTicket": "Criar Novo Ticket",
     "filterByStatus": "Filtrar por status",
     "filterByPriority": "Filtrar por prioridade",
-    "searchPlaceholder": "Buscar tickets..."
+    "searchPlaceholder": "Buscar tickets...",
+    "subject": "Assunto",
+    "subjectPlaceholder": "Sobre o que se trata?",
+    "selectClient": "Selecionar cliente",
+    "linkToOrder": "Vincular a pedido",
+    "initialMessage": "Mensagem Inicial",
+    "describeIssue": "Descreva o problema...",
+    "ticketCreated": "Ticket criado",
+    "failedToCreate": "Falha ao criar ticket"
   },
   "orders": {
     "title": "Pedidos",
