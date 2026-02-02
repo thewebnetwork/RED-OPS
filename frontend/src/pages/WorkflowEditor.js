@@ -139,6 +139,7 @@ const nodePalette = [
 export default function WorkflowEditor() {
   const { workflowId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   
