@@ -97,10 +97,10 @@ export default function TicketDetail() {
   const handleStatusChange = async (newStatus) => {
     try {
       await axios.patch(`${API}/tickets/${ticketId}?status=${newStatus}`);
-      toast.success('Status updated');
+      toast.success(t('tickets.statusUpdated'));
       fetchTicketData();
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error(t('tickets.failedToUpdateStatus'));
     }
   };
 
