@@ -311,10 +311,10 @@ export default function Reports() {
       }
       
       doc.save(`${selectedReport.id}_${format(new Date(), 'yyyyMMdd_HHmmss')}.pdf`);
-      toast.success('PDF exported');
+      toast.success(t('reports.pdfExported'));
     } catch (error) {
       console.error('PDF export error:', error);
-      toast.error('Failed to export PDF');
+      toast.error(t('reports.failedToExportPdf'));
     } finally {
       setExporting(false);
     }
