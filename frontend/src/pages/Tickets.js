@@ -87,7 +87,7 @@ export default function Tickets() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.subject) {
-      toast.error('Subject is required');
+      toast.error(t('formValidation.enterTitle'));
       return;
     }
 
@@ -98,22 +98,22 @@ export default function Tickets() {
       if (!payload.message_body) delete payload.message_body;
       
       await axios.post(`${API}/tickets`, payload);
-      toast.success('Ticket created');
+      toast.success(t('tickets.ticketCreated'));
       setDialogOpen(false);
       setFormData({ subject: '', client_id: '', related_order_id: '', message_body: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create ticket');
+      toast.error(error.response?.data?.detail || t('tickets.failedToCreate'));
     }
   };
 
   const handleStatusChange = async (ticketId, newStatus) => {
     try {
       await axios.patch(`${API}/tickets/${ticketId}?status=${newStatus}`);
-      toast.success('Status updated');
+      toast.success(t('tickets.statusUpdated'));
       fetchData();
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error(t('tickets.failedToUpdateStatus'));
     }
   };
 
