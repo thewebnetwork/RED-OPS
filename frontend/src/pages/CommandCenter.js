@@ -435,7 +435,7 @@ export default function CommandCenter() {
                   {!selectedL2 && (
                     <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">
                       <FileText size={48} className="mx-auto text-slate-300 mb-3" />
-                      <p>Select a category to continue</p>
+                      <p>{t('commandCenter.selectCategoryToContinue')}</p>
                     </div>
                   )}
                 </CardContent>
@@ -446,7 +446,7 @@ export default function CommandCenter() {
             <div>
               <Card className="border-slate-200">
                 <CardHeader className="border-b border-slate-100 pb-4">
-                  <CardTitle className="text-base">Categorization</CardTitle>
+                  <CardTitle className="text-base">{t('categories.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 space-y-4">
                   {/* Search */}
@@ -455,17 +455,17 @@ export default function CommandCenter() {
                     <Input
                       value={categorySearch}
                       onChange={(e) => setCategorySearch(e.target.value)}
-                      placeholder="Type to find a category faster..."
+                      placeholder={t('categories.searchCategories')}
                       className="pl-9 text-sm"
                     />
                   </div>
 
                   {/* Category L1 */}
                   <div>
-                    <Label className="text-xs text-slate-500">Category Level 1</Label>
+                    <Label className="text-xs text-slate-500">{t('categories.level1')}</Label>
                     <Select value={selectedL1} onValueChange={(v) => { setSelectedL1(v); setSelectedL2(''); }}>
                       <SelectTrigger className="mt-1.5" data-testid="category-l1-select">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('categories.selectCategory')} />
                       </SelectTrigger>
                       <SelectContent>
                         {filteredL1Categories.map(cat => {
@@ -474,7 +474,7 @@ export default function CommandCenter() {
                             <SelectItem key={cat.id} value={cat.id}>
                               <div className="flex items-center gap-2">
                                 <Icon size={14} />
-                                {cat.name}
+                                {getCatName(cat)}
                               </div>
                             </SelectItem>
                           );
@@ -486,14 +486,14 @@ export default function CommandCenter() {
                   {/* Category L2 */}
                   {selectedL1 && (
                     <div>
-                      <Label className="text-xs text-slate-500">Category Level 2</Label>
+                      <Label className="text-xs text-slate-500">{t('categories.level2')}</Label>
                       <Select value={selectedL2} onValueChange={setSelectedL2}>
                         <SelectTrigger className="mt-1.5" data-testid="category-l2-select">
-                          <SelectValue placeholder="Select specific category" />
+                          <SelectValue placeholder={t('categories.selectSubcategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {categoriesL2.map(cat => (
-                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                            <SelectItem key={cat.id} value={cat.id}>{getCatName(cat)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -503,13 +503,13 @@ export default function CommandCenter() {
                   {/* Selected Path */}
                   {selectedL1 && (
                     <div className="p-3 bg-slate-50 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">Selected Path:</p>
+                      <p className="text-xs text-slate-500 mb-1">{t('categories.selectedPath')}:</p>
                       <div className="flex items-center gap-1 text-sm">
-                        <span className="font-medium">{selectedL1Details?.name}</span>
+                        <span className="font-medium">{getCatName(selectedL1Details)}</span>
                         {selectedL2Details && (
                           <>
                             <ChevronRight size={14} className="text-slate-400" />
-                            <span className="font-medium text-rose-600">{selectedL2Details.name}</span>
+                            <span className="font-medium text-rose-600">{getCatName(selectedL2Details)}</span>
                           </>
                         )}
                       </div>
@@ -518,7 +518,7 @@ export default function CommandCenter() {
 
                   {/* Compact Attachments (moved under categorization) */}
                   <div className="border-t pt-4">
-                    <Label className="text-xs text-slate-500">{t('commandCenter.attachments')}</Label>
+                    <Label className="text-xs text-slate-500">{t('commandCenter.attachFiles')}</Label>
                     <div 
                       className="mt-2 border border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-rose-400 transition-colors cursor-pointer"
                       onClick={() => fileInputRef.current?.click()}
