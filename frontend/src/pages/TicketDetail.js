@@ -88,7 +88,7 @@ export default function TicketDetail() {
       const messagesRes = await axios.get(`${API}/tickets/${ticketId}/messages`);
       setMessages(messagesRes.data);
     } catch (error) {
-      toast.error('Failed to send message');
+      toast.error(t('tickets.failedToSendMessage'));
     } finally {
       setSendingMessage(false);
     }
