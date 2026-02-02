@@ -358,7 +358,7 @@ function CategoryBarChart({ data, title }) {
   );
 }
 
-function SLATrendChart({ data, title }) {
+function SLATrendChart({ data, title, t }) {
   return (
     <Card className="border-slate-200">
       <CardHeader className="pb-2">
