@@ -44,6 +44,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function RibbonBoard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [pool1Tickets, setPool1Tickets] = useState([]);
   const [pool2Tickets, setPool2Tickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +88,7 @@ export default function RibbonBoard() {
       setPool1Tickets(pool1Res.data);
       setPool2Tickets(pool2Res.data);
     } catch (error) {
-      toast.error('Failed to fetch pool data');
+      toast.error(t('ribbon.failedToFetchPool'));
     } finally {
       setLoading(false);
     }
@@ -97,12 +98,12 @@ export default function RibbonBoard() {
     if (!ticketToPick) return;
     try {
       await axios.post(`${API}/orders/${ticketToPick.id}/pick`);
-      toast.success('Ticket picked successfully!');
+      toast.success(t('ribbon.ticketPickedSuccess'));
       setPickDialogOpen(false);
       setTicketToPick(null);
       fetchPools();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to pick ticket');
+      toast.error(error.response?.data?.detail || t('ribbon.failedToPick'));
     }
   };
 
@@ -117,7 +118,7 @@ export default function RibbonBoard() {
   };
 
   const formatTimeInPool = (enteredAt) => {
-    if (!enteredAt) return 'Just added';
+    if (!enteredAt) return t('ribbon.justAdded');
     const diff = Date.now() - new Date(enteredAt).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
