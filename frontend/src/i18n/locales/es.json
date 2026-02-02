@@ -227,7 +227,10 @@
     "incident": "Incidente / Problemas",
     "total": "Total",
     "searchCategories": "Escriba para encontrar una categoría más rápido...",
-    "describeWhatYouNeed": "Describa lo que necesita..."
+    "describeWhatYouNeed": "Describa lo que necesita...",
+    "whatDoYouNeed": "¿Con qué necesitas ayuda hoy?",
+    "selectCategoryToContinue": "Seleccione una categoría para continuar",
+    "attachFiles": "Adjuntar Archivos"
   },
   "workflows": {
     "title": "Constructor de Flujos",
