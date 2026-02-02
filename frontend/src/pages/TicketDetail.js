@@ -68,7 +68,7 @@ export default function TicketDetail() {
       setTicket(ticketRes.data);
       setMessages(messagesRes.data);
     } catch (error) {
-      toast.error('Failed to load ticket');
+      toast.error(t('errors.failedToLoad'));
       navigate('/tickets');
     } finally {
       setLoading(false);
