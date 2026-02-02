@@ -552,6 +552,53 @@
     "responseRate": "Response Rate",
     "shareExperience": "Share your experience (optional)"
   },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure system settings, workflows, and integrations",
+    "tip": "Changes to settings may require users to refresh their browser to see updates. Some configurations like email templates and webhook URLs take effect immediately.",
+    "modules": {
+      "dashboards": {
+        "name": "Dashboard Builder",
+        "description": "Create and manage dashboard templates for different user roles"
+      },
+      "documentation": {
+        "name": "System Documentation",
+        "description": "View and download system logic snapshot for UAT reference"
+      },
+      "poolPickerRules": {
+        "name": "Pool Picker Rules",
+        "description": "Configure which account types can pick from Pool 1 and Pool 2"
+      },
+      "translations": {
+        "name": "Translation Editor",
+        "description": "Review and correct translations for Spanish and Portuguese"
+      },
+      "uiCustomizations": {
+        "name": "UI Customizations",
+        "description": "Customize field labels, display names, and branding across the platform"
+      },
+      "categories": {
+        "name": "Categories",
+        "description": "Manage service categories and subcategories for requests"
+      },
+      "workflows": {
+        "name": "Workflows",
+        "description": "Configure automation workflows and routing rules"
+      },
+      "emailSettings": {
+        "name": "Email Settings",
+        "description": "Configure SMTP and email notification templates"
+      },
+      "slaEscalation": {
+        "name": "SLA & Escalation",
+        "description": "Set up service level agreements and escalation policies"
+      },
+      "integrations": {
+        "name": "Integrations",
+        "description": "Manage API keys, webhooks, and external integrations"
+      }
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark All Read",
