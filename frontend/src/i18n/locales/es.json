@@ -484,7 +484,23 @@
     "serverError": "Error del servidor",
     "failedToLoad": "Error al cargar",
     "failedToSave": "Error al guardar",
-    "failedToDelete": "Error al eliminar"
+    "failedToDelete": "Error al eliminar",
+    "uploadFailed": "Error al subir"
+  },
+  "buttons": {
+    "newRequest": "Nueva Solicitud",
+    "viewAll": "Ver Todo",
+    "viewDetails": "Ver Detalles",
+    "assign": "Asignar",
+    "reassign": "Reasignar",
+    "pick": "Tomar",
+    "deliver": "Entregar",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "restore": "Restaurar",
+    "archive": "Archivar",
+    "duplicate": "Duplicar",
+    "preview": "Vista previa"
   },
   "success": {
     "saved": "Guardado con éxito",
