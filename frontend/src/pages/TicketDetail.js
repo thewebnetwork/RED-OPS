@@ -120,7 +120,7 @@ export default function TicketDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/tickets')} className="w-fit">
           <ArrowLeft size={18} className="mr-2" />
-          Back to Tickets
+          {t('tickets.backToTickets')}
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
