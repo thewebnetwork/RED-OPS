@@ -49,6 +49,7 @@ const formatDateTimeLocal = (isoString) => {
 };
 
 export default function Announcements() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('list');
   const [announcements, setAnnouncements] = useState([]);
   const [teams, setTeams] = useState([]);
