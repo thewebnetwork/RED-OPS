@@ -14,35 +14,35 @@ Enterprise ticket management and operations platform with full multilingual supp
 
 ## What's Been Implemented
 
-### P0 - i18n Coverage (COMPLETED - Dec 2025)
+### P0 - UAT-Critical Pages i18n (COMPLETED - Feb 2025)
+All 6 UAT-critical pages now fully translated:
+1. **Tickets.js** - List page, status filters, table headers, empty states
+2. **TicketDetail.js** - Status dropdown, cancel/resolve/reassign modals
+3. **RibbonBoard.js** - Pool tabs, descriptions, pick dialog, empty states
+4. **WorkflowEditor.js** - Node palette, settings sheet, save/discard dialogs
+5. **Categories.js** - L1/L2 CRUD, move subcategory, unsaved changes warning
+6. **Reports.js** - All filters, date presets, export buttons, results display
+7. **Announcements.js** - Full CRUD, targeting labels, preview, confirmations
+
+New translation keys added:
+- `tickets.*` - Ticket-related strings (allStatuses, status.open/waiting/closed, etc.)
+- `ribbon.*` - Opportunity ribbon strings (pool descriptions, pick dialog, etc.)
+- `workflow.*` - Workflow editor strings (settings, node config, dialogs, etc.)
+- `categories.*` - Category management strings (L1/L2, move, confirmations, etc.)
+- `reports.*` - Reports page strings (filters, presets, export, results, etc.)
+- `announcements.*` - Announcement strings (CRUD, targeting, preview, etc.)
+
+### Core Pages i18n (COMPLETED - Dec 2025)
 - **Dashboard.js** - Fully translated with t() function for all KPIs, charts, labels
 - **CommandCenter.js** - Forms, validation messages, toasts all translated
 - **SettingsHub.js** - All settings modules dynamically translated
 - **IAMPage.js** - Title, tabs, stats, table headers all translated
-- **Translation Files** - Complete en.json, es.json, pt.json with:
-  - `dashboardLabels.*` - All dashboard KPI and section labels
-  - `chartLabels.*` - Chart legend labels
-  - `forms.*` - Form field labels and placeholders
-  - `formValidation.*` - Validation error messages
-  - `formSuccess.*` - Success toast messages
-  - `formButtons.*` - Button labels
-  - `settings.modules.*` - Settings page module names/descriptions
-  - `iam.*` - IAM page labels
-  - `commandCenter.*` - Command center form labels
-  - `fileValidation.*` - File upload validation messages
 
 ### i18n Audit System (COMPLETED - Dec 2025)
-- **Audit Script** (`scripts/i18n-audit.js`) - Full codebase scanner for:
-  - Missing translation keys across locales
-  - Hardcoded UI strings in JSX
-  - Suggested key namespaces for fixes
-- **CI Check Script** (`scripts/i18n-ci.js`) - Lightweight CI-friendly check
-- **Key Sync Script** (`scripts/i18n-sync.js`) - Syncs missing keys with placeholders
-- **npm commands**:
-  - `npm run i18n:audit` - Full audit with suggestions
-  - `npm run i18n:ci` - CI check (fails on missing keys)
-  - `npm run i18n:sync` - Sync keys across locales
-  - `npm run i18n:audit:strict` - Strict mode (fails on hardcoded strings)
+- **Audit Script** (`scripts/i18n-audit.js`) - Full codebase scanner
+- **CI Check Script** (`scripts/i18n-ci.js`) - CI-friendly check
+- **Key Sync Script** (`scripts/i18n-sync.js`) - Syncs missing keys
+- **npm commands**: `i18n:audit`, `i18n:ci`, `i18n:sync`, `i18n:audit:strict`
 - **GitHub Actions** (`.github/workflows/i18n-check.yml`) - PR/push checks
 - **Documentation** (`docs/i18n-audit.md`) - Usage guide
 
