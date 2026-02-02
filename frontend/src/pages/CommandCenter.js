@@ -387,7 +387,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Bug report submitted!');
+                            toast.success(t('formSuccess.bugSubmitted'));
                           }}
                           onDraftSaved={() => {
                             setTitle('');
