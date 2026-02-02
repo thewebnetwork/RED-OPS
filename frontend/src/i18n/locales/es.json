@@ -552,6 +552,53 @@
     "responseRate": "Tasa de Respuesta",
     "shareExperience": "Comparta su experiencia (opcional)"
   },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Configure ajustes del sistema, flujos de trabajo e integraciones",
+    "tip": "Los cambios en la configuración pueden requerir que los usuarios actualicen su navegador para ver las actualizaciones. Algunas configuraciones como plantillas de correo y URLs de webhooks tienen efecto inmediato.",
+    "modules": {
+      "dashboards": {
+        "name": "Constructor de Paneles",
+        "description": "Crear y gestionar plantillas de panel para diferentes roles de usuario"
+      },
+      "documentation": {
+        "name": "Documentación del Sistema",
+        "description": "Ver y descargar instantánea de lógica del sistema para referencia UAT"
+      },
+      "poolPickerRules": {
+        "name": "Reglas de Selección de Pool",
+        "description": "Configurar qué tipos de cuenta pueden seleccionar del Pool 1 y Pool 2"
+      },
+      "translations": {
+        "name": "Editor de Traducciones",
+        "description": "Revisar y corregir traducciones para español y portugués"
+      },
+      "uiCustomizations": {
+        "name": "Personalizaciones de UI",
+        "description": "Personalizar etiquetas de campos, nombres de visualización y marca en la plataforma"
+      },
+      "categories": {
+        "name": "Categorías",
+        "description": "Gestionar categorías de servicio y subcategorías para solicitudes"
+      },
+      "workflows": {
+        "name": "Flujos de Trabajo",
+        "description": "Configurar flujos de trabajo automatizados y reglas de enrutamiento"
+      },
+      "emailSettings": {
+        "name": "Configuración de Correo",
+        "description": "Configurar SMTP y plantillas de notificación por correo"
+      },
+      "slaEscalation": {
+        "name": "SLA y Escalamiento",
+        "description": "Configurar acuerdos de nivel de servicio y políticas de escalamiento"
+      },
+      "integrations": {
+        "name": "Integraciones",
+        "description": "Gestionar claves API, webhooks e integraciones externas"
+      }
+    }
+  },
   "notifications": {
     "title": "Notificaciones",
     "markAllRead": "Marcar Todas como Leídas",
