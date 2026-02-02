@@ -766,6 +766,7 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
 
 // Feature Request Form
 function FeatureRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess, onDraftSaved }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -794,16 +795,16 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
     
     if (!isDraft) {
       if (!title) {
-        toast.error('Please enter a title');
+        toast.error(t('formValidation.enterTitle'));
         return;
       }
       if (!description) {
-        toast.error('Please describe your request');
+        toast.error(t('formValidation.describeRequest'));
         return;
       }
     } else {
       if (!title) {
-        toast.error('Please enter at least a title to save as draft');
+        toast.error(t('formValidation.enterTitleDraft'));
         return;
       }
     }
@@ -836,7 +837,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
         onSuccess();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to submit request');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     } finally {
       setLoading(false);
       setSavingDraft(false);
@@ -846,50 +847,50 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
   return (
     <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-        <p className="text-sm text-indigo-700 font-medium">Feature Request</p>
-        <p className="text-xs text-indigo-600">Tell us about the feature or service you&apos;d like to see.</p>
+        <p className="text-sm text-indigo-700 font-medium">{t('formTypes.featureRequest')}</p>
+        <p className="text-xs text-indigo-600">{t('formTypes.featureRequestDesc')}</p>
       </div>
 
       <div>
-        <Label>Why is this important / what problem does it solve?</Label>
+        <Label>{t('forms.whyImportant')}</Label>
         <Textarea
           value={formData.why_important}
           onChange={(e) => setFormData(prev => ({ ...prev, why_important: e.target.value }))}
-          placeholder="Explain the value this would provide..."
+          placeholder={t('forms.whyImportantPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Who is this for?</Label>
+        <Label>{t('forms.whoIsFor')}</Label>
         <Input
           value={formData.who_is_for}
           onChange={(e) => setFormData(prev => ({ ...prev, who_is_for: e.target.value }))}
-          placeholder="e.g., All users, Marketing team, Clients..."
+          placeholder={t('forms.whoIsForPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Example / Reference Links</Label>
+        <Label>{t('forms.exampleLinks')}</Label>
         <Textarea
           value={formData.reference_links}
           onChange={(e) => setFormData(prev => ({ ...prev, reference_links: e.target.value }))}
-          placeholder="Links to examples or references..."
+          placeholder={t('forms.exampleLinksPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Priority</Label>
+        <Label>{t('forms.priority')}</Label>
         <Select value={formData.priority} onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}>
           <SelectTrigger className="mt-1.5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Normal">Normal</SelectItem>
-            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Low">{t('priority.low')}</SelectItem>
+            <SelectItem value="Normal">{t('priority.normal')}</SelectItem>
+            <SelectItem value="High">{t('priority.high')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -905,7 +906,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="save-draft-btn"
         >
           <Save size={16} className="mr-2" />
-          {savingDraft ? 'Saving...' : 'Save Draft'}
+          {savingDraft ? t('formButtons.saving') : t('formButtons.saveDraft')}
         </Button>
         <Button 
           type="submit" 
@@ -914,7 +915,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="submit-request-btn"
         >
           <Send size={16} className="mr-2" />
-          {loading ? 'Submitting...' : 'Submit Request'}
+          {loading ? t('formButtons.submitting') : t('formButtons.submitRequest')}
         </Button>
       </div>
     </form>
