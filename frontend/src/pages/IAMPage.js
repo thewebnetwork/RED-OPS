@@ -544,29 +544,29 @@ export default function IAMPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <KeyRound className="text-[#A2182C]" />
-          Identity & Access Management
+          {t('iam.title')}
         </h1>
-        <p className="text-slate-500 mt-1">Manage users, teams, specialties, roles, account types, and subscription plans</p>
+        <p className="text-slate-500 mt-1">{t('iam.subtitle')}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">Users</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">Teams</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">Specialties</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">Roles</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm text-slate-500">Account Types</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{plans.length}</p><p className="text-sm text-slate-500">Plans</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">{t('iam.users')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">{t('iam.teams')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">{t('iam.specialties')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">{t('iam.roles')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm text-slate-500">{t('iam.accountTypes')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{plans.length}</p><p className="text-sm text-slate-500">{t('iam.subscriptionPlans')}</p></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="users"><Users size={16} className="mr-1" />Users</TabsTrigger>
-          <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />Teams</TabsTrigger>
-          <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />Specialties</TabsTrigger>
-          <TabsTrigger value="roles"><Shield size={16} className="mr-1" />Roles</TabsTrigger>
-          <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />Account Types</TabsTrigger>
-          <TabsTrigger value="plans"><CreditCard size={16} className="mr-1" />Plans</TabsTrigger>
+          <TabsTrigger value="users"><Users size={16} className="mr-1" />{t('iam.users')}</TabsTrigger>
+          <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />{t('iam.teams')}</TabsTrigger>
+          <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />{t('iam.specialties')}</TabsTrigger>
+          <TabsTrigger value="roles"><Shield size={16} className="mr-1" />{t('iam.roles')}</TabsTrigger>
+          <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />{t('iam.accountTypes')}</TabsTrigger>
+          <TabsTrigger value="plans"><CreditCard size={16} className="mr-1" />{t('iam.subscriptionPlans')}</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -574,10 +574,10 @@ export default function IAMPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <Input placeholder="Search users..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
+              <Input placeholder={t('iam.searchUsers')} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
-              <Plus size={16} className="mr-2" />Add User
+              <Plus size={16} className="mr-2" />{t('iam.newUser')}
             </Button>
           </div>
           <Card>
@@ -585,13 +585,13 @@ export default function IAMPage() {
               <table className="w-full">
                 <thead className="bg-slate-50 border-b">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">User</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.user')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.role')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('iam.accountTypes')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.plan')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.specialty')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
