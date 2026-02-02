@@ -416,7 +416,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Request submitted successfully!');
+                            toast.success(t('formSuccess.requestSubmitted'));
                           }}
                           onDraftSaved={() => {
                             setTitle('');
