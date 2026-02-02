@@ -31,6 +31,21 @@ Enterprise ticket management and operations platform with full multilingual supp
   - `commandCenter.*` - Command center form labels
   - `fileValidation.*` - File upload validation messages
 
+### i18n Audit System (COMPLETED - Dec 2025)
+- **Audit Script** (`scripts/i18n-audit.js`) - Full codebase scanner for:
+  - Missing translation keys across locales
+  - Hardcoded UI strings in JSX
+  - Suggested key namespaces for fixes
+- **CI Check Script** (`scripts/i18n-ci.js`) - Lightweight CI-friendly check
+- **Key Sync Script** (`scripts/i18n-sync.js`) - Syncs missing keys with placeholders
+- **npm commands**:
+  - `npm run i18n:audit` - Full audit with suggestions
+  - `npm run i18n:ci` - CI check (fails on missing keys)
+  - `npm run i18n:sync` - Sync keys across locales
+  - `npm run i18n:audit:strict` - Strict mode (fails on hardcoded strings)
+- **GitHub Actions** (`.github/workflows/i18n-check.yml`) - PR/push checks
+- **Documentation** (`docs/i18n-audit.md`) - Usage guide
+
 ### Previous Work Completed
 - Dashboard propagation fix (dynamic rendering from user-assigned layouts)
 - Dashboard click-through navigation (KPIs link to filtered views)
