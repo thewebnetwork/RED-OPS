@@ -17,83 +17,83 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 
-const settingsModules = [
+const getSettingsModules = (t) => [
   {
     id: 'dashboards',
-    name: 'Dashboard Builder',
-    description: 'Create and manage dashboard templates for different user roles',
+    name: t('settings.modules.dashboards.name'),
+    description: t('settings.modules.dashboards.description'),
     icon: LayoutDashboard,
     path: '/settings/dashboards',
     color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'documentation',
-    name: 'System Documentation',
-    description: 'View and download system logic snapshot for UAT reference',
+    name: t('settings.modules.documentation.name'),
+    description: t('settings.modules.documentation.description'),
     icon: FileText,
     path: '/settings/documentation',
     color: 'bg-slate-100 text-slate-600'
   },
   {
     id: 'pool-picker-rules',
-    name: 'Pool Picker Rules',
-    description: 'Configure which account types can pick from Pool 1 and Pool 2',
+    name: t('settings.modules.poolPickerRules.name'),
+    description: t('settings.modules.poolPickerRules.description'),
     icon: Users,
     path: '/settings/pool-picker-rules',
     color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'translations',
-    name: 'Translation Editor',
-    description: 'Review and correct translations for Spanish and Portuguese',
+    name: t('settings.modules.translations.name'),
+    description: t('settings.modules.translations.description'),
     icon: Languages,
     path: '/settings/translations',
     color: 'bg-indigo-100 text-indigo-600'
   },
   {
     id: 'ui-customizations',
-    name: 'UI Customizations',
-    description: 'Customize field labels, display names, and branding across the platform',
+    name: t('settings.modules.uiCustomizations.name'),
+    description: t('settings.modules.uiCustomizations.description'),
     icon: Palette,
     path: '/settings/ui',
     color: 'bg-purple-100 text-purple-600'
   },
   {
     id: 'categories',
-    name: 'Categories',
-    description: 'Manage service categories and subcategories for requests',
+    name: t('settings.modules.categories.name'),
+    description: t('settings.modules.categories.description'),
     icon: FolderTree,
     path: '/categories',
     color: 'bg-blue-100 text-blue-600'
   },
   {
     id: 'workflows',
-    name: 'Workflows',
-    description: 'Configure automation workflows and routing rules',
+    name: t('settings.modules.workflows.name'),
+    description: t('settings.modules.workflows.description'),
     icon: GitBranch,
     path: '/workflows',
     color: 'bg-emerald-100 text-emerald-600'
   },
   {
     id: 'email-settings',
-    name: 'Email Settings',
-    description: 'Configure SMTP and email notification templates',
+    name: t('settings.modules.emailSettings.name'),
+    description: t('settings.modules.emailSettings.description'),
     icon: Mail,
     path: '/email-settings',
     color: 'bg-amber-100 text-amber-600'
   },
   {
     id: 'sla-escalation',
-    name: 'SLA & Escalation',
-    description: 'Set up service level agreements and escalation policies',
+    name: t('settings.modules.slaEscalation.name'),
+    description: t('settings.modules.slaEscalation.description'),
     icon: Shield,
     path: '/sla-policies',
     color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'integrations',
-    name: 'Integrations',
-    description: 'Manage API keys, webhooks, and external integrations',
+    name: t('settings.modules.integrations.name'),
+    description: t('settings.modules.integrations.description'),
     icon: Plug,
     path: '/integrations',
     color: 'bg-cyan-100 text-cyan-600'
@@ -101,7 +101,9 @@ const settingsModules = [
 ];
 
 export default function SettingsHub() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const settingsModules = getSettingsModules(t);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="settings-hub-page">
@@ -109,9 +111,9 @@ export default function SettingsHub() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Settings className="text-[#A2182C]" />
-          Settings
+          {t('settings.title')}
         </h1>
-        <p className="text-slate-500 mt-1">Configure system settings, workflows, and integrations</p>
+        <p className="text-slate-500 mt-1">{t('settings.subtitle')}</p>
       </div>
 
       {/* Settings Grid */}
@@ -148,8 +150,7 @@ export default function SettingsHub() {
       <Card className="bg-slate-50 border-slate-200">
         <CardContent className="p-4">
           <p className="text-sm text-slate-600">
-            <strong>Tip:</strong> Changes to settings may require users to refresh their browser to see updates.
-            Some configurations like email templates and webhook URLs take effect immediately.
+            <strong>{t('common.tip')}:</strong> {t('settings.tip')}
           </p>
         </CardContent>
       </Card>
