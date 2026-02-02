@@ -529,10 +529,10 @@ export default function Reports() {
                       }}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">{t('reports.allCategories')}</SelectItem>
                         {categories.l1.map(cat => (
                           <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                         ))}
@@ -542,17 +542,17 @@ export default function Reports() {
 
                   {/* Category L2 */}
                   <div>
-                    <Label className="text-xs">Category L2</Label>
+                    <Label className="text-xs">{t('reports.categoryL2')}</Label>
                     <Select
                       value={filters.category_l2_id || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, category_l2_id: v === 'all' ? '' : v }))}
                       disabled={!filters.category_l1_id}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="all">{t('common.all')}</SelectItem>
                         {categories.l2.map(cat => (
                           <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                         ))}
@@ -562,16 +562,16 @@ export default function Reports() {
 
                   {/* Team */}
                   <div>
-                    <Label className="text-xs">Team</Label>
+                    <Label className="text-xs">{t('reports.team')}</Label>
                     <Select
                       value={filters.team_id || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, team_id: v === 'all' ? '' : v }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Teams</SelectItem>
+                        <SelectItem value="all">{t('reports.allTeams')}</SelectItem>
                         {teams.map(team => (
                           <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
                         ))}
@@ -581,16 +581,16 @@ export default function Reports() {
 
                   {/* Assignee */}
                   <div>
-                    <Label className="text-xs">Assignee</Label>
+                    <Label className="text-xs">{t('reports.assignee')}</Label>
                     <Select
                       value={filters.assignee_id || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, assignee_id: v === 'all' ? '' : v }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Assignees</SelectItem>
+                        <SelectItem value="all">{t('reports.allAssignees')}</SelectItem>
                         {users.filter(u => u.role !== 'Requester').map(user => (
                           <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
                         ))}
@@ -600,16 +600,16 @@ export default function Reports() {
 
                   {/* Specialty */}
                   <div>
-                    <Label className="text-xs">Specialty</Label>
+                    <Label className="text-xs">{t('reports.specialty')}</Label>
                     <Select
                       value={filters.specialty_id || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, specialty_id: v === 'all' ? '' : v }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Specialties</SelectItem>
+                        <SelectItem value="all">{t('reports.allSpecialties')}</SelectItem>
                         {specialties.map(spec => (
                           <SelectItem key={spec.id} value={spec.id}>{spec.name}</SelectItem>
                         ))}
