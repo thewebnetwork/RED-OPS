@@ -363,8 +363,8 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Reports</h1>
-          <p className="text-slate-500">Generate and export operational reports</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('reports.title')}</h1>
+          <p className="text-slate-500">{t('reports.description')}</p>
         </div>
       </div>
 
@@ -375,7 +375,7 @@ export default function Reports() {
             <CardHeader className="border-b border-slate-100 pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText size={18} />
-                Available Reports
+                {t('reports.availableReports')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 max-h-[600px] overflow-y-auto">
@@ -417,7 +417,7 @@ export default function Reports() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Filter size={18} />
-                  Filters
+                  {t('reports.filters')}
                 </CardTitle>
                 <Button
                   variant="ghost"
@@ -432,14 +432,14 @@ export default function Reports() {
               <CardContent className="p-4">
                 {/* Date Range */}
                 <div className="mb-4">
-                  <Label className="text-xs text-slate-500 mb-2 block">Quick Date Range</Label>
+                  <Label className="text-xs text-slate-500 mb-2 block">{t('reports.quickDateRange')}</Label>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { key: 'today', label: 'Today' },
-                      { key: 'last7', label: 'Last 7 Days' },
-                      { key: 'last30', label: 'Last 30 Days' },
-                      { key: 'thisMonth', label: 'This Month' },
-                      { key: 'lastMonth', label: 'Last Month' }
+                      { key: 'today', label: t('reports.today') },
+                      { key: 'last7', label: t('reports.last7Days') },
+                      { key: 'last30', label: t('reports.last30Days') },
+                      { key: 'thisMonth', label: t('reports.thisMonth') },
+                      { key: 'lastMonth', label: t('reports.lastMonth') }
                     ].map(preset => (
                       <Button
                         key={preset.key}
