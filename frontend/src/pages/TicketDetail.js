@@ -136,13 +136,13 @@ export default function TicketDetail() {
         <div className="lg:col-span-2">
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg">Messages</CardTitle>
+              <CardTitle className="text-lg">{t('tickets.messages')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-96 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center text-slate-500 py-8">
-                    No messages yet. Start the conversation!
+                    {t('tickets.noMessagesYet')}
                   </div>
                 ) : (
                   messages.map(msg => (
