@@ -95,7 +95,7 @@ export default function Announcements() {
       setRoles(rolesRes.data || []);
       setSpecialties(specialtiesRes.data || []);
     } catch (error) {
-      toast.error('Failed to load data');
+      toast.error(t('announcements.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -140,12 +140,12 @@ export default function Announcements() {
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.message.trim()) {
-      toast.error('Title and message are required');
+      toast.error(t('announcements.titleMessageRequired'));
       return;
     }
     
     if (!form.send_to_all && !form.target_teams.length && !form.target_roles.length && !form.target_specialties.length) {
-      toast.error('Select at least one target or enable "Send to all"');
+      toast.error(t('announcements.selectTargetOrAll'));
       return;
     }
     
@@ -158,27 +158,27 @@ export default function Announcements() {
       
       if (editingAnnouncement) {
         await axios.patch(`${API}/announcements/${editingAnnouncement.id}`, payload);
-        toast.success('Announcement updated');
+        toast.success(t('announcements.announcementUpdated'));
       } else {
         await axios.post(`${API}/announcements`, payload);
-        toast.success('Announcement created');
+        toast.success(t('announcements.announcementCreated'));
       }
       
       setDialogOpen(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to save announcement');
+      toast.error(error.response?.data?.detail || t('announcements.failedToSave'));
     }
   };
 
   const handleDelete = async () => {
     try {
       await axios.delete(`${API}/announcements/${deleteDialog.item.id}`);
-      toast.success('Announcement deleted');
+      toast.success(t('announcements.announcementDeleted'));
       setDeleteDialog({ open: false, item: null });
       fetchData();
     } catch (error) {
-      toast.error('Failed to delete announcement');
+      toast.error(t('announcements.failedToDelete'));
     }
   };
 
