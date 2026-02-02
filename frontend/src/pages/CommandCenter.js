@@ -924,6 +924,7 @@ function FeatureRequestForm({ title, description, attachments, categoryL1Id, cat
 
 // Bug Report Form
 function BugReportForm({ title, description, attachments, categoryL1Id, categoryL2Id, bugType, onSuccess, onDraftSaved }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -956,16 +957,16 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
     
     if (!isDraft) {
       if (!title) {
-        toast.error('Please enter a title');
+        toast.error(t('formValidation.enterTitle'));
         return;
       }
       if (!description) {
-        toast.error('Please describe the issue');
+        toast.error(t('formValidation.describeIssue'));
         return;
       }
     } else {
       if (!title) {
-        toast.error('Please enter at least a title to save as draft');
+        toast.error(t('formValidation.enterTitleDraft'));
         return;
       }
     }
@@ -998,7 +999,7 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
         onSuccess();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to submit bug report');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     } finally {
       setLoading(false);
       setSavingDraft(false);
@@ -1008,107 +1009,107 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
   return (
     <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-sm text-red-700 font-medium">Bug Report</p>
-        <p className="text-xs text-red-600">Help us fix this issue by providing details.</p>
+        <p className="text-sm text-red-700 font-medium">{t('formTypes.bugReport')}</p>
+        <p className="text-xs text-red-600">{t('formTypes.bugReportDesc')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label>Bug Type</Label>
+          <Label>{t('forms.bugType')}</Label>
           <Select value={formData.bug_type} onValueChange={(v) => setFormData(prev => ({ ...prev, bug_type: v }))}>
             <SelectTrigger className="mt-1.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="UI Bug">UI Bug</SelectItem>
-              <SelectItem value="Button / Click Bug">Button / Click Bug</SelectItem>
-              <SelectItem value="Login / Access Bug">Login / Access Bug</SelectItem>
-              <SelectItem value="Payment / Checkout Bug">Payment / Checkout Bug</SelectItem>
-              <SelectItem value="Other Bug">Other Bug</SelectItem>
+              <SelectItem value="UI Bug">{t('bugTypes.uiBug')}</SelectItem>
+              <SelectItem value="Button / Click Bug">{t('bugTypes.buttonClickBug')}</SelectItem>
+              <SelectItem value="Login / Access Bug">{t('bugTypes.loginAccessBug')}</SelectItem>
+              <SelectItem value="Payment / Checkout Bug">{t('bugTypes.paymentCheckoutBug')}</SelectItem>
+              <SelectItem value="Other Bug">{t('bugTypes.otherBug')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>Severity</Label>
+          <Label>{t('forms.severity')}</Label>
           <Select value={formData.severity} onValueChange={(v) => setFormData(prev => ({ ...prev, severity: v }))}>
             <SelectTrigger className="mt-1.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Low">Low</SelectItem>
-              <SelectItem value="Normal">Normal</SelectItem>
-              <SelectItem value="High">High</SelectItem>
-              <SelectItem value="Urgent">Urgent</SelectItem>
+              <SelectItem value="Low">{t('priority.low')}</SelectItem>
+              <SelectItem value="Normal">{t('priority.normal')}</SelectItem>
+              <SelectItem value="High">{t('priority.high')}</SelectItem>
+              <SelectItem value="Urgent">{t('priority.urgent')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div>
-        <Label>Steps to Reproduce *</Label>
+        <Label>{t('forms.stepsToReproduce')}</Label>
         <Textarea
           value={formData.steps_to_reproduce}
           onChange={(e) => setFormData(prev => ({ ...prev, steps_to_reproduce: e.target.value }))}
-          placeholder="1. Go to...\n2. Click on...\n3. See error..."
+          placeholder={t('forms.stepsPlaceholder')}
           className="mt-1.5 min-h-[100px]"
         />
       </div>
 
       <div>
-        <Label>Expected Behavior *</Label>
+        <Label>{t('forms.expectedBehavior')}</Label>
         <Textarea
           value={formData.expected_behavior}
           onChange={(e) => setFormData(prev => ({ ...prev, expected_behavior: e.target.value }))}
-          placeholder="What should have happened?"
+          placeholder={t('forms.expectedPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Actual Behavior *</Label>
+        <Label>{t('forms.actualBehavior')}</Label>
         <Textarea
           value={formData.actual_behavior}
           onChange={(e) => setFormData(prev => ({ ...prev, actual_behavior: e.target.value }))}
-          placeholder="What actually happened?"
+          placeholder={t('forms.actualPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label>Browser</Label>
+          <Label>{t('forms.browser')}</Label>
           <Select value={formData.browser} onValueChange={(v) => setFormData(prev => ({ ...prev, browser: v }))}>
             <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder={t('common.select')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Chrome">Chrome</SelectItem>
-              <SelectItem value="Safari">Safari</SelectItem>
-              <SelectItem value="Firefox">Firefox</SelectItem>
-              <SelectItem value="Edge">Edge</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              <SelectItem value="Chrome">{t('browsers.chrome')}</SelectItem>
+              <SelectItem value="Safari">{t('browsers.safari')}</SelectItem>
+              <SelectItem value="Firefox">{t('browsers.firefox')}</SelectItem>
+              <SelectItem value="Edge">{t('browsers.edge')}</SelectItem>
+              <SelectItem value="Other">{t('browsers.other')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>Device</Label>
+          <Label>{t('forms.device')}</Label>
           <Select value={formData.device} onValueChange={(v) => setFormData(prev => ({ ...prev, device: v }))}>
             <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder={t('common.select')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Desktop">Desktop</SelectItem>
-              <SelectItem value="Mobile">Mobile</SelectItem>
-              <SelectItem value="Tablet">Tablet</SelectItem>
+              <SelectItem value="Desktop">{t('devices.desktop')}</SelectItem>
+              <SelectItem value="Mobile">{t('devices.mobile')}</SelectItem>
+              <SelectItem value="Tablet">{t('devices.tablet')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>URL/Page</Label>
+          <Label>{t('forms.urlPage')}</Label>
           <Input
             value={formData.url_page}
             onChange={(e) => setFormData(prev => ({ ...prev, url_page: e.target.value }))}
-            placeholder="Where did it happen?"
+            placeholder={t('forms.urlPlaceholder')}
             className="mt-1.5"
           />
         </div>
@@ -1116,7 +1117,7 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
 
       <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-sm text-amber-700">
-          <strong>Tip:</strong> Add screenshots or screen recordings if possible to help us understand the issue better.
+          <strong>{t('common.tip')}:</strong> {t('formTips.bugScreenshot')}
         </p>
       </div>
 
@@ -1131,7 +1132,7 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
           data-testid="save-draft-btn"
         >
           <Save size={16} className="mr-2" />
-          {savingDraft ? 'Saving...' : 'Save Draft'}
+          {savingDraft ? t('formButtons.saving') : t('formButtons.saveDraft')}
         </Button>
         <Button 
           type="submit" 
@@ -1140,7 +1141,7 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
           data-testid="submit-request-btn"
         >
           <Send size={16} className="mr-2" />
-          {loading ? 'Submitting...' : 'Submit Bug Report'}
+          {loading ? t('formButtons.submitting') : t('formButtons.submitBugReport')}
         </Button>
       </div>
     </form>
