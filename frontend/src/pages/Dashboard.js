@@ -713,27 +713,27 @@ function PartnerDashboard({ metrics, ticketLists, chartData, loading, onRefresh,
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">Partner Dashboard - Pool 1 Access</p>
+          <p className="text-slate-500 mt-1">{t('dashboardLabels.partnerPool1Access')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
           <RefreshCw size={14} />
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
       {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
         </Link>
         <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
         </Link>
         <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
         </Link>
         <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
         </Link>
       </div>
 
@@ -749,11 +749,11 @@ function PartnerDashboard({ metrics, ticketLists, chartData, loading, onRefresh,
                   </div>
                   <div>
                     <p className="text-3xl font-bold text-indigo-900">{metrics.pool.pool1_available}</p>
-                    <p className="text-indigo-700">Pool 1 Opportunities Available</p>
+                    <p className="text-indigo-700">{t('dashboardLabels.pool1OpportunitiesAvailable')}</p>
                   </div>
                 </div>
                 <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-                  View Ribbon <ArrowRight size={16} />
+                  {t('dashboardLabels.viewRibbon')} <ArrowRight size={16} />
                 </Button>
               </div>
             </CardContent>
@@ -764,20 +764,20 @@ function PartnerDashboard({ metrics, ticketLists, chartData, loading, onRefresh,
       {/* Ticket Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TicketListSection 
-          title="Tickets I'm Working On"
+          title={t('dashboardLabels.ticketsWorkingOn')}
           icon={Clock}
           iconColor="text-amber-500"
           tickets={ticketLists.workingOn}
-          emptyMessage="No tickets in progress"
+          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
           t={t}
         />
         <TicketListSection 
-          title="Tickets Waiting on Me"
+          title={t('dashboardLabels.ticketsWaitingOnMe')}
           icon={AlertCircle}
           iconColor="text-red-500"
           tickets={ticketLists.waitingOnMe}
           showWaitingReason={true}
-          emptyMessage="No tickets need your action"
+          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
           t={t}
         />
       </div>
@@ -796,27 +796,27 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">Vendor Dashboard - Pool 2 Access</p>
+          <p className="text-slate-500 mt-1">{t('dashboardLabels.vendorPool2Access')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
           <RefreshCw size={14} />
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
       {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
         </Link>
         <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
         </Link>
         <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
         </Link>
         <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
         </Link>
       </div>
 
@@ -832,11 +832,11 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
                   </div>
                   <div>
                     <p className="text-3xl font-bold text-pink-900">{metrics.pool.pool2_available}</p>
-                    <p className="text-pink-700">Pool 2 Opportunities Available</p>
+                    <p className="text-pink-700">{t('dashboardLabels.pool2OpportunitiesAvailable')}</p>
                   </div>
                 </div>
                 <Button className="bg-pink-600 hover:bg-pink-700 gap-2">
-                  View Opportunities <ArrowRight size={16} />
+                  {t('dashboardLabels.viewOpportunities')} <ArrowRight size={16} />
                 </Button>
               </div>
             </CardContent>
@@ -847,21 +847,21 @@ function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, 
       {/* Ticket Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TicketListSection 
-          title="Tickets I'm Working On"
+          title={t('dashboardLabels.ticketsWorkingOn')}
           icon={Clock}
           iconColor="text-amber-500"
           tickets={ticketLists.workingOn}
-          emptyMessage="No tickets in progress"
+          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
           t={t}
           viewAllRoute="/my-tickets?filter=working_on"
         />
         <TicketListSection 
-          title="Tickets Waiting on Me"
+          title={t('dashboardLabels.ticketsWaitingOnMe')}
           icon={AlertCircle}
           iconColor="text-red-500"
           tickets={ticketLists.waitingOnMe}
           showWaitingReason={true}
-          emptyMessage="No tickets need your action"
+          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
           t={t}
           viewAllRoute="/my-tickets?filter=waiting_on_me"
         />
