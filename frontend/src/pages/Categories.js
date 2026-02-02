@@ -291,8 +291,8 @@ export default function Categories() {
     <div className="space-y-6 animate-fade-in" data-testid="categories-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Categories</h1>
-          <p className="text-slate-500 mt-1">Manage request categories (2-level hierarchy)</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('categories.title')}</h1>
+          <p className="text-slate-500 mt-1">{t('categories.description')}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -300,7 +300,7 @@ export default function Categories() {
           data-testid="add-category-l1-btn"
         >
           <Plus size={18} className="mr-2" />
-          Add Category
+          {t('categories.addCategory')}
         </Button>
       </div>
 
@@ -310,13 +310,13 @@ export default function Categories() {
           <CardHeader className="border-b border-slate-100 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <FolderTree size={18} className="text-rose-600" />
-              Level 1 Categories
+              {t('categories.level1Categories')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {categoriesL1.length === 0 ? (
               <div className="p-6 text-center text-slate-500">
-                No categories yet
+                {t('categories.noCategoriesYet')}
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -373,7 +373,7 @@ export default function Categories() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Tag size={18} className="text-rose-600" />
-                  Subcategories
+                  {t('categories.subcategories')}
                   {selectedL1 && (
                     <Badge variant="outline" className="ml-2">
                       {categoriesL1.find(c => c.id === selectedL1)?.name}
@@ -388,7 +388,7 @@ export default function Categories() {
                     data-testid="add-category-l2-btn"
                   >
                     <Plus size={14} className="mr-1" />
-                    Add Subcategory
+                    {t('categories.addSubcategory')}
                   </Button>
                 )}
               </div>
@@ -396,11 +396,11 @@ export default function Categories() {
             <CardContent className="p-0">
               {!selectedL1 ? (
                 <div className="p-12 text-center text-slate-500">
-                  Select a category to view subcategories
+                  {t('categories.selectCategoryToViewSub')}
                 </div>
               ) : categoriesL2.length === 0 ? (
                 <div className="p-12 text-center text-slate-500">
-                  No subcategories yet
+                  {t('categories.noSubcategoriesYet')}
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
