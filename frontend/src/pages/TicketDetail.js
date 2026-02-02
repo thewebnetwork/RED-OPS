@@ -224,7 +224,7 @@ export default function TicketDetail() {
               {/* Client */}
               {ticket.client_name && (
                 <div>
-                  <Label className="text-xs text-slate-500">Client</Label>
+                  <Label className="text-xs text-slate-500">{t('tickets.client')}</Label>
                   <p className="font-medium mt-1.5">{ticket.client_name}</p>
                 </div>
               )}
