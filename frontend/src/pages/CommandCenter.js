@@ -572,6 +572,7 @@ export default function CommandCenter() {
 
 // Editing Request Form (reuses existing workflow)
 function EditingRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, onSuccess, onDraftSaved }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -603,17 +604,17 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
     
     if (!isDraft) {
       if (!title) {
-        toast.error('Please enter a title');
+        toast.error(t('formValidation.enterTitle'));
         return;
       }
       if (!description) {
-        toast.error('Please enter a description');
+        toast.error(t('formValidation.enterDescription'));
         return;
       }
     } else {
       // For drafts, at least title is needed
       if (!title) {
-        toast.error('Please enter at least a title to save as draft');
+        toast.error(t('formValidation.enterTitleDraft'));
         return;
       }
     }
@@ -646,7 +647,7 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
         onSuccess();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to submit request');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     } finally {
       setLoading(false);
       setSavingDraft(false);
@@ -656,82 +657,82 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
   return (
     <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
-        <p className="text-sm text-rose-700 font-medium">Editing Services Request</p>
-        <p className="text-xs text-rose-600">This will create an editing order that editors can pick up.</p>
+        <p className="text-sm text-rose-700 font-medium">{t('formTypes.editingServices')}</p>
+        <p className="text-xs text-rose-600">{t('formTypes.editingServicesDesc')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label>Priority</Label>
+          <Label>{t('forms.priority')}</Label>
           <Select value={formData.priority} onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}>
             <SelectTrigger className="mt-1.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Low">Low</SelectItem>
-              <SelectItem value="Normal">Normal</SelectItem>
-              <SelectItem value="High">High</SelectItem>
-              <SelectItem value="Urgent">Urgent</SelectItem>
+              <SelectItem value="Low">{t('priority.low')}</SelectItem>
+              <SelectItem value="Normal">{t('priority.normal')}</SelectItem>
+              <SelectItem value="High">{t('priority.high')}</SelectItem>
+              <SelectItem value="Urgent">{t('priority.urgent')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>Delivery Format</Label>
+          <Label>{t('forms.deliveryFormat')}</Label>
           <Input
             value={formData.delivery_format}
             onChange={(e) => setFormData(prev => ({ ...prev, delivery_format: e.target.value }))}
-            placeholder="e.g., 1080p MP4, 9:16 for Instagram"
+            placeholder={t('forms.deliveryFormatPlaceholder')}
             className="mt-1.5"
           />
         </div>
       </div>
 
       <div>
-        <Label>Video Script</Label>
+        <Label>{t('forms.videoScript')}</Label>
         <Textarea
           value={formData.video_script}
           onChange={(e) => setFormData(prev => ({ ...prev, video_script: e.target.value }))}
-          placeholder="Paste your video script here..."
+          placeholder={t('forms.videoScriptPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Footage Links</Label>
+        <Label>{t('forms.footageLinks')}</Label>
         <Textarea
           value={formData.footage_links}
           onChange={(e) => setFormData(prev => ({ ...prev, footage_links: e.target.value }))}
-          placeholder="Links to raw footage (Google Drive, Dropbox, etc.)"
+          placeholder={t('forms.footagePlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Reference Links</Label>
+        <Label>{t('forms.referenceLinks')}</Label>
         <Textarea
           value={formData.reference_links}
           onChange={(e) => setFormData(prev => ({ ...prev, reference_links: e.target.value }))}
-          placeholder="Links to example videos or inspiration..."
+          placeholder={t('forms.referencePlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Music Preference</Label>
+        <Label>{t('forms.musicPreference')}</Label>
         <Input
           value={formData.music_preference}
           onChange={(e) => setFormData(prev => ({ ...prev, music_preference: e.target.value }))}
-          placeholder="e.g., Upbeat, corporate, link to specific track..."
+          placeholder={t('forms.musicPlaceholder')}
           className="mt-1.5"
         />
       </div>
 
       <div>
-        <Label>Special Instructions</Label>
+        <Label>{t('forms.specialInstructions')}</Label>
         <Textarea
           value={formData.special_instructions}
           onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
-          placeholder="Any other details or requirements..."
+          placeholder={t('forms.specialInstructionsPlaceholder')}
           className="mt-1.5"
         />
       </div>
@@ -747,7 +748,7 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="save-draft-btn"
         >
           <Save size={16} className="mr-2" />
-          {savingDraft ? 'Saving...' : 'Save Draft'}
+          {savingDraft ? t('formButtons.saving') : t('formButtons.saveDraft')}
         </Button>
         <Button 
           type="submit" 
@@ -756,7 +757,7 @@ function EditingRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="submit-request-btn"
         >
           <Send size={16} className="mr-2" />
-          {loading ? 'Submitting...' : 'Submit Request'}
+          {loading ? t('formButtons.submitting') : t('formButtons.submitRequest')}
         </Button>
       </div>
     </form>
