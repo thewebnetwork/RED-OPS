@@ -457,7 +457,7 @@ export default function Reports() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {/* Date From */}
                   <div>
-                    <Label className="text-xs">Date From</Label>
+                    <Label className="text-xs">{t('reports.dateFrom')}</Label>
                     <Input
                       type="date"
                       value={filters.date_from}
@@ -468,7 +468,7 @@ export default function Reports() {
 
                   {/* Date To */}
                   <div>
-                    <Label className="text-xs">Date To</Label>
+                    <Label className="text-xs">{t('reports.dateTo')}</Label>
                     <Input
                       type="date"
                       value={filters.date_to}
@@ -479,47 +479,47 @@ export default function Reports() {
 
                   {/* Status */}
                   <div>
-                    <Label className="text-xs">Status</Label>
+                    <Label className="text-xs">{t('common.status')}</Label>
                     <Select
                       value={filters.status[0] || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, status: v === 'all' ? [] : [v] }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="Open">Open</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Delivered">Delivered</SelectItem>
-                        <SelectItem value="Closed">Closed</SelectItem>
+                        <SelectItem value="all">{t('reports.allStatuses')}</SelectItem>
+                        <SelectItem value="Open">{t('reports.statusOpen')}</SelectItem>
+                        <SelectItem value="In Progress">{t('reports.statusInProgress')}</SelectItem>
+                        <SelectItem value="Pending">{t('reports.statusPending')}</SelectItem>
+                        <SelectItem value="Delivered">{t('reports.statusDelivered')}</SelectItem>
+                        <SelectItem value="Closed">{t('reports.statusClosed')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   {/* SLA State */}
                   <div>
-                    <Label className="text-xs">SLA State</Label>
+                    <Label className="text-xs">{t('reports.slaState')}</Label>
                     <Select
                       value={filters.sla_state || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, sla_state: v === 'all' ? '' : v }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="on_track">On Track</SelectItem>
-                        <SelectItem value="at_risk">At Risk</SelectItem>
-                        <SelectItem value="breached">Breached</SelectItem>
+                        <SelectItem value="all">{t('common.all')}</SelectItem>
+                        <SelectItem value="on_track">{t('reports.onTrack')}</SelectItem>
+                        <SelectItem value="at_risk">{t('reports.atRisk')}</SelectItem>
+                        <SelectItem value="breached">{t('reports.breached')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   {/* Category L1 */}
                   <div>
-                    <Label className="text-xs">Category L1</Label>
+                    <Label className="text-xs">{t('reports.categoryL1')}</Label>
                     <Select
                       value={filters.category_l1_id || 'all'}
                       onValueChange={(v) => {
