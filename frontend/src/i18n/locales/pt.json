@@ -484,7 +484,23 @@
     "serverError": "Erro do servidor",
     "failedToLoad": "Falha ao carregar",
     "failedToSave": "Falha ao salvar",
-    "failedToDelete": "Falha ao excluir"
+    "failedToDelete": "Falha ao excluir",
+    "uploadFailed": "Falha ao enviar"
+  },
+  "buttons": {
+    "newRequest": "Nova Solicitação",
+    "viewAll": "Ver Tudo",
+    "viewDetails": "Ver Detalhes",
+    "assign": "Atribuir",
+    "reassign": "Reatribuir",
+    "pick": "Pegar",
+    "deliver": "Entregar",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "restore": "Restaurar",
+    "archive": "Arquivar",
+    "duplicate": "Duplicar",
+    "preview": "Visualizar"
   },
   "success": {
     "saved": "Salvo com sucesso",
