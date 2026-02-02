@@ -200,7 +200,15 @@
     "createNewTicket": "Create New Ticket",
     "filterByStatus": "Filter by status",
     "filterByPriority": "Filter by priority",
-    "searchPlaceholder": "Search tickets..."
+    "searchPlaceholder": "Search tickets...",
+    "subject": "Subject",
+    "subjectPlaceholder": "What's this about?",
+    "selectClient": "Select client",
+    "linkToOrder": "Link to order",
+    "initialMessage": "Initial Message",
+    "describeIssue": "Describe the issue...",
+    "ticketCreated": "Ticket created",
+    "failedToCreate": "Failed to create ticket"
   },
   "orders": {
     "title": "Orders",
