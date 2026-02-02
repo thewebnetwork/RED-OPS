@@ -138,7 +138,7 @@ export default function RibbonBoard() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-sm text-slate-500">{ticket.order_code}</span>
               <Badge variant="outline" className="text-xs">
-                {ticket.category_name || 'General'}
+                {ticket.category_name || t('ribbon.general')}
               </Badge>
               {ticket.specialty_name && (
                 <Badge className="bg-purple-100 text-purple-700 text-xs">
@@ -151,16 +151,16 @@ export default function RibbonBoard() {
             <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
               <span className="flex items-center gap-1">
                 <Timer size={14} />
-                In pool: {formatTimeInPool(ticket.pool_entered_at)}
+                {t('ribbon.inPool')}: {formatTimeInPool(ticket.pool_entered_at)}
               </span>
-              <span>Priority: {ticket.priority || 'Normal'}</span>
+              <span>{t('ribbon.priority')}: {ticket.priority || t('ribbon.normal')}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <Link to={`/orders/${ticket.id}`}>
               <Button variant="outline" size="sm">
                 <Eye size={14} className="mr-1" />
-                View
+                {t('common.view')}
               </Button>
             </Link>
             {canPick && (
@@ -174,7 +174,7 @@ export default function RibbonBoard() {
                 data-testid={`pick-ticket-${ticket.id}`}
               >
                 <Hand size={14} className="mr-1" />
-                Pick
+                {t('ribbon.pick')}
               </Button>
             )}
           </div>
