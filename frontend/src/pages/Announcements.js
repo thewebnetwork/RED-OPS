@@ -281,12 +281,12 @@ export default function Announcements() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-slate-900">{ann.title}</h3>
                         {getStatusBadge(ann)}
-                        <Badge variant="outline" className="text-xs">Priority: {ann.priority}</Badge>
+                        <Badge variant="outline" className="text-xs">{t('announcements.priority')}: {ann.priority}</Badge>
                       </div>
                       <p className="text-sm text-slate-600 mt-1 line-clamp-2">{ann.message}</p>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500">
                         {ann.send_to_all ? (
-                          <span className="flex items-center gap-1"><Globe size={12} /> All Users</span>
+                          <span className="flex items-center gap-1"><Globe size={12} /> {t('announcements.allUsers')}</span>
                         ) : (
                           <>
                             {ann.target_team_names?.length > 0 && (
@@ -303,13 +303,13 @@ export default function Announcements() {
                         {ann.start_at && (
                           <span className="flex items-center gap-1">
                             <Calendar size={12} /> 
-                            Starts: {format(new Date(ann.start_at), 'MMM d, yyyy HH:mm')}
+                            {t('announcements.starts')}: {format(new Date(ann.start_at), 'MMM d, yyyy HH:mm')}
                           </span>
                         )}
                         {ann.end_at && (
                           <span className="flex items-center gap-1">
                             <Calendar size={12} /> 
-                            Ends: {format(new Date(ann.end_at), 'MMM d, yyyy HH:mm')}
+                            {t('announcements.ends')}: {format(new Date(ann.end_at), 'MMM d, yyyy HH:mm')}
                           </span>
                         )}
                       </div>
@@ -334,9 +334,9 @@ export default function Announcements() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingAnnouncement ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
+            <DialogTitle>{editingAnnouncement ? t('announcements.editAnnouncement') : t('announcements.createAnnouncement')}</DialogTitle>
             <DialogDescription>
-              Create announcements that will be displayed to users in a banner.
+              {t('announcements.createDescription')}
             </DialogDescription>
           </DialogHeader>
           
@@ -344,20 +344,20 @@ export default function Announcements() {
             {/* Basic Info */}
             <div className="grid gap-4">
               <div>
-                <Label>Title *</Label>
+                <Label>{t('announcements.titleLabel')} *</Label>
                 <Input 
                   value={form.title} 
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Announcement title"
+                  placeholder={t('announcements.titlePlaceholder')}
                   data-testid="announcement-title-input"
                 />
               </div>
               <div>
-                <Label>Message *</Label>
+                <Label>{t('announcements.messageLabel')} *</Label>
                 <Textarea 
                   value={form.message} 
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="The announcement message to display"
+                  placeholder={t('announcements.messagePlaceholder')}
                   rows={3}
                   data-testid="announcement-message-input"
                 />
