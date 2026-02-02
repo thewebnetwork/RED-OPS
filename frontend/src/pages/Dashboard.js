@@ -306,10 +306,10 @@ function StatusAreaChart({ data, title }) {
               labelFormatter={(val) => format(new Date(val), 'MMM d, yyyy')}
             />
             <Legend />
-            <Area type="monotone" dataKey="open" name="Open" stroke={STATUS_COLORS.open} fillOpacity={1} fill="url(#colorOpen)" animationDuration={1500} />
-            <Area type="monotone" dataKey="in_progress" name="In Progress" stroke={STATUS_COLORS.in_progress} fillOpacity={1} fill="url(#colorInProgress)" animationDuration={1500} />
-            <Area type="monotone" dataKey="pending" name="Pending" stroke={STATUS_COLORS.pending} fillOpacity={1} fill="url(#colorPending)" animationDuration={1500} />
-            <Area type="monotone" dataKey="delivered" name="Delivered" stroke={STATUS_COLORS.delivered} fillOpacity={1} fill="url(#colorDelivered)" animationDuration={1500} />
+            <Area type="monotone" dataKey="open" name={t('chartLabels.open')} stroke={STATUS_COLORS.open} fillOpacity={1} fill="url(#colorOpen)" animationDuration={1500} />
+            <Area type="monotone" dataKey="in_progress" name={t('chartLabels.inProgress')} stroke={STATUS_COLORS.in_progress} fillOpacity={1} fill="url(#colorInProgress)" animationDuration={1500} />
+            <Area type="monotone" dataKey="pending" name={t('chartLabels.pending')} stroke={STATUS_COLORS.pending} fillOpacity={1} fill="url(#colorPending)" animationDuration={1500} />
+            <Area type="monotone" dataKey="delivered" name={t('chartLabels.delivered')} stroke={STATUS_COLORS.delivered} fillOpacity={1} fill="url(#colorDelivered)" animationDuration={1500} />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
