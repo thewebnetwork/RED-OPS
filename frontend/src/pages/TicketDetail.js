@@ -245,7 +245,7 @@ export default function TicketDetail() {
 
               {/* Created */}
               <div>
-                <Label className="text-xs text-slate-500">Created</Label>
+                <Label className="text-xs text-slate-500">{t('tickets.created')}</Label>
                 <p className="font-medium mt-1.5">
                   {format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}
                 </p>
