@@ -45,6 +45,7 @@ const TICKET_STATUSES = ["Open", "Waiting", "Closed"];
 
 export default function Tickets() {
   const { hasRole } = useAuth();
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [clients, setClients] = useState([]);
   const [orders, setOrders] = useState([]);
