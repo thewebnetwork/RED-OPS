@@ -209,16 +209,16 @@
     "describeIssue": "Describa el problema...",
     "ticketCreated": "Ticket creado",
     "failedToCreate": "Error al crear ticket",
-    "ticket": "[ES] Ticket",
-    "linkedOrder": "[ES] Linked Order",
-    "updated": "[ES] Updated",
-    "allStatuses": "[ES] All Statuses",
-    "noTicketsMatch": "[ES] No tickets match your filters",
-    "noTicketsYet": "[ES] No tickets yet",
+    "ticket": "Ticket",
+    "linkedOrder": "Pedido Vinculado",
+    "updated": "Actualizado",
+    "allStatuses": "Todos los Estados",
+    "noTicketsMatch": "No hay tickets que coincidan con sus filtros",
+    "noTicketsYet": "Aún no hay tickets",
     "status": {
-      "open": "[ES] Open",
-      "waiting": "[ES] Waiting",
-      "closed": "[ES] Closed"
+      "open": "Abierto",
+      "waiting": "En Espera",
+      "closed": "Cerrado"
     }
   },
   "orders": {
