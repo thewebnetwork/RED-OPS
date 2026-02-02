@@ -146,7 +146,7 @@ export default function CommandCenter() {
       const l1Res = await axios.get(`${API}/categories/l1`);
       setCategoriesL1(l1Res.data);
     } catch (error) {
-      toast.error('Failed to load data');
+      toast.error(t('errors.failedToLoad'));
     } finally {
       setLoading(false);
     }
