@@ -263,12 +263,12 @@ export default function CommandCenter() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">
-          {preselectedType === 'issue' ? 'Report an Issue' : 'Submit New Request'}
+          {preselectedType === 'issue' ? t('bugReport.title') : t('commandCenter.newTicket')}
         </h1>
         <p className="text-slate-500 mt-1">
           {preselectedType === 'issue' 
-            ? 'Report a problem or bug you have encountered' 
-            : 'Place requests, report issues, or request new features'}
+            ? t('bugReport.title')
+            : t('commandCenter.whatDoYouNeed')}
         </p>
       </div>
 
@@ -283,7 +283,7 @@ export default function CommandCenter() {
             <div className="lg:col-span-2">
               <Card className="border-slate-200">
                 <CardHeader className="border-b border-slate-100 pb-4">
-                  <CardTitle>Fill Out Form</CardTitle>
+                  <CardTitle>{t('forms.fillOutForm')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   {/* Title */}
