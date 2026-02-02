@@ -32,6 +32,7 @@ import {
   Send
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getTranslatedCategoryName } from '../utils/i18nHelpers';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
