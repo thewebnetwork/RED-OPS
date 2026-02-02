@@ -86,7 +86,7 @@ const priorityColors = {
 };
 
 export default function CommandCenter() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const preselectedCategory = searchParams.get('category');
@@ -96,6 +96,9 @@ export default function CommandCenter() {
   const [categoriesL2, setCategoriesL2] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categorySearch, setCategorySearch] = useState('');
+  
+  // Helper to get translated category name
+  const getCatName = (cat) => getTranslatedCategoryName(cat, i18n.language);
   
   // Form state
   const [selectedL1, setSelectedL1] = useState('');
