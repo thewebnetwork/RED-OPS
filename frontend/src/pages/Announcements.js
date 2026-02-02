@@ -215,13 +215,13 @@ export default function Announcements() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Megaphone className="text-[#A2182C]" />
-            Announcements
+            {t('announcements.title')}
           </h1>
-          <p className="text-slate-500 mt-1">Create and manage platform announcements for users</p>
+          <p className="text-slate-500 mt-1">{t('announcements.description')}</p>
         </div>
         <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
           <Plus size={16} className="mr-2" />
-          New Announcement
+          {t('announcements.newAnnouncement')}
         </Button>
       </div>
 
@@ -230,25 +230,25 @@ export default function Announcements() {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.length}</p>
-            <p className="text-sm text-slate-500">Total</p>
+            <p className="text-sm text-slate-500">{t('announcements.total')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-emerald-600">{announcements.filter(a => a.is_active).length}</p>
-            <p className="text-sm text-slate-500">Active</p>
+            <p className="text-sm text-slate-500">{t('common.active')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-yellow-600">{announcements.filter(a => a.start_at && new Date(a.start_at) > new Date()).length}</p>
-            <p className="text-sm text-slate-500">Scheduled</p>
+            <p className="text-sm text-slate-500">{t('announcements.scheduled')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-slate-400">{announcements.filter(a => !a.is_active).length}</p>
-            <p className="text-sm text-slate-500">Inactive</p>
+            <p className="text-sm text-slate-500">{t('common.inactive')}</p>
           </CardContent>
         </Card>
       </div>
@@ -256,16 +256,16 @@ export default function Announcements() {
       {/* Announcements List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Announcements</CardTitle>
-          <CardDescription>Announcements are displayed by priority (highest first). One announcement shown at a time per user.</CardDescription>
+          <CardTitle>{t('announcements.allAnnouncements')}</CardTitle>
+          <CardDescription>{t('announcements.displayDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
             <div className="py-12 text-center text-slate-500">
               <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
-              <p>No announcements yet</p>
+              <p>{t('announcements.noAnnouncements')}</p>
               <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
-                Create Your First Announcement
+                {t('announcements.createFirst')}
               </Button>
             </div>
           ) : (
