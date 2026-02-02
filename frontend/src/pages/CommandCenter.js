@@ -341,7 +341,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Draft saved! View it in My Tickets.');
+                            toast.success(t('formSuccess.draftSaved'));
                           }}
                         />
                       )}
@@ -368,7 +368,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Draft saved! View it in My Tickets.');
+                            toast.success(t('formSuccess.draftSaved'));
                           }}
                         />
                       )}
@@ -396,7 +396,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Draft saved! View it in My Tickets.');
+                            toast.success(t('formSuccess.draftSaved'));
                           }}
                         />
                       )}
@@ -425,7 +425,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Draft saved! View it in My Tickets.');
+                            toast.success(t('formSuccess.draftSaved'));
                           }}
                         />
                       )}
