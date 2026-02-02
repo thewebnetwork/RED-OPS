@@ -192,9 +192,9 @@ export default function Reports() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('CSV exported');
+      toast.success(t('reports.csvExported'));
     } catch (error) {
-      toast.error('Failed to export CSV');
+      toast.error(t('reports.failedToExportCsv'));
     } finally {
       setExporting(false);
     }
