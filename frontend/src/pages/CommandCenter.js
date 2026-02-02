@@ -534,7 +534,7 @@ export default function CommandCenter() {
                       />
                       <Upload size={20} className="mx-auto text-slate-400 mb-1" />
                       <p className="text-xs text-slate-600">{t('commandCenter.clickToUpload')}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Max 50 MB total</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{t('commandCenter.maxSize')}</p>
                     </div>
                     
                     {attachments.length > 0 && (
