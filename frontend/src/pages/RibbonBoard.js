@@ -200,12 +200,12 @@ export default function RibbonBoard() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <Layers className="text-[#A2182C]" />
-          Opportunity Ribbon
+          {t('ribbon.title')}
         </h1>
         <p className="text-slate-500 mt-1">
-          {isPartner && "View and pick available service requests from the Partner pool"}
-          {isVendor && "View and pick available service requests from the Vendor pool"}
-          {(isAdmin || isOperator) && "Manage and monitor work pools for Partners and Vendors"}
+          {isPartner && t('ribbon.partnerDescription')}
+          {isVendor && t('ribbon.vendorDescription')}
+          {(isAdmin || isOperator) && t('ribbon.adminDescription')}
         </p>
       </div>
 
@@ -214,7 +214,7 @@ export default function RibbonBoard() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
           <Input
-            placeholder="Search tickets..."
+            placeholder={t('ribbon.searchTickets')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -224,10 +224,10 @@ export default function RibbonBoard() {
         <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
           <SelectTrigger className="w-[200px]" data-testid="specialty-filter">
             <Filter size={16} className="mr-2" />
-            <SelectValue placeholder="Filter by specialty" />
+            <SelectValue placeholder={t('ribbon.filterBySpecialty')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Specialties</SelectItem>
+            <SelectItem value="all">{t('ribbon.allSpecialties')}</SelectItem>
             {specialties.map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
