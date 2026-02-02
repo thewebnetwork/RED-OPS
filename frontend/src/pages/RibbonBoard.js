@@ -241,14 +241,14 @@ export default function RibbonBoard() {
           {canViewPool1 && (
             <TabsTrigger value="pool1" className="flex items-center gap-2" data-testid="pool1-tab">
               <Users size={16} />
-              Pool 1 (Partners)
+              {t('ribbon.pool1Partners')}
               <Badge variant="secondary" className="ml-1">{pool1Tickets.length}</Badge>
             </TabsTrigger>
           )}
           {canViewPool2 && (
             <TabsTrigger value="pool2" className="flex items-center gap-2" data-testid="pool2-tab">
               <Briefcase size={16} />
-              Pool 2 (Vendors)
+              {t('ribbon.pool2Vendors')}
               <Badge variant="secondary" className="ml-1">{pool2Tickets.length}</Badge>
             </TabsTrigger>
           )}
@@ -261,9 +261,9 @@ export default function RibbonBoard() {
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2 text-purple-800">
                   <Users size={18} />
-                  <span className="font-medium">Partner Pool</span>
+                  <span className="font-medium">{t('ribbon.partnerPool')}</span>
                   <span className="text-sm text-purple-600">
-                    • Tickets available for Partners to pick • 24-hour right of first refusal
+                    {t('ribbon.partnerPoolDescription')}
                   </span>
                 </div>
               </CardContent>
@@ -273,7 +273,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">No tickets available in Pool 1</p>
+                  <p className="text-slate-500">{t('ribbon.noTicketsPool1')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -298,9 +298,9 @@ export default function RibbonBoard() {
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2 text-emerald-800">
                   <Briefcase size={18} />
-                  <span className="font-medium">Vendor/Freelancer Pool</span>
+                  <span className="font-medium">{t('ribbon.vendorPool')}</span>
                   <span className="text-sm text-emerald-600">
-                    • Tickets available for Vendors to pick • After 24h in Pool 1
+                    {t('ribbon.vendorPoolDescription')}
                   </span>
                 </div>
               </CardContent>
@@ -310,7 +310,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">No tickets available in Pool 2</p>
+                  <p className="text-slate-500">{t('ribbon.noTicketsPool2')}</p>
                 </CardContent>
               </Card>
             ) : (
