@@ -1151,6 +1151,7 @@ function BugReportForm({ title, description, attachments, categoryL1Id, category
 
 // Generic Request Form - for categories without special forms
 function GenericRequestForm({ title, description, attachments, categoryL1Id, categoryL2Id, requestType, onSuccess, onDraftSaved }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -1169,7 +1170,7 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
         });
       } catch (err) {
         console.error('Failed to upload file:', file.name, err);
-        toast.error(`Failed to upload: ${file.name}`);
+        toast.error(`${t('errors.uploadFailed')}: ${file.name}`);
       }
     }
   };
@@ -1179,16 +1180,16 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
     
     if (!isDraft) {
       if (!title) {
-        toast.error('Please enter a title');
+        toast.error(t('formValidation.enterTitle'));
         return;
       }
       if (!description) {
-        toast.error('Please provide a description');
+        toast.error(t('formValidation.provideDescription'));
         return;
       }
     } else {
       if (!title) {
-        toast.error('Please enter at least a title to save as draft');
+        toast.error(t('formValidation.enterTitleDraft'));
         return;
       }
     }
@@ -1223,7 +1224,7 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
         onSuccess();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to submit request');
+      toast.error(error.response?.data?.detail || t('errors.generic'));
     } finally {
       setLoading(false);
       setSavingDraft(false);
@@ -1234,32 +1235,32 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
     <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
       <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
         <p className="text-sm text-slate-700 font-medium">
-          {requestType === 'Issue' ? 'Report an Issue' : 'Submit Request'}
+          {requestType === 'Issue' ? t('formTypes.reportIssue') : t('formTypes.genericRequest')}
         </p>
-        <p className="text-xs text-slate-600">Fill out the form and submit your request.</p>
+        <p className="text-xs text-slate-600">{t('formTypes.genericRequestDesc')}</p>
       </div>
 
       <div>
-        <Label>Priority</Label>
+        <Label>{t('forms.priority')}</Label>
         <Select value={formData.priority} onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}>
           <SelectTrigger className="mt-1.5">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Normal">Normal</SelectItem>
-            <SelectItem value="High">High</SelectItem>
-            <SelectItem value="Urgent">Urgent</SelectItem>
+            <SelectItem value="Low">{t('priority.low')}</SelectItem>
+            <SelectItem value="Normal">{t('priority.normal')}</SelectItem>
+            <SelectItem value="High">{t('priority.high')}</SelectItem>
+            <SelectItem value="Urgent">{t('priority.urgent')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <Label>Additional Notes (optional)</Label>
+        <Label>{t('forms.additionalNotes')}</Label>
         <Textarea
           value={formData.additional_notes}
           onChange={(e) => setFormData(prev => ({ ...prev, additional_notes: e.target.value }))}
-          placeholder="Any additional information..."
+          placeholder={t('forms.additionalNotesPlaceholder')}
           className="mt-1.5"
         />
       </div>
@@ -1275,7 +1276,7 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="save-draft-btn"
         >
           <Save size={16} className="mr-2" />
-          {savingDraft ? 'Saving...' : 'Save Draft'}
+          {savingDraft ? t('formButtons.saving') : t('formButtons.saveDraft')}
         </Button>
         <Button 
           type="submit" 
@@ -1284,7 +1285,7 @@ function GenericRequestForm({ title, description, attachments, categoryL1Id, cat
           data-testid="submit-request-btn"
         >
           <Send size={16} className="mr-2" />
-          {loading ? 'Submitting...' : 'Submit Request'}
+          {loading ? t('formButtons.submitting') : t('formButtons.submitRequest')}
         </Button>
       </div>
     </form>
