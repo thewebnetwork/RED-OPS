@@ -127,27 +127,27 @@ export default function Tickets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tickets</h1>
-          <p className="text-slate-500 mt-1">{tickets.length} tickets</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('tickets.title')}</h1>
+          <p className="text-slate-500 mt-1">{tickets.length} {t('tickets.title').toLowerCase()}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-ticket-btn">
               <Plus size={18} className="mr-2" />
-              Create Ticket
+              {t('tickets.createNewTicket')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Ticket</DialogTitle>
+              <DialogTitle>{t('tickets.createNewTicket')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Subject *</Label>
+                <Label>{t('tickets.subject')} *</Label>
                 <Input
                   value={formData.subject}
                   onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="What's this about?"
+                  placeholder={t('tickets.subjectPlaceholder')}
                   className="mt-1.5"
                   data-testid="ticket-subject-input"
                 />
