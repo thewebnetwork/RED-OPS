@@ -389,7 +389,7 @@ function SLATrendChart({ data, title }) {
             <Line 
               type="monotone" 
               dataKey="on_track" 
-              name="On Track"
+              name={t('chartLabels.onTrack')}
               stroke={SLA_COLORS.on_track} 
               strokeWidth={2}
               dot={false}
@@ -398,7 +398,7 @@ function SLATrendChart({ data, title }) {
             <Line 
               type="monotone" 
               dataKey="at_risk" 
-              name="At Risk"
+              name={t('chartLabels.atRisk')}
               stroke={SLA_COLORS.at_risk} 
               strokeWidth={2}
               dot={false}
@@ -407,7 +407,7 @@ function SLATrendChart({ data, title }) {
             <Line 
               type="monotone" 
               dataKey="breached" 
-              name="Breached"
+              name={t('chartLabels.breached')}
               stroke={SLA_COLORS.breached} 
               strokeWidth={2}
               dot={false}
