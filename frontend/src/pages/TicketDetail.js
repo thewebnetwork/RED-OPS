@@ -38,6 +38,7 @@ export default function TicketDetail() {
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const messagesEndRef = useRef(null);
   
   const [ticket, setTicket] = useState(null);
