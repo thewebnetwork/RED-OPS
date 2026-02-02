@@ -223,12 +223,12 @@ export default function Tickets() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40" data-testid="status-filter">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder={t('tickets.allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">{t('tickets.allStatuses')}</SelectItem>
                 {TICKET_STATUSES.map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -244,19 +244,19 @@ export default function Tickets() {
           </div>
         ) : filteredTickets.length === 0 ? (
           <CardContent className="p-12 text-center text-slate-500">
-            {search || statusFilter ? 'No tickets match your filters' : 'No tickets yet'}
+            {search || statusFilter ? t('tickets.noTicketsMatch') : t('tickets.noTicketsYet')}
           </CardContent>
         ) : (
           <div className="overflow-x-auto">
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>Ticket</th>
-                  <th>Client</th>
-                  <th>Linked Order</th>
-                  <th>Status</th>
-                  <th>Owner</th>
-                  <th>Updated</th>
+                  <th>{t('tickets.ticket')}</th>
+                  <th>{t('tickets.client')}</th>
+                  <th>{t('tickets.linkedOrder')}</th>
+                  <th>{t('common.status')}</th>
+                  <th>{t('tickets.owner')}</th>
+                  <th>{t('tickets.updated')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -284,11 +284,11 @@ export default function Tickets() {
                     <td>
                       <Select value={ticket.status} onValueChange={(v) => handleStatusChange(ticket.id, v)}>
                         <SelectTrigger className="h-8 w-28">
-                          <Badge className={statusColors[ticket.status]}>{ticket.status}</Badge>
+                          <Badge className={statusColors[ticket.status]}>{t(`tickets.status.${ticket.status.toLowerCase()}`)}</Badge>
                         </SelectTrigger>
                         <SelectContent>
                           {TICKET_STATUSES.map(s => (
-                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                            <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
