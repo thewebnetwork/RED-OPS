@@ -259,7 +259,7 @@ function TicketListSection({ title, icon: Icon, iconColor, tickets, showWaitingR
 
 // ============== CHARTS ==============
 
-function StatusAreaChart({ data, title }) {
+function StatusAreaChart({ data, title, t }) {
   return (
     <Card className="border-slate-200">
       <CardHeader className="pb-2">
