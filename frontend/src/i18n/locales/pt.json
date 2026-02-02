@@ -566,6 +566,12 @@
     "failedToDelete": "Falha ao excluir",
     "uploadFailed": "Falha ao enviar"
   },
+  "fileValidation": {
+    "blockedType": "O tipo de arquivo {{extension}} não é permitido por razões de segurança",
+    "unsupportedType": "O tipo de arquivo {{extension}} não é suportado",
+    "fileTooLarge": "O arquivo \"{{filename}}\" excede o limite de 50 MB",
+    "totalTooLarge": "O total de anexos não pode exceder 50 MB"
+  },
   "buttons": {
     "newRequest": "Nova Solicitação",
     "viewAll": "Ver Tudo",
