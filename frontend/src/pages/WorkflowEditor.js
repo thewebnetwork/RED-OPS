@@ -720,8 +720,8 @@ export default function WorkflowEditor() {
 
               {/* Assign to Teams */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Assign to Teams</Label>
-                <p className="text-xs text-slate-500">Select teams that can use this workflow</p>
+                <Label className="text-sm font-medium">{t('workflow.assignToTeams')}</Label>
+                <p className="text-xs text-slate-500">{t('workflow.selectTeamsDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {teams.map((team) => (
                     <div key={team.id} className="flex items-center gap-2">
@@ -742,7 +742,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {teams.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">No teams available</p>
+                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noTeamsAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_team_names?.length > 0 && (
@@ -758,8 +758,8 @@ export default function WorkflowEditor() {
 
               {/* Target by Specialty */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Target by Specialty</Label>
-                <p className="text-xs text-slate-500">Apply this workflow to users with these specialties</p>
+                <Label className="text-sm font-medium">{t('workflow.targetBySpecialty')}</Label>
+                <p className="text-xs text-slate-500">{t('workflow.targetSpecialtyDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {specialties.map((specialty) => (
                     <div key={specialty.id} className="flex items-center gap-2">
@@ -780,7 +780,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {specialties.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">No specialties available</p>
+                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noSpecialtiesAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_specialty_names?.length > 0 && (
@@ -796,8 +796,8 @@ export default function WorkflowEditor() {
 
               {/* Target by Access Tier */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Target by Access Tier</Label>
-                <p className="text-xs text-slate-500">Apply this workflow to users with these access tiers</p>
+                <Label className="text-sm font-medium">{t('workflow.targetByAccessTier')}</Label>
+                <p className="text-xs text-slate-500">{t('workflow.targetAccessTierDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {accessTiers.map((tier) => (
                     <div key={tier.id} className="flex items-center gap-2">
