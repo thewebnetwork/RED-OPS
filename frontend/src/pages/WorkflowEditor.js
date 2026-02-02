@@ -818,7 +818,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {accessTiers.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">No access tiers available</p>
+                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noAccessTiersAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_access_tier_names?.length > 0 && (
@@ -834,8 +834,8 @@ export default function WorkflowEditor() {
 
               {/* Trigger by Category */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Trigger by Category</Label>
-                <p className="text-xs text-slate-500">Auto-trigger this workflow when tickets are created in these categories</p>
+                <Label className="text-sm font-medium">{t('workflow.triggerByCategory')}</Label>
+                <p className="text-xs text-slate-500">{t('workflow.triggerCategoryDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {categories.map((cat) => (
                     <div key={cat.id} className="flex items-center gap-2">
@@ -857,7 +857,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {categories.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">No categories available</p>
+                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noCategoriesAvailable')}</p>
                   )}
                 </div>
                 {workflow?.trigger_category_names?.length > 0 && (
@@ -879,21 +879,21 @@ export default function WorkflowEditor() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Unsaved Changes
+              {t('workflow.unsavedChanges')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes to this workflow. Would you like to save them before leaving?
+              {t('workflow.unsavedChangesDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
-              Cancel
+              {t('common.cancel')}
             </AlertDialogCancel>
             <Button variant="outline" onClick={handleDiscardChanges}>
-              Discard Changes
+              {t('workflow.discardChanges')}
             </Button>
             <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-rose-600 hover:bg-rose-700">
-              Save & Leave
+              {t('workflow.saveAndLeave')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
