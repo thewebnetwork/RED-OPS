@@ -881,17 +881,17 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">Your submitted tickets</p>
+          <p className="text-slate-500 mt-1">{t('dashboardLabels.yourSubmittedTickets')}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
             <RefreshCw size={14} />
-            Refresh
+            {t('common.refresh')}
           </Button>
           <Link to="/submit">
             <Button size="sm" className="bg-rose-600 hover:bg-rose-700 gap-2">
               <Send size={14} />
-              New Request
+              {t('buttons.newRequest')}
             </Button>
           </Link>
         </div>
@@ -900,24 +900,24 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
       {/* My Ticket KPIs (Clickable - routes to my-tickets for Media Clients) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link to="/my-tickets?status=Open">
-          <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
+          <AnimatedKPICard label={t('dashboardLabels.open')} value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
         </Link>
         <Link to="/my-tickets?status=In Progress">
-          <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.inProgress')} value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
         </Link>
         <Link to="/my-tickets?status=Pending Review">
-          <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={Eye} color="bg-purple-500" />
+          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.kpi.pending_review} icon={Eye} color="bg-purple-500" />
         </Link>
         <Link to="/my-tickets?status=Delivered">
-          <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.delivered')} value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
         </Link>
       </div>
 
       {/* SLA Overview (Non-clickable for Media Clients - they don't have SLA access) */}
       <div className="grid grid-cols-3 gap-4">
-        <AnimatedKPICard label="On Track" value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
-        <AnimatedKPICard label="At Risk" value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label="Breached" value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
+        <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
+        <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
+        <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
       </div>
 
       {/* Tickets Needing Your Review */}
@@ -927,10 +927,10 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
             <CardHeader className="pb-2">
               <CardTitle className="text-purple-900 flex items-center gap-2">
                 <Eye size={20} />
-                Tickets Pending Your Review ({ticketLists.pendingReview.length})
+                {t('dashboardLabels.ticketsPendingReview')} ({ticketLists.pendingReview.length})
               </CardTitle>
               <CardDescription className="text-purple-700">
-                These tickets have been delivered and are waiting for your feedback
+                {t('dashboardLabels.ticketsPendingReviewDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -940,7 +940,7 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
                 ))}
                 {ticketLists.pendingReview.length > 3 && (
                   <p className="text-sm text-purple-600 text-center pt-2">
-                    +{ticketLists.pendingReview.length - 3} more tickets pending review
+                    {t('dashboardLabels.moreTicketsPending', { count: ticketLists.pendingReview.length - 3 })}
                   </p>
                 )}
               </div>
@@ -951,22 +951,22 @@ function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
 
       {/* Active Tickets */}
       <TicketListSection 
-        title="My Active Tickets"
+        title={t('dashboardLabels.activeTickets')}
         icon={Clock}
         iconColor="text-amber-500"
         tickets={ticketLists.workingOn}
-        emptyMessage="No active tickets. Submit a new request to get started!"
+        emptyMessage={t('dashboardLabels.noActiveTickets')}
         t={t}
         viewAllLink="/my-tickets"
       />
 
       {/* Recently Delivered */}
       <TicketListSection 
-        title="Recently Delivered (7 days)"
+        title={t('dashboardLabels.recentlyDelivered7d')}
         icon={CheckCircle2}
         iconColor="text-emerald-500"
         tickets={ticketLists.recentlyDelivered}
-        emptyMessage="No deliveries in the last 7 days"
+        emptyMessage={t('dashboardLabels.noDeliveries7d')}
         t={t}
         viewAllLink="/my-tickets?status=Delivered"
       />
