@@ -479,12 +479,12 @@ export default function WorkflowEditor() {
           </Button>
           <div>
             <h1 className="font-semibold text-slate-900">{workflow?.name}</h1>
-            <p className="text-xs text-slate-500">{workflow?.description || 'No description'}</p>
+            <p className="text-xs text-slate-500">{workflow?.description || t('workflow.noDescription')}</p>
           </div>
           {hasChanges && (
             <Badge className="bg-amber-100 text-amber-700 ml-2">
               <AlertTriangle size={12} className="mr-1" />
-              Unsaved
+              {t('workflow.unsaved')}
             </Badge>
           )}
         </div>
@@ -495,7 +495,7 @@ export default function WorkflowEditor() {
             data-testid="workflow-settings-btn"
           >
             <Settings size={16} className="mr-2" />
-            Settings
+            {t('workflow.settings')}
           </Button>
           <Button
             variant={hasChanges ? "default" : "outline"}
@@ -505,7 +505,7 @@ export default function WorkflowEditor() {
             data-testid="save-workflow-btn"
           >
             <Save size={16} className="mr-2" />
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? t('workflow.saving') : t('common.save')}
           </Button>
         </div>
       </div>
@@ -515,8 +515,8 @@ export default function WorkflowEditor() {
         {/* Node Palette */}
         <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
           <div className="p-4 border-b border-slate-200">
-            <h2 className="font-semibold text-slate-900">Node Palette</h2>
-            <p className="text-xs text-slate-500 mt-1">Drag nodes to the canvas</p>
+            <h2 className="font-semibold text-slate-900">{t('workflow.nodePalette')}</h2>
+            <p className="text-xs text-slate-500 mt-1">{t('workflow.dragNodesToCanvas')}</p>
           </div>
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-2">
@@ -584,7 +584,7 @@ export default function WorkflowEditor() {
                 }}
               >
                 <Trash2 size={14} className="mr-1" />
-                Clear
+                {t('common.clear')}
               </Button>
             </Panel>
           </ReactFlow>
