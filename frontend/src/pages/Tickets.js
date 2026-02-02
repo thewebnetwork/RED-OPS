@@ -155,16 +155,16 @@ export default function Tickets() {
               {hasRole('Admin', 'Manager') && (
                 <>
                   <div>
-                    <Label>Client (optional)</Label>
+                    <Label>{t('tickets.client')} ({t('common.optional')})</Label>
                     <Select 
                       value={formData.client_id} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, client_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Select client" />
+                        <SelectValue placeholder={t('tickets.selectClient')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="">{t('common.none')}</SelectItem>
                         {clients.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
@@ -172,16 +172,16 @@ export default function Tickets() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Related Order (optional)</Label>
+                    <Label>{t('tickets.relatedOrder')} ({t('common.optional')})</Label>
                     <Select 
                       value={formData.related_order_id} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, related_order_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Link to order" />
+                        <SelectValue placeholder={t('tickets.linkToOrder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="">{t('common.none')}</SelectItem>
                         {orders.map(o => (
                           <SelectItem key={o.id} value={o.id}>{o.order_code} - {o.title}</SelectItem>
                         ))}
@@ -191,16 +191,16 @@ export default function Tickets() {
                 </>
               )}
               <div>
-                <Label>Initial Message (optional)</Label>
+                <Label>{t('tickets.initialMessage')} ({t('common.optional')})</Label>
                 <Textarea
                   value={formData.message_body}
                   onChange={(e) => setFormData(prev => ({ ...prev, message_body: e.target.value }))}
-                  placeholder="Describe the issue..."
+                  placeholder={t('tickets.describeIssue')}
                   className="mt-1.5"
                 />
               </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">
-                Create Ticket
+                {t('tickets.createNewTicket')}
               </Button>
             </form>
           </DialogContent>
