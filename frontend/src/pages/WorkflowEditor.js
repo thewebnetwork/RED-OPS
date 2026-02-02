@@ -246,7 +246,7 @@ export default function WorkflowEditor() {
         // Store initial state for change tracking
         initialStateRef.current = { nodes: flowNodes, edges: flowEdges };
       } catch (error) {
-        toast.error('Failed to load workflow');
+        toast.error(t('workflow.failedToLoad'));
         navigate('/settings/workflows');
       } finally {
         setLoading(false);
@@ -317,9 +317,9 @@ export default function WorkflowEditor() {
     try {
       await axios.patch(`${API}/workflows/${workflowId}`, { [field]: value });
       setWorkflow(prev => ({ ...prev, [field]: value }));
-      toast.success('Workflow settings updated');
+      toast.success(t('workflow.settingsUpdated'));
     } catch (error) {
-      toast.error('Failed to update settings');
+      toast.error(t('workflow.failedToUpdateSettings'));
     }
   };
 
@@ -405,9 +405,9 @@ export default function WorkflowEditor() {
       initialStateRef.current = { nodes, edges };
       setHasChanges(false);
       
-      toast.success('Workflow saved!');
+      toast.success(t('workflow.workflowSaved'));
     } catch (error) {
-      toast.error('Failed to save workflow');
+      toast.error(t('workflow.failedToSave'));
     } finally {
       setSaving(false);
     }
