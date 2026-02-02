@@ -550,20 +550,20 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
         <div>
           <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
             <Layers size={18} />
-            Pool Status
+            {t('poolStatus')}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link to="/ribbon-board?pool=1">
-              <AnimatedKPICard label="Pool 1 Available" value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
+              <AnimatedKPICard label={t('dashboardLabels.pool1Available')} value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
             </Link>
             <Link to="/ribbon-board?pool=2">
-              <AnimatedKPICard label="Pool 2 Available" value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
+              <AnimatedKPICard label={t('dashboardLabels.pool2Available')} value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
             </Link>
             <Link to="/reports?metric=pool_pickups">
-              <AnimatedKPICard label="Pool 1 Pickups (30d)" value={metrics.pool.pool1_pickups_30d} icon={TrendingUp} color="bg-indigo-500" />
+              <AnimatedKPICard label={t('dashboardLabels.pool1Pickups30d')} value={metrics.pool.pool1_pickups_30d} icon={TrendingUp} color="bg-indigo-500" />
             </Link>
             <Link to="/reports?metric=avg_pick_time">
-              <AnimatedKPICard label="Avg Pick Time P1" value={metrics.pool.avg_time_to_pick_pool1_hours} suffix="h" icon={Clock} color="bg-indigo-500" />
+              <AnimatedKPICard label={t('dashboardLabels.avgPickTimeP1')} value={metrics.pool.avg_time_to_pick_pool1_hours} suffix="h" icon={Clock} color="bg-indigo-500" />
             </Link>
           </div>
         </div>
@@ -572,36 +572,36 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {chartData.statusVolume && (
-          <StatusAreaChart data={chartData.statusVolume} title="Ticket Volume by Status (30 days)" />
+          <StatusAreaChart data={chartData.statusVolume} title={t('dashboardLabels.ticketVolumeByStatus')} t={t} />
         )}
         {chartData.categoryVolume && (
-          <CategoryBarChart data={chartData.categoryVolume} title="Top Categories" />
+          <CategoryBarChart data={chartData.categoryVolume} title={t('dashboardLabels.topCategories')} />
         )}
         {chartData.slaTrend && (
-          <SLATrendChart data={chartData.slaTrend} title="SLA Trend (30 days)" />
+          <SLATrendChart data={chartData.slaTrend} title={t('dashboardLabels.slaTrend')} t={t} />
         )}
         {chartData.poolRouting && (
-          <PoolRoutingChart data={chartData.poolRouting} title="Pool Routing (30 days)" />
+          <PoolRoutingChart data={chartData.poolRouting} title={t('dashboardLabels.poolRouting')} />
         )}
       </div>
 
       {/* Ticket Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TicketListSection 
-          title="Tickets Waiting Action"
+          title={t('dashboardLabels.ticketsWaitingAction')}
           icon={AlertCircle}
           iconColor="text-amber-500"
           tickets={ticketLists.waitingOnMe}
           showWaitingReason={true}
-          emptyMessage="No tickets waiting for action"
+          emptyMessage={t('dashboardLabels.noTicketsWaiting')}
           t={t}
         />
         <TicketListSection 
-          title="Recently Delivered (7 days)"
+          title={t('dashboardLabels.recentlyDelivered7d')}
           icon={CheckCircle2}
           iconColor="text-emerald-500"
           tickets={ticketLists.recentlyDelivered}
-          emptyMessage="No deliveries in the last 7 days"
+          emptyMessage={t('dashboardLabels.noDeliveries7d')}
           t={t}
           viewAllLink="/orders?status=Delivered"
         />
@@ -621,27 +621,27 @@ function OperatorDashboard({ metrics, ticketLists, chartData, loading, onRefresh
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">Your work overview</p>
+          <p className="text-slate-500 mt-1">{t('dashboardLabels.yourWorkOverview')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
           <RefreshCw size={14} />
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
       {/* Workload KPIs (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label="Working On" value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
         </Link>
         <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label="Waiting on Me" value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
+          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
         </Link>
         <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label="Pending Review" value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
+          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
         </Link>
         <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label="Delivered (7d)" value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
         </Link>
       </div>
 
@@ -650,17 +650,17 @@ function OperatorDashboard({ metrics, ticketLists, chartData, loading, onRefresh
         <div>
           <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
             <Layers size={18} />
-            Available Opportunities
+            {t('dashboardLabels.availableOpportunities')}
           </h2>
           <div className="grid grid-cols-2 gap-4">
             {metrics.can_see_pool1 && (
               <Link to="/ribbon?pool=1">
-                <AnimatedKPICard label="Pool 1 Opportunities" value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
+                <AnimatedKPICard label={t('dashboardLabels.pool1Opportunities')} value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
               </Link>
             )}
             {metrics.can_see_pool2 && (
               <Link to="/ribbon?pool=2">
-                <AnimatedKPICard label="Pool 2 Opportunities" value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
+                <AnimatedKPICard label={t('dashboardLabels.pool2Opportunities')} value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
               </Link>
             )}
           </div>
@@ -670,31 +670,31 @@ function OperatorDashboard({ metrics, ticketLists, chartData, loading, onRefresh
       {/* Ticket Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TicketListSection 
-          title="Tickets I'm Working On"
+          title={t('dashboardLabels.ticketsWorkingOn')}
           icon={Clock}
           iconColor="text-amber-500"
           tickets={ticketLists.workingOn}
-          emptyMessage="No tickets in progress"
+          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
           t={t}
         />
         <TicketListSection 
-          title="Tickets Waiting on Me"
+          title={t('dashboardLabels.ticketsWaitingOnMe')}
           icon={AlertCircle}
           iconColor="text-red-500"
           tickets={ticketLists.waitingOnMe}
           showWaitingReason={true}
-          emptyMessage="No tickets need your action"
+          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
           t={t}
         />
       </div>
 
       {/* Recently Delivered */}
       <TicketListSection 
-        title="Recently Delivered (7 days)"
+        title={t('dashboardLabels.recentlyDelivered7d')}
         icon={CheckCircle2}
         iconColor="text-emerald-500"
         tickets={ticketLists.recentlyDelivered}
-        emptyMessage="No deliveries in the last 7 days"
+        emptyMessage={t('dashboardLabels.noDeliveries7d')}
         t={t}
         viewAllLink="/my-tickets"
       />
