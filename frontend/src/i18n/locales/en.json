@@ -208,7 +208,18 @@
     "initialMessage": "Initial Message",
     "describeIssue": "Describe the issue...",
     "ticketCreated": "Ticket created",
-    "failedToCreate": "Failed to create ticket"
+    "failedToCreate": "Failed to create ticket",
+    "ticket": "Ticket",
+    "linkedOrder": "Linked Order",
+    "updated": "Updated",
+    "allStatuses": "All Statuses",
+    "noTicketsMatch": "No tickets match your filters",
+    "noTicketsYet": "No tickets yet",
+    "status": {
+      "open": "Open",
+      "waiting": "Waiting",
+      "closed": "Closed"
+    }
   },
   "orders": {
     "title": "Orders",
