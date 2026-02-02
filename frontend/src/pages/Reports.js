@@ -619,16 +619,16 @@ export default function Reports() {
 
                   {/* Access Tier */}
                   <div>
-                    <Label className="text-xs">Access Tier</Label>
+                    <Label className="text-xs">{t('reports.accessTier')}</Label>
                     <Select
                       value={filters.access_tier_id || 'all'}
                       onValueChange={(v) => setFilters(prev => ({ ...prev, access_tier_id: v === 'all' ? '' : v }))}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={t('common.all')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Tiers</SelectItem>
+                        <SelectItem value="all">{t('reports.allTiers')}</SelectItem>
                         {accessTiers.map(tier => (
                           <SelectItem key={tier.id} value={tier.id}>{tier.name}</SelectItem>
                         ))}
@@ -638,11 +638,11 @@ export default function Reports() {
 
                   {/* Search */}
                   <div className="col-span-2">
-                    <Label className="text-xs">Search</Label>
+                    <Label className="text-xs">{t('common.search')}</Label>
                     <div className="relative mt-1">
                       <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <Input
-                        placeholder="Search by title, code..."
+                        placeholder={t('reports.searchPlaceholder')}
                         value={filters.search}
                         onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                         className="pl-9"
@@ -660,7 +660,7 @@ export default function Reports() {
                     data-testid="generate-report-btn"
                   >
                     <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? 'Generating...' : 'Generate Report'}
+                    {loading ? t('reports.generating') : t('reports.generateReport')}
                   </Button>
                   
                   <Button
@@ -680,7 +680,7 @@ export default function Reports() {
                       search: ''
                     })}
                   >
-                    Clear Filters
+                    {t('reports.clearFilters')}
                   </Button>
                 </div>
               </CardContent>
