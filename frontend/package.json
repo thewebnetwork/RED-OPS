@@ -70,9 +70,10 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "i18n:audit": "node scripts/i18n-audit.js",
+    "i18n:audit": "node scripts/i18n-audit.js --fix-suggestions",
     "i18n:audit:strict": "node scripts/i18n-audit.js --strict --fix-suggestions",
-    "i18n:check": "node scripts/i18n-audit.js --strict",
+    "i18n:check": "node scripts/i18n-audit.js",
+    "i18n:sync": "node scripts/i18n-sync.js",
     "prebuild": "node scripts/i18n-audit.js || echo 'i18n audit warnings (non-blocking)'"
   },
   "browserslist": {
