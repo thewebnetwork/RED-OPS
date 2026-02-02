@@ -548,12 +548,12 @@ export default function Announcements() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('announcements.deleteAnnouncement')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{deleteDialog.item?.title}&quot;? This action cannot be undone.
+              {t('announcements.deleteConfirmation', { title: deleteDialog.item?.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">{t('common.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
