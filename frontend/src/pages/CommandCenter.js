@@ -359,7 +359,7 @@ export default function CommandCenter() {
                             setSelectedL1('');
                             setSelectedL2('');
                             fetchData();
-                            toast.success('Feature request submitted!');
+                            toast.success(t('formSuccess.featureSubmitted'));
                           }}
                           onDraftSaved={() => {
                             setTitle('');
