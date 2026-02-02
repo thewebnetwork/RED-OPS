@@ -194,12 +194,12 @@ export default function TicketDetail() {
         <div className="space-y-6">
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-base">Ticket Details</CardTitle>
+              <CardTitle className="text-base">{t('tickets.ticketDetails')}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {/* Status */}
               <div>
-                <Label className="text-xs text-slate-500">Status</Label>
+                <Label className="text-xs text-slate-500">{t('common.status')}</Label>
                 <Select value={ticket.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="mt-1.5" data-testid="ticket-status-select">
                     <SelectValue />
