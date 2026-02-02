@@ -19,7 +19,7 @@ import os
 import uuid
 from urllib.parse import quote
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://i18n-platform-2.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://translate-critical.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 ADMIN_EMAIL = "admin@redribbonops.com"
