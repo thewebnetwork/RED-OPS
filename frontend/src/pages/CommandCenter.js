@@ -186,19 +186,19 @@ export default function CommandCenter() {
     
     // Check blocked extensions
     if (BLOCKED_EXTENSIONS.includes(extension)) {
-      toast.error(`File type ${extension} is not allowed for security reasons`);
+      toast.error(t('fileValidation.blockedType', { extension }));
       return false;
     }
     
     // Check allowed extensions
     if (!ALLOWED_EXTENSIONS.includes(extension)) {
-      toast.error(`File type ${extension} is not supported`);
+      toast.error(t('fileValidation.unsupportedType', { extension }));
       return false;
     }
     
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`File "${file.name}" exceeds 50 MB limit`);
+      toast.error(t('fileValidation.fileTooLarge', { filename: file.name }));
       return false;
     }
     
@@ -214,7 +214,7 @@ export default function CommandCenter() {
         // Check total size
         const currentSize = attachments.reduce((sum, f) => sum + f.size, 0);
         if (currentSize + file.size > MAX_FILE_SIZE) {
-          toast.error('Total attachments cannot exceed 50 MB');
+          toast.error(t('fileValidation.totalTooLarge'));
           break;
         }
         validFiles.push(file);
