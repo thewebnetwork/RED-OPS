@@ -484,7 +484,23 @@
     "serverError": "Server error",
     "failedToLoad": "Failed to load",
     "failedToSave": "Failed to save",
-    "failedToDelete": "Failed to delete"
+    "failedToDelete": "Failed to delete",
+    "uploadFailed": "Failed to upload"
+  },
+  "buttons": {
+    "newRequest": "New Request",
+    "viewAll": "View All",
+    "viewDetails": "View Details",
+    "assign": "Assign",
+    "reassign": "Reassign",
+    "pick": "Pick",
+    "deliver": "Deliver",
+    "approve": "Approve",
+    "reject": "Reject",
+    "restore": "Restore",
+    "archive": "Archive",
+    "duplicate": "Duplicate",
+    "preview": "Preview"
   },
   "success": {
     "saved": "Saved successfully",
