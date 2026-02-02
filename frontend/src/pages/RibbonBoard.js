@@ -333,21 +333,21 @@ export default function RibbonBoard() {
       <AlertDialog open={pickDialogOpen} onOpenChange={setPickDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Pick This Ticket?</AlertDialogTitle>
+            <AlertDialogTitle>{t('ribbon.pickThisTicket')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to pick ticket <strong>{ticketToPick?.order_code}</strong>: "{ticketToPick?.title}".
+              {t('ribbon.pickConfirmation', { code: ticketToPick?.order_code, title: ticketToPick?.title })}
               <br /><br />
-              Once picked, you will be assigned as the resolver and responsible for completing this request.
+              {t('ribbon.pickResponsibility')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handlePickTicket}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Hand size={16} className="mr-2" />
-              Confirm Pick
+              {t('ribbon.confirmPick')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
