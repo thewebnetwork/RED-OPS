@@ -498,31 +498,31 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - Admin</h1>
-          <p className="text-slate-500 mt-1">Complete operational visibility</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - {t('adminDashboard')}</h1>
+          <p className="text-slate-500 mt-1">{t('dashboardLabels.completeVisibility')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
           <RefreshCw size={14} />
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
 
       {/* KPI Cards - Status (Clickable) */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Link to="/orders?status=Open">
-          <AnimatedKPICard label="Open" value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
+          <AnimatedKPICard label={t('dashboardLabels.open')} value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
         </Link>
         <Link to="/orders?status=In Progress">
-          <AnimatedKPICard label="In Progress" value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.inProgress')} value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
         </Link>
         <Link to="/orders?status=Pending Review">
-          <AnimatedKPICard label="Pending Review" value={metrics.kpi.pending_review} icon={AlertCircle} color="bg-purple-500" />
+          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.kpi.pending_review} icon={AlertCircle} color="bg-purple-500" />
         </Link>
         <Link to="/orders?status=Delivered">
-          <AnimatedKPICard label="Delivered" value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.delivered')} value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
         </Link>
         <Link to="/orders?status=Closed">
-          <AnimatedKPICard label="Closed" value={metrics.kpi.closed} icon={CheckCircle2} color="bg-slate-500" />
+          <AnimatedKPICard label={t('dashboardLabels.closed')} value={metrics.kpi.closed} icon={CheckCircle2} color="bg-slate-500" />
         </Link>
       </div>
 
@@ -530,17 +530,17 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
       <div>
         <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
           <Target size={18} />
-          SLA Status
+          {t('slaStatus')}
         </h2>
         <div className="grid grid-cols-3 gap-4">
           <Link to="/sla-policies?tab=monitoring&status=on_track">
-            <AnimatedKPICard label="On Track" value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
+            <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
           </Link>
           <Link to="/sla-policies?tab=monitoring&status=at_risk">
-            <AnimatedKPICard label="At Risk" value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
+            <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
           </Link>
           <Link to="/sla-policies?tab=monitoring&status=breached">
-            <AnimatedKPICard label="Breached" value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
+            <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
           </Link>
         </div>
       </div>
