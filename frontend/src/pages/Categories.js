@@ -263,7 +263,7 @@ export default function Categories() {
   };
 
   const handleDelete = async (type, id) => {
-    if (!window.confirm('Are you sure you want to deactivate this category?')) return;
+    if (!window.confirm(t('categories.confirmDeactivate'))) return;
     
     try {
       if (type === 'l1') {
@@ -273,9 +273,9 @@ export default function Categories() {
         await axios.delete(`${API}/categories/l2/${id}`);
         fetchCategoriesL2(selectedL1);
       }
-      toast.success('Category deactivated');
+      toast.success(t('categories.categoryDeactivated'));
     } catch (error) {
-      toast.error('Failed to delete category');
+      toast.error(t('categories.failedToDelete'));
     }
   };
 
@@ -550,7 +550,7 @@ export default function Categories() {
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs text-slate-500 ml-1">(change to move)</span>}</Label>
+                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs text-slate-500 ml-1">({t('categories.changeToMove')})</span>}</Label>
                   <Select 
                     value={formData.category_l1_id} 
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}
@@ -566,7 +566,7 @@ export default function Categories() {
                   </Select>
                   {editingCategory && formData.category_l1_id !== editingCategory.category_l1_id && (
                     <p className="text-xs text-amber-600 mt-1">
-                      This subcategory will be moved to a different parent category
+                      {t('categories.subcategoryWillBeMoved')}
                     </p>
                   )}
                 </div>
@@ -584,21 +584,21 @@ export default function Categories() {
       <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
         <AlertDialogContent data-testid="unsaved-changes-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogTitle>{t('categories.unsavedChanges')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes. Save before leaving?
+              {t('categories.unsavedChangesDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowUnsavedWarning(false)} data-testid="stay-btn">
-              Stay
+              {t('categories.stay')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseDialog}
               className="bg-slate-600 hover:bg-slate-700"
               data-testid="leave-btn"
             >
-              Leave without saving
+              {t('categories.leaveWithoutSaving')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
