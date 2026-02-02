@@ -172,7 +172,7 @@ export default function TicketDetail() {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
+                    placeholder={t('tickets.typeYourMessage')}
                     className="flex-1 min-h-[60px] resize-none"
                     data-testid="ticket-message-input"
                   />
