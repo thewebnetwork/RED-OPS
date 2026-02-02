@@ -726,7 +726,7 @@ export default function Reports() {
                 {!reportData ? (
                   <div className="p-12 text-center text-slate-500">
                     <BarChart3 size={48} className="mx-auto text-slate-300 mb-3" />
-                    <p>Click "Generate Report" to view results</p>
+                    <p>{t('reports.clickGenerateReport')}</p>
                   </div>
                 ) : (
                   <div>
@@ -803,14 +803,14 @@ export default function Reports() {
                       
                       {reportData.data.length > 100 && (
                         <div className="p-3 text-center text-sm text-slate-500 border-t border-slate-100">
-                          Showing 100 of {reportData.total_rows} rows. Export to see all data.
+                          {t('reports.showingRows', { shown: 100, total: reportData.total_rows })}
                         </div>
                       )}
                       
                       {reportData.data.length === 0 && (
                         <div className="p-8 text-center text-slate-500">
                           <FileText size={32} className="mx-auto text-slate-300 mb-2" />
-                          No data found for the selected filters
+                          {t('reports.noDataFound')}
                         </div>
                       )}
                     </div>
