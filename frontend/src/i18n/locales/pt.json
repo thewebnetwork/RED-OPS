@@ -552,6 +552,53 @@
     "responseRate": "Taxa de Resposta",
     "shareExperience": "Compartilhe sua experiência (opcional)"
   },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Configure configurações do sistema, fluxos de trabalho e integrações",
+    "tip": "Alterações nas configurações podem exigir que os usuários atualizem o navegador para ver as atualizações. Algumas configurações como modelos de e-mail e URLs de webhooks têm efeito imediato.",
+    "modules": {
+      "dashboards": {
+        "name": "Construtor de Painéis",
+        "description": "Criar e gerenciar modelos de painel para diferentes funções de usuário"
+      },
+      "documentation": {
+        "name": "Documentação do Sistema",
+        "description": "Ver e baixar snapshot da lógica do sistema para referência UAT"
+      },
+      "poolPickerRules": {
+        "name": "Regras de Seleção de Pool",
+        "description": "Configurar quais tipos de conta podem selecionar do Pool 1 e Pool 2"
+      },
+      "translations": {
+        "name": "Editor de Traduções",
+        "description": "Revisar e corrigir traduções para espanhol e português"
+      },
+      "uiCustomizations": {
+        "name": "Personalizações de UI",
+        "description": "Personalizar rótulos de campos, nomes de exibição e marca na plataforma"
+      },
+      "categories": {
+        "name": "Categorias",
+        "description": "Gerenciar categorias de serviço e subcategorias para solicitações"
+      },
+      "workflows": {
+        "name": "Fluxos de Trabalho",
+        "description": "Configurar fluxos de trabalho automatizados e regras de roteamento"
+      },
+      "emailSettings": {
+        "name": "Configurações de E-mail",
+        "description": "Configurar SMTP e modelos de notificação por e-mail"
+      },
+      "slaEscalation": {
+        "name": "SLA e Escalonamento",
+        "description": "Configurar acordos de nível de serviço e políticas de escalonamento"
+      },
+      "integrations": {
+        "name": "Integrações",
+        "description": "Gerenciar chaves API, webhooks e integrações externas"
+      }
+    }
+  },
   "notifications": {
     "title": "Notificações",
     "markAllRead": "Marcar Todas como Lidas",
