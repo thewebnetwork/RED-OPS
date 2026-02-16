@@ -287,7 +287,7 @@ function AppRoutes() {
       {/* Legacy operator routes */}
       <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} />
       <Route path="/orders" element={<Navigate to="/all-requests" replace />} />
-      <Route path="/orders/:orderId" element={<Navigate to="/requests/:orderId" replace />} />
+      <Route path="/orders/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       <Route 
         path="/report-issue" 
