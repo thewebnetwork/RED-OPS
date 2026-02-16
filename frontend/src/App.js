@@ -253,7 +253,7 @@ function AppRoutes() {
       <Route path="/my-tickets" element={<Navigate to="/my-requests" replace />} />
       <Route path="/command-center" element={<Navigate to="/services" replace />} />
       <Route path="/tickets" element={<Navigate to="/my-requests" replace />} />
-      <Route path="/tickets/:orderId" element={<Navigate to="/requests/:orderId" replace />} />
+      <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}
       {/* My Queue - Assigned requests */}
