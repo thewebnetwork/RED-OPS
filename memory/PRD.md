@@ -6,13 +6,52 @@ Enterprise ticket management and operations platform with full multilingual supp
 ## Core Requirements
 1. **Full i18n Coverage (P0)** - All UI elements must translate when switching between EN/ES/PT
 2. **Dashboard with Dynamic Widgets** - Role-based dashboard rendering
-3. **Ticket Lifecycle Management** - Submit, pick, deliver, review, close workflows
+3. **Request Lifecycle Management** - Submit, pick, deliver, review, close workflows
 4. **Pool-Based Assignment** - Pool 1 and Pool 2 opportunity ribbons with access controls
 5. **SLA Tracking** - On-track, at-risk, breached status monitoring
 6. **IAM System** - Users, teams, roles, specialties, account types, subscription plans
 7. **Category Management** - L1/L2 categories with translations
+8. **Three-Mode Frontend Architecture** - Client Portal, Operator Console, Admin Studio
 
 ## What's Been Implemented
+
+### Frontend Restructuring - 3 Modes (COMPLETED - Feb 2025)
+Restructured frontend into 3 distinct modes based on account_type and role:
+
+**1. Client Portal** (for Media Client account_type)
+- 4 nav items only: Home, Request a Service, My Requests, My Account
+- New pages: ClientHome.js, ServiceCatalog.js, MyAccount.js
+- Clean, simplified experience for clients
+- No access to operator/admin features
+
+**2. Operator Console** (for Partners with capabilities, Vendors, Internal Staff)
+- Nav items: My Queue, Pool, All Requests (staff only), Reports (staff only)
+- Work management focused
+- Pool picking available for authorized users
+
+**3. Admin Studio** (for Administrator role)
+- Full access: Dashboard, IAM, Settings, Reports, Logs, Announcements
+- Can switch between all 3 modes via dropdown
+- "Preview as Client" feature for QA testing
+
+**Global Renames:**
+- 'ticket' → 'request' (in all UI labels)
+- 'Command Center' → 'Request a Service'
+- 'My Services' → 'My Account'
+- Routes: /tickets → /requests, /orders → /all-requests
+
+**Service Catalog:**
+- Browseable page with 8 service cards
+- Each card: name, description, turnaround, included/addon badge, popular badge
+- Search functionality
+- "Start Request" CTA on each card
+
+**New Files:**
+- `/app/frontend/src/hooks/useAppMode.js` - Mode determination logic
+- `/app/frontend/src/components/LayoutNew.js` - Mode-based layout
+- `/app/frontend/src/pages/ServiceCatalog.js` - Browseable catalog
+- `/app/frontend/src/pages/ClientHome.js` - Client home page
+- `/app/frontend/src/pages/MyAccount.js` - Combined profile/plan/security
 
 ### P0 - UAT-Critical Pages i18n (COMPLETED - Feb 2025)
 All 6 UAT-critical pages now fully translated:
@@ -24,27 +63,12 @@ All 6 UAT-critical pages now fully translated:
 6. **Reports.js** - All filters, date presets, export buttons, results display
 7. **Announcements.js** - Full CRUD, targeting labels, preview, confirmations
 
-New translation keys added:
-- `tickets.*` - Ticket-related strings (allStatuses, status.open/waiting/closed, etc.)
-- `ribbon.*` - Opportunity ribbon strings (pool descriptions, pick dialog, etc.)
-- `workflow.*` - Workflow editor strings (settings, node config, dialogs, etc.)
-- `categories.*` - Category management strings (L1/L2, move, confirmations, etc.)
-- `reports.*` - Reports page strings (filters, presets, export, results, etc.)
-- `announcements.*` - Announcement strings (CRUD, targeting, preview, etc.)
-
-### Core Pages i18n (COMPLETED - Dec 2025)
-- **Dashboard.js** - Fully translated with t() function for all KPIs, charts, labels
-- **CommandCenter.js** - Forms, validation messages, toasts all translated
-- **SettingsHub.js** - All settings modules dynamically translated
-- **IAMPage.js** - Title, tabs, stats, table headers all translated
-
 ### i18n Audit System (COMPLETED - Dec 2025)
 - **Audit Script** (`scripts/i18n-audit.js`) - Full codebase scanner
 - **CI Check Script** (`scripts/i18n-ci.js`) - CI-friendly check
 - **Key Sync Script** (`scripts/i18n-sync.js`) - Syncs missing keys
 - **npm commands**: `i18n:audit`, `i18n:ci`, `i18n:sync`, `i18n:audit:strict`
 - **GitHub Actions** (`.github/workflows/i18n-check.yml`) - PR/push checks
-- **Documentation** (`docs/i18n-audit.md`) - Usage guide
 
 ### Previous Work Completed
 - Dashboard propagation fix (dynamic rendering from user-assigned layouts)
@@ -58,6 +82,7 @@ New translation keys added:
 
 ## Known Mocked APIs
 - `/api/webhooks/ghl-payment-mock` - GoHighLevel payment webhook
+- `/api/categories/catalog` - Falls back to static catalog (8 services)
 
 ## Test Credentials
 - Admin: admin@redribbonops.com / Admin123!
