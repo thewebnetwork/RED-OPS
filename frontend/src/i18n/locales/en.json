@@ -65,7 +65,9 @@
     "users": "users",
     "members": "members",
     "partners": "partners",
-    "system": "System"
+    "system": "System",
+    "saveChanges": "Save Changes",
+    "saving": "Saving..."
   },
   "auth": {
     "login": "Login",
