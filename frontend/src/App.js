@@ -2,12 +2,15 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
-import Layout from "./components/Layout";
+import Layout from "./components/LayoutNew";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import RateSurvey from "./pages/RateSurvey";
 import Dashboard from "./pages/Dashboard";
+import ClientHome from "./pages/ClientHome";
+import ServiceCatalog from "./pages/ServiceCatalog";
+import MyAccount from "./pages/MyAccount";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import CreateOrder from "./pages/CreateOrder";
@@ -44,6 +47,35 @@ import DocumentationPage from "./pages/DocumentationPage";
 import PoolPickerRulesPage from "./pages/PoolPickerRulesPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
 import DashboardBuilder from "./pages/DashboardBuilder";
+import { useAppMode, APP_MODES } from "./hooks/useAppMode";
+
+// Route guard that checks mode access
+function ModeRoute({ children, allowedModes = [] }) {
+  const modeConfig = useAppMode();
+  const { user } = useAuth();
+  
+  if (!user) return <Navigate to="/login" />;
+  
+  // Check if user has access to any of the allowed modes
+  const hasAccess = allowedModes.length === 0 || allowedModes.some(mode => {
+    switch (mode) {
+      case APP_MODES.CLIENT_PORTAL: return modeConfig.canAccessClientPortal;
+      case APP_MODES.OPERATOR_CONSOLE: return modeConfig.canAccessOperatorConsole;
+      case APP_MODES.ADMIN_STUDIO: return modeConfig.canAccessAdminStudio;
+      default: return false;
+    }
+  });
+  
+  if (!hasAccess) {
+    // Redirect to appropriate home based on primary mode
+    if (modeConfig.primaryMode === APP_MODES.CLIENT_PORTAL) return <Navigate to="/" />;
+    if (modeConfig.primaryMode === APP_MODES.OPERATOR_CONSOLE) return <Navigate to="/queue" />;
+    if (modeConfig.primaryMode === APP_MODES.ADMIN_STUDIO) return <Navigate to="/admin" />;
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+}
 
 function PrivateRoute({ children, roles }) {
   const { isAuthenticated, loading, user } = useAuth();
