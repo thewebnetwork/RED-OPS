@@ -96,6 +96,25 @@
     "confirmNewPassword": "Confirm new password"
   },
   "nav": {
+    "home": "Home",
+    "requestService": "Request a Service",
+    "myRequests": "My Requests",
+    "myAccount": "My Account",
+    "myQueue": "My Queue",
+    "pool": "Pool",
+    "allRequests": "All Requests",
+    "reports": "Reports",
+    "adminDashboard": "Dashboard",
+    "settings": "Settings",
+    "logs": "Activity Logs",
+    "announcements": "Announcements",
+    "clientPortal": "Client Portal",
+    "operatorConsole": "Operator Console",
+    "adminStudio": "Admin Studio",
+    "previewAsClient": "Preview as Client",
+    "previewMode": "Preview Mode",
+    "exitPreview": "Exit Preview",
+    "clientPreview": "Client Preview",
     "dashboard": "Dashboard",
     "commandCenter": "Command Center",
     "allOrders": "All Orders",
@@ -106,20 +125,133 @@
     "roles": "Roles",
     "categories": "Categories",
     "profile": "Profile",
-    "settings": "Settings",
     "sla": "SLA",
-    "logs": "Logs",
     "integrations": "Integrations",
-    "announcements": "Announcements",
     "emailSettings": "Email Settings",
     "documentation": "Documentation",
     "poolPickerRules": "Pool Picker Rules",
-    "reports": "Reports",
-    "myRequests": "My Requests",
     "myServices": "My Services",
     "reportIssue": "Report an Issue",
     "opportunityRibbon": "Opportunity Ribbon",
-    "deletedTickets": "Deleted Tickets"
+    "deletedTickets": "Deleted Requests"
+  },
+  "catalog": {
+    "title": "Request a Service",
+    "subtitle": "Browse our services and submit a request in seconds",
+    "searchPlaceholder": "Search services...",
+    "popular": "Popular",
+    "included": "Included",
+    "addon": "Add-on",
+    "startRequest": "Start Request",
+    "noServicesFound": "No services match your search",
+    "clearSearch": "Clear search",
+    "helpText": "Can't find what you need?",
+    "customRequest": "Submit a custom request",
+    "services": {
+      "contentWriting": {
+        "name": "Content Writing",
+        "description": "Blog posts, articles, and web copy crafted for your audience"
+      },
+      "graphicDesign": {
+        "name": "Graphic Design",
+        "description": "Social media graphics, banners, and marketing materials"
+      },
+      "videoEditing": {
+        "name": "Video Editing",
+        "description": "Professional video editing for social media and web"
+      },
+      "socialMedia": {
+        "name": "Social Media Management",
+        "description": "Content scheduling, posting, and engagement management"
+      },
+      "seo": {
+        "name": "SEO Optimization",
+        "description": "On-page SEO, keyword research, and content optimization"
+      },
+      "emailMarketing": {
+        "name": "Email Marketing",
+        "description": "Email campaigns, newsletters, and automation setup"
+      },
+      "websiteUpdates": {
+        "name": "Website Updates",
+        "description": "Content updates, minor fixes, and page edits"
+      },
+      "consultation": {
+        "name": "Strategy Consultation",
+        "description": "1-on-1 strategy session for your marketing needs"
+      }
+    }
+  },
+  "clientHome": {
+    "welcome": "Welcome back",
+    "subtitle": "Here's what's happening with your requests",
+    "newRequest": "New Request",
+    "activeRequests": "Active",
+    "completed": "Completed",
+    "needsAttention": "Needs Attention",
+    "recentRequests": "Recent Requests",
+    "viewAll": "View All",
+    "noRequests": "You haven't submitted any requests yet",
+    "submitFirst": "Submit Your First Request",
+    "browseServices": "Browse Services",
+    "browseServicesDesc": "See all available services",
+    "manageAccount": "Manage Account",
+    "manageAccountDesc": "Profile, plan & billing"
+  },
+  "myAccount": {
+    "title": "My Account",
+    "subtitle": "Manage your profile and preferences",
+    "profile": "Profile",
+    "plan": "Plan",
+    "security": "Security",
+    "personalInfo": "Personal Information",
+    "personalInfoDesc": "Update your personal details",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "emailCannotChange": "Contact support to change email",
+    "profileUpdated": "Profile updated successfully",
+    "updateFailed": "Failed to update profile",
+    "currentPlan": "Current Plan",
+    "active": "Active",
+    "perMonth": "/month",
+    "noPlan": "No subscription plan assigned",
+    "billing": "Billing",
+    "paymentMethod": "Payment Method",
+    "paymentMethodDesc": "Manage your payment details",
+    "billingHistory": "Billing History",
+    "billingHistoryDesc": "View past invoices",
+    "changePassword": "Change Password",
+    "changePasswordDesc": "Update your password regularly for security",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updatePassword": "Update Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Failed to change password",
+    "twoFactor": "Two-Factor Authentication",
+    "twoFactorDesc": "Add an extra layer of security",
+    "authenticatorApp": "Authenticator App",
+    "twoFactorEnabled": "Enabled - Your account is protected",
+    "twoFactorDisabled": "Not enabled",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "requests": {
+    "title": "Requests",
+    "myRequests": "My Requests",
+    "allRequests": "All Requests",
+    "newRequest": "New Request",
+    "status": {
+      "open": "Open",
+      "inprogress": "In Progress",
+      "pending": "Pending",
+      "delivered": "Delivered",
+      "closed": "Closed"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
