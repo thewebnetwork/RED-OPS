@@ -181,30 +181,104 @@ function AppRoutes() {
         path="/rate" 
         element={<RateSurvey />}
       />
+      
+      {/* ========== CLIENT PORTAL ROUTES ========== */}
+      {/* Home - Client simplified dashboard */}
       <Route 
         path="/" 
         element={
           <PrivateRoute>
-            <Dashboard />
+            <ClientHome />
           </PrivateRoute>
         } 
       />
+      {/* Service Catalog - Browse services */}
       <Route 
-        path="/my-services" 
+        path="/services" 
         element={
           <PrivateRoute>
-            <MyServices />
+            <ServiceCatalog />
           </PrivateRoute>
         } 
       />
+      {/* My Requests - Client's submitted requests */}
       <Route 
-        path="/my-tickets" 
+        path="/my-requests" 
         element={
           <PrivateRoute>
             <MyRequests />
           </PrivateRoute>
         } 
       />
+      {/* My Account - Profile, Plan, Billing */}
+      <Route 
+        path="/my-account" 
+        element={
+          <PrivateRoute>
+            <MyAccount />
+          </PrivateRoute>
+        } 
+      />
+      {/* Request form - Submit new request */}
+      <Route 
+        path="/request/new" 
+        element={
+          <PrivateRoute>
+            <CommandCenter />
+          </PrivateRoute>
+        } 
+      />
+      {/* Request detail - View request */}
+      <Route 
+        path="/requests/:orderId" 
+        element={
+          <PrivateRoute>
+            <OrderDetail />
+          </PrivateRoute>
+        } 
+      />
+      
+      {/* Legacy routes - redirect to new paths */}
+      <Route path="/my-services" element={<Navigate to="/my-account" replace />} />
+      <Route path="/my-tickets" element={<Navigate to="/my-requests" replace />} />
+      <Route path="/command-center" element={<Navigate to="/services" replace />} />
+      <Route path="/tickets" element={<Navigate to="/my-requests" replace />} />
+      <Route path="/tickets/:orderId" element={<Navigate to="/requests/:orderId" replace />} />
+      
+      {/* ========== OPERATOR CONSOLE ROUTES ========== */}
+      {/* My Queue - Assigned requests */}
+      <Route 
+        path="/queue" 
+        element={
+          <PrivateRoute>
+            <Orders />
+          </PrivateRoute>
+        } 
+      />
+      {/* Pool - Available requests to pick */}
+      <Route 
+        path="/pool" 
+        element={
+          <PrivateRoute>
+            <RibbonBoard />
+          </PrivateRoute>
+        } 
+      />
+      {/* All Requests - Internal staff and admin only */}
+      <Route 
+        path="/all-requests" 
+        element={
+          <PrivateRoute>
+            <Orders />
+          </PrivateRoute>
+        } 
+      />
+      
+      {/* Legacy operator routes */}
+      <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} />
+      <Route path="/orders" element={<Navigate to="/all-requests" replace />} />
+      <Route path="/orders/:orderId" element={<Navigate to="/requests/:orderId" replace />} />
+      
       <Route 
         path="/report-issue" 
         element={
@@ -214,34 +288,10 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/ribbon-board" 
-        element={
-          <PrivateRoute>
-            <RibbonBoard />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/orders" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <Orders />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
         path="/orders/new" 
         element={
           <PrivateRoute roles={["Administrator", "Operator", "Standard User"]}>
             <CreateOrder />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/orders/:orderId" 
-        element={
-          <PrivateRoute>
-            <OrderDetail />
           </PrivateRoute>
         } 
       />
@@ -258,14 +308,6 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Notifications />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/command-center" 
-        element={
-          <PrivateRoute>
-            <CommandCenter />
           </PrivateRoute>
         } 
       />
