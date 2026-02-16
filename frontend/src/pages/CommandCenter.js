@@ -91,6 +91,7 @@ export default function CommandCenter() {
   const [searchParams] = useSearchParams();
   const preselectedCategory = searchParams.get('category');
   const preselectedType = searchParams.get('type');
+  const preselectedService = searchParams.get('service'); // New: service from catalog
   
   const [categoriesL1, setCategoriesL1] = useState([]);
   const [categoriesL2, setCategoriesL2] = useState([]);
@@ -119,6 +120,38 @@ export default function CommandCenter() {
       setRequestType('Bug');
     }
     
+    // Handle preselected service from catalog
+    if (preselectedService && categoriesL1.length > 0) {
+      // Map service ID to category - for MVP, use a simple mapping
+      const serviceCategory MAP = {
+        'content-writing': 'content',
+        'graphic-design': 'design',
+        'video-editing': 'video',
+        'social-media': 'marketing',
+        'seo-optimization': 'seo',
+        'email-marketing': 'marketing',
+        'website-updates': 'web',
+        'consultation': 'support'
+      };
+      
+      const categoryHint = serviceCategoryMap[preselectedService] || '';
+      const matchedCategory = categoriesL1.find(c => 
+        c.name.toLowerCase().includes(categoryHint) || 
+        c.name.toLowerCase().includes(preselectedService.replace(/-/g, ' '))
+      );
+      
+      if (matchedCategory) {
+        setSelectedL1(matchedCategory.id);
+      } else if (categoriesL1[0]) {
+        // Fallback to first category
+        setSelectedL1(categoriesL1[0].id);
+      }
+      
+      // Set a friendly title hint based on service
+      const serviceName = preselectedService.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      setTitle(`${serviceName} Request`);
+    }
+    
     if (preselectedCategory && categoriesL1.length > 0) {
       const bugCategory = categoriesL1.find(c => c.name.toLowerCase().includes('bug') || c.name.toLowerCase().includes('issue'));
       const featureCategory = categoriesL1.find(c => c.name.toLowerCase().includes('feature'));
@@ -131,7 +164,7 @@ export default function CommandCenter() {
         setRequestType('Request');
       }
     }
-  }, [preselectedCategory, preselectedType, categoriesL1]);
+  }, [preselectedCategory, preselectedType, preselectedService, categoriesL1]);
 
   useEffect(() => {
     if (selectedL1) {
