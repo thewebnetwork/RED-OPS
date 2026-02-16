@@ -245,6 +245,12 @@
   "requests": {
     "title": "Requests",
     "myRequests": "My Requests",
+    "subtitle": "View and track all your submitted requests",
+    "submitNew": "Submit New Request",
+    "totalRequests": "Total Requests",
+    "noRequests": "You have not submitted any requests yet",
+    "noMatch": "No requests match your filters",
+    "submitFirst": "Submit Your First Request",
     "allRequests": "All Requests",
     "newRequest": "New Request",
     "status": {
