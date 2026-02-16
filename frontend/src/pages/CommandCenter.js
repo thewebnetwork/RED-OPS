@@ -123,7 +123,7 @@ export default function CommandCenter() {
     // Handle preselected service from catalog
     if (preselectedService && categoriesL1.length > 0) {
       // Map service ID to category - for MVP, use a simple mapping
-      const serviceCategory MAP = {
+      const serviceCategoryMap = {
         'content-writing': 'content',
         'graphic-design': 'design',
         'video-editing': 'video',
