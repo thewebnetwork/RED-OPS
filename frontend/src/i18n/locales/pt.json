@@ -65,7 +65,9 @@
     "users": "usuários",
     "members": "membros",
     "partners": "parceiros",
-    "system": "Sistema"
+    "system": "Sistema",
+    "saveChanges": "Salvar Alterações",
+    "saving": "Salvando..."
   },
   "auth": {
     "login": "Entrar",
