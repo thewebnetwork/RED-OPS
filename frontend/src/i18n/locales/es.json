@@ -137,6 +137,130 @@
     "opportunityRibbon": "Ribbon de Oportunidades",
     "deletedTickets": "Solicitudes Eliminadas"
   },
+  "catalog": {
+    "title": "Solicitar un Servicio",
+    "subtitle": "Explore nuestros servicios y envíe una solicitud en segundos",
+    "searchPlaceholder": "Buscar servicios...",
+    "popular": "Popular",
+    "included": "Incluido",
+    "addon": "Complemento",
+    "startRequest": "Iniciar Solicitud",
+    "noServicesFound": "No se encontraron servicios",
+    "clearSearch": "Limpiar búsqueda",
+    "helpText": "¿No encuentras lo que necesitas?",
+    "customRequest": "Enviar una solicitud personalizada",
+    "services": {
+      "contentWriting": {
+        "name": "Redacción de Contenido",
+        "description": "Artículos, blogs y contenido web diseñado para tu audiencia"
+      },
+      "graphicDesign": {
+        "name": "Diseño Gráfico",
+        "description": "Gráficos para redes sociales, banners y materiales de marketing"
+      },
+      "videoEditing": {
+        "name": "Edición de Video",
+        "description": "Edición profesional de video para redes sociales y web"
+      },
+      "socialMedia": {
+        "name": "Gestión de Redes Sociales",
+        "description": "Programación de contenido, publicación y gestión de interacciones"
+      },
+      "seo": {
+        "name": "Optimización SEO",
+        "description": "SEO en la página, investigación de palabras clave y optimización de contenido"
+      },
+      "emailMarketing": {
+        "name": "Email Marketing",
+        "description": "Campañas de correo, boletines y configuración de automatización"
+      },
+      "websiteUpdates": {
+        "name": "Actualizaciones de Sitio Web",
+        "description": "Actualizaciones de contenido, correcciones menores y ediciones de página"
+      },
+      "consultation": {
+        "name": "Consultoría Estratégica",
+        "description": "Sesión de estrategia 1-a-1 para tus necesidades de marketing"
+      }
+    }
+  },
+  "clientHome": {
+    "welcome": "Bienvenido de nuevo",
+    "subtitle": "Aquí está lo que está sucediendo con tus solicitudes",
+    "newRequest": "Nueva Solicitud",
+    "activeRequests": "Activo",
+    "completed": "Completado",
+    "needsAttention": "Necesita Atención",
+    "recentRequests": "Solicitudes Recientes",
+    "viewAll": "Ver Todas",
+    "noRequests": "Aún no has enviado ninguna solicitud",
+    "submitFirst": "Envía Tu Primera Solicitud",
+    "browseServices": "Explorar Servicios",
+    "browseServicesDesc": "Ver todos los servicios disponibles",
+    "manageAccount": "Administrar Cuenta",
+    "manageAccountDesc": "Perfil, plan y facturación"
+  },
+  "myAccount": {
+    "title": "Mi Cuenta",
+    "subtitle": "Administra tu perfil y preferencias",
+    "profile": "Perfil",
+    "plan": "Plan",
+    "security": "Seguridad",
+    "personalInfo": "Información Personal",
+    "personalInfoDesc": "Actualiza tus datos personales",
+    "fullName": "Nombre Completo",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "company": "Empresa",
+    "emailCannotChange": "Contacta a soporte para cambiar el correo",
+    "profileUpdated": "Perfil actualizado con éxito",
+    "updateFailed": "Error al actualizar el perfil",
+    "currentPlan": "Plan Actual",
+    "active": "Activo",
+    "perMonth": "/mes",
+    "noPlan": "Sin plan de suscripción asignado",
+    "billing": "Facturación",
+    "paymentMethod": "Método de Pago",
+    "paymentMethodDesc": "Administra tus detalles de pago",
+    "billingHistory": "Historial de Facturación",
+    "billingHistoryDesc": "Ver facturas anteriores",
+    "changePassword": "Cambiar Contraseña",
+    "changePasswordDesc": "Actualiza tu contraseña regularmente por seguridad",
+    "currentPassword": "Contraseña Actual",
+    "newPassword": "Nueva Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "updatePassword": "Actualizar Contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "passwordChanged": "Contraseña cambiada con éxito",
+    "passwordChangeFailed": "Error al cambiar la contraseña",
+    "twoFactor": "Autenticación de Dos Factores",
+    "twoFactorDesc": "Agrega una capa adicional de seguridad",
+    "authenticatorApp": "App Autenticadora",
+    "twoFactorEnabled": "Activado - Tu cuenta está protegida",
+    "twoFactorDisabled": "No activado",
+    "enabled": "Activado",
+    "disabled": "Desactivado"
+  },
+  "requests": {
+    "title": "Solicitudes",
+    "myRequests": "Mis Solicitudes",
+    "subtitle": "Ver y rastrear todas tus solicitudes enviadas",
+    "submitNew": "Enviar Nueva Solicitud",
+    "totalRequests": "Total de Solicitudes",
+    "noRequests": "Aún no has enviado ninguna solicitud",
+    "noMatch": "No hay solicitudes que coincidan con tus filtros",
+    "submitFirst": "Envía Tu Primera Solicitud",
+    "allRequests": "Todas las Solicitudes",
+    "newRequest": "Nueva Solicitud",
+    "status": {
+      "open": "Abierto",
+      "inprogress": "En Progreso",
+      "pending": "Pendiente",
+      "delivered": "Entregado",
+      "closed": "Cerrado"
+    }
+  },
   "dashboard": {
     "title": "Panel",
     "welcome": "Bienvenido",
