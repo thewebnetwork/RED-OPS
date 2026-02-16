@@ -319,6 +319,17 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
+      
+      {/* ========== ADMIN STUDIO ROUTES ========== */}
+      {/* Admin Dashboard */}
+      <Route 
+        path="/admin" 
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <Dashboard />
+          </PrivateRoute>
+        } 
+      />
       <Route 
         path="/categories" 
         element={
@@ -372,14 +383,6 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Reports />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/my-services" 
-        element={
-          <PrivateRoute>
-            <MyServices />
           </PrivateRoute>
         } 
       />
