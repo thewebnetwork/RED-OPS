@@ -1,8 +1,18 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
 import Layout from "./components/LayoutNew";
+
+// Helper component for redirecting with params
+function RedirectWithParams({ to }) {
+  const params = useParams();
+  let path = to;
+  Object.keys(params).forEach(key => {
+    path = path.replace(`:${key}`, params[key]);
+  });
+  return <Navigate to={path} replace />;
+}
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
