@@ -174,6 +174,11 @@ def parse_date(date_str: Optional[str]) -> Optional[datetime]:
 def build_base_query(filters: ReportFilter, current_user: dict) -> dict:
     """Build MongoDB query from filters with RBAC"""
     query = {}
+    role = current_user.get("role", "")
+    
+    # RBAC: Standard Users can only see their own data
+    if role == "Standard User":
+        query["requester_id"] = current_user["id"]
     
     # Date range
     if filters.date_from or filters.date_to:
@@ -208,11 +213,19 @@ def build_base_query(filters: ReportFilter, current_user: dict) -> dict:
     
     # Search filter
     if filters.search:
-        query["$or"] = [
+        search_or = [
             {"title": {"$regex": filters.search, "$options": "i"}},
             {"order_code": {"$regex": filters.search, "$options": "i"}},
             {"description": {"$regex": filters.search, "$options": "i"}}
         ]
+        # Merge with existing $or if present (e.g., team filter)
+        if "$or" in query:
+            # Combine using $and
+            existing_or = query["$or"]
+            del query["$or"]
+            query["$and"] = [{"$or": existing_or}, {"$or": search_or}]
+        else:
+            query["$or"] = search_or
     
     # Exclude drafts from reports
     if "status" not in query:

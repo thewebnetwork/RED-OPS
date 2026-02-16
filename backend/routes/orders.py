@@ -702,25 +702,29 @@ async def list_orders(
 ):
     """List orders based on user role. Drafts only visible to their owner."""
     query = {}
+    role = current_user.get("role", "")
     
-    if current_user["role"] == "Requester":
+    # Standard User = restricted to own data only
+    if role == "Standard User":
         query["requester_id"] = current_user["id"]
-        # Requester can see their own drafts
-    elif current_user["role"] == "Editor":
-        # Editors cannot see drafts, only Open and their assigned orders
+        # Standard Users can see their own drafts
+    # Operator = can see assigned orders + open pool
+    elif role == "Operator":
+        # Operators cannot see drafts, only Open and their assigned orders
         query["$or"] = [
             {"status": "Open"},
             {"editor_id": current_user["id"]}
         ]
+    # Administrator = full access
     else:
         # Admin - exclude drafts from general view unless filtering by Draft status
         if status != "Draft":
             query["status"] = {"$ne": "Draft"}
     
     if status:
-        if current_user["role"] == "Editor" and status != "Open":
+        if role == "Operator" and status != "Open":
             query = {"editor_id": current_user["id"], "status": status}
-        elif current_user["role"] != "Editor":
+        elif role != "Operator":
             query["status"] = status
     
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
@@ -1023,15 +1027,22 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
+    role = current_user.get("role", "")
+    
     # Access control - drafts only visible to owner
     if order["status"] == "Draft" and order["requester_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    if current_user["role"] == "Requester" and order["requester_id"] != current_user["id"]:
+    # Standard User = can only view their own orders
+    if role == "Standard User" and order["requester_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
-    if current_user["role"] == "Editor":
+    
+    # Operator = can view Open orders or their assigned orders
+    if role == "Operator":
         if order["status"] not in ["Open", "Draft"] and order.get("editor_id") != current_user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Administrator = full access (no restrictions)
     
     order = normalize_order(order)
     sla_deadline = order.get('sla_deadline')

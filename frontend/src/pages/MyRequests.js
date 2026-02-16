@@ -86,13 +86,13 @@ export default function MyRequests() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Inbox className="text-[#A2182C]" />
-            My Submitted Tickets
+            {t('requests.myRequests', 'My Requests')}
           </h1>
-          <p className="text-slate-500 mt-1">View and track all tickets you have submitted</p>
+          <p className="text-slate-500 mt-1">{t('requests.subtitle', 'View and track all your submitted requests')}</p>
         </div>
-        <Link to="/command-center">
+        <Link to="/services">
           <Button className="bg-rose-600 hover:bg-rose-700">
-            Submit New Request
+            {t('requests.submitNew', 'Submit New Request')}
           </Button>
         </Link>
       </div>
@@ -128,7 +128,7 @@ export default function MyRequests() {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-slate-900">{orders.length}</p>
-            <p className="text-sm text-slate-500">Total Tickets</p>
+            <p className="text-sm text-slate-500">{t('requests.totalRequests', 'Total Requests')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -164,13 +164,13 @@ export default function MyRequests() {
             <Inbox size={48} className="mx-auto mb-4 text-slate-300" />
             <p className="text-slate-500">
               {orders.length === 0 
-                ? "You have not submitted any tickets yet"
-                : "No tickets match your filters"}
+                ? t('requests.noRequests', 'You have not submitted any requests yet')
+                : t('requests.noMatch', 'No requests match your filters')}
             </p>
             {orders.length === 0 && (
-              <Link to="/command-center">
+              <Link to="/services">
                 <Button className="mt-4 bg-rose-600 hover:bg-rose-700">
-                  Submit Your First Request
+                  {t('requests.submitFirst', 'Submit Your First Request')}
                 </Button>
               </Link>
             )}

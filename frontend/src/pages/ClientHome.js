@@ -31,15 +31,16 @@ export default function ClientHome() {
 
   const fetchData = async () => {
     try {
-      // Fetch user's recent requests
-      const res = await axios.get(`${API}/orders/my-submitted?limit=5`);
-      const requests = res.data;
+      // Fetch user's recent requests and slice client-side to 5
+      const res = await axios.get(`${API}/orders/my-requests`);
+      const allRequests = res.data;
+      const requests = allRequests.slice(0, 5);
       setRecentRequests(requests);
       
-      // Calculate stats
-      const active = requests.filter(r => ['Open', 'In Progress'].includes(r.status)).length;
-      const completed = requests.filter(r => ['Delivered', 'Closed'].includes(r.status)).length;
-      const pending = requests.filter(r => r.status === 'Pending').length;
+      // Calculate stats from all requests
+      const active = allRequests.filter(r => ['Open', 'In Progress'].includes(r.status)).length;
+      const completed = allRequests.filter(r => ['Delivered', 'Closed'].includes(r.status)).length;
+      const pending = allRequests.filter(r => r.status === 'Pending').length;
       setStats({ active, completed, pending });
     } catch (error) {
       console.error('Failed to fetch data');
