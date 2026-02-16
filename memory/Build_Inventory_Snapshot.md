@@ -2,7 +2,7 @@
 ## UAT Testing Reference (December 2025)
 
 **Platform Name:** Red Ops
-**Preview URL:** https://translate-critical.preview.emergentagent.com
+**Preview URL:** https://client-ui-modes.preview.emergentagent.com
 **Version:** 4.0
 **Generated:** December 2025
 
