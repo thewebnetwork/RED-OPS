@@ -80,7 +80,7 @@ export default function MyRequests() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="my-tickets-page">
+    <div className="space-y-6 animate-fade-in" data-testid="my-requests-page">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
