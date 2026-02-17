@@ -52,88 +52,89 @@ export default function ServiceCatalog() {
 
   const fetchServices = async () => {
     try {
-      // Fetch categories to build service catalog
+      // Fetch real RRM services from catalog endpoint
       const res = await axios.get(`${API}/categories/catalog`);
       setServices(res.data);
     } catch (error) {
-      // Fallback to static catalog if endpoint doesn't exist yet
+      console.error('Failed to fetch catalog, using fallback:', error);
+      // Fallback to RRM services if endpoint fails
       setServices(getDefaultCatalog());
     } finally {
       setLoading(false);
     }
   };
 
-  // Default catalog for V1 - 8-12 services
+  // RRM Launch Services - Fallback catalog matching backend
   const getDefaultCatalog = () => [
     {
-      id: 'content-writing',
-      name: t('catalog.services.contentWriting.name', 'Content Writing'),
-      description: t('catalog.services.contentWriting.description', 'Blog posts, articles, and web copy crafted for your audience'),
-      icon: 'content',
-      turnaround: '2-3 days',
-      included: true,
-      popular: true
-    },
-    {
-      id: 'graphic-design',
-      name: t('catalog.services.graphicDesign.name', 'Graphic Design'),
-      description: t('catalog.services.graphicDesign.description', 'Social media graphics, banners, and marketing materials'),
-      icon: 'design',
+      id: 'video-editing-60s',
+      name: 'Video Editing (60s Reels)',
+      description: 'Professional 60-second video editing for Instagram Reels, TikTok, and YouTube Shorts',
+      icon: 'video',
       turnaround: '3-5 days',
       included: true,
       popular: true
     },
     {
-      id: 'video-editing',
-      name: t('catalog.services.videoEditing.name', 'Video Editing'),
-      description: t('catalog.services.videoEditing.description', 'Professional video editing for social media and web'),
+      id: 'short-form-stories',
+      name: 'Short-Form Editing (Stories)',
+      description: 'Instagram Stories and Snapchat content - quick edits optimized for vertical format',
       icon: 'video',
-      turnaround: '5-7 days',
-      included: false,
-      popular: false
-    },
-    {
-      id: 'social-media',
-      name: t('catalog.services.socialMedia.name', 'Social Media Management'),
-      description: t('catalog.services.socialMedia.description', 'Content scheduling, posting, and engagement management'),
-      icon: 'marketing',
-      turnaround: 'Ongoing',
+      turnaround: '1-2 days',
       included: true,
       popular: true
     },
     {
-      id: 'seo-optimization',
-      name: t('catalog.services.seo.name', 'SEO Optimization'),
-      description: t('catalog.services.seo.description', 'On-page SEO, keyword research, and content optimization'),
-      icon: 'analytics',
+      id: 'long-form-youtube',
+      name: 'Long-Form Video (YouTube)',
+      description: 'Complete YouTube video editing with intro, outro, b-roll, and transitions',
+      icon: 'video',
       turnaround: '5-7 days',
-      included: false,
-      popular: false
-    },
-    {
-      id: 'email-marketing',
-      name: t('catalog.services.emailMarketing.name', 'Email Marketing'),
-      description: t('catalog.services.emailMarketing.description', 'Email campaigns, newsletters, and automation setup'),
-      icon: 'marketing',
-      turnaround: '2-4 days',
       included: true,
-      popular: false
+      popular: true
     },
     {
-      id: 'website-updates',
-      name: t('catalog.services.websiteUpdates.name', 'Website Updates'),
-      description: t('catalog.services.websiteUpdates.description', 'Content updates, minor fixes, and page edits'),
-      icon: 'web',
+      id: 'thumbnail-design',
+      name: 'Thumbnail Design',
+      description: 'Eye-catching YouTube thumbnails and social media preview images',
+      icon: 'image',
       turnaround: '1-2 days',
       included: true,
       popular: false
     },
     {
-      id: 'consultation',
-      name: t('catalog.services.consultation.name', 'Strategy Consultation'),
-      description: t('catalog.services.consultation.description', '1-on-1 strategy session for your marketing needs'),
-      icon: 'support',
-      turnaround: 'Scheduled',
+      id: 'content-writing',
+      name: 'Content Writing',
+      description: 'Blog posts, captions, scripts, and web copy tailored to your brand voice',
+      icon: 'content',
+      turnaround: '2-3 days',
+      included: true,
+      popular: false
+    },
+    {
+      id: 'social-media-graphics',
+      name: 'Social Media Graphics',
+      description: 'Custom graphics for Instagram, Facebook, LinkedIn, and Twitter posts',
+      icon: 'design',
+      turnaround: '2-4 days',
+      included: true,
+      popular: false
+    },
+    {
+      id: 'email-campaigns',
+      name: 'Email Campaigns',
+      description: 'Email newsletter design and copywriting for audience engagement',
+      icon: 'marketing',
+      turnaround: '2-3 days',
+      included: false,
+      popular: false
+    },
+    {
+      id: 'website-updates',
+      name: 'Website Updates',
+      description: 'Minor website updates, content changes, and page edits',
+      icon: 'web',
+      turnaround: '1-3 days',
       included: false,
       popular: false
     }
