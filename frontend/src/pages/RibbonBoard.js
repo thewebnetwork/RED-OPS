@@ -306,19 +306,19 @@ export default function RibbonBoard() {
               </CardContent>
             </Card>
 
-            {filterTickets(pool2Tickets).length === 0 ? (
+            {filterRequests(pool2Requests).length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">{t('ribbon.noTicketsPool2')}</p>
+                  <p className="text-slate-500">{t('ribbon.noRequestsPool2', 'No requests in Pool 2')}</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
-                {filterTickets(pool2Tickets).map(ticket => (
-                  <PoolTicketCard 
-                    key={ticket.id} 
-                    ticket={ticket} 
+                {filterRequests(pool2Requests).map(request => (
+                  <PoolRequestCard 
+                    key={request.id} 
+                    request={request} 
                     canPick={canPickFromPool2}
                     poolNumber={2}
                   />
@@ -333,17 +333,17 @@ export default function RibbonBoard() {
       <AlertDialog open={pickDialogOpen} onOpenChange={setPickDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('ribbon.pickThisTicket')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('ribbon.pickThisRequest', 'Pick this request?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('ribbon.pickConfirmation', { code: ticketToPick?.order_code, title: ticketToPick?.title })}
+              {t('ribbon.pickConfirmation', { code: requestToPick?.order_code, title: requestToPick?.title })}
               <br /><br />
-              {t('ribbon.pickResponsibility')}
+              {t('ribbon.pickResponsibility', 'You will be responsible for completing this request.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handlePickTicket}
+              onClick={handlePickRequest}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Hand size={16} className="mr-2" />
