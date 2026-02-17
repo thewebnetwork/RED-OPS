@@ -45,14 +45,14 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function RibbonBoard() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [pool1Tickets, setPool1Tickets] = useState([]);
-  const [pool2Tickets, setPool2Tickets] = useState([]);
+  const [pool1Requests, setPool1Requests] = useState([]);
+  const [pool2Requests, setPool2Requests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('all');
   const [specialties, setSpecialties] = useState([]);
   const [pickDialogOpen, setPickDialogOpen] = useState(false);
-  const [ticketToPick, setTicketToPick] = useState(null);
+  const [requestToPick, setRequestToPick] = useState(null);
 
   const isAdmin = user?.role === 'Administrator';
   const isOperator = user?.role === 'Operator';
@@ -85,8 +85,8 @@ export default function RibbonBoard() {
         canViewPool1 ? axios.get(`${API}/orders/pool/1`) : Promise.resolve({ data: [] }),
         canViewPool2 ? axios.get(`${API}/orders/pool/2`) : Promise.resolve({ data: [] })
       ]);
-      setPool1Tickets(pool1Res.data);
-      setPool2Tickets(pool2Res.data);
+      setPool1Requests(pool1Res.data);
+      setPool2Requests(pool2Res.data);
     } catch (error) {
       toast.error(t('ribbon.failedToFetchPool'));
     } finally {
@@ -94,25 +94,25 @@ export default function RibbonBoard() {
     }
   };
 
-  const handlePickTicket = async () => {
-    if (!ticketToPick) return;
+  const handlePickRequest = async () => {
+    if (!requestToPick) return;
     try {
-      await axios.post(`${API}/orders/${ticketToPick.id}/pick`);
-      toast.success(t('ribbon.ticketPickedSuccess'));
+      await axios.post(`${API}/orders/${requestToPick.id}/pick`);
+      toast.success(t('ribbon.requestPickedSuccess', 'Request picked successfully'));
       setPickDialogOpen(false);
-      setTicketToPick(null);
+      setRequestToPick(null);
       fetchPools();
     } catch (error) {
       toast.error(error.response?.data?.detail || t('ribbon.failedToPick'));
     }
   };
 
-  const filterTickets = (tickets) => {
-    return tickets.filter(ticket => {
+  const filterRequests = (requests) => {
+    return requests.filter(request => {
       const matchesSearch = 
-        ticket.order_code?.toLowerCase().includes(search.toLowerCase()) ||
-        ticket.title?.toLowerCase().includes(search.toLowerCase());
-      const matchesSpecialty = specialtyFilter === 'all' || ticket.specialty_id === specialtyFilter;
+        request.order_code?.toLowerCase().includes(search.toLowerCase()) ||
+        request.title?.toLowerCase().includes(search.toLowerCase());
+      const matchesSpecialty = specialtyFilter === 'all' || request.specialty_id === specialtyFilter;
       return matchesSearch && matchesSpecialty;
     });
   };
@@ -130,8 +130,8 @@ export default function RibbonBoard() {
     return `${minutes}m`;
   };
 
-  const PoolTicketCard = ({ ticket, canPick, poolNumber }) => (
-    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-[#A2182C]" data-testid={`pool-ticket-${ticket.id}`}>
+  const PoolRequestCard = ({ request, canPick, poolNumber }) => (
+    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-[#A2182C]" data-testid={`pool-request-${request.id}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
