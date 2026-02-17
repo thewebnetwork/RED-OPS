@@ -302,3 +302,102 @@ async def get_category_tree(current_user: dict = Depends(get_current_user)):
         result.append({**l1, "subcategories": l2_categories})
     
     return result
+
+
+
+# ============== SERVICE CATALOG ENDPOINT ==============
+
+class ServiceCatalogItem(BaseModel):
+    id: str
+    name: str
+    description: str
+    icon: str
+    turnaround: str
+    included: bool
+    popular: bool
+
+
+@router.get("/catalog", response_model=List[ServiceCatalogItem])
+async def get_service_catalog(current_user: dict = Depends(get_current_user)):
+    """
+    Get the browseable service catalog for clients.
+    Returns 8 RRM launch services.
+    """
+    # RRM Launch Services - Hardcoded for MVP
+    catalog = [
+        {
+            "id": "video-editing-60s",
+            "name": "Video Editing (60s Reels)",
+            "description": "Professional 60-second video editing for Instagram Reels, TikTok, and YouTube Shorts",
+            "icon": "video",
+            "turnaround": "3-5 days",
+            "included": True,
+            "popular": True
+        },
+        {
+            "id": "short-form-stories",
+            "name": "Short-Form Editing (Stories)",
+            "description": "Instagram Stories and Snapchat content - quick edits optimized for vertical format",
+            "icon": "video",
+            "turnaround": "1-2 days",
+            "included": True,
+            "popular": True
+        },
+        {
+            "id": "long-form-youtube",
+            "name": "Long-Form Video (YouTube)",
+            "description": "Complete YouTube video editing with intro, outro, b-roll, and transitions",
+            "icon": "video",
+            "turnaround": "5-7 days",
+            "included": True,
+            "popular": True
+        },
+        {
+            "id": "thumbnail-design",
+            "name": "Thumbnail Design",
+            "description": "Eye-catching YouTube thumbnails and social media preview images",
+            "icon": "image",
+            "turnaround": "1-2 days",
+            "included": True,
+            "popular": False
+        },
+        {
+            "id": "content-writing",
+            "name": "Content Writing",
+            "description": "Blog posts, captions, scripts, and web copy tailored to your brand voice",
+            "icon": "content",
+            "turnaround": "2-3 days",
+            "included": True,
+            "popular": False
+        },
+        {
+            "id": "social-media-graphics",
+            "name": "Social Media Graphics",
+            "description": "Custom graphics for Instagram, Facebook, LinkedIn, and Twitter posts",
+            "icon": "design",
+            "turnaround": "2-4 days",
+            "included": True,
+            "popular": False
+        },
+        {
+            "id": "email-campaigns",
+            "name": "Email Campaigns",
+            "description": "Email newsletter design and copywriting for audience engagement",
+            "icon": "marketing",
+            "turnaround": "2-3 days",
+            "included": False,
+            "popular": False
+        },
+        {
+            "id": "website-updates",
+            "name": "Website Updates",
+            "description": "Minor website updates, content changes, and page edits",
+            "icon": "web",
+            "turnaround": "1-3 days",
+            "included": False,
+            "popular": False
+        }
+    ]
+    
+    return catalog
+
