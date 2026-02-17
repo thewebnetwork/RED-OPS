@@ -214,7 +214,7 @@ export default function RibbonBoard() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
           <Input
-            placeholder={t('ribbon.searchTickets')}
+            placeholder={t('ribbon.searchRequests', 'Search requests...')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -242,14 +242,14 @@ export default function RibbonBoard() {
             <TabsTrigger value="pool1" className="flex items-center gap-2" data-testid="pool1-tab">
               <Users size={16} />
               {t('ribbon.pool1Partners')}
-              <Badge variant="secondary" className="ml-1">{pool1Tickets.length}</Badge>
+              <Badge variant="secondary" className="ml-1">{pool1Requests.length}</Badge>
             </TabsTrigger>
           )}
           {canViewPool2 && (
             <TabsTrigger value="pool2" className="flex items-center gap-2" data-testid="pool2-tab">
               <Briefcase size={16} />
               {t('ribbon.pool2Vendors')}
-              <Badge variant="secondary" className="ml-1">{pool2Tickets.length}</Badge>
+              <Badge variant="secondary" className="ml-1">{pool2Requests.length}</Badge>
             </TabsTrigger>
           )}
         </TabsList>
@@ -269,19 +269,19 @@ export default function RibbonBoard() {
               </CardContent>
             </Card>
 
-            {filterTickets(pool1Tickets).length === 0 ? (
+            {filterRequests(pool1Requests).length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">{t('ribbon.noTicketsPool1')}</p>
+                  <p className="text-slate-500">{t('ribbon.noRequestsPool1', 'No requests in Pool 1')}</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
-                {filterTickets(pool1Tickets).map(ticket => (
-                  <PoolTicketCard 
-                    key={ticket.id} 
-                    ticket={ticket} 
+                {filterRequests(pool1Requests).map(request => (
+                  <PoolRequestCard 
+                    key={request.id} 
+                    request={request} 
                     canPick={canPickFromPool1}
                     poolNumber={1}
                   />
