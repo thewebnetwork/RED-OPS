@@ -136,28 +136,28 @@ export default function RibbonBoard() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-sm text-slate-500">{ticket.order_code}</span>
+              <span className="font-mono text-sm text-slate-500">{request.order_code}</span>
               <Badge variant="outline" className="text-xs">
-                {ticket.category_name || t('ribbon.general')}
+                {request.category_name || t('ribbon.general')}
               </Badge>
-              {ticket.specialty_name && (
+              {request.specialty_name && (
                 <Badge className="bg-purple-100 text-purple-700 text-xs">
                   <Briefcase size={10} className="mr-1" />
-                  {ticket.specialty_name}
+                  {request.specialty_name}
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-slate-900 mt-2 line-clamp-2">{ticket.title}</h3>
+            <h3 className="font-medium text-slate-900 mt-2 line-clamp-2">{request.title}</h3>
             <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
               <span className="flex items-center gap-1">
                 <Timer size={14} />
-                {t('ribbon.inPool')}: {formatTimeInPool(ticket.pool_entered_at)}
+                {t('ribbon.inPool')}: {formatTimeInPool(request.pool_entered_at)}
               </span>
-              <span>{t('ribbon.priority')}: {ticket.priority || t('ribbon.normal')}</span>
+              <span>{t('ribbon.priority')}: {request.priority || t('ribbon.normal')}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Link to={`/orders/${ticket.id}`}>
+            <Link to={`/requests/${request.id}`}>
               <Button variant="outline" size="sm">
                 <Eye size={14} className="mr-1" />
                 {t('common.view')}
@@ -168,10 +168,10 @@ export default function RibbonBoard() {
                 size="sm" 
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  setTicketToPick(ticket);
+                  setRequestToPick(request);
                   setPickDialogOpen(true);
                 }}
-                data-testid={`pick-ticket-${ticket.id}`}
+                data-testid={`pick-request-${request.id}`}
               >
                 <Hand size={14} className="mr-1" />
                 {t('ribbon.pick')}
