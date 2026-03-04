@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Save",
+    "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -425,7 +426,9 @@
     "incident": "Incident / Issues",
     "total": "Total",
     "searchCategories": "Type to find a category faster...",
-    "describeWhatYouNeed": "Describe what you need..."
+    "describeWhatYouNeed": "Describe what you need...",
+    "whatDoYouNeed": "What do you need help with today?",
+    "selectCategoryToContinue": "Select a category to continue"
   },
   "workflows": {
     "title": "Workflow Builder",
@@ -643,7 +646,11 @@
     "workflowDescription": "Requests will go through the editor assignment process",
     "englishName": "English name",
     "portugueseName": "Portuguese name",
-    "spanishName": "Spanish name"
+    "spanishName": "Spanish name",
+    "searchCategories": "Search categories...",
+    "selectCategory": "Select a category",
+    "selectSubcategory": "Select a subcategory",
+    "selectedPath": "Selected path"
   },
   "profile": {
     "title": "Profile",

@@ -733,9 +733,13 @@ async def list_orders(
     for order in orders:
         order = normalize_order(order)
         sla_deadline = order.get('sla_deadline')
+        # Calculate SLA breach status
+        sla_breached = is_sla_breached(sla_deadline, order['status']) if sla_deadline else False
+        # Remove is_sla_breached from order dict to avoid duplicate
+        order_copy = {k: v for k, v in order.items() if k != 'is_sla_breached'}
         result.append(OrderResponse(
-            **order,
-            is_sla_breached=is_sla_breached(sla_deadline, order['status']) if sla_deadline else False
+            **order_copy,
+            is_sla_breached=sla_breached
         ))
     
     return result

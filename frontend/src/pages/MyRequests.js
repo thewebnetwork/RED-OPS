@@ -40,6 +40,7 @@ const STATUS_CONFIG = {
 };
 
 export default function MyRequests() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
