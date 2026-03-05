@@ -102,9 +102,13 @@ export default function CommandCenter() {
   // Helper to get translated category name
   const getCatName = (cat) => getTranslatedCategoryName(cat, i18n.language);
   
+  // Determine if user is a client (should see simplified service picker)
+  const isClient = user?.account_type === 'Media Client' || user?.role === 'Standard User';
+
   // Form state
   const [selectedL1, setSelectedL1] = useState('');
   const [selectedL2, setSelectedL2] = useState('');
+  const [selectedService, setSelectedService] = useState(''); // For client service picker
   const [requestType, setRequestType] = useState('Request');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -131,6 +135,7 @@ export default function CommandCenter() {
         const categoryExists = categoriesL1.find(c => c.id === service.categoryId);
         if (categoryExists) {
           setSelectedL1(service.categoryId);
+          setSelectedService(service.id); // For client UI
           setTitle(service.defaultTitle);
         } else {
           // Category was deleted - show message, don't auto-select
@@ -471,72 +476,118 @@ export default function CommandCenter() {
                 <CardHeader className="border-b border-slate-100 pb-4">
                   <CardTitle className="text-base">{t('categories.title')}</CardTitle>
                 </CardHeader>
+                
+                {/* Categorization Section - Conditional based on user type */}
                 <CardContent className="p-4 space-y-4">
-                  {/* Search */}
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <Input
-                      value={categorySearch}
-                      onChange={(e) => setCategorySearch(e.target.value)}
-                      placeholder={t('categories.searchCategories')}
-                      className="pl-9 text-sm"
-                    />
-                  </div>
-
-                  {/* Category L1 */}
-                  <div>
-                    <Label className="text-xs text-slate-500">{t('categories.level1')}</Label>
-                    <Select value={selectedL1} onValueChange={(v) => { setSelectedL1(v); setSelectedL2(''); }}>
-                      <SelectTrigger className="mt-1.5" data-testid="category-l1-select">
-                        <SelectValue placeholder={t('categories.selectCategory')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredL1Categories.map(cat => {
-                          const Icon = getCategoryIcon(cat.name);
-                          return (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              <div className="flex items-center gap-2">
-                                <Icon size={14} />
-                                {getCatName(cat)}
-                              </div>
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Category L2 */}
-                  {selectedL1 && (
+                  {isClient ? (
+                    /* CLIENT VIEW: Simple service picker */
                     <div>
-                      <Label className="text-xs text-slate-500">{t('categories.level2')}</Label>
-                      <Select value={selectedL2} onValueChange={setSelectedL2}>
-                        <SelectTrigger className="mt-1.5" data-testid="category-l2-select">
-                          <SelectValue placeholder={t('categories.selectSubcategory')} />
+                      <Label className="text-xs text-slate-500">{t('catalog.title', 'Select a Service')}</Label>
+                      <Select 
+                        value={selectedService} 
+                        onValueChange={(serviceId) => {
+                          const service = getServiceById(serviceId);
+                          if (service) {
+                            setSelectedService(serviceId);
+                            setSelectedL1(service.categoryId);
+                            if (!title) {
+                              setTitle(service.defaultTitle);
+                            }
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="mt-1.5" data-testid="service-select">
+                          <SelectValue placeholder="Select a service..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {categoriesL2.map(cat => (
-                            <SelectItem key={cat.id} value={cat.id}>{getCatName(cat)}</SelectItem>
+                          {RRM_SERVICES.map(service => (
+                            <SelectItem key={service.id} value={service.id}>
+                              <div className="flex items-center gap-2">
+                                {service.popular && (
+                                  <Badge variant="secondary" className="text-[10px] px-1 py-0">Popular</Badge>
+                                )}
+                                <span>{service.name}</span>
+                              </div>
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {selectedService && (
+                        <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600">
+                          {RRM_SERVICES.find(s => s.id === selectedService)?.description}
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  {/* Selected Path */}
-                  {selectedL1 && (
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <p className="text-xs text-slate-500 mb-1">{t('categories.selectedPath')}:</p>
-                      <div className="flex items-center gap-1 text-sm">
-                        <span className="font-medium">{getCatName(selectedL1Details)}</span>
-                        {selectedL2Details && (
-                          <>
-                            <ChevronRight size={14} className="text-slate-400" />
-                            <span className="font-medium text-rose-600">{getCatName(selectedL2Details)}</span>
-                          </>
-                        )}
+                  ) : (
+                    /* ADMIN/OPERATOR VIEW: Full category tree */
+                    <>
+                      {/* Search */}
+                      <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Input
+                          value={categorySearch}
+                          onChange={(e) => setCategorySearch(e.target.value)}
+                          placeholder={t('categories.searchCategories')}
+                          className="pl-9 text-sm"
+                        />
                       </div>
-                    </div>
+
+                      {/* Category L1 */}
+                      <div>
+                        <Label className="text-xs text-slate-500">{t('categories.level1')}</Label>
+                        <Select value={selectedL1} onValueChange={(v) => { setSelectedL1(v); setSelectedL2(''); }}>
+                          <SelectTrigger className="mt-1.5" data-testid="category-l1-select">
+                            <SelectValue placeholder={t('categories.selectCategory')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredL1Categories.map(cat => {
+                              const Icon = getCategoryIcon(cat.name);
+                              return (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Icon size={14} />
+                                    {getCatName(cat)}
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Category L2 */}
+                      {selectedL1 && (
+                        <div>
+                          <Label className="text-xs text-slate-500">{t('categories.level2')}</Label>
+                          <Select value={selectedL2} onValueChange={setSelectedL2}>
+                            <SelectTrigger className="mt-1.5" data-testid="category-l2-select">
+                              <SelectValue placeholder={t('categories.selectSubcategory')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categoriesL2.map(cat => (
+                                <SelectItem key={cat.id} value={cat.id}>{getCatName(cat)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {/* Selected Path */}
+                      {selectedL1 && (
+                        <div className="p-3 bg-slate-50 rounded-lg">
+                          <p className="text-xs text-slate-500 mb-1">{t('categories.selectedPath')}:</p>
+                          <div className="flex items-center gap-1 text-sm">
+                            <span className="font-medium">{getCatName(selectedL1Details)}</span>
+                            {selectedL2Details && (
+                              <>
+                                <ChevronRight size={14} className="text-slate-400" />
+                                <span className="font-medium text-rose-600">{getCatName(selectedL2Details)}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Compact Attachments (moved under categorization) */}
