@@ -42,6 +42,9 @@ import AnnouncementTicker from './AnnouncementTicker';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Routes shared across modes — mode determined by active_app_mode, not URL
+const SHARED_ROUTES = ['/tasks', '/task-board', '/reports'];
+
 // Icon mapping
 const ICONS = {
   Home, ShoppingBag, FileText, User, Inbox, Layers, ClipboardList,
@@ -78,6 +81,7 @@ export default function Layout({ children }) {
 
   const handleLogout = () => {
     localStorage.removeItem('preview_as_client');
+    localStorage.removeItem('active_app_mode');
     logout();
     navigate('/login');
   };
@@ -92,12 +96,21 @@ export default function Layout({ children }) {
 
   // Determine current mode
   const getCurrentMode = () => {
+    // Preview as Client always forces client portal
     if (previewAsClient && modeConfig.canAccessAdminStudio) {
       return APP_MODES.CLIENT_PORTAL;
     }
     
-    // Check URL to determine mode context
     const path = location.pathname;
+    
+    // Shared routes: respect the sticky active_app_mode from localStorage
+    if (SHARED_ROUTES.some(p => path === p || path.startsWith(p + '/'))) {
+      const stored = localStorage.getItem('active_app_mode');
+      if (stored === 'client_portal') return APP_MODES.CLIENT_PORTAL;
+      if (stored === 'operator_console' && modeConfig.canAccessOperatorConsole) return APP_MODES.OPERATOR_CONSOLE;
+      if (stored === 'admin_studio' && modeConfig.canAccessAdminStudio) return APP_MODES.ADMIN_STUDIO;
+      return modeConfig.primaryMode;
+    }
     
     // Admin routes
     if (['/iam', '/settings', '/announcements', '/logs', '/admin'].some(p => path.startsWith(p))) {
@@ -105,7 +118,7 @@ export default function Layout({ children }) {
     }
     
     // Operator routes
-    if (['/queue', '/pool', '/all-requests', '/reports', '/tasks'].some(p => path.startsWith(p))) {
+    if (['/queue', '/pool', '/all-requests'].some(p => path.startsWith(p))) {
       return modeConfig.canAccessOperatorConsole ? APP_MODES.OPERATOR_CONSOLE : modeConfig.primaryMode;
     }
     
@@ -262,7 +275,7 @@ export default function Layout({ children }) {
               <DropdownMenuContent align="start" className="w-56">
                 {modeConfig.canAccessClientPortal && (
                   <DropdownMenuItem asChild>
-                    <Link to="/" className="flex items-center cursor-pointer">
+                    <Link to="/" onClick={() => localStorage.setItem('active_app_mode', 'client_portal')} className="flex items-center cursor-pointer">
                       <Home size={16} className="mr-2" />
                       {t('nav.clientPortal', 'Client Portal')}
                     </Link>
@@ -270,7 +283,7 @@ export default function Layout({ children }) {
                 )}
                 {modeConfig.canAccessOperatorConsole && (
                   <DropdownMenuItem asChild>
-                    <Link to="/queue" className="flex items-center cursor-pointer">
+                    <Link to="/queue" onClick={() => localStorage.setItem('active_app_mode', 'operator_console')} className="flex items-center cursor-pointer">
                       <Inbox size={16} className="mr-2" />
                       {t('nav.operatorConsole', 'Operator Console')}
                     </Link>
@@ -278,7 +291,7 @@ export default function Layout({ children }) {
                 )}
                 {modeConfig.canAccessAdminStudio && (
                   <DropdownMenuItem asChild>
-                    <Link to="/admin" className="flex items-center cursor-pointer">
+                    <Link to="/admin" onClick={() => localStorage.setItem('active_app_mode', 'admin_studio')} className="flex items-center cursor-pointer">
                       <LayoutDashboard size={16} className="mr-2" />
                       {t('nav.adminStudio', 'Admin Studio')}
                     </Link>

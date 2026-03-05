@@ -34,7 +34,6 @@ import {
   Clock,
   User,
   Calendar,
-  AlertCircle,
   FileText,
   MessageSquare,
   CheckCircle2,
@@ -125,11 +124,6 @@ export default function OrderDetail() {
   const [reassignTargetId, setReassignTargetId] = useState('');
   const [reassignReason, setReassignReason] = useState('');
   const [reassigning, setReassigning] = useState(false);
-  
-  // Force to Pool 2 state
-  const [forcePool2DialogOpen, setForcePool2DialogOpen] = useState(false);
-  const [forcePool2Reason, setForcePool2Reason] = useState('');
-  const [forcingToPool2, setForcingToPool2] = useState(false);
   
   // Soft delete state (Admin only)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -340,24 +334,6 @@ export default function OrderDetail() {
     }
   };
 
-  // Force to Pool 2 handler
-  const handleForceToPool2 = async () => {
-    setForcingToPool2(true);
-    try {
-      await axios.post(`${API}/orders/${orderId}/force-pool-2`, null, {
-        params: { reason: forcePool2Reason.trim() || null }
-      });
-      toast.success('Ticket forced to Pool 2 successfully');
-      setForcePool2DialogOpen(false);
-      setForcePool2Reason('');
-      fetchOrderData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to force ticket to Pool 2');
-    } finally {
-      setForcingToPool2(false);
-    }
-  };
-
   // Soft delete handler (Admin only)
   const handleSoftDelete = async () => {
     if (!deleteReason.trim()) {
@@ -463,16 +439,15 @@ export default function OrderDetail() {
   const isOperator = user?.role === 'Operator';
   const isResolver = order.editor_id === user?.id;
   const canReassign = (isAdmin || isOperator || isResolver) && !['Closed', 'Canceled', 'Delivered'].includes(order.status);
-  // Admin can force Open/unassigned tickets to Pool 2
-  const canForceToPool2 = isAdmin && order.status === 'Open' && !order.editor_id;
   // Admin can soft-delete any ticket that isn't already deleted
   const canSoftDelete = isAdmin && !order.deleted;
 
   const isClient = !isAdmin && !isOperator && !isEditor;
 
-  // Check if admin is in "Preview as Client" mode
+  // Check if admin is in "Preview as Client" mode or Client Portal mode
   const isClientPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
-  const showAsClient = isClient || isClientPreview;
+  const isClientPortalMode = typeof window !== 'undefined' && localStorage.getItem('active_app_mode') === 'client_portal';
+  const showAsClient = isClient || isClientPreview || isClientPortalMode;
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
@@ -529,7 +504,7 @@ export default function OrderDetail() {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        {canPick && (
+        {!showAsClient && canPick && (
           <Button 
             className="bg-rose-600 hover:bg-rose-700"
             onClick={handlePickOrder}
@@ -539,54 +514,7 @@ export default function OrderDetail() {
             Pick This Order
           </Button>
         )}
-        {canForceToPool2 && (
-          <Dialog open={forcePool2DialogOpen} onOpenChange={setForcePool2DialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline"
-                className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                data-testid="force-pool-2-btn"
-              >
-                <AlertCircle size={18} className="mr-2" />
-                Force to Pool 2
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Force Ticket to Pool 2</DialogTitle>
-                <DialogDescription>
-                  This will bypass the 24-hour right-of-first-refusal window and make the ticket immediately available to Vendors/Freelancers.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <Label>Reason (optional)</Label>
-                  <Textarea
-                    value={forcePool2Reason}
-                    onChange={(e) => setForcePool2Reason(e.target.value)}
-                    placeholder="Why is this being forced to Pool 2?"
-                    className="mt-1.5"
-                    data-testid="force-pool-2-reason-input"
-                  />
-                </div>
-                <div className="flex gap-3 justify-end">
-                  <Button variant="outline" onClick={() => setForcePool2DialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    className="bg-orange-600 hover:bg-orange-700"
-                    onClick={handleForceToPool2}
-                    disabled={forcingToPool2}
-                    data-testid="confirm-force-pool-2-btn"
-                  >
-                    {forcingToPool2 ? 'Forcing...' : 'Force to Pool 2'}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-        {canSubmitForReview && (
+        {!showAsClient && canSubmitForReview && (
           <Button 
             className="bg-purple-600 hover:bg-purple-700"
             onClick={handleSubmitForReview}
@@ -596,7 +524,7 @@ export default function OrderDetail() {
             Submit for Review
           </Button>
         )}
-        {canRespond && (
+        {!showAsClient && canRespond && (
           <Button 
             className="bg-indigo-600 hover:bg-indigo-700"
             onClick={handleRespondToOrder}
@@ -606,7 +534,7 @@ export default function OrderDetail() {
             Send Response to Editor
           </Button>
         )}
-        {canDeliver && (
+        {!showAsClient && canDeliver && (
           <Dialog open={deliverDialogOpen} onOpenChange={setDeliverDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -658,7 +586,7 @@ export default function OrderDetail() {
             </DialogContent>
           </Dialog>
         )}
-        {canReassign && (
+        {!showAsClient && canReassign && (
           <Dialog open={reassignDialogOpen} onOpenChange={setReassignDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -675,7 +603,7 @@ export default function OrderDetail() {
               <DialogHeader>
                 <DialogTitle>Reassign Ticket</DialogTitle>
                 <DialogDescription>
-                  Transfer this ticket to another user, team, or specialty pool.
+                  Transfer this ticket to another user, team, or specialty.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
@@ -814,7 +742,7 @@ export default function OrderDetail() {
             </DialogContent>
           </Dialog>
         )}
-        {canClose && (
+        {!showAsClient && canClose && (
           <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -867,7 +795,7 @@ export default function OrderDetail() {
             </DialogContent>
           </Dialog>
         )}
-        {canSoftDelete && (
+        {!showAsClient && canSoftDelete && (
           <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogTrigger asChild>
               <Button 

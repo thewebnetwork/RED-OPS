@@ -270,12 +270,14 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      {/* My Queue - Assigned requests */}
+      {/* My Queue - Internal/Admin only */}
       <Route 
         path="/queue" 
         element={
           <PrivateRoute>
-            <Orders />
+            <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
+              <Orders />
+            </ModeRoute>
           </PrivateRoute>
         } 
       />
@@ -295,7 +297,9 @@ function AppRoutes() {
         path="/all-requests" 
         element={
           <PrivateRoute>
-            <Orders />
+            <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
+              <Orders />
+            </ModeRoute>
           </PrivateRoute>
         } 
       />
@@ -409,7 +413,9 @@ function AppRoutes() {
         path="/reports" 
         element={
           <PrivateRoute>
-            <Reports />
+            <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
+              <Reports />
+            </ModeRoute>
           </PrivateRoute>
         } 
       />

@@ -87,7 +87,15 @@ const TYPE_OPTIONS = [
 
 // ── Role helpers ─────────────────────────────────────────────────
 function getUserMode(user) {
-  if (user?.role === 'Administrator') return 'admin';
+  // Respect sticky mode and client preview
+  const preview = localStorage.getItem('preview_as_client') === 'true';
+  const activeMode = localStorage.getItem('active_app_mode');
+  if (preview) return 'client';
+  if (activeMode === 'client_portal') return 'client';
+  if (user?.role === 'Administrator') {
+    if (activeMode === 'operator_console') return 'manager';
+    return 'admin';
+  }
   if (user?.account_type === 'Media Client') return 'client';
   return 'manager';
 }
