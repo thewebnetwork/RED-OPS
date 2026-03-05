@@ -23,6 +23,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import { RRM_SERVICES } from '../config/rrmServices';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -57,88 +58,13 @@ export default function ServiceCatalog() {
       setServices(res.data);
     } catch (error) {
       console.error('Failed to fetch catalog, using fallback:', error);
-      // Fallback to RRM services if endpoint fails
-      setServices(getDefaultCatalog());
+      // Fallback to canonical RRM service registry
+      setServices(RRM_SERVICES);
     } finally {
       setLoading(false);
     }
   };
 
-  // RRM Launch Services - Fallback catalog matching backend
-  const getDefaultCatalog = () => [
-    {
-      id: 'video-editing-60s',
-      name: 'Video Editing (60s Reels)',
-      description: 'Professional 60-second video editing for Instagram Reels, TikTok, and YouTube Shorts',
-      icon: 'video',
-      turnaround: '3-5 days',
-      included: true,
-      popular: true
-    },
-    {
-      id: 'short-form-stories',
-      name: 'Short-Form Editing (Stories)',
-      description: 'Instagram Stories and Snapchat content - quick edits optimized for vertical format',
-      icon: 'video',
-      turnaround: '1-2 days',
-      included: true,
-      popular: true
-    },
-    {
-      id: 'long-form-youtube',
-      name: 'Long-Form Video (YouTube)',
-      description: 'Complete YouTube video editing with intro, outro, b-roll, and transitions',
-      icon: 'video',
-      turnaround: '5-7 days',
-      included: true,
-      popular: true
-    },
-    {
-      id: 'thumbnail-design',
-      name: 'Thumbnail Design',
-      description: 'Eye-catching YouTube thumbnails and social media preview images',
-      icon: 'image',
-      turnaround: '1-2 days',
-      included: true,
-      popular: false
-    },
-    {
-      id: 'content-writing',
-      name: 'Content Writing',
-      description: 'Blog posts, captions, scripts, and web copy tailored to your brand voice',
-      icon: 'content',
-      turnaround: '2-3 days',
-      included: true,
-      popular: false
-    },
-    {
-      id: 'social-media-graphics',
-      name: 'Social Media Graphics',
-      description: 'Custom graphics for Instagram, Facebook, LinkedIn, and Twitter posts',
-      icon: 'design',
-      turnaround: '2-4 days',
-      included: true,
-      popular: false
-    },
-    {
-      id: 'email-campaigns',
-      name: 'Email Campaigns',
-      description: 'Email newsletter design and copywriting for audience engagement',
-      icon: 'marketing',
-      turnaround: '2-3 days',
-      included: false,
-      popular: false
-    },
-    {
-      id: 'website-updates',
-      name: 'Website Updates',
-      description: 'Minor website updates, content changes, and page edits',
-      icon: 'web',
-      turnaround: '1-3 days',
-      included: false,
-      popular: false
-    }
-  ];
 
   const filteredServices = services.filter(service => 
     service.name.toLowerCase().includes(search.toLowerCase()) ||
