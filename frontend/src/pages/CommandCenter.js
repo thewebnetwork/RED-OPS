@@ -344,7 +344,9 @@ export default function CommandCenter() {
                   </div>
 
                   {/* Dynamic Form Based on Category */}
-                  {selectedL2 && (
+                  {/* For clients: show form when service (L1) is selected */}
+                  {/* For admins: show form when L2 subcategory is selected */}
+                  {(isClient ? selectedL1 : selectedL2) && (
                     <div className="pt-4 border-t border-slate-100">
                       {showEditingForm && (
                         <EditingRequestForm 
@@ -359,6 +361,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.editingSubmitted'));
                           }}
@@ -368,6 +371,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -386,6 +390,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.featureSubmitted'));
                           }}
@@ -395,6 +400,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -414,6 +420,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.bugSubmitted'));
                           }}
@@ -423,6 +430,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -443,6 +451,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.requestSubmitted'));
                           }}
@@ -452,6 +461,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
+                            if (isClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -460,7 +470,8 @@ export default function CommandCenter() {
                     </div>
                   )}
 
-                  {!selectedL2 && (
+                  {/* Empty state - only show for non-clients or when no category selected */}
+                  {!(isClient ? selectedL1 : selectedL2) && (
                     <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">
                       <FileText size={48} className="mx-auto text-slate-300 mb-3" />
                       <p>{t('commandCenter.selectCategoryToContinue')}</p>
