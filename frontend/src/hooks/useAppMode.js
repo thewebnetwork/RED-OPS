@@ -157,6 +157,7 @@ export function getNavItemsForMode(mode, modeConfig, t) {
         { path: '/', icon: 'Home', labelKey: 'nav.home', label: t('nav.home') },
         { path: '/services', icon: 'ShoppingBag', labelKey: 'nav.requestService', label: t('nav.requestService') },
         { path: '/my-requests', icon: 'FileText', labelKey: 'nav.myRequests', label: t('nav.myRequests') },
+        { path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks', label: t('nav.tasks') },
         { path: '/my-account', icon: 'User', labelKey: 'nav.myAccount', label: t('nav.myAccount') }
       ];
       

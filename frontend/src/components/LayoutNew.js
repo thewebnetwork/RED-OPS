@@ -23,7 +23,8 @@ import {
   ChevronDown,
   Star,
   Eye,
-  ChevronRight
+  ChevronRight,
+  CheckSquare
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -43,7 +44,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 // Icon mapping
 const ICONS = {
   Home, ShoppingBag, FileText, User, Inbox, Layers, ClipboardList,
-  BarChart3, LayoutDashboard, KeyRound, Settings, Megaphone
+  BarChart3, LayoutDashboard, KeyRound, Settings, Megaphone, CheckSquare
 };
 
 export default function Layout({ children }) {
@@ -103,7 +104,7 @@ export default function Layout({ children }) {
     }
     
     // Operator routes
-    if (['/queue', '/pool', '/all-requests', '/reports'].some(p => path.startsWith(p))) {
+    if (['/queue', '/pool', '/all-requests', '/reports', '/tasks'].some(p => path.startsWith(p))) {
       return modeConfig.canAccessOperatorConsole ? APP_MODES.OPERATOR_CONSOLE : modeConfig.primaryMode;
     }
     
@@ -128,6 +129,7 @@ export default function Layout({ children }) {
         { path: '/', icon: 'Home', labelKey: 'nav.home' },
         { path: '/services', icon: 'ShoppingBag', labelKey: 'nav.requestService' },
         { path: '/my-requests', icon: 'FileText', labelKey: 'nav.myRequests' },
+        { path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' },
         { path: '/my-account', icon: 'User', labelKey: 'nav.myAccount' }
       ];
     }
@@ -139,6 +141,7 @@ export default function Layout({ children }) {
           { path: '/', icon: 'Home', labelKey: 'nav.home' },
           { path: '/services', icon: 'ShoppingBag', labelKey: 'nav.requestService' },
           { path: '/my-requests', icon: 'FileText', labelKey: 'nav.myRequests' },
+          { path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' },
           { path: '/my-account', icon: 'User', labelKey: 'nav.myAccount' }
         ];
       }
@@ -150,6 +153,7 @@ export default function Layout({ children }) {
         if (modeConfig.canPickFromPools) {
           items.push({ path: '/pool', icon: 'Layers', labelKey: 'nav.pool' });
         }
+        items.push({ path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' });
         items.push({ path: '/all-requests', icon: 'ClipboardList', labelKey: 'nav.allRequests' });
         items.push({ path: '/reports', icon: 'BarChart3', labelKey: 'nav.reports' });
         return items;
@@ -158,6 +162,7 @@ export default function Layout({ children }) {
       // Admin Studio
       return [
         { path: '/admin', icon: 'LayoutDashboard', labelKey: 'nav.adminDashboard' },
+        { path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' },
         { path: '/iam', icon: 'KeyRound', labelKey: 'iam.title' },
         { path: '/settings', icon: 'Settings', labelKey: 'nav.settings' },
         { path: '/reports', icon: 'BarChart3', labelKey: 'nav.reports' },
@@ -174,6 +179,7 @@ export default function Layout({ children }) {
       if (modeConfig.canPickFromPools) {
         items.push({ path: '/pool', icon: 'Layers', labelKey: 'nav.pool' });
       }
+      items.push({ path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' });
       if (modeConfig.isInternalStaff) {
         items.push({ path: '/all-requests', icon: 'ClipboardList', labelKey: 'nav.allRequests' });
         items.push({ path: '/reports', icon: 'BarChart3', labelKey: 'nav.reports' });
@@ -186,6 +192,7 @@ export default function Layout({ children }) {
       { path: '/', icon: 'Home', labelKey: 'nav.home' },
       { path: '/services', icon: 'ShoppingBag', labelKey: 'nav.requestService' },
       { path: '/my-requests', icon: 'FileText', labelKey: 'nav.myRequests' },
+      { path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' },
       { path: '/my-account', icon: 'User', labelKey: 'nav.myAccount' }
     ];
   };

@@ -57,6 +57,7 @@ import DocumentationPage from "./pages/DocumentationPage";
 import PoolPickerRulesPage from "./pages/PoolPickerRulesPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
 import DashboardBuilder from "./pages/DashboardBuilder";
+import TaskBoard from "./pages/TaskBoard";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
 // Route guard that checks mode access
@@ -256,6 +257,15 @@ function AppRoutes() {
       <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}
+      {/* Task Board - All roles */}
+      <Route 
+        path="/tasks" 
+        element={
+          <PrivateRoute>
+            <TaskBoard />
+          </PrivateRoute>
+        } 
+      />
       {/* My Queue - Assigned requests */}
       <Route 
         path="/queue" 
