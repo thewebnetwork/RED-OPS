@@ -1,9 +1,17 @@
 # Red Ribbon Ops - Product Requirements Document
 
-**Last Updated:** December 2024  
-**Version:** 4.0 - Document Implementation Complete
+**Last Updated:** March 2026  
+**Version:** 5.0 - Task Board MVP Backend Complete
 
-## Recent Updates (Dec 2024)
+## Recent Updates (March 2026)
+
+### Task Board MVP - Backend API (COMPLETED - March 2026)
+- **Task Model** (`backend/models/task.py`): Pydantic models with enums for status (backlog/todo/doing/waiting_on_client/review/done), visibility (client/internal/both), task_type (manual/request_generated/approval/follow_up), created_source (system/admin/client)
+- **Task API** (`backend/routes/tasks.py`): GET/POST/PATCH /api/tasks + PATCH /api/tasks/reorder
+- **RBAC Rules**: Admin full CRUD in own org; Client read-only for client/both visibility, status-update only; Operator read/update in own org
+- **28/28 backend tests passed** (see `/app/test_reports/iteration_54.json`)
+- **No pool/routing concepts** in task system
+- Tasks support optional request linking, assignment to internal or client users
 
 ### Phase 1: MVP Blocker Fixes (COMPLETED)
 - Backend RBAC alignment (Administrator/Operator/Standard User)
@@ -124,6 +132,9 @@ All 6 UAT-critical pages now fully translated:
 - Backend: FastAPI + MongoDB
 - Auth: JWT-based with OTP support
 
+## Upcoming Tasks (P0)
+1. **Task Board Frontend**: Kanban board at `/tasks` with drag-and-drop (react-beautiful-dnd), task creation/assignment UI, role-based filtering
+
 ## Upcoming Tasks (P1)
 1. Advanced analytics for API key usage with charts
 2. Slack/Teams notification integration presets
@@ -135,9 +146,8 @@ All 6 UAT-critical pages now fully translated:
 4. Backup code system for OTP recovery
 
 ## Files of Reference
-- `/app/frontend/src/pages/Dashboard.js` - Dynamic dashboard renderer
-- `/app/frontend/src/pages/CommandCenter.js` - Ticket submission forms
-- `/app/frontend/src/pages/SettingsHub.js` - Settings navigation
-- `/app/frontend/src/pages/IAMPage.js` - User/team management
-- `/app/frontend/src/i18n/locales/*.json` - Translation files
-- `/app/frontend/src/utils/i18nHelpers.js` - Translation helper utilities
+- `/app/backend/models/task.py` - Task model and enums
+- `/app/backend/routes/tasks.py` - Task API endpoints with RBAC
+- `/app/backend/server_v2.py` - Main server, includes task router
+- `/app/frontend/src/config/rrmServices.js` - Canonical service definitions
+
