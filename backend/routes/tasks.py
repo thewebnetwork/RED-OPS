@@ -309,12 +309,25 @@ async def list_tasks(
     
     # Enforce org filtering
     user_org_id = current_user.get("org_id") or current_user.get("team_id")
-    if org_id and org_id != user_org_id:
-        # Non-admin users cannot query other orgs
-        if current_user.get("role") != "Administrator":
-            raise HTTPException(status_code=403, detail="Cannot access other org tasks")
+    is_admin = current_user.get("role") == "Administrator"
+    is_internal = current_user.get("account_type") == "Internal Staff"
     
-    query["org_id"] = org_id if org_id else user_org_id
+    # Admin/Internal querying by request_id can see tasks across orgs (linked tasks view)
+    if request_id and (is_admin or is_internal):
+        pass  # No org filter — they see all linked tasks for the request
+    elif org_id and org_id != user_org_id:
+        if not is_admin:
+            raise HTTPException(status_code=403, detail="Cannot access other org tasks")
+        query["org_id"] = org_id
+    else:
+        # Internal staff viewing task board: include tasks assigned to them + their org
+        if is_internal and not request_id:
+            query["$or"] = [
+                {"org_id": user_org_id},
+                {"assignee_user_id": current_user["id"]},
+            ]
+        else:
+            query["org_id"] = user_org_id
     
     # Apply visibility filter based on user type
     if current_user.get("account_type") == "Media Client":

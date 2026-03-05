@@ -178,7 +178,7 @@ export default function OrderDetail() {
       // Fetch linked tasks
       try {
         const tasksRes = await axios.get(`${API}/tasks`, { params: { request_id: orderRes.data.id } });
-        setLinkedTasks(tasksRes.data?.tasks || []);
+        setLinkedTasks(Array.isArray(tasksRes.data) ? tasksRes.data : []);
       } catch {
         setLinkedTasks([]);
       }

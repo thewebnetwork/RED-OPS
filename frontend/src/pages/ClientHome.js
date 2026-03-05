@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Plus,
   ChevronRight,
-  User
+  User,
+  ListTodo
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -25,6 +26,7 @@ export default function ClientHome() {
   const [recentRequests, setRecentRequests] = useState([]);
   const [stats, setStats] = useState({ active: 0, completed: 0, pending: 0 });
   const [accountManager, setAccountManager] = useState(null);
+  const [taskStats, setTaskStats] = useState({ open: 0, waiting: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +52,15 @@ export default function ClientHome() {
         const amRes = await axios.get(`${API}/tasks/account-manager/${user?.id}`);
         setAccountManager(amRes.data?.account_manager || null);
       } catch { /* no AM assigned */ }
+      
+      // Fetch task stats
+      try {
+        const tasksRes = await axios.get(`${API}/tasks`);
+        const allTasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
+        const openCount = allTasks.filter(t => t.status !== 'done').length;
+        const waitingCount = allTasks.filter(t => ['todo', 'waiting_on_client'].includes(t.status)).length;
+        setTaskStats({ open: openCount, waiting: waitingCount });
+      } catch { /* tasks not available */ }
     } catch (error) {
       console.error('Failed to fetch data');
     } finally {
@@ -146,6 +157,32 @@ export default function ClientHome() {
           </CardContent>
         </Card>
       </div>
+
+      {/* My Tasks Card */}
+      <Card className="border-l-4 border-l-[#A2182C]" data-testid="my-tasks-card">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#A2182C]/10 rounded-lg">
+                <ListTodo size={20} className="text-[#A2182C]" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">My Tasks</p>
+                <div className="flex items-center gap-4 mt-0.5">
+                  <span className="text-lg font-bold text-slate-900" data-testid="tasks-open-count">{taskStats.open} <span className="text-xs font-normal text-slate-500">open</span></span>
+                  <span className="text-lg font-bold text-amber-600" data-testid="tasks-waiting-count">{taskStats.waiting} <span className="text-xs font-normal text-slate-500">waiting on you</span></span>
+                </div>
+              </div>
+            </div>
+            <Link to="/tasks">
+              <Button variant="outline" size="sm" className="text-[#A2182C] border-[#A2182C]/30 hover:bg-[#A2182C]/5" data-testid="view-tasks-btn">
+                View Tasks
+                <ChevronRight size={16} className="ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Requests */}
       <Card>

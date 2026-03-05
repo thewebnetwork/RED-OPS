@@ -16,7 +16,7 @@ from utils.helpers import (
 )
 from services.webhooks import trigger_webhooks
 from services.workflow_engine import get_workflows_for_trigger, execute_workflow
-from services.task_generator import generate_tasks_for_event, complete_open_tasks_for_request
+from services.task_generator import generate_tasks_for_event, complete_open_tasks_for_request, sync_progress_task_status
 from services.email import (
     send_satisfaction_survey_email,
     send_ticket_created_email,
@@ -514,6 +514,9 @@ async def create_order(
         else:
             assigned_queue_key = SERVICE_TEMPLATE_QUEUE_MAP.get(service_template_id, "ACCOUNT_MANAGER")
     
+    # Resolve requester_team_id for lifecycle events
+    requester_team_id = current_user.get("team_id") or current_user.get("org_id")
+    
     order = {
         "id": str(uuid.uuid4()),
         "order_code": order_code,
@@ -551,6 +554,8 @@ async def create_order(
         "service_fields": service_fields,
         # Queue routing
         "assigned_queue_key": assigned_queue_key,
+        # Org routing
+        "requester_team_id": requester_team_id,
         # Pool routing fields (will be populated below for non-draft orders)
         "pool_stage": None,
         "routing_specialty_id": None,
@@ -1272,6 +1277,9 @@ async def pick_order(
     # Auto-generate tasks for status_changed_to_doing
     await generate_tasks_for_event("status_changed_to_doing", updated_order, current_user)
     
+    # Sync progress task status
+    await sync_progress_task_status(updated_order)
+    
     return {"message": "Order picked successfully", "order_code": order["order_code"]}
 
 
@@ -1320,6 +1328,9 @@ async def submit_for_review(
     # Auto-generate tasks for status_changed_to_review
     await generate_tasks_for_event("status_changed_to_review", updated_order, current_user)
     
+    # Sync progress task status
+    await sync_progress_task_status(updated_order)
+    
     return {"message": "Order submitted for review"}
 
 
@@ -1359,6 +1370,9 @@ async def respond_to_order(
     
     # Auto-generate tasks for revision_requested
     await generate_tasks_for_event("revision_requested", updated_order, current_user)
+    
+    # Sync progress task status (back to doing)
+    await sync_progress_task_status(updated_order)
     
     return {"message": "Response sent, order back to editor"}
 
@@ -1461,6 +1475,9 @@ async def deliver_order(
     await complete_open_tasks_for_request(order_id)
     await generate_tasks_for_event("delivered", updated_order, current_user)
     
+    # Sync progress task status
+    await sync_progress_task_status(updated_order)
+    
     return {"message": "Order delivered successfully"}
 
 
@@ -1535,6 +1552,11 @@ async def close_order(
     
     # Auto-complete open tasks linked to this request
     await complete_open_tasks_for_request(order_id)
+    
+    # Sync progress task status
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if updated_order:
+        await sync_progress_task_status(updated_order)
     
     return {"message": "Order closed successfully"}
 
@@ -1806,6 +1828,11 @@ async def reopen_order(
         "reason": reopen_data.reason
     })
     
+    # Sync progress task status (back to todo)
+    reopened_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if reopened_order:
+        await sync_progress_task_status(reopened_order)
+    
     return {"message": "Order reopened successfully"}
 
 
@@ -1905,6 +1932,12 @@ async def cancel_order(
         "cancellation_reason": cancel_data.reason,
         "canceled_by": current_user["name"]
     })
+    
+    # Sync progress task status + complete open tasks
+    await complete_open_tasks_for_request(order_id)
+    canceled_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if canceled_order:
+        await sync_progress_task_status(canceled_order)
     
     return {"message": "Ticket canceled successfully"}
 

@@ -1,60 +1,68 @@
-# Red Ribbon Ops (RED OPS) - Product Requirements Document
+# Red Ops — Product Requirements Document
 
 ## Original Problem Statement
-A full-stack task/request management platform ("Red Ribbon Ops") for managing service requests, editing orders, and team operations. The platform serves multiple user roles (Admin, Account Manager, Client) with a portal-based navigation system, multilingual support (EN/PT/ES), and workflow automation.
+Build a user-first, service-driven client portal ("Red Ops") that replaces a generic internal ticketing system. Clients submit requests via service cards, see progress via linked tasks, and communicate with their Account Manager — all without exposure to internal jargon.
 
 ## Core Architecture
-- **Frontend**: React + Shadcn/UI + i18next (multilingual)
-- **Backend**: FastAPI + MongoDB
-- **Auth**: JWT-based with OTP/2FA support
-- **Portals**: Client Portal, Operator Console, Admin Studio
+- **Backend**: FastAPI + MongoDB (schemaless)
+- **Frontend**: React + Shadcn/UI + Tailwind
+- **Auth**: JWT + TOTP 2FA
+- **Integrations**: Gmail SMTP, GoHighLevel (mocked), pyotp, recharts, @dnd-kit, i18next
 
 ## What's Been Implemented
 
-### Task Board (Completed - Feb 2026)
-- Three-mode Task Board for Admin, Account Manager, Client
-- Optimistic UI updates for task creation
-- Role-specific dialogs and workflows
-- Backend endpoint: `GET /api/users/client-assignments`
+### Phase 1 — MVP Foundation (Complete)
+- Service-template-driven intake flow (`/services`)
+- Request detail page (`/requests/:id`) with service-specific data
+- Account Manager visibility on ClientHome and OrderDetail
+- Auto-assignment to queues via `assigned_queue_key`
+- Sticky UI modes (`active_app_mode`) for admin/operator roles
+- Route hardening — clients blocked from internal pages
+- Operational `/queue` page with filters (status, queue, search)
+- IAM and Users pages cleaned of subscription UI
+- MVP Lockdown — removed pools, subscriptions, billing, partner marketplace
 
-### i18n Bug Fix (Completed - Mar 5, 2026)
-- **Root Cause**: `en.json` had duplicate top-level JSON keys (`commandCenter`, `categories`, `status`, `sla`, etc.) where the last occurrence overwrote the first, losing 194 translation keys
-- **Fix**: Merged all 194 missing keys into `en.json` using proper English translations
-- **Safety**: Updated `i18n.js` `parseMissingKeyHandler` to only show `[MISSING: ...]` on localhost; returns empty string in preview/production
-- **Files Changed**: `frontend/src/i18n/locales/en.json`, `frontend/src/i18n/i18n.js`
-- **Testing**: 100% pass rate - all pages verified (Command Center, Settings, Reports, IAM, Announcements, Categories, Language switch)
+### Phase 2 — Auto-Tasking & Task Dashboard (Complete — Mar 5, 2026)
+- **Auto-create Progress Tasks**: Every new request spawns a "Progress task" linked to the request, assigned to the client's AM
+- **Status Sync**: Progress task status mirrors request status (Open→todo, In Progress→doing, Pending→review, Delivered/Closed/Canceled→done)
+- **Linked Tasks Bug Fix**: OrderDetail now correctly displays linked tasks (fixed `setLinkedTasks` parsing + cross-org visibility for admin/internal)
+- **My Tasks Card**: ClientHome dashboard shows task counts (open + waiting) with link to TaskBoard
+- **Client TaskBoard**: Button label changed from "New Request" to "New Task", empty state CTA updated
+- **AM TaskBoard Default Filter**: Defaults to "Assigned to me" so AMs see newly assigned work immediately
+- **Cross-org task visibility**: Admin/Internal staff can view tasks across orgs when querying by request_id; Internal staff see tasks assigned to them regardless of org
+- **requester_team_id stored on orders**: Enables reliable org routing for lifecycle events
+- **Non-destructive template seeding**: `ensure_seed_templates()` uses upsert, safe to run repeatedly
+- **Cleanup**: Deleted unused `CreateOrder.js`
+
+## Key Data Models
+- **service_templates**: `{offer_track, flow_type, cta_url, cta_label, form_schema}`
+- **orders**: `{service_template_id, assigned_queue_key, requester_team_id, service_name, service_fields}`
+- **task_templates**: `{id, service_id, trigger_event, title_template, visibility, task_type, default_status, assign_target_type, active}`
+- **tasks**: `{id, org_id, request_id, template_id, trigger_event, status, assignee_user_id, visibility, task_type, created_source}`
 
 ## Key API Endpoints
-- `POST /api/auth/login` - User login
-- `GET /api/users/client-assignments` - Admin: client-to-AM assignments
-- `POST /api/tasks` - Create task
-- `GET /api/tasks` - List tasks
-- `PATCH /api/tasks/{task_id}` - Update task
-- `GET /api/tasks/assignable-users` - Assignable users for tasks
-
-## Credentials
-- Admin: `admin@redribbonops.com` / `Admin123!`
-- Client: `test2@client.com` / `Client123!`
-- Account Manager: `matheus.pessanha@redribbonops.com` / `Admin123!`
-
-## Mocked APIs
-- `/api/webhooks/ghl-payment-mock` (GoHighLevel)
+- `GET /api/service-templates` — Catalog for client intake
+- `POST /api/orders` — Create request (auto-generates tasks)
+- `GET /api/orders` — List with filters (status, queue, search)
+- `GET /api/tasks` — List tasks (RBAC-enforced, cross-org for admin+request_id)
+- `GET /api/users/me/account-manager` — Client's assigned AM
 
 ## Prioritized Backlog
 
-### P1 - Upcoming
-- Advanced Analytics: Charts for API key usage
-- Slack/Teams Integration: Notification presets
+### P1
+- Deprecate/remove `frontend/src/utils/rrmServices.js` (obsolete static config)
+- Full i18n translation pass (recurring incomplete)
 
-### P2 - Future
+### P2
+- Advanced Analytics (charts for API key usage)
+- Slack/Teams integration for notifications
 - Workflow preview feature
-- Translate all remaining pages/components
-- Bulk-restore or permanently purge deleted requests
-- "My Email Preferences" section in user settings
+- Bulk restore/purge for deleted requests
+- "My Email Preferences" in user settings
 - Backup code system for OTP recovery
-- Deployment assistance (Vercel/Railway + MongoDB Atlas)
+- Deployment to Vercel/Railway + MongoDB Atlas
 
-## 3rd Party Integrations
-- Gmail SMTP
-- GoHighLevel (mocked)
-- pyotp, qrcode.react, recharts, @dnd-kit/core, i18next
+## Credentials
+- **Admin**: admin@redribbonops.com / Admin123!
+- **Client**: info@redribbonrealty.ca / Client1234!
+- **AM**: matheus.pessanha@redribbonops.com (password needs reset)

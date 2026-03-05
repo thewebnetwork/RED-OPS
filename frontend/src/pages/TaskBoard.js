@@ -930,6 +930,15 @@ export default function TaskBoard() {
   const canEditCard = mode === 'admin' || mode === 'manager';
   const canAddInline = mode === 'admin' || mode === 'manager';
 
+  // Default AM filter to "Assigned to me"
+  const [amDefaultApplied, setAmDefaultApplied] = useState(false);
+  useEffect(() => {
+    if (mode === 'manager' && user?.id && !amDefaultApplied) {
+      setFilterAssignee(user.id);
+      setAmDefaultApplied(true);
+    }
+  }, [mode, user?.id, amDefaultApplied]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -1213,24 +1222,28 @@ export default function TaskBoard() {
               </Button>
             </div>
           </div>
-          {/* Manager filters: search + client filter */}
+          {/* Manager filters: search + assignee filter (self + clients) */}
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <Input data-testid="task-search-input" className="pl-8 h-8 w-48 text-sm"
                 placeholder="Search tasks..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            {clientUsers.length > 0 && (
-              <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
-                <SelectTrigger className="h-8 w-44 text-sm" data-testid="task-filter-assignee">
-                  <Users className="w-3.5 h-3.5 mr-1 text-slate-400" /><SelectValue placeholder="All clients" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_all">All clients</SelectItem>
-                  {clientUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
+              <SelectTrigger className="h-8 w-44 text-sm" data-testid="task-filter-assignee">
+                <Users className="w-3.5 h-3.5 mr-1 text-slate-400" /><SelectValue placeholder="All tasks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_all">All tasks</SelectItem>
+                {user?.id && (
+                  <SelectItem value={user.id}>Assigned to me</SelectItem>
+                )}
+                {clientUsers.length > 0 && (
+                  <div className="px-2 pt-1.5 pb-0.5"><span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Clients</span></div>
+                )}
+                {clientUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
             {filterAssignee && (
               <button onClick={() => setFilterAssignee('')}
                 className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1" data-testid="clear-filters-btn">
@@ -1257,7 +1270,7 @@ export default function TaskBoard() {
               </div>
               <Button variant="outline" size="sm" onClick={() => { setEditingTask(null); setDialogOpen(true); }}
                 data-testid="create-task-btn" className="h-8 gap-1.5">
-                <MessageSquarePlus className="w-3.5 h-3.5" /> New Request
+                <MessageSquarePlus className="w-3.5 h-3.5" /> New Task
               </Button>
             </div>
           </div>
@@ -1292,7 +1305,7 @@ export default function TaskBoard() {
               <Button variant="outline" size="sm" className="mt-4 gap-1.5"
                 onClick={() => { setEditingTask(null); setDialogOpen(true); }}
                 data-testid="empty-create-task-btn">
-                <MessageSquarePlus className="w-3.5 h-3.5" /> Submit a request
+                <MessageSquarePlus className="w-3.5 h-3.5" /> Create a task
               </Button>
             </>
           ) : mode === 'manager' ? (

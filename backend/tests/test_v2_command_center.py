@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://account-manager-ops.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://service-portal-134.preview.emergentagent.com').rstrip('/')
 
 class TestAuth:
     """Authentication tests"""

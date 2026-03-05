@@ -4,7 +4,7 @@
 **Document Version:** 1.0  
 **Platform:** Red Pulse (Red Ops)  
 **Generated:** December 2025  
-**Environment:** https://account-manager-ops.preview.emergentagent.com
+**Environment:** https://service-portal-134.preview.emergentagent.com
 
 ---
 

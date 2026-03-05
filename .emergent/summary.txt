@@ -1,51 +1,51 @@
 <analysis>**original_problem_statement:**
-The user provided two MASTER PROMPTs to execute a major product correction for the Red Ops MVP. The core goal is to pivot from a generic, internal-category-driven ticketing system to a user-first, service-driven client portal.
+The user initiated a major product pivot for the Red Ops MVP, moving from a generic internal ticketing system to a user-first, service-driven client portal.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Service-First Intake**: Replace the category-picker with a service-card-based flow. When a client clicks a service, they must immediately see a tailored intake form specific to that service.
-2.  **Service Templates**: Implement a  backend model as the canonical engine for the intake process. This template must define the service name, description, hidden category mappings, and the  for the tailored intake form.
-3.  **Hide Internal Complexity**: Clients must never see internal jargon like Level 1/Level 2 Category, Pool, or Routing Mode.
-4.  **Request Detail as Operating Screen**: The page shown after submitting a request () must be the central hub for that work, clearly showing a plain-language status, service-specific data, linked tasks, messages, and files.
-5.  **Account Manager (AM) Ownership**: Solidify the concept of a primary Account Manager for each client. This should be visible in the UI and restrict task assignments (clients can only assign to themselves or their AM).
-6.  **Distinct Role Experiences**: The UI/UX for Clients (simple), Account Managers (operational), and Admins (governance) must be clearly differentiated.
-7.  **Frozen Service List**: The client-facing intake must be built for a specific list of 9 services.
+1.  **Service-First Intake**: Replace the category-picker with service cards driven by a  backend model. Clicking a card must show a tailored intake form.
+2.  **Hide Internal Complexity**: Clients must never see internal jargon like Pool, Routing Mode, or internal category names.
+3.  **Request Detail as Operating Screen**: The  page should be the central hub for a request, showing status, service-specific data, linked tasks, messages, and files.
+4.  **Account Manager (AM) Ownership**: The client's primary AM should be visible in the UI, and task assignments should be restricted (client can only assign to self or AM).
+5.  **Differentiated Role Experiences**: The UI/UX for Clients, Account Managers, and Admins must be distinct.
+6.  **Offer Tracks & Queues**: Differentiate services by  (, ) and automatically assign new requests to a  (e.g., , ).
+7.  **MVP Lockdown**: Remove all non-MVP UI surfaces, including pools, partner marketplaces, subscription tiers, and billing UI.
+8.  **Auto-Tasking**: Automatically create a Progress Task for every new request, assign it to the AM, and keep its status synced with the parent request's status.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application has been significantly refactored to meet the new product direction. The previous category-driven client intake flow has been entirely replaced.
+The application has been significantly refactored to align with the MVP goals. The UI has been locked down, removing all non-MVP features like pools, subscriptions, and billing. Key features implemented include:
 
--   **P0 (Service-First Intake)** is complete and verified. A  model and API now drive a new client-facing  page (). This page displays service cards, and clicking one opens a dynamic, inline form tailored to that service's schema. The backend order creation now accepts and stores service-specific data.
-
--   **P1 (Request Detail Screen)** is complete and verified. The  page has been overhauled to function as the core operating screen. It now displays the service name, a plain-language status banner, all service-specific fields from the intake form, and tabs for linked tasks, messages, and files.
-
--   **P2 (Account Manager UX)** is in progress. The agent has verified that the backend infrastructure for Account Manager assignment and task permissions already exists. Work has begun on integrating this data into the frontend UI.
+-   A service-template-driven intake flow ().
+-   A revamped request detail page ().
+-   Display of the assigned Account Manager on  and .
+-   Automatic request assignment to queues via .
+-   Sticky UI modes () to prevent navigation bugs for admin/operator roles.
+-   Hardened security, blocking clients from accessing internal-only routes.
+-   An operational  page for internal staff with working filters.
+-   The  and  admin pages have been cleaned of all subscription-related UI.
 
 **Last working item**:
--   **Last item agent was working**: Implementing the frontend logic to display the client's assigned Account Manager on the  page.
+-   **Last item agent was working**: Implementing an MVP Polish Bundle to auto-create progress tasks for new requests, fix a bug in displaying linked tasks, and improve the task dashboard experience for clients and Account Managers. The agent had just started, completing the first step of the plan.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: frontend testing agent (After completing the full P2 and P3 implementation, use the testing agent for a comprehensive E2E verification.) For this specific change, a screenshot of the  page showing the AM's name would suffice for initial validation.
+-   **Which testing method agent to use?**: manual testing by curl and screenshot tool. The user has provided a detailed manual test checklist and explicitly requested not to use the testing agent for this task.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-There are no outstanding bugs. The work is focused on completing the planned phased implementation.
+There are no outstanding bugs; the work is focused on completing the planned feature implementation.
 
 **In progress Task List**:
--   **Task 1**: Complete P2 - Account Manager Ownership & Role-Based UX (Priority: P0)
-    -   **Where to resume**: In , the state and data fetching logic for the account manager have been added. The next step is to add the JSX to render the account manager's name and details on the page.
-    -   **What will be achieved with this?**: Fulfills a core product requirement by making the client's primary point of contact visible, reinforcing the ownership model.
+-   **Task 1**: AUTO-CREATE PROGRESS TASKS FOR NEW REQUESTS + TASK DASHBOARD + AM VISIBILITY + FIX LINKED TASKS BUG (MVP) (Priority: P0)
+    -   **Where to resume**: The agent just finished Step 1 (Fixing the linked tasks bug in ). The next step is Step 2: Implement the backend logic in . This involves adding a new Progress Task seed template, ensuring the seeding script performs an upsert, and adding logic to resolve assignees and render task titles dynamically.
+    -   **What will be achieved with this?**: This will create a seamless feedback loop for clients by auto-generating a visible progress task for every new service request. It will also improve the AM's workflow by auto-assigning these tasks to them and making them visible on their default task board view. It also fixes a bug that was preventing any linked tasks from showing up.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Should Test frontend/backend/both after fix?**: Both
     -   **Blocked on something**: No
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **(P0) Finish P2 Implementation**: After displaying the AM on , verify it also appears correctly on the  sidebar. Confirm that the Account Manager's operational view (seeing only their assigned clients' requests) is functioning correctly on the frontend.
-    *   **(P1) Implement P3 - Polish Task System**:
-        *   Ensure the Task Board () correctly filters tasks based on the user's role (Client, AM, Admin).
-        *   Verify the client-side task assignment restrictions are enforced in the UI (client can only assign to self or their AM).
-        *   Tighten the display of tasks linked to a specific request on the  page.
+    *   **(P0) Finish the current Auto-Tasking implementation**: Complete the remaining steps in the plan (backend changes, ClientHome dashboard update, TaskBoard tweaks).
 *   **Future Tasks:**
     *   Advanced Analytics: Add charts for API key usage.
     *   Slack/Teams Integration: Add presets for notifications.
@@ -57,14 +57,13 @@ There are no outstanding bugs. The work is focused on completing the planned pha
     *   Assist with deployment to Vercel/Railway using MongoDB Atlas.
 
 **Completed work in this session**
--   **P0 - Service-First Client Intake (DONE & VERIFIED)**:
-    -   Created  model, API endpoints (), and a seed script ().
-    -   Rebuilt the client intake flow with a new  page that renders dynamic, tailored forms based on the service selected.
-    -   Updated the order creation endpoint () to be service-template-driven.
--   **P1 - Request Detail as Core Operating Screen (DONE & VERIFIED)**:
-    -   Overhauled the  page to display service name, service-specific data, linked tasks, and a plain-language status banner, hiding all internal jargon.
--   **Comprehensive Testing**:
-    -   Used  after both P0 and P1, achieving 100% pass rates and fixing a minor bug found by the agent.
+-   **P2 - Account Manager UX (DONE)**: Completed rendering of the Account Manager on .
+-   **Catalog Tagging & Cleanup (DONE)**: Added  and  to , updated the seed script, and grouped the  UI accordingly.
+-   **Auto-Assignment Queue (DONE)**: Implemented  on new orders, with logic driven by the service template's .
+-   **UI Mode Switching & Route Hardening (DONE)**: Implemented  in localStorage to fix navigation bugs and guarded all internal routes from client access.
+-   **MVP Lockdown Pass (DONE)**: Removed all UI related to pools, subscriptions, billing, and partner marketplaces from , , , , , and .
+-   **Operational Queue Page (DONE)**: Overhauled  () into a functional page with working filters for status, queue, and search.
+-   **Linked Tasks Bug Fix (Initial Step Done)**: Fixed the data handling for linked tasks in .
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
@@ -72,50 +71,60 @@ There are no outstanding bugs. The work is focused on completing the planned pha
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork**: Incomplete i18n implementation.
 -   **Recurrence count**: 5+
--   **Status**: RESOLVED (The specific reported bug was fixed in a prior session, but the large-scale refactoring in this session has likely introduced many new untranslated UI strings. A full translation pass remains a future task.)
+-   **Status**: NOT STARTED (A full translation pass remains a future task).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Service-Template-Driven Architecture**: The core of the refactor. A backend model containing a JSON  is used to dynamically generate specific frontend forms, decoupling the UI from hardcoded logic.
-*   **Dynamic Form Rendering**: The frontend now renders complex forms based on a schema fetched from an API, a significant shift from static, predefined forms.
-*   **Role-Based UX**: Logic using user roles (, ) is implemented throughout the frontend to create distinct and uncluttered experiences for each user type.
+*   **Service-Template-Driven Architecture**: Backend models () containing a JSON  are used to dynamically generate frontend forms.
+*   **Sticky App Mode**: Using  () to maintain a consistent UI mode (, , ) across shared routes for internal users.
+*   **Route Guarding**: Using  and  components in  to enforce role-based and mode-based access control, blocking clients and users in Client Preview mode from internal pages.
+*   **Schemaless Field Addition**: Adding new fields (, ) to MongoDB documents directly in the application logic without requiring a formal migration.
+*   **Non-destructive Seeding**: Using  in MongoDB scripts to add or update data without wiping existing records.
 
 **key DB schema**
--   **service_templates** (New Collection): 
--   **orders** (Modified Collection): Added fields 
+-   **service_templates**:  (fields added).
+-   **orders**:  (fields added).
+-   **task_templates**: A new  template will be added via the  seed script.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
-*   **/app/backend/models/service_template.py**: Defines the new database model for service templates.
-*   **/app/backend/seed_service_templates.py**: Script to populate the DB with the 9 required service templates and their form schemas.
-*   **/app/frontend/src/pages/ServiceCatalog.js**: The new client-facing page for requesting services.
-*   **/app/frontend/src/pages/OrderDetail.js**: The overhauled core operating screen for a single request.
-*   **/app/frontend/src/pages/ClientHome.js**: The client's main dashboard, currently being updated.
+*   **/app/backend/routes/orders.py**: Modified to handle queue assignment, filtering, and will be modified for task generation.
+*   **/app/backend/services/task_generator.py**: Will be modified to implement auto-tasking logic.
+*   **/app/frontend/src/App.js**: Heavily modified for route hardening and MVP lockdown.
+*   **/app/frontend/src/components/LayoutNew.js**: Heavily modified to implement sticky UI modes.
+*   **/app/frontend/src/pages/OrderDetail.js**: Modified to conditionally display UI elements and fix a bug; central to the user experience.
+*   **/app/frontend/src/pages/ServiceCatalog.js**: The main client intake page.
+*   **/app/frontend/src/pages/Orders.js**: The new operational  page for internal staff.
 
 **Areas that need refactoring**:
--   The static config file  is now obsolete for client intake and should be deprecated or removed to prevent confusion.
+-   The static config file  is now obsolete for client intake and should be deprecated or removed.
+-    is now unused since the  route was removed and should be deleted to avoid confusion.
 
 **key api endpoints**
-*   : Fetches all service templates to build the service catalog UI.
-*   : Creates a new order, now driven by  and custom .
+*   : Fetches all service templates for the catalog UI.
+*   : Creates a new order, now adding  and .
+*   : Fetches a list of orders, now supporting filtering by  and  (search).
 *   : Fetches the current client's assigned Account Manager.
 
 **Critical Info for New Agent**
-*   The application's core client-facing architecture has been successfully refactored. Do not revert this work. Follow the phased plan (P2, P3).
-*   The  model is the new source of truth for all client-facing service offerings and their intake forms.
-*   P0 and P1 are complete and were fully verified by the . The next step is to complete P2, then P3, and then run the testing agent again.
+*   The platform has undergone a massive MVP Lockdown. Many legacy features (pools, subscriptions, billing) have been completely removed from the UI. Do not re-introduce them. Your primary goal is to polish the core MVP workflow.
+*    in  is critical for correct UI rendering for Admin/Operator users on shared pages like , , and .
+*   Route access is now strictly guarded. Clients (and admins in Client Preview mode) are blocked from all internal pages.
+*   You are in the middle of implementing automatic Progress task creation for new service requests. The next step is to implement the backend logic in  as per the existing plan.
 
 **documents and test reports created in this job**
-*   
-*    (P0 Verification)
-*    (P1 Verification)
+*   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
-The agent has been executing a detailed plan based on the MASTER PROMPT messages. There are no recent interactive user messages. The last directive was to execute the full MVP refactor.
+1.  **User**: (Msg 622) Defined the final MVP polish task: Auto-create progress tasks for new requests, fix a bug in linked tasks display, make the client TaskBoard a general task manager, improve the ClientHome dashboard with a tasks card, and default the AM's task board to Assigned to me.
+2.  **Agent**: (Msg 623) Created a detailed 5-step plan to implement the user's request and immediately started working.
+3.  **Agent**: (Msg 624) Executed Step 1 of the plan, fixing the linked tasks fetch bug in .
+
+The agent is now ready to proceed with Step 2 of the plan.
 
 **Project Health Check:**
 *   **Broken**: None.
@@ -131,18 +140,16 @@ The agent has been executing a detailed plan based on the MASTER PROMPT messages
 *   i18next
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (Successfully used after completing P0 and P1).
+-   **Testing agent used after significant changes**: NO (User explicitly requested manual testing for recent tasks).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None.
 -   **Known regressions**: None.
 
 **Credentials to test flow:**
-*   **Admin Email**: 
-*   **Admin Password**: 
-*   **Client Email**: 
-*   **Client Password**: 
-*   **Internal (Account Manager) Email**: 
-*   **Internal (Account Manager) Password**: 
+*   **Admin Email**:  / : 
+*   **Client Email**:  / :  (Note: may be locked or require password change)
+*   **Backup Client Email**:  / :  (Note: may require password change)
+*   **Internal (Account Manager) Email**:  / : 
 
 **What agent forgot to execute**
--   The agent has followed the plan meticulously. The current state is a natural pause point in the middle of the P2 implementation.</analysis>
+-   The agent has not yet deleted the now-unused  file, which is a minor cleanup task that could be done after the current feature is complete.</analysis>

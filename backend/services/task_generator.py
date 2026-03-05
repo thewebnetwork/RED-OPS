@@ -19,10 +19,23 @@ from database import db
 logger = logging.getLogger(__name__)
 
 # ─── Seed templates ───────────────────────────────────────────────
-# These are loaded into the task_templates collection on first run.
+# These are loaded into the task_templates collection via upsert.
 # service_id="_default" applies to all services.
 
 SEED_TEMPLATES = [
+    # ── Progress task (client-visible, assigned to AM) ────────────
+    {
+        "id": "tpl-progress-task",
+        "service_id": "_default",
+        "trigger_event": "request_created",
+        "title_template": "Progress: {service_name} ({request_code})",
+        "visibility": "both",
+        "task_type": "request_generated",
+        "default_status": "todo",
+        "assign_target_type": "account_manager",
+        "due_offset_hours": None,
+        "active": True,
+    },
     # ── request_created ──────────────────────────────────────────
     {
         "id": "tpl-req-created-review-brief",
@@ -140,20 +153,37 @@ SEED_TEMPLATES = [
 ]
 
 
+# ─── Request status → Task status mapping ─────────────────────────
+REQUEST_TO_TASK_STATUS = {
+    "Draft": "backlog",
+    "Open": "todo",
+    "In Progress": "doing",
+    "Pending": "review",
+    "Delivered": "done",
+    "Closed": "done",
+    "Canceled": "done",
+}
+
+
 async def ensure_seed_templates():
-    """Insert seed templates if the collection is empty."""
-    count = await db.task_templates.count_documents({})
-    if count == 0:
-        await db.task_templates.insert_many(SEED_TEMPLATES)
-        logger.info(f"Seeded {len(SEED_TEMPLATES)} task templates")
+    """Upsert seed templates by template id (non-destructive)."""
+    for tpl in SEED_TEMPLATES:
+        await db.task_templates.update_one(
+            {"id": tpl["id"]},
+            {"$set": tpl},
+            upsert=True,
+        )
+    logger.info(f"Upserted {len(SEED_TEMPLATES)} task templates")
 
 
 def _render_title(template_str: str, order: dict) -> str:
     """Simple variable substitution for title templates."""
+    service_name = order.get("service_name") or order.get("title") or "Untitled"
     return (
         template_str
         .replace("{request_title}", order.get("title") or "Untitled")
         .replace("{request_code}", order.get("order_code") or "???")
+        .replace("{service_name}", service_name)
     )
 
 
@@ -165,6 +195,16 @@ async def _resolve_assignee(assign_target: str, order: dict) -> str | None:
         return order.get("editor_id") or order.get("requester_id")
     if assign_target == "internal":
         return order.get("editor_id")
+    if assign_target == "account_manager":
+        requester_id = order.get("requester_id")
+        if requester_id:
+            requester = await db.users.find_one(
+                {"id": requester_id},
+                {"_id": 0, "account_manager_id": 1},
+            )
+            if requester and requester.get("account_manager_id"):
+                return requester["account_manager_id"]
+        return None
     return None  # unassigned
 
 
@@ -179,8 +219,12 @@ async def _get_next_position(org_id: str, status: str) -> float:
 
 
 def _resolve_service_id(order: dict) -> str | None:
-    """Map an order's category to a service_id from RRM_SERVICES."""
-    # Map category L1 names → service ids (simplified for MVP)
+    """Resolve service_id from order, preferring service_template_id."""
+    # Prefer service_template_id (new MVP flow)
+    if order.get("service_template_id"):
+        return order["service_template_id"]
+
+    # Fallback: heuristic from category/title (legacy)
     cat_name = (order.get("category_l1_name") or "").lower()
     title = (order.get("title") or "").lower()
 
@@ -191,7 +235,7 @@ def _resolve_service_id(order: dict) -> str | None:
             return "short-form-stories"
         if "long" in title or "youtube" in title:
             return "long-form-youtube"
-        return "video-editing-60s"  # default video
+        return "video-editing-60s"
     if "graphic" in cat_name:
         if "thumbnail" in title:
             return "thumbnail-design"
@@ -288,6 +332,42 @@ async def generate_tasks_for_event(
     except Exception as e:
         logger.error(f"Task generation failed for event={trigger_event}: {e}", exc_info=True)
         return []
+
+
+async def sync_progress_task_status(order: dict):
+    """
+    Keep the Progress task's status in sync with the parent request status.
+    Only affects the task created from tpl-progress-task template.
+    """
+    try:
+        request_id = order.get("id")
+        request_status = order.get("status")
+        if not request_id or not request_status:
+            return
+
+        task_status = REQUEST_TO_TASK_STATUS.get(request_status)
+        if not task_status:
+            return
+
+        now = datetime.now(timezone.utc)
+        update_fields = {
+            "status": task_status,
+            "updated_at": now,
+        }
+        if task_status == "done":
+            update_fields["completed_at"] = now
+
+        result = await db.tasks.update_many(
+            {
+                "request_id": request_id,
+                "template_id": "tpl-progress-task",
+            },
+            {"$set": update_fields},
+        )
+        if result.modified_count:
+            logger.info(f"Synced progress task for request {request_id}: {request_status} → {task_status}")
+    except Exception as e:
+        logger.error(f"sync_progress_task_status failed for request {order.get('id')}: {e}", exc_info=True)
 
 
 async def complete_open_tasks_for_request(request_id: str):
