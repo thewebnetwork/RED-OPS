@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   AlertCircle,
   Plus,
-  ChevronRight
+  ChevronRight,
+  User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -23,6 +24,7 @@ export default function ClientHome() {
   const { user } = useAuth();
   const [recentRequests, setRecentRequests] = useState([]);
   const [stats, setStats] = useState({ active: 0, completed: 0, pending: 0 });
+  const [accountManager, setAccountManager] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +44,12 @@ export default function ClientHome() {
       const completed = allRequests.filter(r => ['Delivered', 'Closed'].includes(r.status)).length;
       const pending = allRequests.filter(r => r.status === 'Pending').length;
       setStats({ active, completed, pending });
+      
+      // Fetch account manager
+      try {
+        const amRes = await axios.get(`${API}/tasks/account-manager/${user?.id}`);
+        setAccountManager(amRes.data?.account_manager || null);
+      } catch { /* no AM assigned */ }
     } catch (error) {
       console.error('Failed to fetch data');
     } finally {

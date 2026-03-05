@@ -144,6 +144,9 @@ export default function OrderDetail() {
   
   // Linked tasks
   const [linkedTasks, setLinkedTasks] = useState([]);
+  
+  // Account manager
+  const [accountManager, setAccountManager] = useState(null);
 
   useEffect(() => {
     fetchOrderData();
@@ -184,6 +187,14 @@ export default function OrderDetail() {
         setLinkedTasks(tasksRes.data?.tasks || []);
       } catch {
         setLinkedTasks([]);
+      }
+      
+      // Fetch account manager for the requester
+      try {
+        const amRes = await axios.get(`${API}/tasks/account-manager/${orderRes.data.requester_id}`);
+        setAccountManager(amRes.data?.account_manager || null);
+      } catch {
+        setAccountManager(null);
       }
     } catch (error) {
       toast.error('Failed to load request');
@@ -1299,6 +1310,19 @@ export default function OrderDetail() {
                   </span>
                 </div>
               </div>
+
+              {accountManager && (
+                <div data-testid="account-manager-info">
+                  <Label className="text-xs text-slate-500">Account Manager</Label>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <User size={16} className="text-[#A2182C]" />
+                    <span className="font-medium">{accountManager.name}</span>
+                  </div>
+                  {accountManager.email && (
+                    <p className="text-xs text-slate-500 ml-6">{accountManager.email}</p>
+                  )}
+                </div>
+              )}
 
               {order.sla_deadline && (
                 <div>
