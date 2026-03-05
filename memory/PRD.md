@@ -13,6 +13,15 @@
 - **No pool/routing concepts** in task system
 - Tasks support optional request linking, assignment to internal or client users
 
+### Task Auto-Generation from Request Events (COMPLETED - March 2026)
+- **Task Template System** (`backend/models/task_template.py`, `backend/services/task_generator.py`): 9 seed templates covering 5 trigger events
+- **Trigger Events**: request_created, status_changed_to_doing, status_changed_to_review, revision_requested, delivered
+- **Service-Specific Templates**: Video-editing-60s and long-form-youtube get extra templates on request_created
+- **Dedup**: (request_id, template_id, trigger_event) prevents duplicate task spam
+- **Auto-Complete**: On delivery/close, all open system-generated tasks are marked done
+- **16/16 backend tests passed** (see `/app/test_reports/iteration_56.json`)
+- No pool/routing concepts
+
 ### Task Board MVP - Frontend Kanban Board (COMPLETED - March 2026)
 - **TaskBoard.js** (`frontend/src/pages/TaskBoard.js`): Drag-and-drop Kanban with 6 columns using @dnd-kit
 - **Admin controls**: New Task button, edit/assign tasks, assignee filter, column-level add buttons, search
