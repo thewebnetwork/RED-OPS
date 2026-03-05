@@ -22,6 +22,12 @@
 - **16/16 backend tests passed** (see `/app/test_reports/iteration_56.json`)
 - No pool/routing concepts
 
+### Fast Task Creation & Assignment UX (COMPLETED - March 2026)
+- **Quick Task Dialog**: Minimal-first form with title auto-focused, status pills, searchable assignee picker with role badges, visibility toggles, optional expandable section for description/request/type
+- **Inline Column Create**: Click "+" on any column → type title → press Enter → instant task via optimistic update
+- **Assignee Picker**: Searchable popover with initials, names, and role badges (Internal/Client/Partner/Vendor)
+- **14/15 frontend tests passed** (iteration_57) — client view test blocked by unrelated password issue
+
 ### Task Board MVP - Frontend Kanban Board (COMPLETED - March 2026)
 - **TaskBoard.js** (`frontend/src/pages/TaskBoard.js`): Drag-and-drop Kanban with 6 columns using @dnd-kit
 - **Admin controls**: New Task button, edit/assign tasks, assignee filter, column-level add buttons, search
