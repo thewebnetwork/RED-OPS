@@ -122,34 +122,58 @@ export default function CommandCenter() {
     
     // Handle preselected service from catalog
     if (preselectedService && categoriesL1.length > 0) {
-      // Map service ID to category - for MVP, use a simple mapping
-      const serviceCategoryMap = {
-        'content-writing': 'content',
-        'graphic-design': 'design',
-        'video-editing': 'video',
-        'social-media': 'marketing',
-        'seo-optimization': 'seo',
-        'email-marketing': 'marketing',
-        'website-updates': 'web',
-        'consultation': 'support'
+      // Deterministic mapping: service ID -> exact category ID + clean title
+      const serviceMapping = {
+        'video-editing-60s': {
+          categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83',
+          title: 'Video Editing - 60s Reels'
+        },
+        'short-form-stories': {
+          categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83',
+          title: 'Short-Form Video Editing - Stories'
+        },
+        'long-form-youtube': {
+          categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83',
+          title: 'Long-Form Video Editing - YouTube'
+        },
+        'thumbnail-design': {
+          categoryId: '07339517-4355-45c8-bcc5-9192695c9736',
+          title: 'Thumbnail Design'
+        },
+        'content-writing': {
+          categoryId: '966428f9-9472-411e-8391-86521c68e61b',
+          title: 'Content Writing'
+        },
+        'social-media-graphics': {
+          categoryId: '07339517-4355-45c8-bcc5-9192695c9736',
+          title: 'Social Media Graphics'
+        },
+        'email-campaigns': {
+          categoryId: 'ca56e986-fc8d-4dad-9e96-1712a9d084ee',
+          title: 'Email Campaign'
+        },
+        'website-updates': {
+          categoryId: 'd098663c-d5bf-4c55-8d8c-0359d980761c',
+          title: 'Website Update'
+        }
       };
       
-      const categoryHint = serviceCategoryMap[preselectedService] || '';
-      const matchedCategory = categoriesL1.find(c => 
-        c.name.toLowerCase().includes(categoryHint) || 
-        c.name.toLowerCase().includes(preselectedService.replace(/-/g, ' '))
-      );
+      const mapping = serviceMapping[preselectedService];
       
-      if (matchedCategory) {
-        setSelectedL1(matchedCategory.id);
-      } else if (categoriesL1[0]) {
-        // Fallback to first category
-        setSelectedL1(categoriesL1[0].id);
+      if (mapping) {
+        // Check if category still exists in current list
+        const categoryExists = categoriesL1.find(c => c.id === mapping.categoryId);
+        if (categoryExists) {
+          setSelectedL1(mapping.categoryId);
+          setTitle(mapping.title);
+        } else {
+          // Category was deleted - show message, don't auto-select
+          toast.error('Service category not available. Please select manually.');
+        }
+      } else {
+        // Unknown service ID - show message, don't auto-select
+        toast.info('Please select a category for your request.');
       }
-      
-      // Set a friendly title hint based on service
-      const serviceName = preselectedService.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      setTitle(`${serviceName} Request`);
     }
     
     if (preselectedCategory && categoriesL1.length > 0) {
