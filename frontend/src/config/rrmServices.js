@@ -14,8 +14,11 @@
  * - turnaround: estimated completion time
  * - included: whether it's included in base plans
  * - popular: whether to show "Popular" badge
- * - categoryId: exact L1 category UUID to preselect
+ * - categoryL1Name: stable L1 category name (resolved to ID at runtime)
  * - defaultTitle: auto-fill title in request form
+ * 
+ * NOTE: No hardcoded category UUIDs. Categories are resolved at runtime
+ * by matching categoryL1Name against the live category list from the API.
  */
 
 export const RRM_SERVICES = [
@@ -27,7 +30,7 @@ export const RRM_SERVICES = [
     turnaround: '3-5 days',
     included: true,
     popular: true,
-    categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83', // Video Production
+    categoryL1Name: 'Video Production',
     defaultTitle: 'Video Editing - 60s Reels'
   },
   {
@@ -38,7 +41,7 @@ export const RRM_SERVICES = [
     turnaround: '1-2 days',
     included: true,
     popular: true,
-    categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83', // Video Production
+    categoryL1Name: 'Video Production',
     defaultTitle: 'Short-Form Video Editing - Stories'
   },
   {
@@ -49,7 +52,7 @@ export const RRM_SERVICES = [
     turnaround: '5-7 days',
     included: true,
     popular: true,
-    categoryId: '128c2115-7437-4eb5-92f1-6fe8f1829f83', // Video Production
+    categoryL1Name: 'Video Production',
     defaultTitle: 'Long-Form Video Editing - YouTube'
   },
   {
@@ -60,7 +63,7 @@ export const RRM_SERVICES = [
     turnaround: '1-2 days',
     included: true,
     popular: false,
-    categoryId: '07339517-4355-45c8-bcc5-9192695c9736', // Graphic Design
+    categoryL1Name: 'Graphic Design',
     defaultTitle: 'Thumbnail Design'
   },
   {
@@ -71,7 +74,7 @@ export const RRM_SERVICES = [
     turnaround: '2-3 days',
     included: true,
     popular: false,
-    categoryId: '966428f9-9472-411e-8391-86521c68e61b', // Copywriting & Content
+    categoryL1Name: 'Copywriting & Content',
     defaultTitle: 'Content Writing'
   },
   {
@@ -82,7 +85,7 @@ export const RRM_SERVICES = [
     turnaround: '2-4 days',
     included: true,
     popular: false,
-    categoryId: '07339517-4355-45c8-bcc5-9192695c9736', // Graphic Design
+    categoryL1Name: 'Graphic Design',
     defaultTitle: 'Social Media Graphics'
   },
   {
@@ -93,7 +96,7 @@ export const RRM_SERVICES = [
     turnaround: '2-3 days',
     included: false,
     popular: false,
-    categoryId: 'ca56e986-fc8d-4dad-9e96-1712a9d084ee', // Email Marketing
+    categoryL1Name: 'Email Marketing',
     defaultTitle: 'Email Campaign'
   },
   {
@@ -104,7 +107,7 @@ export const RRM_SERVICES = [
     turnaround: '1-3 days',
     included: false,
     popular: false,
-    categoryId: 'd098663c-d5bf-4c55-8d8c-0359d980761c', // CRM & Automations
+    categoryL1Name: 'CRM & Automations',
     defaultTitle: 'Website Update'
   }
 ];

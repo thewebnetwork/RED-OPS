@@ -132,15 +132,16 @@ export default function CommandCenter() {
       const service = getServiceById(preselectedService);
       
       if (service) {
-        // Check if category still exists in current list
-        const categoryExists = categoriesL1.find(c => c.id === service.categoryId);
-        if (categoryExists) {
-          setSelectedL1(service.categoryId);
+        // Resolve category name to ID at runtime (no hardcoded UUIDs)
+        const matchedCategory = categoriesL1.find(c => c.name === service.categoryL1Name);
+        
+        if (matchedCategory) {
+          setSelectedL1(matchedCategory.id);
           setSelectedService(service.id); // For client UI
           setTitle(service.defaultTitle);
         } else {
-          // Category was deleted - show message, don't auto-select
-          toast.error('Service category not available. Please select manually.');
+          // Category not found - fail safely with clear message
+          toast.error(`Service category "${service.categoryL1Name}" not available in this environment.`);
         }
       } else {
         // Unknown service ID - show message, don't auto-select
@@ -500,10 +501,18 @@ export default function CommandCenter() {
                         onValueChange={(serviceId) => {
                           const service = getServiceById(serviceId);
                           if (service) {
-                            setSelectedService(serviceId);
-                            setSelectedL1(service.categoryId);
-                            if (!title) {
-                              setTitle(service.defaultTitle);
+                            // Resolve category name to ID at runtime
+                            const matchedCategory = categoriesL1.find(c => c.name === service.categoryL1Name);
+                            
+                            if (matchedCategory) {
+                              setSelectedService(serviceId);
+                              setSelectedL1(matchedCategory.id);
+                              if (!title) {
+                                setTitle(service.defaultTitle);
+                              }
+                            } else {
+                              // Category not found in current environment
+                              toast.error(`Category "${service.categoryL1Name}" not found in system. Please contact support.`);
                             }
                           }
                         }}
