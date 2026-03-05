@@ -494,20 +494,23 @@ async def create_order(
         "pool_entered_at": None
     }
     
+    # MVP: Pool routing disabled - all requests go to standard queue
     # Only set pool routing for non-draft orders
     routing_info = None
     if not is_draft:
+        # MVP: Skip pool routing, use standard Open status
         # Determine smart pool routing
-        routing_info = await determine_pool_routing(order_data.category_l2_id, order_data.category_l1_id)
-        order["pool_stage"] = routing_info["pool_stage"]
-        order["routing_specialty_id"] = routing_info.get("routing_specialty_id")
-        order["routing_specialty_name"] = routing_info.get("routing_specialty_name")
-        order["pool1_expires_at"] = routing_info.get("pool1_expires_at")
-        order["pool_entered_at"] = created_at.isoformat()
+        # routing_info = await determine_pool_routing(order_data.category_l2_id, order_data.category_l1_id)
+        # order["pool_stage"] = routing_info["pool_stage"]
+        # order["routing_specialty_id"] = routing_info.get("routing_specialty_id")
+        # order["routing_specialty_name"] = routing_info.get("routing_specialty_name")
+        # order["pool1_expires_at"] = routing_info.get("pool1_expires_at")
+        # order["pool_entered_at"] = created_at.isoformat()
         
-        # Log the routing decision
-        if routing_info.get("skipped_pool_1"):
-            logging.info(f"Order {order_code} skipped Pool 1: {routing_info.get('skip_reason')}")
+        # # Log the routing decision
+        # if routing_info.get("skipped_pool_1"):
+        #     logging.info(f"Order {order_code} skipped Pool 1: {routing_info.get('skip_reason')}")
+        pass
     
     await db.orders.insert_one(order)
     

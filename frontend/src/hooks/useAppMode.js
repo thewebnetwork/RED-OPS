@@ -50,7 +50,7 @@ export function useAppMode() {
     const poolAccess = user.pool_access || 'none';
     
     // Determine capabilities
-    const canPickFromPools = canPick && poolAccess !== 'none';
+    const canPickFromPools = false; // MVP: Pool routing disabled
     const canFulfill = canPick; // Simplified: if can pick, can fulfill
     
     // Determine mode access
@@ -130,7 +130,7 @@ export function useAppMode() {
       canAccessClientPortal,
       canAccessOperatorConsole,
       canAccessAdminStudio,
-      canPickFromPools,
+      canPickFromPools: false, // MVP: Pool routing disabled
       canFulfill,
       isInternalStaff,
       previewMode: null // Will be set when admin uses "Preview as Client"
@@ -165,15 +165,16 @@ export function getNavItemsForMode(mode, modeConfig, t) {
         { path: '/queue', icon: 'Inbox', labelKey: 'nav.myQueue', label: t('nav.myQueue') }
       ];
       
+      // MVP: Pool routing disabled - all requests go to standard queue
       // Pool/Team Queue - only for pool pickers
-      if (canPickFromPools) {
-        operatorNav.push({ 
-          path: '/pool', 
-          icon: 'Layers', 
-          labelKey: 'nav.pool', 
-          label: t('nav.pool') 
-        });
-      }
+      // if (canPickFromPools) {
+      //   operatorNav.push({ 
+      //     path: '/pool', 
+      //     icon: 'Layers', 
+      //     labelKey: 'nav.pool', 
+      //     label: t('nav.pool') 
+      //   });
+      // }
       
       // All Requests - only for internal staff and admin
       if (isInternalStaff || isAdmin) {

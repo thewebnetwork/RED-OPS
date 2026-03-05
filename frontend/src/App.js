@@ -265,15 +265,17 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
+      {/* MVP: Pool routing disabled - routes commented out */}
       {/* Pool - Available requests to pick */}
-      <Route 
+      {/* <Route 
         path="/pool" 
         element={
           <PrivateRoute>
             <RibbonBoard />
           </PrivateRoute>
         } 
-      />
+      /> */}
+      
       {/* All Requests - Internal staff and admin only */}
       <Route 
         path="/all-requests" 
@@ -285,7 +287,8 @@ function AppRoutes() {
       />
       
       {/* Legacy operator routes */}
-      <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} />
+      {/* MVP: Ribbon board disabled */}
+      {/* <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} /> */}
       <Route path="/orders" element={<Navigate to="/all-requests" replace />} />
       <Route path="/orders/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
