@@ -45,7 +45,6 @@ import {
   Shield,
   ChevronDown,
   Briefcase,
-  CreditCard,
   Building2
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -58,8 +57,7 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [specialties, setSpecialties] = useState([]);
-  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
-  const [identityConfig, setIdentityConfig] = useState({ roles: [], account_types: [], subscription_plans: [] });
+  const [identityConfig, setIdentityConfig] = useState({ roles: [], account_types: [] });
   const [permissionModules, setPermissionModules] = useState({});
   const [defaultPermissions, setDefaultPermissions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -81,7 +79,6 @@ export default function Users() {
     account_type: 'Internal Staff',
     specialty_id: '',
     team_id: '',
-    subscription_plan_id: '',
     permission_overrides: null,
     force_password_change: false,
     force_otp_setup: false
@@ -137,18 +134,16 @@ export default function Users() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes, modulesRes] = await Promise.all([
+      const [usersRes, teamsRes, specialtiesRes, configRes, modulesRes] = await Promise.all([
         axios.get(`${API}/users`),
         axios.get(`${API}/teams`),
         axios.get(`${API}/specialties`),
-        axios.get(`${API}/subscription-plans`),
         axios.get(`${API}/users/identity-config`),
         axios.get(`${API}/users/permissions/modules`).catch(() => ({ data: { modules: {}, default_permissions: {} } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);
       setSpecialties(specialtiesRes.data);
-      setSubscriptionPlans(plansRes.data);
       setIdentityConfig(configRes.data);
       setPermissionModules(modulesRes.data.modules || {});
       setDefaultPermissions(modulesRes.data.default_permissions || {});
@@ -190,7 +185,6 @@ export default function Users() {
         account_type: user.account_type || 'Internal Staff',
         specialty_id: user.specialty_id || '',
         team_id: user.team_id || '',
-        subscription_plan_id: user.subscription_plan_id || '',
         permission_overrides: user.permission_overrides || null,
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false
@@ -207,7 +201,6 @@ export default function Users() {
         account_type: 'Internal Staff',
         specialty_id: '',
         team_id: '',
-        subscription_plan_id: '',
         permission_overrides: null,
         force_password_change: false,
         force_otp_setup: false 
@@ -237,19 +230,9 @@ export default function Users() {
       toast.error('Password is required for new users');
       return;
     }
-    if (formData.account_type === 'Partner' && !formData.subscription_plan_id) {
-      toast.error('Subscription Plan is required for Partners');
-      return;
-    }
-
     try {
       const submitData = { ...formData };
       if (!submitData.team_id) submitData.team_id = null;
-      
-      // Clear subscription plan if not Partner
-      if (submitData.account_type !== 'Partner') {
-        submitData.subscription_plan_id = null;
-      }
       
       if (!showPermissions) submitData.permission_overrides = null;
       
@@ -381,7 +364,6 @@ export default function Users() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Team</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
                 </tr>
@@ -425,16 +407,6 @@ export default function Users() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-sm text-slate-700">{user.team_name || '—'}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {user.subscription_plan_name ? (
-                        <span className="text-sm text-slate-700 flex items-center gap-1">
-                          <CreditCard size={14} className="text-slate-400" />
-                          {user.subscription_plan_name}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-slate-400">—</span>
-                      )}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={user.active ? 'success' : 'secondary'}>
@@ -551,9 +523,7 @@ export default function Users() {
                     onValueChange={(v) => {
                       setFormData({ 
                         ...formData, 
-                        account_type: v,
-                        // Clear subscription plan if not Partner
-                        subscription_plan_id: v === 'Partner' ? formData.subscription_plan_id : ''
+                        account_type: v
                       });
                     }}
                   >
@@ -630,43 +600,6 @@ export default function Users() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Subscription Plan (conditional - only for Partners) */}
-                {formData.account_type === 'Partner' && (
-                  <div className="space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <Label htmlFor="subscription_plan" className="text-purple-800">
-                      Partner Subscription Plan *
-                    </Label>
-                    <Select
-                      value={formData.subscription_plan_id || '__none__'}
-                      onValueChange={(v) => setFormData({ ...formData, subscription_plan_id: v === '__none__' ? '' : v })}
-                    >
-                      <SelectTrigger data-testid="user-subscription-plan-select" className="border-purple-300">
-                        <SelectValue placeholder="Select subscription plan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__" disabled>Select a plan...</SelectItem>
-                        {subscriptionPlans.map((plan) => (
-                          <SelectItem key={plan.id} value={plan.id}>
-                            {plan.name} {plan.description && `- ${plan.description}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-purple-600">
-                      Required for Partner accounts. Determines features and pricing.
-                    </p>
-                  </div>
-                )}
-
-                {/* Non-Partner info */}
-                {formData.account_type && formData.account_type !== 'Partner' && (
-                  <div className="p-3 bg-slate-50 rounded-lg border">
-                    <p className="text-sm text-slate-600">
-                      <strong>{formData.account_type}</strong> accounts do not require a subscription plan.
-                    </p>
-                  </div>
-                )}
 
                 {/* Security Options */}
                 <div className="border-t pt-4 space-y-3">

@@ -75,15 +75,15 @@ export default function ServiceCatalog() {
     t.description.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Group by offer_track: DFY_CORE first, then ONE_OFF, then untagged
+  // Group by offer_track: ONE_OFF first (primary), DFY_CORE last (secondary)
   const dfyCore = filtered.filter(t => t.offer_track === 'DFY_CORE');
   const oneOff = filtered.filter(t => t.offer_track === 'ONE_OFF');
   const other = filtered.filter(t => !t.offer_track || !['DFY_CORE', 'ONE_OFF'].includes(t.offer_track));
 
   const groups = [];
-  if (dfyCore.length > 0) groups.push({ key: 'DFY_CORE', label: TRACK_LABELS.DFY_CORE, items: dfyCore });
-  if (oneOff.length > 0) groups.push({ key: 'ONE_OFF', label: TRACK_LABELS.ONE_OFF, items: oneOff });
-  if (other.length > 0) groups.push({ key: 'other', label: 'Other Services', items: other });
+  if (oneOff.length > 0) groups.push({ key: 'ONE_OFF', label: TRACK_LABELS.ONE_OFF, items: oneOff, secondary: false });
+  if (other.length > 0) groups.push({ key: 'other', label: 'Other Services', items: other, secondary: false });
+  if (dfyCore.length > 0) groups.push({ key: 'DFY_CORE', label: 'Need more help?', items: dfyCore, secondary: true });
 
   if (loading) {
     return (
@@ -200,10 +200,16 @@ export default function ServiceCatalog() {
       {/* Grouped Service Grids */}
       {groups.map(group => (
         <div key={group.key} data-testid={`service-group-${group.key}`}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${group.key === 'DFY_CORE' ? 'bg-[#A2182C]' : 'bg-slate-400'}`} />
-            {group.label}
-          </h2>
+          {group.secondary ? (
+            <div className="border-t border-slate-200 pt-6 mt-2">
+              <h2 className="text-base font-medium text-slate-500 mb-4">{group.label}</h2>
+            </div>
+          ) : (
+            <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-slate-400" />
+              {group.label}
+            </h2>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.items.map(renderServiceCard)}
           </div>

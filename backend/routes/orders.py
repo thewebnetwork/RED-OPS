@@ -772,6 +772,8 @@ async def update_draft(
 @router.get("", response_model=List[OrderResponse])
 async def list_orders(
     status: Optional[str] = None,
+    assigned_queue_key: Optional[str] = None,
+    q: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """List orders based on user role. Drafts only visible to their owner."""
@@ -800,6 +802,21 @@ async def list_orders(
             query = {"editor_id": current_user["id"], "status": status}
         elif role != "Operator":
             query["status"] = status
+    
+    if assigned_queue_key:
+        query["assigned_queue_key"] = assigned_queue_key
+    
+    if q:
+        search_filter = {"$or": [
+            {"title": {"$regex": q, "$options": "i"}},
+            {"service_name": {"$regex": q, "$options": "i"}},
+            {"order_code": {"$regex": q, "$options": "i"}}
+        ]}
+        if "$and" in query:
+            query["$and"].append(search_filter)
+        else:
+            existing = {k: v for k, v in query.items()}
+            query = {"$and": [existing, search_filter]}
     
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
