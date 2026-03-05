@@ -198,7 +198,7 @@ export default function MyRequests() {
                         </div>
                         <h3 className="font-medium text-slate-900 mt-1">{order.title}</h3>
                         <p className="text-sm text-slate-500 mt-0.5">
-                          {order.category_name} • Created {new Date(order.created_at).toLocaleDateString()}
+                          {order.service_name || order.category_name || 'Request'} • Created {new Date(order.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>

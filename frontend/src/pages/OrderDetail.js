@@ -43,7 +43,12 @@ import {
   RotateCcw,
   XCircle,
   Shuffle,
-  Trash2
+  Trash2,
+  ListTodo,
+  Package,
+  Hourglass,
+  CircleDot,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -58,6 +63,25 @@ const statusConfig = {
   'Delivered': { class: 'bg-green-100 text-green-700', color: 'bg-green-500' },
   'Closed': { class: 'bg-slate-100 text-slate-500', color: 'bg-slate-500' },
   'Canceled': { class: 'bg-red-100 text-red-600', color: 'bg-red-500' },
+};
+
+const statusExplanations = {
+  'Draft': 'This request is saved as a draft and has not been submitted yet.',
+  'Open': 'Your request has been submitted and the team will pick it up shortly.',
+  'In Progress': 'Your request is being worked on by the team.',
+  'Pending': 'The team needs your input before continuing. Please review and respond.',
+  'Delivered': 'Your deliverables are ready! Please review the final files.',
+  'Closed': 'This request has been completed and closed.',
+  'Canceled': 'This request was canceled.',
+};
+
+const taskStatusBadge = {
+  'backlog': 'bg-slate-100 text-slate-600',
+  'todo': 'bg-blue-100 text-blue-700',
+  'doing': 'bg-amber-100 text-amber-700',
+  'waiting_on_client': 'bg-purple-100 text-purple-700',
+  'review': 'bg-indigo-100 text-indigo-700',
+  'done': 'bg-green-100 text-green-700',
 };
 
 const priorityConfig = {
@@ -117,6 +141,9 @@ export default function OrderDetail() {
     label: '',
     url: ''
   });
+  
+  // Linked tasks
+  const [linkedTasks, setLinkedTasks] = useState([]);
 
   useEffect(() => {
     fetchOrderData();
@@ -150,8 +177,16 @@ export default function OrderDetail() {
       setOrder(orderRes.data);
       setMessages(messagesRes.data);
       setFiles(filesRes.data);
+      
+      // Fetch linked tasks
+      try {
+        const tasksRes = await axios.get(`${API}/tasks`, { params: { request_id: orderRes.data.id } });
+        setLinkedTasks(tasksRes.data?.tasks || []);
+      } catch {
+        setLinkedTasks([]);
+      }
     } catch (error) {
-      toast.error('Failed to load order');
+      toast.error('Failed to load request');
       navigate('/');
     } finally {
       setLoading(false);
@@ -422,34 +457,60 @@ export default function OrderDetail() {
   // Admin can soft-delete any ticket that isn't already deleted
   const canSoftDelete = isAdmin && !order.deleted;
 
+  const isClient = !isAdmin && !isOperator && !isEditor;
+
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
-      {/* Header */}
+      {/* Header with Service Context */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate('/')} className="w-fit">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="w-fit" data-testid="back-btn">
           <ArrowLeft size={18} className="mr-2" />
-          Back to Dashboard
+          Back
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="font-mono text-sm text-slate-500">{order.order_code}</span>
             <Badge className={statusConfig[order.status]?.class}>{order.status}</Badge>
             <Badge className={priorityConfig[order.priority]}>{order.priority}</Badge>
+            {order.service_name && (
+              <Badge variant="outline" className="border-[#A2182C]/30 text-[#A2182C]" data-testid="service-badge">
+                <Package size={12} className="mr-1" />
+                {order.service_name}
+              </Badge>
+            )}
             {order.is_sla_breached && (
               <Badge className="bg-red-100 text-red-700">
                 <AlertTriangle size={12} className="mr-1" />
                 SLA Breach
               </Badge>
             )}
-            {order.forced_to_pool_2 && (
-              <Badge className="bg-orange-100 text-orange-700">
-                Forced to Pool 2
-              </Badge>
-            )}
           </div>
-          <h1 className="text-xl font-bold text-slate-900 mt-1">{order.title}</h1>
+          <h1 className="text-xl font-bold text-slate-900 mt-1" data-testid="request-title">{order.title}</h1>
         </div>
       </div>
+
+      {/* Plain Language Status Banner */}
+      {statusExplanations[order.status] && (
+        <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+          order.status === 'Pending' ? 'bg-purple-50 border-purple-200' :
+          order.status === 'Delivered' ? 'bg-green-50 border-green-200' :
+          order.status === 'In Progress' ? 'bg-amber-50 border-amber-200' :
+          'bg-blue-50 border-blue-200'
+        }`} data-testid="status-banner">
+          {order.status === 'Pending' ? <Hourglass size={18} className="text-purple-600 mt-0.5 shrink-0" /> :
+           order.status === 'Delivered' ? <CheckCircle2 size={18} className="text-green-600 mt-0.5 shrink-0" /> :
+           order.status === 'In Progress' ? <Play size={18} className="text-amber-600 mt-0.5 shrink-0" /> :
+           <CircleDot size={18} className="text-blue-600 mt-0.5 shrink-0" />}
+          <div>
+            <p className={`text-sm font-medium ${
+              order.status === 'Pending' ? 'text-purple-800' :
+              order.status === 'Delivered' ? 'text-green-800' :
+              order.status === 'In Progress' ? 'text-amber-800' :
+              'text-blue-800'
+            }`}>{statusExplanations[order.status]}</p>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
@@ -853,48 +914,66 @@ export default function OrderDetail() {
           {/* Order Details Card */}
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle>Order Details</CardTitle>
+              <CardTitle>Request Details</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <div>
-                <Label className="text-xs text-slate-500">Description</Label>
-                <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.description}</p>
-              </div>
-              {order.video_script && (
-                <div>
-                  <Label className="text-xs text-slate-500">Video Script</Label>
-                  <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.video_script}</p>
+              {/* Service-specific fields (structured data) */}
+              {order.service_fields && Object.keys(order.service_fields).length > 0 ? (
+                <div className="space-y-3" data-testid="service-fields-section">
+                  {Object.entries(order.service_fields).map(([key, value]) => {
+                    if (!value) return null;
+                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    return (
+                      <div key={key}>
+                        <Label className="text-xs text-slate-500">{label}</Label>
+                        <p className="mt-1 text-slate-700 whitespace-pre-wrap">{value}</p>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-              {order.reference_links && (
-                <div>
-                  <Label className="text-xs text-slate-500">Reference Links</Label>
-                  <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.reference_links}</p>
-                </div>
-              )}
-              {order.footage_links && (
-                <div>
-                  <Label className="text-xs text-slate-500">Footage Links</Label>
-                  <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.footage_links}</p>
-                </div>
-              )}
-              {order.music_preference && (
-                <div>
-                  <Label className="text-xs text-slate-500">Music Preference</Label>
-                  <p className="mt-1 text-slate-700">{order.music_preference}</p>
-                </div>
-              )}
-              {order.delivery_format && (
-                <div>
-                  <Label className="text-xs text-slate-500">Delivery Format</Label>
-                  <p className="mt-1 text-slate-700">{order.delivery_format}</p>
-                </div>
-              )}
-              {order.special_instructions && (
-                <div>
-                  <Label className="text-xs text-slate-500">Special Instructions</Label>
-                  <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.special_instructions}</p>
-                </div>
+              ) : (
+                <>
+                  <div>
+                    <Label className="text-xs text-slate-500">Description</Label>
+                    <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.description}</p>
+                  </div>
+                  {order.video_script && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Video Script</Label>
+                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.video_script}</p>
+                    </div>
+                  )}
+                  {order.reference_links && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Reference Links</Label>
+                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.reference_links}</p>
+                    </div>
+                  )}
+                  {order.footage_links && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Footage Links</Label>
+                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.footage_links}</p>
+                    </div>
+                  )}
+                  {order.music_preference && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Music Preference</Label>
+                      <p className="mt-1 text-slate-700">{order.music_preference}</p>
+                    </div>
+                  )}
+                  {order.delivery_format && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Delivery Format</Label>
+                      <p className="mt-1 text-slate-700">{order.delivery_format}</p>
+                    </div>
+                  )}
+                  {order.special_instructions && (
+                    <div>
+                      <Label className="text-xs text-slate-500">Special Instructions</Label>
+                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.special_instructions}</p>
+                    </div>
+                  )}
+                </>
               )}
               
               {/* Resolution/Delivery Notes */}
@@ -923,9 +1002,13 @@ export default function OrderDetail() {
             </CardContent>
           </Card>
 
-          {/* Tabs: Messages & Files */}
-          <Tabs defaultValue="messages">
+          {/* Tabs: Tasks, Messages & Files */}
+          <Tabs defaultValue="tasks">
             <TabsList>
+              <TabsTrigger value="tasks" data-testid="tasks-tab">
+                <ListTodo size={16} className="mr-2" />
+                Tasks ({linkedTasks.length})
+              </TabsTrigger>
               <TabsTrigger value="messages" data-testid="messages-tab">
                 <MessageSquare size={16} className="mr-2" />
                 Messages ({messages.length})
@@ -935,6 +1018,54 @@ export default function OrderDetail() {
                 Files ({files.length})
               </TabsTrigger>
             </TabsList>
+
+            {/* Linked Tasks Tab */}
+            <TabsContent value="tasks" className="mt-4">
+              <Card className="border-slate-200">
+                <CardContent className="p-4">
+                  {linkedTasks.length === 0 ? (
+                    <div className="text-center text-slate-500 py-8">
+                      <ListTodo size={32} className="mx-auto text-slate-300 mb-2" />
+                      <p className="text-sm">No tasks linked to this request yet</p>
+                      {!isClient && (
+                        <p className="text-xs text-slate-400 mt-1">Tasks will appear here when assigned to this request</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2" data-testid="linked-tasks-list">
+                      {linkedTasks.map(task => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                          onClick={() => navigate('/task-board')}
+                          data-testid={`linked-task-${task.id}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              task.status === 'done' ? 'bg-green-500' :
+                              task.status === 'doing' ? 'bg-amber-500' :
+                              task.status === 'waiting_on_client' ? 'bg-purple-500' :
+                              'bg-slate-400'
+                            }`} />
+                            <div>
+                              <p className="text-sm font-medium text-slate-800">{task.title}</p>
+                              {task.assignee_name && (
+                                <p className="text-xs text-slate-500">{task.assignee_name}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Badge className={taskStatusBadge[task.status] || 'bg-slate-100 text-slate-600'}>
+                            {task.status === 'waiting_on_client' ? 'Waiting on you' :
+                             task.status === 'doing' ? 'In Progress' :
+                             task.status?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="messages" className="mt-4">
               <Card className="border-slate-200">
@@ -1128,7 +1259,7 @@ export default function OrderDetail() {
           {/* Order Summary */}
           <Card className="border-slate-200">
             <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-base">Order Info</CardTitle>
+              <CardTitle className="text-base">Request Info</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div>
@@ -1136,10 +1267,19 @@ export default function OrderDetail() {
                 <Badge className={`mt-1.5 ${statusConfig[order.status]?.class}`}>{order.status}</Badge>
               </div>
 
-              <div>
-                <Label className="text-xs text-slate-500">Category</Label>
-                <p className="font-medium mt-1.5">{order.category}</p>
-              </div>
+              {order.service_name && (
+                <div>
+                  <Label className="text-xs text-slate-500">Service</Label>
+                  <p className="font-medium mt-1.5">{order.service_name}</p>
+                </div>
+              )}
+
+              {!order.service_name && order.category_l1_name && !isClient && (
+                <div>
+                  <Label className="text-xs text-slate-500">Category</Label>
+                  <p className="font-medium mt-1.5">{order.category_l1_name}</p>
+                </div>
+              )}
 
               <div>
                 <Label className="text-xs text-slate-500">Requester</Label>
@@ -1160,71 +1300,36 @@ export default function OrderDetail() {
                 </div>
               </div>
 
-              <div>
-                <Label className="text-xs text-slate-500">SLA Deadline</Label>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <Calendar size={16} className="text-slate-400" />
-                  <span className={`font-medium ${order.is_sla_breached ? 'text-red-600' : ''}`}>
-                    {format(new Date(order.sla_deadline), 'MMM d, yyyy')}
-                  </span>
+              {order.sla_deadline && (
+                <div>
+                  <Label className="text-xs text-slate-500">Deadline</Label>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <Calendar size={16} className="text-slate-400" />
+                    <span className={`font-medium ${order.is_sla_breached ? 'text-red-600' : ''}`}>
+                      {format(new Date(order.sla_deadline), 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                  {order.is_sla_breached && (
+                    <p className="text-xs text-red-600 ml-6 mt-1">Overdue</p>
+                  )}
                 </div>
-                {order.is_sla_breached && (
-                  <p className="text-xs text-red-600 ml-6 mt-1">SLA Breached!</p>
-                )}
-              </div>
+              )}
 
               <div>
                 <Label className="text-xs text-slate-500">Created</Label>
                 <div className="flex items-center gap-2 mt-1.5">
                   <Clock size={16} className="text-slate-400" />
                   <span className="font-medium">
-                    {format(new Date(order.created_at), 'MMM d, yyyy • h:mm a')}
+                    {format(new Date(order.created_at), 'MMM d, yyyy')}
                   </span>
                 </div>
               </div>
-
-              <div>
-                <Label className="text-xs text-slate-500">Last Updated</Label>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <Clock size={16} className="text-slate-400" />
-                  <span className="font-medium">
-                    {format(new Date(order.updated_at || order.created_at), 'MMM d, yyyy • h:mm a')}
-                  </span>
-                </div>
-              </div>
-
-              {order.picked_at && (
-                <div>
-                  <Label className="text-xs text-slate-500">Picked At</Label>
-                  <p className="font-medium mt-1.5">
-                    {format(new Date(order.picked_at), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              )}
 
               {order.delivered_at && (
                 <div>
-                  <Label className="text-xs text-slate-500">Delivered At</Label>
+                  <Label className="text-xs text-slate-500">Delivered</Label>
                   <p className="font-medium mt-1.5">
-                    {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              )}
-
-              {order.closed_at && (
-                <div>
-                  <Label className="text-xs text-slate-500">Closed At</Label>
-                  <p className="font-medium mt-1.5">
-                    {format(new Date(order.closed_at), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              )}
-
-              {order.close_reason && (
-                <div>
-                  <Label className="text-xs text-slate-500">Close Reason</Label>
-                  <p className="mt-1.5 text-slate-700 text-sm bg-slate-50 p-2 rounded">
-                    {order.close_reason}
+                    {format(new Date(order.delivered_at), 'MMM d, yyyy')}
                   </p>
                 </div>
               )}
