@@ -23,7 +23,6 @@ import ServiceCatalog from "./pages/ServiceCatalog";
 import MyAccount from "./pages/MyAccount";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
-import CreateOrder from "./pages/CreateOrder";
 import Users from "./pages/Users";
 import Notifications from "./pages/Notifications";
 import CommandCenter from "./pages/CommandCenter";
@@ -128,6 +127,17 @@ function PrivateRoute({ children, roles }) {
 
   if (roles && !roles.includes(user?.role)) {
     return <Navigate to="/" />;
+  }
+
+  // Preview-as-client enforcement: block non-client routes
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  if (isPreview) {
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/my-account'];
+    const path = location.pathname;
+    const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests');
+    if (!allowed) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <Layout>{children}</Layout>;
@@ -315,14 +325,6 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/orders/new" 
-        element={
-          <PrivateRoute roles={["Administrator", "Operator", "Standard User"]}>
-            <CreateOrder />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
         path="/users" 
         element={
           <PrivateRoute roles={["Administrator"]}>
@@ -342,7 +344,9 @@ function AppRoutes() {
         path="/drafts/:type/:draftId" 
         element={
           <PrivateRoute>
-            <DraftEditor />
+            <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
+              <DraftEditor />
+            </ModeRoute>
           </PrivateRoute>
         } 
       />

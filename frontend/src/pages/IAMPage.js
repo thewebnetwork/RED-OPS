@@ -38,7 +38,7 @@ import {
 } from '../components/ui/alert-dialog';
 import { 
   KeyRound, Shield, Users, ChevronDown, Edit, Save, Info, Lock, Building2, Briefcase,
-  Plus, Search, Trash2, UserCheck, UserX, CreditCard, CheckCircle2, UsersRound, Eye, EyeOff, RefreshCw, X
+  Plus, Search, Trash2, UserCheck, UserX, UsersRound, Eye, EyeOff, RefreshCw, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,7 +100,7 @@ export default function IAMPage() {
   const [dashboardTemplates, setDashboardTemplates] = useState([]);
   const [userForm, setUserForm] = useState({
     name: '', email: '', password: '', role: 'Standard User', 
-    account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', subscription_plan_id: '',
+    account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '',
     dashboard_type_id: '', force_password_change: true, force_otp_setup: true, send_welcome_email: true, can_pick: true,
     pool_access: 'both'  // none, pool1, pool2, both
   });
@@ -130,12 +130,6 @@ export default function IAMPage() {
   const [specialtyForm, setSpecialtyForm] = useState({ name: '', description: '', color: '#6366F1' });
   const [userSpecialtySearch, setUserSpecialtySearch] = useState(''); // Search for user form specialty selection
 
-  // Subscription Plans state
-  const [plans, setPlans] = useState([]);
-  const [planDialogOpen, setPlanDialogOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState(null);
-  const [planForm, setPlanForm] = useState({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: 1 });
-
   // Roles state
   const [roles, setRoles] = useState([]);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -162,11 +156,10 @@ export default function IAMPage() {
 
   const fetchAllData = async () => {
     try {
-      const [usersRes, teamsRes, specialtiesRes, plansRes, configRes, rolesRes, accountTypesRes, dashboardsRes] = await Promise.all([
+      const [usersRes, teamsRes, specialtiesRes, configRes, rolesRes, accountTypesRes, dashboardsRes] = await Promise.all([
         axios.get(`${API}/users`),
         axios.get(`${API}/teams`),
         axios.get(`${API}/specialties`),
-        axios.get(`${API}/subscription-plans`),
         axios.get(`${API}/users/identity-config`),
         axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
         axios.get(`${API}/iam/account-types`).catch(() => ({ data: [] })),
@@ -175,7 +168,6 @@ export default function IAMPage() {
       setUsers(usersRes.data);
       setTeams(teamsRes.data);
       setSpecialties(specialtiesRes.data);
-      setPlans(plansRes.data);
       setIdentityConfig(configRes.data);
       setRoles(rolesRes.data);
       setAccountTypes(accountTypesRes.data);
@@ -198,7 +190,6 @@ export default function IAMPage() {
         specialty_ids: user.specialty_ids || (user.specialty_id ? [user.specialty_id] : []),
         primary_specialty_id: user.primary_specialty_id || user.specialty_id || '',
         team_id: user.team_id || '',
-        subscription_plan_id: user.subscription_plan_id || '',
         dashboard_type_id: user.dashboard_type_id || '',
         force_password_change: user.force_password_change || false,
         force_otp_setup: user.force_otp_setup || false,
@@ -213,7 +204,7 @@ export default function IAMPage() {
       setUserForm({ 
         name: '', email: '', password: tempPassword, role: 'Standard User', 
         account_type: 'Internal Staff', specialty_ids: [], primary_specialty_id: '', team_id: '', 
-        subscription_plan_id: '', dashboard_type_id: '', force_password_change: true, force_otp_setup: true,
+        dashboard_type_id: '', force_password_change: true, force_otp_setup: true,
         send_welcome_email: true, can_pick: true, pool_access: 'both'
       });
     }
@@ -239,7 +230,6 @@ export default function IAMPage() {
       const data = { 
         ...userForm, 
         team_id: userForm.team_id || null, 
-        subscription_plan_id: userForm.subscription_plan_id || null,
         dashboard_type_id: userForm.dashboard_type_id || null,
         send_welcome_email: !editingUser ? userForm.send_welcome_email : false,
         // Ensure primary_specialty_id is set (only if specialties selected)
@@ -351,42 +341,6 @@ export default function IAMPage() {
     }
   };
 
-  // =============== PLAN HANDLERS ===============
-  const openPlanDialog = (plan = null) => {
-    if (plan) {
-      setEditingPlan(plan);
-      setPlanForm({ name: plan.name, description: plan.description || '', price_monthly: plan.price_monthly || '', price_yearly: plan.price_yearly || '', features: (plan.features || []).join('\n'), sort_order: plan.sort_order || 1 });
-    } else {
-      setEditingPlan(null);
-      setPlanForm({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: plans.length + 1 });
-    }
-    setPlanDialogOpen(true);
-  };
-
-  const savePlan = async () => {
-    if (!planForm.name) { toast.error('Plan name required'); return; }
-    try {
-      const data = {
-        ...planForm,
-        price_monthly: planForm.price_monthly ? parseFloat(planForm.price_monthly) : null,
-        price_yearly: planForm.price_yearly ? parseFloat(planForm.price_yearly) : null,
-        features: planForm.features.split('\n').filter(f => f.trim()),
-        sort_order: parseInt(planForm.sort_order) || 1
-      };
-      if (editingPlan) {
-        await axios.patch(`${API}/subscription-plans/${editingPlan.id}`, data);
-        toast.success('Plan updated');
-      } else {
-        await axios.post(`${API}/subscription-plans`, data);
-        toast.success('Plan created');
-      }
-      setPlanDialogOpen(false);
-      fetchAllData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to save plan');
-    }
-  };
-
   // =============== ROLE HANDLERS ===============
   const openRoleDialog = (role = null) => {
     if (role) {
@@ -486,7 +440,6 @@ export default function IAMPage() {
       if (type === 'user') await axios.delete(`${API}/users/${item.id}`);
       else if (type === 'team') await axios.delete(`${API}/teams/${item.id}`);
       else if (type === 'specialty') await axios.delete(`${API}/specialties/${item.id}`);
-      else if (type === 'plan') await axios.delete(`${API}/subscription-plans/${item.id}`);
       else if (type === 'role') await axios.delete(`${API}/iam/roles/${item.id}`);
       else if (type === 'accountType') await axios.delete(`${API}/iam/account-types/${item.id}`);
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted`);
@@ -529,7 +482,6 @@ export default function IAMPage() {
   const specialtyOptions = specialties.map(s => ({ value: s.id, label: s.name, color: s.color }));
   const filteredSpecialtyOptions = getFilteredSpecialties().map(s => ({ value: s.id, label: s.name, color: s.color }));
   const teamOptions = [{ value: '', label: 'No team' }, ...teams.map(t => ({ value: t.id, label: t.name }))];
-  const planOptions = plans.map(p => ({ value: p.id, label: p.name }));
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
@@ -550,23 +502,21 @@ export default function IAMPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">{t('iam.users')}</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">{t('iam.teams')}</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">{t('iam.specialties')}</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">{t('iam.roles')}</p></CardContent></Card>
         <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm text-slate-500">{t('iam.accountTypes')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{plans.length}</p><p className="text-sm text-slate-500">{t('iam.subscriptionPlans')}</p></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users"><Users size={16} className="mr-1" />{t('iam.users')}</TabsTrigger>
           <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />{t('iam.teams')}</TabsTrigger>
           <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />{t('iam.specialties')}</TabsTrigger>
           <TabsTrigger value="roles"><Shield size={16} className="mr-1" />{t('iam.roles')}</TabsTrigger>
           <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />{t('iam.accountTypes')}</TabsTrigger>
-          <TabsTrigger value="plans"><CreditCard size={16} className="mr-1" />{t('iam.subscriptionPlans')}</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -588,7 +538,6 @@ export default function IAMPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.user')}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.role')}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('iam.accountTypes')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.plan')}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.specialty')}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">{t('common.actions')}</th>
@@ -605,11 +554,6 @@ export default function IAMPage() {
                       </td>
                       <td className="px-4 py-3"><Badge className={getRoleColor(user.role)}>{user.role}</Badge></td>
                       <td className="px-4 py-3">{user.account_type ? <Badge className={getAccountTypeColor(user.account_type)}>{user.account_type}</Badge> : '—'}</td>
-                      <td className="px-4 py-3">
-                        {user.subscription_plan_name ? (
-                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">{user.subscription_plan_name}</Badge>
-                        ) : '—'}
-                      </td>
                       <td className="px-4 py-3">
                         {/* Multi-specialty display */}
                         {user.specialties && user.specialties.length > 0 ? (
@@ -781,13 +725,12 @@ export default function IAMPage() {
                       <Badge className={getAccountTypeColor(at.name)}>{at.name}</Badge>
                       <p className="text-sm text-slate-500 mt-2">
                         {at.description || (
-                          at.name === 'Partner' ? 'Business partners with subscription plans' :
+                          at.name === 'Partner' ? 'Business partners' :
                           at.name === 'Media Client' ? 'Media service clients (A La Carte)' :
                           at.name === 'Internal Staff' ? 'Company employees' :
                           at.name === 'Vendor/Freelancer' ? 'External contractors' : ''
                         )}
                       </p>
-                      {at.requires_subscription && <Badge variant="outline" className="mt-2 text-xs">Requires Plan</Badge>}
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openAccountTypeDialog(at)}><Edit size={14} /></Button>
@@ -798,41 +741,6 @@ export default function IAMPage() {
                   </div>
                   {at.is_system && <Badge variant="outline" className="mt-2 text-xs">System</Badge>}
                   {at.user_count !== undefined && <p className="text-xs text-slate-400 mt-3">{at.user_count} users</p>}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* PLANS TAB */}
-        <TabsContent value="plans" className="mt-6">
-          <div className="flex justify-end mb-4">
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openPlanDialog()}>
-              <Plus size={16} className="mr-2" />Add Plan
-            </Button>
-          </div>
-          <div className="grid md:grid-cols-4 gap-4">
-            {plans.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map((plan, idx) => (
-              <Card key={plan.id} className="relative overflow-hidden">
-                <div className={`absolute top-0 left-0 right-0 h-1`} style={{ backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'][idx % 4] }} />
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{plan.name}</CardTitle>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => openPlanDialog(plan)}><Edit size={14} /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => setDeleteDialog({ open: true, type: 'plan', item: plan })}><Trash2 size={14} className="text-red-500" /></Button>
-                    </div>
-                  </div>
-                  {plan.description && <CardDescription>{plan.description}</CardDescription>}
-                </CardHeader>
-                <CardContent>
-                  {plan.price_monthly && <p className="text-2xl font-bold">${plan.price_monthly}<span className="text-sm text-slate-500 font-normal">/mo</span></p>}
-                  {plan.features?.length > 0 && (
-                    <ul className="mt-3 space-y-1">
-                      {plan.features.slice(0, 4).map((f, i) => <li key={i} className="text-sm flex items-center gap-2"><CheckCircle2 size={14} className="text-green-500" />{f}</li>)}
-                    </ul>
-                  )}
-                  <p className="text-xs text-slate-400 mt-3">{plan.user_count || 0} partners</p>
                 </CardContent>
               </Card>
             ))}
@@ -909,7 +817,7 @@ export default function IAMPage() {
                 <SearchableSelect
                   options={accountTypeOptions}
                   value={userForm.account_type}
-                  onValueChange={(v) => setUserForm({ ...userForm, account_type: v, subscription_plan_id: v === 'Partner' ? userForm.subscription_plan_id : '' })}
+                  onValueChange={(v) => setUserForm({ ...userForm, account_type: v })}
                   placeholder="Select account type..."
                   searchPlaceholder="Search account types..."
                   data-testid="user-account-type-select"
@@ -1042,19 +950,6 @@ export default function IAMPage() {
               )}
             </div>
 
-            <div>
-              <Label>Subscription Plan (Service Level)</Label>
-              <p className="text-xs text-slate-500 mb-2">Select the plan type to determine available services (Core, Engage, Lead-to-Cash, etc.)</p>
-              <SearchableSelect
-                options={[{ value: '', label: 'No plan assigned' }, ...planOptions]}
-                value={userForm.subscription_plan_id || ''}
-                onValueChange={(v) => setUserForm({ ...userForm, subscription_plan_id: v })}
-                placeholder="Select plan..."
-                searchPlaceholder="Search plans..."
-                data-testid="user-subscription-plan-select"
-              />
-            </div>
-
             <div className="flex flex-col gap-3 pt-4 border-t">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Switch checked={userForm.can_pick} onCheckedChange={(v) => setUserForm({ ...userForm, can_pick: v, pool_access: v ? userForm.pool_access : 'none' })} data-testid="can-pick-toggle" />
@@ -1168,23 +1063,6 @@ export default function IAMPage() {
             <div><Label>Description</Label><Input value={specialtyForm.description} onChange={(e) => setSpecialtyForm({ ...specialtyForm, description: e.target.value })} /></div>
             <div><Label>Color</Label><div className="flex gap-2"><Input type="color" value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} className="w-16 h-10 p-1" /><Input value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} /></div></div>
             <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setSpecialtyDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={saveSpecialty}>Save</Button></div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* PLAN DIALOG */}
-      <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editingPlan ? 'Edit Plan' : 'Add Plan'}</DialogTitle></DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div><Label>Name *</Label><Input value={planForm.name} onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })} /></div>
-            <div><Label>Description</Label><Input value={planForm.description} onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Monthly Price ($)</Label><Input type="number" step="0.01" value={planForm.price_monthly} onChange={(e) => setPlanForm({ ...planForm, price_monthly: e.target.value })} /></div>
-              <div><Label>Yearly Price ($)</Label><Input type="number" step="0.01" value={planForm.price_yearly} onChange={(e) => setPlanForm({ ...planForm, price_yearly: e.target.value })} /></div>
-            </div>
-            <div><Label>Features (one per line)</Label><Textarea value={planForm.features} onChange={(e) => setPlanForm({ ...planForm, features: e.target.value })} className="min-h-[100px]" /></div>
-            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setPlanDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={savePlan}>Save</Button></div>
           </div>
         </DialogContent>
       </Dialog>
@@ -1337,14 +1215,6 @@ export default function IAMPage() {
                   onChange={(e) => setAccountTypeForm({ ...accountTypeForm, color: e.target.value })} 
                 />
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch 
-                checked={accountTypeForm.requires_subscription} 
-                onCheckedChange={(v) => setAccountTypeForm({ ...accountTypeForm, requires_subscription: v })} 
-                data-testid="requires-subscription-switch"
-              />
-              <Label className="cursor-pointer">Requires Subscription Plan</Label>
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setAccountTypeDialogOpen(false)}>Cancel</Button>

@@ -43,7 +43,7 @@ import AnnouncementTicker from './AnnouncementTicker';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Routes shared across modes — mode determined by active_app_mode, not URL
-const SHARED_ROUTES = ['/tasks', '/task-board', '/reports'];
+const SHARED_ROUTES = ['/tasks', '/task-board', '/reports', '/requests'];
 
 // Icon mapping
 const ICONS = {
@@ -123,7 +123,7 @@ export default function Layout({ children }) {
     }
     
     // Client routes
-    if (['/', '/services', '/my-requests', '/my-account', '/requests'].some(p => path === p || path.startsWith('/requests/'))) {
+    if (['/', '/services', '/my-requests', '/my-account'].some(p => path === p)) {
       return APP_MODES.CLIENT_PORTAL;
     }
     
