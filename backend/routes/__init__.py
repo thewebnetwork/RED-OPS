@@ -21,6 +21,7 @@ from .specialties import router as specialties_router
 from .access_tiers import router as access_tiers_router
 from .subscription_plans import router as subscription_plans_router
 from .sla_policies import router as sla_policies_router
+from .tasks import router as tasks_router  # MVP Task Board
 
 __all__ = [
     "auth_router",
@@ -43,4 +44,5 @@ __all__ = [
     "access_tiers_router",
     "subscription_plans_router",
     "sla_policies_router",
+    "tasks_router",
 ]

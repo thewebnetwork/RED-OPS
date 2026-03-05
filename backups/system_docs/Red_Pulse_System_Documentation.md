@@ -4,7 +4,7 @@
 **Document Version:** 1.0  
 **Platform:** Red Pulse (Red Ops)  
 **Generated:** December 2025  
-**Environment:** https://client-ui-modes.preview.emergentagent.com
+**Environment:** https://task-board-mvp.preview.emergentagent.com
 
 ---
 
