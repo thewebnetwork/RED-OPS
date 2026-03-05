@@ -22,6 +22,14 @@
 - **16/16 backend tests passed** (see `/app/test_reports/iteration_56.json`)
 - No pool/routing concepts
 
+### Account Manager Relationship & Role-Aware Assignment (VERIFIED - March 2026)
+- **Data Model**: `account_manager_id` field on Media Client user records (nullable, one AM per client)
+- **API Endpoints**: `GET/PATCH /api/tasks/account-manager/{client_user_id}`, `GET /api/tasks/assignable-users`
+- **Client RBAC**: Create tasks (visibility=client/both), assign to self or AM only, edit own tasks, status-update on visible
+- **Server-side Validation**: Invalid assignments (random user, internal visibility, etc.) all return 403
+- **26/27 tests passed** (see `/app/test_reports/iteration_59.json`)
+- No pool/routing logic
+
 ### Account Ownership & Three-Mode Task Board (COMPLETED - March 2026)
 - **Account Manager Assignment**: `account_manager_id` field on client users, admin-only set/get endpoints
 - **Assignable Users API**: `GET /api/tasks/assignable-users` returns role-appropriate assignee options
