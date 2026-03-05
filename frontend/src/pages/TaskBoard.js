@@ -424,6 +424,116 @@ function QuickTaskDialog({ open, onClose, task, assignableUsers, onSave, saving,
   // Admin / Manager dialog
   const visibilityOptions = VISIBILITY_OPTIONS;
 
+  // ── MANAGER MODE: focused, operational dialog ──
+  if (isManager) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden" data-testid="task-form-dialog">
+          <DialogTitle className="sr-only">{isEditing ? 'Edit Task' : 'New Task'}</DialogTitle>
+          <form onSubmit={handleSubmit}>
+            <div className="px-5 pt-5 pb-3">
+              <input ref={titleRef} data-testid="task-title-input"
+                className="w-full text-base font-medium text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
+                placeholder={isEditing ? 'Task title' : 'Create a task for your client...'}
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+
+            {/* Controls row */}
+            <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
+              {/* Status pills — show first 4 + More */}
+              <div className="flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5">
+                {COLUMNS.slice(0, 3).map(col => (
+                  <button key={col.id} type="button" data-testid={`status-pill-${col.id}`}
+                    className={`text-xs px-2 py-1 rounded transition-all ${
+                      form.status === col.id ? 'bg-white shadow-sm text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                    onClick={() => setForm({ ...form, status: col.id })}>
+                    {col.label}
+                  </button>
+                ))}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button type="button"
+                      className={`text-xs px-2 py-1 rounded transition-all ${
+                        !['backlog','todo','doing'].includes(form.status)
+                          ? 'bg-white shadow-sm text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'
+                      }`}>
+                      {!['backlog','todo','doing'].includes(form.status) ? COLUMNS.find(c => c.id === form.status)?.label : 'More'}
+                      <ChevronDown className="w-3 h-3 ml-0.5 inline" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-36 p-1" align="start">
+                    {COLUMNS.filter(c => !['backlog','todo','doing'].includes(c.id)).map(col => (
+                      <button key={col.id} type="button"
+                        className={`w-full text-left text-xs px-2 py-1.5 rounded hover:bg-slate-50 ${form.status === col.id ? 'bg-slate-50 font-medium' : ''}`}
+                        onClick={() => setForm({ ...form, status: col.id })}>
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${col.dot} mr-1.5`} />{col.label}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Assignee — scoped picker */}
+              <AssigneePicker users={assignableUsers} value={form.assignee_user_id}
+                onChange={(v) => setForm({ ...form, assignee_user_id: v })} mode={mode} />
+            </div>
+
+            {/* Due date */}
+            <div className="px-5 pb-3 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <input type="date" data-testid="task-due-input"
+                className="text-sm text-slate-600 outline-none bg-transparent border-none cursor-pointer"
+                value={form.due_at} onChange={(e) => setForm({ ...form, due_at: e.target.value })} />
+              {form.due_at && (
+                <button type="button" onClick={() => setForm({ ...form, due_at: '' })} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+              {!form.due_at && <span className="text-xs text-slate-400">No due date</span>}
+            </div>
+
+            {/* Expandable: description + linked request */}
+            {!showMore ? (
+              <div className="px-5 pb-3">
+                <button type="button" onClick={() => setShowMore(true)} data-testid="show-more-fields"
+                  className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                  + Description, linked request
+                </button>
+              </div>
+            ) : (
+              <div className="px-5 pb-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+                <Textarea data-testid="task-description-input" className="text-sm resize-none" rows={2}
+                  placeholder="Add description..." value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <div>
+                  <Label className="text-xs text-slate-500">Linked Request</Label>
+                  <Input data-testid="task-request-input" className="h-8 text-sm mt-1"
+                    placeholder="Request ID" value={form.request_id}
+                    onChange={(e) => setForm({ ...form, request_id: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between px-5 py-3 border-t bg-slate-50/50">
+              <span className="text-[11px] text-slate-400">{isEditing ? 'Editing task' : ''}</span>
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" size="sm" onClick={onClose} data-testid="task-form-cancel">Cancel</Button>
+                <Button type="submit" size="sm" disabled={saving || !form.title.trim()} data-testid="task-form-submit">
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                  {isEditing ? 'Save' : 'Create Task'}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // ── ADMIN MODE: richest control set ──
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden" data-testid="task-form-dialog">
@@ -477,20 +587,18 @@ function QuickTaskDialog({ open, onClose, task, assignableUsers, onSave, saving,
             <AssigneePicker users={assignableUsers} value={form.assignee_user_id}
               onChange={(v) => setForm({ ...form, assignee_user_id: v })} mode={mode} />
 
-            {/* Visibility toggle - Admin only */}
-            {mode === 'admin' && (
-              <div className="flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5">
-                {visibilityOptions.map(v => (
-                  <button key={v.value} type="button" data-testid={`visibility-toggle-${v.value}`} title={v.desc}
-                    className={`text-xs px-2 py-1 rounded transition-all ${
-                      form.visibility === v.value ? 'bg-white shadow-sm text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                    onClick={() => setForm({ ...form, visibility: v.value })}>
-                    {v.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Visibility toggle — Admin only */}
+            <div className="flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5">
+              {visibilityOptions.map(v => (
+                <button key={v.value} type="button" data-testid={`visibility-toggle-${v.value}`} title={v.desc}
+                  className={`text-xs px-2 py-1 rounded transition-all ${
+                    form.visibility === v.value ? 'bg-white shadow-sm text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  onClick={() => setForm({ ...form, visibility: v.value })}>
+                  {v.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Due date */}
@@ -507,12 +615,12 @@ function QuickTaskDialog({ open, onClose, task, assignableUsers, onSave, saving,
             {!form.due_at && <span className="text-xs text-slate-400">No due date</span>}
           </div>
 
-          {/* Expandable section */}
+          {/* Expandable: description, linked request, type */}
           {!showMore ? (
             <div className="px-5 pb-3">
               <button type="button" onClick={() => setShowMore(true)} data-testid="show-more-fields"
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
-                + Description{mode === 'admin' ? ', linked request, type' : isManager ? ', details' : ''}
+                + Description, linked request, type
               </button>
             </div>
           ) : (
@@ -520,25 +628,23 @@ function QuickTaskDialog({ open, onClose, task, assignableUsers, onSave, saving,
               <Textarea data-testid="task-description-input" className="text-sm resize-none" rows={2}
                 placeholder="Add description..." value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              {mode === 'admin' && (
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <Label className="text-xs text-slate-500">Linked Request</Label>
-                    <Input data-testid="task-request-input" className="h-8 text-sm mt-1"
-                      placeholder="Request ID" value={form.request_id}
-                      onChange={(e) => setForm({ ...form, request_id: e.target.value })} />
-                  </div>
-                  <div className="w-36">
-                    <Label className="text-xs text-slate-500">Type</Label>
-                    <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
-                      <SelectTrigger className="h-8 text-sm mt-1" data-testid="task-type-select"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {TYPE_OPTIONS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs text-slate-500">Linked Request</Label>
+                  <Input data-testid="task-request-input" className="h-8 text-sm mt-1"
+                    placeholder="Request ID" value={form.request_id}
+                    onChange={(e) => setForm({ ...form, request_id: e.target.value })} />
                 </div>
-              )}
+                <div className="w-36">
+                  <Label className="text-xs text-slate-500">Type</Label>
+                  <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
+                    <SelectTrigger className="h-8 text-sm mt-1" data-testid="task-type-select"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {TYPE_OPTIONS.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           )}
 
@@ -812,7 +918,6 @@ export default function TaskBoard() {
   const [amDialogOpen, setAmDialogOpen] = useState(false);
 
   const mode = getUserMode(user);
-  const canCreate = true;
   const canDrag = true;
   const canEditCard = mode === 'admin' || mode === 'manager';
   const canAddInline = mode === 'admin' || mode === 'manager';
@@ -923,12 +1028,13 @@ export default function TaskBoard() {
     }
   };
 
-  // ── Dialog save ──
+  // ── Dialog save (optimistic for creates) ──
   const handleSave = async (form, taskId) => {
     setSaving(true);
     const orgId = user?.org_id || user?.team_id;
     try {
       if (taskId) {
+        // Update existing task — optimistic update in-place
         const payload = {};
         if (form.title) payload.title = form.title;
         if (form.description !== undefined) payload.description = form.description;
@@ -939,26 +1045,53 @@ export default function TaskBoard() {
         }
         if (form.assignee_user_id !== undefined) payload.assignee_user_id = form.assignee_user_id;
         if (form.due_at) payload.due_at = new Date(form.due_at).toISOString();
+
+        // Optimistic: update in local state immediately
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...payload } : t));
+        setDialogOpen(false);
+        setEditingTask(null);
+
         await axios.patch(`${API}/tasks/${taskId}`, payload);
         toast.success('Task updated');
+        fetchTasks(); // Reconcile with server
       } else {
+        // Create new task — optimistic insert
+        const visibility = mode === 'client' ? (form.visibility || 'client') : (form.visibility || 'internal');
+        const tempId = `temp-${Date.now()}`;
+        const assignee = assignableUsers.find(u => u.id === form.assignee_user_id);
+        const tempTask = {
+          id: tempId, title: form.title, status: form.status || 'todo',
+          visibility, task_type: form.task_type || 'manual',
+          org_id: orgId, created_source: mode === 'client' ? 'client' : 'admin',
+          position: Date.now(), created_by_user_id: user?.id,
+          assignee_user_id: form.assignee_user_id || null,
+          assignee_name: assignee?.name || null,
+          description: form.description || null,
+          due_at: form.due_at ? new Date(form.due_at).toISOString() : null,
+          request_id: form.request_id || null,
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        };
+
+        setTasks(prev => [...prev, tempTask]);
+        setDialogOpen(false);
+        setEditingTask(null);
+
         const payload = {
           org_id: orgId, title: form.title,
-          status: form.status || 'todo',
-          visibility: mode === 'client' ? (form.visibility || 'client') : (form.visibility || 'internal'),
+          status: form.status || 'todo', visibility,
           task_type: form.task_type || 'manual',
         };
         if (form.description) payload.description = form.description;
         if (form.assignee_user_id) payload.assignee_user_id = form.assignee_user_id;
         if (form.due_at) payload.due_at = new Date(form.due_at).toISOString();
         if (form.request_id) payload.request_id = form.request_id;
-        await axios.post(`${API}/tasks`, payload);
+
+        const res = await axios.post(`${API}/tasks`, payload);
+        setTasks(prev => prev.map(t => t.id === tempId ? res.data : t));
         toast.success(mode === 'client' ? 'Request submitted' : 'Task created');
       }
-      setDialogOpen(false);
-      setEditingTask(null);
-      fetchTasks();
     } catch (err) {
+      fetchTasks(); // Revert to server state on error
       toast.error(err.response?.data?.detail || 'Failed to save');
     } finally {
       setSaving(false);
