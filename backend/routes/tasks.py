@@ -66,6 +66,19 @@ def can_edit_task(task: dict, user: dict) -> bool:
     return False
 
 
+@router.get("/templates")
+async def list_task_templates(
+    current_user: dict = Depends(get_current_user)
+):
+    """List all active task templates. Admin only."""
+    if current_user.get("role") != "Administrator":
+        raise HTTPException(status_code=403, detail="Admin only")
+    from services.task_generator import ensure_seed_templates
+    await ensure_seed_templates()
+    templates = await db.task_templates.find({"active": True}, {"_id": 0}).to_list(100)
+    return templates
+
+
 @router.get("", response_model=List[TaskResponse])
 async def list_tasks(
     org_id: Optional[str] = Query(None),

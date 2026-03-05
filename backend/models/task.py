@@ -70,6 +70,8 @@ class TaskResponse(BaseModel):
     position: Optional[float] = None
     created_source: CreatedSource
     completed_at: Optional[datetime] = None
+    template_id: Optional[str] = None
+    trigger_event: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     

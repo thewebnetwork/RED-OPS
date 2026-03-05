@@ -16,6 +16,7 @@ from utils.helpers import (
 )
 from services.webhooks import trigger_webhooks
 from services.workflow_engine import get_workflows_for_trigger, execute_workflow
+from services.task_generator import generate_tasks_for_event, complete_open_tasks_for_request
 from services.email import (
     send_satisfaction_survey_email,
     send_ticket_created_email,
@@ -554,6 +555,9 @@ async def create_order(
         # Notify eligible pool users (only those matching the specialty)
         if routing_info:
             await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
+        
+        # Auto-generate tasks for request_created
+        await generate_tasks_for_event("request_created", order, current_user)
     
     return OrderResponse(
         **{k: v for k, v in order.items() if k != '_id'},
@@ -631,6 +635,9 @@ async def submit_draft(
     
     # Notify eligible pool users (only those matching the specialty)
     await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
+    
+    # Auto-generate tasks for request_created (draft submitted)
+    await generate_tasks_for_event("request_created", order, current_user)
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     updated_order = normalize_order(updated_order)
@@ -1177,6 +1184,9 @@ async def pick_order(
         "picked_by_account_type": account_type
     })
     
+    # Auto-generate tasks for status_changed_to_doing
+    await generate_tasks_for_event("status_changed_to_doing", updated_order, current_user)
+    
     return {"message": "Order picked successfully", "order_code": order["order_code"]}
 
 
@@ -1222,6 +1232,9 @@ async def submit_for_review(
             })
     background_tasks.add_task(run_pending_workflows)
     
+    # Auto-generate tasks for status_changed_to_review
+    await generate_tasks_for_event("status_changed_to_review", updated_order, current_user)
+    
     return {"message": "Order submitted for review"}
 
 
@@ -1258,6 +1271,9 @@ async def respond_to_order(
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "In Progress", current_user)
+    
+    # Auto-generate tasks for revision_requested
+    await generate_tasks_for_event("revision_requested", updated_order, current_user)
     
     return {"message": "Response sent, order back to editor"}
 
@@ -1356,6 +1372,10 @@ async def deliver_order(
             survey_link
         )
     
+    # Auto-complete open tasks + generate tasks for delivered
+    await complete_open_tasks_for_request(order_id)
+    await generate_tasks_for_event("delivered", updated_order, current_user)
+    
     return {"message": "Order delivered successfully"}
 
 
@@ -1427,6 +1447,9 @@ async def close_order(
         "close_reason": close_data.reason,
         "closed_by": current_user["name"]
     })
+    
+    # Auto-complete open tasks linked to this request
+    await complete_open_tasks_for_request(order_id)
     
     return {"message": "Order closed successfully"}
 
