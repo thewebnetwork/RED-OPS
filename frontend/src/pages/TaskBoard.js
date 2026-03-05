@@ -23,15 +23,14 @@ import {
   Link2,
   User as UserIcon,
   Eye,
-  EyeOff,
   GripVertical,
-  X,
   Pencil,
   Search,
-  Filter,
   Users,
   CheckCircle2,
   Loader2,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -51,6 +50,11 @@ import {
 } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../components/ui/popover';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -64,9 +68,9 @@ const COLUMNS = [
 ];
 
 const VISIBILITY_OPTIONS = [
-  { value: 'internal', label: 'Internal' },
-  { value: 'client', label: 'Client' },
-  { value: 'both', label: 'Both' },
+  { value: 'internal', label: 'Internal', desc: 'Team only' },
+  { value: 'client', label: 'Client', desc: 'Client visible' },
+  { value: 'both', label: 'Both', desc: 'Everyone' },
 ];
 
 const TYPE_OPTIONS = [
@@ -84,32 +88,389 @@ function isClient(user) {
   return user?.account_type === 'Media Client';
 }
 
-// ─── Sortable Task Card ──────────────────────────────────────────
-function SortableTaskCard({ task, onEdit, canEdit, isClientUser }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id, data: { type: 'task', task } });
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
+function getRoleBadge(u) {
+  const type = u.account_type || '';
+  if (type === 'Media Client') return { label: 'Client', cls: 'bg-purple-100 text-purple-700' };
+  if (type === 'Internal Staff') return { label: 'Internal', cls: 'bg-blue-100 text-blue-700' };
+  if (type === 'Partner') return { label: 'Partner', cls: 'bg-amber-100 text-amber-700' };
+  if (type === 'Vendor/Freelancer') return { label: 'Vendor', cls: 'bg-teal-100 text-teal-700' };
+  return { label: 'User', cls: 'bg-slate-100 text-slate-600' };
+}
+
+// ─── Inline Column Create ────────────────────────────────────────
+function InlineCreate({ columnId, onSubmit, onCancel }) {
+  const [title, setTitle] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = () => {
+    if (!title.trim()) return;
+    onSubmit(title.trim(), columnId);
+    setTitle('');
   };
 
   return (
+    <div className="mb-2 animate-in fade-in slide-in-from-top-1 duration-150" data-testid={`inline-create-${columnId}`}>
+      <div className="bg-white rounded-lg border-2 border-primary/30 shadow-sm p-2">
+        <input
+          ref={inputRef}
+          data-testid={`inline-create-input-${columnId}`}
+          className="w-full text-sm text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
+          placeholder="Task title... press Enter"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSubmit();
+            if (e.key === 'Escape') onCancel();
+          }}
+          onBlur={() => { if (!title.trim()) onCancel(); }}
+        />
+        <div className="flex items-center justify-between mt-1.5">
+          <span className="text-[10px] text-slate-400">Enter to create</span>
+          <div className="flex gap-1">
+            <button onClick={onCancel} className="text-xs text-slate-400 hover:text-slate-600 px-1.5 py-0.5 rounded">
+              Esc
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim()}
+              className="text-xs bg-primary text-white px-2 py-0.5 rounded disabled:opacity-40 hover:bg-primary/90"
+              data-testid={`inline-create-submit-${columnId}`}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Assignee Picker (searchable) ─────────────────────────────────
+function AssigneePicker({ users, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const selectedUser = users.find(u => u.id === value);
+
+  const filtered = users.filter(u => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+  });
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          data-testid="quick-assignee-picker"
+          className="flex items-center gap-1.5 h-8 px-2 rounded-md border border-slate-200 hover:border-slate-300 bg-white text-sm transition-colors min-w-0"
+        >
+          {selectedUser ? (
+            <>
+              <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-medium flex items-center justify-center shrink-0">
+                {getInitials(selectedUser.name)}
+              </span>
+              <span className="truncate max-w-[100px] text-slate-700">{selectedUser.name}</span>
+            </>
+          ) : (
+            <>
+              <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-slate-400">Assign</span>
+            </>
+          )}
+          <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <div className="p-2 border-b">
+          <Input
+            data-testid="assignee-search-input"
+            placeholder="Search people..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-7 text-sm"
+            autoFocus
+          />
+        </div>
+        <div className="max-h-48 overflow-y-auto p-1">
+          <button
+            type="button"
+            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-slate-50 ${!value ? 'bg-slate-50' : ''}`}
+            onClick={() => { onChange(''); setOpen(false); setSearch(''); }}
+            data-testid="assignee-option-none"
+          >
+            <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-400 text-[10px] font-medium flex items-center justify-center">—</span>
+            <span className="text-slate-500">Unassigned</span>
+          </button>
+          {filtered.map(u => {
+            const badge = getRoleBadge(u);
+            return (
+              <button
+                key={u.id}
+                type="button"
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-slate-50 ${value === u.id ? 'bg-primary/5' : ''}`}
+                onClick={() => { onChange(u.id); setOpen(false); setSearch(''); }}
+                data-testid={`assignee-option-${u.id}`}
+              >
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-medium flex items-center justify-center shrink-0">
+                  {getInitials(u.name)}
+                </span>
+                <span className="truncate text-slate-700 flex-1 text-left">{u.name}</span>
+                <span className={`text-[10px] px-1.5 py-0 rounded-full ${badge.cls}`}>{badge.label}</span>
+              </button>
+            );
+          })}
+          {filtered.length === 0 && (
+            <p className="text-xs text-slate-400 text-center py-3">No match</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ─── Quick Task Dialog ───────────────────────────────────────────
+function QuickTaskDialog({ open, onClose, task, orgUsers, onSave, saving }) {
+  const [form, setForm] = useState({
+    title: '', description: '', status: 'todo', visibility: 'internal',
+    task_type: 'manual', assignee_user_id: '', due_at: '', request_id: '',
+  });
+  const [showMore, setShowMore] = useState(false);
+  const titleRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (task?.id) {
+      setForm({
+        title: task.title || '', description: task.description || '',
+        status: task.status || 'todo', visibility: task.visibility || 'internal',
+        task_type: task.task_type || 'manual', assignee_user_id: task.assignee_user_id || '',
+        due_at: task.due_at ? task.due_at.slice(0, 10) : '', request_id: task.request_id || '',
+      });
+      setShowMore(!!(task.description || task.request_id || task.task_type !== 'manual'));
+    } else {
+      setForm({
+        title: '', description: '', status: task?.status || 'todo', visibility: 'internal',
+        task_type: 'manual', assignee_user_id: '', due_at: '', request_id: '',
+      });
+      setShowMore(false);
+    }
+    setTimeout(() => titleRef.current?.focus(), 100);
+  }, [task, open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) return;
+    onSave(form, task?.id);
+  };
+
+  const isEditing = !!task?.id;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden" data-testid="task-form-dialog">
+        <form onSubmit={handleSubmit}>
+          {/* Title — full width, prominent */}
+          <div className="px-5 pt-5 pb-3">
+            <input
+              ref={titleRef}
+              data-testid="task-title-input"
+              className="w-full text-base font-medium text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
+              placeholder={isEditing ? 'Task title' : 'What needs to be done?'}
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </div>
+
+          {/* Quick controls row */}
+          <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
+            {/* Status pills */}
+            <div className="flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5">
+              {COLUMNS.slice(0, 4).map(col => (
+                <button
+                  key={col.id}
+                  type="button"
+                  data-testid={`status-pill-${col.id}`}
+                  className={`text-xs px-2 py-1 rounded transition-all ${
+                    form.status === col.id
+                      ? 'bg-white shadow-sm text-slate-800 font-medium'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  onClick={() => setForm({ ...form, status: col.id })}
+                >
+                  {col.label}
+                </button>
+              ))}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={`text-xs px-2 py-1 rounded transition-all ${
+                      ['review', 'done', 'waiting_on_client'].includes(form.status) && !['backlog','todo','doing'].includes(form.status)
+                        ? 'bg-white shadow-sm text-slate-800 font-medium'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {['review','done','waiting_on_client'].includes(form.status) 
+                      ? COLUMNS.find(c => c.id === form.status)?.label 
+                      : 'More'}
+                    <ChevronDown className="w-3 h-3 ml-0.5 inline" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-36 p-1" align="start">
+                  {COLUMNS.filter(c => !['backlog','todo','doing'].includes(c.id)).map(col => (
+                    <button
+                      key={col.id}
+                      type="button"
+                      className={`w-full text-left text-xs px-2 py-1.5 rounded hover:bg-slate-50 ${form.status === col.id ? 'bg-slate-50 font-medium' : ''}`}
+                      onClick={() => setForm({ ...form, status: col.id })}
+                    >
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${col.dot} mr-1.5`} />
+                      {col.label}
+                    </button>
+                  ))}
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Assignee */}
+            <AssigneePicker
+              users={orgUsers}
+              value={form.assignee_user_id}
+              onChange={(v) => setForm({ ...form, assignee_user_id: v })}
+            />
+
+            {/* Visibility toggle */}
+            <div className="flex items-center gap-0.5 bg-slate-100 rounded-md p-0.5">
+              {VISIBILITY_OPTIONS.map(v => (
+                <button
+                  key={v.value}
+                  type="button"
+                  data-testid={`visibility-toggle-${v.value}`}
+                  title={v.desc}
+                  className={`text-xs px-2 py-1 rounded transition-all ${
+                    form.visibility === v.value
+                      ? 'bg-white shadow-sm text-slate-800 font-medium'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  onClick={() => setForm({ ...form, visibility: v.value })}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Due date — inline, always visible */}
+          <div className="px-5 pb-3 flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="date"
+              data-testid="task-due-input"
+              className="text-sm text-slate-600 outline-none bg-transparent border-none cursor-pointer"
+              value={form.due_at}
+              onChange={(e) => setForm({ ...form, due_at: e.target.value })}
+            />
+            {form.due_at && (
+              <button type="button" onClick={() => setForm({ ...form, due_at: '' })} className="text-slate-400 hover:text-slate-600">
+                <X className="w-3 h-3" />
+              </button>
+            )}
+            {!form.due_at && <span className="text-xs text-slate-400">No due date</span>}
+          </div>
+
+          {/* Expandable: description, request, type */}
+          {!showMore ? (
+            <div className="px-5 pb-3">
+              <button
+                type="button"
+                onClick={() => setShowMore(true)}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                data-testid="show-more-fields"
+              >
+                + Description, linked request, type
+              </button>
+            </div>
+          ) : (
+            <div className="px-5 pb-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div>
+                <Textarea
+                  data-testid="task-description-input"
+                  className="text-sm resize-none"
+                  rows={2}
+                  placeholder="Add description..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs text-slate-500">Linked Request</Label>
+                  <Input
+                    data-testid="task-request-input"
+                    className="h-8 text-sm mt-1"
+                    placeholder="Request ID or code"
+                    value={form.request_id}
+                    onChange={(e) => setForm({ ...form, request_id: e.target.value })}
+                  />
+                </div>
+                <div className="w-36">
+                  <Label className="text-xs text-slate-500">Type</Label>
+                  <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
+                    <SelectTrigger className="h-8 text-sm mt-1" data-testid="task-type-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TYPE_OPTIONS.map(t => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-5 py-3 border-t bg-slate-50/50">
+            <span className="text-[11px] text-slate-400">
+              {isEditing ? 'Editing task' : 'Press Ctrl+Enter to create'}
+            </span>
+            <div className="flex gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={onClose} data-testid="task-form-cancel">
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={saving || !form.title.trim()} data-testid="task-form-submit">
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                {isEditing ? 'Save' : 'Create Task'}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Sortable Task Card ──────────────────────────────────────────
+function SortableTaskCard({ task, onEdit, canEdit, isClientUser }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id, data: { type: 'task', task },
+  });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+
+  return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <TaskCard
-        task={task}
-        onEdit={onEdit}
-        canEdit={canEdit}
-        dragListeners={listeners}
-        isClientUser={isClientUser}
-      />
+      <TaskCard task={task} onEdit={onEdit} canEdit={canEdit} dragListeners={listeners} isClientUser={isClientUser} />
     </div>
   );
 }
@@ -137,14 +498,13 @@ function TaskCard({ task, onEdit, canEdit, dragListeners, isClientUser, isOverla
           </button>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-800 leading-snug line-clamp-2">
-            {task.title}
-          </p>
-
+          <p className="text-sm font-medium text-slate-800 leading-snug line-clamp-2">{task.title}</p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {task.assignee_name && (
               <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                <UserIcon className="w-3 h-3" />
+                <span className="w-4 h-4 rounded-full bg-primary/10 text-primary text-[9px] font-medium flex items-center justify-center">
+                  {getInitials(task.assignee_name)}
+                </span>
                 <span className="truncate max-w-[80px]">{task.assignee_name}</span>
               </span>
             )}
@@ -167,7 +527,6 @@ function TaskCard({ task, onEdit, canEdit, dragListeners, isClientUser, isOverla
             )}
           </div>
         </div>
-
         {canEdit && !isClientUser && onEdit && (
           <button
             onClick={() => onEdit(task)}
@@ -183,232 +542,46 @@ function TaskCard({ task, onEdit, canEdit, dragListeners, isClientUser, isOverla
 }
 
 // ─── Column ──────────────────────────────────────────────────────
-function KanbanColumn({ column, tasks, onEdit, canEdit, isClientUser, onAddTask }) {
-  const taskIds = tasks.map((t) => t.id);
+function KanbanColumn({ column, tasks, onEdit, canEdit, isClientUser, onAddTask, inlineCreateCol, setInlineCreateCol, onInlineSubmit }) {
+  const taskIds = tasks.map(t => t.id);
+  const showInline = inlineCreateCol === column.id;
 
   return (
-    <div
-      data-testid={`kanban-column-${column.id}`}
-      className="flex flex-col min-w-[260px] w-[260px] shrink-0"
-    >
+    <div data-testid={`kanban-column-${column.id}`} className="flex flex-col min-w-[260px] w-[260px] shrink-0">
       <div className={`flex items-center justify-between px-3 py-2 rounded-t-lg border ${column.color}`}>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${column.dot}`} />
-          <span className={`text-xs font-semibold uppercase tracking-wider ${column.textColor}`}>
-            {column.label}
-          </span>
+          <span className={`text-xs font-semibold uppercase tracking-wider ${column.textColor}`}>{column.label}</span>
           <span className="text-xs text-slate-400 font-medium">{tasks.length}</span>
         </div>
         {canEdit && !isClientUser && onAddTask && (
           <button
-            onClick={() => onAddTask(column.id)}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            onClick={() => setInlineCreateCol(showInline ? null : column.id)}
+            className={`transition-colors ${showInline ? 'text-primary' : 'text-slate-400 hover:text-slate-600'}`}
             data-testid={`add-task-${column.id}`}
           >
             <Plus className="w-4 h-4" />
           </button>
         )}
       </div>
-
       <div className="flex-1 bg-slate-50/50 rounded-b-lg border border-t-0 border-slate-200 p-2 min-h-[200px] overflow-y-auto max-h-[calc(100vh-220px)]">
+        {showInline && (
+          <InlineCreate
+            columnId={column.id}
+            onSubmit={onInlineSubmit}
+            onCancel={() => setInlineCreateCol(null)}
+          />
+        )}
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {tasks.map((task) => (
-            <SortableTaskCard
-              key={task.id}
-              task={task}
-              onEdit={onEdit}
-              canEdit={canEdit}
-              isClientUser={isClientUser}
-            />
+          {tasks.map(task => (
+            <SortableTaskCard key={task.id} task={task} onEdit={onEdit} canEdit={canEdit} isClientUser={isClientUser} />
           ))}
         </SortableContext>
-        {tasks.length === 0 && (
-          <div className="flex items-center justify-center h-20 text-xs text-slate-400">
-            No tasks
-          </div>
+        {tasks.length === 0 && !showInline && (
+          <div className="flex items-center justify-center h-20 text-xs text-slate-400">No tasks</div>
         )}
       </div>
     </div>
-  );
-}
-
-// ─── Task Form Dialog ────────────────────────────────────────────
-function TaskFormDialog({ open, onClose, task, orgUsers, onSave, saving }) {
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    status: 'todo',
-    visibility: 'internal',
-    task_type: 'manual',
-    assignee_user_id: '',
-    due_at: '',
-    request_id: '',
-  });
-
-  useEffect(() => {
-    if (task) {
-      setForm({
-        title: task.title || '',
-        description: task.description || '',
-        status: task.status || 'todo',
-        visibility: task.visibility || 'internal',
-        task_type: task.task_type || 'manual',
-        assignee_user_id: task.assignee_user_id || '',
-        due_at: task.due_at ? task.due_at.slice(0, 10) : '',
-        request_id: task.request_id || '',
-      });
-    } else {
-      setForm({
-        title: '',
-        description: '',
-        status: 'todo',
-        visibility: 'internal',
-        task_type: 'manual',
-        assignee_user_id: '',
-        due_at: '',
-        request_id: '',
-      });
-    }
-  }, [task, open]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.title.trim()) return;
-    onSave(form, task?.id);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md" data-testid="task-form-dialog">
-        <DialogHeader>
-          <DialogTitle>{task ? 'Edit Task' : 'New Task'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="task-title">Title</Label>
-            <Input
-              id="task-title"
-              data-testid="task-title-input"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="What needs to be done?"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="task-desc">Description</Label>
-            <Textarea
-              id="task-desc"
-              data-testid="task-description-input"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Optional details..."
-              rows={2}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger data-testid="task-status-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COLUMNS.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Visibility</Label>
-              <Select value={form.visibility} onValueChange={(v) => setForm({ ...form, visibility: v })}>
-                <SelectTrigger data-testid="task-visibility-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {VISIBILITY_OPTIONS.map((v) => (
-                    <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Type</Label>
-              <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
-                <SelectTrigger data-testid="task-type-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_OPTIONS.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Assignee</Label>
-              <Select
-                value={form.assignee_user_id || '_none'}
-                onValueChange={(v) => setForm({ ...form, assignee_user_id: v === '_none' ? '' : v })}
-              >
-                <SelectTrigger data-testid="task-assignee-select">
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">Unassigned</SelectItem>
-                  {orgUsers.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name || u.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="task-due">Due Date</Label>
-              <Input
-                id="task-due"
-                type="date"
-                data-testid="task-due-input"
-                value={form.due_at}
-                onChange={(e) => setForm({ ...form, due_at: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="task-request">Request ID</Label>
-              <Input
-                id="task-request"
-                data-testid="task-request-input"
-                value={form.request_id}
-                onChange={(e) => setForm({ ...form, request_id: e.target.value })}
-                placeholder="Optional"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} data-testid="task-form-cancel">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving || !form.title.trim()} data-testid="task-form-submit">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-              {task ? 'Save' : 'Create'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -424,6 +597,7 @@ export default function TaskBoard() {
   const [activeTask, setActiveTask] = useState(null);
   const [filterAssignee, setFilterAssignee] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [inlineCreateCol, setInlineCreateCol] = useState(null);
 
   const userIsAdmin = isAdmin(user);
   const userIsClient = isClient(user);
@@ -433,140 +607,122 @@ export default function TaskBoard() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  // Fetch tasks
   const fetchTasks = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filterAssignee) params.append('assignee_user_id', filterAssignee);
       const res = await axios.get(`${API}/tasks?${params.toString()}`);
       setTasks(res.data);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
     }
   }, [filterAssignee]);
 
-  // Fetch org users for assignee picker (admin only)
   useEffect(() => {
     if (!userIsAdmin) return;
     axios.get(`${API}/users`)
-      .then((res) => {
-        const users = (res.data || []).map((u) => ({
+      .then(res => {
+        setOrgUsers((res.data || []).map(u => ({
           id: u.id,
           name: u.full_name || u.name || u.email,
           email: u.email,
-        }));
-        setOrgUsers(users);
+          account_type: u.account_type,
+        })));
       })
       .catch(() => {});
   }, [userIsAdmin]);
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
-  // Group tasks by status
-  const getColumnTasks = useCallback(
-    (statusId) => {
-      let filtered = tasks.filter((t) => t.status === statusId);
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (t) =>
-            t.title.toLowerCase().includes(q) ||
-            (t.assignee_name && t.assignee_name.toLowerCase().includes(q))
-        );
-      }
-      return filtered.sort((a, b) => (a.position || 0) - (b.position || 0));
-    },
-    [tasks, searchQuery]
-  );
+  const getColumnTasks = useCallback((statusId) => {
+    let filtered = tasks.filter(t => t.status === statusId);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(t =>
+        t.title.toLowerCase().includes(q) || (t.assignee_name && t.assignee_name.toLowerCase().includes(q))
+      );
+    }
+    return filtered.sort((a, b) => (a.position || 0) - (b.position || 0));
+  }, [tasks, searchQuery]);
 
-  // ─── Drag handlers ─────────────────────────────────────────────
+  // ── Drag handlers ──
   const handleDragStart = (event) => {
-    const task = tasks.find((t) => t.id === event.active.id);
-    setActiveTask(task || null);
+    setActiveTask(tasks.find(t => t.id === event.active.id) || null);
   };
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     setActiveTask(null);
     if (!over || !active) return;
-
     const taskId = active.id;
-    const task = tasks.find((t) => t.id === taskId);
+    const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Determine target column
     let targetStatus = null;
-
-    // Check if dropped over a column (the droppable area)
-    const overTask = tasks.find((t) => t.id === over.id);
-    if (overTask) {
-      targetStatus = overTask.status;
-    } else {
-      // Dropped on empty column area
-      const colId = over.id;
-      if (COLUMNS.some((c) => c.id === colId)) {
-        targetStatus = colId;
-      }
-    }
-
+    const overTask = tasks.find(t => t.id === over.id);
+    if (overTask) targetStatus = overTask.status;
+    else if (COLUMNS.some(c => c.id === over.id)) targetStatus = over.id;
     if (!targetStatus) return;
 
-    // If status didn't change and we're over the same task, handle reorder
     if (task.status === targetStatus) {
       const columnTasks = getColumnTasks(targetStatus);
-      const oldIndex = columnTasks.findIndex((t) => t.id === taskId);
-      const newIndex = columnTasks.findIndex((t) => t.id === over.id);
+      const oldIndex = columnTasks.findIndex(t => t.id === taskId);
+      const newIndex = columnTasks.findIndex(t => t.id === over.id);
       if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
         const reordered = arrayMove(columnTasks, oldIndex, newIndex);
-        // Calculate new position
         const prevPos = newIndex > 0 ? reordered[newIndex - 1].position || 0 : 0;
         const nextPos = newIndex < reordered.length - 1 ? reordered[newIndex + 1].position || prevPos + 2000 : prevPos + 2000;
         const newPosition = (prevPos + nextPos) / 2;
-
-        // Optimistic update
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, position: newPosition } : t))
-        );
-
-        try {
-          await axios.patch(`${API}/tasks/reorder`, {
-            task_id: taskId,
-            new_position: newPosition,
-          });
-        } catch {
-          fetchTasks();
-          toast.error('Failed to reorder task');
-        }
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, position: newPosition } : t));
+        try { await axios.patch(`${API}/tasks/reorder`, { task_id: taskId, new_position: newPosition }); }
+        catch { fetchTasks(); toast.error('Failed to reorder'); }
       }
       return;
     }
 
-    // Status change — optimistic update
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: targetStatus } : t))
-    );
-
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: targetStatus } : t));
     try {
       await axios.patch(`${API}/tasks/${taskId}`, { status: targetStatus });
-      toast.success(`Moved to ${COLUMNS.find((c) => c.id === targetStatus)?.label}`);
+      toast.success(`Moved to ${COLUMNS.find(c => c.id === targetStatus)?.label}`);
     } catch (err) {
       fetchTasks();
-      const msg = err.response?.data?.detail || 'Failed to update task';
-      toast.error(msg);
+      toast.error(err.response?.data?.detail || 'Failed to update');
     }
   };
 
-  // ─── Create / Edit task ────────────────────────────────────────
+  // ── Inline create (fast, from column +) ──
+  const handleInlineCreate = async (title, columnId) => {
+    const orgId = user?.org_id || user?.team_id;
+    const tempId = `temp-${Date.now()}`;
+    // Optimistic insert
+    setTasks(prev => [...prev, {
+      id: tempId, title, status: columnId, visibility: 'internal', task_type: 'manual',
+      org_id: orgId, created_source: 'admin', position: Date.now(),
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    }]);
+    setInlineCreateCol(null);
+
+    try {
+      const res = await axios.post(`${API}/tasks`, {
+        org_id: orgId, title, status: columnId, visibility: 'internal', task_type: 'manual',
+      });
+      // Replace temp with real
+      setTasks(prev => prev.map(t => t.id === tempId ? res.data : t));
+      toast.success('Task created');
+    } catch (err) {
+      setTasks(prev => prev.filter(t => t.id !== tempId));
+      toast.error(err.response?.data?.detail || 'Failed to create');
+    }
+  };
+
+  // ── Dialog save (full form) ──
   const handleSave = async (form, taskId) => {
     setSaving(true);
     const orgId = user?.org_id || user?.team_id;
     try {
       if (taskId) {
-        // Edit
         const payload = {};
         if (form.title) payload.title = form.title;
         if (form.description !== undefined) payload.description = form.description;
@@ -574,16 +730,14 @@ export default function TaskBoard() {
         if (form.visibility) payload.visibility = form.visibility;
         if (form.task_type) payload.task_type = form.task_type;
         if (form.assignee_user_id) payload.assignee_user_id = form.assignee_user_id;
+        else if (form.assignee_user_id === '') payload.assignee_user_id = '';
         if (form.due_at) payload.due_at = new Date(form.due_at).toISOString();
         await axios.patch(`${API}/tasks/${taskId}`, payload);
         toast.success('Task updated');
       } else {
-        // Create
         const payload = {
-          org_id: orgId,
-          title: form.title,
-          status: form.status || 'todo',
-          visibility: form.visibility || 'internal',
+          org_id: orgId, title: form.title,
+          status: form.status || 'todo', visibility: form.visibility || 'internal',
           task_type: form.task_type || 'manual',
         };
         if (form.description) payload.description = form.description;
@@ -597,28 +751,14 @@ export default function TaskBoard() {
       setEditingTask(null);
       fetchTasks();
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Failed to save task';
-      toast.error(msg);
+      toast.error(err.response?.data?.detail || 'Failed to save');
     } finally {
       setSaving(false);
     }
   };
 
-  const openCreate = (status) => {
-    setEditingTask(null);
-    setDialogOpen(true);
-    // Pre-set status in next render via useEffect in dialog
-    setTimeout(() => {
-      setEditingTask({ status, title: '', description: '', visibility: 'internal', task_type: 'manual' });
-    }, 0);
-  };
+  const openEdit = (task) => { setEditingTask(task); setDialogOpen(true); };
 
-  const openEdit = (task) => {
-    setEditingTask(task);
-    setDialogOpen(true);
-  };
-
-  // ─── Render ────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]" data-testid="task-board-loading">
@@ -638,7 +778,6 @@ export default function TaskBoard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <Input
@@ -649,29 +788,20 @@ export default function TaskBoard() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-
-          {/* Assignee filter — admin only */}
           {userIsAdmin && orgUsers.length > 0 && (
-            <Select
-              value={filterAssignee || '_all'}
-              onValueChange={(v) => setFilterAssignee(v === '_all' ? '' : v)}
-            >
+            <Select value={filterAssignee || '_all'} onValueChange={v => setFilterAssignee(v === '_all' ? '' : v)}>
               <SelectTrigger className="h-8 w-40 text-sm" data-testid="task-filter-assignee">
                 <Users className="w-3.5 h-3.5 mr-1 text-slate-400" />
                 <SelectValue placeholder="All members" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="_all">All members</SelectItem>
-                {orgUsers.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.name}
-                  </SelectItem>
+                {orgUsers.map(u => (
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           )}
-
-          {/* Create button — admin only */}
           {userIsAdmin && (
             <Button
               size="sm"
@@ -687,14 +817,9 @@ export default function TaskBoard() {
       </div>
 
       {/* Board */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4" data-testid="kanban-board">
-          {COLUMNS.map((col) => (
+          {COLUMNS.map(col => (
             <KanbanColumn
               key={col.id}
               column={col}
@@ -702,30 +827,24 @@ export default function TaskBoard() {
               onEdit={userIsAdmin ? openEdit : null}
               canEdit={canEdit}
               isClientUser={userIsClient}
-              onAddTask={userIsAdmin ? openCreate : null}
+              onAddTask={userIsAdmin ? () => {} : null}
+              inlineCreateCol={inlineCreateCol}
+              setInlineCreateCol={setInlineCreateCol}
+              onInlineSubmit={handleInlineCreate}
             />
           ))}
         </div>
-
         <DragOverlay>
-          {activeTask ? (
-            <div className="w-[240px]">
-              <TaskCard task={activeTask} isOverlay />
-            </div>
-          ) : null}
+          {activeTask ? <div className="w-[240px]"><TaskCard task={activeTask} isOverlay /></div> : null}
         </DragOverlay>
       </DndContext>
 
-      {/* Empty state */}
       {tasks.length === 0 && !loading && (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400" data-testid="task-board-empty">
           <CheckCircle2 className="w-10 h-10 mb-3 text-slate-300" />
           <p className="text-sm font-medium">No tasks yet</p>
           {userIsAdmin && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
+            <Button variant="outline" size="sm" className="mt-3"
               onClick={() => { setEditingTask(null); setDialogOpen(true); }}
               data-testid="empty-create-task-btn"
             >
@@ -736,9 +855,8 @@ export default function TaskBoard() {
         </div>
       )}
 
-      {/* Task form dialog — admin only */}
       {userIsAdmin && (
-        <TaskFormDialog
+        <QuickTaskDialog
           open={dialogOpen}
           onClose={() => { setDialogOpen(false); setEditingTask(null); }}
           task={editingTask}
