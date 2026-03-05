@@ -1,9 +1,32 @@
 # Red Ribbon Ops - Product Requirements Document
 
 **Last Updated:** March 2026  
-**Version:** 6.0 - Three-Mode Task Board UX Complete
+**Version:** 6.1 - Role-Aware Quick Task Creation Complete
 
 ## Recent Updates (March 2026)
+
+### Role-Aware Quick Task Creation (COMPLETED - March 2026)
+Split task creation into 3 separate dialog code paths with optimistic UI:
+
+**Admin Create Dialog** (`sm:max-w-lg`):
+- Placeholder: "What needs to be done?"
+- 4+more status pills, full grouped assignee picker (Team/Clients sections), visibility toggle (Internal/Client/Both)
+- Due date, expandable: description + linked request + type selector
+- Button: "Create Task"
+
+**Account Manager Create Dialog** (`sm:max-w-md`):
+- Placeholder: "Create a task for your client..."
+- 3+more status pills, scoped assignee picker
+- Due date, expandable: description + linked request (NO visibility, NO type)
+- Button: "Create Task"
+
+**Client Create Dialog** (`sm:max-w-md`):
+- Label: "What do you need help with?"
+- 3 status pills (To Do/Doing/Review), simplified assignee: "Assign to me" / "Assign to my account manager" / "No one yet"
+- Due date ("When do you need this?"), expandable: description only
+- Button: "Submit Request"
+
+**Optimistic UI**: Tasks appear instantly in the correct column on both inline and dialog create, before API roundtrip completes. Errors revert to server state.
 
 ### Three-Mode Task Board UX (COMPLETED - March 2026)
 Implemented three distinctly different user experiences on a shared Kanban board:
@@ -20,7 +43,7 @@ Implemented three distinctly different user experiences on a shared Kanban board
 - Title: "My Client Tasks" / "Manage tasks for your assigned clients"
 - Focused filters: Search + Client filter (only their clients)
 - No admin-only controls (no AM management, no visibility toggle)
-- Task dialog: Status pills, assignee picker, description (no visibility, linked request, or type fields)
+- Task dialog: Status pills, scoped assignee picker, due date, expandable (description + linked request — no visibility or type)
 - Cards: Assignee names, due dates, linked requests (no visibility badges)
 
 **Client Mode:**
