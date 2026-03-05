@@ -1,56 +1,47 @@
 # Red Ribbon Ops - Product Requirements Document
 
 **Last Updated:** March 2026  
-**Version:** 5.0 - Task Board MVP Backend Complete
+**Version:** 6.0 - Three-Mode Task Board UX Complete
 
 ## Recent Updates (March 2026)
 
-### Task Board MVP - Backend API (COMPLETED - March 2026)
-- **Task Model** (`backend/models/task.py`): Pydantic models with enums for status (backlog/todo/doing/waiting_on_client/review/done), visibility (client/internal/both), task_type (manual/request_generated/approval/follow_up), created_source (system/admin/client)
-- **Task API** (`backend/routes/tasks.py`): GET/POST/PATCH /api/tasks + PATCH /api/tasks/reorder
-- **RBAC Rules**: Admin full CRUD in own org; Client read-only for client/both visibility, status-update only; Operator read/update in own org
-- **28/28 backend tests passed** (see `/app/test_reports/iteration_54.json`)
-- **No pool/routing concepts** in task system
-- Tasks support optional request linking, assignment to internal or client users
+### Three-Mode Task Board UX (COMPLETED - March 2026)
+Implemented three distinctly different user experiences on a shared Kanban board:
 
-### Task Auto-Generation from Request Events (COMPLETED - March 2026)
-- **Task Template System** (`backend/models/task_template.py`, `backend/services/task_generator.py`): 9 seed templates covering 5 trigger events
-- **Trigger Events**: request_created, status_changed_to_doing, status_changed_to_review, revision_requested, delivered
-- **Service-Specific Templates**: Video-editing-60s and long-form-youtube get extra templates on request_created
-- **Dedup**: (request_id, template_id, trigger_event) prevents duplicate task spam
-- **Auto-Complete**: On delivery/close, all open system-generated tasks are marked done
-- **16/16 backend tests passed** (see `/app/test_reports/iteration_56.json`)
-- No pool/routing concepts
+**Admin Mode:**
+- Title: "Task Board" / "Manage and track all work across your team"
+- Full filter set: Search, Assignee (grouped Team/Clients), Status (all 6 columns)
+- Admin-only: "Account Managers" management dialog to set/change client AMs
+- Task dialog: All status pills, grouped assignee picker, visibility toggle (Internal/Client/Both), linked request, task type
+- Cards: Full metadata with visibility badges, linked request indicators, edit pencils
+- Inline "+" column create on all columns
 
-### Account Manager Relationship & Role-Aware Assignment (VERIFIED - March 2026)
-- **Data Model**: `account_manager_id` field on Media Client user records (nullable, one AM per client)
-- **API Endpoints**: `GET/PATCH /api/tasks/account-manager/{client_user_id}`, `GET /api/tasks/assignable-users`
-- **Client RBAC**: Create tasks (visibility=client/both), assign to self or AM only, edit own tasks, status-update on visible
-- **Server-side Validation**: Invalid assignments (random user, internal visibility, etc.) all return 403
-- **26/27 tests passed** (see `/app/test_reports/iteration_59.json`)
-- No pool/routing logic
+**Account Manager Mode:**
+- Title: "My Client Tasks" / "Manage tasks for your assigned clients"
+- Focused filters: Search + Client filter (only their clients)
+- No admin-only controls (no AM management, no visibility toggle)
+- Task dialog: Status pills, assignee picker, description (no visibility, linked request, or type fields)
+- Cards: Assignee names, due dates, linked requests (no visibility badges)
 
-### Account Ownership & Three-Mode Task Board (COMPLETED - March 2026)
-- **Account Manager Assignment**: `account_manager_id` field on client users, admin-only set/get endpoints
-- **Assignable Users API**: `GET /api/tasks/assignable-users` returns role-appropriate assignee options
-- **Client Task Creation**: Clients can create tasks (visibility=client/both), assign to self or AM only
-- **Client Task Editing**: Clients can edit title/desc/assignee/due on tasks they created, status on all visible
-- **Three Frontend Modes**: Admin (full CRUD), Manager (create/edit for clients), Client (simplified: "My Tasks", "New Request", self+AM assignee only, no visibility toggle)
-- **Backend 14/15, Frontend 100%** (iteration_58)
+**Client Mode:**
+- Title: "My Tasks" / "Track progress on your account"
+- Minimal controls: Search + "New Request" button (outline)
+- No column "+" buttons, no assignee/status/visibility filters
+- Client-friendly assignee picker: "Assign to me" / "Assign to my account manager [name]" / "No one yet"
+- Simplified dialog: "What do you need help with?", 3 status pills (To Do/Doing/Review), "Submit Request"
+- Cards: "You" or "Account Manager" labels, due dates only — no visibility, type, or request badges
 
-### Fast Task Creation & Assignment UX (COMPLETED - March 2026)
-- **Quick Task Dialog**: Minimal-first form with title auto-focused, status pills, searchable assignee picker with role badges, visibility toggles, optional expandable section for description/request/type
-- **Inline Column Create**: Click "+" on any column → type title → press Enter → instant task via optimistic update
-- **Assignee Picker**: Searchable popover with initials, names, and role badges (Internal/Client/Partner/Vendor)
-- **14/15 frontend tests passed** (iteration_57) — client view test blocked by unrelated password issue
+**New Backend Endpoint:**
+- `GET /api/tasks/client-assignments` — Admin-only: Returns all clients with their AM assignments + internal staff list
 
-### Task Board MVP - Frontend Kanban Board (COMPLETED - March 2026)
-- **TaskBoard.js** (`frontend/src/pages/TaskBoard.js`): Drag-and-drop Kanban with 6 columns using @dnd-kit
-- **Admin controls**: New Task button, edit/assign tasks, assignee filter, column-level add buttons, search
-- **Client view**: Simplified — no create/edit/assign controls, only status update via drag
-- **Navigation**: "Tasks" nav item in all modes (Client Portal, Operator Console, Admin Studio)
-- **i18n**: nav.tasks key added in EN/ES/PT
-- **All frontend tests passed** (see `/app/test_reports/iteration_55.json`)
+**Testing:** 100% pass rate (backend + frontend) via testing_agent iteration_60
+
+### Previous Completed Work
+- Task Board MVP Backend API (tasks CRUD, RBAC, reordering)
+- Task Auto-Generation from Request Events (9 templates, 5 trigger events)
+- Account Manager Relationship & Role-Aware Assignment
+- Fast Task Creation & Assignment UX (inline create, quick dialog)
+- Task Board Frontend Kanban Board with @dnd-kit
 
 ### Phase 1: MVP Blocker Fixes (COMPLETED)
 - Backend RBAC alignment (Administrator/Operator/Standard User)
@@ -61,23 +52,9 @@
 - i18n sync for ES/PT translations
 
 ### Phase 2: Document Implementation (COMPLETED - Dec 2024)
-**From RedOps_Emergent_Brief_Complete.docx**
-
-1. **Real Service Catalog Endpoint** ✅
-   - Built `/api/categories/catalog` returning 8 RRM services
-   - Services: Video Editing (60s, Stories, Long-form), Thumbnail Design, Content Writing, Social Media Graphics, Email Campaigns, Website Updates
-   - Updated ServiceCatalog.js fallback to match
-
-2. **Comprehensive "Ticket" → "Request" Cleanup** ✅
-   - RibbonBoard.js: All variables renamed (pool1Requests, handlePickRequest, PoolRequestCard, etc.)
-   - en.json: 40+ "ticket" references replaced with "request"
-   - Test IDs updated (my-requests-page, pool-request-*, pick-request-*)
-   - All component links updated
-
-3. **Translation Enhancements** ✅
-   - Added missing ribbon/pool translations
-   - Synced ES/PT files with new RRM service catalog
-   - All client-facing text uses "Request" terminology
+1. Real Service Catalog Endpoint (8 RRM services)
+2. Comprehensive "Ticket" → "Request" Cleanup
+3. Translation Enhancements
 
 ## Original Problem Statement
 Enterprise ticket management and operations platform with full multilingual support (English, Spanish, Portuguese). The platform handles service requests, bug reports, feature requests, and editing workflows with SLA tracking, pool-based ticket assignment, and comprehensive IAM controls.
@@ -94,70 +71,18 @@ Enterprise ticket management and operations platform with full multilingual supp
 
 ## What's Been Implemented
 
-### Frontend Restructuring - 3 Modes (COMPLETED - Feb 2025)
-Restructured frontend into 3 distinct modes based on account_type and role:
+### Frontend Restructuring - 3 Modes (COMPLETED)
+- **Client Portal**: Home, Request a Service, My Requests, Tasks, My Account
+- **Operator Console**: My Queue, Tasks, All Requests, Reports
+- **Admin Studio**: Dashboard, Tasks, IAM, Settings, Reports, Logs, Announcements
 
-**1. Client Portal** (for Media Client account_type)
-- 4 nav items only: Home, Request a Service, My Requests, My Account
-- New pages: ClientHome.js, ServiceCatalog.js, MyAccount.js
-- Clean, simplified experience for clients
-- No access to operator/admin features
-
-**2. Operator Console** (for Partners with capabilities, Vendors, Internal Staff)
-- Nav items: My Queue, Pool, All Requests (staff only), Reports (staff only)
-- Work management focused
-- Pool picking available for authorized users
-
-**3. Admin Studio** (for Administrator role)
-- Full access: Dashboard, IAM, Settings, Reports, Logs, Announcements
-- Can switch between all 3 modes via dropdown
-- "Preview as Client" feature for QA testing
-
-**Global Renames:**
-- 'ticket' → 'request' (in all UI labels)
-- 'Command Center' → 'Request a Service'
-- 'My Services' → 'My Account'
-- Routes: /tickets → /requests, /orders → /all-requests
-
-**Service Catalog:**
-- Browseable page with 8 service cards
-- Each card: name, description, turnaround, included/addon badge, popular badge
-- Search functionality
-- "Start Request" CTA on each card
-
-**New Files:**
-- `/app/frontend/src/hooks/useAppMode.js` - Mode determination logic
-- `/app/frontend/src/components/LayoutNew.js` - Mode-based layout
-- `/app/frontend/src/pages/ServiceCatalog.js` - Browseable catalog
-- `/app/frontend/src/pages/ClientHome.js` - Client home page
-- `/app/frontend/src/pages/MyAccount.js` - Combined profile/plan/security
-
-### P0 - UAT-Critical Pages i18n (COMPLETED - Feb 2025)
-All 6 UAT-critical pages now fully translated:
-1. **Tickets.js** - List page, status filters, table headers, empty states
-2. **TicketDetail.js** - Status dropdown, cancel/resolve/reassign modals
-3. **RibbonBoard.js** - Pool tabs, descriptions, pick dialog, empty states
-4. **WorkflowEditor.js** - Node palette, settings sheet, save/discard dialogs
-5. **Categories.js** - L1/L2 CRUD, move subcategory, unsaved changes warning
-6. **Reports.js** - All filters, date presets, export buttons, results display
-7. **Announcements.js** - Full CRUD, targeting labels, preview, confirmations
-
-### i18n Audit System (COMPLETED - Dec 2025)
-- **Audit Script** (`scripts/i18n-audit.js`) - Full codebase scanner
-- **CI Check Script** (`scripts/i18n-ci.js`) - CI-friendly check
-- **Key Sync Script** (`scripts/i18n-sync.js`) - Syncs missing keys
-- **npm commands**: `i18n:audit`, `i18n:ci`, `i18n:sync`, `i18n:audit:strict`
-- **GitHub Actions** (`.github/workflows/i18n-check.yml`) - PR/push checks
-
-### Previous Work Completed
-- Dashboard propagation fix (dynamic rendering from user-assigned layouts)
-- Dashboard click-through navigation (KPIs link to filtered views)
-- Pool access controls (`can_pick`, `pool_access` fields)
-- Category restoration and translation (445 categories with name_en/es/pt)
-- User creation/editing with pool access settings
-- SLA policy management
-- Workflow automation builder
-- Email notification system
+### Task System (COMPLETED)
+- Full CRUD API with RBAC at `/api/tasks`
+- Drag-and-drop Kanban board with 6 columns
+- 3 distinct UI modes (Admin/Manager/Client)
+- Automated task generation from request lifecycle
+- Account Manager relationship management
+- Inline column creation and quick task dialog
 
 ## Known Mocked APIs
 - `/api/webhooks/ghl-payment-mock` - GoHighLevel payment webhook
@@ -165,9 +90,10 @@ All 6 UAT-critical pages now fully translated:
 
 ## Test Credentials
 - Admin: admin@redribbonops.com / Admin123!
+- Client: test@client.com / Client123!
 
 ## Tech Stack
-- Frontend: React + Tailwind + Shadcn/UI + react-i18next
+- Frontend: React + Tailwind + Shadcn/UI + react-i18next + @dnd-kit
 - Backend: FastAPI + MongoDB
 - Auth: JWT-based with OTP support
 
@@ -177,13 +103,16 @@ All 6 UAT-critical pages now fully translated:
 
 ## Future Tasks (P2)
 1. Workflow preview/simulation feature
-2. Bulk restore/purge deleted tickets
-3. "My Email Preferences" in user settings
-4. Backup code system for OTP recovery
+2. Complete i18n translation for all pages
+3. Bulk restore/purge deleted tickets
+4. "My Email Preferences" in user settings
+5. Backup code system for OTP recovery
+6. Deployment assistance (Vercel/Railway + MongoDB Atlas)
 
-## Files of Reference
+## Key Files
 - `/app/backend/models/task.py` - Task model and enums
 - `/app/backend/routes/tasks.py` - Task API endpoints with RBAC
-- `/app/backend/server_v2.py` - Main server, includes task router
+- `/app/backend/services/task_generator.py` - Task automation
+- `/app/backend/server_v2.py` - Main server
+- `/app/frontend/src/pages/TaskBoard.js` - Three-mode Kanban board
 - `/app/frontend/src/config/rrmServices.js` - Canonical service definitions
-
