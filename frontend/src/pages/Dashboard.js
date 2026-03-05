@@ -526,48 +526,18 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
         </Link>
       </div>
 
-      {/* SLA Status (Clickable) */}
+      {/* SLA Status */}
       <div>
         <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
           <Target size={18} />
           {t('slaStatus')}
         </h2>
         <div className="grid grid-cols-3 gap-4">
-          <Link to="/sla-policies?tab=monitoring&status=on_track">
-            <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
-          </Link>
-          <Link to="/sla-policies?tab=monitoring&status=at_risk">
-            <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
-          </Link>
-          <Link to="/sla-policies?tab=monitoring&status=breached">
-            <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
-          </Link>
+          <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
+          <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
+          <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
         </div>
       </div>
-
-      {/* Pool Analytics (Clickable) */}
-      {metrics.pool && (
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <Layers size={18} />
-            {t('poolStatus')}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link to="/ribbon-board?pool=1">
-              <AnimatedKPICard label={t('dashboardLabels.pool1Available')} value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
-            </Link>
-            <Link to="/ribbon-board?pool=2">
-              <AnimatedKPICard label={t('dashboardLabels.pool2Available')} value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
-            </Link>
-            <Link to="/reports?metric=pool_pickups">
-              <AnimatedKPICard label={t('dashboardLabels.pool1Pickups30d')} value={metrics.pool.pool1_pickups_30d} icon={TrendingUp} color="bg-indigo-500" />
-            </Link>
-            <Link to="/reports?metric=avg_pick_time">
-              <AnimatedKPICard label={t('dashboardLabels.avgPickTimeP1')} value={metrics.pool.avg_time_to_pick_pool1_hours} suffix="h" icon={Clock} color="bg-indigo-500" />
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -579,9 +549,6 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
         )}
         {chartData.slaTrend && (
           <SLATrendChart data={chartData.slaTrend} title={t('dashboardLabels.slaTrend')} t={t} />
-        )}
-        {chartData.poolRouting && (
-          <PoolRoutingChart data={chartData.poolRouting} title={t('dashboardLabels.poolRouting')} />
         )}
       </div>
 

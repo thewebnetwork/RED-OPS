@@ -5,17 +5,8 @@ import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   User, 
-  Mail, 
-  Phone, 
-  Building, 
-  CreditCard, 
-  Package,
   Shield,
-  Bell,
-  Key,
-  ChevronRight,
-  Check,
-  ExternalLink
+  Key
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -23,8 +14,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Switch } from '../components/ui/switch';
-import { Separator } from '../components/ui/separator';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -43,7 +32,6 @@ export default function MyAccount() {
     new_password: '',
     confirm_password: ''
   });
-  const [plan, setPlan] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -53,20 +41,8 @@ export default function MyAccount() {
         phone: user.phone || '',
         company: user.company || ''
       });
-      fetchPlanDetails();
     }
   }, [user]);
-
-  const fetchPlanDetails = async () => {
-    if (user?.subscription_plan_id) {
-      try {
-        const res = await axios.get(`${API}/subscription-plans/${user.subscription_plan_id}`);
-        setPlan(res.data);
-      } catch (error) {
-        console.error('Failed to fetch plan');
-      }
-    }
-  };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -117,14 +93,10 @@ export default function MyAccount() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-2 max-w-xs">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User size={16} />
             {t('myAccount.profile', 'Profile')}
-          </TabsTrigger>
-          <TabsTrigger value="plan" className="flex items-center gap-2">
-            <Package size={16} />
-            {t('myAccount.plan', 'Plan')}
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield size={16} />
@@ -192,85 +164,6 @@ export default function MyAccount() {
                   </Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Plan Tab */}
-        <TabsContent value="plan" className="mt-6 space-y-4">
-          {/* Current Plan */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t('myAccount.currentPlan', 'Current Plan')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {plan ? (
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-                      <Badge className="bg-emerald-100 text-emerald-700">
-                        {t('myAccount.active', 'Active')}
-                      </Badge>
-                    </div>
-                    <p className="text-slate-500 mt-1">{plan.description}</p>
-                    
-                    {/* Plan Features */}
-                    {plan.features && (
-                      <div className="mt-4 space-y-2">
-                        {plan.features.slice(0, 4).map((feature, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                            <Check size={16} className="text-emerald-500" />
-                            {feature}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {plan.price && (
-                    <div className="text-right">
-                      <p className="text-3xl font-bold text-slate-900">${plan.price}</p>
-                      <p className="text-sm text-slate-500">{t('myAccount.perMonth', '/month')}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <Package size={40} className="mx-auto text-slate-300 mb-3" />
-                  <p className="text-slate-500">{t('myAccount.noPlan', 'No subscription plan assigned')}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Billing Quick Links */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t('myAccount.billing', 'Billing')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-[#A2182C]/30 hover:bg-slate-50 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <CreditCard size={20} className="text-slate-500" />
-                  <div>
-                    <p className="font-medium text-slate-900">{t('myAccount.paymentMethod', 'Payment Method')}</p>
-                    <p className="text-sm text-slate-500">{t('myAccount.paymentMethodDesc', 'Manage your payment details')}</p>
-                  </div>
-                </div>
-                <ChevronRight size={20} className="text-slate-400" />
-              </button>
-              
-              <button className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-[#A2182C]/30 hover:bg-slate-50 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <ExternalLink size={20} className="text-slate-500" />
-                  <div>
-                    <p className="font-medium text-slate-900">{t('myAccount.billingHistory', 'Billing History')}</p>
-                    <p className="text-sm text-slate-500">{t('myAccount.billingHistoryDesc', 'View past invoices')}</p>
-                  </div>
-                </div>
-                <ChevronRight size={20} className="text-slate-400" />
-              </button>
             </CardContent>
           </Card>
         </TabsContent>

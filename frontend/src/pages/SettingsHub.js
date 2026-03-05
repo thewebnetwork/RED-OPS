@@ -7,12 +7,10 @@ import {
   FolderTree, 
   GitBranch, 
   Mail, 
-  Shield, 
   Plug, 
   Palette,
   ChevronRight,
   FileText,
-  Users,
   Languages,
   LayoutDashboard
 } from 'lucide-react';
@@ -33,14 +31,6 @@ const getSettingsModules = (t) => [
     icon: FileText,
     path: '/settings/documentation',
     color: 'bg-slate-100 text-slate-600'
-  },
-  {
-    id: 'pool-picker-rules',
-    name: t('settings.modules.poolPickerRules.name'),
-    description: t('settings.modules.poolPickerRules.description'),
-    icon: Users,
-    path: '/settings/pool-picker-rules',
-    color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'translations',
@@ -81,14 +71,6 @@ const getSettingsModules = (t) => [
     icon: Mail,
     path: '/email-settings',
     color: 'bg-amber-100 text-amber-600'
-  },
-  {
-    id: 'sla-escalation',
-    name: t('settings.modules.slaEscalation.name'),
-    description: t('settings.modules.slaEscalation.description'),
-    icon: Shield,
-    path: '/sla-policies',
-    color: 'bg-rose-100 text-rose-600'
   },
   {
     id: 'integrations',

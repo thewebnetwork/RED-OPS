@@ -37,16 +37,13 @@ import UISettings from "./pages/UISettings";
 import Announcements from "./pages/Announcements";
 import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
-import SLAPolicies from "./pages/SLAPolicies";
 import EmailSettings from "./pages/EmailSettings";
 import DraftEditor from "./pages/DraftEditor";
 import Reports from "./pages/Reports";
 import MyServices from "./pages/MyServices";
 import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
-import SubscriptionPlansAdmin from "./pages/SubscriptionPlansAdmin";
 import MyRequests from "./pages/MyRequests";
 import ReportIssue from "./pages/ReportIssue";
-import RibbonBoard from "./pages/RibbonBoard";
 import IAMPage from "./pages/IAMPage";
 import SettingsHub from "./pages/SettingsHub";
 import DeletedTickets from "./pages/DeletedTickets";
@@ -54,7 +51,6 @@ import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
 import VerifyOTP from "./pages/VerifyOTP";
 import DocumentationPage from "./pages/DocumentationPage";
-import PoolPickerRulesPage from "./pages/PoolPickerRulesPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
 import DashboardBuilder from "./pages/DashboardBuilder";
 import TaskBoard from "./pages/TaskBoard";
@@ -428,14 +424,6 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/subscription-plans" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <SubscriptionPlansAdmin />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
         path="/settings" 
         element={
           <PrivateRoute roles={["Administrator"]}>
@@ -484,14 +472,6 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/sla-policies" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <SLAPolicies />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
         path="/deleted-tickets" 
         element={
           <PrivateRoute roles={["Administrator"]}>
@@ -504,14 +484,6 @@ function AppRoutes() {
         element={
           <PrivateRoute roles={["Administrator"]}>
             <DocumentationPage />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/settings/pool-picker-rules" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <PoolPickerRulesPage />
           </PrivateRoute>
         } 
       />
@@ -530,14 +502,6 @@ function AppRoutes() {
             <DashboardBuilder />
           </PrivateRoute>
         } 
-      />
-      <Route 
-        path="/sla" 
-        element={<Navigate to="/sla-policies" />}
-      />
-      <Route 
-        path="/escalation" 
-        element={<Navigate to="/sla-policies" />}
       />
       <Route 
         path="/profile" 

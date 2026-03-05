@@ -118,7 +118,7 @@ export default function Layout({ children }) {
     }
     
     // Operator routes
-    if (['/queue', '/pool', '/all-requests'].some(p => path.startsWith(p))) {
+    if (['/queue', '/all-requests'].some(p => path.startsWith(p))) {
       return modeConfig.canAccessOperatorConsole ? APP_MODES.OPERATOR_CONSOLE : modeConfig.primaryMode;
     }
     
@@ -164,9 +164,6 @@ export default function Layout({ children }) {
         const items = [
           { path: '/queue', icon: 'Inbox', labelKey: 'nav.myQueue' }
         ];
-        if (modeConfig.canPickFromPools) {
-          items.push({ path: '/pool', icon: 'Layers', labelKey: 'nav.pool' });
-        }
         items.push({ path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' });
         items.push({ path: '/all-requests', icon: 'ClipboardList', labelKey: 'nav.allRequests' });
         items.push({ path: '/reports', icon: 'BarChart3', labelKey: 'nav.reports' });
@@ -190,9 +187,6 @@ export default function Layout({ children }) {
       const items = [
         { path: '/queue', icon: 'Inbox', labelKey: 'nav.myQueue' }
       ];
-      if (modeConfig.canPickFromPools) {
-        items.push({ path: '/pool', icon: 'Layers', labelKey: 'nav.pool' });
-      }
       items.push({ path: '/tasks', icon: 'CheckSquare', labelKey: 'nav.tasks' });
       if (modeConfig.isInternalStaff) {
         items.push({ path: '/all-requests', icon: 'ClipboardList', labelKey: 'nav.allRequests' });
