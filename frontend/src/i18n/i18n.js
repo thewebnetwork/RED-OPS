@@ -14,8 +14,10 @@ const resources = {
 // Get saved language or default to English
 const savedLanguage = localStorage.getItem('language') || 'en';
 
-// Check if we're in development/test mode
-const isDev = process.env.NODE_ENV === 'development' || process.env.REACT_APP_SHOW_MISSING_KEYS === 'true';
+// Show [MISSING: ...] only on localhost or when explicitly forced via env var
+const isLocalhost = typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const showMissingKeys = isLocalhost || process.env.REACT_APP_SHOW_MISSING_KEYS === 'true';
 
 i18n
   .use(initReactI18next)
@@ -26,19 +28,19 @@ i18n
     interpolation: {
       escapeValue: false
     },
-    // Show missing keys in dev/UAT builds
-    saveMissing: isDev,
+    saveMissing: showMissingKeys,
     missingKeyHandler: (lngs, ns, key, fallbackValue) => {
-      if (isDev) {
+      if (showMissingKeys) {
         console.warn(`[MISSING_I18N] Key: "${key}" not found in namespace "${ns}"`);
       }
     },
-    // Return key wrapped in brackets when missing (for visual detection)
+    // In local dev: show [MISSING: key] for easy detection
+    // In preview/production: return empty string so UI degrades silently
     parseMissingKeyHandler: (key) => {
-      if (isDev) {
+      if (showMissingKeys) {
         return `[MISSING: ${key}]`;
       }
-      return key;
+      return '';
     }
   });
 
