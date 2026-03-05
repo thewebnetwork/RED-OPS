@@ -102,8 +102,9 @@ export default function CommandCenter() {
   // Helper to get translated category name
   const getCatName = (cat) => getTranslatedCategoryName(cat, i18n.language);
   
-  // Determine if user is a client (should see simplified service picker)
-  const isClient = user?.account_type === 'Media Client' || user?.role === 'Standard User';
+  // Determine if user is a Media Client (should see simplified service picker)
+  // Only check account_type, NOT role - role=Standard User can apply to internal staff too
+  const isMediaClient = user?.account_type === 'Media Client';
 
   // Form state
   const [selectedL1, setSelectedL1] = useState('');
@@ -344,9 +345,9 @@ export default function CommandCenter() {
                   </div>
 
                   {/* Dynamic Form Based on Category */}
-                  {/* For clients: show form when service (L1) is selected */}
-                  {/* For admins: show form when L2 subcategory is selected */}
-                  {(isClient ? selectedL1 : selectedL2) && (
+                  {/* For Media Clients: show form when service (L1) is selected */}
+                  {/* For admins/operators: show form when L2 subcategory is selected */}
+                  {(isMediaClient ? selectedL1 : selectedL2) && (
                     <div className="pt-4 border-t border-slate-100">
                       {showEditingForm && (
                         <EditingRequestForm 
@@ -361,7 +362,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.editingSubmitted'));
                           }}
@@ -371,7 +372,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -390,7 +391,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.featureSubmitted'));
                           }}
@@ -400,7 +401,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -420,7 +421,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.bugSubmitted'));
                           }}
@@ -430,7 +431,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -451,7 +452,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.requestSubmitted'));
                           }}
@@ -461,7 +462,7 @@ export default function CommandCenter() {
                             setAttachments([]);
                             setSelectedL1('');
                             setSelectedL2('');
-                            if (isClient) setSelectedService(''); // Clear client service selection
+                            if (isMediaClient) setSelectedService(''); // Clear client service selection
                             fetchData();
                             toast.success(t('formSuccess.draftSaved'));
                           }}
@@ -470,8 +471,8 @@ export default function CommandCenter() {
                     </div>
                   )}
 
-                  {/* Empty state - only show for non-clients or when no category selected */}
-                  {!(isClient ? selectedL1 : selectedL2) && (
+                  {/* Empty state - only show for non-Media Clients or when no category selected */}
+                  {!(isMediaClient ? selectedL1 : selectedL2) && (
                     <div className="p-8 text-center text-slate-500 bg-slate-50 rounded-lg">
                       <FileText size={48} className="mx-auto text-slate-300 mb-3" />
                       <p>{t('commandCenter.selectCategoryToContinue')}</p>
@@ -490,8 +491,8 @@ export default function CommandCenter() {
                 
                 {/* Categorization Section - Conditional based on user type */}
                 <CardContent className="p-4 space-y-4">
-                  {isClient ? (
-                    /* CLIENT VIEW: Simple service picker */
+                  {isMediaClient ? (
+                    /* MEDIA CLIENT VIEW: Simple service picker */
                     <div>
                       <Label className="text-xs text-slate-500">{t('catalog.title', 'Select a Service')}</Label>
                       <Select 
