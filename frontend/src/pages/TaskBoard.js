@@ -168,7 +168,7 @@ function TaskCard({ task, onEdit, canEdit, dragListeners, isClientUser, isOverla
           </div>
         </div>
 
-        {canEdit && !isClient && onEdit && (
+        {canEdit && !isClientUser && onEdit && (
           <button
             onClick={() => onEdit(task)}
             className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-slate-600 shrink-0"

@@ -13,6 +13,14 @@
 - **No pool/routing concepts** in task system
 - Tasks support optional request linking, assignment to internal or client users
 
+### Task Board MVP - Frontend Kanban Board (COMPLETED - March 2026)
+- **TaskBoard.js** (`frontend/src/pages/TaskBoard.js`): Drag-and-drop Kanban with 6 columns using @dnd-kit
+- **Admin controls**: New Task button, edit/assign tasks, assignee filter, column-level add buttons, search
+- **Client view**: Simplified — no create/edit/assign controls, only status update via drag
+- **Navigation**: "Tasks" nav item in all modes (Client Portal, Operator Console, Admin Studio)
+- **i18n**: nav.tasks key added in EN/ES/PT
+- **All frontend tests passed** (see `/app/test_reports/iteration_55.json`)
+
 ### Phase 1: MVP Blocker Fixes (COMPLETED)
 - Backend RBAC alignment (Administrator/Operator/Standard User)
 - Frontend mode enforcement via PrivateRoute
@@ -131,9 +139,6 @@ All 6 UAT-critical pages now fully translated:
 - Frontend: React + Tailwind + Shadcn/UI + react-i18next
 - Backend: FastAPI + MongoDB
 - Auth: JWT-based with OTP support
-
-## Upcoming Tasks (P0)
-1. **Task Board Frontend**: Kanban board at `/tasks` with drag-and-drop (react-beautiful-dnd), task creation/assignment UI, role-based filtering
 
 ## Upcoming Tasks (P1)
 1. Advanced analytics for API key usage with charts
