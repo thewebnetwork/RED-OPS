@@ -18,7 +18,7 @@ import requests
 import os
 import io
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://i18n-fix-10.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://i18n-fix-11.preview.emergentagent.com')
 
 # Test credentials
 ADMIN_EMAIL = "admin@redribbonops.com"
