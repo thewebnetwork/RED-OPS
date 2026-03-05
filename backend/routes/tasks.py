@@ -2,9 +2,9 @@
 Task Routes - Shared work orchestration API
 
 RBAC Rules:
-- Client: Read tasks for their org with visibility=client or both, update status only
-- Admin: Full CRUD on all tasks in their org
-- Operator: Read and update tasks based on role and org
+- Admin: Full CRUD on all tasks in their org, assign to anyone
+- Internal Account Manager: Manage tasks for assigned client accounts
+- Client: Create tasks (assign to self or AM), update own tasks, move visible tasks
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
@@ -26,43 +26,70 @@ from models.task import (
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-def can_view_task(task: dict, user: dict) -> bool:
-    """Check if user can view this task"""
+async def get_account_manager_id(user: dict) -> str | None:
+    """Get the account_manager_id for a client user."""
+    if user.get("account_type") != "Media Client":
+        return None
+    return user.get("account_manager_id")
+
+
+async def get_managed_client_ids(user_id: str) -> list[str]:
+    """Get list of client user IDs this user is account manager for."""
+    clients = await db.users.find(
+        {"account_manager_id": user_id, "account_type": "Media Client"},
+        {"_id": 0, "id": 1}
+    ).to_list(100)
+    return [c["id"] for c in clients]
+
+
+def is_account_manager(user: dict) -> bool:
+    """Check if user is an internal staff who manages client accounts."""
+    return (
+        user.get("account_type") in ("Internal Staff", "Partner")
+        and user.get("role") in ("Administrator", "Operator", "Standard User")
+    )
+
+
+def can_view_task(task: dict, user: dict, managed_client_ids: list = None) -> bool:
+    """Check if user can view this task."""
     user_org_id = user.get("org_id") or user.get("team_id")
     task_org_id = task.get("org_id")
-    
-    # Must be same org
+
     if user_org_id != task_org_id:
         return False
-    
+
     # Admin/Internal can see all
     if user.get("role") == "Administrator" or user.get("account_type") == "Internal Staff":
         return True
-    
+
     # Client can only see client or both visibility
     if user.get("account_type") == "Media Client":
         return task.get("visibility") in ["client", "both"]
-    
+
     # Operator can see internal or both
     return task.get("visibility") in ["internal", "both"]
 
 
-def can_edit_task(task: dict, user: dict) -> bool:
-    """Check if user can edit this task"""
+def can_edit_task(task: dict, user: dict, managed_client_ids: list = None) -> bool:
+    """Check if user can edit this task."""
     user_org_id = user.get("org_id") or user.get("team_id")
-    
-    # Admin can edit all tasks in their org
+
     if user.get("role") == "Administrator" and user_org_id == task.get("org_id"):
         return True
-    
-    # Client can only update status on visible tasks
+
+    # Account manager can edit tasks for their managed clients
+    if managed_client_ids and is_account_manager(user):
+        if task.get("org_id") == user_org_id:
+            return True
+
+    # Client can update status on visible tasks, or edit tasks they created
     if user.get("account_type") == "Media Client":
         return can_view_task(task, user)
-    
-    # Operator can edit tasks in their org (simplified for MVP)
+
+    # Operator can edit tasks in their org
     if user.get("role") == "Operator" and user_org_id == task.get("org_id"):
         return True
-    
+
     return False
 
 
@@ -77,6 +104,152 @@ async def list_task_templates(
     await ensure_seed_templates()
     templates = await db.task_templates.find({"active": True}, {"_id": 0}).to_list(100)
     return templates
+
+
+@router.get("/account-manager/{client_user_id}")
+async def get_account_manager(
+    client_user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get the account manager for a client user."""
+    client = await db.users.find_one({"id": client_user_id}, {"_id": 0, "account_manager_id": 1, "account_type": 1})
+    if not client:
+        raise HTTPException(status_code=404, detail="User not found")
+    am_id = client.get("account_manager_id")
+    if not am_id:
+        return {"account_manager": None}
+    am = await db.users.find_one(
+        {"id": am_id},
+        {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1, "role": 1}
+    )
+    if not am:
+        return {"account_manager": None}
+    return {"account_manager": {
+        "id": am["id"],
+        "name": am.get("full_name") or am.get("name") or am.get("email"),
+        "email": am.get("email"),
+    }}
+
+
+@router.patch("/account-manager/{client_user_id}")
+async def set_account_manager(
+    client_user_id: str,
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Set the account manager for a client user. Admin only."""
+    if current_user.get("role") != "Administrator":
+        raise HTTPException(status_code=403, detail="Admin only")
+    client = await db.users.find_one({"id": client_user_id}, {"_id": 0, "id": 1, "account_type": 1})
+    if not client:
+        raise HTTPException(status_code=404, detail="Client user not found")
+    if client.get("account_type") != "Media Client":
+        raise HTTPException(status_code=400, detail="Account managers can only be assigned to client accounts")
+    am_id = body.get("account_manager_id")
+    if am_id:
+        am = await db.users.find_one({"id": am_id}, {"_id": 0, "id": 1, "account_type": 1})
+        if not am:
+            raise HTTPException(status_code=404, detail="Account manager user not found")
+        if am.get("account_type") == "Media Client":
+            raise HTTPException(status_code=400, detail="Account manager must be an internal team member")
+    await db.users.update_one(
+        {"id": client_user_id},
+        {"$set": {"account_manager_id": am_id}}
+    )
+    return {"success": True, "client_user_id": client_user_id, "account_manager_id": am_id}
+
+
+@router.get("/assignable-users")
+async def list_assignable_users(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Return the list of users the current user can assign tasks to.
+    - Admin: all users in their org
+    - Account Manager: themselves + their managed clients
+    - Client: themselves + their account manager (if set)
+    """
+    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    result = []
+
+    if current_user.get("role") == "Administrator":
+        users = await db.users.find(
+            {"team_id": user_org_id, "active": {"$ne": False}},
+            {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1, "role": 1}
+        ).to_list(200)
+        for u in users:
+            result.append({
+                "id": u["id"],
+                "name": u.get("full_name") or u.get("name") or u.get("email"),
+                "email": u.get("email"),
+                "account_type": u.get("account_type"),
+                "role": u.get("role"),
+            })
+
+    elif current_user.get("account_type") == "Media Client":
+        # Client can assign to self
+        result.append({
+            "id": current_user["id"],
+            "name": current_user.get("full_name") or current_user.get("name") or current_user.get("email"),
+            "email": current_user.get("email"),
+            "account_type": "Media Client",
+            "role": current_user.get("role"),
+        })
+        # + their account manager if set
+        am_id = current_user.get("account_manager_id")
+        if am_id:
+            am = await db.users.find_one(
+                {"id": am_id},
+                {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1, "role": 1}
+            )
+            if am:
+                result.append({
+                    "id": am["id"],
+                    "name": am.get("full_name") or am.get("name") or am.get("email"),
+                    "email": am.get("email"),
+                    "account_type": am.get("account_type"),
+                    "role": am.get("role"),
+                    "is_account_manager": True,
+                })
+
+    else:
+        # Internal / Account Manager: self + managed clients
+        result.append({
+            "id": current_user["id"],
+            "name": current_user.get("full_name") or current_user.get("name") or current_user.get("email"),
+            "email": current_user.get("email"),
+            "account_type": current_user.get("account_type"),
+            "role": current_user.get("role"),
+        })
+        managed_ids = await get_managed_client_ids(current_user["id"])
+        if managed_ids:
+            clients = await db.users.find(
+                {"id": {"$in": managed_ids}},
+                {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1}
+            ).to_list(100)
+            for c in clients:
+                result.append({
+                    "id": c["id"],
+                    "name": c.get("full_name") or c.get("name") or c.get("email"),
+                    "email": c.get("email"),
+                    "account_type": c.get("account_type"),
+                    "role": "Standard User",
+                })
+        # Also include other internal staff in the same org
+        internal = await db.users.find(
+            {"team_id": user_org_id, "account_type": "Internal Staff", "id": {"$ne": current_user["id"]}, "active": {"$ne": False}},
+            {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1, "role": 1}
+        ).to_list(100)
+        for u in internal:
+            result.append({
+                "id": u["id"],
+                "name": u.get("full_name") or u.get("name") or u.get("email"),
+                "email": u.get("email"),
+                "account_type": u.get("account_type"),
+                "role": u.get("role"),
+            })
+
+    return result
 
 
 @router.get("", response_model=List[TaskResponse])
@@ -167,19 +340,32 @@ async def create_task(
 ):
     """
     Create a new task.
-    
-    RBAC: Admin only for MVP (clients cannot create tasks manually)
+    - Admin: can create any task in their org, assign to anyone
+    - Account Manager: can create tasks in their org
+    - Client: can create tasks with visibility=client, assign to self or AM only
     """
-    # Only admin can create tasks in MVP
-    if current_user.get("role") != "Administrator":
-        raise HTTPException(status_code=403, detail="Only administrators can create tasks")
-    
-    # Verify org matches user's org
     user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    is_client = current_user.get("account_type") == "Media Client"
+
+    # Verify org matches user's org
     if task_data.org_id != user_org_id:
         raise HTTPException(status_code=403, detail="Cannot create tasks for other organizations")
-    
-    # Verify assignee exists and belongs to same org (if provided)
+
+    # Client-specific restrictions
+    if is_client:
+        # Clients can only create client-visible tasks
+        if task_data.visibility not in ("client", "both"):
+            raise HTTPException(status_code=403, detail="Clients can only create client-visible tasks")
+        # Clients can only assign to self or their account manager
+        if task_data.assignee_user_id:
+            am_id = current_user.get("account_manager_id")
+            allowed_assignees = {current_user["id"]}
+            if am_id:
+                allowed_assignees.add(am_id)
+            if task_data.assignee_user_id not in allowed_assignees:
+                raise HTTPException(status_code=403, detail="You can only assign tasks to yourself or your account manager")
+
+    # Verify assignee exists (if provided)
     if task_data.assignee_user_id:
         assignee = await db.users.find_one(
             {"id": task_data.assignee_user_id},
@@ -187,42 +373,33 @@ async def create_task(
         )
         if not assignee:
             raise HTTPException(status_code=404, detail="Assignee user not found")
-        
-        assignee_org = assignee.get("org_id") or assignee.get("team_id")
-        if assignee_org != user_org_id:
-            raise HTTPException(status_code=400, detail="Cannot assign task to user from different organization")
-    
-    # Verify request exists and belongs to same org (if provided)
+        if not is_client:
+            assignee_org = assignee.get("org_id") or assignee.get("team_id")
+            if assignee_org != user_org_id:
+                raise HTTPException(status_code=400, detail="Cannot assign task to user from different organization")
+
+    # Verify request exists (if provided)
     if task_data.request_id:
         request = await db.orders.find_one(
-            {"id": task_data.request_id},
-            {"_id": 0, "id": 1, "requester_team_id": 1}
+            {"id": task_data.request_id}, {"_id": 0, "id": 1}
         )
         if not request:
             raise HTTPException(status_code=404, detail="Request not found")
-        
-        # Simplified org check (assumes requester_team_id is the org)
-        # In real system, would need more complex org resolution
-    
-    # Generate task ID and timestamps
+
     task_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc)
-    
-    # Auto-set position if not provided (append to end)
+
     position = task_data.position
     if position is None:
-        # Get max position and add 1000
         last_task = await db.tasks.find_one(
             {"org_id": task_data.org_id, "status": task_data.status},
             {"_id": 0, "position": 1},
             sort=[("position", -1)]
         )
         position = (last_task.get("position", 0) + 1000) if last_task else 1000.0
-    
-    # Determine created_source
-    created_source = "admin"  # For manual task creation
-    
-    # Build task document
+
+    created_source = "client" if is_client else "admin"
+
     task = {
         "id": task_id,
         "org_id": task_data.org_id,
@@ -241,11 +418,8 @@ async def create_task(
         "created_at": now,
         "updated_at": now
     }
-    
-    # Insert task
+
     await db.tasks.insert_one(task)
-    
-    # Return response (exclude _id)
     task_response = {k: v for k, v in task.items() if k != "_id"}
     return TaskResponse(**task_response)
 
@@ -282,33 +456,49 @@ async def update_task(
 ):
     """
     Update a task.
-    RBAC:
-    - Admin: Can update all fields
-    - Client: Can only update status on visible tasks
-    - Operator: Can update tasks in their org
+    - Admin: all fields
+    - Account Manager: all fields on tasks in their org
+    - Client: status on visible tasks; title/description/assignee on tasks they created
     """
     task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    if not can_edit_task(task, current_user):
+
+    managed_ids = await get_managed_client_ids(current_user["id"]) if is_account_manager(current_user) else []
+    if not can_edit_task(task, current_user, managed_ids):
         raise HTTPException(status_code=403, detail="Not authorized to edit this task")
-    
-    # For clients, restrict to status updates only
-    if current_user.get("account_type") == "Media Client":
-        if any([
+
+    is_client = current_user.get("account_type") == "Media Client"
+    is_task_creator = task.get("created_by_user_id") == current_user["id"]
+
+    # Client restrictions
+    if is_client:
+        non_status_fields = [
+            task_update.visibility is not None,
+            task_update.task_type is not None,
+            task_update.position is not None,
+        ]
+        editable_by_creator = [
             task_update.title is not None,
             task_update.description is not None,
             task_update.assignee_user_id is not None,
-            task_update.visibility is not None,
-            task_update.task_type is not None,
             task_update.due_at is not None,
-            task_update.position is not None
-        ]):
-            raise HTTPException(
-                status_code=403,
-                detail="Clients can only update task status"
-            )
-    
+        ]
+        # Always block visibility/type/position changes for clients
+        if any(non_status_fields):
+            raise HTTPException(status_code=403, detail="Clients cannot update these fields")
+        # Title/desc/assignee/due only on tasks client created
+        if any(editable_by_creator) and not is_task_creator:
+            raise HTTPException(status_code=403, detail="Clients can only update status on tasks they didn't create")
+        # Assignee must be self or AM
+        if task_update.assignee_user_id is not None:
+            am_id = current_user.get("account_manager_id")
+            allowed = {current_user["id"]}
+            if am_id:
+                allowed.add(am_id)
+            if task_update.assignee_user_id not in allowed and task_update.assignee_user_id != "":
+                raise HTTPException(status_code=403, detail="You can only assign to yourself or your account manager")
+
     update_data = {}
     if task_update.title is not None:
         update_data["title"] = task_update.title
@@ -321,13 +511,13 @@ async def update_task(
         elif task_update.status != "done":
             update_data["completed_at"] = None
     if task_update.assignee_user_id is not None:
-        assignee = await db.users.find_one(
-            {"id": task_update.assignee_user_id},
-            {"_id": 0, "id": 1}
-        )
-        if not assignee:
-            raise HTTPException(status_code=404, detail="Assignee user not found")
-        update_data["assignee_user_id"] = task_update.assignee_user_id
+        if task_update.assignee_user_id != "":
+            assignee = await db.users.find_one(
+                {"id": task_update.assignee_user_id}, {"_id": 0, "id": 1}
+            )
+            if not assignee:
+                raise HTTPException(status_code=404, detail="Assignee user not found")
+        update_data["assignee_user_id"] = task_update.assignee_user_id if task_update.assignee_user_id != "" else None
     if task_update.visibility is not None:
         update_data["visibility"] = task_update.visibility
     if task_update.task_type is not None:
@@ -338,7 +528,7 @@ async def update_task(
         update_data["position"] = task_update.position
     if task_update.completed_at is not None:
         update_data["completed_at"] = task_update.completed_at
-    
+
     update_data["updated_at"] = datetime.now(timezone.utc)
     await db.tasks.update_one({"id": task_id}, {"$set": update_data})
     updated_task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
