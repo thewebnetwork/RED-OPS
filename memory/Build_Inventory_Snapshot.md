@@ -2,7 +2,7 @@
 ## UAT Testing Reference (December 2025)
 
 **Platform Name:** Red Ops
-**Preview URL:** https://i18n-fix-11.preview.emergentagent.com
+**Preview URL:** https://account-manager-ops.preview.emergentagent.com
 **Version:** 4.0
 **Generated:** December 2025
 

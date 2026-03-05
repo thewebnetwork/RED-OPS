@@ -21,7 +21,7 @@ from datetime import datetime
 # API URL from environment
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://i18n-fix-11.preview.emergentagent.com"
+    BASE_URL = "https://account-manager-ops.preview.emergentagent.com"
 
 # Test credentials
 ADMIN_EMAIL = "admin@redribbonops.com"
