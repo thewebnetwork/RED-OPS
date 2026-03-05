@@ -207,6 +207,26 @@ export default function ClientHome() {
         </CardContent>
       </Card>
 
+      {/* Account Manager */}
+      {accountManager && (
+        <Card className="border-l-4 border-l-[#A2182C]" data-testid="account-manager-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-[#A2182C]/10 rounded-full">
+                <User size={22} className="text-[#A2182C]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Your Account Manager</p>
+                <p className="font-semibold text-slate-900 truncate" data-testid="am-name">{accountManager.name}</p>
+                {accountManager.email && (
+                  <p className="text-sm text-slate-500 truncate" data-testid="am-email">{accountManager.email}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link to="/services" className="block">

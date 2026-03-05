@@ -1,5 +1,6 @@
 """
-Seed script for the 9 frozen MVP service templates.
+Seed script for MVP service templates.
+NON-DESTRUCTIVE: upserts by template id. Never drops or deletes.
 Run: python scripts/seed_service_templates.py
 """
 import asyncio
@@ -9,8 +10,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
-DB_NAME = os.environ.get("DB_NAME", "test_database")
+MONGO_URL = os.environ.get("MONGO_URL")
+DB_NAME = os.environ.get("DB_NAME")
 
 TEMPLATES = [
     {
@@ -22,6 +23,10 @@ TEMPLATES = [
         "default_title": "Video Editing - 60s Reels",
         "hidden_category_l1": "Video Production",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "footage_links", "label": "Footage Link(s)", "type": "textarea", "required": True, "placeholder": "Paste Google Drive, Dropbox, or WeTransfer links to your raw footage"},
             {"field": "platform", "label": "Platform", "type": "select", "required": True, "options": ["Instagram Reels", "TikTok", "YouTube Shorts", "Multiple Platforms"]},
@@ -42,7 +47,7 @@ TEMPLATES = [
         "turnaround_text": "3-5 days",
         "deliverable_type": "video",
         "active": True,
-        "sort_order": 1
+        "sort_order": 10
     },
     {
         "id": "story-editing",
@@ -53,6 +58,10 @@ TEMPLATES = [
         "default_title": "Story Editing",
         "hidden_category_l1": "Video Production",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "footage_links", "label": "Footage Link(s)", "type": "textarea", "required": True, "placeholder": "Paste links to your raw footage or clips"},
             {"field": "platform", "label": "Platform", "type": "select", "required": True, "options": ["Instagram Stories", "Facebook Stories", "TikTok Stories", "Multiple"]},
@@ -73,48 +82,60 @@ TEMPLATES = [
         "turnaround_text": "1-2 days",
         "deliverable_type": "video",
         "active": True,
-        "sort_order": 2
+        "sort_order": 11
     },
     {
         "id": "long-form-video",
         "name": "Long Form Video Editing",
-        "description": "Complete video editing for longer content — promos, brand videos, and presentations",
+        "description": "Full-length video editing for YouTube, promos, brand videos, and presentations",
         "client_visible": True,
         "icon": "video",
         "default_title": "Long Form Video Editing",
         "hidden_category_l1": "Video Production",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "footage_links", "label": "Footage Link(s)", "type": "textarea", "required": True, "placeholder": "Paste Google Drive, Dropbox, or WeTransfer links"},
-            {"field": "video_length", "label": "Target Video Length", "type": "select", "required": True, "options": ["2-5 minutes", "5-10 minutes", "10-15 minutes", "Other"]},
-            {"field": "purpose", "label": "Video Purpose", "type": "textarea", "required": True, "placeholder": "What is this video for? (e.g., brand promo, training, event recap)"},
+            {"field": "platform", "label": "Platform", "type": "select", "required": True, "options": ["YouTube", "Instagram", "TikTok", "Other"]},
+            {"field": "target_length", "label": "Target Length", "type": "select", "required": True, "options": ["15-30 minutes", "30-60 minutes", "60+ minutes"]},
+            {"field": "purpose", "label": "Video Purpose", "type": "textarea", "required": True, "placeholder": "What is this video for? (e.g., brand promo, training, event recap, YouTube episode)"},
+            {"field": "youtube_title_topic", "label": "Title / Topic", "type": "text", "required": False, "placeholder": "Video title or main topic"},
             {"field": "reference_links", "label": "Reference Links", "type": "textarea", "required": False, "placeholder": "Links to example videos or style references"},
             {"field": "captions", "label": "Captions", "type": "select", "required": True, "options": ["Yes", "No"], "default_value": "Yes"},
+            {"field": "chapter_markers", "label": "Chapter Markers", "type": "select", "required": False, "options": ["Yes", "No"], "default_value": "No"},
+            {"field": "thumbnail_needed", "label": "Thumbnail Needed", "type": "select", "required": False, "options": ["Yes", "No"], "default_value": "No"},
             {"field": "music_preference", "label": "Music / Audio Direction", "type": "textarea", "required": False, "placeholder": "Music style, voiceover needs, specific tracks..."},
             {"field": "priority", "label": "Priority", "type": "select", "required": True, "options": ["Low", "Normal", "High", "Urgent"], "default_value": "Normal"},
             {"field": "deadline", "label": "Deadline", "type": "date", "required": False},
             {"field": "special_notes", "label": "Special Notes", "type": "textarea", "required": False, "placeholder": "Intro/outro requirements, color grading preferences, etc."}
         ],
-        "required_fields": ["footage_links", "video_length", "purpose", "captions", "priority"],
+        "required_fields": ["footage_links", "platform", "target_length", "purpose", "captions", "priority"],
         "default_task_templates": [
             {"title": "Review footage and brief", "assignee_type": "internal", "visibility": "internal", "default_status": "todo"},
             {"title": "Assembly cut", "assignee_type": "internal", "visibility": "internal", "default_status": "backlog"},
             {"title": "Review first cut", "assignee_type": "client", "visibility": "client", "default_status": "backlog"}
         ],
-        "turnaround_text": "5-7 days",
+        "turnaround_text": "5-10 days",
         "deliverable_type": "video",
         "active": True,
-        "sort_order": 3
+        "sort_order": 12
     },
     {
         "id": "youtube-long-form",
         "name": "YouTube Long Form Editing 15 to 30 Minutes",
         "description": "Complete YouTube video editing with intro, outro, b-roll, transitions, chapters, and retention optimization",
-        "client_visible": True,
+        "client_visible": False,
         "icon": "video",
         "default_title": "YouTube Long Form Editing",
         "hidden_category_l1": "Video Production",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "footage_links", "label": "Footage Link(s)", "type": "textarea", "required": True, "placeholder": "Paste Google Drive, Dropbox, or WeTransfer links to all footage"},
             {"field": "video_length_target", "label": "Video Length Target", "type": "select", "required": True, "options": ["15-20 minutes", "20-25 minutes", "25-30 minutes"]},
@@ -140,7 +161,7 @@ TEMPLATES = [
         "turnaround_text": "7-10 days",
         "deliverable_type": "video",
         "active": True,
-        "sort_order": 4
+        "sort_order": 13
     },
     {
         "id": "thumbnail-design",
@@ -151,6 +172,10 @@ TEMPLATES = [
         "default_title": "Thumbnail Design",
         "hidden_category_l1": "Graphic Design",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "platform", "label": "Platform", "type": "select", "required": True, "options": ["YouTube", "Instagram", "Facebook", "LinkedIn", "Other"]},
             {"field": "video_topic", "label": "Video / Content Topic", "type": "text", "required": True, "placeholder": "What is the video or content about?"},
@@ -172,7 +197,7 @@ TEMPLATES = [
         "turnaround_text": "1-2 days",
         "deliverable_type": "image",
         "active": True,
-        "sort_order": 5
+        "sort_order": 14
     },
     {
         "id": "social-media-graphics",
@@ -183,6 +208,10 @@ TEMPLATES = [
         "default_title": "Social Media Graphics",
         "hidden_category_l1": "Graphic Design",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "platforms", "label": "Platforms", "type": "select", "required": True, "options": ["Instagram", "Facebook", "LinkedIn", "Twitter/X", "Multiple Platforms"]},
             {"field": "content_type", "label": "Content Type", "type": "select", "required": True, "options": ["Single Post", "Carousel", "Banner/Cover", "Ad Creative", "Infographic"]},
@@ -203,7 +232,7 @@ TEMPLATES = [
         "turnaround_text": "2-4 days",
         "deliverable_type": "image",
         "active": True,
-        "sort_order": 6
+        "sort_order": 15
     },
     {
         "id": "content-writing",
@@ -214,6 +243,10 @@ TEMPLATES = [
         "default_title": "Content Writing",
         "hidden_category_l1": "Copywriting & Content",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "content_type", "label": "Content Type", "type": "select", "required": True, "options": ["Blog Post", "Social Media Captions", "Video Script", "Website Copy", "Email Copy", "Ad Copy", "Other"]},
             {"field": "topic", "label": "Topic / Subject", "type": "textarea", "required": True, "placeholder": "What should the content be about?"},
@@ -235,7 +268,7 @@ TEMPLATES = [
         "turnaround_text": "2-3 days",
         "deliverable_type": "document",
         "active": True,
-        "sort_order": 7
+        "sort_order": 16
     },
     {
         "id": "email-campaigns",
@@ -246,6 +279,10 @@ TEMPLATES = [
         "default_title": "Email Campaign Support",
         "hidden_category_l1": "Email Marketing",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "campaign_type", "label": "Campaign Type", "type": "select", "required": True, "options": ["Newsletter", "Promotional", "Welcome Sequence", "Product Launch", "Re-engagement", "Other"]},
             {"field": "goal", "label": "Campaign Goal", "type": "textarea", "required": True, "placeholder": "What is the goal of this email campaign?"},
@@ -268,7 +305,7 @@ TEMPLATES = [
         "turnaround_text": "2-3 days",
         "deliverable_type": "document",
         "active": True,
-        "sort_order": 8
+        "sort_order": 17
     },
     {
         "id": "website-updates",
@@ -279,6 +316,10 @@ TEMPLATES = [
         "default_title": "Website Update",
         "hidden_category_l1": "CRM & Automations",
         "hidden_category_l2": None,
+        "offer_track": "ONE_OFF",
+        "flow_type": None,
+        "cta_url": None,
+        "cta_label": None,
         "form_schema": [
             {"field": "update_type", "label": "Update Type", "type": "select", "required": True, "options": ["Text / Content Change", "Image Replacement", "New Page / Section", "Bug Fix", "Design Tweak", "Other"]},
             {"field": "page_url", "label": "Page URL", "type": "text", "required": True, "placeholder": "https://yoursite.com/page-to-update"},
@@ -301,7 +342,36 @@ TEMPLATES = [
         "turnaround_text": "1-3 days",
         "deliverable_type": "website",
         "active": True,
-        "sort_order": 9
+        "sort_order": 18
+    },
+    {
+        "id": "rrm-strategy-call",
+        "name": "Red Ribbon Media Strategy Call",
+        "description": "Book a strategy call to discuss your DFY appointment system, growth plan, or onboarding",
+        "client_visible": True,
+        "icon": "marketing",
+        "default_title": "Strategy Call Request",
+        "hidden_category_l1": "Strategy",
+        "hidden_category_l2": None,
+        "offer_track": "DFY_CORE",
+        "flow_type": "BOOK_CALL",
+        "cta_url": "https://media.redribbongroup.ca/training",
+        "cta_label": "Book a Call",
+        "form_schema": [
+            {"field": "call_topic", "label": "What do you want to discuss?", "type": "select", "required": True, "options": ["DFY Appointment System Setup", "Growth Strategy", "Onboarding Help", "Campaign Review", "Other"]},
+            {"field": "brief_description", "label": "Brief Description", "type": "textarea", "required": True, "placeholder": "Give us a short summary so we can prepare for the call"},
+            {"field": "preferred_time", "label": "Preferred Time (optional)", "type": "text", "required": False, "placeholder": "e.g., Mornings EST, Wednesday afternoon"},
+            {"field": "priority", "label": "Priority", "type": "select", "required": True, "options": ["Low", "Normal", "High", "Urgent"], "default_value": "Normal"}
+        ],
+        "required_fields": ["call_topic", "brief_description", "priority"],
+        "default_task_templates": [
+            {"title": "Prepare for strategy call", "assignee_type": "internal", "visibility": "internal", "default_status": "todo"},
+            {"title": "Follow up after call", "assignee_type": "internal", "visibility": "internal", "default_status": "backlog"}
+        ],
+        "turnaround_text": "1-2 days",
+        "deliverable_type": "meeting",
+        "active": True,
+        "sort_order": 1
     }
 ]
 
@@ -311,16 +381,15 @@ async def seed():
     db = client[DB_NAME]
 
     for template in TEMPLATES:
-        existing = await db.service_templates.find_one({"id": template["id"]})
-        if existing:
-            # Update existing template
-            await db.service_templates.replace_one({"id": template["id"]}, template)
-            print(f"  Updated: {template['name']}")
-        else:
-            await db.service_templates.insert_one(template)
-            print(f"  Created: {template['name']}")
+        result = await db.service_templates.update_one(
+            {"id": template["id"]},
+            {"$set": template},
+            upsert=True
+        )
+        action = "Updated" if result.matched_count > 0 else "Created"
+        print(f"  {action}: {template['name']} (offer_track={template.get('offer_track')})")
 
-    print(f"\nSeeded {len(TEMPLATES)} service templates.")
+    print(f"\nUpserted {len(TEMPLATES)} service templates (non-destructive).")
     client.close()
 
 

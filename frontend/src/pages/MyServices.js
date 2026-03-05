@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { displayAccountType } from '../utils/displayAccountType';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -82,6 +83,7 @@ export default function MyServices() {
     const colors = {
       'Partner': 'bg-purple-100 text-purple-700',
       'Media Client': 'bg-cyan-100 text-cyan-700',
+      'Client': 'bg-cyan-100 text-cyan-700',
       'Internal Staff': 'bg-orange-100 text-orange-700',
       'Vendor/Freelancer': 'bg-emerald-100 text-emerald-700'
     };
@@ -248,7 +250,7 @@ For support, email support@example.com"
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600">
-                As a <strong>{user.account_type}</strong>, you have access to request services 
+                As a <strong>{displayAccountType(user.account_type)}</strong>, you have access to request services 
                 and manage your work within the platform.
               </p>
               {user.account_type === 'Media Client' && (

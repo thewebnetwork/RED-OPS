@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { displayAccountType } from '../utils/displayAccountType';
 import { useAppMode, APP_MODES } from '../hooks/useAppMode';
 import {
   Home,
@@ -354,7 +355,7 @@ export default function Layout({ children }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-white/60">{user?.account_type || user?.role}</p>
+              <p className="text-xs text-white/60">{displayAccountType(user?.account_type) || user?.role}</p>
             </div>
             <button 
               onClick={handleLogout}
@@ -429,7 +430,7 @@ export default function Layout({ children }) {
               <div className="px-3 py-2 border-b border-slate-100">
                 <p className="font-medium text-sm">{user?.name}</p>
                 <p className="text-xs text-slate-500">{user?.email}</p>
-                <p className="text-xs text-[#A2182C] font-medium mt-1">{user?.account_type || user?.role}</p>
+                <p className="text-xs text-[#A2182C] font-medium mt-1">{displayAccountType(user?.account_type) || user?.role}</p>
               </div>
               <DropdownMenuItem asChild>
                 <Link to="/my-account" className="flex items-center cursor-pointer" data-testid="account-menu-item">

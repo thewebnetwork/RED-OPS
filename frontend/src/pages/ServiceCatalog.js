@@ -7,14 +7,14 @@ import {
   Search,
   Clock,
   ArrowRight,
-  Sparkles,
   FileText,
   Image,
   Video,
   PenTool,
   Megaphone,
   Globe,
-  Package
+  Package,
+  Phone
 } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -32,6 +32,11 @@ const SERVICE_ICONS = {
   'marketing': Megaphone,
   'web': Globe,
   'default': Package
+};
+
+const TRACK_LABELS = {
+  DFY_CORE: 'DFY Core',
+  ONE_OFF: 'One-off Services',
 };
 
 export default function ServiceCatalog() {
@@ -53,7 +58,6 @@ export default function ServiceCatalog() {
       const res = await axios.get(`${API}/service-templates`);
       setTemplates(res.data);
 
-      // Handle preselected service from URL
       if (preselectedService && res.data.length > 0) {
         const match = res.data.find(t => t.id === preselectedService);
         if (match) setSelectedTemplate(match);
@@ -71,6 +75,16 @@ export default function ServiceCatalog() {
     t.description.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Group by offer_track: DFY_CORE first, then ONE_OFF, then untagged
+  const dfyCore = filtered.filter(t => t.offer_track === 'DFY_CORE');
+  const oneOff = filtered.filter(t => t.offer_track === 'ONE_OFF');
+  const other = filtered.filter(t => !t.offer_track || !['DFY_CORE', 'ONE_OFF'].includes(t.offer_track));
+
+  const groups = [];
+  if (dfyCore.length > 0) groups.push({ key: 'DFY_CORE', label: TRACK_LABELS.DFY_CORE, items: dfyCore });
+  if (oneOff.length > 0) groups.push({ key: 'ONE_OFF', label: TRACK_LABELS.ONE_OFF, items: oneOff });
+  if (other.length > 0) groups.push({ key: 'other', label: 'Other Services', items: other });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -79,7 +93,6 @@ export default function ServiceCatalog() {
     );
   }
 
-  // If a service is selected, show the tailored form
   if (selectedTemplate) {
     return (
       <div className="max-w-2xl mx-auto animate-fade-in" data-testid="service-request-page">
@@ -101,9 +114,65 @@ export default function ServiceCatalog() {
     );
   }
 
-  // Service catalog grid
+  const renderServiceCard = (template) => {
+    const IconComponent = SERVICE_ICONS[template.icon] || SERVICE_ICONS.default;
+    const isBookCall = template.flow_type === 'BOOK_CALL';
+
+    return (
+      <Card
+        key={template.id}
+        className="group hover:shadow-lg transition-all duration-300 hover:border-[#A2182C]/30 cursor-pointer relative overflow-hidden"
+        onClick={() => setSelectedTemplate(template)}
+        data-testid={`service-card-${template.id}`}
+      >
+        <CardContent className="p-5">
+          <div className="w-12 h-12 rounded-xl bg-[#A2182C]/10 flex items-center justify-center mb-4 group-hover:bg-[#A2182C] transition-colors">
+            {isBookCall ? (
+              <Phone size={24} className="text-[#A2182C] group-hover:text-white transition-colors" />
+            ) : (
+              <IconComponent size={24} className="text-[#A2182C] group-hover:text-white transition-colors" />
+            )}
+          </div>
+
+          <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-[#A2182C] transition-colors">
+            {template.name}
+          </h3>
+
+          <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+            {template.description}
+          </p>
+
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1 text-slate-400">
+              <Clock size={14} />
+              <span>{template.turnaround_text}</span>
+            </div>
+            {isBookCall ? (
+              <Badge variant="outline" className="text-[#A2182C] border-[#A2182C]/30">
+                Book a Call
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-slate-500">
+                {template.form_schema?.length || 0} fields
+              </Badge>
+            )}
+          </div>
+
+          <Button
+            className="w-full mt-4 bg-[#A2182C] hover:bg-[#8B1526] opacity-0 group-hover:opacity-100 transition-opacity"
+            size="sm"
+            data-testid={`start-request-${template.id}`}
+          >
+            {isBookCall ? 'Get Started' : 'Start Request'}
+            <ArrowRight size={16} className="ml-2" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="service-catalog-page">
+    <div className="space-y-8 animate-fade-in" data-testid="service-catalog-page">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-900">
@@ -128,61 +197,18 @@ export default function ServiceCatalog() {
         </div>
       </div>
 
-      {/* Service Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((template) => {
-          const IconComponent = SERVICE_ICONS[template.icon] || SERVICE_ICONS.default;
-          return (
-            <Card
-              key={template.id}
-              className="group hover:shadow-lg transition-all duration-300 hover:border-[#A2182C]/30 cursor-pointer relative overflow-hidden"
-              onClick={() => setSelectedTemplate(template)}
-              data-testid={`service-card-${template.id}`}
-            >
-              <CardContent className="p-5">
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-[#A2182C]/10 flex items-center justify-center mb-4 group-hover:bg-[#A2182C] transition-colors">
-                  <IconComponent
-                    size={24}
-                    className="text-[#A2182C] group-hover:text-white transition-colors"
-                  />
-                </div>
-
-                {/* Service Name */}
-                <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-[#A2182C] transition-colors">
-                  {template.name}
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm text-slate-500 mb-4 line-clamp-2">
-                  {template.description}
-                </p>
-
-                {/* Meta */}
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1 text-slate-400">
-                    <Clock size={14} />
-                    <span>{template.turnaround_text}</span>
-                  </div>
-                  <Badge variant="outline" className="text-slate-500">
-                    {template.form_schema?.length || 0} fields
-                  </Badge>
-                </div>
-
-                {/* CTA */}
-                <Button
-                  className="w-full mt-4 bg-[#A2182C] hover:bg-[#8B1526] opacity-0 group-hover:opacity-100 transition-opacity"
-                  size="sm"
-                  data-testid={`start-request-${template.id}`}
-                >
-                  Start Request
-                  <ArrowRight size={16} className="ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* Grouped Service Grids */}
+      {groups.map(group => (
+        <div key={group.key} data-testid={`service-group-${group.key}`}>
+          <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${group.key === 'DFY_CORE' ? 'bg-[#A2182C]' : 'bg-slate-400'}`} />
+            {group.label}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {group.items.map(renderServiceCard)}
+          </div>
+        </div>
+      ))}
 
       {/* Empty State */}
       {filtered.length === 0 && (

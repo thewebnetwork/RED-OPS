@@ -47,3 +47,7 @@ class ServiceTemplateResponse(BaseModel):
     deliverable_type: Optional[str] = None
     active: bool = True
     sort_order: int = 0
+    offer_track: Optional[str] = None
+    flow_type: Optional[str] = None
+    cta_url: Optional[str] = None
+    cta_label: Optional[str] = None

@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Send, Upload, X, File, ArrowLeft, Loader2 } from 'lucide-react';
+import { Send, Upload, X, File, ArrowLeft, Loader2, ExternalLink, CheckCircle2 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -31,6 +31,7 @@ export default function ServiceRequestForm({ template, onBack }) {
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [submittedOrderId, setSubmittedOrderId] = useState(null);
   const [formValues, setFormValues] = useState(() => {
     const defaults = {};
     template.form_schema.forEach(field => {
@@ -132,7 +133,13 @@ export default function ServiceRequestForm({ template, onBack }) {
       }
 
       toast.success('Request submitted successfully!');
-      navigate(`/requests/${res.data.id}`);
+
+      // For BOOK_CALL templates, show CTA instead of navigating
+      if (template.flow_type === 'BOOK_CALL') {
+        setSubmittedOrderId(res.data.id);
+      } else {
+        navigate(`/requests/${res.data.id}`);
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to submit request');
     } finally {
@@ -234,6 +241,42 @@ export default function ServiceRequestForm({ template, onBack }) {
   };
 
   return (
+    <>
+      {/* BOOK_CALL post-submit CTA */}
+      {submittedOrderId && template.flow_type === 'BOOK_CALL' && (
+        <div className="text-center py-8 space-y-6" data-testid="book-call-success">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+            <CheckCircle2 size={32} className="text-green-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Request Submitted</h3>
+            <p className="text-slate-500 mt-1">Your request has been logged. Take the next step and book your call.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href={template.cta_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="book-call-cta-btn"
+            >
+              <Button className="bg-[#A2182C] hover:bg-[#8B1526] h-11 px-8 text-base">
+                <ExternalLink size={18} className="mr-2" />
+                {template.cta_label || 'Book a Call'}
+              </Button>
+            </a>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/requests/${submittedOrderId}`)}
+              data-testid="view-request-btn"
+            >
+              View Request
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Regular form (hidden after BOOK_CALL submit) */}
+      {!submittedOrderId && (
     <form onSubmit={handleSubmit} className="space-y-6" data-testid="service-request-form">
       {/* Back + Service Context */}
       <div className="flex items-center gap-3">
@@ -318,5 +361,7 @@ export default function ServiceRequestForm({ template, onBack }) {
         </Button>
       </div>
     </form>
+      )}
+    </>
   );
 }
