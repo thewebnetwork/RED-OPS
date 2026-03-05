@@ -38,6 +38,7 @@ from routes import (
     subscription_plans_router,
     sla_policies_router,
     tasks_router,
+    service_templates_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -183,6 +184,7 @@ app.include_router(documentation_router, prefix="/api")
 app.include_router(dashboard_v2_router, prefix="/api")
 app.include_router(dashboard_builder_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")  # MVP Task Board
+app.include_router(service_templates_router, prefix="/api")  # Service Templates
 
 
 @app.get("/")

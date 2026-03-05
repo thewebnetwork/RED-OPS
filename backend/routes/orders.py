@@ -55,6 +55,10 @@ class OrderCreate(BaseModel):
     delivery_format: Optional[str] = None
     special_instructions: Optional[str] = None
     is_draft: bool = False  # If true, save as Draft instead of Open
+    # Service template fields (P0 MVP)
+    service_template_id: Optional[str] = None
+    service_name: Optional[str] = None
+    service_fields: Optional[dict] = None  # Structured per-service form data
 
 
 class OrderResponse(BaseModel):
@@ -106,6 +110,10 @@ class OrderResponse(BaseModel):
     routing_specialty_id: Optional[str] = None
     routing_specialty_name: Optional[str] = None
     pool1_expires_at: Optional[str] = None
+    # Service template fields
+    service_template_id: Optional[str] = None
+    service_name: Optional[str] = None
+    service_fields: Optional[dict] = None
 
 
 class CloseOrderRequest(BaseModel):
@@ -446,13 +454,35 @@ async def create_order(
     sla_deadline = None if is_draft else calculate_sla_deadline(created_at)
     initial_status = "Draft" if is_draft else "Open"
     
-    # Get category names
+    # Get category names - resolve from service template if provided
     cat_l1_name = None
     cat_l2_name = None
-    if order_data.category_l1_id:
+    service_template_id = order_data.service_template_id
+    service_name = order_data.service_name
+    service_fields = order_data.service_fields
+    
+    # If service_template_id provided, resolve hidden categories from template
+    if service_template_id and not order_data.category_l1_id:
+        template = await db.service_templates.find_one({"id": service_template_id}, {"_id": 0})
+        if template:
+            service_name = service_name or template.get("name")
+            hidden_l1 = template.get("hidden_category_l1")
+            if hidden_l1:
+                l1 = await db.categories_l1.find_one({"name": hidden_l1}, {"_id": 0})
+                if l1:
+                    order_data.category_l1_id = l1["id"]
+                    cat_l1_name = l1["name"]
+            hidden_l2 = template.get("hidden_category_l2")
+            if hidden_l2:
+                l2 = await db.categories_l2.find_one({"name": hidden_l2}, {"_id": 0})
+                if l2:
+                    order_data.category_l2_id = l2["id"]
+                    cat_l2_name = l2["name"]
+    
+    if not cat_l1_name and order_data.category_l1_id:
         l1 = await db.categories_l1.find_one({"id": order_data.category_l1_id}, {"_id": 0})
         cat_l1_name = l1["name"] if l1 else None
-    if order_data.category_l2_id:
+    if not cat_l2_name and order_data.category_l2_id:
         l2 = await db.categories_l2.find_one({"id": order_data.category_l2_id}, {"_id": 0})
         cat_l2_name = l2["name"] if l2 else None
     
@@ -487,6 +517,10 @@ async def create_order(
         "last_responded_at": None,
         "review_started_at": None,
         "last_requester_message_at": None,
+        # Service template fields
+        "service_template_id": service_template_id,
+        "service_name": service_name,
+        "service_fields": service_fields,
         # Pool routing fields (will be populated below for non-draft orders)
         "pool_stage": None,
         "routing_specialty_id": None,
@@ -782,8 +816,10 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
     result = []
     for order in orders:
         order = normalize_order(order)
+        # Remove is_sla_breached from order dict to avoid duplicate keyword argument
+        order_copy = {k: v for k, v in order.items() if k != 'is_sla_breached'}
         result.append(OrderResponse(
-            **order,
+            **order_copy,
             is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
         ))
     
@@ -801,8 +837,10 @@ async def get_my_assigned_tickets(current_user: dict = Depends(get_current_user)
     result = []
     for order in orders:
         order = normalize_order(order)
+        # Remove is_sla_breached from order dict to avoid duplicate keyword argument
+        order_copy = {k: v for k, v in order.items() if k != 'is_sla_breached'}
         result.append(OrderResponse(
-            **order,
+            **order_copy,
             is_sla_breached=is_sla_breached(order.get('sla_deadline'), order['status'])
         ))
     

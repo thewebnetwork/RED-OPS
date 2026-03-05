@@ -230,12 +230,12 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      {/* Request form - Submit new request */}
+      {/* Request form - Client: service-template-driven intake */}
       <Route 
         path="/request/new" 
         element={
           <PrivateRoute>
-            <CommandCenter />
+            <ServiceCatalog />
           </PrivateRoute>
         } 
       />
@@ -252,7 +252,11 @@ function AppRoutes() {
       {/* Legacy routes - redirect to new paths */}
       <Route path="/my-services" element={<Navigate to="/my-account" replace />} />
       <Route path="/my-tickets" element={<Navigate to="/my-requests" replace />} />
-      <Route path="/command-center" element={<Navigate to="/services" replace />} />
+      <Route path="/command-center" element={
+        <PrivateRoute roles={["Administrator", "Operator"]}>
+          <CommandCenter />
+        </PrivateRoute>
+      } />
       <Route path="/tickets" element={<Navigate to="/my-requests" replace />} />
       <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       

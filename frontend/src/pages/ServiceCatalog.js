@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { 
-  Search, 
-  Clock, 
-  Check, 
+import {
+  Search,
+  Clock,
   ArrowRight,
   Sparkles,
   FileText,
@@ -15,19 +14,16 @@ import {
   PenTool,
   Megaphone,
   Globe,
-  BarChart3,
-  Headphones,
   Package
 } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { RRM_SERVICES } from '../config/rrmServices';
+import ServiceRequestForm from '../components/ServiceRequestForm';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Icon mapping for service types
 const SERVICE_ICONS = {
   'content': FileText,
   'design': PenTool,
@@ -35,46 +31,45 @@ const SERVICE_ICONS = {
   'image': Image,
   'marketing': Megaphone,
   'web': Globe,
-  'analytics': BarChart3,
-  'support': Headphones,
   'default': Package
 };
 
 export default function ServiceCatalog() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [services, setServices] = useState([]);
+  const [searchParams] = useSearchParams();
+  const preselectedService = searchParams.get('service');
+
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
-    fetchServices();
+    fetchTemplates();
   }, []);
 
-  const fetchServices = async () => {
+  const fetchTemplates = async () => {
     try {
-      // Fetch real RRM services from catalog endpoint
-      const res = await axios.get(`${API}/categories/catalog`);
-      setServices(res.data);
+      const res = await axios.get(`${API}/service-templates`);
+      setTemplates(res.data);
+
+      // Handle preselected service from URL
+      if (preselectedService && res.data.length > 0) {
+        const match = res.data.find(t => t.id === preselectedService);
+        if (match) setSelectedTemplate(match);
+      }
     } catch (error) {
-      console.error('Failed to fetch catalog, using fallback:', error);
-      // Fallback to canonical RRM service registry
-      setServices(RRM_SERVICES);
+      console.error('Failed to fetch service templates:', error);
+      toast.error('Failed to load services');
     } finally {
       setLoading(false);
     }
   };
 
-
-  const filteredServices = services.filter(service => 
-    service.name.toLowerCase().includes(search.toLowerCase()) ||
-    service.description.toLowerCase().includes(search.toLowerCase())
+  const filtered = templates.filter(t =>
+    t.name.toLowerCase().includes(search.toLowerCase()) ||
+    t.description.toLowerCase().includes(search.toLowerCase())
   );
-
-  const handleStartRequest = (service) => {
-    // Navigate to request form with service pre-selected
-    navigate(`/request/new?service=${service.id}`);
-  };
 
   if (loading) {
     return (
@@ -84,6 +79,29 @@ export default function ServiceCatalog() {
     );
   }
 
+  // If a service is selected, show the tailored form
+  if (selectedTemplate) {
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-in" data-testid="service-request-page">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-900" data-testid="form-heading">
+            {selectedTemplate.name}
+          </h1>
+          <p className="text-slate-500 mt-1">{selectedTemplate.description}</p>
+        </div>
+        <Card className="border-slate-200">
+          <CardContent className="p-6">
+            <ServiceRequestForm
+              template={selectedTemplate}
+              onBack={() => setSelectedTemplate(null)}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Service catalog grid
   return (
     <div className="space-y-6 animate-fade-in" data-testid="service-catalog-page">
       {/* Header */}
@@ -92,7 +110,7 @@ export default function ServiceCatalog() {
           {t('catalog.title', 'Request a Service')}
         </h1>
         <p className="text-slate-500 mt-2">
-          {t('catalog.subtitle', 'Browse our services and submit a request in seconds')}
+          {t('catalog.subtitle', 'Choose a service below and fill out the tailored form')}
         </p>
       </div>
 
@@ -111,71 +129,53 @@ export default function ServiceCatalog() {
       </div>
 
       {/* Service Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredServices.map((service) => {
-          const IconComponent = SERVICE_ICONS[service.icon] || SERVICE_ICONS.default;
-          
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map((template) => {
+          const IconComponent = SERVICE_ICONS[template.icon] || SERVICE_ICONS.default;
           return (
-            <Card 
-              key={service.id}
+            <Card
+              key={template.id}
               className="group hover:shadow-lg transition-all duration-300 hover:border-[#A2182C]/30 cursor-pointer relative overflow-hidden"
-              onClick={() => handleStartRequest(service)}
-              data-testid={`service-card-${service.id}`}
+              onClick={() => setSelectedTemplate(template)}
+              data-testid={`service-card-${template.id}`}
             >
-              {service.popular && (
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-amber-100 text-amber-700 border-amber-200">
-                    <Sparkles size={12} className="mr-1" />
-                    {t('catalog.popular', 'Popular')}
-                  </Badge>
-                </div>
-              )}
-              
               <CardContent className="p-5">
                 {/* Icon */}
                 <div className="w-12 h-12 rounded-xl bg-[#A2182C]/10 flex items-center justify-center mb-4 group-hover:bg-[#A2182C] transition-colors">
-                  <IconComponent 
-                    size={24} 
-                    className="text-[#A2182C] group-hover:text-white transition-colors" 
+                  <IconComponent
+                    size={24}
+                    className="text-[#A2182C] group-hover:text-white transition-colors"
                   />
                 </div>
-                
+
                 {/* Service Name */}
                 <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-[#A2182C] transition-colors">
-                  {service.name}
+                  {template.name}
                 </h3>
-                
+
                 {/* Description */}
                 <p className="text-sm text-slate-500 mb-4 line-clamp-2">
-                  {service.description}
+                  {template.description}
                 </p>
-                
-                {/* Meta Info */}
+
+                {/* Meta */}
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1 text-slate-400">
                     <Clock size={14} />
-                    <span>{service.turnaround}</span>
+                    <span>{template.turnaround_text}</span>
                   </div>
-                  
-                  {service.included ? (
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">
-                      <Check size={12} className="mr-1" />
-                      {t('catalog.included', 'Included')}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-slate-500">
-                      {t('catalog.addon', 'Add-on')}
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-slate-500">
+                    {template.form_schema?.length || 0} fields
+                  </Badge>
                 </div>
-                
+
                 {/* CTA */}
-                <Button 
+                <Button
                   className="w-full mt-4 bg-[#A2182C] hover:bg-[#8B1526] opacity-0 group-hover:opacity-100 transition-opacity"
                   size="sm"
-                  data-testid={`start-request-${service.id}`}
+                  data-testid={`start-request-${template.id}`}
                 >
-                  {t('catalog.startRequest', 'Start Request')}
+                  Start Request
                   <ArrowRight size={16} className="ml-2" />
                 </Button>
               </CardContent>
@@ -185,32 +185,15 @@ export default function ServiceCatalog() {
       </div>
 
       {/* Empty State */}
-      {filteredServices.length === 0 && (
+      {filtered.length === 0 && (
         <div className="text-center py-12">
           <Package size={48} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500">{t('catalog.noServicesFound', 'No services match your search')}</p>
-          <Button 
-            variant="link" 
-            onClick={() => setSearch('')}
-            className="text-[#A2182C]"
-          >
-            {t('catalog.clearSearch', 'Clear search')}
+          <p className="text-slate-500">No services match your search</p>
+          <Button variant="link" onClick={() => setSearch('')} className="text-[#A2182C]">
+            Clear search
           </Button>
         </div>
       )}
-
-      {/* Help Text */}
-      <div className="text-center text-sm text-slate-400 pt-4">
-        {t('catalog.helpText', "Can't find what you need?")}
-        {' '}
-        <Button 
-          variant="link" 
-          className="text-[#A2182C] p-0 h-auto"
-          onClick={() => navigate('/request/custom')}
-        >
-          {t('catalog.customRequest', 'Submit a custom request')}
-        </Button>
-      </div>
     </div>
   );
 }
