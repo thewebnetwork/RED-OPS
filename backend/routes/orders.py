@@ -35,6 +35,22 @@ from config import FRONTEND_URL, CANCELLATION_REASONS
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
+# ============== QUEUE ROUTING (MVP) ==============
+# Deterministic mapping: service_template_id → queue key
+# IDs must match seeded values in scripts/seed_service_templates.py
+SERVICE_TEMPLATE_QUEUE_MAP = {
+    "video-editing-60s": "VIDEO_EDITING",
+    "story-editing": "VIDEO_EDITING",
+    "long-form-video": "LONG_FORM_EDITING",
+    "youtube-long-form": "LONG_FORM_EDITING",
+    "thumbnail-design": "DESIGN",
+    "social-media-graphics": "DESIGN",
+    "content-writing": "COPYWRITING",
+    "email-campaigns": "EMAIL_MARKETING",
+    "website-updates": "WEB_UPDATES",
+    "rrm-strategy-call": "ACCOUNT_MANAGER",
+}
+
 # File upload directory
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -114,6 +130,8 @@ class OrderResponse(BaseModel):
     service_template_id: Optional[str] = None
     service_name: Optional[str] = None
     service_fields: Optional[dict] = None
+    # Queue routing
+    assigned_queue_key: Optional[str] = None
 
 
 class CloseOrderRequest(BaseModel):
@@ -486,6 +504,16 @@ async def create_order(
         l2 = await db.categories_l2.find_one({"id": order_data.category_l2_id}, {"_id": 0})
         cat_l2_name = l2["name"] if l2 else None
     
+    # Determine assigned_queue_key from service template
+    assigned_queue_key = None
+    if service_template_id:
+        tmpl = await db.service_templates.find_one({"id": service_template_id}, {"_id": 0, "offer_track": 1})
+        offer_track = tmpl.get("offer_track") if tmpl else None
+        if offer_track == "DFY_CORE":
+            assigned_queue_key = "ACCOUNT_MANAGER"
+        else:
+            assigned_queue_key = SERVICE_TEMPLATE_QUEUE_MAP.get(service_template_id, "ACCOUNT_MANAGER")
+    
     order = {
         "id": str(uuid.uuid4()),
         "order_code": order_code,
@@ -521,6 +549,8 @@ async def create_order(
         "service_template_id": service_template_id,
         "service_name": service_name,
         "service_fields": service_fields,
+        # Queue routing
+        "assigned_queue_key": assigned_queue_key,
         # Pool routing fields (will be populated below for non-draft orders)
         "pool_stage": None,
         "routing_specialty_id": None,

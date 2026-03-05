@@ -68,6 +68,8 @@ def normalize_order(order: dict) -> dict:
         'routing_specialty_id': order.get('routing_specialty_id'),
         'routing_specialty_name': order.get('routing_specialty_name'),
         'pool1_expires_at': order.get('pool1_expires_at'),
+        # Queue routing
+        'assigned_queue_key': order.get('assigned_queue_key'),
     }
     return {**order, **defaults}
 

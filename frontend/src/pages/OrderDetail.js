@@ -470,6 +470,10 @@ export default function OrderDetail() {
 
   const isClient = !isAdmin && !isOperator && !isEditor;
 
+  // Check if admin is in "Preview as Client" mode
+  const isClientPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const showAsClient = isClient || isClientPreview;
+
   return (
     <div className="space-y-6 animate-fade-in" data-testid="order-detail-page">
       {/* Header with Service Context */}
@@ -1305,11 +1309,25 @@ export default function OrderDetail() {
                 <Label className="text-xs text-slate-500">Assigned to</Label>
                 <div className="flex items-center gap-2 mt-1.5">
                   <User size={16} className="text-slate-400" />
-                  <span className={`font-medium ${order.editor_name ? '' : 'text-slate-400 italic'}`}>
-                    {order.editor_name || 'Unassigned'}
-                  </span>
+                  {showAsClient ? (
+                    <span className="font-medium">RRM Team</span>
+                  ) : (
+                    <span className={`font-medium ${order.editor_name ? '' : 'text-slate-400 italic'}`}>
+                      {order.editor_name || 'Unassigned'}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Queue label — internal users only */}
+              {!showAsClient && order.assigned_queue_key && (
+                <div data-testid="queue-info">
+                  <Label className="text-xs text-slate-500">Queue</Label>
+                  <p className="font-medium mt-1.5 text-sm" data-testid="queue-label">
+                    {order.assigned_queue_key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                </div>
+              )}
 
               {accountManager && (
                 <div data-testid="account-manager-info">
