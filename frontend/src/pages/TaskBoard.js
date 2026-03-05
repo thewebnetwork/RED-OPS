@@ -39,6 +39,7 @@ import { Badge } from '../components/ui/badge';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '../components/ui/dialog';
 import {
   Select,
@@ -250,6 +251,7 @@ function QuickTaskDialog({ open, onClose, task, assignableUsers, onSave, saving,
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden" data-testid="task-form-dialog">
+        <DialogTitle className="sr-only">{isEditing ? 'Edit Task' : 'New Task'}</DialogTitle>
         <form onSubmit={handleSubmit}>
           <div className="px-5 pt-5 pb-3">
             <input ref={titleRef} data-testid="task-title-input"

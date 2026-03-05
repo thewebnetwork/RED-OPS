@@ -22,6 +22,14 @@
 - **16/16 backend tests passed** (see `/app/test_reports/iteration_56.json`)
 - No pool/routing concepts
 
+### Account Ownership & Three-Mode Task Board (COMPLETED - March 2026)
+- **Account Manager Assignment**: `account_manager_id` field on client users, admin-only set/get endpoints
+- **Assignable Users API**: `GET /api/tasks/assignable-users` returns role-appropriate assignee options
+- **Client Task Creation**: Clients can create tasks (visibility=client/both), assign to self or AM only
+- **Client Task Editing**: Clients can edit title/desc/assignee/due on tasks they created, status on all visible
+- **Three Frontend Modes**: Admin (full CRUD), Manager (create/edit for clients), Client (simplified: "My Tasks", "New Request", self+AM assignee only, no visibility toggle)
+- **Backend 14/15, Frontend 100%** (iteration_58)
+
 ### Fast Task Creation & Assignment UX (COMPLETED - March 2026)
 - **Quick Task Dialog**: Minimal-first form with title auto-focused, status pills, searchable assignee picker with role badges, visibility toggles, optional expandable section for description/request/type
 - **Inline Column Create**: Click "+" on any column → type title → press Enter → instant task via optimistic update
