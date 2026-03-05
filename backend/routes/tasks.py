@@ -93,6 +93,42 @@ def can_edit_task(task: dict, user: dict, managed_client_ids: list = None) -> bo
     return False
 
 
+
+@router.get("/client-assignments")
+async def list_client_assignments(
+    current_user: dict = Depends(get_current_user)
+):
+    """Admin only: List all clients with their account manager assignments."""
+    if current_user.get("role") != "Administrator":
+        raise HTTPException(status_code=403, detail="Admin only")
+    org_id = current_user.get("org_id") or current_user.get("team_id")
+    clients = await db.users.find(
+        {"team_id": org_id, "account_type": "Media Client", "active": {"$ne": False}},
+        {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_manager_id": 1}
+    ).to_list(200)
+    internal_staff = await db.users.find(
+        {"team_id": org_id, "account_type": "Internal Staff", "active": {"$ne": False}},
+        {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1}
+    ).to_list(200)
+    result = []
+    for c in clients:
+        am_name = None
+        am_id = c.get("account_manager_id")
+        if am_id:
+            am_user = next((s for s in internal_staff if s["id"] == am_id), None)
+            if am_user:
+                am_name = am_user.get("full_name") or am_user.get("name")
+        result.append({
+            "id": c["id"],
+            "name": c.get("full_name") or c.get("name") or c.get("email"),
+            "account_manager_id": am_id,
+            "account_manager_name": am_name,
+        })
+    staff_list = [{"id": s["id"], "name": s.get("full_name") or s.get("name") or s.get("email")} for s in internal_staff]
+    return {"clients": result, "internal_staff": staff_list}
+
+
+
 @router.get("/templates")
 async def list_task_templates(
     current_user: dict = Depends(get_current_user)
