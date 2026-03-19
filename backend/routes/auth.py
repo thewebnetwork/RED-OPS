@@ -43,6 +43,8 @@ class UserResponse(BaseModel):
     permissions: Dict[str, Dict[str, bool]] = {}
     active: bool
     avatar: Optional[str] = None
+    bio: Optional[str] = None
+    phone: Optional[str] = None
     force_password_change: bool = False
     force_otp_setup: bool = False
     otp_verified: bool = False
@@ -60,6 +62,8 @@ class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     avatar: Optional[str] = None
+    bio: Optional[str] = None
+    phone: Optional[str] = None
 
 
 class PasswordChange(BaseModel):
@@ -135,6 +139,8 @@ async def build_user_response(user: dict) -> UserResponse:
         permissions=permissions,
         active=user.get("active", True),
         avatar=user.get("avatar"),
+        bio=user.get("bio"),
+        phone=user.get("phone"),
         force_password_change=user.get("force_password_change", False),
         force_otp_setup=user.get("force_otp_setup", False),
         otp_verified=user.get("otp_verified", False),
