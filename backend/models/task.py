@@ -20,14 +20,18 @@ TaskType = Literal["manual", "request_generated", "approval", "follow_up"]
 # Created source enum
 CreatedSource = Literal["system", "admin", "client"]
 
+# Priority enum
+TaskPriority = Literal["urgent", "high", "medium", "low"]
+
 
 class TaskCreate(BaseModel):
     """Task creation request"""
-    org_id: str
+    org_id: Optional[str] = None  # Auto-filled from user if not provided
     request_id: Optional[str] = None
     title: str
     description: Optional[str] = None
     status: TaskStatus = "todo"
+    priority: TaskPriority = "medium"
     assignee_user_id: Optional[str] = None
     visibility: TaskVisibility = "internal"
     task_type: TaskType = "manual"
@@ -40,6 +44,7 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
     assignee_user_id: Optional[str] = None
     visibility: Optional[TaskVisibility] = None
     task_type: Optional[TaskType] = None
@@ -51,17 +56,19 @@ class TaskUpdate(BaseModel):
 class TaskReorder(BaseModel):
     """Task reorder request"""
     task_id: str
+    new_status: TaskStatus
     new_position: float
 
 
 class TaskResponse(BaseModel):
     """Task response"""
     id: str
-    org_id: str
+    org_id: Optional[str] = None
     request_id: Optional[str] = None
     title: str
     description: Optional[str] = None
     status: TaskStatus
+    priority: TaskPriority = "medium"
     assignee_user_id: Optional[str] = None
     created_by_user_id: str
     visibility: TaskVisibility
@@ -74,7 +81,7 @@ class TaskResponse(BaseModel):
     trigger_event: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    
+
     # Optional enriched fields (populated from joins)
     assignee_name: Optional[str] = None
     created_by_name: Optional[str] = None
