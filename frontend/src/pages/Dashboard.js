@@ -8,11 +8,11 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { 
+import {
   TrendingUp,
   TrendingDown,
-  Clock, 
-  CheckCircle2, 
+  Clock,
+  CheckCircle2,
   AlertCircle,
   AlertTriangle,
   Inbox,
@@ -27,7 +27,11 @@ import {
   Layers,
   ArrowRight,
   RefreshCw,
-  Calendar
+  Calendar,
+  DollarSign,
+  UserCheck,
+  FileCheck,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -490,9 +494,30 @@ function LoadingSpinner() {
 
 // ============== ADMIN DASHBOARD ==============
 
-function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t }) {
+function FinancialMetricCard({ label, value, icon: Icon, color, prefix = '', suffix = '', subtext }) {
+  return (
+    <Card className="border-slate-200">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">
+              {prefix}{typeof value === 'number' ? value.toLocaleString() : (value ?? '—')}{suffix}
+            </p>
+            {subtext && <p className="text-xs text-slate-400 mt-0.5">{subtext}</p>}
+          </div>
+          <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center flex-shrink-0`}>
+            <Icon size={20} className="text-white" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AdminDashboard({ metrics, ticketLists, chartData, financialStats, loading, onRefresh, t }) {
   if (loading) return <LoadingSpinner />;
-  
+
   return (
     <div className="space-y-6" data-testid="admin-dashboard">
       {/* Header */}
@@ -505,6 +530,45 @@ function AdminDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t
           <RefreshCw size={14} />
           {t('common.refresh')}
         </Button>
+      </div>
+
+      {/* Financial Metrics Row */}
+      <div>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <DollarSign size={15} />
+          Revenue & Growth
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <FinancialMetricCard
+            label="MRR"
+            value={financialStats?.mrr ?? null}
+            icon={DollarSign}
+            color="bg-emerald-500"
+            prefix="$"
+            subtext={financialStats ? `${financialStats.active_subscribers} paying subscribers` : 'Loading...'}
+          />
+          <FinancialMetricCard
+            label="Active Clients"
+            value={financialStats?.total_clients ?? null}
+            icon={UserCheck}
+            color="bg-blue-500"
+            subtext={financialStats ? `+${financialStats.new_clients_mtd} new this month` : 'Loading...'}
+          />
+          <FinancialMetricCard
+            label="Requests MTD"
+            value={financialStats?.requests_mtd ?? null}
+            icon={Zap}
+            color="bg-amber-500"
+            subtext={financialStats ? `${financialStats.requests_prev_month} last month` : 'Loading...'}
+          />
+          <FinancialMetricCard
+            label="Delivered MTD"
+            value={financialStats?.delivered_mtd ?? null}
+            icon={FileCheck}
+            color="bg-purple-500"
+            subtext="Delivered or closed this month"
+          />
+        </div>
       </div>
 
       {/* KPI Cards - Status (Clickable) */}
@@ -1199,6 +1263,7 @@ export default function Dashboard() {
     slaTrend: null,
     poolRouting: null
   });
+  const [financialStats, setFinancialStats] = useState(null);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -1238,6 +1303,14 @@ export default function Dashboard() {
           axios.get(`${API}/dashboard/v2/charts/ticket-volume-by-category?days=30`),
           axios.get(`${API}/dashboard/v2/charts/pool-routing?days=30`)
         ]);
+
+        // Fetch financial stats for admin
+        try {
+          const finRes = await axios.get(`${API}/dashboard/financial-stats`);
+          setFinancialStats(finRes.data);
+        } catch {
+          // Non-critical — silently skip if endpoint not available
+        }
         
         // Transform SLA trend data from metrics
         const slaTrend = metricsRes.data.trends_30d?.sla?.on_track?.map((item, idx) => ({
@@ -1291,10 +1364,11 @@ export default function Dashboard() {
         <>
           {/* Fall back to role-based dashboards */}
           {roleType === 'admin' && (
-            <AdminDashboard 
+            <AdminDashboard
               metrics={metrics}
               ticketLists={ticketLists}
               chartData={chartData}
+              financialStats={financialStats}
               loading={loading}
               onRefresh={fetchDashboardData}
               t={t}
