@@ -360,14 +360,22 @@ export default function Layout({ children }) {
             <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-sm font-medium">{user?.name?.charAt(0) || 'U'}</span>
             </div>
-            <div className="flex-1 min-w-0">
+            <Link to="/my-account" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
               <p className="text-sm font-medium truncate">{user?.name}</p>
               <p className="text-xs text-white/60">{displayAccountType(user?.account_type) || user?.role}</p>
-            </div>
+            </Link>
+            <button 
+              onClick={() => navigate('/my-account')}
+              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="My Account"
+            >
+              <User size={18} />
+            </button>
             <button 
               onClick={handleLogout}
               className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               data-testid="logout-btn"
+              title="Sign out"
             >
               <LogOut size={18} />
             </button>
