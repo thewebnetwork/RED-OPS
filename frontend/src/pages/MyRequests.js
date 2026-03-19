@@ -14,7 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '../components/ui/dialog';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import {
   Inbox,
   Search,
   Eye,
@@ -23,11 +33,14 @@ import {
   AlertCircle,
   XCircle,
   Filter,
-  ArrowUpRight
+  ArrowUpRight,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const CANCELLABLE_STATUSES = ['New', 'Open', 'In Progress', 'Pending'];
 
 const STATUS_CONFIG = {
   'New': { icon: Clock, class: 'bg-blue-100 text-blue-700', color: 'bg-blue-500' },
@@ -47,8 +60,17 @@ export default function MyRequests() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Cancel dialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelNotes, setCancelNotes] = useState('');
+  const [canceling, setCanceling] = useState(false);
+  const [cancellationReasons, setCancellationReasons] = useState([]);
+
   useEffect(() => {
     fetchMyRequests();
+    fetchCancellationReasons();
   }, []);
 
   const fetchMyRequests = async () => {
@@ -62,8 +84,51 @@ export default function MyRequests() {
     }
   };
 
+  const fetchCancellationReasons = async () => {
+    try {
+      const res = await axios.get(`${API}/orders/cancellation-reasons`);
+      setCancellationReasons(res.data.reasons || []);
+    } catch {
+      setCancellationReasons(['No longer needed', 'Changed my mind', 'Found another solution', 'Other']);
+    }
+  };
+
+  const openCancelDialog = (order) => {
+    setCancelTarget(order);
+    setCancelReason('');
+    setCancelNotes('');
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancel = async () => {
+    if (!cancelReason) {
+      toast.error('Please select a cancellation reason');
+      return;
+    }
+    if (cancelReason === 'Other' && !cancelNotes.trim()) {
+      toast.error('Please add a note explaining why');
+      return;
+    }
+    setCanceling(true);
+    try {
+      await axios.post(`${API}/orders/${cancelTarget.id}/cancel`, {
+        reason: cancelReason,
+        notes: cancelNotes.trim() || null,
+      });
+      toast.success('Request canceled');
+      setCancelDialogOpen(false);
+      setOrders(prev => prev.map(o =>
+        o.id === cancelTarget.id ? { ...o, status: 'Canceled' } : o
+      ));
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to cancel request');
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.order_code?.toLowerCase().includes(search.toLowerCase()) ||
       order.title?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -92,7 +157,7 @@ export default function MyRequests() {
           <p className="text-slate-500 mt-1">{t('requests.subtitle', 'View and track all your submitted requests')}</p>
         </div>
         <Link to="/services">
-          <Button className="bg-rose-600 hover:bg-rose-700">
+          <Button className="bg-[#A2182C] hover:bg-[#8B1526]">
             {t('requests.submitNew', 'Submit New Request')}
           </Button>
         </Link>
@@ -164,13 +229,13 @@ export default function MyRequests() {
           <CardContent className="py-12 text-center">
             <Inbox size={48} className="mx-auto mb-4 text-slate-300" />
             <p className="text-slate-500">
-              {orders.length === 0 
+              {orders.length === 0
                 ? t('requests.noRequests', 'You have not submitted any requests yet')
                 : t('requests.noMatch', 'No requests match your filters')}
             </p>
             {orders.length === 0 && (
               <Link to="/services">
-                <Button className="mt-4 bg-rose-600 hover:bg-rose-700">
+                <Button className="mt-4 bg-[#A2182C] hover:bg-[#8B1526]">
                   {t('requests.submitFirst', 'Submit Your First Request')}
                 </Button>
               </Link>
@@ -182,33 +247,48 @@ export default function MyRequests() {
           {filteredOrders.map(order => {
             const statusConfig = getStatusConfig(order.status);
             const StatusIcon = statusConfig.icon;
+            const canCancel = CANCELLABLE_STATUSES.includes(order.status);
             return (
               <Card key={order.id} className="hover:shadow-md transition-shadow" data-testid={`request-${order.id}`}>
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-2 h-12 rounded-full ${statusConfig.color}`} />
-                      <div>
-                        <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className={`w-2 h-12 rounded-full flex-shrink-0 ${statusConfig.color}`} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-mono text-sm text-slate-500">{order.order_code}</span>
                           <Badge className={statusConfig.class}>
                             <StatusIcon size={12} className="mr-1" />
                             {order.status}
                           </Badge>
                         </div>
-                        <h3 className="font-medium text-slate-900 mt-1">{order.title}</h3>
+                        <h3 className="font-medium text-slate-900 mt-1 truncate">{order.title}</h3>
                         <p className="text-sm text-slate-500 mt-0.5">
                           {order.service_name || order.category_name || 'Request'} • Created {new Date(order.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <Link to={`/orders/${order.id}`}>
-                      <Button variant="outline" size="sm" data-testid={`view-request-${order.id}`}>
-                        <Eye size={16} className="mr-1" />
-                        View
-                        <ArrowUpRight size={14} className="ml-1" />
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {canCancel && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openCancelDialog(order)}
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          data-testid={`cancel-request-${order.id}`}
+                          title="Cancel request"
+                        >
+                          <X size={16} />
+                        </Button>
+                      )}
+                      <Link to={`/orders/${order.id}`}>
+                        <Button variant="outline" size="sm" data-testid={`view-request-${order.id}`}>
+                          <Eye size={16} className="mr-1" />
+                          View
+                          <ArrowUpRight size={14} className="ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -216,6 +296,65 @@ export default function MyRequests() {
           })}
         </div>
       )}
+
+      {/* Cancel Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle size={20} className="text-red-500" />
+              Cancel Request
+            </DialogTitle>
+            <DialogDescription>
+              Cancel <span className="font-medium text-slate-900">{cancelTarget?.title}</span>. The team will be notified. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-sm font-medium">Reason *</Label>
+              <Select value={cancelReason} onValueChange={setCancelReason}>
+                <SelectTrigger className="mt-1.5" data-testid="cancel-reason-select">
+                  <SelectValue placeholder="Select a reason..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {cancellationReasons.map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">
+                Notes {cancelReason === 'Other' ? '*' : '(optional)'}
+              </Label>
+              <Textarea
+                className="mt-1.5 resize-none"
+                rows={3}
+                placeholder="Add any additional context..."
+                value={cancelNotes}
+                onChange={(e) => setCancelNotes(e.target.value)}
+                data-testid="cancel-notes"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} disabled={canceling}>
+              Keep Request
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={canceling || !cancelReason}
+              data-testid="confirm-cancel-btn"
+            >
+              {canceling ? 'Canceling...' : 'Cancel Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
