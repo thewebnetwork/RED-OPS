@@ -174,7 +174,7 @@ function AssigneePicker({ users, value, onChange }) {
 
 function QuickTaskDialog({ task, users, columns, onSave, onClose, saving }) {
   const isEdit = !!task?.id;
-  const [form, setForm] = useState({ title: task?.title || '', description: task?.description || '', status: task?.status || columns[0]?.id || 'todo', priority: task?.priority || 'medium', assigned_to: task?.assigned_to || null, due_date: task?.due_date ? task.due_date.substring(0, 10) : '' });
+  const [form, setForm] = useState({ title: task?.title || '', description: task?.description || '', status: task?.status || columns[0]?.id || 'todo', priority: task?.priority || 'medium', assignee_user_id: task?.assignee_user_id || null, due_at: task?.due_at ? task.due_at.substring(0, 10) : '' });
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
   function submit(e) { e.preventDefault(); if (!form.title.trim()) return toast.error('Title is required'); onSave({ ...task, ...form }); }
   return (
@@ -192,8 +192,8 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, saving }) {
             <div><label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Priority</label><select value={form.priority} onChange={e => set('priority', e.target.value)} className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">{Object.entries(PRIORITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Assignee</label><AssigneePicker users={users} value={form.assigned_to} onChange={v => set('assigned_to', v)} /></div>
-            <div><label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Due Date</label><input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)} className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white" /></div>
+            <div><label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Assignee</label><AssigneePicker users={users} value={form.assignee_user_id} onChange={v => set('assignee_user_id', v)} /></div>
+            <div><label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Due Date</label><input type="date" value={form.due_at} onChange={e => set('due_at', e.target.value)} className="w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white" /></div>
           </div>
         </form>
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
@@ -213,7 +213,7 @@ function SortableTaskCard(props) {
 
 function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
   const pri = PRIORITY[task.priority] || PRIORITY.medium;
-  const date = fmtDate(task.due_date);
+  const date = fmtDate(task.due_at);
   const assigneeName = task.assigned_user?.name || task.assignee_name || null;
   return (
     <div className={`group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer overflow-hidden ${isDragging ? 'rotate-1 shadow-xl ring-2 ring-red-400' : ''}`} onClick={() => onEdit(task)}>
@@ -276,7 +276,7 @@ export default function TaskBoard() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filterAssignee) params.set('assigned_to', filterAssignee);
+      if (filterAssignee) params.set('assignee_user_id', filterAssignee);
       if (filterStatus) params.set('status', filterStatus);
       if (searchQuery) params.set('search', searchQuery);
       const { data } = await axios.get(`${API}/tasks?${params.toString()}`, { headers: headers() });
@@ -341,7 +341,7 @@ export default function TaskBoard() {
     return tasks.filter(t => {
       if (t.status !== colId) return false;
       if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (filterAssignee && t.assigned_to !== filterAssignee) return false;
+      if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
       return true;
     });
   }
