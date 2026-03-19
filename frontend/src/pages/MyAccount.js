@@ -169,8 +169,8 @@ export default function MyAccount() {
                     <p className="text-xs text-muted-foreground text-right">{(profileData.bio || '').length}/300</p>
                   </div>
 
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? t('common.saving', 'Saving...') : t('myAccount.profile.save', 'Save Changes')}
+                  <Button type="submit" disabled={loading} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold">
+                    {loading ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </CardContent>
               </Card>
@@ -200,8 +200,8 @@ export default function MyAccount() {
                     <Input id="confirm_password" type="password" value={passwordData.confirm_password}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, confirm_password: e.target.value }))} placeholder="Repeat new password" />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? t('common.saving', 'Saving...') : t('myAccount.security.update', 'Update Password')}
+                  <Button type="submit" disabled={loading} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold">
+                    {loading ? 'Saving...' : 'Update Password'}
                   </Button>
                 </CardContent>
               </Card>
