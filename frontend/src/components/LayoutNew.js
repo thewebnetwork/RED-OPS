@@ -47,8 +47,19 @@ const SHARED_ROUTES = ['/tasks', '/task-board', '/reports', '/requests'];
 
 // Icon mapping
 const ICONS = {
-  Home, ShoppingBag, FileText, User, Inbox, Layers, ClipboardList,
-  BarChart3, LayoutDashboard, KeyRound, Settings, Megaphone, CheckSquare
+  Home,
+  ShoppingBag,
+  FileText,
+  User,
+  Inbox,
+  Layers,
+  ClipboardList,
+  BarChart3,
+  LayoutDashboard,
+  KeyRound,
+  Settings,
+  Megaphone,
+  CheckSquare
 };
 
 export default function Layout({ children }) {
@@ -100,9 +111,9 @@ export default function Layout({ children }) {
     if (previewAsClient && modeConfig.canAccessAdminStudio) {
       return APP_MODES.CLIENT_PORTAL;
     }
-    
+
     const path = location.pathname;
-    
+
     // Shared routes: respect the sticky active_app_mode from localStorage
     if (SHARED_ROUTES.some(p => path === p || path.startsWith(p + '/'))) {
       const stored = localStorage.getItem('active_app_mode');
@@ -111,22 +122,22 @@ export default function Layout({ children }) {
       if (stored === 'admin_studio' && modeConfig.canAccessAdminStudio) return APP_MODES.ADMIN_STUDIO;
       return modeConfig.primaryMode;
     }
-    
+
     // Admin routes
     if (['/iam', '/settings', '/announcements', '/logs', '/admin'].some(p => path.startsWith(p))) {
       return modeConfig.canAccessAdminStudio ? APP_MODES.ADMIN_STUDIO : modeConfig.primaryMode;
     }
-    
+
     // Operator routes
     if (['/queue', '/all-requests'].some(p => path.startsWith(p))) {
       return modeConfig.canAccessOperatorConsole ? APP_MODES.OPERATOR_CONSOLE : modeConfig.primaryMode;
     }
-    
+
     // Client routes
     if (['/', '/services', '/my-requests', '/my-account'].some(p => path === p)) {
       return APP_MODES.CLIENT_PORTAL;
     }
-    
+
     return modeConfig.primaryMode;
   };
 
@@ -159,7 +170,7 @@ export default function Layout({ children }) {
           { path: '/my-account', icon: 'User', labelKey: 'nav.myAccount' }
         ];
       }
-      
+
       if (isOperatorMode) {
         const items = [
           { path: '/queue', icon: 'Inbox', labelKey: 'nav.myQueue' }
@@ -169,7 +180,7 @@ export default function Layout({ children }) {
         items.push({ path: '/reports', icon: 'BarChart3', labelKey: 'nav.reports' });
         return items;
       }
-      
+
       // Admin Studio
       return [
         { path: '/admin', icon: 'LayoutDashboard', labelKey: 'nav.adminDashboard' },
@@ -220,10 +231,7 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen bg-slate-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -232,11 +240,7 @@ export default function Layout({ children }) {
         <div className="h-16 flex items-center px-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <img 
-                src="/assets/logos/logo-icon.jpg" 
-                alt="Red Ops" 
-                className="w-10 h-10 rounded-lg object-cover relative z-10"
-              />
+              <img src="/assets/logos/logo-icon.jpg" alt="Red Ops" className="w-10 h-10 rounded-lg object-cover relative z-10" />
               <span className="absolute inset-0 rounded-lg bg-white/20 blur-sm" />
             </div>
             <div>
@@ -248,10 +252,7 @@ export default function Layout({ children }) {
               )}
             </div>
           </div>
-          <button 
-            className="ml-auto lg:hidden text-white/70 hover:text-white"
-            onClick={() => setSidebarOpen(false)}
-          >
+          <button className="ml-auto lg:hidden text-white/70 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X size={20} />
           </button>
         </div>
@@ -303,10 +304,7 @@ export default function Layout({ children }) {
               <Eye size={14} />
               <span className="font-medium">{t('nav.previewMode', 'Preview Mode')}</span>
             </div>
-            <button 
-              onClick={toggleClientPreview}
-              className="text-xs underline mt-1 hover:no-underline"
-            >
+            <button onClick={toggleClientPreview} className="text-xs underline mt-1 hover:no-underline">
               {t('nav.exitPreview', 'Exit Preview')}
             </button>
           </div>
@@ -317,18 +315,14 @@ export default function Layout({ children }) {
           <div className="space-y-1">
             {navItems.map(item => {
               const IconComponent = ICONS[item.icon] || FileText;
-              const isActive = location.pathname === item.path || 
-                (item.path !== '/' && location.pathname.startsWith(item.path));
-              
+              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white text-[#A2182C] shadow-lg'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                    isActive ? 'bg-white text-[#A2182C] shadow-lg' : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                   data-testid={`nav-${item.path.replace('/', '') || 'home'}`}
                 >
@@ -343,11 +337,7 @@ export default function Layout({ children }) {
         {/* Admin Preview as Client Button */}
         {modeConfig.canAccessAdminStudio && !previewAsClient && (
           <div className="px-4 py-3 border-t border-white/10">
-            <button
-              onClick={toggleClientPreview}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              data-testid="preview-as-client-btn"
-            >
+            <button onClick={toggleClientPreview} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors" data-testid="preview-as-client-btn">
               <Eye size={16} />
               {t('nav.previewAsClient', 'Preview as Client')}
             </button>
@@ -356,30 +346,27 @@ export default function Layout({ children }) {
 
         {/* User section */}
         <div className="p-4 border-t border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="text-sm font-medium">{user?.name?.charAt(0) || 'U'}</span>
+          <Link to="/my-account" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors group" data-testid="sidebar-user-section">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/20 group-hover:ring-white/40 transition-all">
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user?.name || 'User'} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-medium">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+              )}
             </div>
-            <Link to="/my-account" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-white/60">{displayAccountType(user?.account_type) || user?.role}</p>
-            </Link>
-            <button 
-              onClick={() => navigate('/my-account')}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              title="My Account"
-            >
-              <User size={18} />
-            </button>
-            <button 
-              onClick={handleLogout}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              data-testid="logout-btn"
-              title="Sign out"
-            >
-              <LogOut size={18} />
-            </button>
-          </div>
+              <p className="text-xs text-white/60 truncate">{displayAccountType(user?.account_type) || user?.role}</p>
+            </div>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-1.5 text-xs text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            data-testid="logout-btn"
+          >
+            <LogOut size={14} />
+            {t('auth.logout', 'Sign out')}
+          </button>
         </div>
       </aside>
 
@@ -387,11 +374,7 @@ export default function Layout({ children }) {
       <div className="flex-1 lg:ml-64">
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center px-4 lg:px-8">
-          <button 
-            className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg mr-4"
-            onClick={() => setSidebarOpen(true)}
-            data-testid="mobile-menu-btn"
-          >
+          <button className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg mr-4" onClick={() => setSidebarOpen(true)} data-testid="mobile-menu-btn">
             <Menu size={20} />
           </button>
 
@@ -400,15 +383,9 @@ export default function Layout({ children }) {
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg mr-4" data-testid="header-rating">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={14}
-                    className={
-                      star <= Math.round(ratingStats.average_rating)
-                        ? 'fill-[#97662D] text-[#97662D]'
-                        : 'fill-gray-200 text-gray-200'
-                    }
-                  />
+                  <Star key={star} size={14} className={
+                    star <= Math.round(ratingStats.average_rating) ? 'fill-[#97662D] text-[#97662D]' : 'fill-gray-200 text-gray-200'
+                  } />
                 ))}
               </div>
               <span className="font-semibold text-sm text-slate-900">{ratingStats.average_rating.toFixed(1)}</span>
