@@ -257,3 +257,80 @@ async def get_requester_dashboard(current_user: dict = Depends(require_roles(["R
         "delivered": enrich_orders(delivered)
     }
 
+
+
+# ============== FINANCIAL STATS ==============
+
+@router.get("/financial-stats")
+async def get_financial_stats(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """Get financial/revenue metrics for admin dashboard"""
+    from datetime import timedelta
+
+    now = datetime.now(timezone.utc)
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    prev_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+
+    # Total active clients
+    total_clients = await db.users.count_documents({"active": True})
+
+    # New clients this month
+    new_clients_mtd = await db.users.count_documents({
+        "active": True,
+        "created_at": {"$gte": start_of_month.isoformat()}
+    })
+
+    # Active subscribers (users with a subscription plan)
+    active_subscribers = await db.users.count_documents({
+        "active": True,
+        "subscription_plan_id": {"$exists": True, "$ne": None}
+    })
+
+    # Compute MRR from active subscriptions
+    plans = await db.subscription_plans.find({"active": True}, {"_id": 0}).to_list(100)
+    plan_map = {p["id"]: p for p in plans}
+
+    mrr = 0.0
+    prev_mrr = 0.0
+    users_with_plans = await db.users.find(
+        {"active": True, "subscription_plan_id": {"$exists": True, "$ne": None}},
+        {"subscription_plan_id": 1, "subscription_billing": 1, "_id": 0}
+    ).to_list(1000)
+
+    for u in users_with_plans:
+        plan_id = u.get("subscription_plan_id")
+        plan = plan_map.get(plan_id)
+        if plan:
+            billing = u.get("subscription_billing", "monthly")
+            if billing == "yearly":
+                mrr += (plan.get("price_yearly") or 0) / 12
+            else:
+                mrr += plan.get("price_monthly") or 0
+
+    # Requests submitted this month
+    requests_mtd = await db.orders.count_documents({
+        "created_at": {"$gte": start_of_month.isoformat()}
+    })
+
+    # Requests submitted last month
+    requests_prev = await db.orders.count_documents({
+        "created_at": {
+            "$gte": prev_month_start.isoformat(),
+            "$lt": start_of_month.isoformat()
+        }
+    })
+
+    # Delivered this month
+    delivered_mtd = await db.orders.count_documents({
+        "status": {"$in": ["Delivered", "Closed"]},
+        "delivered_at": {"$gte": start_of_month.isoformat()}
+    })
+
+    return {
+        "mrr": round(mrr, 2),
+        "active_subscribers": active_subscribers,
+        "total_clients": total_clients,
+        "new_clients_mtd": new_clients_mtd,
+        "requests_mtd": requests_mtd,
+        "requests_prev_month": requests_prev,
+        "delivered_mtd": delivered_mtd,
+    }
