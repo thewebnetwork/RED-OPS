@@ -197,23 +197,29 @@ async def health():
     return {"status": "healthy", "version": "2.0.0"}
 
 
-# TEMPORARY BOOTSTRAP ENDPOINT - Remove after first admin is created
+# TEMPORARY SETUP ENDPOINTS - Remove after setup is complete
 @app.post("/api/setup/bootstrap")
-async def bootstrap_admin():
-    """Create the first admin user if no users exist. Delete this endpoint after use."""
+async def bootstrap_admin(reset: bool = False):
+    """Create or reset the first admin user."""
+    if reset:
+        await db.users.delete_many({})
+    
     count = await db.users.count_documents({})
     if count > 0:
-        return {"status": "already_setup", "message": f"{count} user(s) already exist. Login normally."}
+        # Return info about existing user to help debug
+        existing = await db.users.find_one({}, {"_id": 0, "email": 1, "role": 1, "active": 1})
+        return {"status": "already_setup", "message": f"{count} user(s) exist.", "sample": existing}
 
     import uuid
     from utils.helpers import hash_password, get_utc_now
 
-    admin_id = str(uuid.uuid4())
+    pw = "RedOps2024!"
+    hashed = hash_password(pw)
     admin_user = {
-        "id": admin_id,
+        "id": str(uuid.uuid4()),
         "name": "Admin",
         "email": "admin@redops.com",
-        "password": hash_password("RedOps2024!"),
+        "password": hashed,
         "role": "Administrator",
         "account_type": "Internal Staff",
         "active": True,
@@ -224,14 +230,13 @@ async def bootstrap_admin():
         "pool_access": "both",
         "created_at": get_utc_now(),
     }
-
     await db.users.insert_one(admin_user)
-
     return {
         "status": "created",
-        "message": "Admin user created. Change password after first login.",
-        "credentials": {"email": "admin@redops.com", "password": "RedOps2024!"},
+        "credentials": {"email": "admin@redops.com", "password": pw},
+        "hash_preview": hashed[:20] + "...",
     }
+
 
 
 if __name__ == "__main__":
