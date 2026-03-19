@@ -393,11 +393,15 @@ async def create_task(
     - Account Manager: can create tasks in their org
     - Client: can create tasks with visibility=client, assign to self or AM only
     """
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
     is_client = current_user.get("account_type") == "Media Client"
 
-    # Verify org matches user's org
-    if task_data.org_id != user_org_id:
+    # Auto-fill org_id from user if not provided
+    effective_org_id = task_data.org_id or user_org_id
+
+    # Verify org matches user's org (skip if admin)
+    is_admin = current_user.get("role") == "Administrator"
+    if not is_admin and effective_org_id != user_org_id:
         raise HTTPException(status_code=403, detail="Cannot create tasks for other organizations")
 
     # Client-specific restrictions
@@ -441,7 +445,7 @@ async def create_task(
     position = task_data.position
     if position is None:
         last_task = await db.tasks.find_one(
-            {"org_id": task_data.org_id, "status": task_data.status},
+            {"org_id": effective_org_id, "status": task_data.status},
             {"_id": 0, "position": 1},
             sort=[("position", -1)]
         )
@@ -451,11 +455,12 @@ async def create_task(
 
     task = {
         "id": task_id,
-        "org_id": task_data.org_id,
+        "org_id": effective_org_id,
         "request_id": task_data.request_id,
         "title": task_data.title,
         "description": task_data.description,
         "status": task_data.status,
+        "priority": task_data.priority if hasattr(task_data, 'priority') else "medium",
         "assignee_user_id": task_data.assignee_user_id,
         "created_by_user_id": current_user["id"],
         "visibility": task_data.visibility,
