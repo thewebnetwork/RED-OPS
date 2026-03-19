@@ -197,6 +197,43 @@ async def health():
     return {"status": "healthy", "version": "2.0.0"}
 
 
+# TEMPORARY BOOTSTRAP ENDPOINT - Remove after first admin is created
+@app.post("/api/setup/bootstrap")
+async def bootstrap_admin():
+    """Create the first admin user if no users exist. Delete this endpoint after use."""
+    count = await db.users.count_documents({})
+    if count > 0:
+        return {"status": "already_setup", "message": f"{count} user(s) already exist. Login normally."}
+
+    import uuid
+    from utils.helpers import hash_password, get_utc_now
+
+    admin_id = str(uuid.uuid4())
+    admin_user = {
+        "id": admin_id,
+        "name": "Admin",
+        "email": "admin@redops.com",
+        "password": hash_password("RedOps2024!"),
+        "role": "Administrator",
+        "account_type": "Internal Staff",
+        "active": True,
+        "force_password_change": True,
+        "force_otp_setup": False,
+        "otp_verified": False,
+        "can_pick": True,
+        "pool_access": "both",
+        "created_at": get_utc_now(),
+    }
+
+    await db.users.insert_one(admin_user)
+
+    return {
+        "status": "created",
+        "message": "Admin user created. Change password after first login.",
+        "credentials": {"email": "admin@redops.com", "password": "RedOps2024!"},
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8002)
