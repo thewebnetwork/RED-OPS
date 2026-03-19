@@ -3,19 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import {
-  Search,
-  Clock,
-  ArrowRight,
-  FileText,
-  Image,
-  Video,
-  PenTool,
-  Megaphone,
-  Globe,
-  Package,
-  Phone
-} from 'lucide-react';
+import { Search, Clock, ArrowRight, FileText, Image, Video, PenTool, Megaphone, Globe, Package, Phone } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
@@ -43,10 +31,10 @@ export default function ServiceCatalog() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const preselectedService = searchParams.get('service');
-
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
@@ -57,7 +45,6 @@ export default function ServiceCatalog() {
     try {
       const res = await axios.get(`${API}/service-templates`);
       setTemplates(res.data);
-
       if (preselectedService && res.data.length > 0) {
         const match = res.data.find(t => t.id === preselectedService);
         if (match) setSelectedTemplate(match);
@@ -70,10 +57,22 @@ export default function ServiceCatalog() {
     }
   };
 
-  const filtered = templates.filter(t =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.description.toLowerCase().includes(search.toLowerCase())
-  );
+  // Extract unique categories from templates
+  const categories = ['All', ...Array.from(
+    new Set(
+      templates
+        .map(t => t.category || t.hidden_category_l1)
+        .filter(Boolean)
+    )
+  )];
+
+  const filtered = templates.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.description.toLowerCase().includes(search.toLowerCase());
+    const templateCategory = t.category || t.hidden_category_l1;
+    const matchesCategory = selectedCategory === 'All' || templateCategory === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   // Group by offer_track: ONE_OFF first (primary), DFY_CORE last (secondary)
   const dfyCore = filtered.filter(t => t.offer_track === 'DFY_CORE');
@@ -82,7 +81,7 @@ export default function ServiceCatalog() {
 
   const groups = [];
   if (oneOff.length > 0) groups.push({ key: 'ONE_OFF', label: TRACK_LABELS.ONE_OFF, items: oneOff, secondary: false });
-  if (other.length > 0) groups.push({ key: 'other', label: 'Other Services', items: other, secondary: false });
+  if (other.length > 0) groups.push({ key: 'other', label: 'Services', items: other, secondary: false });
   if (dfyCore.length > 0) groups.push({ key: 'DFY_CORE', label: 'Need more help?', items: dfyCore, secondary: true });
 
   if (loading) {
@@ -104,10 +103,7 @@ export default function ServiceCatalog() {
         </div>
         <Card className="border-slate-200">
           <CardContent className="p-6">
-            <ServiceRequestForm
-              template={selectedTemplate}
-              onBack={() => setSelectedTemplate(null)}
-            />
+            <ServiceRequestForm template={selectedTemplate} onBack={() => setSelectedTemplate(null)} />
           </CardContent>
         </Card>
       </div>
@@ -117,7 +113,6 @@ export default function ServiceCatalog() {
   const renderServiceCard = (template) => {
     const IconComponent = SERVICE_ICONS[template.icon] || SERVICE_ICONS.default;
     const isBookCall = template.flow_type === 'BOOK_CALL';
-
     return (
       <Card
         key={template.id}
@@ -133,15 +128,12 @@ export default function ServiceCatalog() {
               <IconComponent size={24} className="text-[#A2182C] group-hover:text-white transition-colors" />
             )}
           </div>
-
           <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-[#A2182C] transition-colors">
             {template.name}
           </h3>
-
           <p className="text-sm text-slate-500 mb-4 line-clamp-2">
             {template.description}
           </p>
-
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1 text-slate-400">
               <Clock size={14} />
@@ -157,7 +149,6 @@ export default function ServiceCatalog() {
               </Badge>
             )}
           </div>
-
           <Button
             className="w-full mt-4 bg-[#A2182C] hover:bg-[#8B1526] opacity-0 group-hover:opacity-100 transition-opacity"
             size="sm"
@@ -172,7 +163,7 @@ export default function ServiceCatalog() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in" data-testid="service-catalog-page">
+    <div className="space-y-6 animate-fade-in" data-testid="service-catalog-page">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-900">
@@ -196,6 +187,26 @@ export default function ServiceCatalog() {
           />
         </div>
       </div>
+
+      {/* Category Filter Pills */}
+      {categories.length > 1 && (
+        <div className="flex flex-wrap gap-2 justify-center" data-testid="category-filter">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              data-testid={`category-pill-${cat}`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                selectedCategory === cat
+                  ? 'bg-[#A2182C] text-white border-[#A2182C] shadow-sm'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#A2182C]/40 hover:text-[#A2182C]'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Grouped Service Grids */}
       {groups.map(group => (
@@ -221,8 +232,12 @@ export default function ServiceCatalog() {
         <div className="text-center py-12">
           <Package size={48} className="mx-auto text-slate-300 mb-4" />
           <p className="text-slate-500">No services match your search</p>
-          <Button variant="link" onClick={() => setSearch('')} className="text-[#A2182C]">
-            Clear search
+          <Button
+            variant="link"
+            onClick={() => { setSearch(''); setSelectedCategory('All'); }}
+            className="text-[#A2182C]"
+          >
+            Clear filters
           </Button>
         </div>
       )}
