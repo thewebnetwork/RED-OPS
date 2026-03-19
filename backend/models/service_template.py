@@ -35,6 +35,7 @@ class ServiceTemplateResponse(BaseModel):
     id: str
     name: str
     description: str
+        category: Optional[str] = None
     client_visible: bool = True
     icon: str
     default_title: str
