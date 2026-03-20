@@ -15,11 +15,11 @@ function Avatar({ name, size = 44 }) {
   );
 }
 
-function WorkloadBar({ value, max, color = 'hsl(var(--primary))' }) {
+function WorkloadBar({ value, max, color = 'var(--red)' }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   const barColor = pct > 85 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#10b981';
   return (
-    <div style={{ height: 5, background: 'hsl(var(--border))', borderRadius: 3, overflow: 'hidden', marginTop: 4 }}>
+    <div style={{ height: 5, background: 'var(--border)', borderRadius: 3, overflow: 'hidden', marginTop: 4 }}>
       <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width .4s ease' }} />
     </div>
   );
@@ -66,8 +66,8 @@ export default function Team() {
     <div className="page-content" style={{ animation: 'fadeInUp .3s ease' }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>Team Hub</h1>
-        <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'hsl(var(--text-3))' }}>Workload and performance by team member</p>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Team Hub</h1>
+        <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--tx-3)' }}>Workload and performance by team member</p>
       </div>
 
       {/* Summary row */}
@@ -83,19 +83,19 @@ export default function Team() {
               <Icon size={16} style={{ color }} />
             </div>
             <div className="metric-value">{value}</div>
-            <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 2 }}>{label}</div>
+            <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>{label}</div>
           </div>
         ))}
       </div>
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={24} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
         </div>
       ) : members.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'hsl(var(--text-3))' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--tx-3)' }}>
           <Users size={40} style={{ opacity: .2, marginBottom: 12 }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'hsl(var(--text-2))' }}>No team members yet</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx-2)' }}>No team members yet</div>
           <div style={{ fontSize: 13, marginTop: 4 }}>Add team members in Settings → Users</div>
         </div>
       ) : (
@@ -104,18 +104,18 @@ export default function Team() {
             <div
               key={m.id}
               style={{
-                background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))',
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
                 borderRadius: 12, padding: '16px', transition: 'border-color .15s',
               }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'hsl(var(--border))'}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--red)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
             >
               {/* Member info */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                 <Avatar name={m.name} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
-                  <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 1 }}>{m.role}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 1 }}>{m.role}</div>
                 </div>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: m.activeTasks > 0 ? '#10b981' : '#6b7280', flexShrink: 0 }} title={m.activeTasks > 0 ? 'Active' : 'Idle'} />
               </div>
@@ -127,16 +127,16 @@ export default function Team() {
                   { label: 'Done', value: m.doneTasks, color: '#10b981' },
                   { label: 'Overdue', value: m.overdueTasks, color: m.overdueTasks > 0 ? '#ef4444' : '#6b7280' },
                 ].map(({ label, value, color }) => (
-                  <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: 'hsl(var(--surface-2))', borderRadius: 7 }}>
+                  <div key={label} style={{ textAlign: 'center', padding: '8px 4px', background: 'var(--bg-elevated)', borderRadius: 7 }}>
                     <div style={{ fontSize: 16, fontWeight: 700, color }}>{value}</div>
-                    <div style={{ fontSize: 10, color: 'hsl(var(--text-3))', marginTop: 1 }}>{label}</div>
+                    <div style={{ fontSize: 10, color: 'var(--tx-3)', marginTop: 1 }}>{label}</div>
                   </div>
                 ))}
               </div>
 
               {/* Workload bar */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'hsl(var(--text-3))' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--tx-3)' }}>
                   <span>Workload</span>
                   <span style={{ fontWeight: 600 }}>{m.activeTasks} tasks</span>
                 </div>
@@ -147,7 +147,7 @@ export default function Team() {
               {m.specialties?.length > 0 && (
                 <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                   {m.specialties.slice(0, 3).map(s => (
-                    <span key={s} style={{ fontSize: 10, padding: '2px 6px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 4, color: 'hsl(var(--text-3))' }}>{s}</span>
+                    <span key={s} style={{ fontSize: 10, padding: '2px 6px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--tx-3)' }}>{s}</span>
                   ))}
                 </div>
               )}

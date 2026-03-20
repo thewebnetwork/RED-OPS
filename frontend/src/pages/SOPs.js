@@ -59,27 +59,27 @@ function DocViewer({ doc, onEdit, onClose }) {
 
   // Simple markdown-like renderer
   const renderLine = (line, i) => {
-    if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: 18, fontWeight: 800, color: 'hsl(var(--text-1))', margin: '0 0 12px', letterSpacing: '-.02em' }}>{line.slice(2)}</h1>;
-    if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: 14, fontWeight: 700, color: 'hsl(var(--text-1))', margin: '20px 0 8px', borderBottom: '1px solid hsl(var(--border))', paddingBottom: 6 }}>{line.slice(3)}</h2>;
-    if (line.startsWith('### ')) return <h3 key={i} style={{ fontSize: 13, fontWeight: 700, color: 'hsl(var(--text-2))', margin: '14px 0 6px' }}>{line.slice(4)}</h3>;
-    if (line.startsWith('- [ ] ')) return <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0', fontSize: 13, color: 'hsl(var(--text-2))' }}><input type="checkbox" style={{ accentColor: 'hsl(var(--primary))' }} /><span>{line.slice(6)}</span></div>;
-    if (line.startsWith('- ')) return <div key={i} style={{ padding: '2px 0 2px 14px', fontSize: 13, color: 'hsl(var(--text-2))', position: 'relative' }}><span style={{ position: 'absolute', left: 4, color: 'hsl(var(--text-3))' }}>·</span>{line.slice(2)}</div>;
+    if (line.startsWith('# ')) return <h1 key={i} style={{ fontSize: 18, fontWeight: 800, color: 'var(--tx-1)', margin: '0 0 12px', letterSpacing: '-.02em' }}>{line.slice(2)}</h1>;
+    if (line.startsWith('## ')) return <h2 key={i} style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', margin: '20px 0 8px', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>{line.slice(3)}</h2>;
+    if (line.startsWith('### ')) return <h3 key={i} style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-2)', margin: '14px 0 6px' }}>{line.slice(4)}</h3>;
+    if (line.startsWith('- [ ] ')) return <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0', fontSize: 13, color: 'var(--tx-2)' }}><input type="checkbox" style={{ accentColor: 'var(--red)' }} /><span>{line.slice(6)}</span></div>;
+    if (line.startsWith('- ')) return <div key={i} style={{ padding: '2px 0 2px 14px', fontSize: 13, color: 'var(--tx-2)', position: 'relative' }}><span style={{ position: 'absolute', left: 4, color: 'var(--tx-3)' }}>·</span>{line.slice(2)}</div>;
     if (line.startsWith('|') && line.includes('|')) {
       const cells = line.split('|').filter(c => c.trim());
       const isHeader = i < lines.length - 1 && lines[i + 1].startsWith('|---');
       const isSeparator = line.includes('---');
       if (isSeparator) return null;
       return (
-        <div key={i} style={{ display: 'flex', borderBottom: '1px solid hsl(var(--border))', background: isHeader ? 'hsl(var(--surface-3))' : 'transparent' }}>
+        <div key={i} style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: isHeader ? 'var(--bg-overlay)' : 'transparent' }}>
           {cells.map((cell, ci) => (
-            <div key={ci} style={{ flex: 1, padding: '6px 8px', fontSize: 12, color: isHeader ? 'hsl(var(--text-3))' : 'hsl(var(--text-2))', fontWeight: isHeader ? 600 : 400, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cell.trim()}</div>
+            <div key={ci} style={{ flex: 1, padding: '6px 8px', fontSize: 12, color: isHeader ? 'var(--tx-3)' : 'var(--tx-2)', fontWeight: isHeader ? 600 : 400, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cell.trim()}</div>
           ))}
         </div>
       );
     }
-    if (line === '---') return <hr key={i} style={{ border: 'none', borderTop: '1px solid hsl(var(--border))', margin: '16px 0' }} />;
+    if (line === '---') return <hr key={i} style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '16px 0' }} />;
     if (!line.trim()) return <div key={i} style={{ height: 8 }} />;
-    return <p key={i} style={{ margin: '2px 0', fontSize: 13, color: 'hsl(var(--text-2))', lineHeight: 1.6 }}>{line}</p>;
+    return <p key={i} style={{ margin: '2px 0', fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.6 }}>{line}</p>;
   };
 
   return (
@@ -88,20 +88,20 @@ function DocViewer({ doc, onEdit, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexShrink: 0 }}>
           <div style={{ flex: 1 }}>
             <span style={{ fontSize: 10, fontWeight: 600, color: CAT_COLORS[doc.category] || '#6b7280', letterSpacing: '.06em', textTransform: 'uppercase' }}>{doc.category}</span>
-            <h2 style={{ margin: '3px 0 0', fontSize: 16, fontWeight: 700, color: 'hsl(var(--text-1))' }}>{doc.title}</h2>
+            <h2 style={{ margin: '3px 0 0', fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>{doc.title}</h2>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))' }}><X size={16} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}><X size={16} /></button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {lines.map((line, i) => renderLine(line, i))}
         </div>
-        <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid hsl(var(--border))', display: 'flex', gap: 8, flexShrink: 0 }}>
-          <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', flex: 1 }}>
+        <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', gap: 8, flexShrink: 0 }}>
+          <div style={{ fontSize: 11, color: 'var(--tx-3)', flex: 1 }}>
             {doc.tags?.map(t => (
-              <span key={t} style={{ marginRight: 6, padding: '1px 6px', background: 'hsl(var(--surface-2))', borderRadius: 4, fontSize: 10 }}>{t}</span>
+              <span key={t} style={{ marginRight: 6, padding: '1px 6px', background: 'var(--bg-elevated)', borderRadius: 4, fontSize: 10 }}>{t}</span>
             ))}
           </div>
-          <button onClick={onClose} className="btn-ghost-dark" style={{ padding: '6px 14px', fontSize: 12 }}>Close</button>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: '6px 14px', fontSize: 12 }}>Close</button>
         </div>
       </div>
     </div>
@@ -128,11 +128,11 @@ export default function SOPs() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ flex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>SOPs & Playbooks</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'hsl(var(--text-3))' }}>Processes, templates, and reference docs</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>SOPs & Playbooks</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--tx-3)' }}>Processes, templates, and reference docs</p>
         </div>
         <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--text-3))', pointerEvents: 'none' }} />
+          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
           <input className="input-field" placeholder="Search docs..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 28, width: 200, height: 34, fontSize: 12 }} />
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function SOPs() {
 
         {/* Sidebar */}
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>Categories</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>Categories</div>
           {CATEGORIES.map(cat => {
             const Icon = CAT_ICONS[cat] || BookOpen;
             const count = cat === 'All' ? docs.length : docs.filter(d => d.category === cat).length;
@@ -152,18 +152,18 @@ export default function SOPs() {
                 onClick={() => setCategory(cat)}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', marginBottom: 2,
-                  background: active ? 'hsl(var(--primary) / .12)' : 'transparent',
-                  border: active ? '1px solid hsl(var(--primary) / .3)' : '1px solid transparent',
+                  background: active ? 'rgba(201,42,62,.12)' : 'transparent',
+                  border: active ? '1px solid rgba(201,42,62,.3)' : '1px solid transparent',
                   borderRadius: 7, cursor: 'pointer',
-                  color: active ? 'hsl(var(--primary))' : 'hsl(var(--text-2))',
+                  color: active ? 'var(--red)' : 'var(--tx-2)',
                   transition: 'all .15s',
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'hsl(var(--surface-2))'; }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
               >
                 <Icon size={14} />
                 <span style={{ flex: 1, fontSize: 12.5, fontWeight: active ? 600 : 400, textAlign: 'left' }}>{cat}</span>
-                <span style={{ fontSize: 11, color: 'hsl(var(--text-3))', background: 'hsl(var(--surface-2))', padding: '0 5px', borderRadius: 8 }}>{count}</span>
+                <span style={{ fontSize: 11, color: 'var(--tx-3)', background: 'var(--bg-elevated)', padding: '0 5px', borderRadius: 8 }}>{count}</span>
               </button>
             );
           })}
@@ -172,9 +172,9 @@ export default function SOPs() {
         {/* Doc Grid */}
         <div>
           {filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: 'hsl(var(--text-3))' }}>
+            <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--tx-3)' }}>
               <BookOpen size={32} style={{ opacity: .2, marginBottom: 8 }} />
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'hsl(var(--text-2))' }}>No documents found</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-2)' }}>No documents found</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -186,26 +186,26 @@ export default function SOPs() {
                     key={doc.id}
                     onClick={() => setViewing(doc)}
                     style={{
-                      padding: '14px 16px', background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))',
+                      padding: '14px 16px', background: 'var(--bg-card)', border: '1px solid var(--border)',
                       borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
                       transition: 'all .15s',
                     }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.transform = 'translateX(2px)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.transform = 'none'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: 9, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Icon size={17} style={{ color }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: 'hsl(var(--text-1))', marginBottom: 3 }}>{doc.title}</div>
-                      <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))' }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--tx-1)', marginBottom: 3 }}>{doc.title}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--tx-3)' }}>
                         {doc.tags?.slice(0, 3).map(t => (
-                          <span key={t} style={{ marginRight: 6, padding: '1px 5px', background: 'hsl(var(--surface-2))', borderRadius: 3, fontSize: 10 }}>{t}</span>
+                          <span key={t} style={{ marginRight: 6, padding: '1px 5px', background: 'var(--bg-elevated)', borderRadius: 3, fontSize: 10 }}>{t}</span>
                         ))}
                       </div>
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 600, color, padding: '2px 7px', background: color + '20', borderRadius: 4 }}>{doc.category}</span>
-                    <ChevronRight size={13} style={{ color: 'hsl(var(--text-3))' }} />
+                    <ChevronRight size={13} style={{ color: 'var(--tx-3)' }} />
                   </div>
                 );
               })}

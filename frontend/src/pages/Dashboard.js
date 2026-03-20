@@ -3,18 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Plus, RefreshCw, TrendingUp, TrendingDown,
-  Clock, CheckCircle2, AlertTriangle, Activity,
-  Users, DollarSign, Inbox, Zap, ChevronRight,
-  Circle, ArrowUpRight, MoreHorizontal, Calendar,
-  Target, Star, AlertCircle
+  CheckCircle2, AlertTriangle, Inbox, Zap,
+  ChevronRight, Circle, Calendar, Target, AlertCircle
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
 const token = () => localStorage.getItem('token');
-const get = (path) => fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token()}` } }).then(r => r.ok ? r.json() : null);
+const get = (path) => fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token()}` } })
+  .then(r => r.ok ? r.json() : null).catch(() => null);
 
-// ── Helpers ──
 const greet = () => {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -22,78 +19,136 @@ const greet = () => {
   return 'Good evening';
 };
 
-const STATUS_COLORS = {
-  open: '#3b82f6',
-  assigned: '#8b5cf6',
-  in_progress: '#f59e0b',
-  pending_review: '#a855f7',
-  delivered: '#10b981',
-  closed: '#6b7280',
-  revisions: '#ef4444',
+const STATUS_COLOR = {
+  open: '#3b82f6', assigned: '#8b5cf6', in_progress: '#f59e0b',
+  pending_review: '#a855f7', delivered: '#22c55e', closed: '#606060', revisions: '#ef4444',
 };
 
-const PRIORITY_DOT = {
-  urgent: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#6b7280',
-};
+const PRI_COLOR = { urgent: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#606060' };
 
-function PriorityDot({ p }) {
-  return <span style={{ width: 7, height: 7, borderRadius: '50%', background: PRIORITY_DOT[p] || '#6b7280', display: 'inline-block', flexShrink: 0 }} />;
+// ── Sub-components ──────────────────────────────────────────
+
+function Dot({ color }) {
+  return <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />;
 }
 
 function StatusPill({ s }) {
-  const label = s?.replace(/_/g, ' ') || 'open';
-  const color = STATUS_COLORS[s] || '#6b7280';
+  const color = STATUS_COLOR[s] || '#606060';
   return (
-    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: color + '22', color, letterSpacing: '.03em', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-      {label}
+    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: color + '20', color, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+      {(s || 'open').replace(/_/g, ' ')}
     </span>
   );
 }
 
-function MetricCard({ icon: Icon, label, value, sub, trend, color = '#a855f7', loading }) {
+function MetricCard({ icon: Icon, label, value, sub, color = '#a855f7', loading }) {
   return (
-    <div className="metric-card" style={{ cursor: 'default' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 9, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={17} style={{ color }} />
+    <div style={{
+      background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
+      padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ width: 34, height: 34, borderRadius: 8, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={16} style={{ color }} />
         </div>
-        {trend !== undefined && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: trend >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-            {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-            {Math.abs(trend)}%
-          </div>
-        )}
       </div>
-      <div className="metric-value" style={{ color: 'hsl(var(--text-1))' }}>
-        {loading ? <span style={{ opacity: .3 }}>—</span> : value ?? '—'}
+      <div>
+        <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--tx-1)' }}>
+          {loading ? <span style={{ color: 'var(--tx-3)' }}>—</span> : (value ?? '—')}
+        </div>
+        <div style={{ fontSize: 12.5, color: 'var(--tx-3)', marginTop: 4 }}>{label}</div>
+        {sub && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2, opacity: 0.7 }}>{sub}</div>}
       </div>
-      <div style={{ fontSize: 12, color: 'hsl(var(--text-3))', marginTop: 2 }}>{label}</div>
-      {sub && <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 4, opacity: .7 }}>{sub}</div>}
     </div>
   );
 }
 
-function InsightCard({ type, text, action, onAction }) {
-  const configs = {
-    warning: { icon: AlertTriangle, color: '#f59e0b', bg: '#f59e0b12' },
-    danger: { icon: AlertCircle, color: '#ef4444', bg: '#ef444412' },
-    success: { icon: CheckCircle2, color: '#10b981', bg: '#10b98112' },
-    info: { icon: Zap, color: '#3b82f6', bg: '#3b82f612' },
+function InsightRow({ type, text, action, onAction }) {
+  const map = {
+    warning: { cls: 'warn',   icon: AlertTriangle, color: '#f59e0b' },
+    danger:  { cls: 'danger', icon: AlertCircle,   color: '#ef4444' },
+    success: { cls: 'good',   icon: CheckCircle2,  color: '#22c55e' },
+    info:    { cls: 'info',   icon: Zap,           color: '#3b82f6' },
   };
-  const { icon: Icon, color, bg } = configs[type] || configs.info;
+  const { cls, icon: Icon, color } = map[type] || map.info;
   return (
-    <div className="insight" style={{ background: bg, borderColor: color + '30', cursor: action ? 'pointer' : 'default' }} onClick={onAction}>
-      <Icon size={14} style={{ color, flexShrink: 0 }} />
-      <span style={{ flex: 1, fontSize: 12.5, color: 'hsl(var(--text-2))' }}>{text}</span>
+    <div className={`insight ${cls}`} onClick={onAction} style={{ cursor: onAction ? 'pointer' : 'default' }}>
+      <Icon size={13} style={{ color, flexShrink: 0 }} />
+      <span style={{ flex: 1, fontSize: 12.5, color: 'var(--tx-2)' }}>{text}</span>
       {action && <span style={{ fontSize: 11, color, fontWeight: 600, flexShrink: 0 }}>{action} →</span>}
     </div>
   );
 }
 
-// ────────────────────────────────────────────
+function SectionLabel({ children, to }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.08em' }}>{children}</span>
+      {to && (
+        <Link to={to} style={{ fontSize: 11, color: 'var(--red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}>
+          View all <ChevronRight size={11} />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function RequestRow({ req }) {
+  return (
+    <Link to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px',
+        borderRadius: 8, transition: 'background .1s', cursor: 'pointer',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      >
+        <Dot color={PRI_COLOR[req.priority] || '#606060'} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {req.title || req.request_type || 'Request'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>
+            {req.order_code} · {req.requester_name || 'Client'}
+          </div>
+        </div>
+        <StatusPill s={req.status} />
+      </div>
+    </Link>
+  );
+}
+
+function TaskRow({ task }) {
+  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
+  return (
+    <Link to="/tasks" style={{ textDecoration: 'none' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px', borderRadius: 8, transition: 'background .1s', cursor: 'pointer',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      >
+        <Circle size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {task.title}
+          </div>
+          {task.due_date && (
+            <div style={{ fontSize: 11, color: isOverdue ? '#ef4444' : 'var(--tx-3)', marginTop: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Calendar size={9} />
+              Due {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+            </div>
+          )}
+        </div>
+        <Dot color={PRI_COLOR[task.priority] || '#606060'} />
+      </div>
+    </Link>
+  );
+}
+
+// ── Main ────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -103,30 +158,20 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [requests, setRequests] = useState([]);
   const [activity, setActivity] = useState([]);
-  const [lastRefresh, setLastRefresh] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [dashRes, tasksRes, ordersRes, notifRes] = await Promise.all([
         get('/dashboard/v2'),
-        get('/tasks?limit=8&status=todo,doing,review'),
-        get('/orders?limit=8&status=open,assigned,in_progress,pending_review'),
-        get('/notifications?limit=8'),
+        get('/tasks?limit=8'),
+        get('/orders?limit=8'),
+        get('/notifications?limit=6'),
       ]);
       if (dashRes) setMetrics(dashRes);
-      if (tasksRes?.items || tasksRes?.tasks || Array.isArray(tasksRes)) {
-        setTasks(tasksRes?.items || tasksRes?.tasks || tasksRes || []);
-      }
-      if (ordersRes?.orders || Array.isArray(ordersRes)) {
-        setRequests(ordersRes?.orders || ordersRes || []);
-      }
-      if (notifRes?.notifications || Array.isArray(notifRes)) {
-        setActivity(notifRes?.notifications || notifRes || []);
-      }
-      setLastRefresh(new Date());
-    } catch (e) {
-      console.error(e);
+      setTasks(tasksRes?.items || tasksRes?.tasks || (Array.isArray(tasksRes) ? tasksRes : []));
+      setRequests(ordersRes?.orders || (Array.isArray(ordersRes) ? ordersRes : []));
+      setActivity(notifRes?.notifications || (Array.isArray(notifRes) ? notifRes : []));
     } finally {
       setLoading(false);
     }
@@ -134,257 +179,164 @@ export default function Dashboard() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── Compute insights from data ──
+  // Compute insights
   const insights = [];
-  if (metrics) {
+  if (!loading) {
     const unassigned = metrics?.kpi?.open || 0;
-    if (unassigned > 3) insights.push({ type: 'warning', text: `${unassigned} requests are unassigned and waiting`, action: 'Review', nav: '/requests' });
-    if (metrics?.sla?.breached > 0) insights.push({ type: 'danger', text: `${metrics.sla.breached} request${metrics.sla.breached > 1 ? 's' : ''} have breached SLA`, action: 'View', nav: '/requests' });
-    if (metrics?.sla?.at_risk > 0) insights.push({ type: 'warning', text: `${metrics.sla.at_risk} request${metrics.sla.at_risk > 1 ? 's' : ''} approaching SLA deadline`, action: 'View', nav: '/requests' });
-    if (metrics?.kpi?.delivered > 0) insights.push({ type: 'success', text: `${metrics.kpi.delivered} deliveries completed this month — great output`, action: null });
-  }
-  if (tasks.length > 0) {
-    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date()).length;
-    if (overdue > 0) insights.push({ type: 'danger', text: `${overdue} task${overdue > 1 ? 's' : ''} past due date`, action: 'View Tasks', nav: '/tasks' });
-  }
-  if (insights.length === 0 && !loading) {
-    insights.push({ type: 'success', text: 'Everything looks on track — no critical alerts', action: null });
+    const breached   = metrics?.sla?.breached || 0;
+    const atRisk     = metrics?.sla?.at_risk || 0;
+    const delivered  = metrics?.kpi?.delivered || 0;
+    const overdue    = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length;
+
+    if (breached > 0) insights.push({ type: 'danger',  text: `${breached} request${breached > 1 ? 's' : ''} have breached SLA`, action: 'View', nav: '/requests' });
+    if (overdue  > 0) insights.push({ type: 'danger',  text: `${overdue} task${overdue > 1 ? 's' : ''} past due date`, action: 'View', nav: '/tasks' });
+    if (atRisk   > 0) insights.push({ type: 'warning', text: `${atRisk} request${atRisk > 1 ? 's' : ''} approaching SLA deadline`, action: 'View', nav: '/requests' });
+    if (unassigned > 3) insights.push({ type: 'warning', text: `${unassigned} requests unassigned and waiting`, action: 'Assign', nav: '/requests' });
+    if (delivered > 0)  insights.push({ type: 'success', text: `${delivered} deliveries completed this month` });
+    if (insights.length === 0) insights.push({ type: 'success', text: 'Everything is on track — no critical alerts' });
   }
 
   const today = new Date().toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <div className="page-content" style={{ animation: 'fadeInUp .3s ease' }}>
+    <div className="page-scroll">
+      <div style={{ padding: '24px 28px', maxWidth: 1100 }}>
 
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em', margin: 0, lineHeight: 1.2 }}>
-            {greet()}, {user?.name?.split(' ')[0] || 'there'} 👋
-          </h1>
-          <p style={{ fontSize: 13, color: 'hsl(var(--text-3))', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Calendar size={12} /> {today}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 7, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12 }}>
-            <RefreshCw size={12} style={loading ? { animation: 'spin 1s linear infinite' } : {}} />
-            Refresh
-          </button>
-          <button onClick={() => navigate('/command-center')} className="btn-primary-dark btn-sm" style={{ gap: 6 }}>
-            <Plus size={13} /> New Request
-          </button>
-        </div>
-      </div>
-
-      {/* ── Metric Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <MetricCard
-          icon={Inbox}
-          label="Open Requests"
-          value={(metrics?.kpi?.open || 0) + (metrics?.kpi?.in_progress || 0) + (metrics?.kpi?.pending_review || 0)}
-          sub={`${metrics?.kpi?.open || 0} unassigned`}
-          color="#3b82f6"
-          loading={loading}
-        />
-        <MetricCard
-          icon={CheckCircle2}
-          label="Deliveries MTD"
-          value={metrics?.kpi?.delivered || 0}
-          sub="this month"
-          color="#10b981"
-          loading={loading}
-        />
-        <MetricCard
-          icon={Target}
-          label="My Open Tasks"
-          value={tasks.length}
-          sub="in progress"
-          color="#f59e0b"
-          loading={loading}
-        />
-        <MetricCard
-          icon={AlertTriangle}
-          label="SLA Risks"
-          value={(metrics?.sla?.at_risk || 0) + (metrics?.sla?.breached || 0)}
-          sub={`${metrics?.sla?.breached || 0} breached`}
-          color={((metrics?.sla?.breached || 0) > 0) ? '#ef4444' : '#a855f7'}
-          loading={loading}
-        />
-      </div>
-
-      {/* ── Insights ── */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
-          AI Insights
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {loading ? (
-            <div style={{ height: 36, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .4 }} />
-          ) : (
-            insights.map((ins, i) => (
-              <InsightCard key={i} {...ins} onAction={ins.nav ? () => navigate(ins.nav) : undefined} />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* ── Main Grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-
-        {/* Open Requests */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-              Open Requests
-            </div>
-            <Link to="/requests" style={{ fontSize: 11, color: 'hsl(var(--primary))', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
-              View all <ChevronRight size={11} />
-            </Link>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, gap: 12 }}>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--tx-1)', margin: 0, letterSpacing: '-0.03em' }}>
+              {greet()}, {user?.name?.split(' ')[0] || 'there'} 👋
+            </h1>
+            <p style={{ fontSize: 12.5, color: 'var(--tx-3)', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Calendar size={11} /> {today}
+            </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button onClick={load} className="btn-ghost btn-sm" style={{ gap: 5 }}>
+              <RefreshCw size={12} className={loading ? 'spin' : ''} /> Refresh
+            </button>
+            <button onClick={() => navigate('/command-center')} className="btn-primary btn-sm" style={{ gap: 5 }}>
+              <Plus size={13} /> New Request
+            </button>
+          </div>
+        </div>
+
+        {/* Metric cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+          <MetricCard icon={Inbox} label="Open Requests" color="#3b82f6"
+            value={loading ? null : (metrics?.kpi?.open || 0) + (metrics?.kpi?.in_progress || 0)}
+            sub={`${metrics?.kpi?.open || 0} unassigned`} loading={loading} />
+          <MetricCard icon={CheckCircle2} label="Deliveries MTD" color="#22c55e"
+            value={loading ? null : metrics?.kpi?.delivered || 0}
+            sub="this month" loading={loading} />
+          <MetricCard icon={Target} label="Open Tasks" color="#f59e0b"
+            value={loading ? null : tasks.filter(t => t.status !== 'done').length}
+            sub="in progress" loading={loading} />
+          <MetricCard icon={AlertTriangle} label="SLA Risks" color={((metrics?.sla?.breached || 0) > 0) ? '#ef4444' : '#a855f7'}
+            value={loading ? null : (metrics?.sla?.at_risk || 0) + (metrics?.sla?.breached || 0)}
+            sub={`${metrics?.sla?.breached || 0} breached`} loading={loading} />
+        </div>
+
+        {/* Insights */}
+        <div style={{ marginBottom: 24 }}>
+          <SectionLabel>AI Insights</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             {loading ? (
-              [1, 2, 3].map(i => (
-                <div key={i} style={{ height: 52, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .3 }} />
-              ))
-            ) : requests.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 13, background: 'hsl(var(--surface-2))', borderRadius: 8 }}>
-                No open requests 🎉
-              </div>
+              <div style={{ height: 38, background: 'var(--bg-elevated)', borderRadius: 8, opacity: 0.5 }} />
             ) : (
-              requests.map(req => (
-                <Link key={req.id} to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    padding: '10px 12px',
-                    background: 'hsl(var(--surface-2))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    transition: 'border-color .15s',
-                    cursor: 'pointer',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'hsl(var(--border))'}
-                  >
-                    <PriorityDot p={req.priority} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {req.title || req.request_type || 'Request'}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1 }}>
-                        {req.order_code} · {req.requester_name || 'Client'}
-                      </div>
-                    </div>
-                    <StatusPill s={req.status} />
-                  </div>
-                </Link>
+              insights.map((ins, i) => (
+                <InsightRow key={i} {...ins} onAction={ins.nav ? () => navigate(ins.nav) : undefined} />
               ))
             )}
           </div>
         </div>
 
-        {/* My Tasks */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-              My Tasks
+        {/* Two-col */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+
+          {/* Open Requests */}
+          <div>
+            <SectionLabel to="/requests">Open Requests</SectionLabel>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+              {loading ? (
+                [0, 1, 2].map(i => (
+                  <div key={i} style={{ height: 52, margin: 8, background: 'var(--bg-elevated)', borderRadius: 7, opacity: 0.4 }} />
+                ))
+              ) : requests.length === 0 ? (
+                <div style={{ padding: '28px', textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>
+                  No open requests 🎉
+                </div>
+              ) : (
+                <div style={{ padding: '6px' }}>
+                  {requests.slice(0, 6).map(req => <RequestRow key={req.id} req={req} />)}
+                </div>
+              )}
             </div>
-            <Link to="/tasks" style={{ fontSize: 11, color: 'hsl(var(--primary))', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
-              View all <ChevronRight size={11} />
-            </Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {loading ? (
-              [1, 2, 3].map(i => (
-                <div key={i} style={{ height: 52, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .3 }} />
-              ))
-            ) : tasks.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 13, background: 'hsl(var(--surface-2))', borderRadius: 8 }}>
-                No tasks right now — clean slate ✓
+
+          {/* My Tasks */}
+          <div>
+            <SectionLabel to="/tasks">My Tasks</SectionLabel>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+              {loading ? (
+                [0, 1, 2].map(i => (
+                  <div key={i} style={{ height: 52, margin: 8, background: 'var(--bg-elevated)', borderRadius: 7, opacity: 0.4 }} />
+                ))
+              ) : tasks.length === 0 ? (
+                <div style={{ padding: '28px', textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>
+                  No tasks right now ✓
+                </div>
+              ) : (
+                <div style={{ padding: '6px' }}>
+                  {tasks.slice(0, 6).map(task => <TaskRow key={task.id} task={task} />)}
+                </div>
+              )}
+              <div style={{ padding: '6px 6px 8px' }}>
+                <button
+                  onClick={() => navigate('/tasks?new=1')}
+                  style={{ width: '100%', padding: '7px', background: 'transparent', border: '1px dashed var(--border)', borderRadius: 7, cursor: 'pointer', color: 'var(--tx-3)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.color = 'var(--red)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+                >
+                  <Plus size={11} /> Add task
+                </button>
               </div>
-            ) : (
-              tasks.map(task => (
-                <Link key={task.id} to="/tasks" style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    padding: '10px 12px',
-                    background: 'hsl(var(--surface-2))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    cursor: 'pointer',
-                    transition: 'border-color .15s',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'hsl(var(--border))'}
-                  >
-                    <Circle size={13} style={{ color: 'hsl(var(--text-3))', flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {task.title}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1, display: 'flex', gap: 6, alignItems: 'center' }}>
-                        {task.due_date && (
-                          <span style={{ color: new Date(task.due_date) < new Date() ? '#ef4444' : 'hsl(var(--text-3))' }}>
-                            Due {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
-                          </span>
-                        )}
-                        {task.assignee_name && <span>{task.assignee_name}</span>}
-                      </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Activity */}
+        {activity.length > 0 && (
+          <div>
+            <SectionLabel>Recent Activity</SectionLabel>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+              {activity.slice(0, 5).map((n, i) => (
+                <div key={n.id || i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                  borderBottom: i < 4 ? '1px solid var(--border)' : 'none',
+                }}>
+                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                    {(n.actor_name || n.title || 'S').charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {n.message || n.title || 'Activity'}
                     </div>
-                    <PriorityDot p={task.priority} />
+                    {n.created_at && (
+                      <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>
+                        {new Date(n.created_at).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    )}
                   </div>
-                </Link>
-              ))
-            )}
+                  {!n.is_read && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--red)', flexShrink: 0 }} />}
+                </div>
+              ))}
+            </div>
           </div>
-          <button
-            onClick={() => navigate('/tasks?new=1')}
-            style={{ marginTop: 8, width: '100%', padding: '8px', background: 'transparent', border: '1px dashed hsl(var(--border))', borderRadius: 8, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'hsl(var(--primary))'; e.currentTarget.style.color = 'hsl(var(--primary))'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.color = 'hsl(var(--text-3))'; }}
-          >
-            <Plus size={12} /> Add task
-          </button>
-        </div>
+        )}
+
       </div>
-
-      {/* ── Activity Feed ── */}
-      {activity.length > 0 && (
-        <div style={{ marginTop: 24 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
-            Recent Activity
-          </div>
-          <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, overflow: 'hidden' }}>
-            {activity.slice(0, 5).map((n, i) => (
-              <div key={n.id || i} style={{
-                padding: '10px 14px',
-                borderBottom: i < Math.min(activity.length, 5) - 1 ? '1px solid hsl(var(--border))' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
-                  {(n.actor_name || n.title || 'S').charAt(0).toUpperCase()}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {n.message || n.title || 'Activity'}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1 }}>
-                    {n.created_at ? new Date(n.created_at).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
-                  </div>
-                </div>
-                {!n.is_read && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'hsl(var(--primary))', flexShrink: 0 }} />}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

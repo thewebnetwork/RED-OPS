@@ -81,7 +81,7 @@ function NavItem({ item, location, onClick, badgeCount }) {
       <item.icon size={15} />
       <span style={{ flex: 1 }}>{item.label}</span>
       {item.isNew && (
-        <span style={{ fontSize:9, fontWeight:700, background:'rgba(168,85,247,.15)', color:'#a855f7', padding:'1px 5px', borderRadius:4, letterSpacing:'.05em' }}>
+        <span style={{ fontSize:9, fontWeight:700, background:'#a855f718', color:'#a855f7', padding:'1px 5px', borderRadius:4, letterSpacing:'.05em' }}>
           NEW
         </span>
       )}
@@ -179,35 +179,35 @@ export default function Layout({ children }) {
       }`}>
 
         {/* Logo */}
-        <div style={{ padding:'14px 16px', borderBottom:'1px solid hsl(var(--border))', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
-          <div style={{ width:30, height:30, background:'hsl(var(--primary))', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:14, color:'white', flexShrink:0 }}>
+        <div style={{ padding:'12px 14px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+          <div style={{ width:28, height:28, background:'var(--red)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:13, color:'white', flexShrink:0, letterSpacing:'-.02em' }}>
             R
           </div>
           <div>
-            <div style={{ fontSize:14, fontWeight:800, letterSpacing:'-0.02em', fontFamily:'DM Sans, sans-serif' }}>RED OPS</div>
-            <div style={{ fontSize:9, color:'hsl(var(--text-3))', letterSpacing:'0.1em', textTransform:'uppercase' }}>Red Ribbon Group</div>
+            <div style={{ fontSize:13, fontWeight:800, letterSpacing:'-0.03em', color:'var(--tx-1)' }}>RED OPS</div>
+            <div style={{ fontSize:9, color:'var(--tx-3)', letterSpacing:'0.09em', textTransform:'uppercase', marginTop:1 }}>Red Ribbon Group</div>
           </div>
           <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}
-            style={{ color:'hsl(var(--text-3))', background:'none', border:'none', cursor:'pointer' }}>
-            <X size={18} />
+            style={{ color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer', padding:2 }}>
+            <X size={16} />
           </button>
         </div>
 
         {/* Search trigger */}
-        <div style={{ padding:'10px 10px 2px' }}>
+        <div style={{ padding:'8px 10px 4px' }}>
           <button onClick={openCmd} style={{
-            width:'100%', display:'flex', alignItems:'center', gap:8, padding:'7px 10px',
-            background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7,
-            cursor:'pointer', color:'hsl(var(--text-3))', fontSize:12, fontFamily:'Inter, sans-serif',
+            width:'100%', display:'flex', alignItems:'center', gap:7, padding:'6px 9px',
+            background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7,
+            cursor:'pointer', color:'var(--tx-3)', fontSize:12,
           }}>
-            <Search size={13} />
+            <Search size={12} style={{ flexShrink:0 }} />
             <span style={{ flex:1, textAlign:'left' }}>Search...</span>
-            <kbd style={{ fontSize:10 }}>⌘K</kbd>
+            <kbd>⌘K</kbd>
           </button>
         </div>
 
         {/* Nav items */}
-        <nav style={{ flex:1, overflowY:'auto', padding:'4px 10px 10px' }}>
+        <nav style={{ flex:1, overflowY:'auto', padding:'2px 8px 8px' }}>
           {mainItems.length > 0 && (
             <>
               <div className="nav-section-label" style={{ marginTop:10 }}>Menu</div>
@@ -229,69 +229,74 @@ export default function Layout({ children }) {
         </nav>
 
         {/* User */}
-        <div style={{ padding:'10px', borderTop:'1px solid hsl(var(--border))', flexShrink:0 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:9, padding:'8px 10px', borderRadius:8, cursor:'pointer' }}
-            onMouseEnter={e => e.currentTarget.style.background='hsl(var(--surface-2))'}
+        <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'default' }}
+            onMouseEnter={e => e.currentTarget.style.background='var(--bg-elevated)'}
             onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-            <div style={{ width:28, height:28, background:'hsl(var(--primary))', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
+            <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:12.5, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name || 'User'}</div>
-              <div style={{ fontSize:10.5, color:'hsl(var(--text-3))' }}>{user?.role || ''}</div>
+              <div style={{ fontSize:12.5, fontWeight:600, color:'var(--tx-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name || 'User'}</div>
+              <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:1 }}>{user?.role || ''}</div>
             </div>
-            <button onClick={handleLogout} title="Sign out" style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--text-3))', display:'flex', alignItems:'center', padding:4, borderRadius:5 }}
-              onMouseEnter={e => { e.currentTarget.style.color='#ef4444'; e.currentTarget.style.background='rgba(239,68,68,.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color='hsl(var(--text-3))'; e.currentTarget.style.background='none'; }}>
-              <LogOut size={14} />
+            <button onClick={handleLogout} title="Sign out"
+              style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', display:'flex', alignItems:'center', padding:4, borderRadius:5, flexShrink:0 }}
+              onMouseEnter={e => { e.currentTarget.style.color='#ef4444'; e.currentTarget.style.background='rgba(239,68,68,.12)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color='var(--tx-3)'; e.currentTarget.style.background='none'; }}>
+              <LogOut size={13} />
             </button>
           </div>
         </div>
       </aside>
 
       {/* ══ MAIN ══ */}
-      <div className="app-main" style={{ display:'flex', flexDirection:'column' }}>
+      <div className="app-main">
 
         {/* Top bar */}
         <div className="top-bar">
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}
-            style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--text-2))', display:'flex' }}>
+            style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)', display:'flex', padding:0 }}>
             <Menu size={18} />
           </button>
 
-          <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12.5 }}>
-            <span style={{ color:'hsl(var(--text-3))' }}>Red Ops</span>
+          <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:12.5 }}>
+            <span style={{ color:'var(--tx-3)' }}>Red Ops</span>
             {pageTitle && <>
-              <ChevronRight size={12} style={{ color:'hsl(var(--text-3))' }} />
-              <span style={{ color:'hsl(var(--text-1))', fontWeight:600 }}>{pageTitle}</span>
+              <ChevronRight size={11} style={{ color:'var(--tx-3)' }} />
+              <span style={{ color:'var(--tx-1)', fontWeight:600 }}>{pageTitle}</span>
             </>}
           </div>
 
           <div style={{ flex:1 }} />
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <button onClick={openCmd} style={{ display:'flex', alignItems:'center', gap:7, background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7, padding:'5px 12px', cursor:'pointer', color:'hsl(var(--text-3))', fontSize:12, fontFamily:'Inter, sans-serif' }}>
-              <Search size={13} />
+            <button onClick={openCmd}
+              style={{ display:'flex', alignItems:'center', gap:6, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 11px', cursor:'pointer', color:'var(--tx-3)', fontSize:12 }}>
+              <Search size={12} />
               <span>Search</span>
               <kbd>⌘K</kbd>
             </button>
 
             <div style={{ position:'relative' }}>
-              <Link to="/notifications" style={{ width:34, height:34, background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', color:'hsl(var(--text-2))' }}>
-                <Bell size={15} />
+              <Link to="/notifications"
+                style={{ width:32, height:32, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-2)' }}>
+                <Bell size={14} />
               </Link>
               {unread > 0 && <div className="notif-dot" />}
             </div>
 
-            <button onClick={() => navigate('/command-center')} className="btn-primary-dark btn-sm" style={{ gap:6 }}>
-              <Plus size={14} />
-              <span>New Request</span>
+            <button onClick={() => navigate('/command-center')} className="btn-primary btn-sm" style={{ gap:5 }}>
+              <Plus size={13} />
+              New Request
             </button>
           </div>
         </div>
 
-        {/* Page */}
-        <div style={{ flex:1 }}>{children}</div>
+        {/* Page content — flex:1 with proper scroll/fill handling */}
+        <div style={{ flex:1, minHeight:0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+          {children}
+        </div>
       </div>
 
       {/* ══ COMMAND PALETTE ══ */}
@@ -324,7 +329,7 @@ export default function Layout({ children }) {
                 </>
               )}
             </div>
-            <div style={{ padding:'8px 16px', borderTop:'1px solid hsl(var(--border))', display:'flex', gap:16, fontSize:11, color:'hsl(var(--text-3))' }}>
+            <div style={{ padding:'8px 16px', borderTop:'1px solid var(--border)', display:'flex', gap:16, fontSize:11, color:'var(--tx-3)' }}>
               <span><kbd>↑↓</kbd> navigate</span>
               <span><kbd>↵</kbd> select</span>
               <span><kbd>Esc</kbd> close</span>

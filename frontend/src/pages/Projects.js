@@ -58,7 +58,7 @@ function StatusBadge({ s }) {
 
 function ProgressBar({ value, color = '#10b981' }) {
   return (
-    <div style={{ height: 4, background: 'hsl(var(--border))', borderRadius: 2, overflow: 'hidden' }}>
+    <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
       <div style={{ height: '100%', width: `${Math.min(100, value)}%`, background: color, borderRadius: 2, transition: 'width .4s ease' }} />
     </div>
   );
@@ -85,20 +85,20 @@ function NewProjectModal({ onSave, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" style={{ width: 500 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'hsl(var(--text-1))' }}>New Project</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))' }}><X size={16} /></button>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>New Project</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}><X size={16} /></button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Project Name */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Project Name</label>
+            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Project Name</label>
             <input className="input-field" placeholder="e.g. Taryn Pessanha — Onboarding" value={form.name} onChange={e => set('name', e.target.value)} autoFocus />
           </div>
 
           {/* Project Type */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Project Type</label>
+            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Project Type</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {PROJECT_TYPES.map(t => (
                 <button
@@ -106,8 +106,8 @@ function NewProjectModal({ onSave, onClose }) {
                   onClick={() => set('type', t.key)}
                   style={{
                     padding: '10px 12px',
-                    background: form.type === t.key ? 'hsl(var(--primary) / .12)' : 'hsl(var(--surface-2))',
-                    border: `1px solid ${form.type === t.key ? 'hsl(var(--primary))' : 'hsl(var(--border))'}`,
+                    background: form.type === t.key ? 'rgba(201,42,62,.12)' : 'var(--bg-elevated)',
+                    border: `1px solid ${form.type === t.key ? 'var(--red)' : 'var(--border)'}`,
                     borderRadius: 8,
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -115,8 +115,8 @@ function NewProjectModal({ onSave, onClose }) {
                   }}
                 >
                   <div style={{ fontSize: 16, marginBottom: 3 }}>{t.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'hsl(var(--text-1))' }}>{t.label}</div>
-                  <div style={{ fontSize: 10.5, color: 'hsl(var(--text-3))', marginTop: 2 }}>{t.desc}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{t.label}</div>
+                  <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 2 }}>{t.desc}</div>
                 </button>
               ))}
             </div>
@@ -124,7 +124,7 @@ function NewProjectModal({ onSave, onClose }) {
 
           {/* Client name */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Client Name <span style={{ color: 'hsl(var(--text-3))', fontWeight: 400 }}>(optional)</span></label>
+            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Client Name <span style={{ color: 'var(--tx-3)', fontWeight: 400 }}>(optional)</span></label>
             <input className="input-field" placeholder="e.g. Taryn Pessanha" value={form.client_name} onChange={e => set('client_name', e.target.value)} />
           </div>
 
@@ -133,14 +133,14 @@ function NewProjectModal({ onSave, onClose }) {
               <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <Sparkles size={12} /> Auto-generates 16-step checklist
               </div>
-              <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))' }}>GHL setup → Meta ads → Launch → Live review. All tasks created automatically.</div>
+              <div style={{ fontSize: 11.5, color: 'var(--tx-3)' }}>GHL setup → Meta ads → Launch → Live review. All tasks created automatically.</div>
             </div>
           )}
         </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-          <button onClick={onClose} className="btn-ghost-dark" style={{ padding: '8px 16px' }}>Cancel</button>
-          <button onClick={save} className="btn-primary-dark" style={{ padding: '8px 18px' }} disabled={!form.name.trim() || saving}>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px' }}>Cancel</button>
+          <button onClick={save} className="btn-primary" style={{ padding: '8px 18px' }} disabled={!form.name.trim() || saving}>
             {saving ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : 'Create Project'}
           </button>
         </div>
@@ -165,30 +165,30 @@ function ProjectDetail({ project, onClose, onChecklistUpdate }) {
   return (
     <div style={{
       position: 'fixed', right: 0, top: 0, bottom: 0, width: 420,
-      background: 'hsl(var(--card))', borderLeft: '1px solid hsl(var(--border))',
+      background: 'var(--bg-card)', borderLeft: '1px solid var(--border)',
       display: 'flex', flexDirection: 'column', zIndex: 200, animation: 'slideInRight .2s ease',
     }}>
-      <div style={{ padding: '16px', borderBottom: '1px solid hsl(var(--border))', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'hsl(var(--text-1))' }}>{project.name}</div>
-          <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 2 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{project.name}</div>
+          <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>
             {project.type?.replace('_', ' ')} · {project.client_name || 'Internal'}
           </div>
         </div>
         <StatusBadge s={project.status || 'active'} />
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))' }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
           <X size={16} />
         </button>
       </div>
 
       {/* Progress */}
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid hsl(var(--border))' }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'hsl(var(--text-2))' }}>Onboarding Progress</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? '#10b981' : 'hsl(var(--text-1))' }}>{pct}%</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)' }}>Onboarding Progress</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? '#10b981' : 'var(--tx-1)' }}>{pct}%</span>
         </div>
-        <ProgressBar value={pct} color={pct === 100 ? '#10b981' : 'hsl(var(--primary))'} />
-        <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 5 }}>{done} of {steps.length} steps complete</div>
+        <ProgressBar value={pct} color={pct === 100 ? '#10b981' : 'var(--red)'} />
+        <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 5 }}>{done} of {steps.length} steps complete</div>
       </div>
 
       {/* Checklist */}
@@ -198,9 +198,9 @@ function ProjectDetail({ project, onClose, onChecklistUpdate }) {
           const catDone = catSteps.filter(s => s.done).length;
           return (
             <div key={cat} style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>{cat}</span>
-                <span style={{ color: catDone === catSteps.length ? '#10b981' : 'hsl(var(--text-3))' }}>{catDone}/{catSteps.length}</span>
+                <span style={{ color: catDone === catSteps.length ? '#10b981' : 'var(--tx-3)' }}>{catDone}/{catSteps.length}</span>
               </div>
               {catSteps.map(step => (
                 <div
@@ -209,13 +209,13 @@ function ProjectDetail({ project, onClose, onChecklistUpdate }) {
                   style={{ cursor: 'pointer' }}
                   onClick={() => toggle(step._idx)}
                 >
-                  <div style={{ flexShrink: 0, color: step.done ? '#10b981' : 'hsl(var(--text-3))', transition: 'color .15s' }}>
+                  <div style={{ flexShrink: 0, color: step.done ? '#10b981' : 'var(--tx-3)', transition: 'color .15s' }}>
                     {step.done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                   </div>
-                  <span style={{ flex: 1, fontSize: 13, textDecoration: step.done ? 'line-through' : 'none', color: step.done ? 'hsl(var(--text-3))' : 'hsl(var(--text-1))', transition: 'all .15s' }}>
+                  <span style={{ flex: 1, fontSize: 13, textDecoration: step.done ? 'line-through' : 'none', color: step.done ? 'var(--tx-3)' : 'var(--tx-1)', transition: 'all .15s' }}>
                     {step.title}
                   </span>
-                  <span style={{ fontSize: 10, color: 'hsl(var(--text-3))' }}>#{step.step}</span>
+                  <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>#{step.step}</span>
                 </div>
               ))}
             </div>
@@ -277,28 +277,28 @@ export default function Projects() {
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ flex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>Projects</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'hsl(var(--text-3))' }}>{projects.length} active projects</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Projects</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--tx-3)' }}>{projects.length} active projects</p>
         </div>
         <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--text-3))', pointerEvents: 'none' }} />
+          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
           <input className="input-field" placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 28, width: 200, height: 34, fontSize: 12 }} />
         </div>
-        <button onClick={() => setShowNew(true)} className="btn-primary-dark btn-sm" style={{ gap: 6 }}>
+        <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap: 6 }}>
           <Plus size={13} /> New Project
         </button>
       </div>
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={24} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'hsl(var(--text-3))' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--tx-3)' }}>
           <FolderKanban size={40} style={{ opacity: .2, marginBottom: 12 }} />
-          <div style={{ fontSize: 16, fontWeight: 600, color: 'hsl(var(--text-2))', marginBottom: 6 }}>No projects yet</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 6 }}>No projects yet</div>
           <div style={{ fontSize: 13, marginBottom: 20 }}>Start with a Client Onboarding — it auto-builds the 16-step checklist</div>
-          <button onClick={() => setShowNew(true)} className="btn-primary-dark btn-sm" style={{ gap: 6 }}>
+          <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap: 6 }}>
             <Plus size={13} /> Create first project
           </button>
         </div>
@@ -315,21 +315,21 @@ export default function Projects() {
                 key={project.id}
                 onClick={() => setSelected(project)}
                 style={{
-                  background: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRadius: 12,
                   padding: '16px',
                   cursor: 'pointer',
                   transition: 'border-color .15s, transform .15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'hsl(var(--primary))'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.transform = 'none'; }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
                   <div style={{ fontSize: 20, flexShrink: 0 }}>{typeConfig.icon}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 2 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.name}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>
                       {project.client_name || typeConfig.label} · {project.type?.replace('_', ' ')}
                     </div>
                   </div>
@@ -341,21 +341,21 @@ export default function Projects() {
                     <div style={{ marginBottom: 6 }}>
                       <ProgressBar value={pct} />
                     </div>
-                    <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', justifyContent: 'space-between' }}>
                       <span>{done} of {steps.length} steps</span>
-                      <span style={{ fontWeight: 700, color: pct === 100 ? '#10b981' : 'hsl(var(--text-2))' }}>{pct}%</span>
+                      <span style={{ fontWeight: 700, color: pct === 100 ? '#10b981' : 'var(--tx-2)' }}>{pct}%</span>
                     </div>
                   </>
                 )}
 
                 <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   {project.created_at && (
-                    <span style={{ fontSize: 11, color: 'hsl(var(--text-3))', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Calendar size={10} />
                       {new Date(project.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
                     </span>
                   )}
-                  <ChevronRight size={14} style={{ color: 'hsl(var(--text-3))' }} />
+                  <ChevronRight size={14} style={{ color: 'var(--tx-3)' }} />
                 </div>
               </div>
             );

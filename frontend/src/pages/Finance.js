@@ -22,8 +22,8 @@ function MetricTile({ icon: Icon, label, value, sub, delta, color = '#10b981' })
         )}
       </div>
       <div className="metric-value">{value || '—'}</div>
-      <div style={{ fontSize: 12, color: 'hsl(var(--text-3))', marginTop: 2 }}>{label}</div>
-      {sub && <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 3, opacity: .7 }}>{sub}</div>}
+      <div style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 2 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 3, opacity: .7 }}>{sub}</div>}
     </div>
   );
 }
@@ -35,18 +35,18 @@ function RenewalRow({ client, idx }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-      borderBottom: '1px solid hsl(var(--border))',
-      background: idx % 2 === 0 ? 'transparent' : 'hsl(var(--surface-2) / .3)',
+      borderBottom: '1px solid var(--border)',
+      background: idx % 2 === 0 ? 'transparent' : 'rgba(30,30,30,.3)',
     }}>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+      <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
         {(client.name || '?').charAt(0).toUpperCase()}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'hsl(var(--text-1))' }}>{client.name}</div>
-        <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1 }}>{client.plan || 'Growth'}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{client.name}</div>
+        <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>{client.plan || 'Growth'}</div>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'hsl(var(--text-1))' }}>${(client.mrr || 0).toLocaleString()}<span style={{ fontSize: 10, fontWeight: 400 }}>/mo</span></div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>${(client.mrr || 0).toLocaleString()}<span style={{ fontSize: 10, fontWeight: 400 }}>/mo</span></div>
         <div style={{ fontSize: 11, color: urgency, fontWeight: 600, marginTop: 1 }}>
           {daysLeft < 0 ? 'Overdue' : daysLeft === 0 ? 'Today' : `${daysLeft}d`}
         </div>
@@ -117,17 +117,17 @@ export default function Finance() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>Finance</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'hsl(var(--text-3))' }}>Revenue & client billing overview</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Finance</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--tx-3)' }}>Revenue & client billing overview</p>
         </div>
-        <button onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 7, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12 }}>
+        <button onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, cursor: 'pointer', color: 'var(--tx-3)', fontSize: 12 }}>
           <RefreshCw size={12} style={loading ? { animation: 'spin 1s linear infinite' } : {}} /> Refresh
         </button>
       </div>
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={24} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
         </div>
       ) : (
         <>
@@ -144,29 +144,29 @@ export default function Finance() {
 
             {/* Client Revenue Table */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Client Revenue Breakdown
               </div>
-              <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, overflow: 'hidden' }}>
+              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
                 {/* Table header */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 80px', padding: '8px 14px', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--surface-3))' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 80px', padding: '8px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-overlay)' }}>
                   {['Client', 'Plan', 'MRR', 'Status'].map(h => (
-                    <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase' }}>{h}</div>
+                    <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>{h}</div>
                   ))}
                 </div>
                 {clients.length === 0 ? (
-                  <div style={{ padding: '32px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 13 }}>
+                  <div style={{ padding: '32px', textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>
                     No client billing data yet. Add MRR values to client profiles to see this table.
                   </div>
                 ) : (
                   clients.map((client, i) => (
-                    <div key={client.id || i} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 80px', padding: '10px 14px', borderBottom: '1px solid hsl(var(--border))', alignItems: 'center', transition: 'background .1s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'hsl(var(--surface-3))'}
+                    <div key={client.id || i} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 80px', padding: '10px 14px', borderBottom: '1px solid var(--border)', alignItems: 'center', transition: 'background .1s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-overlay)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.name}</div>
-                      <div style={{ fontSize: 12, color: 'hsl(var(--text-3))' }}>{client.plan || '—'}</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'hsl(var(--text-1))' }}>{client.mrr ? `$${client.mrr.toLocaleString()}` : '—'}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--tx-3)' }}>{client.plan || '—'}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{client.mrr ? `$${client.mrr.toLocaleString()}` : '—'}</div>
                       <div>
                         <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 600, background: client.status === 'churned' ? '#ef444420' : '#10b98120', color: client.status === 'churned' ? '#ef4444' : '#10b981' }}>
                           {client.status === 'churned' ? 'Churned' : 'Active'}
@@ -180,12 +180,12 @@ export default function Finance() {
 
             {/* Upcoming Renewals */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Upcoming Renewals
               </div>
-              <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, overflow: 'hidden' }}>
+              <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
                 {upcomingRenewals.length === 0 ? (
-                  <div style={{ padding: '24px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 12.5 }}>
+                  <div style={{ padding: '24px', textAlign: 'center', color: 'var(--tx-3)', fontSize: 12.5 }}>
                     {clients.length === 0 ? 'Add clients with renewal dates to track here' : 'No renewals in the next 90 days'}
                   </div>
                 ) : (
@@ -195,14 +195,14 @@ export default function Finance() {
 
               {/* MRR Trend */}
               <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
                   MRR Trend
                 </div>
-                <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, padding: '14px' }}>
-                  <MiniBar data={mrrTrend} color="hsl(var(--primary))" />
+                <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px' }}>
+                  <MiniBar data={mrrTrend} color="var(--red)" />
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
                     {mrrTrend.slice(-4).map((d, i) => (
-                      <span key={i} style={{ fontSize: 10, color: 'hsl(var(--text-3))' }}>{d.month}</span>
+                      <span key={i} style={{ fontSize: 10, color: 'var(--tx-3)' }}>{d.month}</span>
                     ))}
                   </div>
                 </div>

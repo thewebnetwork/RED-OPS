@@ -29,9 +29,9 @@ function Message({ msg }) {
   // Simple markdown bold/code rendering
   const renderContent = (text) => {
     return text.split('\n').map((line, i) => {
-      if (line.startsWith('# ')) return <div key={i} style={{ fontSize: 15, fontWeight: 700, color: 'hsl(var(--text-1))', margin: '8px 0 4px' }}>{line.slice(2)}</div>;
-      if (line.startsWith('## ')) return <div key={i} style={{ fontSize: 13.5, fontWeight: 700, color: 'hsl(var(--text-1))', margin: '8px 0 4px' }}>{line.slice(3)}</div>;
-      if (line.startsWith('- ')) return <div key={i} style={{ paddingLeft: 14, position: 'relative', fontSize: 13, lineHeight: 1.6 }}><span style={{ position: 'absolute', left: 4, color: 'hsl(var(--text-3))' }}>·</span>{line.slice(2)}</div>;
+      if (line.startsWith('# ')) return <div key={i} style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)', margin: '8px 0 4px' }}>{line.slice(2)}</div>;
+      if (line.startsWith('## ')) return <div key={i} style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--tx-1)', margin: '8px 0 4px' }}>{line.slice(3)}</div>;
+      if (line.startsWith('- ')) return <div key={i} style={{ paddingLeft: 14, position: 'relative', fontSize: 13, lineHeight: 1.6 }}><span style={{ position: 'absolute', left: 4, color: 'var(--tx-3)' }}>·</span>{line.slice(2)}</div>;
       if (!line.trim()) return <div key={i} style={{ height: 6 }} />;
       return <p key={i} style={{ margin: '2px 0', fontSize: 13, lineHeight: 1.65 }}>{line}</p>;
     });
@@ -42,7 +42,7 @@ function Message({ msg }) {
       {/* Avatar */}
       <div style={{
         width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-        background: isUser ? 'hsl(var(--primary))' : 'linear-gradient(135deg, #7c3aed, #a855f7)',
+        background: isUser ? 'var(--red)' : 'linear-gradient(135deg, #7c3aed, #a855f7)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 12, fontWeight: 700, color: 'white',
       }}>
@@ -50,14 +50,14 @@ function Message({ msg }) {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', marginBottom: 5 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5 }}>
           {isUser ? 'You' : 'Red Ops AI'}
         </div>
-        <div style={{ color: 'hsl(var(--text-2))', lineHeight: 1.6 }}>
+        <div style={{ color: 'var(--tx-2)', lineHeight: 1.6 }}>
           {msg.loading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Loader2 size={14} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
-              <span style={{ fontSize: 13, color: 'hsl(var(--text-3))' }}>Thinking...</span>
+              <Loader2 size={14} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: 13, color: 'var(--tx-3)' }}>Thinking...</span>
             </div>
           ) : (
             renderContent(msg.content)
@@ -66,7 +66,7 @@ function Message({ msg }) {
         {!isUser && !msg.loading && (
           <button
             onClick={copy}
-            style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 11, padding: 0 }}
+            style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', fontSize: 11, padding: 0 }}
           >
             {copied ? <Check size={11} /> : <Copy size={11} />}
             {copied ? 'Copied' : 'Copy'}
@@ -144,15 +144,15 @@ export default function AIAssistant() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
+    <div className="page-fill">
       {/* Header */}
-      <div style={{ padding: '14px 24px', borderBottom: '1px solid hsl(var(--border))', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+      <div style={{ padding: '14px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg, #7c3aed, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Sparkles size={15} style={{ color: 'white' }} />
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'hsl(var(--text-1))' }}>AI Assistant</div>
-          <div style={{ fontSize: 11, color: 'hsl(var(--text-3))' }}>Briefing · Reports · Status · SOPs</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>AI Assistant</div>
+          <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>Briefing · Reports · Status · SOPs</div>
         </div>
         <div style={{ marginLeft: 'auto' }}>
           <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(168,85,247,.15)', color: '#a855f7', padding: '2px 7px', borderRadius: 4 }}>BETA</span>
@@ -169,30 +169,30 @@ export default function AIAssistant() {
         </div>
 
         {/* Quick Prompts sidebar */}
-        <div style={{ width: 200, borderLeft: '1px solid hsl(var(--border))', padding: '16px', flexShrink: 0, overflowY: 'auto' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>Quick Prompts</div>
+        <div style={{ width: 200, borderLeft: '1px solid var(--border)', padding: '16px', flexShrink: 0, overflowY: 'auto' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>Quick Prompts</div>
           {QUICK_PROMPTS.map((p, i) => (
             <button
               key={i}
               onClick={() => sendMessage(p.prompt)}
               style={{
                 width: '100%', padding: '8px 10px', marginBottom: 4,
-                background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))',
+                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                 borderRadius: 7, cursor: 'pointer', textAlign: 'left',
                 display: 'flex', alignItems: 'center', gap: 7, transition: 'all .15s',
               }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#a855f7'; e.currentTarget.style.background = 'rgba(168,85,247,.08)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.background = 'hsl(var(--surface-2))'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
             >
               <span style={{ fontSize: 14 }}>{p.icon}</span>
-              <span style={{ fontSize: 11.5, color: 'hsl(var(--text-2))', fontWeight: 500, lineHeight: 1.3 }}>{p.label}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--tx-2)', fontWeight: 500, lineHeight: 1.3 }}>{p.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Input */}
-      <div style={{ padding: '12px 24px', borderTop: '1px solid hsl(var(--border))', flexShrink: 0 }}>
+      <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
           <textarea
             ref={inputRef}
@@ -210,8 +210,8 @@ export default function AIAssistant() {
             disabled={!input.trim() || sending}
             style={{
               width: 40, height: 40, borderRadius: 9, border: 'none', cursor: 'pointer',
-              background: input.trim() && !sending ? 'hsl(var(--primary))' : 'hsl(var(--surface-3))',
-              color: input.trim() && !sending ? 'white' : 'hsl(var(--text-3))',
+              background: input.trim() && !sending ? 'var(--red)' : 'var(--bg-overlay)',
+              color: input.trim() && !sending ? 'white' : 'var(--tx-3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all .15s', flexShrink: 0,
             }}
@@ -219,7 +219,7 @@ export default function AIAssistant() {
             {sending ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
           </button>
         </div>
-        <div style={{ maxWidth: 680, margin: '6px auto 0', fontSize: 10.5, color: 'hsl(var(--text-3))', textAlign: 'center' }}>
+        <div style={{ maxWidth: 680, margin: '6px auto 0', fontSize: 10.5, color: 'var(--tx-3)', textAlign: 'center' }}>
           Enter to send · Shift+Enter for new line
         </div>
       </div>

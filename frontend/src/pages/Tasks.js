@@ -89,10 +89,10 @@ function TaskModal({ task, users, onSave, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" style={{ width: 520 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'hsl(var(--text-1))' }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>
             {task ? 'Edit Task' : 'New Task'}
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
             <X size={16} />
           </button>
         </div>
@@ -121,13 +121,13 @@ function TaskModal({ task, users, onSave, onClose }) {
           {/* Row: Status + Priority */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Status</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Status</label>
               <select className="input-field" value={form.status} onChange={e => set('status', e.target.value)}>
                 {STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Priority</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Priority</label>
               <select className="input-field" value={form.priority} onChange={e => set('priority', e.target.value)}>
                 {PRIORITIES.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
               </select>
@@ -137,22 +137,22 @@ function TaskModal({ task, users, onSave, onClose }) {
           {/* Row: Assignee + Due date */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Assignee</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Assignee</label>
               <select className="input-field" value={form.assignee_id} onChange={e => set('assignee_id', e.target.value)}>
                 <option value="">Unassigned</option>
                 {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'hsl(var(--text-3))', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Due Date</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Due Date</label>
               <input type="date" className="input-field" value={form.due_date} onChange={e => set('due_date', e.target.value)} />
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-          <button onClick={onClose} className="btn-ghost-dark" style={{ padding: '8px 16px' }}>Cancel</button>
-          <button onClick={save} className="btn-primary-dark" style={{ padding: '8px 18px' }} disabled={!form.title.trim() || saving}>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px' }}>Cancel</button>
+          <button onClick={save} className="btn-primary" style={{ padding: '8px 18px' }} disabled={!form.title.trim() || saving}>
             {saving ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : (task ? 'Save Changes' : 'Create Task')}
           </button>
         </div>
@@ -169,12 +169,12 @@ function KanbanColumn({ status, tasks, onStatusChange, onEdit, onDelete }) {
     <div
       style={{
         flex: '0 0 240px',
-        background: 'hsl(var(--surface-2))',
-        border: `1px solid ${dragOver ? status.color + '60' : 'hsl(var(--border))'}`,
+        background: 'var(--bg-elevated)',
+        border: `1px solid ${dragOver ? status.color + '60' : 'var(--border)'}`,
         borderRadius: 10,
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: 'calc(100vh - 220px)',
+        height: '100%',
         transition: 'border-color .15s',
       }}
       onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -187,10 +187,10 @@ function KanbanColumn({ status, tasks, onStatusChange, onEdit, onDelete }) {
       }}
     >
       {/* Column header */}
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid hsl(var(--border))', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: status.color }} />
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'hsl(var(--text-2))', flex: 1 }}>{status.label}</span>
-        <span style={{ fontSize: 11, color: 'hsl(var(--text-3))', background: 'hsl(var(--surface-3))', padding: '1px 6px', borderRadius: 10 }}>{tasks.length}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx-2)', flex: 1 }}>{status.label}</span>
+        <span style={{ fontSize: 11, color: 'var(--tx-3)', background: 'var(--bg-overlay)', padding: '1px 6px', borderRadius: 10 }}>{tasks.length}</span>
       </div>
 
       {/* Cards */}
@@ -217,12 +217,12 @@ function KanbanCard({ task, onEdit, onDelete }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
         <PriorityDot p={task.priority} size={7} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 600, color: 'hsl(var(--text-1))', lineHeight: 1.35, marginBottom: 6 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--tx-1)', lineHeight: 1.35, marginBottom: 6 }}>
             {task.title}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
             {task.due_date && (
-              <span style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 3, color: isOverdue ? '#ef4444' : 'hsl(var(--text-3))' }}>
+              <span style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 3, color: isOverdue ? '#ef4444' : 'var(--tx-3)' }}>
                 <Calendar size={9} />
                 {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
               </span>
@@ -234,15 +234,15 @@ function KanbanCard({ task, onEdit, onDelete }) {
         </div>
         <button
           onClick={() => setMenu(m => !m)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))', padding: 2, flexShrink: 0, opacity: .6 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2, flexShrink: 0, opacity: .6 }}
         >
           <MoreHorizontal size={13} />
         </button>
       </div>
       {menu && (
-        <div style={{ position: 'absolute', top: 28, right: 0, background: 'hsl(var(--surface-3))', border: '1px solid hsl(var(--border))', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
-          <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-2))', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'hsl(var(--surface-2))'}
+        <div style={{ position: 'absolute', top: 28, right: 0, background: 'var(--bg-overlay)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
+          <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}
           >Edit</button>
           <button onClick={() => { onDelete(task.id); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
@@ -266,10 +266,10 @@ function TaskRow({ task, onEdit, onStatusChange, onDelete }) {
       alignItems: 'center',
       gap: 10,
       padding: '9px 14px',
-      borderBottom: '1px solid hsl(var(--border))',
+      borderBottom: '1px solid var(--border)',
       transition: 'background .1s',
     }}
-      onMouseEnter={e => e.currentTarget.style.background = 'hsl(var(--surface-2))'}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
       {/* Status toggle */}
@@ -288,7 +288,7 @@ function TaskRow({ task, onEdit, onStatusChange, onDelete }) {
 
       {/* Title */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: task.status === 'done' ? 'hsl(var(--text-3))' : 'hsl(var(--text-1))', textDecoration: task.status === 'done' ? 'line-through' : 'none' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: task.status === 'done' ? 'var(--tx-3)' : 'var(--tx-1)', textDecoration: task.status === 'done' ? 'line-through' : 'none' }}>
           {task.title}
         </span>
       </div>
@@ -297,7 +297,7 @@ function TaskRow({ task, onEdit, onStatusChange, onDelete }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         <StatusChip s={task.status} />
         {task.due_date && (
-          <span style={{ fontSize: 11, color: isOverdue ? '#ef4444' : 'hsl(var(--text-3))', display: 'flex', alignItems: 'center', gap: 3, minWidth: 65 }}>
+          <span style={{ fontSize: 11, color: isOverdue ? '#ef4444' : 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 3, minWidth: 65 }}>
             <Calendar size={10} />
             {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
           </span>
@@ -305,16 +305,16 @@ function TaskRow({ task, onEdit, onStatusChange, onDelete }) {
         {task.assignee_name ? (
           <Avatar name={task.assignee_name} size={20} />
         ) : (
-          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '1.5px dashed hsl(var(--border))' }} />
+          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '1.5px dashed var(--border)' }} />
         )}
         <div style={{ position: 'relative' }}>
-          <button onClick={() => setMenu(m => !m)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))', padding: 3 }}>
+          <button onClick={() => setMenu(m => !m)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 3 }}>
             <MoreHorizontal size={13} />
           </button>
           {menu && (
-            <div style={{ position: 'absolute', top: 24, right: 0, background: 'hsl(var(--surface-3))', border: '1px solid hsl(var(--border))', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
-              <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 14px', background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-2))', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'hsl(var(--surface-2))'}
+            <div style={{ position: 'absolute', top: 24, right: 0, background: 'var(--bg-overlay)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
+              <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 14px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >Edit</button>
               <button onClick={() => { onDelete(task.id); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
@@ -407,19 +407,19 @@ export default function Tasks() {
   const byStatus = Object.fromEntries(STATUSES.map(s => [s.key, filtered.filter(t => t.status === s.key)]));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="page-fill">
       {/* ── Top Bar ── */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid hsl(var(--border))', display: 'flex', alignItems: 'center', gap: 12, background: 'hsl(var(--background))', flexShrink: 0 }}>
+      <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg)', flexShrink: 0 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>Tasks</h1>
-          <p style={{ margin: 0, fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 1 }}>{tasks.length} total · Press <kbd style={{ fontSize: 10, padding: '1px 4px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 3 }}>C</kbd> to create</p>
+          <h1 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Tasks</h1>
+          <p style={{ margin: 0, fontSize: 11.5, color: 'var(--tx-3)', marginTop: 1 }}>{tasks.length} total · Press <kbd style={{ fontSize: 10, padding: '1px 4px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 3 }}>C</kbd> to create</p>
         </div>
 
         <div style={{ flex: 1 }} />
 
         {/* Search */}
         <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--text-3))', pointerEvents: 'none' }} />
+          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
           <input
             placeholder="Search tasks..."
             value={search}
@@ -440,11 +440,11 @@ export default function Tasks() {
         </select>
 
         {/* View toggle */}
-        <div style={{ display: 'flex', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 7, padding: 2 }}>
+        <div style={{ display: 'flex', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, padding: 2 }}>
           {[{ key: 'list', icon: List }, { key: 'kanban', icon: LayoutGrid }].map(({ key, icon: Icon }) => (
             <button key={key} onClick={() => setView(key)} style={{
-              padding: '5px 8px', background: view === key ? 'hsl(var(--surface-3))' : 'transparent',
-              border: 'none', borderRadius: 5, cursor: 'pointer', color: view === key ? 'hsl(var(--text-1))' : 'hsl(var(--text-3))',
+              padding: '5px 8px', background: view === key ? 'var(--bg-overlay)' : 'transparent',
+              border: 'none', borderRadius: 5, cursor: 'pointer', color: view === key ? 'var(--tx-1)' : 'var(--tx-3)',
               transition: 'all .15s',
             }}>
               <Icon size={14} />
@@ -452,7 +452,7 @@ export default function Tasks() {
           ))}
         </div>
 
-        <button onClick={() => setModal('new')} className="btn-primary-dark btn-sm" style={{ gap: 5 }}>
+        <button onClick={() => setModal('new')} className="btn-primary btn-sm" style={{ gap: 5 }}>
           <Plus size={13} /> New Task
         </button>
       </div>
@@ -460,12 +460,12 @@ export default function Tasks() {
       {/* ── Content ── */}
       {loading ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader2 size={24} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
         </div>
       ) : view === 'kanban' ? (
 
         /* ── Kanban ── */
-        <div style={{ flex: 1, overflowX: 'auto', padding: '16px 24px', display: 'flex', gap: 12 }}>
+        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '16px 24px', display: 'flex', gap: 12, alignItems: 'stretch' }}>
           {STATUSES.map(status => (
             <KanbanColumn
               key={status.key}
@@ -483,21 +483,21 @@ export default function Tasks() {
         /* ── List ── */
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
           {filtered.length === 0 ? (
-            <div style={{ padding: '48px 0', textAlign: 'center', color: 'hsl(var(--text-3))' }}>
+            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--tx-3)' }}>
               <CheckCircle2 size={32} style={{ opacity: .3, marginBottom: 8 }} />
               <div style={{ fontSize: 14, fontWeight: 600 }}>No tasks yet</div>
               <div style={{ fontSize: 12, marginTop: 4 }}>Press C or click New Task to get started</div>
             </div>
           ) : (
-            <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, marginTop: 16, overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, marginTop: 16, overflow: 'hidden' }}>
               {/* List header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--surface-3))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-overlay)' }}>
                 <div style={{ width: 16 }} />
                 <div style={{ width: 7 }} />
-                <div style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase' }}>Title</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase', width: 80 }}>Status</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase', width: 65 }}>Due</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase', width: 20 }}>Who</div>
+                <div style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Title</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 80 }}>Status</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 65 }}>Due</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 20 }}>Who</div>
                 <div style={{ width: 20 }} />
               </div>
               {filtered.map(task => (
