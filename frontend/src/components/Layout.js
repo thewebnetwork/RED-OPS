@@ -34,7 +34,8 @@ import {
   Inbox,
   Layers,
   KeyRound,
-  Trash2
+  Trash2,
+  Cloud
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -90,6 +91,7 @@ export default function Layout({ children }) {
     { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
     { path: '/announcements', icon: Megaphone, labelKey: 'nav.announcements', roles: ['Administrator'] },
     { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Administrator'] },
+    { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator', 'Operator', 'Standard User'], external: true },
   ];
 
   // Quick Links removed as per user request
@@ -105,6 +107,13 @@ export default function Layout({ children }) {
     if (item.requiresCanPick && user?.pool_access === 'none') return false;
     return true;
   });
+
+  const navItemClass = (isActive) =>
+    `flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+      isActive
+        ? 'bg-white text-[#A2182C] shadow-lg'
+        : 'text-white/80 hover:text-white hover:bg-white/10'
+    }`;
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -144,12 +153,29 @@ export default function Layout({ children }) {
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map(item => {
+              // External links (e.g. Nextcloud)
+              if (item.external) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setSidebarOpen(false)}
+                    className={navItemClass(false)}
+                  >
+                    <item.icon size={18} strokeWidth={1.5} />
+                    {item.label}
+                  </a>
+                );
+              }
+
               // Determine active state correctly for each item
               let isActive = false;
-              
+
               if (item.path === '/report-issue') {
                 // Report an Issue is active when on /report-issue OR /command-center with type=issue
-                isActive = location.pathname === '/report-issue' || 
+                isActive = location.pathname === '/report-issue' ||
                   (location.pathname === '/command-center' && location.search.includes('type=issue'));
               } else if (item.path === '/command-center') {
                 // Command Center (Submit New Request) is active ONLY when on /command-center WITHOUT type=issue
@@ -158,17 +184,13 @@ export default function Layout({ children }) {
                 // All other items use exact path matching
                 isActive = location.pathname === item.path;
               }
-              
+
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white text-[#A2182C] shadow-lg'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
+                  className={navItemClass(isActive)}
                 >
                   <item.icon size={18} strokeWidth={1.5} />
                   {t(item.labelKey)}
