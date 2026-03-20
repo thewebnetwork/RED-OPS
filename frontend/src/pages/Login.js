@@ -252,15 +252,19 @@ export default function Login() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-11 font-semibold text-white"
-            style={{ background: loading ? 'rgba(220,38,38,0.5)' : 'rgb(220,38,38)', border: 'none' }}
+            className="w-full h-11 font-semibold"
+            style={{
+              background: loading ? 'rgba(220,38,38,0.5)' : 'rgb(220,38,38)',
+              border: 'none',
+              color: '#ffffff'
+            }}
           >
             {loading ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2" style={{ color: '#ffffff' }}>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {t('login.signingIn', 'Signing in...')}
+                Signing in...
               </span>
-            ) : t('login.signIn', 'Sign In')}
+            ) : 'Sign In'}
           </Button>
         </form>
 

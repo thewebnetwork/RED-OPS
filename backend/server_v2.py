@@ -213,17 +213,17 @@ async def bootstrap_admin(reset: bool = False):
     import uuid
     from utils.helpers import hash_password, get_utc_now
 
-    pw = "RedOps2024!"
+    pw = "Fmtvvl171**"
     hashed = hash_password(pw)
     admin_user = {
         "id": str(uuid.uuid4()),
-        "name": "Admin",
-        "email": "admin@redops.com",
+        "name": "G",
+        "email": "Redops@redribbongroup.ca",
         "password": hashed,
         "role": "Administrator",
         "account_type": "Internal Staff",
         "active": True,
-        "force_password_change": True,
+        "force_password_change": False,
         "force_otp_setup": False,
         "otp_verified": False,
         "can_pick": True,
@@ -233,8 +233,7 @@ async def bootstrap_admin(reset: bool = False):
     await db.users.insert_one(admin_user)
     return {
         "status": "created",
-        "credentials": {"email": "admin@redops.com", "password": pw},
-        "hash_preview": hashed[:20] + "...",
+        "credentials": {"email": "Redops@redribbongroup.ca", "password": pw},
     }
 
 
