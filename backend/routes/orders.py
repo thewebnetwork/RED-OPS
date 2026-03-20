@@ -1,4 +1,5 @@
 """Order management routes including messages and files"""
+# Nextcloud storage imported below alongside existing imports
 import uuid
 import os
 import base64
@@ -17,6 +18,7 @@ from utils.helpers import (
 from services.webhooks import trigger_webhooks
 from services.workflow_engine import get_workflows_for_trigger, execute_workflow
 from services.task_generator import generate_tasks_for_event, complete_open_tasks_for_request, sync_progress_task_status
+from utils.nextcloud import upload_file as nc_upload, download_file as nc_download, order_file_path, is_configured as nc_enabled
 from services.email import (
     send_satisfaction_survey_email,
     send_ticket_created_email,
@@ -2288,30 +2290,36 @@ async def upload_file(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    """Upload a file attachment to an order"""
+    """Upload a file attachment to an order — stored on Nextcloud/TrueNAS when configured, local disk otherwise."""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    
-    # Create order-specific upload directory
-    order_upload_dir = os.path.join(UPLOAD_DIR, order_id)
-    os.makedirs(order_upload_dir, exist_ok=True)
-    
-    # Generate unique filename
+
     file_id = str(uuid.uuid4())
     file_ext = os.path.splitext(file.filename)[1] if file.filename else ''
     stored_filename = f"{file_id}{file_ext}"
-    file_path = os.path.join(order_upload_dir, stored_filename)
-    
-    # Save file to disk
-    try:
-        content = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(content)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
-    
-    # Create file record in DB
+
+    content = await file.read()
+    storage_backend = "local"
+
+    if nc_enabled():
+        # ── Nextcloud / TrueNAS path ──────────────────────────────────────────
+        nc_path = order_file_path(order_id, stored_filename)
+        success = await nc_upload(nc_path, content, file.content_type or "application/octet-stream")
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to upload file to Nextcloud storage")
+        storage_backend = "nextcloud"
+    else:
+        # ── Local disk fallback ───────────────────────────────────────────────
+        order_upload_dir = os.path.join(UPLOAD_DIR, order_id)
+        os.makedirs(order_upload_dir, exist_ok=True)
+        file_path = os.path.join(order_upload_dir, stored_filename)
+        try:
+            with open(file_path, "wb") as f:
+                f.write(content)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
     file_doc = {
         "id": file_id,
         "order_id": order_id,
@@ -2323,11 +2331,12 @@ async def upload_file(
         "original_filename": file.filename,
         "stored_filename": stored_filename,
         "content_type": file.content_type,
+        "storage_backend": storage_backend,
         "is_final_delivery": False,
         "created_at": get_utc_now()
     }
     await db.order_files.insert_one(file_doc)
-    
+
     return {
         "id": file_id,
         "label": file.filename,
@@ -2342,26 +2351,45 @@ async def download_file(
     file_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Download a file attachment"""
-    from fastapi.responses import FileResponse as FastAPIFileResponse
-    
+    """Download a file — streams from Nextcloud/TrueNAS or local disk depending on storage_backend."""
+    from fastapi.responses import FileResponse as FastAPIFileResponse, StreamingResponse
+
     file_doc = await db.order_files.find_one({"id": file_id, "order_id": order_id}, {"_id": 0})
     if not file_doc:
         raise HTTPException(status_code=404, detail="File not found")
-    
+
     stored_filename = file_doc.get("stored_filename")
     if not stored_filename:
         raise HTTPException(status_code=404, detail="File storage info missing")
-    
-    file_path = os.path.join(UPLOAD_DIR, order_id, stored_filename)
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found on disk")
-    
-    return FastAPIFileResponse(
-        path=file_path,
-        filename=file_doc.get("original_filename", stored_filename),
-        media_type=file_doc.get("content_type", "application/octet-stream")
-    )
+
+    original_filename = file_doc.get("original_filename", stored_filename)
+    content_type = file_doc.get("content_type", "application/octet-stream")
+    storage_backend = file_doc.get("storage_backend", "local")
+
+    if storage_backend == "nextcloud":
+        # ── Stream from Nextcloud / TrueNAS ──────────────────────────────────
+        nc_path = order_file_path(order_id, stored_filename)
+        file_bytes = await nc_download(nc_path)
+        if file_bytes is None:
+            raise HTTPException(status_code=404, detail="File not found in Nextcloud storage")
+
+        import io
+        return StreamingResponse(
+            io.BytesIO(file_bytes),
+            media_type=content_type,
+            headers={"Content-Disposition": f'attachment; filename="{original_filename}"'}
+        )
+    else:
+        # ── Local disk fallback ───────────────────────────────────────────────
+        file_path = os.path.join(UPLOAD_DIR, order_id, stored_filename)
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="File not found on disk")
+
+        return FastAPIFileResponse(
+            path=file_path,
+            filename=original_filename,
+            media_type=content_type
+        )
 
 
 @router.post("/{order_id}/files", response_model=FileResponse)
