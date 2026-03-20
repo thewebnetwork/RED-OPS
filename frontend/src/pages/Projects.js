@@ -1,370 +1,723 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
-  Plus, Search, ChevronRight, CheckCircle2, Circle, Clock,
-  FolderKanban, Users, Calendar, MoreHorizontal, X, Loader2,
-  Layers, TrendingUp, AlertTriangle, Sparkles
+  FolderKanban,
+  Plus,
+  Filter,
+  Calendar,
+  Users,
+  CheckSquare,
+  MoreHorizontal,
+  ChevronRight,
+  Circle,
+  Clock,
+  Folder,
+  Tag,
+  X
 } from 'lucide-react';
+;
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const token = () => localStorage.getItem('token');
-const req = (path, opts = {}) => fetch(`${API}${path}`, {
-  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-  ...opts,
-}).then(r => r.ok ? r.json() : Promise.reject(r));
-
-// ── RRM Onboarding Checklist (16-step) ──
-const ONBOARDING_STEPS = [
-  { step: 1,  title: 'Initial kickoff call booked',           category: 'Setup' },
-  { step: 2,  title: 'Client intake form completed',          category: 'Setup' },
-  { step: 3,  title: 'GHL sub-account created',               category: 'GHL' },
-  { step: 4,  title: 'GHL pipeline configured',               category: 'GHL' },
-  { step: 5,  title: 'ISA workflow activated',                category: 'GHL' },
-  { step: 6,  title: 'Facebook Ad Account access granted',    category: 'Meta' },
-  { step: 7,  title: 'Meta Business Manager connected',       category: 'Meta' },
-  { step: 8,  title: 'Pixel installed and verified',          category: 'Meta' },
-  { step: 9,  title: 'Ad creative assets collected',          category: 'Creative' },
-  { step: 10, title: 'First ad campaign drafted',             category: 'Creative' },
-  { step: 11, title: 'Campaign reviewed and approved',        category: 'Launch' },
-  { step: 12, title: 'Campaign live (ads running)',           category: 'Launch' },
-  { step: 13, title: 'First leads flowing into GHL',         category: 'Live' },
-  { step: 14, title: 'ISA follow-up sequence tested',        category: 'Live' },
-  { step: 15, title: 'Week 1 performance review done',       category: 'Review' },
-  { step: 16, title: 'Client onboarding complete ✓',         category: 'Review' },
+const mockProjects = [
+  {
+    id: 1,
+    name: 'Thompson RE — April Campaign',
+    type: 'Campaign Build',
+    client: 'Thompson Realty',
+    progress: 65,
+    tasksComplete: 13,
+    tasksTotal: 20,
+    dueDate: '2026-05-15',
+    status: 'Active',
+    team: [
+      { initials: 'MR', name: 'Marcus Rodriguez' },
+      { initials: 'JP', name: 'Jessica Park' },
+      { initials: 'DK', name: 'David Kim' }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Riverside Realty Onboarding',
+    type: 'Client Onboarding',
+    client: 'Riverside Realty',
+    progress: 40,
+    tasksComplete: 6,
+    tasksTotal: 16,
+    dueDate: '2026-04-30',
+    status: 'Active',
+    team: [
+      { initials: 'SC', name: 'Sarah Chen' },
+      { initials: 'AT', name: 'Alex Thompson' }
+    ]
+  },
+  {
+    id: 3,
+    name: 'Apex Content Sprint — May',
+    type: 'Creative Sprint',
+    client: 'Apex Marketing',
+    progress: 10,
+    tasksComplete: 2,
+    tasksTotal: 20,
+    dueDate: '2026-05-31',
+    status: 'Planning',
+    team: [
+      { initials: 'JP', name: 'Jessica Park' },
+      { initials: 'MR', name: 'Marcus Rodriguez' }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Dani K. Rebrand Package',
+    type: 'Campaign Build',
+    client: 'Dani K. Coaching',
+    progress: 90,
+    tasksComplete: 18,
+    tasksTotal: 20,
+    dueDate: '2026-04-22',
+    status: 'Active',
+    team: [
+      { initials: 'DK', name: 'David Kim' },
+      { initials: 'JP', name: 'Jessica Park' },
+      { initials: 'SC', name: 'Sarah Chen' }
+    ]
+  },
+  {
+    id: 5,
+    name: 'Burnham Strategy Build',
+    type: 'Internal',
+    progress: 55,
+    tasksComplete: 11,
+    tasksTotal: 20,
+    dueDate: '2026-05-10',
+    status: 'Active',
+    team: [
+      { initials: 'MR', name: 'Marcus Rodriguez' },
+      { initials: 'AT', name: 'Alex Thompson' }
+    ]
+  },
+  {
+    id: 6,
+    name: 'RRM ISA Scripts Update',
+    type: 'Internal',
+    progress: 100,
+    tasksComplete: 8,
+    tasksTotal: 8,
+    dueDate: '2026-04-15',
+    status: 'Completed',
+    team: [
+      { initials: 'AT', name: 'Alex Thompson' }
+    ]
+  },
+  {
+    id: 7,
+    name: 'Riverside May Content Month',
+    type: 'Creative Sprint',
+    client: 'Riverside Realty',
+    progress: 0,
+    tasksComplete: 0,
+    tasksTotal: 30,
+    dueDate: '2026-05-31',
+    status: 'Planning',
+    team: [
+      { initials: 'JP', name: 'Jessica Park' }
+    ]
+  },
+  {
+    id: 8,
+    name: 'Team SOP Audit Q2',
+    type: 'Internal',
+    progress: 30,
+    tasksComplete: 3,
+    tasksTotal: 10,
+    dueDate: '2026-05-20',
+    status: 'Active',
+    team: [
+      { initials: 'SC', name: 'Sarah Chen' },
+      { initials: 'MR', name: 'Marcus Rodriguez' },
+      { initials: 'AT', name: 'Alex Thompson' },
+      { initials: 'DK', name: 'David Kim' }
+    ]
+  }
 ];
 
-const PROJECT_TYPES = [
-  { key: 'client_onboarding', label: 'Client Onboarding', icon: '🚀', desc: 'Auto-generates 16-step RRM onboarding checklist' },
-  { key: 'campaign_build',    label: 'Campaign Build',    icon: '📣', desc: 'Ad campaign from brief to launch' },
-  { key: 'creative_sprint',   label: 'Creative Sprint',   icon: '🎨', desc: 'Batch of creative deliverables' },
-  { key: 'internal',          label: 'Internal',          icon: '⚙️',  desc: 'Team projects, process builds' },
-];
-
-const STATUS_CONFIG = {
-  active:    { label: 'Active',     color: '#10b981' },
-  planning:  { label: 'Planning',   color: '#3b82f6' },
-  on_hold:   { label: 'On Hold',    color: '#f59e0b' },
-  complete:  { label: 'Complete',   color: '#6b7280' },
+const typeConfig = {
+  'Campaign Build': { color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' },
+  'Client Onboarding': { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' },
+  'Creative Sprint': { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)' },
+  'Internal': { color: '#606060', bg: 'rgba(96, 96, 96, 0.15)' }
 };
 
-function StatusBadge({ s }) {
-  const cfg = STATUS_CONFIG[s] || { label: s, color: '#6b7280' };
-  return (
-    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: cfg.color + '20', color: cfg.color, letterSpacing: '.03em' }}>
-      {cfg.label}
-    </span>
-  );
-}
+const statusConfig = {
+  'Active': { color: '#22c55e', icon: Circle },
+  'Planning': { color: '#f59e0b', icon: Clock },
+  'Completed': { color: '#3b82f6', icon: CheckSquare },
+  'On Hold': { color: '#c92a3e', icon: Clock }
+};
 
-function ProgressBar({ value, color = '#10b981' }) {
-  return (
-    <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-      <div style={{ height: '100%', width: `${Math.min(100, value)}%`, background: color, borderRadius: 2, transition: 'width .4s ease' }} />
-    </div>
-  );
-}
+function ProjectModal({ onClose, onCreate }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    type: '',
+    client: '',
+    dueDate: '',
+    teamMembers: []
+  });
 
-// ── New Project Modal ──
-function NewProjectModal({ onSave, onClose }) {
-  const [form, setForm] = useState({ name: '', type: 'client_onboarding', client_name: '', description: '' });
-  const [saving, setSaving] = useState(false);
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const teamOptions = ['Sarah Chen', 'Marcus Rodriguez', 'Jessica Park', 'David Kim', 'Alex Thompson'];
+  const typeOptions = ['Campaign Build', 'Client Onboarding', 'Creative Sprint', 'Internal'];
+  const clientOptions = ['Thompson Realty', 'Riverside Realty', 'Apex Marketing', 'Dani K. Coaching', 'Burnham Group'];
 
-  const save = async () => {
-    if (!form.name.trim()) return;
-    setSaving(true);
-    try {
-      await onSave(form);
+  const handleSubmit = () => {
+    if (formData.name && formData.type) {
+      onCreate(formData);
       onClose();
-    } finally {
-      setSaving(false);
     }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" style={{ width: 500 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>New Project</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}><X size={16} /></button>
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div className="card" style={{
+        width: '90%',
+        maxWidth: '500px',
+        padding: '30px'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <h2 style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: 'var(--tx-1)',
+            margin: 0
+          }}>
+            New Project
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--tx-2)',
+              padding: '4px'
+            }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Project Name */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Project Name</label>
-            <input className="input-field" placeholder="e.g. Taryn Pessanha — Onboarding" value={form.name} onChange={e => set('name', e.target.value)} autoFocus />
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--tx-2)',
+              marginBottom: '6px'
+            }}>
+              Project Name *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="input-field"
+              placeholder="e.g., Acme Corp Campaign"
+            />
           </div>
 
-          {/* Project Type */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Project Type</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {PROJECT_TYPES.map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => set('type', t.key)}
-                  style={{
-                    padding: '10px 12px',
-                    background: form.type === t.key ? 'rgba(201,42,62,.12)' : 'var(--bg-elevated)',
-                    border: `1px solid ${form.type === t.key ? 'var(--red)' : 'var(--border)'}`,
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all .15s',
-                  }}
-                >
-                  <div style={{ fontSize: 16, marginBottom: 3 }}>{t.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{t.label}</div>
-                  <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 2 }}>{t.desc}</div>
-                </button>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--tx-2)',
+              marginBottom: '6px'
+            }}>
+              Project Type *
+            </label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              className="input-field"
+              style={{ cursor: 'pointer' }}
+            >
+              <option value="">Select a type</option>
+              {typeOptions.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          {formData.type !== 'Internal' && (
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: '500',
+                color: 'var(--tx-2)',
+                marginBottom: '6px'
+              }}>
+                Client
+              </label>
+              <select
+                value={formData.client}
+                onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                className="input-field"
+                style={{ cursor: 'pointer' }}
+              >
+                <option value="">Select a client</option>
+                {clientOptions.map(client => (
+                  <option key={client} value={client}>{client}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--tx-2)',
+              marginBottom: '6px'
+            }}>
+              Target Completion Date
+            </label>
+            <input
+              type="date"
+              value={formData.dueDate}
+              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: '500',
+              color: 'var(--tx-2)',
+              marginBottom: '6px'
+            }}>
+              Team Members
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {teamOptions.map(member => (
+                <label key={member} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  padding: '8px 0'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.teamMembers.includes(member)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setFormData({
+                          ...formData,
+                          teamMembers: [...formData.teamMembers, member]
+                        });
+                      } else {
+                        setFormData({
+                          ...formData,
+                          teamMembers: formData.teamMembers.filter(m => m !== member)
+                        });
+                      }
+                    }}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <span style={{ color: 'var(--tx-1)', fontSize: '14px' }}>{member}</span>
+                </label>
               ))}
             </div>
           </div>
 
-          {/* Client name */}
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Client Name <span style={{ color: 'var(--tx-3)', fontWeight: 400 }}>(optional)</span></label>
-            <input className="input-field" placeholder="e.g. Taryn Pessanha" value={form.client_name} onChange={e => set('client_name', e.target.value)} />
-          </div>
-
-          {form.type === 'client_onboarding' && (
-            <div style={{ padding: '10px 12px', background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.2)', borderRadius: 8 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Sparkles size={12} /> Auto-generates 16-step checklist
-              </div>
-              <div style={{ fontSize: 11.5, color: 'var(--tx-3)' }}>GHL setup → Meta ads → Launch → Live review. All tasks created automatically.</div>
+          {formData.type === 'Client Onboarding' && (
+            <div style={{
+              padding: '12px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '6px',
+              fontSize: '13px',
+              color: '#60a5fa'
+            }}>
+              Auto-generates 16-step onboarding checklist
             </div>
           )}
-        </div>
 
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px' }}>Cancel</button>
-          <button onClick={save} className="btn-primary" style={{ padding: '8px 18px' }} disabled={!form.name.trim() || saving}>
-            {saving ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : 'Create Project'}
-          </button>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+            <button
+              onClick={handleSubmit}
+              className="btn-primary"
+              style={{ flex: 1 }}
+            >
+              Create Project
+            </button>
+            <button
+              onClick={onClose}
+              className="btn-ghost"
+              style={{ flex: 1 }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Project Detail Panel ──
-function ProjectDetail({ project, onClose, onChecklistUpdate }) {
-  const steps = project.checklist || ONBOARDING_STEPS.map(s => ({ ...s, done: false }));
-  const done = steps.filter(s => s.done).length;
-  const pct = Math.round((done / steps.length) * 100);
+export default function Projects() {
+  const navigate = useNavigate();
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [projects, setProjects] = useState(mockProjects);
 
-  const toggle = async (stepIdx) => {
-    const newSteps = steps.map((s, i) => i === stepIdx ? { ...s, done: !s.done } : s);
-    onChecklistUpdate(project.id, newSteps);
+  const filters = ['All', 'Campaign Build', 'Client Onboarding', 'Creative Sprint', 'Internal'];
+
+  const filteredProjects = useMemo(() => {
+    if (selectedFilter === 'All') return projects;
+    return projects.filter(p => p.type === selectedFilter);
+  }, [selectedFilter, projects]);
+
+  const handleCreateProject = (formData) => {
+    const newProject = {
+      id: projects.length + 1,
+      ...formData,
+      progress: 0,
+      tasksComplete: 0,
+      tasksTotal: formData.type === 'Client Onboarding' ? 16 : 20,
+      status: 'Planning',
+      team: formData.teamMembers.map(name => ({
+        initials: name.split(' ').map(n => n[0]).join(''),
+        name
+      }))
+    };
+    setProjects([...projects, newProject]);
   };
 
-  const categories = [...new Set(steps.map(s => s.category))];
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const daysUntilDue = (dueDate) => {
+    const due = new Date(dueDate);
+    const today = new Date();
+    const days = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    return days;
+  };
 
   return (
-    <div style={{
-      position: 'fixed', right: 0, top: 0, bottom: 0, width: 420,
-      background: 'var(--bg-card)', borderLeft: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column', zIndex: 200, animation: 'slideInRight .2s ease',
-    }}>
-      <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{project.name}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>
-            {project.type?.replace('_', ' ')} · {project.client_name || 'Internal'}
-          </div>
-        </div>
-        <StatusBadge s={project.status || 'active'} />
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
-          <X size={16} />
+    <div className="page-fill">
+      {/* Header */}
+      <div style={{
+        padding: '20px',
+        borderBottom: `1px solid var(--border)`,
+        background: 'var(--bg-card)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: '700',
+          color: 'var(--tx-1)',
+          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <FolderKanban size={32} />
+          Projects
+        </h1>
+        <button
+          onClick={() => setShowNewProjectModal(true)}
+          className="btn-primary"
+        >
+          <Plus size={16} style={{ marginRight: '6px' }} />
+          New Project
         </button>
       </div>
 
-      {/* Progress */}
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)' }}>Onboarding Progress</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? '#10b981' : 'var(--tx-1)' }}>{pct}%</span>
-        </div>
-        <ProgressBar value={pct} color={pct === 100 ? '#10b981' : 'var(--red)'} />
-        <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 5 }}>{done} of {steps.length} steps complete</div>
+      {/* Filter Tabs */}
+      <div style={{
+        padding: '16px 20px',
+        borderBottom: `1px solid var(--border)`,
+        background: 'var(--bg-card)',
+        display: 'flex',
+        gap: '8px',
+        overflowX: 'auto'
+      }}>
+        {filters.map(filter => (
+          <button
+            key={filter}
+            onClick={() => setSelectedFilter(filter)}
+            style={{
+              padding: '8px 16px',
+              background: selectedFilter === filter ? 'var(--bg-elevated)' : 'transparent',
+              border: `1px solid ${selectedFilter === filter ? 'var(--border-hi)' : 'transparent'}`,
+              borderRadius: '6px',
+              color: selectedFilter === filter ? 'var(--tx-1)' : 'var(--tx-2)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              if (selectedFilter !== filter) {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.color = 'var(--tx-1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedFilter !== filter) {
+                e.currentTarget.style.borderColor = 'transparent';
+                e.currentTarget.style.color = 'var(--tx-2)';
+              }
+            }}
+          >
+            {filter}
+          </button>
+        ))}
       </div>
 
-      {/* Checklist */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 16px' }}>
-        {categories.map(cat => {
-          const catSteps = steps.map((s, i) => ({ ...s, _idx: i })).filter(s => s.category === cat);
-          const catDone = catSteps.filter(s => s.done).length;
+      {/* Project Grid */}
+      <div style={{
+        padding: '20px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(520px, 1fr))',
+        gap: '20px',
+        overflowY: 'auto',
+        flex: 1
+      }}>
+        {filteredProjects.map(project => {
+          const config = typeConfig[project.type];
+          const statusCfg = statusConfig[project.status];
+          const StatusIcon = statusCfg.icon;
+          const daysLeft = daysUntilDue(project.dueDate);
+
           return (
-            <div key={cat} style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>{cat}</span>
-                <span style={{ color: catDone === catSteps.length ? '#10b981' : 'var(--tx-3)' }}>{catDone}/{catSteps.length}</span>
-              </div>
-              {catSteps.map(step => (
-                <div
-                  key={step._idx}
-                  className={`checklist-step ${step.done ? 'step-done' : ''}`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => toggle(step._idx)}
-                >
-                  <div style={{ flexShrink: 0, color: step.done ? '#10b981' : 'var(--tx-3)', transition: 'color .15s' }}>
-                    {step.done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+            <div
+              key={project.id}
+              className="card"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              {/* Header Row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                  <div style={{
+                    padding: '6px 10px',
+                    background: config.bg,
+                    border: `1px solid ${config.color}`,
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: config.color,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {project.type}
                   </div>
-                  <span style={{ flex: 1, fontSize: 13, textDecoration: step.done ? 'line-through' : 'none', color: step.done ? 'var(--tx-3)' : 'var(--tx-1)', transition: 'all .15s' }}>
-                    {step.title}
-                  </span>
-                  <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>#{step.step}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: statusCfg.color,
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    <StatusIcon size={14} />
+                    {project.status}
+                  </div>
                 </div>
-              ))}
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: 'var(--tx-3)',
+                    transition: 'color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--tx-1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--tx-3)'}
+                >
+                  <MoreHorizontal size={18} />
+                </button>
+              </div>
+
+              {/* Project Name */}
+              <div>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: 'var(--tx-1)',
+                  margin: '0 0 4px 0'
+                }}>
+                  {project.name}
+                </h3>
+                {project.client && (
+                  <div style={{
+                    fontSize: '13px',
+                    color: 'var(--tx-2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Folder size={12} />
+                    For: <span style={{ color: 'var(--tx-1)', fontWeight: '500' }}>{project.client}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Bar */}
+              <div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: '13px', color: 'var(--tx-2)' }}>Progress</span>
+                  <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--tx-1)' }}>
+                    {project.progress}%
+                  </span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '6px',
+                  background: 'var(--bg)',
+                  borderRadius: '3px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${project.progress}%`,
+                    background: project.progress === 100 ? 'var(--green)' : project.progress >= 75 ? 'var(--blue)' : project.progress >= 50 ? 'var(--purple)' : 'var(--red)',
+                    transition: 'width 0.3s'
+                  }} />
+                </div>
+              </div>
+
+              {/* Task Count */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '13px',
+                color: 'var(--tx-2)'
+              }}>
+                <CheckSquare size={16} />
+                <span>
+                  <span style={{ color: 'var(--tx-1)', fontWeight: '600' }}>
+                    {project.tasksComplete}
+                  </span>
+                  /{project.tasksTotal} tasks complete
+                </span>
+              </div>
+
+              {/* Bottom Row: Team + Due Date */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: '12px',
+                borderTop: `1px solid var(--border)`
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden' }}>
+                  {project.team.slice(0, 3).map((member, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        background: 'var(--bg-elevated)',
+                        border: `2px solid var(--border)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: 'var(--tx-1)',
+                        marginLeft: i > 0 ? '-8px' : '0',
+                        zIndex: 3 - i,
+                        position: 'relative',
+                        title: member.name
+                      }}
+                    >
+                      {member.initials}
+                    </div>
+                  ))}
+                  {project.team.length > 3 && (
+                    <div style={{
+                      fontSize: '11px',
+                      color: 'var(--tx-2)',
+                      marginLeft: '4px'
+                    }}>
+                      +{project.team.length - 3}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '12px',
+                  color: daysLeft <= 7 ? 'var(--red)' : daysLeft <= 14 ? 'var(--yellow)' : 'var(--tx-2)'
+                }}>
+                  <Calendar size={14} />
+                  {formatDate(project.dueDate)}
+                  {daysLeft <= 14 && (
+                    <span style={{ fontWeight: '600' }}>({daysLeft}d)</span>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
-    </div>
-  );
-}
 
-// ────────────────────────────────────────────
-export default function Projects() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [showNew, setShowNew] = useState(false);
-  const [selected, setSelected] = useState(null);
-
-  const loadProjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Try to load from API; fall back to empty
-      const res = await req('/projects?limit=50').catch(() => null);
-      const list = res?.projects || res?.items || (Array.isArray(res) ? res : []);
-      setProjects(list);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { loadProjects(); }, [loadProjects]);
-
-  const createProject = async (data) => {
-    try {
-      const payload = {
-        ...data,
-        status: 'active',
-        checklist: data.type === 'client_onboarding' ? ONBOARDING_STEPS.map(s => ({ ...s, done: false })) : [],
-        created_at: new Date().toISOString(),
-      };
-      const res = await req('/projects', { method: 'POST', body: JSON.stringify(payload) }).catch(() => ({ ...payload, id: Date.now().toString() }));
-      setProjects(prev => [res, ...prev]);
-    } catch (e) { console.error(e); }
-  };
-
-  const updateChecklist = async (id, checklist) => {
-    setProjects(prev => prev.map(p => p.id === id ? { ...p, checklist } : p));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, checklist }));
-    try {
-      await req(`/projects/${id}`, { method: 'PATCH', body: JSON.stringify({ checklist }) });
-    } catch (e) {}
-  };
-
-  const filtered = projects.filter(p => !search || p.name?.toLowerCase().includes(search.toLowerCase()) || p.client_name?.toLowerCase().includes(search.toLowerCase()));
-
-  return (
-    <div className="page-content" style={{ animation: 'fadeInUp .3s ease' }}>
-
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Projects</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--tx-3)' }}>{projects.length} active projects</p>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
-          <input className="input-field" placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 28, width: 200, height: 34, fontSize: 12 }} />
-        </div>
-        <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap: 6 }}>
-          <Plus size={13} /> New Project
-        </button>
-      </div>
-
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--tx-3)' }}>
-          <FolderKanban size={40} style={{ opacity: .2, marginBottom: 12 }} />
-          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 6 }}>No projects yet</div>
-          <div style={{ fontSize: 13, marginBottom: 20 }}>Start with a Client Onboarding — it auto-builds the 16-step checklist</div>
-          <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap: 6 }}>
-            <Plus size={13} /> Create first project
-          </button>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-          {filtered.map(project => {
-            const steps = project.checklist || [];
-            const done = steps.filter(s => s.done).length;
-            const pct = steps.length > 0 ? Math.round((done / steps.length) * 100) : 0;
-            const typeConfig = PROJECT_TYPES.find(t => t.key === project.type) || { icon: '📁', label: 'Project' };
-
-            return (
-              <div
-                key={project.id}
-                onClick={() => setSelected(project)}
-                style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 12,
-                  padding: '16px',
-                  cursor: 'pointer',
-                  transition: 'border-color .15s, transform .15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
-              >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                  <div style={{ fontSize: 20, flexShrink: 0 }}>{typeConfig.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>
-                      {project.client_name || typeConfig.label} · {project.type?.replace('_', ' ')}
-                    </div>
-                  </div>
-                  <StatusBadge s={project.status || 'active'} />
-                </div>
-
-                {steps.length > 0 && (
-                  <>
-                    <div style={{ marginBottom: 6 }}>
-                      <ProgressBar value={pct} />
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>{done} of {steps.length} steps</span>
-                      <span style={{ fontWeight: 700, color: pct === 100 ? '#10b981' : 'var(--tx-2)' }}>{pct}%</span>
-                    </div>
-                  </>
-                )}
-
-                <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  {project.created_at && (
-                    <span style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Calendar size={10} />
-                      {new Date(project.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
-                    </span>
-                  )}
-                  <ChevronRight size={14} style={{ color: 'var(--tx-3)' }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <ProjectModal
+          onClose={() => setShowNewProjectModal(false)}
+          onCreate={handleCreateProject}
+        />
       )}
-
-      {showNew && <NewProjectModal onSave={createProject} onClose={() => setShowNew(false)} />}
-      {selected && <ProjectDetail project={selected} onClose={() => setSelected(null)} onChecklistUpdate={updateChecklist} />}
     </div>
   );
 }

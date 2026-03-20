@@ -20,6 +20,8 @@ import {
   Bell,
   ChevronRight,
   Cloud,
+  ShoppingBag,
+  Plug,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -39,23 +41,31 @@ const NAV_BUSINESS = [
   { path: '/finance',  icon: DollarSign, label: 'Finance',         roles: ['Administrator'] },
   { path: '/sops',     icon: BookOpen,   label: 'SOPs & Playbooks',roles: ['Administrator','Operator','Standard User'] },
 ];
+const NAV_SERVICES = [
+  { path: '/services',     icon: ShoppingBag, label: 'RRG Services',    roles: ['Administrator','Operator','Standard User'], isNew: true },
+  { path: '/integrations', icon: Plug,        label: 'Integrations',   roles: ['Administrator'] },
+];
 const NAV_SYSTEM = [
-  { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'], isNew: true },
+  { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
   { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'], external: true },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
 
 // Command palette items
 const CMD_ITEMS = [
-  { label:'Command Center',  icon:'🏠', to:'/',         group:'Navigate' },
-  { label:'Tasks',           icon:'✅', to:'/tasks',    group:'Navigate' },
-  { label:'Projects',        icon:'📁', to:'/projects', group:'Navigate' },
-  { label:'Requests',        icon:'📋', to:'/requests', group:'Navigate' },
-  { label:'Clients',         icon:'👥', to:'/clients',  group:'Navigate' },
-  { label:'Finance',         icon:'💰', to:'/finance',  group:'Navigate' },
-  { label:'AI Assistant',    icon:'✨', to:'/ai',       group:'Navigate' },
+  { label:'Command Center',  icon:'🏠', to:'/',              group:'Navigate' },
+  { label:'Tasks',           icon:'✅', to:'/tasks',         group:'Navigate' },
+  { label:'Projects',        icon:'📁', to:'/projects',      group:'Navigate' },
+  { label:'Requests',        icon:'📋', to:'/requests',      group:'Navigate' },
+  { label:'Clients',         icon:'👥', to:'/clients',       group:'Navigate' },
+  { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
+  { label:'Finance',         icon:'💰', to:'/finance',       group:'Navigate' },
+  { label:'SOPs',            icon:'📚', to:'/sops',          group:'Navigate' },
+  { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
+  { label:'RRG Services',    icon:'🛍', to:'/services',      group:'Navigate' },
+  { label:'Integrations',    icon:'🔌', to:'/integrations',  group:'Navigate' },
   { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'C' },
-  { label:'New Request',     icon:'📝', to:'/command-center',    group:'Create', shortcut:'R' },
+  { label:'New Request',     icon:'📝', to:'/requests?new=1',    group:'Create', shortcut:'R' },
   { label:'New Project',     icon:'🗂',  to:'/projects?new=1',   group:'Create', shortcut:'P' },
 ];
 
@@ -111,10 +121,11 @@ export default function Layout({ children }) {
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
   const mainItems     = filter(NAV_MAIN);
   const businessItems = filter(NAV_BUSINESS);
+  const servicesItems = filter(NAV_SERVICES);
   const systemItems   = filter(NAV_SYSTEM);
 
   // Page title for breadcrumb
-  const pageTitle = [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SYSTEM]
+  const pageTitle = [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SERVICES, ...NAV_SYSTEM]
     .find(i => i.path && (i.path === '/' ? location.pathname === '/' : location.pathname.startsWith(i.path)))?.label || '';
 
   // ── Command palette ──
@@ -218,6 +229,12 @@ export default function Layout({ children }) {
             <>
               <div className="nav-section-label">Business</div>
               {businessItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
+            </>
+          )}
+          {servicesItems.length > 0 && (
+            <>
+              <div className="nav-section-label">Ecosystem</div>
+              {servicesItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
             </>
           )}
           {systemItems.length > 0 && (

@@ -37,6 +37,7 @@ import UISettings from "./pages/UISettings";
 import Announcements from "./pages/Announcements";
 import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
+import Services from "./pages/Services";
 import EmailSettings from "./pages/EmailSettings";
 import DraftEditor from "./pages/DraftEditor";
 import Reports from "./pages/Reports";
@@ -67,7 +68,7 @@ function HomeRoute() {
   const { user } = useAuth();
   const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
   if (isClient) return <ClientHome />;
-  return <Dashboard />;
+  return <CommandCenter />;
 }
 
 // Route guard that checks mode access
@@ -224,15 +225,29 @@ function AppRoutes() {
         }
       />
 
+      {/* ========== RED OPS CORE ROUTES ========== */}
+      {/* RRG Services Marketplace */}
+      <Route
+        path="/services"
+        element={<PrivateRoute><Services /></PrivateRoute>}
+      />
+      {/* Integrations Hub */}
+      <Route
+        path="/integrations"
+        element={<PrivateRoute roles={['Administrator']}><Integrations /></PrivateRoute>}
+      />
+      {/* Legacy Command Center redirect */}
+      <Route path="/command-center" element={<Navigate to="/" replace />} />
+
       {/* ========== CLIENT PORTAL ROUTES ========== */}
-      {/* Service Catalog - Browse services */}
-      <Route 
-        path="/services" 
+      {/* Service Catalog - Browse services (client portal) */}
+      <Route
+        path="/catalog"
         element={
           <PrivateRoute>
             <ServiceCatalog />
           </PrivateRoute>
-        } 
+        }
       />
       {/* My Requests - Client's submitted requests */}
       <Route 
@@ -274,11 +289,6 @@ function AppRoutes() {
       {/* Legacy routes - redirect to new paths */}
       <Route path="/my-services" element={<Navigate to="/my-account" replace />} />
       <Route path="/my-tickets" element={<Navigate to="/my-requests" replace />} />
-      <Route path="/command-center" element={
-        <PrivateRoute roles={["Administrator", "Operator"]}>
-          <CommandCenter />
-        </PrivateRoute>
-      } />
       <Route path="/tickets" element={<Navigate to="/my-requests" replace />} />
       <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       

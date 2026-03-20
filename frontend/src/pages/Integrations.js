@@ -1,851 +1,633 @@
-import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '../components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../components/ui/alert-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
-import { 
-  Key, 
-  Webhook, 
-  Plus, 
-  Copy, 
-  Trash2, 
-  Eye, 
-  EyeOff,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Clock,
-  Send,
-  BarChart3,
-  TrendingUp,
-  Activity
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
+import React, { useState } from 'react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const Integrations = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [connectedIntegrations, setConnectedIntegrations] = useState([
+    'GoHighLevel',
+    'Google Drive',
+    'Nextcloud',
+    'OpenAI'
+  ]);
 
-export default function Integrations() {
-  const [activeTab, setActiveTab] = useState('api-keys');
-  const [apiKeys, setApiKeys] = useState([]);
-  const [webhooks, setWebhooks] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
-  // API Key dialog
-  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
-  const [newApiKey, setNewApiKey] = useState({ name: '', permissions: 'read' });
-  const [generatedKey, setGeneratedKey] = useState(null);
-  
-  // Webhook dialog
-  const [webhookDialogOpen, setWebhookDialogOpen] = useState(false);
-  const [newWebhook, setNewWebhook] = useState({
-    name: '',
-    url: '',
-    direction: 'outgoing',
-    events: [],
-    is_active: true
-  });
-  
-  const [visibleKeys, setVisibleKeys] = useState({});
-  
-  // Unsaved changes tracking
-  const [hasApiKeyChanges, setHasApiKeyChanges] = useState(false);
-  const [hasWebhookChanges, setHasWebhookChanges] = useState(false);
-  const [showApiKeyUnsavedWarning, setShowApiKeyUnsavedWarning] = useState(false);
-  const [showWebhookUnsavedWarning, setShowWebhookUnsavedWarning] = useState(false);
-  const initialApiKeyRef = useRef(null);
-  const initialWebhookRef = useRef(null);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  // Track API key form changes
-  useEffect(() => {
-    if (initialApiKeyRef.current && apiKeyDialogOpen) {
-      const changed = JSON.stringify(newApiKey) !== JSON.stringify(initialApiKeyRef.current);
-      setHasApiKeyChanges(changed);
+  const allIntegrations = [
+    {
+      id: 1,
+      name: 'GoHighLevel',
+      category: 'CRM',
+      description: 'Your primary acquisition & nurture CRM. Syncs contact status and pipeline stages.',
+      icon: 'G',
+      color: '#3b82f6',
+      lastSync: '5 mins ago'
+    },
+    {
+      id: 2,
+      name: 'Google Drive',
+      category: 'Storage',
+      description: 'Access and deliver files directly from Drive within requests and projects.',
+      icon: 'D',
+      color: '#4285f4',
+      lastSync: '12 mins ago'
+    },
+    {
+      id: 3,
+      name: 'Slack',
+      category: 'Communication',
+      description: 'Get notified in Slack when requests are submitted, assigned, or completed.',
+      icon: 'S',
+      color: '#36c5f0'
+    },
+    {
+      id: 4,
+      name: 'Gmail/Google Workspace',
+      category: 'Communication',
+      description: 'Send automated client emails and monthly reports directly from Red Ops.',
+      icon: 'G',
+      color: '#ea4335'
+    },
+    {
+      id: 5,
+      name: 'Stripe',
+      category: 'Payments',
+      description: 'Sync client MRR, track renewals, and flag missed payments automatically.',
+      icon: 'S',
+      color: '#625bdb'
+    },
+    {
+      id: 6,
+      name: 'Calendly',
+      category: 'Scheduling',
+      description: 'Auto-create tasks when strategy calls are booked.',
+      icon: 'C',
+      color: '#006fee'
+    },
+    {
+      id: 7,
+      name: 'Zapier',
+      category: 'Automation',
+      description: 'Trigger Red Ops actions from 5,000+ apps.',
+      icon: 'Z',
+      color: '#ff4f00'
+    },
+    {
+      id: 8,
+      name: 'Notion',
+      category: 'Knowledge',
+      description: 'Migrate Notion docs to Red Ops SOPs with one click.',
+      icon: 'N',
+      color: '#000000'
+    },
+    {
+      id: 9,
+      name: 'Meta Ads',
+      category: 'Marketing',
+      description: 'Pull live ad performance into client dashboards.',
+      icon: 'M',
+      color: '#1877f2'
+    },
+    {
+      id: 10,
+      name: 'Google Ads',
+      category: 'Marketing',
+      description: 'Monitor campaign performance alongside client health scores.',
+      icon: 'A',
+      color: '#4285f4'
+    },
+    {
+      id: 11,
+      name: 'Nextcloud',
+      category: 'Storage',
+      description: 'Primary file storage for all deliverables and client assets.',
+      icon: 'N',
+      color: '#0082c9',
+      lastSync: '8 mins ago'
+    },
+    {
+      id: 12,
+      name: 'OpenAI',
+      category: 'AI',
+      description: 'Powers the AI Brief Generator, Status Summary, and internal search.',
+      icon: 'O',
+      color: '#10a37f',
+      lastSync: '2 mins ago'
     }
-  }, [newApiKey, apiKeyDialogOpen]);
-
-  // Track webhook form changes
-  useEffect(() => {
-    if (initialWebhookRef.current && webhookDialogOpen) {
-      const changed = JSON.stringify(newWebhook) !== JSON.stringify(initialWebhookRef.current);
-      setHasWebhookChanges(changed);
-    }
-  }, [newWebhook, webhookDialogOpen]);
-
-  // Browser beforeunload warning
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if ((hasApiKeyChanges && apiKeyDialogOpen) || (hasWebhookChanges && webhookDialogOpen)) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes.';
-        return e.returnValue;
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasApiKeyChanges, hasWebhookChanges, apiKeyDialogOpen, webhookDialogOpen]);
-
-  const handleApiKeyDialogClose = (open) => {
-    if (!open && !generatedKey) {
-      // Check for changes directly
-      const hasChanges = initialApiKeyRef.current && 
-        JSON.stringify(newApiKey) !== JSON.stringify(initialApiKeyRef.current);
-      if (hasChanges) {
-        setShowApiKeyUnsavedWarning(true);
-        return;
-      }
-    }
-    setApiKeyDialogOpen(open);
-    if (!open) {
-      setGeneratedKey(null);
-      const initialData = { name: '', permissions: 'read' };
-      setNewApiKey(initialData);
-      initialApiKeyRef.current = null;
-      setHasApiKeyChanges(false);
-    }
-  };
-
-  const handleWebhookDialogClose = (open) => {
-    if (!open) {
-      // Check for changes directly
-      const hasChanges = initialWebhookRef.current && 
-        JSON.stringify(newWebhook) !== JSON.stringify(initialWebhookRef.current);
-      if (hasChanges) {
-        setShowWebhookUnsavedWarning(true);
-        return;
-      }
-    }
-    setWebhookDialogOpen(open);
-    if (!open) {
-      const initialData = { name: '', url: '', direction: 'outgoing', events: [], is_active: true };
-      setNewWebhook(initialData);
-      initialWebhookRef.current = null;
-      setHasWebhookChanges(false);
-    }
-  };
-
-  const confirmCloseApiKeyDialog = () => {
-    setShowApiKeyUnsavedWarning(false);
-    setApiKeyDialogOpen(false);
-    setGeneratedKey(null);
-    setNewApiKey({ name: '', permissions: 'read' });
-    initialApiKeyRef.current = null;
-    setHasApiKeyChanges(false);
-  };
-
-  const confirmCloseWebhookDialog = () => {
-    setShowWebhookUnsavedWarning(false);
-    setWebhookDialogOpen(false);
-    setNewWebhook({ name: '', url: '', direction: 'outgoing', events: [], is_active: true });
-    initialWebhookRef.current = null;
-    setHasWebhookChanges(false);
-  };
-
-  const handleOpenApiKeyDialog = () => {
-    const initialData = { name: '', permissions: 'read' };
-    setNewApiKey(initialData);
-    initialApiKeyRef.current = initialData;
-    setHasApiKeyChanges(false);
-    setApiKeyDialogOpen(true);
-  };
-
-  const handleOpenWebhookDialog = () => {
-    const initialData = { name: '', url: '', direction: 'outgoing', events: [], is_active: true };
-    setNewWebhook(initialData);
-    initialWebhookRef.current = initialData;
-    setHasWebhookChanges(false);
-    setWebhookDialogOpen(true);
-  };
-
-  const fetchData = async () => {
-    try {
-      const [keysRes, webhooksRes, analyticsRes] = await Promise.all([
-        axios.get(`${API}/api-keys`).catch(() => ({ data: [] })),
-        axios.get(`${API}/webhooks`).catch(() => ({ data: [] })),
-        axios.get(`${API}/api-keys/analytics/summary`).catch(() => ({ data: null }))
-      ]);
-      setApiKeys(keysRes.data || []);
-      setWebhooks(webhooksRes.data || []);
-      setAnalytics(analyticsRes.data || null);
-    } catch (error) {
-      setApiKeys([]);
-      setWebhooks([]);
-      setAnalytics(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateApiKey = async () => {
-    try {
-      const res = await axios.post(`${API}/api-keys`, {
-        name: newApiKey.name,
-        permissions: newApiKey.permissions
-      });
-      setGeneratedKey(res.data.key);
-      // Refresh list to get the new key
-      const keysRes = await axios.get(`${API}/api-keys`);
-      setApiKeys(keysRes.data || []);
-      setHasApiKeyChanges(false);
-      initialApiKeyRef.current = null;
-      toast.success('API key created');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create API key');
-    }
-  };
-
-  const handleDeleteApiKey = async (keyId) => {
-    if (!window.confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) return;
-    
-    try {
-      await axios.delete(`${API}/api-keys/${keyId}`);
-      setApiKeys(prev => prev.filter(k => k.id !== keyId));
-      toast.success('API key revoked');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to revoke API key');
-    }
-  };
-
-  const handleCreateWebhook = async () => {
-    try {
-      const res = await axios.post(`${API}/webhooks`, {
-        name: newWebhook.name,
-        url: newWebhook.url,
-        direction: newWebhook.direction,
-        events: newWebhook.events,
-        is_active: newWebhook.is_active
-      });
-      setWebhooks(prev => [res.data, ...prev]);
-      setWebhookDialogOpen(false);
-      setNewWebhook({ name: '', url: '', direction: 'outgoing', events: [], is_active: true });
-      setHasWebhookChanges(false);
-      initialWebhookRef.current = null;
-      toast.success('Webhook created');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create webhook');
-    }
-  };
-
-  const handleDeleteWebhook = async (webhookId) => {
-    if (!window.confirm('Are you sure you want to delete this webhook?')) return;
-    
-    try {
-      await axios.delete(`${API}/webhooks/${webhookId}`);
-      setWebhooks(prev => prev.filter(w => w.id !== webhookId));
-      toast.success('Webhook deleted');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to delete webhook');
-    }
-  };
-
-  const handleToggleWebhook = async (webhookId) => {
-    const webhook = webhooks.find(w => w.id === webhookId);
-    if (!webhook) return;
-    
-    try {
-      await axios.patch(`${API}/webhooks/${webhookId}`, {
-        is_active: !webhook.is_active
-      });
-      setWebhooks(prev => prev.map(w => 
-        w.id === webhookId ? { ...w, is_active: !w.is_active } : w
-      ));
-      toast.success('Webhook status updated');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to update webhook');
-    }
-  };
-
-  const handleTestWebhook = async (webhookId) => {
-    try {
-      const res = await axios.post(`${API}/webhooks/${webhookId}/test`);
-      if (res.data.success) {
-        toast.success(`Test webhook sent successfully (Status: ${res.data.status_code})`);
-      } else {
-        toast.error(`Test failed: ${res.data.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to send test webhook');
-    }
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
-  };
-
-  const toggleKeyVisibility = (keyId) => {
-    setVisibleKeys(prev => ({ ...prev, [keyId]: !prev[keyId] }));
-  };
-
-  const WEBHOOK_EVENTS = [
-    { value: 'order.created', label: 'Order Created' },
-    { value: 'order.updated', label: 'Order Updated' },
-    { value: 'order.delivered', label: 'Order Delivered' },
-    { value: 'order.closed', label: 'Order Closed' },
-    { value: 'user.created', label: 'User Created' },
-    { value: 'user.updated', label: 'User Updated' },
-    { value: 'message.sent', label: 'Message Sent' },
-    { value: 'file.uploaded', label: 'File Uploaded' }
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  const comingSoon = [
+    { name: 'HubSpot', category: 'CRM' },
+    { name: 'Salesforce', category: 'CRM' },
+    { name: 'Monday.com', category: 'Project Management' },
+    { name: 'QuickBooks', category: 'Accounting' }
+  ];
+
+  const getIntegrationStatus = (name) => {
+    return connectedIntegrations.includes(name) ? 'Connected' : 'Available';
+  };
+
+  const filteredIntegrations = allIntegrations.filter(integration => {
+    const matchesSearch = integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         integration.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         integration.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const status = getIntegrationStatus(integration.name);
+    const matchesFilter = statusFilter === 'All' || status === statusFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleConnect = (integration) => {
+    setSelectedIntegration(integration);
+    setIsModalOpen(true);
+  };
+
+  const handleDisconnect = (name) => {
+    const confirmed = window.confirm(`Are you sure you want to disconnect ${name}?`);
+    if (confirmed) {
+      setConnectedIntegrations(connectedIntegrations.filter(i => i !== name));
+      window.alert(`${name} has been disconnected.`);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedIntegration(null);
+  };
+
+  const handleModalConnect = () => {
+    window.alert(`To connect ${selectedIntegration.name}, contact your Red Ops admin or email support@redribbongroup.ca`);
+    closeModal();
+  };
+
+  const styles = {
+    pageContainer: {
+      backgroundColor: 'var(--bg)',
+      minHeight: '100vh',
+      color: 'var(--tx-1)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    },
+    pageContent: {
+      maxWidth: '1400px',
+      margin: '0 auto',
+      padding: '40px 24px'
+    },
+    header: {
+      marginBottom: '40px'
+    },
+    title: {
+      fontSize: '32px',
+      fontWeight: '700',
+      marginBottom: '8px',
+      color: 'var(--tx-1)'
+    },
+    subtitle: {
+      fontSize: '16px',
+      color: 'var(--tx-2)',
+      lineHeight: '1.5'
+    },
+    controls: {
+      display: 'flex',
+      gap: '24px',
+      marginBottom: '32px',
+      flexWrap: 'wrap',
+      alignItems: 'center'
+    },
+    searchBox: {
+      flex: 1,
+      minWidth: '250px',
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '6px',
+      padding: '0 12px',
+      transition: 'all 0.2s ease'
+    },
+    searchInput: {
+      flex: 1,
+      backgroundColor: 'transparent',
+      border: 'none',
+      color: 'var(--tx-1)',
+      padding: '12px 12px',
+      fontSize: '14px',
+      outline: 'none'
+    },
+    searchInputPlaceholder: {
+      color: 'var(--tx-3)'
+    },
+    filterGroup: {
+      display: 'flex',
+      gap: '12px'
+    },
+    filterButton: {
+      padding: '10px 16px',
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '6px',
+      color: 'var(--tx-2)',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
+    },
+    filterButtonActive: {
+      backgroundColor: 'var(--red)',
+      borderColor: 'var(--red)',
+      color: '#fff'
+    },
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+      gap: '24px',
+      marginBottom: '48px'
+    },
+    card: {
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '8px',
+      padding: '24px',
+      transition: 'all 0.2s ease',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    cardHover: {
+      borderColor: 'var(--border-hi)',
+      backgroundColor: 'var(--bg-elevated)'
+    },
+    iconCircle: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff',
+      fontSize: '20px',
+      fontWeight: '600',
+      marginBottom: '16px'
+    },
+    integrationName: {
+      fontSize: '18px',
+      fontWeight: '600',
+      marginBottom: '8px',
+      color: 'var(--tx-1)'
+    },
+    category: {
+      display: 'inline-block',
+      padding: '4px 12px',
+      backgroundColor: 'var(--bg-elevated)',
+      border: '1px solid var(--border)',
+      borderRadius: '20px',
+      fontSize: '12px',
+      color: 'var(--tx-2)',
+      fontWeight: '500',
+      marginBottom: '12px'
+    },
+    description: {
+      fontSize: '14px',
+      color: 'var(--tx-2)',
+      marginBottom: '16px',
+      lineHeight: '1.5',
+      flex: 1
+    },
+    statusRow: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '16px'
+    },
+    statusBadge: {
+      display: 'inline-block',
+      padding: '6px 12px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '600'
+    },
+    statusGreen: {
+      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+      color: 'var(--green)',
+      border: '1px solid rgba(34, 197, 94, 0.2)'
+    },
+    statusGray: {
+      backgroundColor: 'rgba(160, 160, 160, 0.1)',
+      color: 'var(--tx-2)',
+      border: '1px solid rgba(160, 160, 160, 0.2)'
+    },
+    lastSync: {
+      fontSize: '12px',
+      color: 'var(--tx-3)'
+    },
+    button: {
+      padding: '10px 20px',
+      border: 'none',
+      borderRadius: '6px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      width: '100%'
+    },
+    buttonConnect: {
+      backgroundColor: 'var(--blue)',
+      color: '#fff'
+    },
+    buttonDisconnect: {
+      backgroundColor: 'var(--bg)',
+      border: '1px solid var(--border)',
+      color: 'var(--tx-2)'
+    },
+    buttonHover: {
+      transform: 'translateY(-1px)',
+      opacity: 0.9
+    },
+    section: {
+      marginBottom: '48px'
+    },
+    sectionTitle: {
+      fontSize: '20px',
+      fontWeight: '600',
+      marginBottom: '24px',
+      color: 'var(--tx-1)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    },
+    comingSoonGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+      gap: '24px'
+    },
+    comingSoonCard: {
+      backgroundColor: 'var(--bg-card)',
+      border: '2px dashed var(--border)',
+      borderRadius: '8px',
+      padding: '32px 24px',
+      textAlign: 'center',
+      opacity: 0.6
+    },
+    comingSoonName: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: 'var(--tx-1)',
+      marginBottom: '8px'
+    },
+    comingSoonCategory: {
+      fontSize: '12px',
+      color: 'var(--tx-2)'
+    },
+    modalOverlay: {
+      display: isModalOpen ? 'flex' : 'none',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      zIndex: 1000,
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    modalBox: {
+      backgroundColor: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '8px',
+      padding: '32px',
+      maxWidth: '500px',
+      width: '90%',
+      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)'
+    },
+    modalTitle: {
+      fontSize: '24px',
+      fontWeight: '700',
+      marginBottom: '12px',
+      color: 'var(--tx-1)'
+    },
+    modalDescription: {
+      fontSize: '14px',
+      color: 'var(--tx-2)',
+      lineHeight: '1.6',
+      marginBottom: '24px'
+    },
+    modalButtons: {
+      display: 'flex',
+      gap: '12px',
+      marginTop: '24px'
+    },
+    modalButton: {
+      flex: 1,
+      padding: '12px 20px',
+      border: 'none',
+      borderRadius: '6px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
+    },
+    modalButtonPrimary: {
+      backgroundColor: 'var(--blue)',
+      color: '#fff'
+    },
+    modalButtonSecondary: {
+      backgroundColor: 'var(--bg)',
+      border: '1px solid var(--border)',
+      color: 'var(--tx-1)'
+    }
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="integrations-page">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
-        <p className="text-slate-500 mt-1">Manage API keys and webhook configurations</p>
-      </div>
+    <div style={styles.pageContainer}>
+      <div style={styles.pageContent}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>Integrations</h1>
+          <p style={styles.subtitle}>
+            Connect Red Ops to your existing stack. One hub, all your tools.
+          </p>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full max-w-lg">
-          <TabsTrigger value="api-keys" className="flex items-center gap-2" data-testid="api-keys-tab">
-            <Key size={14} />
-            API Keys
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2" data-testid="analytics-tab">
-            <BarChart3 size={14} />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="webhooks" className="flex items-center gap-2" data-testid="webhooks-tab">
-            <Webhook size={14} />
-            Webhooks
-          </TabsTrigger>
-        </TabsList>
-
-        {/* API Keys Tab */}
-        <TabsContent value="api-keys" className="mt-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>API Keys</CardTitle>
-                <p className="text-sm text-slate-500 mt-1">Manage API keys for external integrations</p>
-              </div>
-              <Dialog open={apiKeyDialogOpen} onOpenChange={handleApiKeyDialogClose}>
-                <DialogTrigger asChild>
-                  <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleOpenApiKeyDialog} data-testid="create-api-key-btn">
-                    <Plus size={16} className="mr-2" />
-                    Create Key
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create API Key</DialogTitle>
-                    <DialogDescription>
-                      Generate a new API key for external integrations
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  {generatedKey ? (
-                    <div className="space-y-4 pt-4">
-                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                        <p className="text-sm text-amber-800 font-medium mb-2">
-                          Copy this key now - you won&apos;t be able to see it again!
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <code className="flex-1 p-2 bg-white rounded border text-sm font-mono break-all">
-                            {generatedKey}
-                          </code>
-                          <Button variant="outline" size="icon" onClick={() => copyToClipboard(generatedKey)}>
-                            <Copy size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                      <Button onClick={() => {
-                        setApiKeyDialogOpen(false);
-                        setGeneratedKey(null);
-                        setNewApiKey({ name: '', permissions: 'read' });
-                      }} className="w-full">
-                        Done
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4 pt-4">
-                      <div>
-                        <Label>Key Name *</Label>
-                        <Input
-                          value={newApiKey.name}
-                          onChange={(e) => setNewApiKey(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="e.g., Production API Key"
-                          className="mt-1.5"
-                          data-testid="api-key-name-input"
-                        />
-                      </div>
-                      <div>
-                        <Label>Permissions</Label>
-                        <Select 
-                          value={newApiKey.permissions} 
-                          onValueChange={(val) => setNewApiKey(prev => ({ ...prev, permissions: val }))}
-                        >
-                          <SelectTrigger className="mt-1.5">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="read">Read Only</SelectItem>
-                            <SelectItem value="read_write">Read & Write</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex gap-3 pt-2">
-                        <Button variant="outline" onClick={() => handleApiKeyDialogClose(false)} className="flex-1">
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={handleCreateApiKey}
-                          className="flex-1 bg-rose-600 hover:bg-rose-700"
-                          disabled={!newApiKey.name}
-                          data-testid="generate-api-key-btn"
-                        >
-                          Generate Key
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent className="p-0">
-              {apiKeys.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
-                  <Key size={48} className="mx-auto text-slate-300 mb-3" />
-                  <p>No API keys created yet</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {apiKeys.map(key => (
-                    <div key={key.id} className="p-4 hover:bg-slate-50" data-testid={`api-key-${key.id}`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900">{key.name}</span>
-                            <Badge className={key.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
-                              {key.is_active ? 'Active' : 'Revoked'}
-                            </Badge>
-                            <Badge className="bg-slate-100 text-slate-600">
-                              {key.permissions === 'read' ? 'Read Only' : 'Read & Write'}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                            <code className="font-mono">{key.key_preview}</code>
-                            <span>Created {format(new Date(key.created_at), 'MMM d, yyyy')}</span>
-                            {key.last_used && (
-                              <span className="flex items-center gap-1">
-                                <Clock size={12} />
-                                Last used {format(new Date(key.last_used), 'MMM d, h:mm a')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDeleteApiKey(key.id)}
-                        >
-                          <Trash2 size={18} />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="mt-6 space-y-6">
-          {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card className="border-slate-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">Total API Keys</p>
-                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_keys || 0}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Key size={20} className="text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">Requests Today</p>
-                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_today || 0}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Activity size={20} className="text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">This Week</p>
-                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_week || 0}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <TrendingUp size={20} className="text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">All Time</p>
-                    <p className="text-2xl font-bold text-slate-900">{analytics?.totals?.total_requests_all_time || 0}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <BarChart3 size={20} className="text-amber-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div style={styles.controls}>
+          <div style={styles.searchBox}>
+            <span style={{ color: 'var(--tx-3)', marginRight: '8px' }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Search integrations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                ...styles.searchInput,
+                color: searchQuery ? 'var(--tx-1)' : 'var(--tx-3)'
+              }}
+            />
           </div>
 
-          {/* Per-Key Usage Table */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 size={20} />
-                API Key Usage
-              </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">Request counts per API key</p>
-            </CardHeader>
-            <CardContent className="p-0">
-              {(!analytics?.keys || analytics.keys.length === 0) ? (
-                <div className="p-12 text-center text-slate-500">
-                  <BarChart3 size={48} className="mx-auto text-slate-300 mb-3" />
-                  <p>No API key usage data yet</p>
-                  <p className="text-sm mt-1">Usage statistics will appear here once API keys are used</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {analytics.keys.map(key => (
-                    <div key={key.id} className="p-4 hover:bg-slate-50" data-testid={`analytics-key-${key.id}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900">{key.name}</span>
-                            <Badge className={key.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
-                              {key.is_active ? 'Active' : 'Inactive'}
-                            </Badge>
-                            <Badge className="bg-slate-100 text-slate-600">
-                              {key.permissions === 'read' ? 'Read' : 'Read/Write'}
-                            </Badge>
-                          </div>
-                          <code className="text-sm text-slate-500 font-mono">{key.key_preview}</code>
-                        </div>
-                        <div className="flex items-center gap-6 text-right">
-                          <div>
-                            <p className="text-xs text-slate-500">Today</p>
-                            <p className="text-lg font-semibold text-slate-900">{key.requests_today}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">This Week</p>
-                            <p className="text-lg font-semibold text-slate-900">{key.requests_this_week}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500">Total</p>
-                            <p className="text-lg font-semibold text-slate-900">{key.total_requests}</p>
-                          </div>
-                        </div>
-                      </div>
-                      {key.last_used && (
-                        <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                          <Clock size={10} />
-                          Last used: {format(new Date(key.last_used), 'MMM d, yyyy h:mm a')}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div style={styles.filterGroup}>
+            {['All', 'Connected', 'Available'].map(filter => (
+              <button
+                key={filter}
+                style={{
+                  ...styles.filterButton,
+                  ...(statusFilter === filter ? styles.filterButtonActive : {})
+                }}
+                onClick={() => setStatusFilter(filter)}
+                onMouseEnter={(e) => {
+                  if (statusFilter !== filter) {
+                    e.currentTarget.style.borderColor = 'var(--border-hi)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (statusFilter !== filter) {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }
+                }}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* Webhooks Tab */}
-        <TabsContent value="webhooks" className="mt-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Webhooks</CardTitle>
-                <p className="text-sm text-slate-500 mt-1">Configure incoming and outgoing webhooks</p>
-              </div>
-              <Dialog open={webhookDialogOpen} onOpenChange={handleWebhookDialogClose}>
-                <DialogTrigger asChild>
-                  <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleOpenWebhookDialog} data-testid="create-webhook-btn">
-                    <Plus size={16} className="mr-2" />
-                    Add Webhook
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Create Webhook</DialogTitle>
-                    <DialogDescription>
-                      Configure a new webhook endpoint
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <div>
-                      <Label>Webhook Name *</Label>
-                      <Input
-                        value={newWebhook.name}
-                        onChange={(e) => setNewWebhook(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="e.g., Order Notifications"
-                        className="mt-1.5"
-                        data-testid="webhook-name-input"
-                      />
-                    </div>
-                    <div>
-                      <Label>Direction</Label>
-                      <Select 
-                        value={newWebhook.direction} 
-                        onValueChange={(val) => setNewWebhook(prev => ({ ...prev, direction: val }))}
-                      >
-                        <SelectTrigger className="mt-1.5">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="outgoing">
-                            <div className="flex items-center gap-2">
-                              <ArrowUpRight size={14} />
-                              Outgoing (send events to external URL)
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="incoming">
-                            <div className="flex items-center gap-2">
-                              <ArrowDownLeft size={14} />
-                              Incoming (receive events from external source)
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Endpoint URL *</Label>
-                      <Input
-                        value={newWebhook.url}
-                        onChange={(e) => setNewWebhook(prev => ({ ...prev, url: e.target.value }))}
-                        placeholder="https://api.example.com/webhook"
-                        className="mt-1.5"
-                        data-testid="webhook-url-input"
-                      />
-                    </div>
-                    <div>
-                      <Label>Events to trigger</Label>
-                      <div className="mt-2 grid grid-cols-2 gap-2">
-                        {WEBHOOK_EVENTS.map(event => (
-                          <label key={event.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={newWebhook.events.includes(event.value)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setNewWebhook(prev => ({ ...prev, events: [...prev.events, event.value] }));
-                                } else {
-                                  setNewWebhook(prev => ({ ...prev, events: prev.events.filter(ev => ev !== event.value) }));
-                                }
-                              }}
-                              className="rounded border-slate-300"
-                            />
-                            {event.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                      <Button variant="outline" onClick={() => handleWebhookDialogClose(false)} className="flex-1">
-                        Cancel
-                      </Button>
-                      <Button 
-                        onClick={handleCreateWebhook}
-                        className="flex-1 bg-rose-600 hover:bg-rose-700"
-                        disabled={!newWebhook.name || !newWebhook.url}
-                        data-testid="save-webhook-btn"
-                      >
-                        Create Webhook
-                      </Button>
-                    </div>
+        <div style={styles.section}>
+          <div style={styles.grid}>
+            {filteredIntegrations.map(integration => {
+              const status = getIntegrationStatus(integration.name);
+              const isConnected = status === 'Connected';
+
+              return (
+                <div
+                  key={integration.id}
+                  style={styles.card}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border-hi)';
+                    e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.backgroundColor = 'var(--bg-card)';
+                  }}
+                >
+                  <div
+                    style={{
+                      ...styles.iconCircle,
+                      backgroundColor: integration.color
+                    }}
+                  >
+                    {integration.icon}
                   </div>
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent className="p-0">
-              {webhooks.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
-                  <Webhook size={48} className="mx-auto text-slate-300 mb-3" />
-                  <p>No webhooks configured yet</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {webhooks.map(webhook => (
-                    <div key={webhook.id} className="p-4 hover:bg-slate-50" data-testid={`webhook-${webhook.id}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-slate-900">{webhook.name}</span>
-                            <Badge className={webhook.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
-                              {webhook.is_active ? 'Active' : 'Paused'}
-                            </Badge>
-                            <Badge className="bg-slate-100 text-slate-600">
-                              {webhook.direction === 'outgoing' ? (
-                                <><ArrowUpRight size={12} className="mr-1" /> Outgoing</>
-                              ) : (
-                                <><ArrowDownLeft size={12} className="mr-1" /> Incoming</>
-                              )}
-                            </Badge>
-                            {webhook.success_rate !== undefined && (
-                              <Badge className={webhook.success_rate >= 90 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
-                                {webhook.success_rate}% success
-                              </Badge>
-                            )}
-                          </div>
-                          <code className="text-sm text-slate-500 mt-1 block truncate">{webhook.url}</code>
-                          <div className="flex items-center gap-4 mt-1 text-xs text-slate-400 flex-wrap">
-                            <span>Events: {webhook.events.join(', ') || 'None'}</span>
-                            {webhook.last_triggered && (
-                              <span>Last triggered: {format(new Date(webhook.last_triggered), 'MMM d, h:mm a')}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleTestWebhook(webhook.id)}
-                            title="Send test webhook"
-                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                            data-testid={`test-webhook-${webhook.id}`}
-                          >
-                            <Send size={18} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleToggleWebhook(webhook.id)}
-                            className={webhook.is_active ? 'text-amber-500 hover:text-amber-700' : 'text-green-500 hover:text-green-700'}
-                          >
-                            {webhook.is_active ? <XCircle size={18} /> : <CheckCircle size={18} />}
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDeleteWebhook(webhook.id)}
-                          >
-                            <Trash2 size={18} />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
 
-      {/* API Key Unsaved Changes Warning Dialog */}
-      <AlertDialog open={showApiKeyUnsavedWarning} onOpenChange={setShowApiKeyUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. Save before leaving?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowApiKeyUnsavedWarning(false)} data-testid="stay-btn">
-              Stay
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmCloseApiKeyDialog}
-              className="bg-slate-600 hover:bg-slate-700"
-              data-testid="leave-btn"
-            >
-              Leave without saving
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                  <h3 style={styles.integrationName}>{integration.name}</h3>
+                  <span style={styles.category}>{integration.category}</span>
+                  <p style={styles.description}>{integration.description}</p>
 
-      {/* Webhook Unsaved Changes Warning Dialog */}
-      <AlertDialog open={showWebhookUnsavedWarning} onOpenChange={setShowWebhookUnsavedWarning}>
-        <AlertDialogContent data-testid="unsaved-changes-dialog" className="z-[100]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. Save before leaving?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowWebhookUnsavedWarning(false)} data-testid="stay-btn">
-              Stay
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmCloseWebhookDialog}
-              className="bg-slate-600 hover:bg-slate-700"
-              data-testid="leave-btn"
+                  <div style={styles.statusRow}>
+                    <span
+                      style={{
+                        ...styles.statusBadge,
+                        ...(isConnected ? styles.statusGreen : styles.statusGray)
+                      }}
+                    >
+                      {status}
+                    </span>
+                    {isConnected && integration.lastSync && (
+                      <span style={styles.lastSync}>Last sync: {integration.lastSync}</span>
+                    )}
+                  </div>
+
+                  <button
+                    style={{
+                      ...styles.button,
+                      ...(isConnected ? styles.buttonDisconnect : styles.buttonConnect)
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    onClick={() => {
+                      if (isConnected) {
+                        handleDisconnect(integration.name);
+                      } else {
+                        handleConnect(integration);
+                      }
+                    }}
+                  >
+                    {isConnected ? 'Disconnect' : 'Connect'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>
+            🔜 Coming Soon
+          </h2>
+          <div style={styles.comingSoonGrid}>
+            {comingSoon.map((item, idx) => (
+              <div key={idx} style={styles.comingSoonCard}>
+                <div style={styles.comingSoonName}>{item.name}</div>
+                <div style={styles.comingSoonCategory}>{item.category}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      <div style={styles.modalOverlay} onClick={closeModal}>
+        <div style={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+          <h2 style={styles.modalTitle}>Connect {selectedIntegration?.name}</h2>
+          <p style={styles.modalDescription}>
+            To connect {selectedIntegration?.name} to Red Ops, contact your Red Ops admin or email{' '}
+            <strong>support@redribbongroup.ca</strong>
+          </p>
+          <p style={styles.modalDescription}>
+            Our team will help you set up the integration securely and configure it for your needs.
+          </p>
+
+          <div style={styles.modalButtons}>
+            <button
+              style={{
+                ...styles.modalButton,
+                ...styles.modalButtonSecondary
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-hi)';
+                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.backgroundColor = 'var(--bg)';
+              }}
+              onClick={closeModal}
             >
-              Leave without saving
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              Close
+            </button>
+            <button
+              style={{
+                ...styles.modalButton,
+                ...styles.modalButtonPrimary
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.9';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onClick={handleModalConnect}
+            >
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Integrations;

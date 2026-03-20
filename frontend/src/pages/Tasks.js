@@ -1,527 +1,299 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, List, LayoutGrid, Search, Filter, X, ChevronDown,
-  Circle, CheckCircle2, Clock, User, Calendar, Flag,
-  MoreHorizontal, Tag, Loader2, AlertTriangle, GripVertical
+  Circle, CheckCircle2, Clock, AlertCircle, ArrowUp, Minus, ArrowDown,
+  MoreHorizontal, Calendar, Tag, User, Loader2, Grip,
 } from 'lucide-react';
+import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const token = () => localStorage.getItem('token');
-const req = (path, opts = {}) => fetch(`${API}${path}`, {
-  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-  ...opts,
-}).then(r => r.ok ? r.json() : Promise.reject(r));
+const tok  = () => localStorage.getItem('token');
+const ax   = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
-// ── Constants ──
-const STATUSES = [
-  { key: 'backlog',   label: 'Backlog',     color: '#6b7280' },
-  { key: 'todo',      label: 'To Do',       color: '#3b82f6' },
-  { key: 'doing',     label: 'In Progress', color: '#f59e0b' },
-  { key: 'review',    label: 'In Review',   color: '#a855f7' },
-  { key: 'done',      label: 'Done',        color: '#10b981' },
+const STATUSES = ['Backlog', 'Todo', 'In Progress', 'In Review', 'Done'];
+const STATUS_COLORS  = { Backlog:'var(--tx-3)', Todo:'#3b82f6', 'In Progress':'#f59e0b', 'In Review':'#a855f7', Done:'#22c55e' };
+const STATUS_BG      = { Backlog:'var(--bg-elevated)', Todo:'#3b82f618', 'In Progress':'#f59e0b18', 'In Review':'#a855f718', Done:'#22c55e18' };
+const PRIORITY_ICON  = { Urgent:<AlertCircle size={13} style={{color:'#ef4444'}}/>, High:<ArrowUp size={13} style={{color:'#f59e0b'}}/>, Normal:<Minus size={13} style={{color:'var(--tx-3)'}}/>, Low:<ArrowDown size={13} style={{color:'var(--tx-3)'}}/>};
+const PRIORITY_ORDER = { Urgent:0, High:1, Normal:2, Low:3 };
+
+const MOCK_TASKS = [
+  { _id:'m1', title:'Review April ad creative — Thompson RE',        status:'In Progress', priority:'Urgent', project:'Thompson RE — April Campaign', assignee:'Taryn P.', due_date: new Date(Date.now()+86400*1000).toISOString(), labels:['Creative'] },
+  { _id:'m2', title:'Write 5-email welcome sequence — Riverside',    status:'Todo',        priority:'High',   project:'Riverside Onboarding',         assignee:'Sarah C.', due_date: new Date(Date.now()+2*86400*1000).toISOString(), labels:['Copywriting'] },
+  { _id:'m3', title:'Set up Meta ad account — Burnham',              status:'In Review',   priority:'High',   project:'Burnham Strategy Build',        assignee:'Lucca R.', due_date: new Date(Date.now()+86400*1000).toISOString(), labels:['Technical'] },
+  { _id:'m4', title:'Design thumbnail pack (10) — Apex May',         status:'In Progress', priority:'Normal', project:'Apex Content Sprint — May',     assignee:'Taryn P.', due_date: new Date(Date.now()+3*86400*1000).toISOString(), labels:['Creative'] },
+  { _id:'m5', title:'Monthly report — April (all clients)',           status:'Backlog',     priority:'High',   project:'Internal',                      assignee:'Vitto P.', due_date: new Date(Date.now()+5*86400*1000).toISOString(), labels:['Admin'] },
+  { _id:'m6', title:'Update GHL pipeline stages — Apex',             status:'Todo',        priority:'Normal', project:'Apex Content Sprint — May',     assignee:'Vitto P.', due_date: new Date(Date.now()+4*86400*1000).toISOString(), labels:['Technical'] },
+  { _id:'m7', title:'Record strategy call recap — Dani K.',          status:'Done',        priority:'Normal', project:'Dani K. Rebrand Package',       assignee:'Jordan K.', due_date: new Date(Date.now()-86400*1000).toISOString(), labels:['Strategy'] },
+  { _id:'m8', title:'Edit 60s video ad — Riverside May campaign',    status:'In Progress', priority:'High',   project:'Riverside May Content',         assignee:'Marcus O.', due_date: new Date(Date.now()+2*86400*1000).toISOString(), labels:['Creative'] },
+  { _id:'m9', title:'Audit SOP docs for Q2 accuracy',               status:'Backlog',     priority:'Low',    project:'Team SOP Audit Q2',             assignee:'Jordan K.', due_date: new Date(Date.now()+10*86400*1000).toISOString(), labels:['Admin'] },
+  { _id:'m10',title:'QA final deliverables — Dani K. package',       status:'In Review',   priority:'Urgent', project:'Dani K. Rebrand Package',       assignee:'Vitto P.', due_date: new Date(Date.now()+86400*1000).toISOString(), labels:['Creative'] },
+  { _id:'m11',title:'Build content calendar — Riverside May',        status:'Todo',        priority:'Normal', project:'Riverside May Content',         assignee:'Sarah C.', due_date: new Date(Date.now()+5*86400*1000).toISOString(), labels:['Strategy'] },
+  { _id:'m12',title:'Upload deliverables to Nextcloud — Thompson',   status:'Done',        priority:'Normal', project:'Thompson RE — April Campaign',  assignee:'Marcus O.', due_date: new Date(Date.now()-2*86400*1000).toISOString(), labels:['Admin'] },
 ];
 
-const PRIORITIES = [
-  { key: 'urgent', label: 'Urgent', color: '#ef4444' },
-  { key: 'high',   label: 'High',   color: '#f97316' },
-  { key: 'medium', label: 'Medium', color: '#f59e0b' },
-  { key: 'low',    label: 'Low',    color: '#6b7280' },
-];
-
-const PRI_COLOR = { urgent: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#6b7280' };
-const STATUS_MAP = Object.fromEntries(STATUSES.map(s => [s.key, s]));
-
-// ── Sub-components ──
-function PriorityDot({ p, size = 7 }) {
-  return <span style={{ width: size, height: size, borderRadius: '50%', background: PRI_COLOR[p] || '#6b7280', display: 'inline-block', flexShrink: 0 }} />;
+// ── Status Dot ───────────────────────────────────────────
+function StatusDot({ status, size=9 }) {
+  return <div style={{ width:size, height:size, borderRadius:'50%', background:STATUS_COLORS[status], flexShrink:0 }}/>;
 }
 
-function StatusChip({ s }) {
-  const st = STATUS_MAP[s] || { label: s, color: '#6b7280' };
-  return (
-    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: st.color + '20', color: st.color, letterSpacing: '.03em', whiteSpace: 'nowrap' }}>
-      {st.label}
-    </span>
-  );
-}
-
-function Avatar({ name, size = 22 }) {
-  const ch = (name || '?').charAt(0).toUpperCase();
-  const hue = [...(name || 'X')].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: `hsl(${hue}, 55%, 45%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * .42, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-      {ch}
-    </div>
-  );
-}
-
-// ── Task Modal ──
-function TaskModal({ task, users, onSave, onClose }) {
-  const [form, setForm] = useState({
-    title: task?.title || '',
-    description: task?.description || '',
-    status: task?.status || 'todo',
-    priority: task?.priority || 'medium',
-    assignee_id: task?.assignee_id || '',
-    due_date: task?.due_date ? task.due_date.slice(0, 10) : '',
-  });
-  const [saving, setSaving] = useState(false);
-
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const save = async () => {
-    if (!form.title.trim()) return;
-    setSaving(true);
-    try {
-      const payload = { ...form };
-      if (!payload.due_date) delete payload.due_date;
-      if (!payload.assignee_id) delete payload.assignee_id;
-      await onSave(payload);
-      onClose();
-    } finally {
-      setSaving(false);
-    }
-  };
+// ── New Task Modal ───────────────────────────────────────
+function NewTaskModal({ onClose, onSave }) {
+  const [form, setForm] = useState({ title:'', status:'Todo', priority:'Normal', assignee:'', due_date:'', project:'', labels:[] });
+  const f = (k,v) => setForm(p => ({...p,[k]:v}));
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" style={{ width: 520 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>
-            {task ? 'Edit Task' : 'New Task'}
-          </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
-            <X size={16} />
-          </button>
+      <div className="modal-box" onClick={e=>e.stopPropagation()} style={{ width:480 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18 }}>
+          <h2 style={{ fontSize:16, fontWeight:700, letterSpacing:'-.02em' }}>New Task</h2>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', display:'flex' }}><X size={16}/></button>
         </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Title */}
-          <input
-            className="input-field"
-            placeholder="Task title"
-            value={form.title}
-            onChange={e => set('title', e.target.value)}
-            autoFocus
-            style={{ fontSize: 15, fontWeight: 600 }}
-          />
-
-          {/* Description */}
-          <textarea
-            className="input-field"
-            placeholder="Add a description..."
-            value={form.description}
-            onChange={e => set('description', e.target.value)}
-            rows={3}
-            style={{ resize: 'vertical', fontFamily: 'inherit' }}
-          />
-
-          {/* Row: Status + Priority */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <div>
+            <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Task Title *</label>
+            <input className="input-field" placeholder="What needs to be done?" value={form.title} onChange={e=>f('title',e.target.value)} autoFocus />
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Status</label>
-              <select className="input-field" value={form.status} onChange={e => set('status', e.target.value)}>
-                {STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+              <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Status</label>
+              <select className="input-field" value={form.status} onChange={e=>f('status',e.target.value)}>
+                {STATUSES.map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Priority</label>
-              <select className="input-field" value={form.priority} onChange={e => set('priority', e.target.value)}>
-                {PRIORITIES.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
+              <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Priority</label>
+              <select className="input-field" value={form.priority} onChange={e=>f('priority',e.target.value)}>
+                {['Urgent','High','Normal','Low'].map(p=><option key={p}>{p}</option>)}
               </select>
             </div>
           </div>
-
-          {/* Row: Assignee + Due date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Assignee</label>
-              <select className="input-field" value={form.assignee_id} onChange={e => set('assignee_id', e.target.value)}>
-                <option value="">Unassigned</option>
-                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-              </select>
+              <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Assignee</label>
+              <input className="input-field" placeholder="Assign to..." value={form.assignee} onChange={e=>f('assignee',e.target.value)} />
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', letterSpacing: '.05em', textTransform: 'uppercase', display: 'block', marginBottom: 5 }}>Due Date</label>
-              <input type="date" className="input-field" value={form.due_date} onChange={e => set('due_date', e.target.value)} />
+              <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Due Date</label>
+              <input className="input-field" type="date" value={form.due_date} onChange={e=>f('due_date',e.target.value)} />
             </div>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px' }}>Cancel</button>
-          <button onClick={save} className="btn-primary" style={{ padding: '8px 18px' }} disabled={!form.title.trim() || saving}>
-            {saving ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : (task ? 'Save Changes' : 'Create Task')}
-          </button>
+          <div>
+            <label style={{ fontSize:11.5, color:'var(--tx-3)', display:'block', marginBottom:5 }}>Project</label>
+            <input className="input-field" placeholder="Link to a project..." value={form.project} onChange={e=>f('project',e.target.value)} />
+          </div>
+          <div style={{ display:'flex', gap:8, justifyContent:'flex-end', marginTop:6 }}>
+            <button onClick={onClose} className="btn-ghost">Cancel</button>
+            <button onClick={() => { if(form.title.trim()) { onSave(form); onClose(); } }} className="btn-primary" disabled={!form.title.trim()}>
+              Create Task
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Kanban Column ──
-function KanbanColumn({ status, tasks, onStatusChange, onEdit, onDelete }) {
-  const [dragOver, setDragOver] = useState(false);
-
+// ── List Row ─────────────────────────────────────────────
+function TaskRow({ task, onToggle, onClick }) {
+  const done = task.status === 'Done';
+  const overdue = task.due_date && new Date(task.due_date) < new Date() && !done;
   return (
-    <div
-      style={{
-        flex: '0 0 240px',
-        background: 'var(--bg-elevated)',
-        border: `1px solid ${dragOver ? status.color + '60' : 'var(--border)'}`,
-        borderRadius: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        transition: 'border-color .15s',
-      }}
-      onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={e => {
-        e.preventDefault();
-        setDragOver(false);
-        const id = e.dataTransfer.getData('taskId');
-        if (id) onStatusChange(id, status.key);
-      }}
-    >
-      {/* Column header */}
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: status.color }} />
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx-2)', flex: 1 }}>{status.label}</span>
-        <span style={{ fontSize: 11, color: 'var(--tx-3)', background: 'var(--bg-overlay)', padding: '1px 6px', borderRadius: 10 }}>{tasks.length}</span>
-      </div>
-
-      {/* Cards */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
-        {tasks.map(task => (
-          <KanbanCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function KanbanCard({ task, onEdit, onDelete }) {
-  const [menu, setMenu] = useState(false);
-  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
-
-  return (
-    <div
-      draggable
-      onDragStart={e => e.dataTransfer.setData('taskId', task.id)}
-      className="kanban-card"
-      style={{ marginBottom: 6, position: 'relative', cursor: 'grab' }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-        <PriorityDot p={task.priority} size={7} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--tx-1)', lineHeight: 1.35, marginBottom: 6 }}>
-            {task.title}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
-            {task.due_date && (
-              <span style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 3, color: isOverdue ? '#ef4444' : 'var(--tx-3)' }}>
-                <Calendar size={9} />
-                {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
-              </span>
-            )}
-            {task.assignee_name && (
-              <Avatar name={task.assignee_name} size={16} />
-            )}
-          </div>
-        </div>
-        <button
-          onClick={() => setMenu(m => !m)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2, flexShrink: 0, opacity: .6 }}
-        >
-          <MoreHorizontal size={13} />
-        </button>
-      </div>
-      {menu && (
-        <div style={{ position: 'absolute', top: 28, right: 0, background: 'var(--bg-overlay)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
-          <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >Edit</button>
-          <button onClick={() => { onDelete(task.id); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,.1)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >Delete</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── List Row ──
-function TaskRow({ task, onEdit, onStatusChange, onDelete }) {
-  const [menu, setMenu] = useState(false);
-  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
-
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '9px 14px',
-      borderBottom: '1px solid var(--border)',
-      transition: 'background .1s',
-    }}
-      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-    >
-      {/* Status toggle */}
-      <button
-        onClick={() => {
-          const idx = STATUSES.findIndex(s => s.key === task.status);
-          const next = STATUSES[(idx + 1) % STATUSES.length].key;
-          onStatusChange(task.id, next);
-        }}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: STATUS_MAP[task.status]?.color || '#6b7280', padding: 0, flexShrink: 0 }}
-      >
-        {task.status === 'done' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+    <div onClick={onClick} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 14px', borderBottom:'1px solid var(--border)', cursor:'pointer', transition:'background .08s' }}
+      onMouseEnter={e=>e.currentTarget.style.background='var(--bg-elevated)'}
+      onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+      <button onClick={e=>{e.stopPropagation();onToggle(task._id);}} style={{ background:'none', border:'none', cursor:'pointer', color:done?'#22c55e':'var(--tx-3)', padding:0, flexShrink:0, display:'flex' }}>
+        {done ? <CheckCircle2 size={15}/> : <Circle size={15}/>}
       </button>
-
-      <PriorityDot p={task.priority} />
-
-      {/* Title */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: task.status === 'done' ? 'var(--tx-3)' : 'var(--tx-1)', textDecoration: task.status === 'done' ? 'line-through' : 'none' }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:13, color:done?'var(--tx-3)':'var(--tx-1)', textDecoration:done?'line-through':'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontWeight:500 }}>
           {task.title}
-        </span>
+        </div>
+        {task.project && (
+          <div style={{ fontSize:11, color:'var(--tx-3)', marginTop:2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.project}</div>
+        )}
       </div>
-
-      {/* Metadata */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-        <StatusChip s={task.status} />
+      <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+        {PRIORITY_ICON[task.priority]}
+        {task.labels?.map(l => (
+          <span key={l} style={{ fontSize:10, fontWeight:600, padding:'1px 6px', borderRadius:4, background:'var(--bg-overlay)', color:'var(--tx-3)' }}>{l}</span>
+        ))}
+        {task.assignee && (
+          <div style={{ width:22, height:22, borderRadius:'50%', background:'var(--red)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, color:'white', flexShrink:0 }}>
+            {task.assignee.charAt(0)}
+          </div>
+        )}
         {task.due_date && (
-          <span style={{ fontSize: 11, color: isOverdue ? '#ef4444' : 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 3, minWidth: 65 }}>
-            <Calendar size={10} />
-            {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+          <span style={{ fontSize:11, color: overdue ? '#ef4444' : 'var(--tx-3)', fontWeight: overdue ? 600 : 400, display:'flex', alignItems:'center', gap:3 }}>
+            {overdue && <AlertCircle size={11}/>}
+            {new Date(task.due_date).toLocaleDateString('en-CA',{month:'short',day:'numeric'})}
           </span>
         )}
-        {task.assignee_name ? (
-          <Avatar name={task.assignee_name} size={20} />
-        ) : (
-          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '1.5px dashed var(--border)' }} />
-        )}
-        <div style={{ position: 'relative' }}>
-          <button onClick={() => setMenu(m => !m)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 3 }}>
-            <MoreHorizontal size={13} />
-          </button>
-          {menu && (
-            <div style={{ position: 'absolute', top: 24, right: 0, background: 'var(--bg-overlay)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
-              <button onClick={() => { onEdit(task); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 14px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}
-              >Edit</button>
-              <button onClick={() => { onDelete(task.id); setMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '6px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 12, borderRadius: 5, whiteSpace: 'nowrap' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,.1)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}
-              >Delete</button>
-            </div>
-          )}
+        <div style={{ padding:'2px 8px', borderRadius:20, fontSize:10, fontWeight:600, background:STATUS_BG[task.status], color:STATUS_COLORS[task.status] }}>
+          {task.status}
         </div>
       </div>
     </div>
   );
 }
 
-// ────────────────────────────────────────────
+// ── Kanban Column ─────────────────────────────────────────
+function KanbanCol({ status, tasks, onToggle }) {
+  const color = STATUS_COLORS[status];
+  return (
+    <div style={{ flex:'0 0 230px', display:'flex', flexDirection:'column', height:'100%' }}>
+      <div style={{ padding:'10px 12px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+        <div style={{ width:8, height:8, borderRadius:'50%', background:color }}/>
+        <span style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)' }}>{status}</span>
+        <span style={{ marginLeft:'auto', fontSize:11, color:'var(--tx-3)', background:'var(--bg-overlay)', padding:'1px 7px', borderRadius:10, fontWeight:600 }}>{tasks.length}</span>
+      </div>
+      <div style={{ flex:1, overflowY:'auto', padding:8, display:'flex', flexDirection:'column', gap:6 }}>
+        {tasks.map(task => {
+          const done = task.status==='Done';
+          const overdue = task.due_date && new Date(task.due_date) < new Date() && !done;
+          return (
+            <div key={task._id} className="kanban-card">
+              <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:6, marginBottom:6 }}>
+                <span style={{ fontSize:12.5, fontWeight:500, color:done?'var(--tx-3)':'var(--tx-1)', flex:1, lineHeight:1.4 }}>{task.title}</span>
+                {PRIORITY_ICON[task.priority]}
+              </div>
+              {task.project && <div style={{ fontSize:10.5, color:'var(--tx-3)', marginBottom:6 }}>{task.project}</div>}
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                {task.assignee && (
+                  <div style={{ width:18, height:18, borderRadius:'50%', background:'var(--red)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, fontWeight:700, color:'white' }}>
+                    {task.assignee.charAt(0)}
+                  </div>
+                )}
+                <span style={{ fontSize:10, flex:1, color:'var(--tx-3)' }}>{task.assignee?.split(' ')[0]}</span>
+                {task.due_date && (
+                  <span style={{ fontSize:10, color:overdue?'#ef4444':'var(--tx-3)', fontWeight:overdue?600:400 }}>
+                    {new Date(task.due_date).toLocaleDateString('en-CA',{month:'short',day:'numeric'})}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <button style={{ display:'flex', alignItems:'center', gap:5, padding:'6px 8px', color:'var(--tx-3)', background:'none', border:'1px dashed var(--border)', borderRadius:8, cursor:'pointer', fontSize:12, width:'100%', justifyContent:'center' }}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--border-hi)';e.currentTarget.style.color='var(--tx-2)';}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.color='var(--tx-3)';}}>
+          <Plus size={12}/> Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────
 export default function Tasks() {
-  const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const [view, setView] = useState('kanban'); // 'kanban' | 'list'
-  const [tasks, setTasks] = useState([]);
-  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
+  const [view, setView]       = useState('list');
+  const [search, setSearch]   = useState('');
+  const [filter, setFilter]   = useState('all');
+  const [tasks, setTasks]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterPriority, setFilterPriority] = useState('all');
-  const [modal, setModal] = useState(null); // null | { task } | 'new'
+  const [doneIds, setDoneIds] = useState(new Set());
+  const [showNew, setShowNew] = useState(searchParams.get('new') === '1');
+  const [localNew, setLocalNew] = useState([]);
 
-  // Open new task modal if ?new=1
   useEffect(() => {
-    if (searchParams.get('new') === '1') setModal('new');
-  }, [searchParams]);
-
-  const loadTasks = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [tasksRes, usersRes] = await Promise.all([
-        req('/tasks?limit=100'),
-        req('/users?limit=50'),
-      ]);
-      const taskList = tasksRes?.items || tasksRes?.tasks || (Array.isArray(tasksRes) ? tasksRes : []);
-      setTasks(taskList);
-      const userList = usersRes?.users || (Array.isArray(usersRes) ? usersRes : []);
-      setUsers(userList.filter(u => u.account_type !== 'Media Client'));
-    } catch (e) {
-      console.error(e);
-    } finally {
+    const load = async () => {
+      try {
+        const r = await ax().get(`${API}/tasks?limit=50`);
+        const d = r.data;
+        setTasks(Array.isArray(d) ? d : d?.items || []);
+      } catch(_) {}
       setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { loadTasks(); }, [loadTasks]);
-
-  // Keyboard shortcut: C to create
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === 'c' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName === 'BODY') {
-        setModal('new');
-      }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    load();
   }, []);
 
-  const createTask = async (data) => {
-    const res = await req('/tasks', { method: 'POST', body: JSON.stringify(data) });
-    setTasks(prev => [res, ...prev]);
-  };
+  const allTasks = [...(tasks.length > 0 ? tasks : MOCK_TASKS), ...localNew];
 
-  const updateTask = async (id, data) => {
-    const res = await req(`/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...res } : t));
-  };
-
-  const deleteTask = async (id) => {
-    await req(`/tasks/${id}`, { method: 'DELETE' });
-    setTasks(prev => prev.filter(t => t.id !== id));
-  };
-
-  const onStatusChange = (id, status) => updateTask(id, { status });
-
-  // Filter tasks
-  const filtered = tasks.filter(t => {
-    if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filterStatus !== 'all' && t.status !== filterStatus) return false;
-    if (filterPriority !== 'all' && t.priority !== filterPriority) return false;
-    return true;
+  const filtered = allTasks.filter(t => {
+    const matchSearch = !search || t.title.toLowerCase().includes(search.toLowerCase());
+    const matchFilter = filter === 'all' || t.status === filter || (filter === 'mine' && t.assignee);
+    return matchSearch && matchFilter;
   });
 
-  // Group by status for kanban
-  const byStatus = Object.fromEntries(STATUSES.map(s => [s.key, filtered.filter(t => t.status === s.key)]));
+  const toggleDone = id => setDoneIds(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
+
+  const handleSave = (form) => {
+    setLocalNew(p => [...p, { ...form, _id: `local-${Date.now()}` }]);
+  };
 
   return (
     <div className="page-fill">
-      {/* ── Top Bar ── */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg)', flexShrink: 0 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-.02em' }}>Tasks</h1>
-          <p style={{ margin: 0, fontSize: 11.5, color: 'var(--tx-3)', marginTop: 1 }}>{tasks.length} total · Press <kbd style={{ fontSize: 10, padding: '1px 4px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 3 }}>C</kbd> to create</p>
-        </div>
+      {showNew && <NewTaskModal onClose={() => setShowNew(false)} onSave={handleSave} />}
 
-        <div style={{ flex: 1 }} />
+      {/* Top bar */}
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 20px', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
+        <h1 style={{ fontSize:17, fontWeight:800, letterSpacing:'-.03em', margin:0, marginRight:4 }}>Tasks</h1>
 
-        {/* Search */}
-        <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
-          <input
-            placeholder="Search tasks..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="input-field"
-            style={{ paddingLeft: 28, width: 180, height: 32, fontSize: 12 }}
-          />
-        </div>
-
-        {/* Filters */}
-        <select className="input-field" style={{ height: 32, fontSize: 12, paddingLeft: 8 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="all">All statuses</option>
-          {STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-        </select>
-        <select className="input-field" style={{ height: 32, fontSize: 12, paddingLeft: 8 }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
-          <option value="all">All priorities</option>
-          {PRIORITIES.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
-        </select>
-
-        {/* View toggle */}
-        <div style={{ display: 'flex', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, padding: 2 }}>
-          {[{ key: 'list', icon: List }, { key: 'kanban', icon: LayoutGrid }].map(({ key, icon: Icon }) => (
-            <button key={key} onClick={() => setView(key)} style={{
-              padding: '5px 8px', background: view === key ? 'var(--bg-overlay)' : 'transparent',
-              border: 'none', borderRadius: 5, cursor: 'pointer', color: view === key ? 'var(--tx-1)' : 'var(--tx-3)',
-              transition: 'all .15s',
-            }}>
-              <Icon size={14} />
-            </button>
+        {/* Filter chips */}
+        <div style={{ display:'flex', gap:4 }}>
+          {[['all','All'],['Todo','Todo'],['In Progress','In Progress'],['In Review','Review'],['Done','Done']].map(([v,l]) => (
+            <button key={v} onClick={()=>setFilter(v)} style={{
+              padding:'4px 10px', borderRadius:6, fontSize:12, fontWeight:500, border:'1px solid',
+              borderColor: filter===v ? 'var(--red)' : 'var(--border)',
+              background:  filter===v ? 'var(--red-bg)' : 'transparent',
+              color:       filter===v ? '#e8404e' : 'var(--tx-2)',
+              cursor:'pointer', transition:'all .1s',
+            }}>{l}</button>
           ))}
         </div>
 
-        <button onClick={() => setModal('new')} className="btn-primary btn-sm" style={{ gap: 5 }}>
-          <Plus size={13} /> New Task
+        <div style={{ flex:1 }}/>
+
+        {/* Search */}
+        <div style={{ position:'relative' }}>
+          <Search size={13} style={{ position:'absolute', left:9, top:'50%', transform:'translateY(-50%)', color:'var(--tx-3)' }}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tasks..."
+            style={{ background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'6px 10px 6px 28px', fontSize:12.5, color:'var(--tx-1)', outline:'none', width:180 }} />
+        </div>
+
+        {/* View toggle */}
+        <div style={{ display:'flex', border:'1px solid var(--border)', borderRadius:7, overflow:'hidden' }}>
+          {[['list',<List size={13}/>],['board',<LayoutGrid size={13}/>]].map(([v,ic]) => (
+            <button key={v} onClick={()=>setView(v)} style={{
+              padding:'6px 10px', background:view===v?'var(--bg-elevated)':'transparent', border:'none',
+              cursor:'pointer', color:view===v?'var(--tx-1)':'var(--tx-3)', display:'flex', alignItems:'center',
+            }}>{ic}</button>
+          ))}
+        </div>
+
+        <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap:5 }}>
+          <Plus size={12}/> New Task
         </button>
       </div>
 
-      {/* ── Content ── */}
+      {/* Content */}
       {loading ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader2 size={24} style={{ color: 'var(--red)', animation: 'spin 1s linear infinite' }} />
+        <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-3)' }}>
+          <Loader2 size={20} className="spin"/>
         </div>
-      ) : view === 'kanban' ? (
-
-        /* ── Kanban ── */
-        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '16px 24px', display: 'flex', gap: 12, alignItems: 'stretch' }}>
-          {STATUSES.map(status => (
-            <KanbanColumn
-              key={status.key}
-              status={status}
-              tasks={byStatus[status.key] || []}
-              onStatusChange={onStatusChange}
-              onEdit={task => setModal({ task })}
-              onDelete={deleteTask}
-            />
+      ) : view === 'list' ? (
+        <div style={{ flex:1, overflowY:'auto', overflowX:'hidden' }}>
+          {filtered.length === 0 ? (
+            <div className="empty-state">No tasks match your filter.</div>
+          ) : filtered.map(t => (
+            <TaskRow key={t._id} task={{ ...t, status: doneIds.has(t._id) ? 'Done' : t.status }} onToggle={toggleDone} />
           ))}
         </div>
-
       ) : (
-
-        /* ── List ── */
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
-          {filtered.length === 0 ? (
-            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--tx-3)' }}>
-              <CheckCircle2 size={32} style={{ opacity: .3, marginBottom: 8 }} />
-              <div style={{ fontSize: 14, fontWeight: 600 }}>No tasks yet</div>
-              <div style={{ fontSize: 12, marginTop: 4 }}>Press C or click New Task to get started</div>
-            </div>
-          ) : (
-            <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, marginTop: 16, overflow: 'hidden' }}>
-              {/* List header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg-overlay)' }}>
-                <div style={{ width: 16 }} />
-                <div style={{ width: 7 }} />
-                <div style={{ flex: 1, fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Title</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 80 }}>Status</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 65 }}>Due</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', letterSpacing: '.07em', textTransform: 'uppercase', width: 20 }}>Who</div>
-                <div style={{ width: 20 }} />
+        // Kanban board
+        <div style={{ flex:1, display:'flex', overflowX:'auto', overflowY:'hidden', gap:12, padding:12 }}>
+          {STATUSES.map(s => {
+            const col = filtered.filter(t => (doneIds.has(t._id) ? 'Done' : t.status) === s);
+            return (
+              <div key={s} className="kanban-col" style={{ flex:'0 0 230px', height:'100%' }}>
+                <KanbanCol status={s} tasks={col} onToggle={toggleDone} />
               </div>
-              {filtered.map(task => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  onEdit={t => setModal({ task: t })}
-                  onStatusChange={onStatusChange}
-                  onDelete={deleteTask}
-                />
-              ))}
-            </div>
-          )}
+            );
+          })}
         </div>
-      )}
-
-      {/* ── Modal ── */}
-      {modal && (
-        <TaskModal
-          task={modal === 'new' ? null : modal.task}
-          users={users}
-          onSave={modal === 'new' ? createTask : (data) => updateTask(modal.task.id, data)}
-          onClose={() => setModal(null)}
-        />
       )}
     </div>
   );
