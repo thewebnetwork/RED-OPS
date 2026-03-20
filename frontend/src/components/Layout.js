@@ -304,7 +304,7 @@ export default function Layout({ children }) {
         <div className="cmd-overlay" onClick={closeCmd}>
           <div className="cmd-box" onClick={e => e.stopPropagation()}>
             <div className="cmd-input-row">
-              <Search size={15} style={{ color:'hsl(var(--text-3))', flexShrink:0 }} />
+              <Search size={15} style={{ color:'var(--tx-3)', flexShrink:0 }} />
               <input ref={cmdInputRef} placeholder="Go to, search, or create..."
                 value={cmdQuery}
                 onChange={e => { setCmdQuery(e.target.value); setCmdIdx(0); }} />
@@ -312,7 +312,7 @@ export default function Layout({ children }) {
             </div>
             <div className="cmd-results">
               {filtered.length === 0 ? (
-                <div style={{ padding:'20px', textAlign:'center', color:'hsl(var(--text-3))', fontSize:13 }}>No results for "{cmdQuery}"</div>
+                <div style={{ padding:'20px', textAlign:'center', color:'var(--tx-3)', fontSize:13 }}>No results for "{cmdQuery}"</div>
               ) : (
                 <>
                   <div className="cmd-group">Navigate & Create</div>
