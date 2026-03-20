@@ -19,6 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import RateSurvey from "./pages/RateSurvey";
 import Dashboard from "./pages/Dashboard";
 import ClientHome from "./pages/ClientHome";
+import Clients from "./pages/Clients";
 import ServiceCatalog from "./pages/ServiceCatalog";
 import MyAccount from "./pages/MyAccount";
 import Orders from "./pages/Orders";
