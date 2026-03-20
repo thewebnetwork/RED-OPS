@@ -1,1420 +1,390 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import {
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  AlertTriangle,
-  Inbox,
-  Send,
-  Eye,
-  MessageSquare,
-  BarChart3,
-  PieChart,
-  Activity,
-  Target,
-  Users,
-  Layers,
-  ArrowRight,
-  RefreshCw,
-  Calendar,
-  DollarSign,
-  UserCheck,
-  FileCheck,
-  Zap
+  Plus, RefreshCw, TrendingUp, TrendingDown,
+  Clock, CheckCircle2, AlertTriangle, Activity,
+  Users, DollarSign, Inbox, Zap, ChevronRight,
+  Circle, ArrowUpRight, MoreHorizontal, Calendar,
+  Target, Star, AlertCircle
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, formatDistanceToNow } from 'date-fns';
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell
-} from 'recharts';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// ============== CONSTANTS ==============
+const token = () => localStorage.getItem('token');
+const get = (path) => fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token()}` } }).then(r => r.ok ? r.json() : null);
+
+// ── Helpers ──
+const greet = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+};
 
 const STATUS_COLORS = {
-  open: '#3B82F6',
-  in_progress: '#F59E0B',
-  pending: '#8B5CF6',
-  delivered: '#10B981',
-  closed: '#6B7280'
+  open: '#3b82f6',
+  assigned: '#8b5cf6',
+  in_progress: '#f59e0b',
+  pending_review: '#a855f7',
+  delivered: '#10b981',
+  closed: '#6b7280',
+  revisions: '#ef4444',
 };
 
-const SLA_COLORS = {
-  on_track: '#10B981',
-  at_risk: '#F59E0B',
-  breached: '#EF4444'
+const PRIORITY_DOT = {
+  urgent: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#6b7280',
 };
 
-const POOL_COLORS = {
-  pool1: '#6366F1',
-  pool2: '#EC4899'
-};
+function PriorityDot({ p }) {
+  return <span style={{ width: 7, height: 7, borderRadius: '50%', background: PRIORITY_DOT[p] || '#6b7280', display: 'inline-block', flexShrink: 0 }} />;
+}
 
-const statusConfig = {
-  'Open': { class: 'bg-blue-100 text-blue-700', icon: Inbox },
-  'In Progress': { class: 'bg-amber-100 text-amber-700', icon: Clock },
-  'Pending': { class: 'bg-purple-100 text-purple-700', icon: AlertCircle },
-  'Delivered': { class: 'bg-green-100 text-green-700', icon: CheckCircle2 },
-  'Closed': { class: 'bg-slate-100 text-slate-700', icon: CheckCircle2 },
-};
-
-const priorityConfig = {
-  'Low': 'bg-slate-100 text-slate-600',
-  'Normal': 'bg-blue-100 text-blue-600',
-  'High': 'bg-orange-100 text-orange-600',
-  'Urgent': 'bg-red-100 text-red-600',
-};
-
-// ============== ANIMATED KPI CARD ==============
-
-function AnimatedKPICard({ 
-  label, 
-  value, 
-  previousValue, 
-  icon: Icon, 
-  color, 
-  onClick,
-  trend,
-  suffix = ''
-}) {
-  const [displayValue, setDisplayValue] = useState(0);
-  
-  useEffect(() => {
-    // Animate the number
-    const duration = 800;
-    const start = displayValue;
-    const end = value;
-    const startTime = Date.now();
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const current = Math.round(start + (end - start) * easeOutQuart);
-      
-      setDisplayValue(current);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    
-    requestAnimationFrame(animate);
-  }, [value]);
-  
-  const trendValue = previousValue !== undefined ? value - previousValue : null;
-  const trendPercent = previousValue && previousValue > 0 
-    ? Math.round(((value - previousValue) / previousValue) * 100) 
-    : null;
-  
+function StatusPill({ s }) {
+  const label = s?.replace(/_/g, ' ') || 'open';
+  const color = STATUS_COLORS[s] || '#6b7280';
   return (
-    <Card 
-      className={`border-slate-200 cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${onClick ? 'hover:border-rose-200' : ''}`}
-      onClick={onClick}
-      data-testid={`kpi-${label.toLowerCase().replace(/\s+/g, '-')}`}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 hover:rotate-6`}>
-              <Icon size={24} className="text-white" />
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-slate-900 tabular-nums">
-                {displayValue}{suffix}
-              </p>
-              <p className="text-sm text-slate-500">{label}</p>
-            </div>
+    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: color + '22', color, letterSpacing: '.03em', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+      {label}
+    </span>
+  );
+}
+
+function MetricCard({ icon: Icon, label, value, sub, trend, color = '#a855f7', loading }) {
+  return (
+    <div className="metric-card" style={{ cursor: 'default' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 9, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={17} style={{ color }} />
+        </div>
+        {trend !== undefined && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: trend >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+            {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+            {Math.abs(trend)}%
           </div>
-          {trendValue !== null && trendValue !== 0 && (
-            <div className={`flex items-center gap-1 text-sm ${trendValue > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {trendValue > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-              <span>{trendPercent > 0 ? '+' : ''}{trendPercent}%</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ============== TICKET LIST ITEM ==============
-
-function TicketListItem({ ticket, showWaitingReason, t }) {
-  const isBreaching = ticket.is_sla_breached;
-  const StatusIcon = statusConfig[ticket.status]?.icon || Inbox;
-  
-  return (
-    <Link 
-      to={`/orders/${ticket.id}`}
-      className={`block p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
-        isBreaching ? 'border-red-300 bg-red-50/50' : 'border-slate-200 bg-white hover:border-rose-200'
-      }`}
-      data-testid={`ticket-${ticket.order_code}`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-              {ticket.order_code}
-            </span>
-            <Badge className={statusConfig[ticket.status]?.class}>
-              <StatusIcon size={12} className="mr-1" />
-              {ticket.status}
-            </Badge>
-            <Badge className={priorityConfig[ticket.priority]}>
-              {ticket.priority}
-            </Badge>
-            {isBreaching && (
-              <Badge className="bg-red-100 text-red-700 animate-pulse">
-                <AlertTriangle size={12} className="mr-1" />
-                SLA Breach
-              </Badge>
-            )}
-            {showWaitingReason && ticket.waiting_reason && (
-              <Badge className="bg-amber-100 text-amber-700">
-                <MessageSquare size={12} className="mr-1" />
-                {ticket.waiting_reason === 'unread_message' ? 'Unread Message' : 'Needs Response'}
-              </Badge>
-            )}
-          </div>
-          <h3 className="font-medium text-slate-900 mt-2 truncate">{ticket.title}</h3>
-          <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-            {ticket.category_l1_name && <span>{ticket.category_l1_name}</span>}
-            <span>Due: {format(new Date(ticket.sla_deadline), 'MMM d, h:mm a')}</span>
-          </div>
-        </div>
-        <ArrowRight size={16} className="text-slate-400 mt-2" />
-      </div>
-    </Link>
-  );
-}
-
-// ============== TICKET LIST SECTION ==============
-
-function TicketListSection({ title, icon: Icon, iconColor, tickets, showWaitingReason, emptyMessage, t, viewAllLink, viewAllRoute }) {
-  // Support both viewAllLink (legacy) and viewAllRoute (new)
-  const linkTo = viewAllRoute || viewAllLink;
-  
-  return (
-    <Card className="border-slate-200">
-      <CardHeader className="border-b border-slate-100 pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Icon size={20} className={iconColor} />
-            {title} ({tickets.length})
-          </CardTitle>
-          {linkTo && tickets.length > 0 && (
-            <Link to={linkTo} className="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
-              View All <ArrowRight size={14} />
-            </Link>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          {tickets.slice(0, 10).map(ticket => (
-            <TicketListItem 
-              key={ticket.id} 
-              ticket={ticket} 
-              showWaitingReason={showWaitingReason}
-              t={t} 
-            />
-          ))}
-          {tickets.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <Icon size={40} className="mx-auto mb-3 opacity-30" />
-              <p>{emptyMessage}</p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ============== CHARTS ==============
-
-function StatusAreaChart({ data, title, t }) {
-  return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Activity size={18} className="text-blue-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorOpen" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={STATUS_COLORS.open} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={STATUS_COLORS.open} stopOpacity={0.1}/>
-              </linearGradient>
-              <linearGradient id="colorInProgress" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={STATUS_COLORS.in_progress} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={STATUS_COLORS.in_progress} stopOpacity={0.1}/>
-              </linearGradient>
-              <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={STATUS_COLORS.pending} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={STATUS_COLORS.pending} stopOpacity={0.1}/>
-              </linearGradient>
-              <linearGradient id="colorDelivered" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={STATUS_COLORS.delivered} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={STATUS_COLORS.delivered} stopOpacity={0.1}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 11, fill: '#64748B' }}
-              tickFormatter={(val) => format(new Date(val), 'MMM d')}
-            />
-            <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
-                border: '1px solid #E2E8F0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
-              }}
-              labelFormatter={(val) => format(new Date(val), 'MMM d, yyyy')}
-            />
-            <Legend />
-            <Area type="monotone" dataKey="open" name={t('chartLabels.open')} stroke={STATUS_COLORS.open} fillOpacity={1} fill="url(#colorOpen)" animationDuration={1500} />
-            <Area type="monotone" dataKey="in_progress" name={t('chartLabels.inProgress')} stroke={STATUS_COLORS.in_progress} fillOpacity={1} fill="url(#colorInProgress)" animationDuration={1500} />
-            <Area type="monotone" dataKey="pending" name={t('chartLabels.pending')} stroke={STATUS_COLORS.pending} fillOpacity={1} fill="url(#colorPending)" animationDuration={1500} />
-            <Area type="monotone" dataKey="delivered" name={t('chartLabels.delivered')} stroke={STATUS_COLORS.delivered} fillOpacity={1} fill="url(#colorDelivered)" animationDuration={1500} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CategoryBarChart({ data, title }) {
-  return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <BarChart3 size={18} className="text-indigo-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#64748B' }} />
-            <YAxis 
-              dataKey="category" 
-              type="category" 
-              width={120}
-              tick={{ fontSize: 11, fill: '#64748B' }}
-              tickFormatter={(val) => val?.length > 15 ? val.slice(0, 15) + '...' : val}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
-                border: '1px solid #E2E8F0',
-                borderRadius: '8px'
-              }}
-            />
-            <Bar 
-              dataKey="count" 
-              fill="#6366F1" 
-              radius={[0, 4, 4, 0]}
-              animationDuration={1500}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SLATrendChart({ data, title, t }) {
-  return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Target size={18} className="text-emerald-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 11, fill: '#64748B' }}
-              tickFormatter={(val) => format(new Date(val), 'MMM d')}
-            />
-            <YAxis tick={{ fontSize: 11, fill: '#64748B' }} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
-                border: '1px solid #E2E8F0',
-                borderRadius: '8px'
-              }}
-              labelFormatter={(val) => format(new Date(val), 'MMM d, yyyy')}
-            />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="on_track" 
-              name={t('chartLabels.onTrack')}
-              stroke={SLA_COLORS.on_track} 
-              strokeWidth={2}
-              dot={false}
-              animationDuration={1500}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="at_risk" 
-              name={t('chartLabels.atRisk')}
-              stroke={SLA_COLORS.at_risk} 
-              strokeWidth={2}
-              dot={false}
-              animationDuration={1500}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="breached" 
-              name={t('chartLabels.breached')}
-              stroke={SLA_COLORS.breached} 
-              strokeWidth={2}
-              dot={false}
-              animationDuration={1500}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PoolRoutingChart({ data, title }) {
-  if (!data || !data.pool1) return null;
-  
-  const chartData = [
-    { name: 'Pool 1 Pickups', value: data.pool1.picked, fill: POOL_COLORS.pool1 },
-    { name: 'Pool 2 Assignments', value: data.pool2.picked, fill: POOL_COLORS.pool2 },
-    { name: 'Expired to Pool 2', value: data.expired_pool1_to_pool2, fill: '#F59E0B' }
-  ];
-  
-  return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Layers size={18} className="text-pink-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <ResponsiveContainer width="100%" height={200}>
-            <RechartsPieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={70}
-                paddingAngle={2}
-                dataKey="value"
-                animationDuration={1500}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </RechartsPieChart>
-          </ResponsiveContainer>
-          <div className="flex flex-col justify-center space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: POOL_COLORS.pool1 }} />
-              <span className="text-sm">Pool 1: {data.pool1.picked} picked</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: POOL_COLORS.pool2 }} />
-              <span className="text-sm">Pool 2: {data.pool2.picked} assigned</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <span className="text-sm">Expired P1→P2: {data.expired_pool1_to_pool2}</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ============== LOADING SPINNER ==============
-
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
-    </div>
-  );
-}
-
-// ============== ADMIN DASHBOARD ==============
-
-function FinancialMetricCard({ label, value, icon: Icon, color, prefix = '', suffix = '', subtext }) {
-  return (
-    <Card className="border-slate-200">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">
-              {prefix}{typeof value === 'number' ? value.toLocaleString() : (value ?? '—')}{suffix}
-            </p>
-            {subtext && <p className="text-xs text-slate-400 mt-0.5">{subtext}</p>}
-          </div>
-          <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-            <Icon size={20} className="text-white" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function AdminDashboard({ metrics, ticketLists, chartData, financialStats, loading, onRefresh, t }) {
-  if (loading) return <LoadingSpinner />;
-
-  return (
-    <div className="space-y-6" data-testid="admin-dashboard">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')} - {t('adminDashboard')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboardLabels.completeVisibility')}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
-          <RefreshCw size={14} />
-          {t('common.refresh')}
-        </Button>
-      </div>
-
-      {/* Financial Metrics Row */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <DollarSign size={15} />
-          Revenue & Growth
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <FinancialMetricCard
-            label="MRR"
-            value={financialStats?.mrr ?? null}
-            icon={DollarSign}
-            color="bg-emerald-500"
-            prefix="$"
-            subtext={financialStats ? `${financialStats.active_subscribers} paying subscribers` : 'Loading...'}
-          />
-          <FinancialMetricCard
-            label="Active Clients"
-            value={financialStats?.total_clients ?? null}
-            icon={UserCheck}
-            color="bg-blue-500"
-            subtext={financialStats ? `+${financialStats.new_clients_mtd} new this month` : 'Loading...'}
-          />
-          <FinancialMetricCard
-            label="Requests MTD"
-            value={financialStats?.requests_mtd ?? null}
-            icon={Zap}
-            color="bg-amber-500"
-            subtext={financialStats ? `${financialStats.requests_prev_month} last month` : 'Loading...'}
-          />
-          <FinancialMetricCard
-            label="Delivered MTD"
-            value={financialStats?.delivered_mtd ?? null}
-            icon={FileCheck}
-            color="bg-purple-500"
-            subtext="Delivered or closed this month"
-          />
-        </div>
-      </div>
-
-      {/* KPI Cards - Status (Clickable) */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Link to="/orders?status=Open">
-          <AnimatedKPICard label={t('dashboardLabels.open')} value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
-        </Link>
-        <Link to="/orders?status=In Progress">
-          <AnimatedKPICard label={t('dashboardLabels.inProgress')} value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
-        </Link>
-        <Link to="/orders?status=Pending Review">
-          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.kpi.pending_review} icon={AlertCircle} color="bg-purple-500" />
-        </Link>
-        <Link to="/orders?status=Delivered">
-          <AnimatedKPICard label={t('dashboardLabels.delivered')} value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
-        </Link>
-        <Link to="/orders?status=Closed">
-          <AnimatedKPICard label={t('dashboardLabels.closed')} value={metrics.kpi.closed} icon={CheckCircle2} color="bg-slate-500" />
-        </Link>
-      </div>
-
-      {/* SLA Status */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-          <Target size={18} />
-          {t('slaStatus')}
-        </h2>
-        <div className="grid grid-cols-3 gap-4">
-          <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
-          <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
-          <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {chartData.statusVolume && (
-          <StatusAreaChart data={chartData.statusVolume} title={t('dashboardLabels.ticketVolumeByStatus')} t={t} />
-        )}
-        {chartData.categoryVolume && (
-          <CategoryBarChart data={chartData.categoryVolume} title={t('dashboardLabels.topCategories')} />
-        )}
-        {chartData.slaTrend && (
-          <SLATrendChart data={chartData.slaTrend} title={t('dashboardLabels.slaTrend')} t={t} />
         )}
       </div>
-
-      {/* Ticket Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWaitingAction')}
-          icon={AlertCircle}
-          iconColor="text-amber-500"
-          tickets={ticketLists.waitingOnMe}
-          showWaitingReason={true}
-          emptyMessage={t('dashboardLabels.noTicketsWaiting')}
-          t={t}
-        />
-        <TicketListSection 
-          title={t('dashboardLabels.recentlyDelivered7d')}
-          icon={CheckCircle2}
-          iconColor="text-emerald-500"
-          tickets={ticketLists.recentlyDelivered}
-          emptyMessage={t('dashboardLabels.noDeliveries7d')}
-          t={t}
-          viewAllLink="/orders?status=Delivered"
-        />
+      <div className="metric-value" style={{ color: 'hsl(var(--text-1))' }}>
+        {loading ? <span style={{ opacity: .3 }}>—</span> : value ?? '—'}
       </div>
+      <div style={{ fontSize: 12, color: 'hsl(var(--text-3))', marginTop: 2 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 4, opacity: .7 }}>{sub}</div>}
     </div>
   );
 }
 
-// ============== OPERATOR DASHBOARD ==============
-
-function OperatorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t }) {
-  if (loading) return <LoadingSpinner />;
-  
-  return (
-    <div className="space-y-6" data-testid="operator-dashboard">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboardLabels.yourWorkOverview')}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
-          <RefreshCw size={14} />
-          {t('common.refresh')}
-        </Button>
-      </div>
-
-      {/* Workload KPIs (Clickable) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        </Link>
-        <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        </Link>
-        <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        </Link>
-        <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
-        </Link>
-      </div>
-
-      {/* Pool Opportunities */}
-      {(metrics.can_see_pool1 || metrics.can_see_pool2) && metrics.pool && (
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <Layers size={18} />
-            {t('dashboardLabels.availableOpportunities')}
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {metrics.can_see_pool1 && (
-              <Link to="/ribbon?pool=1">
-                <AnimatedKPICard label={t('dashboardLabels.pool1Opportunities')} value={metrics.pool.pool1_available} icon={Layers} color="bg-indigo-500" />
-              </Link>
-            )}
-            {metrics.can_see_pool2 && (
-              <Link to="/ribbon?pool=2">
-                <AnimatedKPICard label={t('dashboardLabels.pool2Opportunities')} value={metrics.pool.pool2_available} icon={Layers} color="bg-pink-500" />
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Ticket Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWorkingOn')}
-          icon={Clock}
-          iconColor="text-amber-500"
-          tickets={ticketLists.workingOn}
-          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
-          t={t}
-        />
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWaitingOnMe')}
-          icon={AlertCircle}
-          iconColor="text-red-500"
-          tickets={ticketLists.waitingOnMe}
-          showWaitingReason={true}
-          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
-          t={t}
-        />
-      </div>
-
-      {/* Recently Delivered */}
-      <TicketListSection 
-        title={t('dashboardLabels.recentlyDelivered7d')}
-        icon={CheckCircle2}
-        iconColor="text-emerald-500"
-        tickets={ticketLists.recentlyDelivered}
-        emptyMessage={t('dashboardLabels.noDeliveries7d')}
-        t={t}
-        viewAllLink="/my-tickets"
-      />
-    </div>
-  );
-}
-
-// ============== PARTNER DASHBOARD ==============
-
-function PartnerDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t }) {
-  if (loading) return <LoadingSpinner />;
-  
-  return (
-    <div className="space-y-6" data-testid="partner-dashboard">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboardLabels.partnerPool1Access')}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
-          <RefreshCw size={14} />
-          {t('common.refresh')}
-        </Button>
-      </div>
-
-      {/* Workload KPIs (Clickable) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        </Link>
-        <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        </Link>
-        <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        </Link>
-        <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
-        </Link>
-      </div>
-
-      {/* Pool 1 Opportunities (Clickable) */}
-      {metrics.pool && (
-        <Link to="/ribbon-board?pool=1">
-          <Card className="border-indigo-200 bg-indigo-50/50 hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center">
-                    <Layers size={28} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-indigo-900">{metrics.pool.pool1_available}</p>
-                    <p className="text-indigo-700">{t('dashboardLabels.pool1OpportunitiesAvailable')}</p>
-                  </div>
-                </div>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-                  {t('dashboardLabels.viewRibbon')} <ArrowRight size={16} />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
-
-      {/* Ticket Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWorkingOn')}
-          icon={Clock}
-          iconColor="text-amber-500"
-          tickets={ticketLists.workingOn}
-          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
-          t={t}
-        />
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWaitingOnMe')}
-          icon={AlertCircle}
-          iconColor="text-red-500"
-          tickets={ticketLists.waitingOnMe}
-          showWaitingReason={true}
-          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
-          t={t}
-        />
-      </div>
-    </div>
-  );
-}
-
-// ============== VENDOR DASHBOARD ==============
-
-function VendorDashboard({ metrics, ticketLists, chartData, loading, onRefresh, t }) {
-  if (loading) return <LoadingSpinner />;
-  
-  return (
-    <div className="space-y-6" data-testid="vendor-dashboard">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboardLabels.vendorPool2Access')}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
-          <RefreshCw size={14} />
-          {t('common.refresh')}
-        </Button>
-      </div>
-
-      {/* Workload KPIs (Clickable) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/my-tickets?filter=working_on">
-          <AnimatedKPICard label={t('dashboardLabels.workingOn')} value={metrics.workload.tickets_working_on} icon={Clock} color="bg-amber-500" />
-        </Link>
-        <Link to="/my-tickets?filter=waiting_on_me">
-          <AnimatedKPICard label={t('dashboardLabels.waitingOnMe')} value={metrics.workload.tickets_waiting_on_me} icon={AlertCircle} color="bg-red-500" />
-        </Link>
-        <Link to="/my-tickets?filter=pending_review">
-          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.workload.tickets_pending_review} icon={Eye} color="bg-purple-500" />
-        </Link>
-        <Link to="/my-tickets?filter=recently_delivered">
-          <AnimatedKPICard label={t('dashboardLabels.delivered7d')} value={metrics.workload.recently_delivered_7d} icon={CheckCircle2} color="bg-emerald-500" />
-        </Link>
-      </div>
-
-      {/* Pool 2 Opportunities (Clickable) */}
-      {metrics.pool && (
-        <Link to="/ribbon-board?pool=2">
-          <Card className="border-pink-200 bg-pink-50/50 hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-pink-500 rounded-xl flex items-center justify-center">
-                    <Layers size={28} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-pink-900">{metrics.pool.pool2_available}</p>
-                    <p className="text-pink-700">{t('dashboardLabels.pool2OpportunitiesAvailable')}</p>
-                  </div>
-                </div>
-                <Button className="bg-pink-600 hover:bg-pink-700 gap-2">
-                  {t('dashboardLabels.viewOpportunities')} <ArrowRight size={16} />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
-
-      {/* Ticket Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWorkingOn')}
-          icon={Clock}
-          iconColor="text-amber-500"
-          tickets={ticketLists.workingOn}
-          emptyMessage={t('dashboardLabels.noTicketsInProgress')}
-          t={t}
-          viewAllRoute="/my-tickets?filter=working_on"
-        />
-        <TicketListSection 
-          title={t('dashboardLabels.ticketsWaitingOnMe')}
-          icon={AlertCircle}
-          iconColor="text-red-500"
-          tickets={ticketLists.waitingOnMe}
-          showWaitingReason={true}
-          emptyMessage={t('dashboardLabels.noTicketsNeedAction')}
-          t={t}
-          viewAllRoute="/my-tickets?filter=waiting_on_me"
-        />
-      </div>
-    </div>
-  );
-}
-
-// ============== MEDIA CLIENT DASHBOARD ==============
-
-function MediaClientDashboard({ metrics, ticketLists, loading, onRefresh, t }) {
-  if (loading) return <LoadingSpinner />;
-  
-  return (
-    <div className="space-y-6" data-testid="media-client-dashboard">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('dashboardLabels.yourSubmittedTickets')}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onRefresh} className="gap-2">
-            <RefreshCw size={14} />
-            {t('common.refresh')}
-          </Button>
-          <Link to="/submit">
-            <Button size="sm" className="bg-rose-600 hover:bg-rose-700 gap-2">
-              <Send size={14} />
-              {t('buttons.newRequest')}
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* My Ticket KPIs (Clickable - routes to my-tickets for Media Clients) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/my-tickets?status=Open">
-          <AnimatedKPICard label={t('dashboardLabels.open')} value={metrics.kpi.open} icon={Inbox} color="bg-blue-500" />
-        </Link>
-        <Link to="/my-tickets?status=In Progress">
-          <AnimatedKPICard label={t('dashboardLabels.inProgress')} value={metrics.kpi.in_progress} icon={Clock} color="bg-amber-500" />
-        </Link>
-        <Link to="/my-tickets?status=Pending Review">
-          <AnimatedKPICard label={t('dashboardLabels.pendingReview')} value={metrics.kpi.pending_review} icon={Eye} color="bg-purple-500" />
-        </Link>
-        <Link to="/my-tickets?status=Delivered">
-          <AnimatedKPICard label={t('dashboardLabels.delivered')} value={metrics.kpi.delivered} icon={CheckCircle2} color="bg-emerald-500" />
-        </Link>
-      </div>
-
-      {/* SLA Overview (Non-clickable for Media Clients - they don't have SLA access) */}
-      <div className="grid grid-cols-3 gap-4">
-        <AnimatedKPICard label={t('dashboardLabels.onTrack')} value={metrics.sla.on_track} icon={CheckCircle2} color="bg-emerald-500" />
-        <AnimatedKPICard label={t('dashboardLabels.atRisk')} value={metrics.sla.at_risk} icon={Clock} color="bg-amber-500" />
-        <AnimatedKPICard label={t('dashboardLabels.breached')} value={metrics.sla.breached} icon={AlertTriangle} color="bg-red-500" />
-      </div>
-
-      {/* Tickets Needing Your Review */}
-      {ticketLists.pendingReview.length > 0 && (
-        <Link to="/my-tickets?filter=pending_review">
-          <Card className="border-purple-200 bg-purple-50/50 hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-purple-900 flex items-center gap-2">
-                <Eye size={20} />
-                {t('dashboardLabels.ticketsPendingReview')} ({ticketLists.pendingReview.length})
-              </CardTitle>
-              <CardDescription className="text-purple-700">
-                {t('dashboardLabels.ticketsPendingReviewDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {ticketLists.pendingReview.slice(0, 3).map(ticket => (
-                  <TicketListItem key={ticket.id} ticket={ticket} t={t} />
-                ))}
-                {ticketLists.pendingReview.length > 3 && (
-                  <p className="text-sm text-purple-600 text-center pt-2">
-                    {t('dashboardLabels.moreTicketsPending', { count: ticketLists.pendingReview.length - 3 })}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
-
-      {/* Active Tickets */}
-      <TicketListSection 
-        title={t('dashboardLabels.activeTickets')}
-        icon={Clock}
-        iconColor="text-amber-500"
-        tickets={ticketLists.workingOn}
-        emptyMessage={t('dashboardLabels.noActiveTickets')}
-        t={t}
-        viewAllLink="/my-tickets"
-      />
-
-      {/* Recently Delivered */}
-      <TicketListSection 
-        title={t('dashboardLabels.recentlyDelivered7d')}
-        icon={CheckCircle2}
-        iconColor="text-emerald-500"
-        tickets={ticketLists.recentlyDelivered}
-        emptyMessage={t('dashboardLabels.noDeliveries7d')}
-        t={t}
-        viewAllLink="/my-tickets?status=Delivered"
-      />
-    </div>
-  );
-}
-
-// ============== DYNAMIC WIDGET RENDERER ==============
-
-// Click-through routes for KPI cards based on metric type
-const getKPIClickRoute = (metricKey, userRole, accountType) => {
-  // Route mappings for different metrics
-  const routes = {
-    // Ticket status KPIs → filtered orders/tickets
-    'open': '/orders?status=Open',
-    'in_progress': '/orders?status=In Progress',
-    'pending_review': '/orders?status=Pending Review',
-    'delivered': '/orders?status=Delivered',
-    'closed': '/orders?status=Closed',
-    // SLA status KPIs → SLA filtered view
-    'sla_on_track': '/orders?sla=on_track',
-    'sla_at_risk': '/orders?sla=at_risk',
-    'sla_breached': '/orders?sla=breached',
-    // Workload KPIs
-    'working_on': '/my-tickets?filter=working_on',
-    'waiting_on_me': '/my-tickets?filter=waiting_on_me',
-    // Pool KPIs
-    'pool1_available': '/ribbon-board?pool=1',
-    'pool2_available': '/ribbon-board?pool=2',
-    'pool_pickups': '/reports?metric=pool_pickups',
-    'avg_pick_time': '/reports?metric=avg_pick_time'
+function InsightCard({ type, text, action, onAction }) {
+  const configs = {
+    warning: { icon: AlertTriangle, color: '#f59e0b', bg: '#f59e0b12' },
+    danger: { icon: AlertCircle, color: '#ef4444', bg: '#ef444412' },
+    success: { icon: CheckCircle2, color: '#10b981', bg: '#10b98112' },
+    info: { icon: Zap, color: '#3b82f6', bg: '#3b82f612' },
   };
-  
-  // Media clients get restricted routing
-  if (accountType === 'Media Client') {
-    const mediaClientRoutes = {
-      'open': '/my-tickets?status=Open',
-      'in_progress': '/my-tickets?status=In Progress',
-      'pending_review': '/my-tickets?status=Pending Review',
-      'delivered': '/my-tickets?status=Delivered',
-      'closed': '/my-tickets?status=Closed',
-      'working_on': '/my-tickets',
-      'waiting_on_me': '/my-tickets?filter=waiting_on_me'
-    };
-    return mediaClientRoutes[metricKey] || '/my-tickets';
-  }
-  
-  // Non-admins may have restricted access to /orders
-  if (userRole !== 'Administrator') {
-    // Redirect to my-tickets instead of /orders for non-admins
-    const nonAdminRoutes = {
-      'open': '/my-tickets?status=Open',
-      'in_progress': '/my-tickets?status=In Progress',
-      'pending_review': '/my-tickets?status=Pending Review',
-      'delivered': '/my-tickets?status=Delivered',
-      'closed': '/my-tickets?status=Closed'
-    };
-    return nonAdminRoutes[metricKey] || routes[metricKey] || null;
-  }
-  
-  return routes[metricKey] || null;
-};
-
-// Check if a widget is pool-related
-const isPoolWidget = (widget) => {
-  const poolMetrics = ['pool1_available', 'pool2_available', 'pool_pickups', 'avg_pick_time'];
-  const poolListTypes = ['pool1_tickets', 'pool2_tickets'];
-  
-  if (widget.widget_type === 'kpi_card') {
-    return poolMetrics.includes(widget.config?.metric);
-  }
-  if (widget.widget_type === 'ticket_list') {
-    return poolListTypes.includes(widget.config?.list_type);
-  }
-  return false;
-};
-
-function DynamicDashboard({ dashboardConfig, metrics, ticketLists, chartData, loading, onRefresh, t, user }) {
-  const navigate = useNavigate();
-  const allWidgets = dashboardConfig?.widgets || [];
-  
-  // Filter out pool widgets if user can't pick or has no pool access
-  const widgets = allWidgets.filter(widget => {
-    if (!isPoolWidget(widget)) return true;
-    // Hide pool widgets if can_pick is false or pool_access is "none"
-    if (user?.can_pick === false || user?.pool_access === 'none') return false;
-    return true;
-  });
-  
-  // Handle KPI card click
-  const handleKPIClick = (metricKey) => {
-    const route = getKPIClickRoute(metricKey, user?.role, user?.account_type);
-    if (route) {
-      navigate(route);
-    } else {
-      toast.info('This view is not available');
-    }
-  };
-  
-  // Group widgets by size for responsive layout
-  const renderWidget = (widget) => {
-    const { widget_type, title, config, size } = widget;
-    const sizeClass = size === 'large' ? 'md:col-span-2' : size === 'small' ? '' : 'md:col-span-1';
-    
-    switch (widget_type) {
-      case 'kpi_card':
-        const metricKey = config?.metric;
-        const value = metricKey === 'open' ? metrics?.kpi?.open :
-                      metricKey === 'in_progress' ? metrics?.kpi?.in_progress :
-                      metricKey === 'pending_review' ? metrics?.kpi?.pending_review :
-                      metricKey === 'delivered' ? metrics?.kpi?.delivered :
-                      metricKey === 'closed' ? metrics?.kpi?.closed :
-                      metricKey === 'sla_on_track' ? metrics?.sla?.on_track :
-                      metricKey === 'sla_at_risk' ? metrics?.sla?.at_risk :
-                      metricKey === 'sla_breached' ? metrics?.sla?.breached :
-                      metricKey === 'working_on' ? metrics?.workload?.tickets_working_on :
-                      metricKey === 'waiting_on_me' ? metrics?.workload?.tickets_waiting_on_me : 0;
-        
-        const IconComponent = config?.icon === 'Inbox' ? Inbox :
-                              config?.icon === 'Clock' ? Clock :
-                              config?.icon === 'AlertCircle' ? AlertCircle :
-                              config?.icon === 'CheckCircle2' ? CheckCircle2 :
-                              config?.icon === 'Target' ? Target :
-                              config?.icon === 'AlertTriangle' ? AlertTriangle :
-                              config?.icon === 'Activity' ? Activity : BarChart3;
-        
-        return (
-          <AnimatedKPICard
-            key={widget.id}
-            label={title}
-            value={value || 0}
-            icon={IconComponent}
-            color={config?.color || 'bg-blue-500'}
-            onClick={() => handleKPIClick(metricKey)}
-          />
-        );
-      
-      case 'ticket_list':
-        const listType = config?.list_type;
-        const tickets = listType === 'working_on' ? ticketLists.workingOn :
-                        listType === 'waiting_on_me' ? ticketLists.waitingOnMe :
-                        listType === 'pending_review' ? ticketLists.pendingReview :
-                        listType === 'recently_delivered' ? ticketLists.recentlyDelivered : [];
-        
-        // Determine route for the "View All" link based on list type
-        const listRoute = listType === 'recently_delivered' ? '/my-tickets?filter=recently_delivered' :
-                          listType === 'waiting_on_me' ? '/my-tickets?filter=waiting_on_me' :
-                          listType === 'pending_review' ? '/my-tickets?filter=pending_review' :
-                          '/my-tickets';
-        
-        return (
-          <div key={widget.id} className={sizeClass}>
-            <TicketListSection
-              title={title}
-              icon={listType === 'recently_delivered' ? CheckCircle2 : 
-                    listType === 'waiting_on_me' ? Clock : Inbox}
-              iconColor={listType === 'recently_delivered' ? 'text-emerald-500' : 
-                         listType === 'waiting_on_me' ? 'text-amber-500' : 'text-blue-500'}
-              tickets={tickets}
-              emptyMessage={`No ${title.toLowerCase()}`}
-              t={t}
-              viewAllRoute={listRoute}
-            />
-          </div>
-        );
-      
-      case 'chart':
-        const chartType = config?.chart_type;
-        if (chartType === 'ticket_volume_status' && chartData.statusVolume) {
-          return (
-            <Card key={widget.id} className={`${sizeClass} col-span-full md:col-span-1 cursor-pointer hover:shadow-md transition-shadow`}
-                  onClick={() => navigate('/reports?chart=ticket_volume&range=30')}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BarChart3 size={18} className="text-blue-500" />
-                  {title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData.statusVolume}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9CA3AF" />
-                      <YAxis tick={{ fontSize: 11 }} stroke="#9CA3AF" />
-                      <Tooltip />
-                      <Bar dataKey="open" stackId="a" fill={STATUS_COLORS.open} name="Open" />
-                      <Bar dataKey="in_progress" stackId="a" fill={STATUS_COLORS.in_progress} name="In Progress" />
-                      <Bar dataKey="pending" stackId="a" fill={STATUS_COLORS.pending} name="Pending" />
-                      <Bar dataKey="delivered" stackId="a" fill={STATUS_COLORS.delivered} name="Delivered" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        }
-        return null;
-      
-      default:
-        return null;
-    }
-  };
-  
-  // Separate KPI cards from other widgets
-  const kpiWidgets = widgets.filter(w => w.widget_type === 'kpi_card');
-  const otherWidgets = widgets.filter(w => w.widget_type !== 'kpi_card');
-  
+  const { icon: Icon, color, bg } = configs[type] || configs.info;
   return (
-    <div className="space-y-6" data-testid="dynamic-dashboard">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
-          <p className="text-slate-500 text-sm">{dashboardConfig?.name || 'Dashboard'}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} disabled={loading}>
-          <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-          {t('common.refresh')}
-        </Button>
-      </div>
-      
-      {/* KPI Cards Grid */}
-      {kpiWidgets.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {kpiWidgets.map(renderWidget)}
-        </div>
-      )}
-      
-      {/* Other Widgets */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {otherWidgets.map(renderWidget)}
-      </div>
-      
-      {/* If no widgets configured, show a message */}
-      {widgets.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-slate-500">No widgets configured for this dashboard.</p>
-          <p className="text-slate-400 text-sm mt-2">Contact your administrator to set up your dashboard.</p>
-        </Card>
-      )}
+    <div className="insight" style={{ background: bg, borderColor: color + '30', cursor: action ? 'pointer' : 'default' }} onClick={onAction}>
+      <Icon size={14} style={{ color, flexShrink: 0 }} />
+      <span style={{ flex: 1, fontSize: 12.5, color: 'hsl(var(--text-2))' }}>{text}</span>
+      {action && <span style={{ fontSize: 11, color, fontWeight: 600, flexShrink: 0 }}>{action} →</span>}
     </div>
   );
 }
 
-// ============== MAIN DASHBOARD COMPONENT ==============
-
+// ────────────────────────────────────────────
 export default function Dashboard() {
-  const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState(null);
-  const [dashboardConfig, setDashboardConfig] = useState(null);
-  const [useCustomDashboard, setUseCustomDashboard] = useState(false);
-  const [ticketLists, setTicketLists] = useState({
-    workingOn: [],
-    waitingOnMe: [],
-    pendingReview: [],
-    recentlyDelivered: []
-  });
-  const [chartData, setChartData] = useState({
-    statusVolume: null,
-    categoryVolume: null,
-    slaTrend: null,
-    poolRouting: null
-  });
-  const [financialStats, setFinancialStats] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [lastRefresh, setLastRefresh] = useState(null);
 
-  const fetchDashboardData = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch user's assigned dashboard configuration FIRST
-      const dashboardRes = await axios.get(`${API}/dashboards/user-dashboard`);
-      if (dashboardRes.data.dashboard && dashboardRes.data.assigned) {
-        setDashboardConfig(dashboardRes.data.dashboard);
-        setUseCustomDashboard(true);
-      } else {
-        setUseCustomDashboard(false);
-      }
-      
-      // Fetch main metrics
-      const metricsRes = await axios.get(`${API}/dashboard/v2/metrics`);
-      setMetrics(metricsRes.data);
-      
-      // Fetch ticket lists
-      const [workingOnRes, waitingOnMeRes, pendingReviewRes, recentlyDeliveredRes] = await Promise.all([
-        axios.get(`${API}/dashboard/v2/tickets/working-on`),
-        axios.get(`${API}/dashboard/v2/tickets/waiting-on-me`),
-        axios.get(`${API}/dashboard/v2/tickets/pending-review`),
-        axios.get(`${API}/dashboard/v2/tickets/recently-delivered`)
+      const [dashRes, tasksRes, ordersRes, notifRes] = await Promise.all([
+        get('/dashboard/v2'),
+        get('/tasks?limit=8&status=todo,doing,review'),
+        get('/orders?limit=8&status=open,assigned,in_progress,pending_review'),
+        get('/notifications?limit=8'),
       ]);
-      
-      setTicketLists({
-        workingOn: workingOnRes.data.tickets || [],
-        waitingOnMe: waitingOnMeRes.data.tickets || [],
-        pendingReview: pendingReviewRes.data.tickets || [],
-        recentlyDelivered: recentlyDeliveredRes.data.tickets || []
-      });
-      
-      // Fetch chart data (only for admin and some roles)
-      if (metricsRes.data.role_type === 'admin') {
-        const [statusVolumeRes, categoryVolumeRes, poolRoutingRes] = await Promise.all([
-          axios.get(`${API}/dashboard/v2/charts/ticket-volume-by-status?days=30`),
-          axios.get(`${API}/dashboard/v2/charts/ticket-volume-by-category?days=30`),
-          axios.get(`${API}/dashboard/v2/charts/pool-routing?days=30`)
-        ]);
-
-        // Fetch financial stats for admin
-        try {
-          const finRes = await axios.get(`${API}/dashboard/financial-stats`);
-          setFinancialStats(finRes.data);
-        } catch {
-          // Non-critical — silently skip if endpoint not available
-        }
-        
-        // Transform SLA trend data from metrics
-        const slaTrend = metricsRes.data.trends_30d?.sla?.on_track?.map((item, idx) => ({
-          date: item.date,
-          on_track: item.value,
-          at_risk: metricsRes.data.trends_30d?.sla?.at_risk?.[idx]?.value || 0,
-          breached: metricsRes.data.trends_30d?.sla?.breached?.[idx]?.value || 0
-        })) || [];
-        
-        setChartData({
-          statusVolume: statusVolumeRes.data.data || [],
-          categoryVolume: categoryVolumeRes.data.data || [],
-          slaTrend: slaTrend,
-          poolRouting: poolRoutingRes.data.data || null
-        });
+      if (dashRes) setMetrics(dashRes);
+      if (tasksRes?.items || tasksRes?.tasks || Array.isArray(tasksRes)) {
+        setTasks(tasksRes?.items || tasksRes?.tasks || tasksRes || []);
       }
-    } catch (error) {
-      console.error('Dashboard fetch error:', error);
-      toast.error('Failed to load dashboard data');
+      if (ordersRes?.orders || Array.isArray(ordersRes)) {
+        setRequests(ordersRes?.orders || ordersRes || []);
+      }
+      if (notifRes?.notifications || Array.isArray(notifRes)) {
+        setActivity(notifRes?.notifications || notifRes || []);
+      }
+      setLastRefresh(new Date());
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+  useEffect(() => { load(); }, [load]);
 
-  if (!user) return <LoadingSpinner />;
+  // ── Compute insights from data ──
+  const insights = [];
+  if (metrics) {
+    const unassigned = metrics?.kpi?.open || 0;
+    if (unassigned > 3) insights.push({ type: 'warning', text: `${unassigned} requests are unassigned and waiting`, action: 'Review', nav: '/requests' });
+    if (metrics?.sla?.breached > 0) insights.push({ type: 'danger', text: `${metrics.sla.breached} request${metrics.sla.breached > 1 ? 's' : ''} have breached SLA`, action: 'View', nav: '/requests' });
+    if (metrics?.sla?.at_risk > 0) insights.push({ type: 'warning', text: `${metrics.sla.at_risk} request${metrics.sla.at_risk > 1 ? 's' : ''} approaching SLA deadline`, action: 'View', nav: '/requests' });
+    if (metrics?.kpi?.delivered > 0) insights.push({ type: 'success', text: `${metrics.kpi.delivered} deliveries completed this month — great output`, action: null });
+  }
+  if (tasks.length > 0) {
+    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date()).length;
+    if (overdue > 0) insights.push({ type: 'danger', text: `${overdue} task${overdue > 1 ? 's' : ''} past due date`, action: 'View Tasks', nav: '/tasks' });
+  }
+  if (insights.length === 0 && !loading) {
+    insights.push({ type: 'success', text: 'Everything looks on track — no critical alerts', action: null });
+  }
 
-  // Determine which dashboard to show based on role_type from metrics
-  const roleType = metrics?.role_type || 'operator';
+  const today = new Date().toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <div className="animate-fade-in" data-testid="dashboard-page">
-      {/* Use custom dashboard if user has one assigned */}
-      {useCustomDashboard && dashboardConfig ? (
-        <DynamicDashboard
-          dashboardConfig={dashboardConfig}
-          metrics={metrics}
-          ticketLists={ticketLists}
-          chartData={chartData}
+    <div className="page-content" style={{ animation: 'fadeInUp .3s ease' }}>
+
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em', margin: 0, lineHeight: 1.2 }}>
+            {greet()}, {user?.name?.split(' ')[0] || 'there'} 👋
+          </h1>
+          <p style={{ fontSize: 13, color: 'hsl(var(--text-3))', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Calendar size={12} /> {today}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 7, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12 }}>
+            <RefreshCw size={12} style={loading ? { animation: 'spin 1s linear infinite' } : {}} />
+            Refresh
+          </button>
+          <button onClick={() => navigate('/command-center')} className="btn-primary-dark btn-sm" style={{ gap: 6 }}>
+            <Plus size={13} /> New Request
+          </button>
+        </div>
+      </div>
+
+      {/* ── Metric Cards ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <MetricCard
+          icon={Inbox}
+          label="Open Requests"
+          value={(metrics?.kpi?.open || 0) + (metrics?.kpi?.in_progress || 0) + (metrics?.kpi?.pending_review || 0)}
+          sub={`${metrics?.kpi?.open || 0} unassigned`}
+          color="#3b82f6"
           loading={loading}
-          onRefresh={fetchDashboardData}
-          t={t}
-          user={user}
         />
-      ) : (
-        <>
-          {/* Fall back to role-based dashboards */}
-          {roleType === 'admin' && (
-            <AdminDashboard
-              metrics={metrics}
-              ticketLists={ticketLists}
-              chartData={chartData}
-              financialStats={financialStats}
-              loading={loading}
-              onRefresh={fetchDashboardData}
-              t={t}
-            />
+        <MetricCard
+          icon={CheckCircle2}
+          label="Deliveries MTD"
+          value={metrics?.kpi?.delivered || 0}
+          sub="this month"
+          color="#10b981"
+          loading={loading}
+        />
+        <MetricCard
+          icon={Target}
+          label="My Open Tasks"
+          value={tasks.length}
+          sub="in progress"
+          color="#f59e0b"
+          loading={loading}
+        />
+        <MetricCard
+          icon={AlertTriangle}
+          label="SLA Risks"
+          value={(metrics?.sla?.at_risk || 0) + (metrics?.sla?.breached || 0)}
+          sub={`${metrics?.sla?.breached || 0} breached`}
+          color={((metrics?.sla?.breached || 0) > 0) ? '#ef4444' : '#a855f7'}
+          loading={loading}
+        />
+      </div>
+
+      {/* ── Insights ── */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+          AI Insights
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {loading ? (
+            <div style={{ height: 36, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .4 }} />
+          ) : (
+            insights.map((ins, i) => (
+              <InsightCard key={i} {...ins} onAction={ins.nav ? () => navigate(ins.nav) : undefined} />
+            ))
           )}
-          {roleType === 'operator' && (
-            <OperatorDashboard 
-              metrics={metrics}
-              ticketLists={ticketLists}
-              chartData={chartData}
-              loading={loading}
-              onRefresh={fetchDashboardData}
-              t={t}
-            />
-          )}
-          {roleType === 'partner' && (
-            <PartnerDashboard 
-              metrics={metrics}
-              ticketLists={ticketLists}
-              chartData={chartData}
-              loading={loading}
-              onRefresh={fetchDashboardData}
-              t={t}
-            />
-          )}
-          {roleType === 'vendor' && (
-            <VendorDashboard 
-              metrics={metrics}
-              ticketLists={ticketLists}
-              chartData={chartData}
-              loading={loading}
-              onRefresh={fetchDashboardData}
-              t={t}
-            />
-          )}
-          {roleType === 'media_client' && (
-            <MediaClientDashboard 
-              metrics={metrics}
-              ticketLists={ticketLists}
-              loading={loading}
-              onRefresh={fetchDashboardData}
-              t={t}
-            />
-          )}
-        </>
+        </div>
+      </div>
+
+      {/* ── Main Grid ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+
+        {/* Open Requests */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              Open Requests
+            </div>
+            <Link to="/requests" style={{ fontSize: 11, color: 'hsl(var(--primary))', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
+              View all <ChevronRight size={11} />
+            </Link>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {loading ? (
+              [1, 2, 3].map(i => (
+                <div key={i} style={{ height: 52, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .3 }} />
+              ))
+            ) : requests.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 13, background: 'hsl(var(--surface-2))', borderRadius: 8 }}>
+                No open requests 🎉
+              </div>
+            ) : (
+              requests.map(req => (
+                <Link key={req.id} to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    padding: '10px 12px',
+                    background: 'hsl(var(--surface-2))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    transition: 'border-color .15s',
+                    cursor: 'pointer',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'hsl(var(--border))'}
+                  >
+                    <PriorityDot p={req.priority} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {req.title || req.request_type || 'Request'}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1 }}>
+                        {req.order_code} · {req.requester_name || 'Client'}
+                      </div>
+                    </div>
+                    <StatusPill s={req.status} />
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* My Tasks */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              My Tasks
+            </div>
+            <Link to="/tasks" style={{ fontSize: 11, color: 'hsl(var(--primary))', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
+              View all <ChevronRight size={11} />
+            </Link>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {loading ? (
+              [1, 2, 3].map(i => (
+                <div key={i} style={{ height: 52, background: 'hsl(var(--surface-2))', borderRadius: 8, opacity: .3 }} />
+              ))
+            ) : tasks.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-3))', fontSize: 13, background: 'hsl(var(--surface-2))', borderRadius: 8 }}>
+                No tasks right now — clean slate ✓
+              </div>
+            ) : (
+              tasks.map(task => (
+                <Link key={task.id} to="/tasks" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    padding: '10px 12px',
+                    background: 'hsl(var(--surface-2))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    transition: 'border-color .15s',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'hsl(var(--border))'}
+                  >
+                    <Circle size={13} style={{ color: 'hsl(var(--text-3))', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {task.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1, display: 'flex', gap: 6, alignItems: 'center' }}>
+                        {task.due_date && (
+                          <span style={{ color: new Date(task.due_date) < new Date() ? '#ef4444' : 'hsl(var(--text-3))' }}>
+                            Due {new Date(task.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                        {task.assignee_name && <span>{task.assignee_name}</span>}
+                      </div>
+                    </div>
+                    <PriorityDot p={task.priority} />
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+          <button
+            onClick={() => navigate('/tasks?new=1')}
+            style={{ marginTop: 8, width: '100%', padding: '8px', background: 'transparent', border: '1px dashed hsl(var(--border))', borderRadius: 8, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'hsl(var(--primary))'; e.currentTarget.style.color = 'hsl(var(--primary))'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.color = 'hsl(var(--text-3))'; }}
+          >
+            <Plus size={12} /> Add task
+          </button>
+        </div>
+      </div>
+
+      {/* ── Activity Feed ── */}
+      {activity.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+            Recent Activity
+          </div>
+          <div style={{ background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 10, overflow: 'hidden' }}>
+            {activity.slice(0, 5).map((n, i) => (
+              <div key={n.id || i} style={{
+                padding: '10px 14px',
+                borderBottom: i < Math.min(activity.length, 5) - 1 ? '1px solid hsl(var(--border))' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                  {(n.actor_name || n.title || 'S').charAt(0).toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12.5, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {n.message || n.title || 'Activity'}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 1 }}>
+                    {n.created_at ? new Date(n.created_at).toLocaleString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                  </div>
+                </div>
+                {!n.is_read && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'hsl(var(--primary))', flexShrink: 0 }} />}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
+
     </div>
   );
 }

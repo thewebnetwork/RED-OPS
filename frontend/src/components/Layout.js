@@ -1,310 +1,337 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
-  ClipboardList,
+  CheckSquare,
+  FolderKanban,
+  FileText,
   Users,
+  UsersRound,
+  DollarSign,
+  BookOpen,
+  Sparkles,
+  Settings,
   LogOut,
   Menu,
   X,
-  ChevronDown,
-  Bug,
-  Lightbulb,
-  PlusCircle,
-  FolderTree,
-  User,
-  Shield,
-  UsersRound,
-  Star,
-  GitBranch,
-  Settings,
-  FileText,
-  Plug,
-  Clock,
-  Megaphone,
-  Mail,
-  AlertTriangle,
-  BarChart3,
-  PackageOpen,
-  Briefcase,
-  CreditCard,
-  Inbox,
-  Layers,
-  KeyRound,
-  Trash2,
-  Cloud
+  Search,
+  Plus,
+  Bell,
+  ChevronRight,
+  Cloud,
 } from 'lucide-react';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import NotificationDropdown from './NotificationDropdown';
-import LanguageSwitcher from './LanguageSwitcher';
-import AnnouncementTicker from './AnnouncementTicker';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function Layout({ children }) {
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ratingStats, setRatingStats] = useState(null);
+// ─────────────────────────────────────────────
+// Navigation config
+// ─────────────────────────────────────────────
+const NAV_MAIN = [
+  { path: '/',         icon: LayoutDashboard, label: 'Command Center', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/tasks',    icon: CheckSquare,     label: 'Tasks',          roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/projects', icon: FolderKanban,    label: 'Projects',       roles: ['Administrator','Operator','Standard User'] },
+  { path: '/requests', icon: FileText,        label: 'Requests',       roles: ['Administrator','Operator','Standard User'], badge: true },
+];
+const NAV_BUSINESS = [
+  { path: '/clients',  icon: Users,      label: 'Clients',         roles: ['Administrator','Operator'] },
+  { path: '/team',     icon: UsersRound, label: 'Team',            roles: ['Administrator','Operator'] },
+  { path: '/finance',  icon: DollarSign, label: 'Finance',         roles: ['Administrator'] },
+  { path: '/sops',     icon: BookOpen,   label: 'SOPs & Playbooks',roles: ['Administrator','Operator','Standard User'] },
+];
+const NAV_SYSTEM = [
+  { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'], isNew: true },
+  { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'], external: true },
+  { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
+];
 
-  useEffect(() => {
-    const fetchRatingStats = async () => {
-      try {
-        const res = await axios.get(`${API}/ratings/my-stats`);
-        setRatingStats(res.data);
-      } catch (error) {
-        // Silently fail - ratings not critical for layout
-      }
-    };
-    fetchRatingStats();
-  }, []);
+// Command palette items
+const CMD_ITEMS = [
+  { label:'Command Center',  icon:'🏠', to:'/',         group:'Navigate' },
+  { label:'Tasks',           icon:'✅', to:'/tasks',    group:'Navigate' },
+  { label:'Projects',        icon:'📁', to:'/projects', group:'Navigate' },
+  { label:'Requests',        icon:'📋', to:'/requests', group:'Navigate' },
+  { label:'Clients',         icon:'👥', to:'/clients',  group:'Navigate' },
+  { label:'Finance',         icon:'💰', to:'/finance',  group:'Navigate' },
+  { label:'AI Assistant',    icon:'✨', to:'/ai',       group:'Navigate' },
+  { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'C' },
+  { label:'New Request',     icon:'📝', to:'/command-center',    group:'Create', shortcut:'R' },
+  { label:'New Project',     icon:'🗂',  to:'/projects?new=1',   group:'Create', shortcut:'P' },
+];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const navItems = [
-    { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/my-services', icon: PackageOpen, labelKey: 'nav.myServices', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/my-tickets', icon: Inbox, labelKey: 'dashboard.mySubmittedTickets', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/command-center', icon: PlusCircle, labelKey: 'commandCenter.newTicket', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/report-issue', icon: Bug, labelKey: 'nav.reportIssue', roles: ['Administrator', 'Operator', 'Standard User'] },
-    // Opportunity Ribbon - visible only if can_pick = true AND not Media Client
-    { path: '/ribbon-board', icon: Layers, labelKey: 'nav.opportunityRibbon', roles: ['Administrator', 'Operator', 'Standard User'], excludeAccountTypes: ['Media Client'], requiresCanPick: true },
-    { path: '/orders', icon: ClipboardList, labelKey: 'nav.allOrders', roles: ['Administrator'] },
-    { path: '/deleted-tickets', icon: Trash2, labelKey: 'nav.deletedTickets', roles: ['Administrator'] },
-    { path: '/reports', icon: BarChart3, labelKey: 'nav.reports', roles: ['Administrator', 'Operator', 'Standard User'] },
-    { path: '/iam', icon: KeyRound, labelKey: 'iam.title', roles: ['Administrator'] },
-    { path: '/logs', icon: FileText, labelKey: 'nav.logs', roles: ['Administrator', 'Operator'] },
-    { path: '/announcements', icon: Megaphone, labelKey: 'nav.announcements', roles: ['Administrator'] },
-    { path: '/settings', icon: Settings, labelKey: 'nav.settings', roles: ['Administrator'] },
-    { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator', 'Operator', 'Standard User'], external: true },
-  ];
-
-  // Quick Links removed as per user request
-
-  const filteredNavItems = navItems.filter(item => {
-    // Check role permission
-    if (!item.roles.includes(user?.role)) return false;
-    // Check account type exclusions
-    if (item.excludeAccountTypes && item.excludeAccountTypes.includes(user?.account_type)) return false;
-    // Check can_pick requirement (for Opportunity Ribbon)
-    if (item.requiresCanPick && user?.can_pick === false) return false;
-    // Check pool_access - if "none", hide pool-related items
-    if (item.requiresCanPick && user?.pool_access === 'none') return false;
-    return true;
-  });
-
-  const navItemClass = (isActive) =>
-    `flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-      isActive
-        ? 'bg-white text-[#A2182C] shadow-lg'
-        : 'text-white/80 hover:text-white hover:bg-white/10'
-    }`;
+// ─────────────────────────────────────────────
+// Single nav item
+// ─────────────────────────────────────────────
+function NavItem({ item, location, onClick, badgeCount }) {
+  if (item.external) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer"
+        className="nav-item" onClick={onClick}>
+        <item.icon size={15} />
+        <span>{item.label}</span>
+      </a>
+    );
+  }
+  const isActive = item.path === '/'
+    ? location.pathname === '/'
+    : location.pathname.startsWith(item.path);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Mobile sidebar backdrop */}
+    <Link to={item.path} className={`nav-item${isActive ? ' active' : ''}`} onClick={onClick}>
+      <item.icon size={15} />
+      <span style={{ flex: 1 }}>{item.label}</span>
+      {item.isNew && (
+        <span style={{ fontSize:9, fontWeight:700, background:'rgba(168,85,247,.15)', color:'#a855f7', padding:'1px 5px', borderRadius:4, letterSpacing:'.05em' }}>
+          NEW
+        </span>
+      )}
+      {item.badge && badgeCount > 0 && (
+        <span className="nav-badge">{badgeCount > 99 ? '99+' : badgeCount}</span>
+      )}
+    </Link>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Main Layout
+// ─────────────────────────────────────────────
+export default function Layout({ children }) {
+  const { user, logout } = useAuth();
+  const location  = useLocation();
+  const navigate  = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cmdOpen,     setCmdOpen]     = useState(false);
+  const [cmdQuery,    setCmdQuery]    = useState('');
+  const [cmdIdx,      setCmdIdx]      = useState(0);
+  const [unread,      setUnread]      = useState(0);
+  const [badges,      setBadges]      = useState({ tasks: 0, requests: 0 });
+  const cmdInputRef = useRef(null);
+
+  // Filter items by role
+  const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
+  const mainItems     = filter(NAV_MAIN);
+  const businessItems = filter(NAV_BUSINESS);
+  const systemItems   = filter(NAV_SYSTEM);
+
+  // Page title for breadcrumb
+  const pageTitle = [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SYSTEM]
+    .find(i => i.path && (i.path === '/' ? location.pathname === '/' : location.pathname.startsWith(i.path)))?.label || '';
+
+  // ── Command palette ──
+  const openCmd = useCallback(() => {
+    setCmdQuery(''); setCmdIdx(0); setCmdOpen(true);
+    setTimeout(() => cmdInputRef.current?.focus(), 40);
+  }, []);
+  const closeCmd = useCallback(() => setCmdOpen(false), []);
+
+  const filtered = cmdQuery.trim()
+    ? CMD_ITEMS.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
+    : CMD_ITEMS;
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); cmdOpen ? closeCmd() : openCmd(); return; }
+      if (e.key === 'Escape') { closeCmd(); setSidebarOpen(false); return; }
+      if (!cmdOpen) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); setCmdIdx(i => Math.min(i+1, filtered.length-1)); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); setCmdIdx(i => Math.max(i-1, 0)); }
+      if (e.key === 'Enter' && filtered[cmdIdx]) { e.preventDefault(); execCmd(filtered[cmdIdx]); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [cmdOpen, cmdIdx, filtered, openCmd, closeCmd]); // eslint-disable-line
+
+  const execCmd = (item) => { closeCmd(); navigate(item.to); };
+
+  // ── Fetch unread notifications ──
+  useEffect(() => {
+    let dead = false;
+    const fetch_ = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const r = await fetch(`${API}/notifications?unread_only=true&limit=1`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!r.ok || dead) return;
+        const d = await r.json();
+        setUnread(d.total_unread ?? 0);
+      } catch {}
+    };
+    fetch_();
+    const iv = setInterval(fetch_, 60000);
+    return () => { dead = true; clearInterval(iv); };
+  }, []);
+
+  const handleLogout = () => { logout(); navigate('/login'); };
+
+  return (
+    <div className="app-shell">
+      {/* Mobile backdrop */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/60 z-40 lg:hidden animate-fade-in"
+          onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen w-64 bg-[#A2182C] text-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* ══ SIDEBAR ══ */}
+      <aside className={`app-sidebar fixed lg:static transition-transform duration-200 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+
         {/* Logo */}
-        <div className="h-16 flex items-center px-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <img 
-                src="/assets/logos/logo-icon.jpg" 
-                alt="Red Ops" 
-                className="w-10 h-10 rounded-lg object-cover relative z-10"
-              />
-              {/* Subtle glow effect instead of constant pulse */}
-              <span className="absolute inset-0 rounded-lg bg-white/20 blur-sm" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">RED OPS</span>
+        <div style={{ padding:'14px 16px', borderBottom:'1px solid hsl(var(--border))', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+          <div style={{ width:30, height:30, background:'hsl(var(--primary))', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:14, color:'white', flexShrink:0 }}>
+            R
           </div>
-          <button 
-            className="ml-auto lg:hidden text-white/70 hover:text-white"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X size={20} />
+          <div>
+            <div style={{ fontSize:14, fontWeight:800, letterSpacing:'-0.02em', fontFamily:'DM Sans, sans-serif' }}>RED OPS</div>
+            <div style={{ fontSize:9, color:'hsl(var(--text-3))', letterSpacing:'0.1em', textTransform:'uppercase' }}>Red Ribbon Group</div>
+          </div>
+          <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}
+            style={{ color:'hsl(var(--text-3))', background:'none', border:'none', cursor:'pointer' }}>
+            <X size={18} />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-6 px-3 overflow-y-auto">
-          <div className="space-y-1">
-            {filteredNavItems.map(item => {
-              // External links (e.g. Nextcloud)
-              if (item.external) {
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setSidebarOpen(false)}
-                    className={navItemClass(false)}
-                  >
-                    <item.icon size={18} strokeWidth={1.5} />
-                    {item.label}
-                  </a>
-                );
-              }
+        {/* Search trigger */}
+        <div style={{ padding:'10px 10px 2px' }}>
+          <button onClick={openCmd} style={{
+            width:'100%', display:'flex', alignItems:'center', gap:8, padding:'7px 10px',
+            background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7,
+            cursor:'pointer', color:'hsl(var(--text-3))', fontSize:12, fontFamily:'Inter, sans-serif',
+          }}>
+            <Search size={13} />
+            <span style={{ flex:1, textAlign:'left' }}>Search...</span>
+            <kbd style={{ fontSize:10 }}>⌘K</kbd>
+          </button>
+        </div>
 
-              // Determine active state correctly for each item
-              let isActive = false;
-
-              if (item.path === '/report-issue') {
-                // Report an Issue is active when on /report-issue OR /command-center with type=issue
-                isActive = location.pathname === '/report-issue' ||
-                  (location.pathname === '/command-center' && location.search.includes('type=issue'));
-              } else if (item.path === '/command-center') {
-                // Command Center (Submit New Request) is active ONLY when on /command-center WITHOUT type=issue
-                isActive = location.pathname === '/command-center' && !location.search.includes('type=issue');
-              } else {
-                // All other items use exact path matching
-                isActive = location.pathname === item.path;
-              }
-
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={navItemClass(isActive)}
-                >
-                  <item.icon size={18} strokeWidth={1.5} />
-                  {t(item.labelKey)}
-                </Link>
-              );
-            })}
-          </div>
+        {/* Nav items */}
+        <nav style={{ flex:1, overflowY:'auto', padding:'4px 10px 10px' }}>
+          {mainItems.length > 0 && (
+            <>
+              <div className="nav-section-label" style={{ marginTop:10 }}>Menu</div>
+              {mainItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} badgeCount={badges[i.path === '/tasks' ? 'tasks' : 'requests']} />)}
+            </>
+          )}
+          {businessItems.length > 0 && (
+            <>
+              <div className="nav-section-label">Business</div>
+              {businessItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
+            </>
+          )}
+          {systemItems.length > 0 && (
+            <>
+              <div className="nav-section-label">System</div>
+              {systemItems.map(i => <NavItem key={i.path || i.href} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
+            </>
+          )}
         </nav>
 
-        {/* User section */}
-        <div className="p-4 border-t border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="text-sm font-medium">{user?.name?.charAt(0) || 'U'}</span>
+        {/* User */}
+        <div style={{ padding:'10px', borderTop:'1px solid hsl(var(--border))', flexShrink:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:9, padding:'8px 10px', borderRadius:8, cursor:'pointer' }}
+            onMouseEnter={e => e.currentTarget.style.background='hsl(var(--surface-2))'}
+            onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+            <div style={{ width:28, height:28, background:'hsl(var(--primary))', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-white/60">{user?.role}</p>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:12.5, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name || 'User'}</div>
+              <div style={{ fontSize:10.5, color:'hsl(var(--text-3))' }}>{user?.role || ''}</div>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              data-testid="logout-btn"
-            >
-              <LogOut size={18} />
+            <button onClick={handleLogout} title="Sign out" style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--text-3))', display:'flex', alignItems:'center', padding:4, borderRadius:5 }}
+              onMouseEnter={e => { e.currentTarget.style.color='#ef4444'; e.currentTarget.style.background='rgba(239,68,68,.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color='hsl(var(--text-3))'; e.currentTarget.style.background='none'; }}>
+              <LogOut size={14} />
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64">
-        {/* Top header */}
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center px-4 lg:px-8">
-          <button 
-            className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg mr-4"
-            onClick={() => setSidebarOpen(true)}
-            data-testid="mobile-menu-btn"
-          >
-            <Menu size={20} />
+      {/* ══ MAIN ══ */}
+      <div className="app-main" style={{ display:'flex', flexDirection:'column' }}>
+
+        {/* Top bar */}
+        <div className="top-bar">
+          <button className="lg:hidden" onClick={() => setSidebarOpen(true)}
+            style={{ background:'none', border:'none', cursor:'pointer', color:'hsl(var(--text-2))', display:'flex' }}>
+            <Menu size={18} />
           </button>
 
-          {/* Rating Display (Google Review Style) */}
-          {ratingStats && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg mr-4" data-testid="header-rating">
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={14}
-                    className={
-                      star <= Math.round(ratingStats.average_rating)
-                        ? 'fill-[#97662D] text-[#97662D]'
-                        : 'fill-gray-200 text-gray-200'
-                    }
-                  />
-                ))}
-              </div>
-              <span className="font-semibold text-sm text-slate-900">{ratingStats.average_rating.toFixed(1)}</span>
-              <span className="text-xs text-slate-500">({ratingStats.total_ratings})</span>
+          <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12.5 }}>
+            <span style={{ color:'hsl(var(--text-3))' }}>Red Ops</span>
+            {pageTitle && <>
+              <ChevronRight size={12} style={{ color:'hsl(var(--text-3))' }} />
+              <span style={{ color:'hsl(var(--text-1))', fontWeight:600 }}>{pageTitle}</span>
+            </>}
+          </div>
+
+          <div style={{ flex:1 }} />
+
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <button onClick={openCmd} style={{ display:'flex', alignItems:'center', gap:7, background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7, padding:'5px 12px', cursor:'pointer', color:'hsl(var(--text-3))', fontSize:12, fontFamily:'Inter, sans-serif' }}>
+              <Search size={13} />
+              <span>Search</span>
+              <kbd>⌘K</kbd>
+            </button>
+
+            <div style={{ position:'relative' }}>
+              <Link to="/notifications" style={{ width:34, height:34, background:'hsl(var(--surface-2))', border:'1px solid hsl(var(--border))', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', color:'hsl(var(--text-2))' }}>
+                <Bell size={15} />
+              </Link>
+              {unread > 0 && <div className="notif-dot" />}
             </div>
-          )}
 
-          {/* Announcement Banner - inline in header */}
-          <AnnouncementTicker />
+            <button onClick={() => navigate('/command-center')} className="btn-primary-dark btn-sm" style={{ gap:6 }}>
+              <Plus size={14} />
+              <span>New Request</span>
+            </button>
+          </div>
+        </div>
 
-          <div className="flex-1" />
-
-          {/* Language Switcher */}
-          <LanguageSwitcher variant="compact" />
-
-          {/* Notification Dropdown */}
-          <NotificationDropdown />
-
-          {/* User dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-lg ml-2" data-testid="user-menu-btn">
-                <div className="w-8 h-8 rounded-full bg-[#AEC6C8] flex items-center justify-center overflow-hidden">
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-medium text-[#A2182C]">{user?.name?.charAt(0) || 'U'}</span>
-                  )}
-                </div>
-                <ChevronDown size={16} className="text-slate-400" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-3 py-2 border-b border-slate-100">
-                <p className="font-medium text-sm">{user?.name}</p>
-                <p className="text-xs text-slate-500">{user?.email}</p>
-                <p className="text-xs text-[#A2182C] font-medium mt-1">{user?.role}</p>
-              </div>
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="flex items-center cursor-pointer" data-testid="profile-menu-item">
-                  <User size={16} className="mr-2" />
-                  {t('nav.profile')}
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600" data-testid="logout-menu-item">
-                <LogOut size={16} className="mr-2" />
-                {t('auth.logout')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-
-        {/* Page content */}
-        <main className="p-4 lg:p-8">
-          {children}
-        </main>
+        {/* Page */}
+        <div style={{ flex:1 }}>{children}</div>
       </div>
+
+      {/* ══ COMMAND PALETTE ══ */}
+      {cmdOpen && (
+        <div className="cmd-overlay" onClick={closeCmd}>
+          <div className="cmd-box" onClick={e => e.stopPropagation()}>
+            <div className="cmd-input-row">
+              <Search size={15} style={{ color:'hsl(var(--text-3))', flexShrink:0 }} />
+              <input ref={cmdInputRef} placeholder="Go to, search, or create..."
+                value={cmdQuery}
+                onChange={e => { setCmdQuery(e.target.value); setCmdIdx(0); }} />
+              <kbd onClick={closeCmd} style={{ cursor:'pointer' }}>Esc</kbd>
+            </div>
+            <div className="cmd-results">
+              {filtered.length === 0 ? (
+                <div style={{ padding:'20px', textAlign:'center', color:'hsl(var(--text-3))', fontSize:13 }}>No results for "{cmdQuery}"</div>
+              ) : (
+                <>
+                  <div className="cmd-group">Navigate & Create</div>
+                  {filtered.map((item, i) => (
+                    <div key={item.label}
+                      className={`cmd-item${i === cmdIdx ? ' highlighted' : ''}`}
+                      onClick={() => execCmd(item)}
+                      onMouseEnter={() => setCmdIdx(i)}>
+                      <div className="cmd-icon">{item.icon}</div>
+                      <span>{item.label}</span>
+                      {item.shortcut && <span className="cmd-shortcut">{item.shortcut}</span>}
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+            <div style={{ padding:'8px 16px', borderTop:'1px solid hsl(var(--border))', display:'flex', gap:16, fontSize:11, color:'hsl(var(--text-3))' }}>
+              <span><kbd>↑↓</kbd> navigate</span>
+              <span><kbd>↵</kbd> select</span>
+              <span><kbd>Esc</kbd> close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

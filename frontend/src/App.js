@@ -2,7 +2,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/sonner";
-import Layout from "./components/LayoutNew";
+import Layout from "./components/Layout";
 
 // Helper component for redirecting with params
 function RedirectWithParams({ to }) {
@@ -53,7 +53,21 @@ import DocumentationPage from "./pages/DocumentationPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
 import DashboardBuilder from "./pages/DashboardBuilder";
 import TaskBoard from "./pages/TaskBoard";
+import Tasks from "./pages/Tasks";
+import Projects from "./pages/Projects";
+import Finance from "./pages/Finance";
+import SOPs from "./pages/SOPs";
+import AIAssistant from "./pages/AIAssistant";
+import Team from "./pages/Team";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
+
+// Home route — Command Center for internal roles, ClientHome for clients
+function HomeRoute() {
+  const { user } = useAuth();
+  const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
+  if (isClient) return <ClientHome />;
+  return <Dashboard />;
+}
 
 // Route guard that checks mode access
 function ModeRoute({ children, allowedModes = [] }) {
@@ -199,16 +213,17 @@ function AppRoutes() {
         element={<RateSurvey />}
       />
       
-      {/* ========== CLIENT PORTAL ROUTES ========== */}
-      {/* Home - Client simplified dashboard */}
-      <Route 
-        path="/" 
+      {/* ========== HOME — role-based ========== */}
+      <Route
+        path="/"
         element={
           <PrivateRoute>
-            <ClientHome />
+            <HomeRoute />
           </PrivateRoute>
-        } 
+        }
       />
+
+      {/* ========== CLIENT PORTAL ROUTES ========== */}
       {/* Service Catalog - Browse services */}
       <Route 
         path="/services" 
@@ -266,15 +281,25 @@ function AppRoutes() {
       <Route path="/tickets" element={<Navigate to="/my-requests" replace />} />
       <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
+      {/* ========== CORE APP ROUTES ========== */}
+      <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
+      <Route path="/projects" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Projects /></PrivateRoute>} />
+      <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
+      <Route path="/sops" element={<PrivateRoute><SOPs /></PrivateRoute>} />
+      <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
+      <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
+      <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
+      <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Orders /></PrivateRoute>} />
+
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}
-      {/* Task Board - All roles */}
-      <Route 
-        path="/tasks" 
+      {/* Task Board - All roles (legacy) */}
+      <Route
+        path="/task-board"
         element={
           <PrivateRoute>
             <TaskBoard />
           </PrivateRoute>
-        } 
+        }
       />
       {/* My Queue - Internal/Admin only */}
       <Route 
@@ -352,15 +377,8 @@ function AppRoutes() {
       />
       
       {/* ========== ADMIN STUDIO ROUTES ========== */}
-      {/* Admin Dashboard */}
-      <Route 
-        path="/admin" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <Dashboard />
-          </PrivateRoute>
-        } 
-      />
+      {/* Admin redirect */}
+      <Route path="/admin" element={<Navigate to="/" replace />} />
       <Route 
         path="/categories" 
         element={

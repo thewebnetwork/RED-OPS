@@ -1,256 +1,266 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '../components/ui/dialog';
-import { 
-  Plus, 
-  Search,
-  Mail,
-  Phone,
-  Edit,
-  Trash2
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { useState, useEffect, useCallback } from 'react';
+import { Users, Search, Plus, TrendingUp, AlertTriangle, CheckCircle2, Loader2, ChevronRight, DollarSign, Clock, Star, X, RefreshCw } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const token = () => localStorage.getItem('token');
+const get = (path) => fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token()}` } }).then(r => r.ok ? r.json() : null);
+
+// ── Health Score engine ──
+function computeHealth(client, orders = []) {
+  let score = 100;
+  const now = new Date();
+
+  // Days since last delivery
+  if (client.last_delivery_date) {
+    const days = Math.floor((now - new Date(client.last_delivery_date)) / 86400000);
+    if (days > 30) score -= 20;
+    else if (days > 14) score -= 10;
+  } else {
+    score -= 15;
+  }
+
+  // Open requests vs plan capacity
+  const clientOrders = orders.filter(o => o.requester_id === client.id && !['closed', 'delivered'].includes(o.status));
+  if (clientOrders.length > 5) score -= 15;
+
+  // Satisfaction rating
+  if (client.satisfaction_avg) {
+    if (client.satisfaction_avg < 3) score -= 20;
+    else if (client.satisfaction_avg < 4) score -= 10;
+  }
+
+  // Renewal proximity
+  if (client.renewal_date) {
+    const daysToRenew = Math.ceil((new Date(client.renewal_date) - now) / 86400000);
+    if (daysToRenew < 0) score -= 25;
+    else if (daysToRenew < 14) score -= 10;
+  }
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function HealthScore({ score }) {
+  const color = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
+  const label = score >= 70 ? 'Healthy' : score >= 40 ? 'Watch' : 'At Risk';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: color + '18', border: `2px solid ${color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color, flexShrink: 0 }}>
+        {score}
+      </div>
+      <span style={{ fontSize: 11, fontWeight: 600, color, whiteSpace: 'nowrap' }}>{label}</span>
+    </div>
+  );
+}
+
+function ClientCard({ client, orders, onClick }) {
+  const health = computeHealth(client, orders);
+  const color = health >= 70 ? '#10b981' : health >= 40 ? '#f59e0b' : '#ef4444';
+  const clientOrders = orders.filter(o => o.requester_id === client.id);
+  const openOrders = clientOrders.filter(o => !['closed', 'delivered'].includes(o.status)).length;
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))',
+        borderRadius: 12, padding: '16px', cursor: 'pointer',
+        transition: 'all .15s', position: 'relative', overflow: 'hidden',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.transform = 'none'; }}
+    >
+      {/* Health bar accent */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color, borderRadius: '12px 12px 0 0', opacity: .6 }} />
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: 'white', flexShrink: 0 }}>
+          {(client.name || '?').charAt(0).toUpperCase()}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.name}</div>
+          <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))', marginTop: 1 }}>{client.email}</div>
+        </div>
+        <HealthScore score={health} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {[
+          { label: 'MRR', value: client.mrr ? `$${client.mrr}` : '—' },
+          { label: 'Open', value: openOrders },
+          { label: 'Plan', value: client.plan || '—' },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ padding: '7px 8px', background: 'hsl(var(--surface-2))', borderRadius: 7, textAlign: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'hsl(var(--text-1))' }}>{value}</div>
+            <div style={{ fontSize: 10, color: 'hsl(var(--text-3))', marginTop: 1 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {client.tags?.length > 0 && (
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {client.tags.map(tag => {
+            const tagColors = { 'At Risk': '#ef4444', 'VIP': '#f59e0b', 'New': '#3b82f6', 'Paused': '#6b7280' };
+            const tc = tagColors[tag] || '#6b7280';
+            return <span key={tag} style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: tc + '20', color: tc }}>{tag}</span>;
+          })}
+        </div>
+      )}
+
+      {client.renewal_date && (
+        <div style={{ marginTop: 10, fontSize: 11, color: 'hsl(var(--text-3))', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Clock size={10} />
+          Renews {new Date(client.renewal_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Clients() {
   const [clients, setClients] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    notes: ''
-  });
+  const [filter, setFilter] = useState('all'); // all | at_risk | healthy | watch
+  const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
-  const fetchClients = async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(`${API}/clients`);
-      setClients(res.data);
-    } catch (error) {
-      toast.error('Failed to load clients');
+      const [usersRes, ordersRes] = await Promise.all([
+        get('/users?account_type=Media+Client&limit=100'),
+        get('/orders?limit=200'),
+      ]);
+      const cl = usersRes?.users || (Array.isArray(usersRes) ? usersRes : []);
+      setClients(cl);
+      const ord = ordersRes?.orders || (Array.isArray(ordersRes) ? ordersRes : []);
+      setOrders(ord);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleOpenDialog = (client = null) => {
-    if (client) {
-      setEditingClient(client);
-      setFormData({
-        name: client.name,
-        email: client.email,
-        phone: client.phone || '',
-        notes: client.notes || ''
-      });
-    } else {
-      setEditingClient(null);
-      setFormData({ name: '', email: '', phone: '', notes: '' });
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = clients.filter(c => {
+    if (search && !c.name?.toLowerCase().includes(search.toLowerCase()) && !c.email?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filter !== 'all') {
+      const h = computeHealth(c, orders);
+      if (filter === 'healthy' && h < 70) return false;
+      if (filter === 'watch' && (h < 40 || h >= 70)) return false;
+      if (filter === 'at_risk' && h >= 40) return false;
     }
-    setDialogOpen(true);
-  };
+    return true;
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email) {
-      toast.error('Name and email are required');
-      return;
-    }
-
-    try {
-      if (editingClient) {
-        await axios.patch(`${API}/clients/${editingClient.id}`, formData);
-        toast.success('Client updated');
-      } else {
-        await axios.post(`${API}/clients`, formData);
-        toast.success('Client created');
-      }
-      setDialogOpen(false);
-      fetchClients();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Operation failed');
-    }
-  };
-
-  const handleDelete = async (clientId) => {
-    if (!window.confirm('Are you sure you want to delete this client?')) return;
-    
-    try {
-      await axios.delete(`${API}/clients/${clientId}`);
-      toast.success('Client deleted');
-      fetchClients();
-    } catch (error) {
-      toast.error('Failed to delete client');
-    }
-  };
-
-  const filteredClients = clients.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase())
-  );
+  // Summary stats
+  const withHealth = clients.map(c => ({ ...c, _h: computeHealth(c, orders) }));
+  const healthy = withHealth.filter(c => c._h >= 70).length;
+  const watch = withHealth.filter(c => c._h >= 40 && c._h < 70).length;
+  const atRisk = withHealth.filter(c => c._h < 40).length;
 
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="clients-page">
+    <div className="page-content" style={{ animation: 'fadeInUp .3s ease' }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Clients</h1>
-          <p className="text-slate-500 mt-1">{clients.length} clients</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'hsl(var(--text-1))', letterSpacing: '-.02em' }}>Clients</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'hsl(var(--text-3))' }}>{clients.length} accounts · health-scored</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="bg-rose-600 hover:bg-rose-700"
-              onClick={() => handleOpenDialog()}
-              data-testid="add-client-btn"
-            >
-              <Plus size={18} className="mr-2" />
-              Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingClient ? 'Edit Client' : 'Add Client'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Name *</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Client name"
-                  className="mt-1.5"
-                  data-testid="client-name-input"
-                />
-              </div>
-              <div>
-                <Label>Email *</Label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="client@example.com"
-                  className="mt-1.5"
-                  data-testid="client-email-input"
-                />
-              </div>
-              <div>
-                <Label>Phone</Label>
-                <Input
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+1 234 567 8900"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>Notes</Label>
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes..."
-                  className="mt-1.5"
-                />
-              </div>
-              <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-client-btn">
-                {editingClient ? 'Update Client' : 'Add Client'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div style={{ position: 'relative' }}>
+          <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--text-3))', pointerEvents: 'none' }} />
+          <input className="input-field" placeholder="Search clients..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 28, width: 200, height: 34, fontSize: 12 }} />
+        </div>
+        <button onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', background: 'hsl(var(--surface-2))', border: '1px solid hsl(var(--border))', borderRadius: 7, cursor: 'pointer', color: 'hsl(var(--text-3))', fontSize: 12 }}>
+          <RefreshCw size={12} style={loading ? { animation: 'spin 1s linear infinite' } : {}} />
+        </button>
       </div>
 
-      {/* Search */}
-      <Card className="border-slate-200">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <Input
-              placeholder="Search clients..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-              data-testid="search-clients"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Health summary */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {[
+          { key: 'all', label: `All ${clients.length}`, color: '#6b7280' },
+          { key: 'healthy', label: `🟢 Healthy ${healthy}`, color: '#10b981' },
+          { key: 'watch', label: `🟡 Watch ${watch}`, color: '#f59e0b' },
+          { key: 'at_risk', label: `🔴 At Risk ${atRisk}`, color: '#ef4444' },
+        ].map(({ key, label, color }) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            style={{
+              padding: '6px 14px', borderRadius: 7, border: `1px solid ${filter === key ? color : 'hsl(var(--border))'}`,
+              background: filter === key ? color + '15' : 'transparent',
+              cursor: 'pointer', fontSize: 12, fontWeight: filter === key ? 700 : 500,
+              color: filter === key ? color : 'hsl(var(--text-3))', transition: 'all .15s',
+            }}
+          >{label}</button>
+        ))}
+      </div>
 
-      {/* Clients Grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+          <Loader2 size={24} style={{ color: 'hsl(var(--primary))', animation: 'spin 1s linear infinite' }} />
         </div>
-      ) : filteredClients.length === 0 ? (
-        <Card className="border-slate-200">
-          <CardContent className="p-12 text-center text-slate-500">
-            {search ? 'No clients match your search' : 'No clients yet'}
-          </CardContent>
-        </Card>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'hsl(var(--text-3))' }}>
+          <Users size={40} style={{ opacity: .2, marginBottom: 12 }} />
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'hsl(var(--text-2))' }}>
+            {clients.length === 0 ? 'No clients yet' : 'No clients match this filter'}
+          </div>
+          {clients.length === 0 && (
+            <div style={{ fontSize: 13, marginTop: 4 }}>Add client accounts in Settings → Users with account type "Media Client"</div>
+          )}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredClients.map(client => (
-            <Card key={client.id} className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate">{client.name}</h3>
-                    <div className="flex items-center gap-2 mt-2 text-sm text-slate-500">
-                      <Mail size={14} />
-                      <span className="truncate">{client.email}</span>
-                    </div>
-                    {client.phone && (
-                      <div className="flex items-center gap-2 mt-1 text-sm text-slate-500">
-                        <Phone size={14} />
-                        <span>{client.phone}</span>
-                      </div>
-                    )}
-                    <p className="text-xs text-slate-400 mt-2">
-                      Added {format(new Date(client.created_at), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleOpenDialog(client)}
-                      className="h-8 w-8"
-                    >
-                      <Edit size={14} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleDelete(client.id)}
-                      className="h-8 w-8 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+          {filtered.map(client => (
+            <ClientCard key={client.id} client={client} orders={orders} onClick={() => setSelected(client)} />
           ))}
+        </div>
+      )}
+
+      {/* Client Detail Panel */}
+      {selected && (
+        <div style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: 380, background: 'hsl(var(--card))', borderLeft: '1px solid hsl(var(--border))', zIndex: 200, display: 'flex', flexDirection: 'column', animation: 'slideInRight .2s ease' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid hsl(var(--border))', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: 'white' }}>
+              {(selected.name || '?').charAt(0).toUpperCase()}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'hsl(var(--text-1))' }}>{selected.name}</div>
+              <div style={{ fontSize: 11.5, color: 'hsl(var(--text-3))' }}>{selected.email}</div>
+            </div>
+            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--text-3))' }}><X size={16} /></button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+            <HealthScore score={computeHealth(selected, orders)} />
+            <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                { label: 'Plan', value: selected.plan || 'N/A' },
+                { label: 'MRR', value: selected.mrr ? `$${selected.mrr}/mo` : 'N/A' },
+                { label: 'Role', value: selected.role },
+                { label: 'Joined', value: selected.created_at ? new Date(selected.created_at).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' }) : 'N/A' },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ padding: '10px', background: 'hsl(var(--surface-2))', borderRadius: 8 }}>
+                  <div style={{ fontSize: 10, color: 'hsl(var(--text-3))', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 3 }}>{label}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'hsl(var(--text-1))' }}>{value}</div>
+                </div>
+              ))}
+            </div>
+            {/* Recent orders */}
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'hsl(var(--text-3))', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 8 }}>Recent Requests</div>
+              {orders.filter(o => o.requester_id === selected.id).slice(0, 5).map(o => (
+                <div key={o.id} style={{ padding: '8px 10px', background: 'hsl(var(--surface-2))', borderRadius: 7, marginBottom: 5, fontSize: 12 }}>
+                  <div style={{ fontWeight: 500, color: 'hsl(var(--text-1))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.title || o.request_type || 'Request'}</div>
+                  <div style={{ fontSize: 11, color: 'hsl(var(--text-3))', marginTop: 2 }}>{o.status} · {o.order_code}</div>
+                </div>
+              ))}
+              {orders.filter(o => o.requester_id === selected.id).length === 0 && (
+                <div style={{ fontSize: 12, color: 'hsl(var(--text-3))', padding: '10px', textAlign: 'center' }}>No requests yet</div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
