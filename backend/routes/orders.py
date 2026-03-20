@@ -463,7 +463,7 @@ async def notify_pool_users(order: dict, pool_stage: str, routing_info: dict, ba
 async def create_order(
     order_data: OrderCreate,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(require_roles(["Requester", "Admin"]))
+    current_user: dict = Depends(get_current_user)
 ):
     """Create a new order (or save as draft)"""
     order_code = await get_next_code(db, "order_code", "RRG")
@@ -1340,7 +1340,7 @@ async def submit_for_review(
 async def respond_to_order(
     order_id: str,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(require_roles(["Requester"]))
+    current_user: dict = Depends(get_current_user)
 ):
     """Requester responds to pending order"""
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})

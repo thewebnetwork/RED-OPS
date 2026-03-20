@@ -12,7 +12,7 @@ ROLE_ALIASES = {
     "Admin": "Administrator",
     "Manager": "Privileged User",
     "Requester": "Standard User",
-    "Editor": "Standard User",
+    "Editor": "Operator",  # Workers/pickers are now Operators, not Standard Users
 }
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
