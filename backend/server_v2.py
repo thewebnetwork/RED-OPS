@@ -218,7 +218,7 @@ async def bootstrap_admin(reset: bool = False):
     admin_user = {
         "id": str(uuid.uuid4()),
         "name": "G",
-        "email": "Redops@redribbongroup.ca",
+        "email": "redops@redribbongroup.ca",
         "password": hashed,
         "role": "Administrator",
         "account_type": "Internal Staff",
@@ -233,7 +233,7 @@ async def bootstrap_admin(reset: bool = False):
     await db.users.insert_one(admin_user)
     return {
         "status": "created",
-        "credentials": {"email": "Redops@redribbongroup.ca", "password": pw},
+        "credentials": {"email": "redops@redribbongroup.ca", "password": pw},
     }
 
 
