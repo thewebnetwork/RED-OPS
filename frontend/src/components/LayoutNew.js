@@ -315,7 +315,7 @@ export default function Layout({ children }) {
           <div className="space-y-1">
             {navItems.map(item => {
               const IconComponent = ICONS[item.icon] || FileText;
-              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'));
               return (
                 <Link
                   key={item.path}

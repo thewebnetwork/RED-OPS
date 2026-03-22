@@ -1,814 +1,225 @@
-import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Badge } from '../components/ui/badge';
+import React, { useState } from 'react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../components/ui/table';
-import {
-  BarChart3,
-  Download,
-  FileText,
-  Filter,
-  RefreshCw,
-  FileSpreadsheet,
-  FileType,
-  Calendar,
-  Search,
-  ChevronDown,
-  ChevronUp,
-  TrendingUp,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-  Users,
-  Layers,
-  Building2
+  TrendingUp, TrendingDown, Clock, CheckCircle2, AlertCircle,
+  Users, Layers, BarChart3, Download, RefreshCw, ArrowUp, ArrowDown, Minus,
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// ── Mock analytics data ───────────────────────────────────────────────────────
+const KPI_CARDS = [
+  { label: 'Active Requests',   value: '24',   delta: '+3',  up: true,  icon: Layers,       color: '#3b82f6' },
+  { label: 'Avg. Delivery Days',value: '4.2d',  delta: '-0.8d', up: true, icon: Clock,       color: '#f59e0b' },
+  { label: 'SLA Compliance',    value: '91%',  delta: '+2%', up: true,  icon: CheckCircle2, color: '#22c55e' },
+  { label: 'Overdue Items',     value: '3',    delta: '-2',  up: true,  icon: AlertCircle,  color: '#ef4444' },
+  { label: 'Active Clients',    value: '18',   delta: '+1',  up: true,  icon: Users,        color: '#a855f7' },
+  { label: 'Requests This Month',value:'47',   delta: '+12', up: true,  icon: BarChart3,    color: '#06b6d4' },
+];
 
-// Brand colors for PDF
-const BRAND_COLORS = {
-  primary: '#E11D48',
-  secondary: '#1E293B',
-  accent: '#F43F5E',
-  background: '#FFFFFF',
-  text: '#334155',
-  lightGray: '#F1F5F9'
-};
+const STAGE_DIST = [
+  { stage: 'Submitted',     count: 4,  color: '#3b82f6' },
+  { stage: 'Assigned',      count: 5,  color: '#a855f7' },
+  { stage: 'In Progress',   count: 8,  color: '#f59e0b' },
+  { stage: 'Pending Review',count: 4,  color: '#06b6d4' },
+  { stage: 'Revision',      count: 2,  color: '#ef4444' },
+  { stage: 'Delivered',     count: 18, color: '#22c55e' },
+  { stage: 'Closed',        count: 6,  color: '#606060' },
+];
+const STAGE_TOTAL = STAGE_DIST.reduce((s, r) => s + r.count, 0);
 
-// Report category icons
-const categoryIcons = {
-  Volume: <BarChart3 size={16} className="text-blue-600" />,
-  Aging: <Clock size={16} className="text-amber-600" />,
-  Performance: <TrendingUp size={16} className="text-green-600" />,
-  SLA: <AlertTriangle size={16} className="text-rose-600" />,
-  Distribution: <Users size={16} className="text-purple-600" />,
-  Escalation: <ChevronUp size={16} className="text-orange-600" />,
-  Workflow: <RefreshCw size={16} className="text-cyan-600" />
-};
+const PRIORITY_DIST = [
+  { label: 'Urgent', count: 5,  color: '#c92a3e' },
+  { label: 'High',   count: 12, color: '#f59e0b' },
+  { label: 'Normal', count: 18, color: '#3b82f6' },
+  { label: 'Low',    count: 12, color: '#606060' },
+];
+const PRI_TOTAL = PRIORITY_DIST.reduce((s, r) => s + r.count, 0);
+
+const VOLUME_DATA = [
+  { month: 'Oct', count: 28 },
+  { month: 'Nov', count: 34 },
+  { month: 'Dec', count: 22 },
+  { month: 'Jan', count: 39 },
+  { month: 'Feb', count: 41 },
+  { month: 'Mar', count: 47 },
+];
+const VOL_MAX = Math.max(...VOLUME_DATA.map(d => d.count));
+
+const TOP_SERVICES = [
+  { name: 'Video Editing',     count: 14, pct: 30 },
+  { name: 'Graphic Design',    count: 11, pct: 23 },
+  { name: 'Copywriting',       count: 9,  pct: 19 },
+  { name: 'Meta Ads Setup',    count: 7,  pct: 15 },
+  { name: 'Email Sequence',    count: 6,  pct: 13 },
+];
+
+const RECENT_ACTIVITY = [
+  { id: 'RRG-00015', title: 'Burnham Strategy Presentation', stage: 'In Progress', priority: 'Urgent', assignee: 'Marcus Obi',  due: 'Mar 24', overdue: false },
+  { id: 'RRG-00006', title: 'Coastal Living Feature Video',  stage: 'Revision',    priority: 'Urgent', assignee: 'Taryn P.',    due: 'Mar 21', overdue: true  },
+  { id: 'RRG-00001', title: 'Thompson RE — April Ad Creative',stage:'In Progress', priority: 'Urgent', assignee: 'Taryn P.',    due: 'Mar 22', overdue: false },
+  { id: 'RRG-00002', title: 'Dani K. Blog Post Series',      stage: 'Pending Review',priority:'High',  assignee: 'Sarah Chen',  due: 'Mar 28', overdue: false },
+  { id: 'RRG-00005', title: 'Verde Cafe Meta Ads Q2',         stage: 'In Progress', priority: 'High',  assignee: 'Lucca R.',    due: 'Mar 26', overdue: false },
+  { id: 'RRG-00010', title: 'TechStart Pitch Deck Redesign',  stage: 'Pending Review',priority:'Normal',assignee: 'Marcus Obi', due: 'Mar 29', overdue: false },
+  { id: 'RRG-00013', title: 'Green Energy Blog Series',       stage: 'Delivered',   priority: 'Normal', assignee: 'Sarah Chen', due: 'Mar 27', overdue: false },
+];
+
+const STAGE_COLORS  = { 'Submitted':'#3b82f6','Assigned':'#a855f7','In Progress':'#f59e0b','Pending Review':'#06b6d4','Revision':'#ef4444','Delivered':'#22c55e','Closed':'#606060' };
+const PRI_COLORS    = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#606060' };
+
+const RANGES = ['Last 7 days', 'Last 30 days', 'This month', 'Last 3 months'];
+
+function StagePill({ stage }) {
+  const c = STAGE_COLORS[stage] || 'var(--tx-3)';
+  return <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 5, background: c + '22', color: c }}>{stage}</span>;
+}
+function PriPill({ priority }) {
+  const c = PRI_COLORS[priority] || 'var(--tx-3)';
+  return <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 5, background: c + '22', color: c }}>{priority}</span>;
+}
 
 export default function Reports() {
-  const { t } = useTranslation();
-  const [availableReports, setAvailableReports] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [reportData, setReportData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [showFilters, setShowFilters] = useState(true);
-  
-  // Filter states
-  const [filters, setFilters] = useState({
-    date_from: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
-    date_to: format(new Date(), 'yyyy-MM-dd'),
-    status: [],
-    category_l1_id: '',
-    category_l2_id: '',
-    team_id: '',
-    assignee_id: '',
-    role: '',
-    specialty_id: '',
-    access_tier_id: '',
-    sla_state: '',
-    search: ''
-  });
-
-  // Lookup data for filters
-  const [categories, setCategories] = useState({ l1: [], l2: [] });
-  const [teams, setTeams] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [specialties, setSpecialties] = useState([]);
-  const [accessTiers, setAccessTiers] = useState([]);
-
-  useEffect(() => {
-    fetchAvailableReports();
-    fetchFilterData();
-  }, []);
-
-  const fetchAvailableReports = async () => {
-    try {
-      const res = await axios.get(`${API}/reports/available`);
-      setAvailableReports(res.data);
-    } catch (error) {
-      toast.error('Failed to load reports');
-    }
-  };
-
-  const fetchFilterData = async () => {
-    try {
-      const [catL1, teamsRes, usersRes, specRes, tierRes] = await Promise.all([
-        axios.get(`${API}/categories/l1`),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/users`),
-        axios.get(`${API}/specialties`),
-        axios.get(`${API}/access-tiers`)
-      ]);
-      setCategories({ l1: catL1.data, l2: [] });
-      setTeams(teamsRes.data);
-      setUsers(usersRes.data);
-      setSpecialties(specRes.data);
-      setAccessTiers(tierRes.data);
-    } catch (error) {
-      console.error('Failed to load filter data:', error);
-    }
-  };
-
-  const fetchCategoriesL2 = async (l1Id) => {
-    if (!l1Id) {
-      setCategories(prev => ({ ...prev, l2: [] }));
-      return;
-    }
-    try {
-      const res = await axios.get(`${API}/categories/l2?category_l1_id=${l1Id}`);
-      setCategories(prev => ({ ...prev, l2: res.data }));
-    } catch (error) {
-      console.error('Failed to load L2 categories:', error);
-    }
-  };
-
-  const generateReport = async () => {
-    if (!selectedReport) {
-      toast.error('Please select a report');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, v]) => v && (Array.isArray(v) ? v.length > 0 : true))
-      );
-      
-      const res = await axios.post(`${API}/reports/${selectedReport.id}/generate`, cleanFilters);
-      setReportData(res.data);
-      toast.success('Report generated');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to generate report');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const exportCSV = async () => {
-    if (!selectedReport || !reportData) return;
-
-    setExporting(true);
-    try {
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, v]) => v && (Array.isArray(v) ? v.length > 0 : true))
-      );
-
-      const res = await axios.post(
-        `${API}/reports/${selectedReport.id}/export/csv`,
-        cleanFilters,
-        { responseType: 'blob' }
-      );
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${selectedReport.id}_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success(t('reports.csvExported'));
-    } catch (error) {
-      toast.error(t('reports.failedToExportCsv'));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const exportPDF = async () => {
-    if (!selectedReport || !reportData) return;
-
-    setExporting(true);
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      
-      // Header with brand colors
-      doc.setFillColor(BRAND_COLORS.primary);
-      doc.rect(0, 0, pageWidth, 25, 'F');
-      
-      // Title
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text(reportData.report_name, 14, 16);
-      
-      // Subtitle
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generated: ${format(new Date(reportData.generated_at), 'PPpp')}`, pageWidth - 14, 16, { align: 'right' });
-      
-      // Reset text color
-      doc.setTextColor(BRAND_COLORS.text);
-      
-      // Summary section if available
-      let yPos = 35;
-      if (reportData.summary) {
-        doc.setFillColor(BRAND_COLORS.lightGray);
-        doc.rect(10, yPos - 5, pageWidth - 20, 25, 'F');
-        
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Summary', 14, yPos);
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        yPos += 8;
-        
-        const summaryItems = Object.entries(reportData.summary)
-          .filter(([k, v]) => typeof v !== 'object')
-          .slice(0, 6);
-        
-        let xPos = 14;
-        summaryItems.forEach(([key, value], idx) => {
-          const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          doc.setFont('helvetica', 'bold');
-          doc.text(`${label}: `, xPos, yPos);
-          const labelWidth = doc.getTextWidth(`${label}: `);
-          doc.setFont('helvetica', 'normal');
-          doc.text(String(value), xPos + labelWidth, yPos);
-          
-          if ((idx + 1) % 3 === 0) {
-            yPos += 6;
-            xPos = 14;
-          } else {
-            xPos += 60;
-          }
-        });
-        
-        yPos += 15;
-      }
-      
-      // Data table
-      if (reportData.data && reportData.data.length > 0) {
-        const tableColumns = reportData.columns.map(col => ({
-          header: col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          dataKey: col
-        }));
-        
-        doc.autoTable({
-          startY: yPos,
-          columns: tableColumns,
-          body: reportData.data,
-          headStyles: {
-            fillColor: BRAND_COLORS.secondary,
-            textColor: '#FFFFFF',
-            fontStyle: 'bold',
-            fontSize: 9
-          },
-          bodyStyles: {
-            fontSize: 8,
-            textColor: BRAND_COLORS.text
-          },
-          alternateRowStyles: {
-            fillColor: BRAND_COLORS.lightGray
-          },
-          margin: { left: 10, right: 10 },
-          styles: {
-            overflow: 'linebreak',
-            cellPadding: 3
-          }
-        });
-      }
-      
-      // Footer
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(
-          `Page ${i} of ${pageCount} | Red Ops Portal Reports`,
-          pageWidth / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: 'center' }
-        );
-      }
-      
-      doc.save(`${selectedReport.id}_${format(new Date(), 'yyyyMMdd_HHmmss')}.pdf`);
-      toast.success(t('reports.pdfExported'));
-    } catch (error) {
-      console.error('PDF export error:', error);
-      toast.error(t('reports.failedToExportPdf'));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  // Quick date range presets
-  const setDatePreset = (preset) => {
-    const today = new Date();
-    let from, to = format(today, 'yyyy-MM-dd');
-    
-    switch (preset) {
-      case 'today':
-        from = format(today, 'yyyy-MM-dd');
-        break;
-      case 'last7':
-        from = format(subDays(today, 7), 'yyyy-MM-dd');
-        break;
-      case 'last30':
-        from = format(subDays(today, 30), 'yyyy-MM-dd');
-        break;
-      case 'thisMonth':
-        from = format(startOfMonth(today), 'yyyy-MM-dd');
-        to = format(endOfMonth(today), 'yyyy-MM-dd');
-        break;
-      case 'lastMonth':
-        const lastMonth = subMonths(today, 1);
-        from = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
-        to = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
-        break;
-      default:
-        from = format(subDays(today, 30), 'yyyy-MM-dd');
-    }
-    
-    setFilters(prev => ({ ...prev, date_from: from, date_to: to }));
-  };
-
-  // Group reports by category
-  const reportsByCategory = availableReports.reduce((acc, report) => {
-    if (!acc[report.category]) acc[report.category] = [];
-    acc[report.category].push(report);
-    return acc;
-  }, {});
+  const [range, setRange] = useState('Last 30 days');
 
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="reports-page">
+    <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', padding: '24px 28px' }}>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{t('reports.title')}</h1>
-          <p style={{ color: 'var(--tx-3)' }}>{t('reports.description')}</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Analytics</h1>
+          <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--tx-3)' }}>Live snapshot of request performance and delivery health.</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-elevated)', borderRadius: 7, padding: 3, gap: 2 }}>
+            {RANGES.map(r => (
+              <button key={r} onClick={() => setRange(r)}
+                style={{ padding: '4px 10px', borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none', background: range === r ? 'var(--red)' : 'transparent', color: range === r ? '#fff' : 'var(--tx-2)', transition: 'all .12s', whiteSpace: 'nowrap' }}>
+                {r}
+              </button>
+            ))}
+          </div>
+          <button className="btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Download size={13} /> Export
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Report Selector Panel */}
-        <div className="col-span-12 lg:col-span-3">
-          <Card className="border-slate-200 sticky top-4">
-            <CardHeader className="border-b border-slate-100 pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText size={18} />
-                {t('reports.availableReports')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 max-h-[600px] overflow-y-auto">
-              {Object.entries(reportsByCategory).map(([category, reports]) => (
-                <div key={category} className="border-b border-slate-100 last:border-0">
-                  <div style={{ padding: '8px 16px', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: 'var(--tx-2)' }}>
-                    {categoryIcons[category] || <FileText size={16} />}
-                    {category}
-                  </div>
-                  {reports.map(report => (
-                    <button
-                      key={report.id}
-                      onClick={() => {
-                        setSelectedReport(report);
-                        setReportData(null);
-                      }}
-                      style={{
-                        width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
-                        border: 'none', borderLeft: `2px solid ${selectedReport?.id === report.id ? 'var(--red)' : 'transparent'}`,
-                        background: selectedReport?.id === report.id ? 'var(--red-bg)' : 'none',
-                        cursor: 'pointer', transition: 'all .15s',
-                      }}
-                      data-testid={`report-${report.id}`}
-                    >
-                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>{report.name}</p>
-                      <p style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 3 }}>{report.description}</p>
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="col-span-12 lg:col-span-9 space-y-4">
-          {/* Filters Panel */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Filter size={18} />
-                  {t('reports.filters')}
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </Button>
+      {/* KPI Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+        {KPI_CARDS.map(({ label, value, delta, up, icon: Icon, color }) => (
+          <div key={label} className="card" style={{ padding: '16px 18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={14} color={color} />
               </div>
-            </CardHeader>
-            {showFilters && (
-              <CardContent className="p-4">
-                {/* Date Range */}
-                <div className="mb-4">
-                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 8, display: 'block' }}>{t('reports.quickDateRange')}</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { key: 'today', label: t('reports.today') },
-                      { key: 'last7', label: t('reports.last7Days') },
-                      { key: 'last30', label: t('reports.last30Days') },
-                      { key: 'thisMonth', label: t('reports.thisMonth') },
-                      { key: 'lastMonth', label: t('reports.lastMonth') }
-                    ].map(preset => (
-                      <Button
-                        key={preset.key}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDatePreset(preset.key)}
-                        className="text-xs"
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+            </div>
+            <p style={{ margin: '10px 0 6px', fontSize: 26, fontWeight: 800, color: 'var(--tx-1)', lineHeight: 1 }}>{value}</p>
+            <span style={{ fontSize: 11, fontWeight: 600, color: up ? '#22c55e' : '#ef4444', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              {up ? <ArrowUp size={10} /> : <ArrowDown size={10} />} {delta} vs prev period
+            </span>
+          </div>
+        ))}
+      </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Date From */}
-                  <div>
-                    <Label className="text-xs">{t('reports.dateFrom')}</Label>
-                    <Input
-                      type="date"
-                      value={filters.date_from}
-                      onChange={(e) => setFilters(prev => ({ ...prev, date_from: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
+      {/* Row 2: Volume chart + Stage distribution */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
 
-                  {/* Date To */}
-                  <div>
-                    <Label className="text-xs">{t('reports.dateTo')}</Label>
-                    <Input
-                      type="date"
-                      value={filters.date_to}
-                      onChange={(e) => setFilters(prev => ({ ...prev, date_to: e.target.value }))}
-                      className="mt-1"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <Label className="text-xs">{t('common.status')}</Label>
-                    <Select
-                      value={filters.status[0] || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, status: v === 'all' ? [] : [v] }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allStatuses')}</SelectItem>
-                        <SelectItem value="Open">{t('reports.statusOpen')}</SelectItem>
-                        <SelectItem value="In Progress">{t('reports.statusInProgress')}</SelectItem>
-                        <SelectItem value="Pending">{t('reports.statusPending')}</SelectItem>
-                        <SelectItem value="Delivered">{t('reports.statusDelivered')}</SelectItem>
-                        <SelectItem value="Closed">{t('reports.statusClosed')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* SLA State */}
-                  <div>
-                    <Label className="text-xs">{t('reports.slaState')}</Label>
-                    <Select
-                      value={filters.sla_state || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, sla_state: v === 'all' ? '' : v }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('common.all')}</SelectItem>
-                        <SelectItem value="on_track">{t('reports.onTrack')}</SelectItem>
-                        <SelectItem value="at_risk">{t('reports.atRisk')}</SelectItem>
-                        <SelectItem value="breached">{t('reports.breached')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Category L1 */}
-                  <div>
-                    <Label className="text-xs">{t('reports.categoryL1')}</Label>
-                    <Select
-                      value={filters.category_l1_id || 'all'}
-                      onValueChange={(v) => {
-                        const newVal = v === 'all' ? '' : v;
-                        setFilters(prev => ({ ...prev, category_l1_id: newVal, category_l2_id: '' }));
-                        fetchCategoriesL2(newVal);
-                      }}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allCategories')}</SelectItem>
-                        {categories.l1.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Category L2 */}
-                  <div>
-                    <Label className="text-xs">{t('reports.categoryL2')}</Label>
-                    <Select
-                      value={filters.category_l2_id || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, category_l2_id: v === 'all' ? '' : v }))}
-                      disabled={!filters.category_l1_id}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('common.all')}</SelectItem>
-                        {categories.l2.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Team */}
-                  <div>
-                    <Label className="text-xs">{t('reports.team')}</Label>
-                    <Select
-                      value={filters.team_id || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, team_id: v === 'all' ? '' : v }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allTeams')}</SelectItem>
-                        {teams.map(team => (
-                          <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Assignee */}
-                  <div>
-                    <Label className="text-xs">{t('reports.assignee')}</Label>
-                    <Select
-                      value={filters.assignee_id || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, assignee_id: v === 'all' ? '' : v }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allAssignees')}</SelectItem>
-                        {users.filter(u => u.role !== 'Requester').map(user => (
-                          <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Specialty */}
-                  <div>
-                    <Label className="text-xs">{t('reports.specialty')}</Label>
-                    <Select
-                      value={filters.specialty_id || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, specialty_id: v === 'all' ? '' : v }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allSpecialties')}</SelectItem>
-                        {specialties.map(spec => (
-                          <SelectItem key={spec.id} value={spec.id}>{spec.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Access Tier */}
-                  <div>
-                    <Label className="text-xs">{t('reports.accessTier')}</Label>
-                    <Select
-                      value={filters.access_tier_id || 'all'}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, access_tier_id: v === 'all' ? '' : v }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('common.all')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('reports.allTiers')}</SelectItem>
-                        {accessTiers.map(tier => (
-                          <SelectItem key={tier.id} value={tier.id}>{tier.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Search */}
-                  <div className="col-span-2">
-                    <Label className="text-xs">{t('common.search')}</Label>
-                    <div className="relative mt-1">
-                      <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
-                      <Input
-                        placeholder={t('reports.searchPlaceholder')}
-                        value={filters.search}
-                        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                        className="pl-9"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Generate Button */}
-                <div className="mt-4 flex gap-2">
-                  <Button
-                    onClick={generateReport}
-                    disabled={!selectedReport || loading}
-                    className="bg-rose-600 hover:bg-rose-700"
-                    data-testid="generate-report-btn"
-                  >
-                    <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? t('reports.generating') : t('reports.generateReport')}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => setFilters({
-                      date_from: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
-                      date_to: format(new Date(), 'yyyy-MM-dd'),
-                      status: [],
-                      category_l1_id: '',
-                      category_l2_id: '',
-                      team_id: '',
-                      assignee_id: '',
-                      role: '',
-                      specialty_id: '',
-                      access_tier_id: '',
-                      sla_state: '',
-                      search: ''
-                    })}
-                  >
-                    {t('reports.clearFilters')}
-                  </Button>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          {/* Report Results */}
-          {selectedReport && (
-            <Card className="border-slate-200">
-              <CardHeader className="border-b border-slate-100 pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">{selectedReport.name}</CardTitle>
-                    <p style={{ fontSize: 13, color: 'var(--tx-3)' }}>{selectedReport.description}</p>
-                  </div>
-                  {reportData && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={exportCSV}
-                        disabled={exporting}
-                        data-testid="export-csv-btn"
-                      >
-                        <FileSpreadsheet size={16} className="mr-2" />
-                        CSV
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={exportPDF}
-                        disabled={exporting}
-                        data-testid="export-pdf-btn"
-                      >
-                        <FileType size={16} className="mr-2" />
-                        PDF
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {!reportData ? (
-                  <div style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tx-3)' }}>
-                    <BarChart3 size={48} style={{ color: 'var(--tx-3)', margin: '0 auto 12px', opacity: 0.5 }} />
-                    <p>{t('reports.clickGenerateReport')}</p>
-                  </div>
-                ) : (
-                  <div>
-                    {/* Summary Cards */}
-                    {reportData.summary && (
-                      <div style={{ padding: 16, background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                          {Object.entries(reportData.summary)
-                            .filter(([k, v]) => typeof v !== 'object')
-                            .map(([key, value]) => (
-                              <div key={key} style={{ background: 'var(--bg-elevated)', borderRadius: 8, padding: 12, border: '1px solid var(--border)' }}>
-                                <p style={{ fontSize: 11, color: 'var(--tx-3)', textTransform: 'capitalize' }}>
-                                  {key.replace(/_/g, ' ')}
-                                </p>
-                                <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', marginTop: 4 }}>
-                                  {typeof value === 'number' && key.includes('rate') 
-                                    ? `${value}%` 
-                                    : typeof value === 'number' && key.includes('hours')
-                                    ? `${value}h`
-                                    : value}
-                                </p>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Data Table */}
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            {reportData.columns.map(col => (
-                              <TableHead key={col} className="text-xs font-semibold capitalize whitespace-nowrap">
-                                {col.replace(/_/g, ' ')}
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {reportData.data.slice(0, 100).map((row, idx) => (
-                            <TableRow key={idx}>
-                              {reportData.columns.map(col => (
-                                <TableCell key={col} className="text-sm whitespace-nowrap">
-                                  {col === 'sla_state' ? (() => {
-                                    const s = { on_track: { bg:'#22c55e18',c:'#22c55e' }, at_risk: { bg:'#f59e0b18',c:'#f59e0b' }, breached: { bg:'#ef444418',c:'#ef4444' } }[row[col]] || { bg:'var(--bg-elevated)',c:'var(--tx-3)' };
-                                    return <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, background: s.bg, color: s.c }}>{row[col]}</span>;
-                                  })() : col === 'workflow_status' ? (() => {
-                                    const s = { Responded: { bg:'#22c55e18',c:'#22c55e' }, 'Auto-close pending': { bg:'#ef444418',c:'#ef4444' }, 'Email reminder sent': { bg:'#f59e0b18',c:'#f59e0b' } }[row[col]] || { bg:'var(--bg-elevated)',c:'var(--tx-3)' };
-                                    return <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, background: s.bg, color: s.c }}>{row[col]}</span>;
-                                  })() : col.includes('_at') && row[col] ? (
-                                    format(new Date(row[col]), 'MMM d, yyyy HH:mm')
-                                  ) : (
-                                    String(row[col] ?? '-')
-                                  )}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      
-                      {reportData.data.length > 100 && (
-                        <div style={{ padding: 12, textAlign: 'center', fontSize: 13, color: 'var(--tx-3)', borderTop: '1px solid var(--border)' }}>
-                          {t('reports.showingRows', { shown: 100, total: reportData.total_rows })}
-                        </div>
-                      )}
-                      
-                      {reportData.data.length === 0 && (
-                        <div style={{ padding: 32, textAlign: 'center', color: 'var(--tx-3)' }}>
-                          <FileText size={32} style={{ color: 'var(--tx-3)', margin: '0 auto 8px', opacity: 0.5 }} />
-                          {t('reports.noDataFound')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+        {/* Monthly Volume Bar Chart */}
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ margin: '0 0 20px', fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Requests by Month</h3>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 120 }}>
+            {VOLUME_DATA.map(d => (
+              <div key={d.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-2)' }}>{d.count}</span>
+                <div style={{ width: '100%', background: `var(--red)`, borderRadius: '4px 4px 0 0', height: `${(d.count / VOL_MAX) * 90}px`, opacity: d.month === 'Mar' ? 1 : 0.45, transition: 'height .3s' }} />
+                <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{d.month}</span>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Stage Distribution */}
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Stage Distribution</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+            {STAGE_DIST.map(({ stage, count, color }) => (
+              <div key={stage} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 88, fontSize: 11, color: 'var(--tx-2)', flexShrink: 0 }}>{stage}</span>
+                <div style={{ flex: 1, height: 8, background: 'var(--bg-elevated)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${(count / STAGE_TOTAL) * 100}%`, background: color, borderRadius: 4, transition: 'width .4s' }} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-1)', width: 22, textAlign: 'right' }}>{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Priority dist + Top services */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+
+        {/* Priority */}
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Priority Breakdown</h3>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            {PRIORITY_DIST.map(({ label, count, color }) => (
+              <div key={label} style={{ flex: 1, textAlign: 'center', padding: '12px 4px', background: color + '14', border: `1px solid ${color}30`, borderRadius: 8 }}>
+                <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color }}>{count}</p>
+                <p style={{ margin: '3px 0 0', fontSize: 10, fontWeight: 600, color: 'var(--tx-3)' }}>{label}</p>
+              </div>
+            ))}
+          </div>
+          {/* Stacked bar */}
+          <div style={{ display: 'flex', height: 8, borderRadius: 5, overflow: 'hidden' }}>
+            {PRIORITY_DIST.map(({ label, count, color }) => (
+              <div key={label} style={{ width: `${(count / PRI_TOTAL) * 100}%`, background: color }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Top Services */}
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Top Services</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {TOP_SERVICES.map(({ name, count, pct }) => (
+              <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 130, fontSize: 12, color: 'var(--tx-1)', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                <div style={{ flex: 1, height: 7, background: 'var(--bg-elevated)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: 'var(--red)', borderRadius: 4 }} />
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--tx-3)', width: 22, textAlign: 'right' }}>{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Requests Table */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Recent Requests</h3>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>Showing {RECENT_ACTIVITY.length} of 47</span>
+        </div>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Title</th><th>Stage</th><th>Priority</th><th>Assignee</th><th>Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            {RECENT_ACTIVITY.map(r => (
+              <tr key={r.id}>
+                <td style={{ color: 'var(--red)', fontWeight: 700, fontSize: 11 }}>{r.id}</td>
+                <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>{r.title}</td>
+                <td><StagePill stage={r.stage} /></td>
+                <td><PriPill priority={r.priority} /></td>
+                <td style={{ fontSize: 12, color: 'var(--tx-2)' }}>{r.assignee}</td>
+                <td style={{ fontSize: 12, fontWeight: r.overdue ? 700 : 400, color: r.overdue ? '#ef4444' : 'var(--tx-1)' }}>
+                  {r.overdue ? '⚠ ' : ''}{r.due}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

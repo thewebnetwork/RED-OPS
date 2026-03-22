@@ -11,6 +11,7 @@ const Services = () => {
   const [requestDescription, setRequestDescription] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [hoveredId, setHoveredId] = useState(null);
 
   const categories = [
     'All',
@@ -461,17 +462,11 @@ const Services = () => {
 
         <div style={styles.grid}>
           {filteredServices.map(service => (
-            <div 
-              key={service.id} 
-              style={styles.card}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-hi)';
-                e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.backgroundColor = 'var(--bg-card)';
-              }}
+            <div
+              key={service.id}
+              style={{ ...styles.card, borderColor: hoveredId === service.id ? 'var(--border-hi)' : 'var(--border)', backgroundColor: hoveredId === service.id ? 'var(--bg-elevated)' : 'var(--bg-card)' }}
+              onMouseEnter={() => setHoveredId(service.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
               <div style={styles.icon}>{service.icon}</div>
               <h3 style={styles.serviceName}>{service.name}</h3>
