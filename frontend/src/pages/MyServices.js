@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { displayAccountType } from '../utils/displayAccountType';
@@ -49,13 +48,13 @@ export default function MyServices() {
   const fetchServiceContent = async () => {
     try {
       // Fetch service content from settings
-      const contentRes = await axios.get(`${API}/settings/my-services-content`).catch(() => ({ data: null }));
+      const contentRes = await axios.geAPI.catch(() => ({ data: null }));
       setServiceContent(contentRes.data);
       setEditContent(contentRes.data?.content || '');
 
       // Fetch user's subscription plan if they're a Partner
       if (user?.subscription_plan_id) {
-        const planRes = await axios.get(`${API}/subscription-plans/${user.subscription_plan_id}`).catch(() => ({ data: null }));
+        const planRes = await axios.geuser.subscription_plan_id.catch(() => ({ data: null }));
         setSubscriptionPlan(planRes.data);
       }
     } catch (error) {
@@ -283,7 +282,7 @@ For support, email support@example.com"
           {serviceContent?.content ? (
             <div className="prose prose-slate max-w-none">
               {/* Simple markdown rendering */}
-              {serviceContent.content.split('\n').map((line, idx) => {
+              {serviceContent.content.split("\n").map((line, idx) => {
                 if (line.startsWith('# ')) {
                   return <h1 key={idx} className="text-xl font-bold mt-4 mb-2">{line.slice(2)}</h1>;
                 } else if (line.startsWith('## ')) {

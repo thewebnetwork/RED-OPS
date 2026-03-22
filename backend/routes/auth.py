@@ -50,6 +50,11 @@ class UserResponse(BaseModel):
     otp_verified: bool = False
     can_pick: bool = True  # Whether user can pick from pools
     pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
+    # Organization context
+    primary_org_id: Optional[str] = None
+    org_ids: list = []
+    org_id: Optional[str] = None  # Current active org
+    org_role: Optional[str] = None  # Role in current org
     created_at: str
 
 
@@ -146,6 +151,11 @@ async def build_user_response(user: dict) -> UserResponse:
         otp_verified=user.get("otp_verified", False),
         can_pick=user.get("can_pick", True),  # Default to True for existing users
         pool_access=user.get("pool_access", "both"),  # Default to both for existing users
+        # Organization context
+        primary_org_id=user.get("primary_org_id"),
+        org_ids=user.get("org_ids", []),
+        org_id=user.get("org_id") or user.get("primary_org_id"),
+        org_role=user.get("org_role"),
         created_at=user["created_at"]
     )
 

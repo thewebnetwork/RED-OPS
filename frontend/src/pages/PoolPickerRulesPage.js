@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -47,7 +46,7 @@ export default function PoolPickerRulesPage() {
   const fetchRules = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/api/pool-picker-rules`);
+      const res = await axios.geAPI;
       setRules(res.data.rules);
       setHasChanges(false);
     } catch (err) {
@@ -115,7 +114,7 @@ export default function PoolPickerRulesPage() {
     
     try {
       setSaving(true);
-      await axios.post(`${API}/api/pool-picker-rules/reset-defaults`);
+      await axios.posAPI;
       toast.success('Pool picker rules reset to defaults');
       await fetchRules();
     } catch (err) {

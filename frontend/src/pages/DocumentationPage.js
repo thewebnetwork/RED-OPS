@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -42,7 +41,7 @@ export default function DocumentationPage() {
   const fetchDocPack = async () => {
     try {
       setLoadingDocPack(true);
-      const res = await axios.get(`${API}/api/documentation/system-docs-pack`);
+      const res = await axios.geAPI;
       setDocPackFiles(res.data.files || []);
     } catch (err) {
       console.error('Error fetching doc pack:', err);
@@ -60,7 +59,7 @@ export default function DocumentationPage() {
       
       const blob = new Blob([res.data]);
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = file.filename;
       document.body.appendChild(a);
@@ -91,7 +90,7 @@ export default function DocumentationPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get(`${API}/api/documentation/system-logic-snapshot`);
+      const res = await axios.geAPI;
       setContent(res.data.content);
       setLastModified(res.data.last_modified);
     } catch (err) {
@@ -111,7 +110,7 @@ export default function DocumentationPage() {
       
       const blob = new Blob([res.data], { type: 'text/markdown' });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = 'System_Logic_Snapshot.md';
       document.body.appendChild(a);
@@ -133,7 +132,7 @@ export default function DocumentationPage() {
       setDownloadingPdf(true);
       
       // Dynamic import of jspdf
-      const { jsPDF } = await import('jspdf');
+      const { jsPDF } = await import("jspdf");
       
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -162,7 +161,7 @@ export default function DocumentationPage() {
       
       // Process content line by line
       doc.setFontSize(10);
-      const lines = content.split('\n');
+      const lines = content.split("\n");
       
       for (const line of lines) {
         // Check if we need a new page

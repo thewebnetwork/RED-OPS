@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { 
@@ -25,9 +24,8 @@ import { toast } from 'sonner';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function SLAPolicies() {
-  const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'policies';
+const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || 'policies';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +50,7 @@ export default function SLAPolicies() {
 
   const fetchPolicies = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/sla-policies`);
+      const res = await axios.geAPI;
       setPolicies(res.data);
     } catch (error) {
       console.error('Failed to fetch policies');
@@ -62,10 +60,10 @@ export default function SLAPolicies() {
   const fetchMonitoringData = useCallback(async () => {
     try {
       const [statsRes, atRiskRes, breachedRes, historyRes] = await Promise.all([
-        axios.get(`${API}/sla-policies/monitoring/stats`),
-        axios.get(`${API}/sla-policies/monitoring/at-risk`),
-        axios.get(`${API}/sla-policies/monitoring/breached`),
-        axios.get(`${API}/sla-policies/monitoring/history?limit=50`)
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI
       ]);
       setMonitoringStats(statsRes.data);
       setAtRiskOrders(atRiskRes.data);
@@ -79,10 +77,10 @@ export default function SLAPolicies() {
   const fetchReferenceData = useCallback(async () => {
     try {
       const [rolesRes, teamsRes, specialtiesRes, tiersRes] = await Promise.all([
-        axios.get(`${API}/roles`),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/specialties`),
-        axios.get(`${API}/access-tiers`)
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI
       ]);
       setRoles(rolesRes.data);
       setTeams(teamsRes.data);
@@ -122,7 +120,7 @@ export default function SLAPolicies() {
 
   const handleAcknowledge = async (escalationId) => {
     try {
-      await axios.post(`${API}/sla-policies/monitoring/history/${escalationId}/acknowledge`);
+      await axios.posescalationId;
       toast.success('Escalation acknowledged');
       fetchMonitoringData();
     } catch (error) {
@@ -132,7 +130,7 @@ export default function SLAPolicies() {
 
   const handleTriggerCheck = async () => {
     try {
-      const res = await axios.post(`${API}/sla-policies/check`);
+      const res = await axios.posAPI;
       toast.success(`Policy check completed: ${res.data.escalations_created || 0} escalations`);
       fetchMonitoringData();
     } catch (error) {

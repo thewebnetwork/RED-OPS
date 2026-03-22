@@ -1020,17 +1020,41 @@ export default function Clients() {
   useEffect(() => {
     const load = async () => {
       try {
-        const r = await ax().get(`${API}/users?role=Media+Client`);
+        // Fetch all users, then filter for Media Client account types
+        const r = await ax().get(`${API}/users`);
         const d = r.data;
         const arr = Array.isArray(d) ? d : d?.items || [];
-        if (arr.length > 0) setClients(arr);
+        // Map API user objects to the shape the page expects
+        const mapped = arr
+          .filter(u => u.account_type === 'Media Client')
+          .map(u => ({
+            _id: u.id || u._id,
+            name: u.name || u.email,
+            plan: u.subscription_plan_name || 'Starter',
+            mrr: 0,
+            score: 70,
+            renewal: '',
+            requests_open: 0,
+            deliveries: 0,
+            last_delivery: '—',
+            am: '—',
+            tags: [],
+            notes: '',
+            portal: u.active ? 'active' : 'none',
+            contact: { name: u.name, email: u.email, phone: '' },
+            industry: '',
+            website: '',
+            last_login: '—',
+            login_count: 0,
+          }));
+        setClients(mapped);
       } catch(_) {}
       setLoading(false);
     };
     load();
   }, []);
 
-  const source = clients.length > 0 ? clients : MOCK_CLIENTS;
+  const source = clients;
 
   const display = source
     .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.contact?.email?.toLowerCase().includes(search.toLowerCase()))
@@ -1045,7 +1069,7 @@ export default function Clients() {
   const noPortal   = display.filter(c => c.portal === 'none' || !c.portal).length;
 
   const handleCreated = (newClient) => {
-    setClients(prev => [newClient, ...prev.length > 0 ? prev : MOCK_CLIENTS]);
+    setClients(prev => [newClient, ...prev]);
     setShowWizard(false);
     setSelected(newClient._id);
     toast.success(`${newClient.name} created — ${newClient.portal === 'invited' ? 'invite sent!' : 'no invite sent'}`);
@@ -1053,7 +1077,7 @@ export default function Clients() {
 
   const handleUpdateClient = (updated) => {
     setClients(prev => {
-      const src = prev.length > 0 ? prev : [...MOCK_CLIENTS];
+      const src = [...prev];
       return src.map(c => c._id === updated._id ? updated : c);
     });
   };

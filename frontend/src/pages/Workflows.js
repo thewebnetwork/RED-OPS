@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -187,7 +186,7 @@ export default function Workflows() {
 
   const fetchWorkflows = async () => {
     try {
-      const res = await axios.get(`${API}/workflows`);
+      const res = await axios.geAPI;
       setWorkflows(res.data);
     } catch (error) {
       toast.error('Failed to load workflows');
@@ -198,7 +197,7 @@ export default function Workflows() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${API}/categories/l2`);
+      const res = await axios.geAPI;
       setCategories(res.data || []);
     } catch (error) {
       console.error('Failed to load categories');
@@ -207,7 +206,7 @@ export default function Workflows() {
 
   const fetchExecutions = async () => {
     try {
-      const res = await axios.get(`${API}/workflow-executions`);
+      const res = await axios.geAPI;
       setExecutions(res.data || []);
     } catch (error) {
       console.error('Failed to load executions');
@@ -216,7 +215,7 @@ export default function Workflows() {
 
   const fetchTemplates = async () => {
     try {
-      const res = await axios.get(`${API}/workflow-templates`);
+      const res = await axios.geAPI;
       setTemplates(res.data.templates || []);
       setTemplateCategories(res.data.categories || []);
     } catch (error) {
@@ -227,7 +226,7 @@ export default function Workflows() {
   const handleInstallTemplate = async (templateId) => {
     setInstallingTemplate(templateId);
     try {
-      const res = await axios.post(`${API}/workflow-templates/${templateId}/install`);
+      const res = await axios.postemplateId;
       toast.success(res.data.message || 'Workflow installed successfully!');
       fetchWorkflows();
       // Navigate to the new workflow
@@ -260,7 +259,7 @@ export default function Workflows() {
 
   const handleTestWorkflow = async (workflowId) => {
     try {
-      const res = await axios.post(`${API}/workflows/${workflowId}/test`);
+      const res = await axios.posworkflowId;
       if (res.data) {
         toast.success(`Workflow test completed: ${res.data.status}`);
         fetchExecutions();
@@ -323,9 +322,7 @@ export default function Workflows() {
     }
 
     try {
-      const res = await axios.post(
-        `${API}/workflows/${selectedWorkflow.id}/duplicate?new_name=${encodeURIComponent(newWorkflowName)}`
-      );
+      const res = await axios.posencodeURIComponent(newWorkflowName);
       toast.success('Workflow duplicated!');
       setShowDuplicateDialog(false);
       setNewWorkflowName('');

@@ -1,6 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { OrgProvider } from "./contexts/OrgContext";
 import { Toaster } from "./components/ui/sonner";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -64,6 +65,7 @@ import Finance from "./pages/Finance";
 import SOPs from "./pages/SOPs";
 import AIAssistant from "./pages/AIAssistant";
 import Team from "./pages/Team";
+import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
 // Home route — Command Center for internal roles, ClientHome for clients
@@ -108,8 +110,8 @@ function PrivateRoute({ children, roles }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <div className="spinner-ring" />
       </div>
     );
   }
@@ -167,8 +169,8 @@ function PublicRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <div className="spinner-ring" />
       </div>
     );
   }
@@ -547,7 +549,7 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
@@ -557,8 +559,10 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
-          <Toaster position="top-right" richColors />
+          <OrgProvider>
+            <AppRoutes />
+            <Toaster position="top-right" richColors />
+          </OrgProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

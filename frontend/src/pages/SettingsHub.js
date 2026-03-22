@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import {
   Settings,
   FolderTree,
@@ -190,8 +189,7 @@ function SettingsItem({ item, onClick }) {
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function SettingsHub() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS[0].id);
   const [search, setSearch] = useState('');
 
@@ -215,10 +213,10 @@ export default function SettingsHub() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Settings size={22} className="text-[#A2182C]" />
-          {t('settings.title', 'Settings')}
+          {'Settings'}
         </h1>
         <p className="mt-1 text-sm">
-          {t('settings.subtitle', 'Configure your platform, integrations, and branding')}
+          {'Configure your platform, integrations, and branding'}
         </p>
       </div>
 

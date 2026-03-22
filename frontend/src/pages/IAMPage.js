@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -85,8 +84,7 @@ const ROLE_TEMPLATES = {
 };
 
 export default function IAMPage() {
-  const { t } = useTranslation();
-  const { user: currentUser } = useAuth();
+const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('users');
   const [identityConfig, setIdentityConfig] = useState(null);
@@ -157,13 +155,13 @@ export default function IAMPage() {
   const fetchAllData = async () => {
     try {
       const [usersRes, teamsRes, specialtiesRes, configRes, rolesRes, accountTypesRes, dashboardsRes] = await Promise.all([
-        axios.get(`${API}/users`),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/specialties`),
-        axios.get(`${API}/users/identity-config`),
-        axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
-        axios.get(`${API}/iam/account-types`).catch(() => ({ data: [] })),
-        axios.get(`${API}/dashboards/list`).catch(() => ({ data: { dashboards: [] } }))
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI.catch(() => ({ data: { dashboards: [] } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);
@@ -496,27 +494,27 @@ export default function IAMPage() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <KeyRound className="text-[#A2182C]" />
-          {t('iam.title')}
+          {"Title"}
         </h1>
-        <p className="mt-1">{t('iam.subtitle')}</p>
+        <p className="mt-1">{"Subtitle"}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm">{t('iam.users')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm">{t('iam.teams')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm">{t('iam.specialties')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm">{t('iam.roles')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm">{t('iam.accountTypes')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm">{"Users"}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm">{"Teams"}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm">{"Specialties"}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm">{"Roles"}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm">{"Account Types"}</p></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="users"><Users size={16} className="mr-1" />{t('iam.users')}</TabsTrigger>
-          <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />{t('iam.teams')}</TabsTrigger>
-          <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />{t('iam.specialties')}</TabsTrigger>
-          <TabsTrigger value="roles"><Shield size={16} className="mr-1" />{t('iam.roles')}</TabsTrigger>
-          <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />{t('iam.accountTypes')}</TabsTrigger>
+          <TabsTrigger value="users"><Users size={16} className="mr-1" />{"Users"}</TabsTrigger>
+          <TabsTrigger value="teams"><UsersRound size={16} className="mr-1" />{"Teams"}</TabsTrigger>
+          <TabsTrigger value="specialties"><Briefcase size={16} className="mr-1" />{"Specialties"}</TabsTrigger>
+          <TabsTrigger value="roles"><Shield size={16} className="mr-1" />{"Roles"}</TabsTrigger>
+          <TabsTrigger value="account-types"><Building2 size={16} className="mr-1" />{"Account Types"}</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -524,10 +522,10 @@ export default function IAMPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
-              <Input placeholder={t('iam.searchUsers')} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
+              <Input placeholder={"Search Users"} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
-              <Plus size={16} className="mr-2" />{t('iam.newUser')}
+              <Plus size={16} className="mr-2" />{"New User"}
             </Button>
           </div>
           <Card>
@@ -535,12 +533,12 @@ export default function IAMPage() {
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.user')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.role')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('iam.accountTypes')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.specialty')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.status')}</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase">{t('common.actions')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"User"}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Role"}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Account Types"}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Specialty"}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Status"}</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase">{"Actions"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -57,8 +56,7 @@ const categoryIcons = {
 };
 
 export default function UISettings() {
-  const { t, i18n } = useTranslation();
-  const [settings, setSettings] = useState([]);
+const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +70,7 @@ export default function UISettings() {
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.get(`${API}/ui-settings`);
+      const res = await axios.geAPI;
       setSettings(res.data);
       // Initialize edited settings with current values
       const edits = {};
@@ -116,7 +114,7 @@ export default function UISettings() {
 
   const handleReset = async () => {
     try {
-      await axios.post(`${API}/ui-settings/reset`);
+      await axios.posAPI;
       toast.success('Settings reset to defaults');
       setShowResetDialog(false);
       fetchSettings();
@@ -150,7 +148,7 @@ export default function UISettings() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold">{t('nav.settings')} - UI Customization</h1>
+          <h1 className="text-2xl font-bold">{"Settings"} - UI Customization</h1>
           <p className="mt-1">Customize text, labels, and messages across the platform</p>
         </div>
         <div className="flex gap-2">

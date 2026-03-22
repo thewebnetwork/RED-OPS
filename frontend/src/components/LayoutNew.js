@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { displayAccountType } from '../utils/displayAccountType';
@@ -63,8 +62,7 @@ const ICONS = {
 };
 
 export default function Layout({ children }) {
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
+const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const modeConfig = useAppMode();
@@ -81,7 +79,7 @@ export default function Layout({ children }) {
   useEffect(() => {
     const fetchRatingStats = async () => {
       try {
-        const res = await axios.get(`${API}/ratings/my-stats`);
+        const res = await axios.geAPI;
         setRatingStats(res.data);
       } catch (error) {
         // Silently fail
@@ -220,10 +218,10 @@ export default function Layout({ children }) {
 
   // Mode indicator text
   const getModeLabel = () => {
-    if (previewAsClient) return t('nav.clientPreview', 'Client Preview');
-    if (isClientMode) return t('nav.clientPortal', 'Client Portal');
-    if (isOperatorMode) return t('nav.operatorConsole', 'Operator Console');
-    if (isAdminMode) return t('nav.adminStudio', 'Admin Studio');
+    if (previewAsClient) return 'Client Preview';
+    if (isClientMode) return 'Client Portal';
+    if (isOperatorMode) return 'Operator Console';
+    if (isAdminMode) return 'Admin Studio';
     return '';
   };
 
@@ -272,7 +270,7 @@ export default function Layout({ children }) {
                   <DropdownMenuItem asChild>
                     <Link to="/" onClick={() => localStorage.setItem('active_app_mode', 'client_portal')} className="flex items-center cursor-pointer">
                       <Home size={16} className="mr-2" />
-                      {t('nav.clientPortal', 'Client Portal')}
+                      {'Client Portal'}
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -280,7 +278,7 @@ export default function Layout({ children }) {
                   <DropdownMenuItem asChild>
                     <Link to="/queue" onClick={() => localStorage.setItem('active_app_mode', 'operator_console')} className="flex items-center cursor-pointer">
                       <Inbox size={16} className="mr-2" />
-                      {t('nav.operatorConsole', 'Operator Console')}
+                      {'Operator Console'}
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -288,7 +286,7 @@ export default function Layout({ children }) {
                   <DropdownMenuItem asChild>
                     <Link to="/admin" onClick={() => localStorage.setItem('active_app_mode', 'admin_studio')} className="flex items-center cursor-pointer">
                       <LayoutDashboard size={16} className="mr-2" />
-                      {t('nav.adminStudio', 'Admin Studio')}
+                      {'Admin Studio'}
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -302,10 +300,10 @@ export default function Layout({ children }) {
           <div className="px-3 py-2 bg-amber-500">
             <div className="flex items-center gap-2 text-sm">
               <Eye size={14} />
-              <span className="font-medium">{t('nav.previewMode', 'Preview Mode')}</span>
+              <span className="font-medium">{'Preview Mode'}</span>
             </div>
             <button onClick={toggleClientPreview} className="text-xs underline mt-1 hover:no-underline">
-              {t('nav.exitPreview', 'Exit Preview')}
+              {'Exit Preview'}
             </button>
           </div>
         )}
@@ -339,7 +337,7 @@ export default function Layout({ children }) {
           <div className="px-4 py-3 border-t border-white/10">
             <button onClick={toggleClientPreview} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors" data-testid="preview-as-client-btn">
               <Eye size={16} />
-              {t('nav.previewAsClient', 'Preview as Client')}
+              {'Preview as Client'}
             </button>
           </div>
         )}
@@ -365,7 +363,7 @@ export default function Layout({ children }) {
             data-testid="logout-btn"
           >
             <LogOut size={14} />
-            {t('auth.logout', 'Sign out')}
+            {'Sign out'}
           </button>
         </div>
       </aside>
@@ -427,13 +425,13 @@ export default function Layout({ children }) {
               <DropdownMenuItem asChild>
                 <Link to="/my-account" className="flex items-center cursor-pointer" data-testid="account-menu-item">
                   <User size={16} className="mr-2" />
-                  {t('nav.myAccount', 'My Account')}
+                  {'My Account'}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600" data-testid="logout-menu-item">
                 <LogOut size={16} className="mr-2" />
-                {t('auth.logout', 'Logout')}
+                {'Logout'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

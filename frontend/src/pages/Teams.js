@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -48,8 +47,7 @@ const colorOptions = [
 ];
 
 export default function Teams() {
-  const { t } = useTranslation();
-  const [teams, setTeams] = useState([]);
+const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -78,13 +76,13 @@ export default function Teams() {
 
   const fetchTeams = async () => {
     try {
-      const res = await axios.get(`${API}/teams`);
+      const res = await axios.geAPI;
       setTeams(res.data);
       if (res.data.length > 0 && !selectedTeam) {
         setSelectedTeam(res.data[0]);
       }
     } catch (error) {
-      toast.error(t('errors.generic'));
+      toast.error("Generic");
     } finally {
       setLoading(false);
     }
@@ -93,7 +91,7 @@ export default function Teams() {
   const fetchTeamMembers = async (teamId) => {
     setLoadingMembers(true);
     try {
-      const res = await axios.get(`${API}/teams/${teamId}/members`);
+      const res = await axios.geteamId;
       // API returns {team: {...}, members: [...]} - extract members array
       setTeamMembers(res.data.members || []);
     } catch (error) {
@@ -126,22 +124,22 @@ export default function Teams() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error(t('errors.validation'));
+      toast.error("Validation");
       return;
     }
 
     try {
       if (editingTeam) {
         await axios.patch(`${API}/teams/${editingTeam.id}`, formData);
-        toast.success(t('success.updated'));
+        toast.success("Updated");
       } else {
         await axios.post(`${API}/teams`, formData);
-        toast.success(t('success.created'));
+        toast.success("Created");
       }
       fetchTeams();
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('errors.generic'));
+      toast.error(error.response?.data?.detail || "Generic");
     }
   };
 
@@ -156,9 +154,9 @@ export default function Teams() {
               setSelectedTeam(null);
             }
             fetchTeams();
-            toast.success(t('success.deleted'));
+            toast.success("Deleted");
           } catch (error) {
-            toast.error(t('errors.generic'));
+            toast.error("Generic");
           }
         },
       },
@@ -178,8 +176,8 @@ export default function Teams() {
     <div className="space-y-6 animate-fade-in" data-testid="teams-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{t('teams.title')}</h1>
-          <p className="mt-1">{t('teams.subtitle')}</p>
+          <h1 className="text-2xl font-bold">{"Title"}</h1>
+          <p className="mt-1">{"Subtitle"}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -187,7 +185,7 @@ export default function Teams() {
           data-testid="add-team-btn"
         >
           <Plus size={18} className="mr-2" />
-          {t('teams.addTeam')}
+          {"Add Team"}
         </Button>
       </div>
 
@@ -201,7 +199,7 @@ export default function Teams() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{teams.length}</p>
-                <p className="text-sm">{t('teams.totalTeams')}</p>
+                <p className="text-sm">{"Total Teams"}</p>
               </div>
             </div>
           </CardContent>
@@ -214,7 +212,7 @@ export default function Teams() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{teams.reduce((acc, team) => acc + team.member_count, 0)}</p>
-                <p className="text-sm">{t('teams.totalMembers')}</p>
+                <p className="text-sm">{"Total Members"}</p>
               </div>
             </div>
           </CardContent>
@@ -229,7 +227,7 @@ export default function Teams() {
                 <p className="text-2xl font-bold">
                   {teams.length > 0 ? Math.round(teams.reduce((acc, team) => acc + team.member_count, 0) / teams.length) : 0}
                 </p>
-                <p className="text-sm">{t('teams.avgTeamSize')}</p>
+                <p className="text-sm">{"Avg Team Size"}</p>
               </div>
             </div>
           </CardContent>
@@ -242,13 +240,13 @@ export default function Teams() {
           <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <UsersRound size={18} className="text-rose-600" />
-              {t('teams.title')}
+              {"Title"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {teams.length === 0 ? (
               <div className="p-6 text-center">
-                {t('common.noResults')}
+                {"No Results"}
               </div>
             ) : (
               <div className="divide-y">
@@ -269,7 +267,7 @@ export default function Teams() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{team.name}</p>
-                      <p className="text-xs">{team.member_count} {t('teams.members')}</p>
+                      <p className="text-xs">{team.member_count} {"Members"}</p>
                     </div>
                     <ChevronRight size={16} className="" />
                   </div>
@@ -300,7 +298,7 @@ export default function Teams() {
                           <p className="text-sm mt-1">{selectedTeam.description}</p>
                         )}
                         <p className="text-sm mt-2">
-                          <strong>{selectedTeam.member_count}</strong> {t('teams.members')}
+                          <strong>{selectedTeam.member_count}</strong> {"Members"}
                         </p>
                       </div>
                     </div>
@@ -311,7 +309,7 @@ export default function Teams() {
                         onClick={() => openDialog(selectedTeam)}
                       >
                         <Edit size={14} className="mr-1" />
-                        {t('common.edit')}
+                        {"Edit"}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -320,7 +318,7 @@ export default function Teams() {
                         onClick={() => handleDelete(selectedTeam.id)}
                       >
                         <Trash2 size={14} className="mr-1" />
-                        {t('common.delete')}
+                        {"Delete"}
                       </Button>
                     </div>
                   </div>
@@ -332,7 +330,7 @@ export default function Teams() {
                 <CardHeader className="border-b pb-4">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Users size={18} className="text-rose-600" />
-                    {t('teams.members')}
+                    {"Members"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -343,7 +341,7 @@ export default function Teams() {
                   ) : teamMembers.length === 0 ? (
                     <div className="p-8 text-center">
                       <Users size={32} className="mx-auto mb-2 text-slate-300" />
-                      <p>{t('teams.noMembers')}</p>
+                      <p>{"No Members"}</p>
                     </div>
                   ) : (
                     <div className="divide-y">
@@ -375,7 +373,7 @@ export default function Teams() {
             <Card className="">
               <CardContent className="p-12 text-center">
                 <UsersRound size={48} className="mx-auto mb-4 text-slate-300" />
-                <p>{t('teams.selectTeam')}</p>
+                <p>{"Select Team"}</p>
               </CardContent>
             </Card>
           )}
@@ -386,38 +384,38 @@ export default function Teams() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTeam ? t('teams.editTeam') : t('teams.newTeam')}</DialogTitle>
+            <DialogTitle>{editingTeam ? "Edit Team" : "New Team"}</DialogTitle>
             <DialogDescription>
               {editingTeam 
-                ? t('teams.editTeam') 
-                : t('teams.subtitle')
+                ? "Edit Team" 
+                : "Subtitle"
               }
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>{t('teams.teamName')} *</Label>
+              <Label>{"Team Name"} *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={t('teams.teamName')}
+                placeholder={"Team Name"}
                 className="mt-1.5"
                 data-testid="team-name-input"
               />
             </div>
             
             <div>
-              <Label>{t('common.description')}</Label>
+              <Label>{"Description"}</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={t('common.description')}
+                placeholder={"Description"}
                 className="mt-1.5"
               />
             </div>
 
             <div>
-              <Label>{t('teams.color')}</Label>
+              <Label>{"Color"}</Label>
               <Select 
                 value={formData.color} 
                 onValueChange={(v) => setFormData(prev => ({ ...prev, color: v }))}
@@ -442,7 +440,7 @@ export default function Teams() {
             </div>
 
             <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-team-btn">
-              {editingTeam ? t('common.save') : t('common.create')}
+              {editingTeam ? "Save" : "Create"}
             </Button>
           </form>
         </DialogContent>

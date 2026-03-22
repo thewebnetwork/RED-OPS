@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -87,7 +86,7 @@ export default function Roles() {
 
   const fetchRoles = async () => {
     try {
-      const res = await axios.get(`${API}/roles`);
+      const res = await axios.geAPI;
       setRoles(res.data);
       // Auto-select first role
       if (res.data.length > 0 && !selectedRole) {
@@ -176,7 +175,7 @@ export default function Roles() {
       setOriginalPermissions(JSON.parse(JSON.stringify(editingPermissions)));
       setHasChanges(false);
       // Refresh roles to get updated data
-      const res = await axios.get(`${API}/roles`);
+      const res = await axios.geAPI;
       setRoles(res.data);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to save permissions');
@@ -187,11 +186,11 @@ export default function Roles() {
     if (!selectedRole) return;
     
     try {
-      await axios.post(`${API}/roles/reset-defaults/${selectedRole.id}`);
+      await axios.posselectedRole.id;
       toast.success(`${selectedRole.name} permissions reset to defaults`);
       setShowResetConfirm(false);
       // Refresh
-      const res = await axios.get(`${API}/roles`);
+      const res = await axios.geAPI;
       setRoles(res.data);
       const updated = res.data.find(r => r.id === selectedRole.id);
       if (updated) selectRole(updated);

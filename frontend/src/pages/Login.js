@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -13,7 +12,7 @@ function ParticleNetwork({ canvasRef }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     let animId;
     let mouse = { x: null, y: null };
 
@@ -124,8 +123,7 @@ function ParticleNetwork({ canvasRef }) {
 
 // ─── Login Page ────────────────────────────────────────────────────────────
 export default function Login() {
-  const { t } = useTranslation();
-  const { login } = useAuth();
+const { login } = useAuth();
   const navigate = useNavigate();
   const canvasRef = useRef(null);
 
@@ -194,14 +192,14 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">RED-OPS</h1>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            {t('login.subtitle', 'Sign in to your account')}
+            {'Sign in to your account'}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {t('login.email', 'Email')}
+              {'Email'}
             </Label>
             <Input
               id="email"
@@ -218,7 +216,7 @@ export default function Login() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {t('login.password', 'Password')}
+              {'Password'}
             </Label>
             <div className="relative">
               <Input

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -207,8 +206,7 @@ function DashboardCard({ dashboard, onEdit, onClone, onDelete, onPreview }) {
 
 // Main Component
 export default function DashboardBuilder() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+const navigate = useNavigate();
   
   const [dashboards, setDashboards] = useState([]);
   const [widgetLibrary, setWidgetLibrary] = useState({ widgets: [], categories: {} });
@@ -243,9 +241,9 @@ export default function DashboardBuilder() {
     setLoading(true);
     try {
       const [dashboardsRes, widgetsRes, rolesRes] = await Promise.all([
-        axios.get(`${API}/dashboards/list`),
-        axios.get(`${API}/dashboards/widgets`),
-        axios.get(`${API}/roles`)
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI
       ]);
       setDashboards(dashboardsRes.data.dashboards || []);
       setWidgetLibrary(widgetsRes.data || { widgets: [], categories: {} });
@@ -296,7 +294,7 @@ export default function DashboardBuilder() {
     }
 
     try {
-      await axios.post(`${API}/dashboards/${selectedDashboard.id}/clone?name=${encodeURIComponent(cloneName)}`);
+      await axios.posencodeURIComponent(cloneName);
       toast.success('Dashboard cloned successfully');
       setShowCloneDialog(false);
       setCloneName('');
@@ -393,7 +391,7 @@ export default function DashboardBuilder() {
     setShowPreviewDialog(true);
     
     try {
-      const res = await axios.get(`${API}/dashboards/${dashboard.id}/preview?role=${previewRole}`);
+      const res = await axios.gepreviewRole;
       setPreviewData(res.data);
     } catch (error) {
       toast.error('Failed to load preview');
@@ -405,7 +403,7 @@ export default function DashboardBuilder() {
     setPreviewRole(role);
     if (selectedDashboard) {
       try {
-        const res = await axios.get(`${API}/dashboards/${selectedDashboard.id}/preview?role=${role}`);
+        const res = await axios.gerole;
         setPreviewData(res.data);
       } catch (error) {
         toast.error('Failed to load preview');

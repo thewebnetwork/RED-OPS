@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -45,8 +44,7 @@ const TICKET_STATUSES = ["Open", "Waiting", "Closed"];
 
 export default function Tickets() {
   const { hasRole } = useAuth();
-  const { t } = useTranslation();
-  const [tickets, setTickets] = useState([]);
+const [tickets, setTickets] = useState([]);
   const [clients, setClients] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,15 +68,15 @@ export default function Tickets() {
       if (statusFilter) params.append('status', statusFilter);
       
       const [ticketsRes, clientsRes, ordersRes] = await Promise.all([
-        axios.get(`${API}/tickets?${params.toString()}`),
-        hasRole('Admin', 'Manager') ? axios.get(`${API}/clients`) : Promise.resolve({ data: [] }),
-        hasRole('Admin', 'Manager') ? axios.get(`${API}/orders`) : Promise.resolve({ data: [] })
+        axios.geparams.toString(),
+        hasRole('Admin', 'Manager') ? axios.geAPI : Promise.resolve({ data: [] }),
+        hasRole('Admin', 'Manager') ? axios.geAPI : Promise.resolve({ data: [] })
       ]);
       setTickets(ticketsRes.data);
       setClients(clientsRes.data);
       setOrders(ordersRes.data);
     } catch (error) {
-      toast.error(t('errors.failedToLoad'));
+      toast.error("Failed To Load");
     } finally {
       setLoading(false);
     }
@@ -87,7 +85,7 @@ export default function Tickets() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.subject) {
-      toast.error(t('formValidation.enterTitle'));
+      toast.error("Enter Title");
       return;
     }
 
@@ -98,22 +96,22 @@ export default function Tickets() {
       if (!payload.message_body) delete payload.message_body;
       
       await axios.post(`${API}/tickets`, payload);
-      toast.success(t('tickets.ticketCreated'));
+      toast.success("Ticket Created");
       setDialogOpen(false);
       setFormData({ subject: '', client_id: '', related_order_id: '', message_body: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('tickets.failedToCreate'));
+      toast.error(error.response?.data?.detail || "Failed To Create");
     }
   };
 
   const handleStatusChange = async (ticketId, newStatus) => {
     try {
       await axios.patch(`${API}/tickets/${ticketId}?status=${newStatus}`);
-      toast.success(t('tickets.statusUpdated'));
+      toast.success("Status Updated");
       fetchData();
     } catch (error) {
-      toast.error(t('tickets.failedToUpdateStatus'));
+      toast.error("Failed To Update Status");
     }
   };
 
@@ -127,27 +125,27 @@ export default function Tickets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{t('tickets.title')}</h1>
-          <p className="mt-1">{tickets.length} {t('tickets.title').toLowerCase()}</p>
+          <h1 className="text-2xl font-bold">{"Title"}</h1>
+          <p className="mt-1">{tickets.length} {"Title".toLowerCase()}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-ticket-btn">
               <Plus size={18} className="mr-2" />
-              {t('tickets.createNewTicket')}
+              {"Create New Ticket"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('tickets.createNewTicket')}</DialogTitle>
+              <DialogTitle>{"Create New Ticket"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>{t('tickets.subject')} *</Label>
+                <Label>{"Subject"} *</Label>
                 <Input
                   value={formData.subject}
                   onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder={t('tickets.subjectPlaceholder')}
+                  placeholder={"Subject Placeholder"}
                   className="mt-1.5"
                   data-testid="ticket-subject-input"
                 />
@@ -155,16 +153,16 @@ export default function Tickets() {
               {hasRole('Admin', 'Manager') && (
                 <>
                   <div>
-                    <Label>{t('tickets.client')} ({t('common.optional')})</Label>
+                    <Label>{"Client"} ({"Optional"})</Label>
                     <Select 
                       value={formData.client_id} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, client_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder={t('tickets.selectClient')} />
+                        <SelectValue placeholder={"Select Client"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('common.none')}</SelectItem>
+                        <SelectItem value="">{"None"}</SelectItem>
                         {clients.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
@@ -172,16 +170,16 @@ export default function Tickets() {
                     </Select>
                   </div>
                   <div>
-                    <Label>{t('tickets.relatedOrder')} ({t('common.optional')})</Label>
+                    <Label>{"Related Order"} ({"Optional"})</Label>
                     <Select 
                       value={formData.related_order_id} 
                       onValueChange={(v) => setFormData(prev => ({ ...prev, related_order_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder={t('tickets.linkToOrder')} />
+                        <SelectValue placeholder={"Link To Order"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('common.none')}</SelectItem>
+                        <SelectItem value="">{"None"}</SelectItem>
                         {orders.map(o => (
                           <SelectItem key={o.id} value={o.id}>{o.order_code} - {o.title}</SelectItem>
                         ))}
@@ -191,16 +189,16 @@ export default function Tickets() {
                 </>
               )}
               <div>
-                <Label>{t('tickets.initialMessage')} ({t('common.optional')})</Label>
+                <Label>{"Initial Message"} ({"Optional"})</Label>
                 <Textarea
                   value={formData.message_body}
                   onChange={(e) => setFormData(prev => ({ ...prev, message_body: e.target.value }))}
-                  placeholder={t('tickets.describeIssue')}
+                  placeholder={"Describe Issue"}
                   className="mt-1.5"
                 />
               </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">
-                {t('tickets.createNewTicket')}
+                {"Create New Ticket"}
               </Button>
             </form>
           </DialogContent>
@@ -214,7 +212,7 @@ export default function Tickets() {
             <div className="relative flex-1">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
-                placeholder={t('tickets.searchPlaceholder')}
+                placeholder={"Search Placeholder"}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -223,12 +221,12 @@ export default function Tickets() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40" data-testid="status-filter">
-                <SelectValue placeholder={t('tickets.allStatuses')} />
+                <SelectValue placeholder={"All Statuses"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('tickets.allStatuses')}</SelectItem>
+                <SelectItem value="all">{"All Statuses"}</SelectItem>
                 {TICKET_STATUSES.map(s => (
-                  <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
+                  <SelectItem key={s} value={s}>{s.toLowerCase()}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -244,19 +242,19 @@ export default function Tickets() {
           </div>
         ) : filteredTickets.length === 0 ? (
           <CardContent className="p-12 text-center">
-            {search || statusFilter ? t('tickets.noTicketsMatch') : t('tickets.noTicketsYet')}
+            {search || statusFilter ? "No Tickets Match" : "No Tickets Yet"}
           </CardContent>
         ) : (
           <div className="overflow-x-auto">
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>{t('tickets.ticket')}</th>
-                  <th>{t('tickets.client')}</th>
-                  <th>{t('tickets.linkedOrder')}</th>
-                  <th>{t('common.status')}</th>
-                  <th>{t('tickets.owner')}</th>
-                  <th>{t('tickets.updated')}</th>
+                  <th>{"Ticket"}</th>
+                  <th>{"Client"}</th>
+                  <th>{"Linked Order"}</th>
+                  <th>{"Status"}</th>
+                  <th>{"Owner"}</th>
+                  <th>{"Updated"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -284,11 +282,11 @@ export default function Tickets() {
                     <td>
                       <Select value={ticket.status} onValueChange={(v) => handleStatusChange(ticket.id, v)}>
                         <SelectTrigger className="h-8 w-28">
-                          <Badge className={statusColors[ticket.status]}>{t(`tickets.status.${ticket.status.toLowerCase()}`)}</Badge>
+                          <Badge className={statusColors[ticket.status]}>{ticket.status.toLowerCase()}</Badge>
                         </SelectTrigger>
                         <SelectContent>
                           {TICKET_STATUSES.map(s => (
-                            <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
+                            <SelectItem key={s} value={s}>{s.toLowerCase()}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

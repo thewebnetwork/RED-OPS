@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,9 +14,7 @@ const languages = [
 ];
 
 export default function LanguageSwitcher({ variant = 'default' }) {
-  const { i18n } = useTranslation();
-
-  const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
+const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
 
   const changeLanguage = (langCode) => {
     i18n.changeLanguage(langCode);

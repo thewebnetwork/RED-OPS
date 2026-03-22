@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -83,7 +82,7 @@ export default function EmailSettings() {
 
   const fetchConfig = async () => {
     try {
-      const res = await axios.get(`${API}/smtp-config`);
+      const res = await axios.geAPI;
       const loadedConfig = {
         smtp_host: res.data.smtp_host || '',
         smtp_port: res.data.smtp_port || 587,

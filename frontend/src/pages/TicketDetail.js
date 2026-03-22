@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -38,8 +37,7 @@ export default function TicketDetail() {
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation();
-  const messagesEndRef = useRef(null);
+const messagesEndRef = useRef(null);
   
   const [ticket, setTicket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -62,13 +60,13 @@ export default function TicketDetail() {
   const fetchTicketData = async () => {
     try {
       const [ticketRes, messagesRes] = await Promise.all([
-        axios.get(`${API}/tickets/${ticketId}`),
-        axios.get(`${API}/tickets/${ticketId}/messages`)
+        axios.geticketId,
+        axios.geticketId
       ]);
       setTicket(ticketRes.data);
       setMessages(messagesRes.data);
     } catch (error) {
-      toast.error(t('errors.failedToLoad'));
+      toast.error("Failed To Load");
       navigate('/tickets');
     } finally {
       setLoading(false);
@@ -85,10 +83,10 @@ export default function TicketDetail() {
         message_body: newMessage.trim()
       });
       setNewMessage('');
-      const messagesRes = await axios.get(`${API}/tickets/${ticketId}/messages`);
+      const messagesRes = await axios.geticketId;
       setMessages(messagesRes.data);
     } catch (error) {
-      toast.error(t('tickets.failedToSendMessage'));
+      toast.error("Failed To Send Message");
     } finally {
       setSendingMessage(false);
     }
@@ -97,10 +95,10 @@ export default function TicketDetail() {
   const handleStatusChange = async (newStatus) => {
     try {
       await axios.patch(`${API}/tickets/${ticketId}?status=${newStatus}`);
-      toast.success(t('tickets.statusUpdated'));
+      toast.success("Status Updated");
       fetchTicketData();
     } catch (error) {
-      toast.error(t('tickets.failedToUpdateStatus'));
+      toast.error("Failed To Update Status");
     }
   };
 
@@ -120,7 +118,7 @@ export default function TicketDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/tickets')} className="w-fit">
           <ArrowLeft size={18} className="mr-2" />
-          {t('tickets.backToTickets')}
+          {"Back To Tickets"}
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
@@ -136,13 +134,13 @@ export default function TicketDetail() {
         <div className="lg:col-span-2">
           <Card className="var(--border)">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">{t('tickets.messages')}</CardTitle>
+              <CardTitle className="text-lg">{"Messages"}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-96 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-8">
-                    {t('tickets.noMessagesYet')}
+                    {"No Messages Yet"}
                   </div>
                 ) : (
                   messages.map(msg => (
@@ -172,7 +170,7 @@ export default function TicketDetail() {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={t('tickets.typeYourMessage')}
+                    placeholder={"Type Your Message"}
                     className="flex-1 min-h-[60px] resize-none"
                     data-testid="ticket-message-input"
                   />
@@ -194,19 +192,19 @@ export default function TicketDetail() {
         <div className="space-y-6">
           <Card className="var(--border)">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-base">{t('tickets.ticketDetails')}</CardTitle>
+              <CardTitle className="text-base">{"Ticket Details"}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {/* Status */}
               <div>
-                <Label className="text-xs">{t('common.status')}</Label>
+                <Label className="text-xs">{"Status"}</Label>
                 <Select value={ticket.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="mt-1.5" data-testid="ticket-status-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {TICKET_STATUSES.map(s => (
-                      <SelectItem key={s} value={s}>{t(`tickets.status.${s.toLowerCase()}`)}</SelectItem>
+                      <SelectItem key={s} value={s}>{s.toLowerCase()}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -214,7 +212,7 @@ export default function TicketDetail() {
 
               {/* Owner */}
               <div>
-                <Label className="text-xs">{t('tickets.owner')}</Label>
+                <Label className="text-xs">{"Owner"}</Label>
                 <div className="flex items-center gap-2 mt-1.5">
                   <User size={16} className="" />
                   <span className="font-medium">{ticket.owner_name}</span>
@@ -224,7 +222,7 @@ export default function TicketDetail() {
               {/* Client */}
               {ticket.client_name && (
                 <div>
-                  <Label className="text-xs">{t('tickets.client')}</Label>
+                  <Label className="text-xs">{"Client"}</Label>
                   <p className="font-medium mt-1.5">{ticket.client_name}</p>
                 </div>
               )}
@@ -232,7 +230,7 @@ export default function TicketDetail() {
               {/* Related Order */}
               {ticket.related_order_code && (
                 <div>
-                  <Label className="text-xs">{t('tickets.relatedOrder')}</Label>
+                  <Label className="text-xs">{"Related Order"}</Label>
                   <Link 
                     to={`/orders/${ticket.related_order_id}`}
                     className="flex items-center gap-2 mt-1.5 text-rose-600 hover:text-rose-700"
@@ -245,7 +243,7 @@ export default function TicketDetail() {
 
               {/* Created */}
               <div>
-                <Label className="text-xs">{t('tickets.created')}</Label>
+                <Label className="text-xs">{"Created"}</Label>
                 <p className="font-medium mt-1.5">
                   {format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}
                 </p>

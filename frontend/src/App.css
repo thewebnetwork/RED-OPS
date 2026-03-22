@@ -1,7 +1,323 @@
 /* App.css — Red Ops dark theme overrides */
 /* All core design system is in index.css */
+/* This file forces dark theme on Tailwind/shadcn pages that haven't been converted yet */
 
-/* Remove any lingering light-mode Tailwind component overrides */
-.sidebar { all: unset; }
-.main-content { all: unset; }
-.kpi-card { all: unset; }
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND BACKGROUND OVERRIDES → dark backgrounds
+   ═══════════════════════════════════════════════════════════ */
+.bg-white,
+.bg-gray-50,
+.bg-slate-50,
+.bg-gray-100,
+.bg-slate-100 {
+  background-color: var(--bg-card) !important;
+}
+
+.bg-gray-200,
+.bg-slate-200,
+.bg-muted,
+[class*="bg-muted"] {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND TEXT OVERRIDES → light text
+   ═══════════════════════════════════════════════════════════ */
+.text-black,
+.text-gray-900,
+.text-slate-900,
+.text-gray-800,
+.text-slate-800,
+.text-gray-700,
+.text-slate-700,
+.text-foreground,
+[class*="text-foreground"] {
+  color: var(--tx-1) !important;
+}
+
+.text-gray-600,
+.text-slate-600,
+.text-gray-500,
+.text-slate-500,
+[class*="text-muted-foreground"] {
+  color: var(--tx-2) !important;
+}
+
+.text-gray-400,
+.text-slate-400,
+.text-gray-300,
+.text-slate-300 {
+  color: var(--tx-3) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND BORDER OVERRIDES → dark borders
+   ═══════════════════════════════════════════════════════════ */
+.border-gray-200,
+.border-slate-200,
+.border-gray-300,
+.border-slate-300,
+.border-gray-100,
+.border-slate-100,
+[class*="border-border"],
+.border-input,
+.divide-gray-200 > * + *,
+.divide-gray-100 > * + * {
+  border-color: var(--border) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHADCN/UI COMPONENT DARK OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Dialog / DialogContent */
+[role="dialog"],
+[data-radix-dialog-content],
+[class*="DialogContent"],
+.fixed.inset-0 + div {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--tx-1) !important;
+}
+
+/* Dialog overlay */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(2px);
+}
+
+/* Button (shadcn) */
+button[class*="bg-primary"],
+[class*="Button"][class*="default"] {
+  background-color: var(--red) !important;
+  color: #fff !important;
+}
+
+button[class*="variant-outline"],
+button[class*="bg-secondary"] {
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--tx-2) !important;
+}
+
+button[class*="variant-ghost"],
+button[class*="bg-ghost"] {
+  color: var(--tx-2) !important;
+}
+
+button[class*="variant-ghost"]:hover,
+button[class*="bg-ghost"]:hover {
+  background-color: var(--bg-elevated) !important;
+  color: var(--tx-1) !important;
+}
+
+/* Input / Textarea (shadcn) */
+input[class*="border-input"],
+input[class*="bg-background"],
+textarea[class*="border-input"],
+textarea[class*="bg-background"],
+input.flex.h-10,
+input.flex.h-9,
+textarea.flex {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  color: var(--tx-1) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--tx-3) !important;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--red) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--red) !important;
+}
+
+/* Select (shadcn) */
+button[role="combobox"],
+[data-radix-select-trigger],
+[class*="SelectTrigger"] {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  color: var(--tx-1) !important;
+}
+
+[data-radix-select-content],
+[class*="SelectContent"],
+[role="listbox"] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--tx-1) !important;
+}
+
+[data-radix-select-item]:hover,
+[role="option"]:hover,
+[role="option"][data-highlighted] {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* Label */
+label[class*="text-sm"],
+[class*="Label"] {
+  color: var(--tx-2) !important;
+}
+
+/* Badge (shadcn) */
+[class*="Badge"],
+.inline-flex.items-center.rounded-full {
+  border-color: var(--border) !important;
+}
+
+/* Card (shadcn) */
+[class*="rounded-lg"][class*="border"][class*="bg-card"],
+[class*="rounded-xl"][class*="border"][class*="shadow"] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Table (shadcn & Tailwind) */
+table th {
+  color: var(--tx-3) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+table td {
+  color: var(--tx-1) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+table tbody tr:hover td {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* Tabs (shadcn) */
+[role="tablist"],
+[class*="TabsList"] {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+}
+
+[role="tab"][data-state="active"],
+[class*="TabsTrigger"][data-state="active"] {
+  background-color: var(--bg-card) !important;
+  color: var(--tx-1) !important;
+}
+
+[role="tab"] {
+  color: var(--tx-3) !important;
+}
+
+/* Popover */
+[data-radix-popover-content] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Tooltip */
+[data-radix-tooltip-content] {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  color: var(--tx-1) !important;
+}
+
+/* ScrollArea */
+[data-radix-scroll-area-viewport] {
+  background-color: transparent !important;
+}
+
+/* Switch (shadcn) */
+[role="switch"] {
+  background-color: var(--bg-overlay) !important;
+}
+
+[role="switch"][data-state="checked"] {
+  background-color: var(--red) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND SHADOW & RING OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+.shadow,
+.shadow-sm,
+.shadow-md,
+.shadow-lg {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.ring-1,
+.ring-offset-background,
+[class*="ring-"] {
+  --tw-ring-color: var(--border) !important;
+  --tw-ring-offset-color: var(--bg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND DIVIDE OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+.divide-y > * + *,
+.divide-x > * + * {
+  border-color: var(--border) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MISC: hover states, focus rings, disabled states
+   ═══════════════════════════════════════════════════════════ */
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-100:hover,
+.hover\:bg-slate-50:hover,
+.hover\:bg-slate-100:hover,
+.hover\:bg-muted:hover,
+.hover\:bg-accent:hover {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* Focus visible ring */
+.focus-visible\:ring-2:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--red) !important;
+}
+
+/* Disabled states */
+.disabled\:opacity-50:disabled,
+[disabled] {
+  opacity: 0.4 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SONNER TOAST DARK OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+[data-sonner-toaster] [data-sonner-toast] {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border-hi) !important;
+  color: var(--tx-1) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE-SPECIFIC PATCHES for pages still using className
+   ═══════════════════════════════════════════════════════════ */
+
+/* Ensure all pages render on dark background */
+.page-content,
+.container,
+.mx-auto,
+[class*="max-w-"] {
+  background-color: transparent !important;
+  color: var(--tx-1) !important;
+}
+
+/* Force h1-h6 dark text in all contexts */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--tx-1) !important;
+}
+
+/* Force paragraph text to be readable */
+p {
+  color: var(--tx-2);
+}
+
+/* Remove any white background leaks */
+main, section, article, aside, nav, header, footer, div.min-h-screen {
+  background-color: transparent;
+}

@@ -25,6 +25,27 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
+
+        # Attach org context if user has a primary org
+        primary_org_id = user.get("primary_org_id")
+        if primary_org_id:
+            membership = await db.org_members.find_one(
+                {"user_id": user_id, "org_id": primary_org_id, "active": True},
+                {"_id": 0}
+            )
+            if membership:
+                user["org_id"] = primary_org_id
+                user["org_role"] = membership.get("org_role", "member")
+                user["org_permissions"] = membership.get("permissions", {})
+            else:
+                user["org_id"] = None
+                user["org_role"] = None
+                user["org_permissions"] = {}
+        else:
+            user["org_id"] = None
+            user["org_role"] = None
+            user["org_permissions"] = {}
+
         return user
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")

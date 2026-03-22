@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -45,7 +44,7 @@ const flattenObject = (obj, prefix = '') => {
 const unflattenObject = (obj) => {
   const result = {};
   for (const key in obj) {
-    const keys = key.split('.');
+    const keys = key.split(".");
     let current = result;
     for (let i = 0; i < keys.length - 1; i++) {
       if (!current[keys[i]]) current[keys[i]] = {};
@@ -58,8 +57,7 @@ const unflattenObject = (obj) => {
 
 export default function TranslationEditorPage() {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-  const [selectedLang, setSelectedLang] = useState('es');
+const [selectedLang, setSelectedLang] = useState('es');
   const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [changes, setChanges] = useState({});
@@ -93,7 +91,7 @@ export default function TranslationEditorPage() {
   const groupedKeys = useMemo(() => {
     const groups = {};
     filteredKeys.forEach(key => {
-      const section = key.split('.')[0];
+      const section = key.split(".")[0];
       if (!groups[section]) groups[section] = [];
       groups[section].push(key);
     });
@@ -122,7 +120,7 @@ export default function TranslationEditorPage() {
   
   const saveTranslations = async () => {
     if (!hasChanges) {
-      toast.info(t('settings.translations.noChanges'));
+      toast.info("No Changes");
       return;
     }
     
@@ -139,7 +137,7 @@ export default function TranslationEditorPage() {
       // Log the changes for manual update
       console.log('Updated translations for', selectedLang, ':', JSON.stringify(updatedNested, null, 2));
       
-      toast.success(t('settings.translations.translationsSaved'));
+      toast.success("Translations Saved");
       toast.info('Changes logged to console. In production, these would be saved to the server.');
       
       // Reset changes for this language
@@ -174,15 +172,15 @@ export default function TranslationEditorPage() {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            {t('common.back')}
+            {"Back"}
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Languages className="text-[#A2182C]" />
-              {t('settings.translations.title')}
+              {"Title"}
             </h1>
             <p className="text-sm mt-1">
-              {t('settings.translations.description')}
+              {"Description"}
             </p>
           </div>
         </div>
@@ -198,7 +196,7 @@ export default function TranslationEditorPage() {
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          {t('settings.translations.saveTranslations')}
+          {"Save Translations"}
         </Button>
       </div>
       
@@ -207,7 +205,7 @@ export default function TranslationEditorPage() {
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-48">
-              <Label>{t('settings.translations.selectLanguage')}</Label>
+              <Label>{"Select Language"}</Label>
               <Select value={selectedLang} onValueChange={setSelectedLang}>
                 <SelectTrigger className="mt-1.5" data-testid="language-select">
                   <SelectValue />
@@ -220,11 +218,11 @@ export default function TranslationEditorPage() {
             </div>
             
             <div className="flex-1">
-              <Label>{t('settings.translations.searchKeys')}</Label>
+              <Label>{"Search Keys"}</Label>
               <div className="relative mt-1.5">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
                 <Input
-                  placeholder={t('settings.translations.searchKeys')}
+                  placeholder={"Search Keys"}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -240,7 +238,7 @@ export default function TranslationEditorPage() {
       <Card className="">
         <CardContent className="p-4">
           <p className="text-sm">
-            <strong>{t('common.tip')}:</strong> Edit translations below. Changes are saved in memory and logged to console. 
+            <strong>{"Tip"}:</strong> Edit translations below. Changes are saved in memory and logged to console. 
             For permanent changes, export the translations and update the JSON files.
           </p>
         </CardContent>
@@ -278,21 +276,21 @@ export default function TranslationEditorPage() {
                             onClick={() => resetToOriginal(key)}
                           >
                             <RotateCcw size={12} className="mr-1" />
-                            {t('settings.translations.resetToOriginal')}
+                            {"Reset To Original"}
                           </Button>
                         )}
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs">{t('settings.translations.english')}</Label>
+                          <Label className="text-xs">{"English"}</Label>
                           <div className="mt-1 p-2 rounded text-sm min-h-[38px]">
                             {englishValue}
                           </div>
                         </div>
                         
                         <div>
-                          <Label className="text-xs">{t('settings.translations.translation')}</Label>
+                          <Label className="text-xs">{"Translation"}</Label>
                           {englishValue.length > 100 ? (
                             <Textarea
                               value={currentValue}
@@ -321,7 +319,7 @@ export default function TranslationEditorPage() {
       {/* Floating save indicator */}
       {hasChanges && (
         <div className="fixed bottom-4 right-4 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
-          <p className="text-amber-800 text-sm font-medium">{t('settings.poolRules.unsavedChanges')}</p>
+          <p className="text-amber-800 text-sm font-medium">{"Unsaved Changes"}</p>
         </div>
       )}
     </div>

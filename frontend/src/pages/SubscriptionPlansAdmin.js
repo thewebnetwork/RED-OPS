@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -52,7 +51,7 @@ export default function SubscriptionPlansAdmin() {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get(`${API}/subscription-plans`);
+      const response = await axios.geAPI;
       setPlans(response.data);
     } catch (error) {
       toast.error('Failed to fetch subscription plans');
@@ -98,7 +97,7 @@ export default function SubscriptionPlansAdmin() {
         ...formData,
         price_monthly: formData.price_monthly ? parseFloat(formData.price_monthly) : null,
         price_yearly: formData.price_yearly ? parseFloat(formData.price_yearly) : null,
-        features: formData.features.split('\n').filter(f => f.trim()),
+        features: formData.features.split("\n").filter(f => f.trim()),
         sort_order: parseInt(formData.sort_order) || 1
       };
 

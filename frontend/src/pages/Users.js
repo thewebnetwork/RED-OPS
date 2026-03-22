@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent } from '../components/ui/card';
@@ -52,8 +51,7 @@ import { toast } from 'sonner';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function Users() {
-  const { t } = useTranslation();
-  const { user: currentUser } = useAuth();
+const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [specialties, setSpecialties] = useState([]);
@@ -135,11 +133,11 @@ export default function Users() {
   const fetchData = async () => {
     try {
       const [usersRes, teamsRes, specialtiesRes, configRes, modulesRes] = await Promise.all([
-        axios.get(`${API}/users`),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/specialties`),
-        axios.get(`${API}/users/identity-config`),
-        axios.get(`${API}/users/permissions/modules`).catch(() => ({ data: { modules: {}, default_permissions: {} } }))
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI.catch(() => ({ data: { modules: {}, default_permissions: {} } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);
@@ -148,7 +146,7 @@ export default function Users() {
       setPermissionModules(modulesRes.data.modules || {});
       setDefaultPermissions(modulesRes.data.default_permissions || {});
     } catch (error) {
-      toast.error(t('errors.generic'));
+      toast.error("Generic");
     } finally {
       setLoading(false);
     }
@@ -334,7 +332,7 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{t('users.title')}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{"Title"}</h1>
           <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>{users.length} users</p>
         </div>
         <Button 

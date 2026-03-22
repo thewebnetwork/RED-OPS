@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -59,8 +58,7 @@ const getIcon = (iconName) => {
 };
 
 export default function Categories() {
-  const { t, i18n } = useTranslation();
-  const [categoriesL1, setCategoriesL1] = useState([]);
+const [categoriesL1, setCategoriesL1] = useState([]);
   const [categoriesL2, setCategoriesL2] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedL1, setSelectedL1] = useState(null);
@@ -148,13 +146,13 @@ export default function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${API}/categories/l1`);
+      const res = await axios.geAPI;
       setCategoriesL1(res.data);
       if (res.data.length > 0 && !selectedL1) {
         setSelectedL1(res.data[0].id);
       }
     } catch (error) {
-      toast.error(t('errors.generic'));
+      toast.error("Generic");
     } finally {
       setLoading(false);
     }
@@ -162,7 +160,7 @@ export default function Categories() {
 
   const fetchCategoriesL2 = async (l1Id) => {
     try {
-      const res = await axios.get(`${API}/categories/l2?category_l1_id=${l1Id}`);
+      const res = await axios.gel1Id;
       setCategoriesL2(res.data);
     } catch (error) {
       console.error('Failed to load L2 categories');
@@ -206,7 +204,7 @@ export default function Categories() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error(t('errors.validation'));
+      toast.error("Validation");
       return;
     }
 
@@ -223,15 +221,15 @@ export default function Categories() {
         
         if (editingCategory) {
           await axios.patch(`${API}/categories/l1/${editingCategory.id}`, payload);
-          toast.success(t('success.updated'));
+          toast.success("Updated");
         } else {
           await axios.post(`${API}/categories/l1`, payload);
-          toast.success(t('success.created'));
+          toast.success("Created");
         }
         fetchCategories();
       } else {
         if (!formData.category_l1_id) {
-          toast.error(t('errors.validation'));
+          toast.error("Validation");
           return;
         }
         
@@ -247,10 +245,10 @@ export default function Categories() {
         
         if (editingCategory) {
           await axios.patch(`${API}/categories/l2/${editingCategory.id}`, payload);
-          toast.success(t('success.updated'));
+          toast.success("Updated");
         } else {
           await axios.post(`${API}/categories/l2`, payload);
-          toast.success(t('success.created'));
+          toast.success("Created");
         }
         fetchCategoriesL2(selectedL1);
       }
@@ -258,7 +256,7 @@ export default function Categories() {
       initialFormRef.current = null;
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('errors.generic'));
+      toast.error(error.response?.data?.detail || "Generic");
     }
   };
 
@@ -282,9 +280,9 @@ export default function Categories() {
         await axios.delete(`${API}/categories/l2/${id}`);
         fetchCategoriesL2(selectedL1);
       }
-      toast.success(t('categories.categoryDeactivated'));
+      toast.success("Category Deactivated");
     } catch (error) {
-      toast.error(t('categories.failedToDelete'));
+      toast.error("Failed To Delete");
     }
   };
 
@@ -300,8 +298,8 @@ export default function Categories() {
     <div className="space-y-6 animate-fade-in" data-testid="categories-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('categories.title')}</h1>
-          <p className="mt-1">{t('categories.description')}</p>
+          <h1 className="text-2xl font-bold">{"Title"}</h1>
+          <p className="mt-1">{"Description"}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -309,7 +307,7 @@ export default function Categories() {
           data-testid="add-category-l1-btn"
         >
           <Plus size={18} className="mr-2" />
-          {t('categories.addCategory')}
+          {"Add Category"}
         </Button>
       </div>
 
@@ -319,13 +317,13 @@ export default function Categories() {
           <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <FolderTree size={18} className="text-rose-600" />
-              {t('categories.level1Categories')}
+              {"Level1 Categories"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {categoriesL1.length === 0 ? (
               <div className="p-6 text-center">
-                {t('categories.noCategoriesYet')}
+                {"No Categories Yet"}
               </div>
             ) : (
               <div className="divide-y">
@@ -382,7 +380,7 @@ export default function Categories() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Tag size={18} className="text-rose-600" />
-                  {t('categories.subcategories')}
+                  {"Subcategories"}
                   {selectedL1 && (
                     <Badge variant="outline" className="ml-2">
                       {categoriesL1.find(c => c.id === selectedL1)?.name}
@@ -397,7 +395,7 @@ export default function Categories() {
                     data-testid="add-category-l2-btn"
                   >
                     <Plus size={14} className="mr-1" />
-                    {t('categories.addSubcategory')}
+                    {"Add Subcategory"}
                   </Button>
                 )}
               </div>
@@ -405,11 +403,11 @@ export default function Categories() {
             <CardContent className="p-0">
               {!selectedL1 ? (
                 <div className="p-12 text-center">
-                  {t('categories.selectCategoryToViewSub')}
+                  {"Select Category To View Sub"}
                 </div>
               ) : categoriesL2.length === 0 ? (
                 <div className="p-12 text-center">
-                  {t('categories.noSubcategoriesYet')}
+                  {"No Subcategories Yet"}
                 </div>
               ) : (
                 <div className="divide-y">
@@ -460,22 +458,22 @@ export default function Categories() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? t('common.edit') : t('common.create')} {dialogType === 'l1' ? t('categories.title') : t('categories.subcategory')}
+              {editingCategory ? "Edit" : "Create"} {dialogType === 'l1' ? "Title" : "Subcategory"}
             </DialogTitle>
             <DialogDescription>
               {dialogType === 'l1' 
-                ? t('categories.level1Description') 
-                : t('categories.level2Description')
+                ? "Level1 Description" 
+                : "Level2 Description"
               }
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>{t('common.name')} * ({t('categories.defaultName')})</Label>
+              <Label>{"Name"} * ({"Default Name"})</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={t('categories.categoryName')}
+                placeholder={"Category Name"}
                 className="mt-1.5"
                 data-testid="category-name-input"
               />
@@ -483,7 +481,7 @@ export default function Categories() {
             
             {/* Multi-language name fields */}
             <div className="border rounded-lg p-3 space-y-3">
-              <p className="text-xs font-semibold uppercase">{t('categories.translations')}</p>
+              <p className="text-xs font-semibold uppercase">{"Translations"}</p>
               <div>
                 <Label className="flex items-center gap-2">
                   <span>🇺🇸</span> English
@@ -520,18 +518,18 @@ export default function Categories() {
             </div>
             
             <div>
-              <Label>{t('common.description')}</Label>
+              <Label>{"Description"}</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={t('common.optional')}
+                placeholder={"Optional"}
                 className="mt-1.5"
               />
             </div>
 
             {dialogType === 'l1' && (
               <div>
-                <Label>{t('categories.icon')}</Label>
+                <Label>{"Icon"}</Label>
                 <Select 
                   value={formData.icon} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, icon: v }))}
@@ -559,13 +557,13 @@ export default function Categories() {
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs ml-1">({t('categories.changeToMove')})</span>}</Label>
+                  <Label>{"Parent Category"} {editingCategory && <span className="text-xs ml-1">({"Change To Move"})</span>}</Label>
                   <Select 
                     value={formData.category_l1_id} 
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}
                   >
                     <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder={t('categories.selectParent')} />
+                      <SelectValue placeholder={"Select Parent"} />
                     </SelectTrigger>
                     <SelectContent>
                       {categoriesL1.map(cat => (
@@ -575,7 +573,7 @@ export default function Categories() {
                   </Select>
                   {editingCategory && formData.category_l1_id !== editingCategory.category_l1_id && (
                     <p className="text-xs text-amber-600 mt-1">
-                      {t('categories.subcategoryWillBeMoved')}
+                      {"Subcategory Will Be Moved"}
                     </p>
                   )}
                 </div>
@@ -583,7 +581,7 @@ export default function Categories() {
             )}
 
             <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-category-btn">
-              {editingCategory ? t('common.save') : t('common.create')}
+              {editingCategory ? "Save" : "Create"}
             </Button>
           </form>
         </DialogContent>
@@ -593,21 +591,21 @@ export default function Categories() {
       <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
         <AlertDialogContent data-testid="unsaved-changes-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('categories.unsavedChanges')}</AlertDialogTitle>
+            <AlertDialogTitle>{"Unsaved Changes"}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('categories.unsavedChangesDescription')}
+              {"Unsaved Changes Description"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowUnsavedWarning(false)} data-testid="stay-btn">
-              {t('categories.stay')}
+              {"Stay"}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseDialog}
               className="bg-slate-600 hover:bg-slate-700"
               data-testid="leave-btn"
             >
-              {t('categories.leaveWithoutSaving')}
+              {"Leave Without Saving"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

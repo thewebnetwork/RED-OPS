@@ -1,431 +1,193 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  AlertCircle,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  BarChart2,
-  RefreshCw,
+  TrendingUp, TrendingDown, DollarSign, Users, AlertCircle,
+  Calendar, BarChart2, RefreshCw, Loader2,
 } from 'lucide-react';
 import {
-  LineChart,
-  BarChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  LineChart, BarChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer,
 } from 'recharts';
 import axios from 'axios';
-;
+import { toast } from 'sonner';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'on-track': return '#22c55e';
+    case 'at-risk':  return '#f59e0b';
+    case 'critical': return '#c92a3e';
+    default:         return '#606060';
+  }
+};
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'on-track': return 'On track';
+    case 'at-risk':  return 'At risk';
+    case 'critical': return 'Critical';
+    default:         return status;
+  }
+};
 
 const Finance = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Mock MRR data for 12 months
-  const mrrChartData = [
-    { month: 'Jan', value: 12400 },
-    { month: 'Feb', value: 13100 },
-    { month: 'Mar', value: 13800 },
-    { month: 'Apr', value: 14200 },
-    { month: 'May', value: 15100 },
-    { month: 'Jun', value: 15800 },
-    { month: 'Jul', value: 16400 },
-    { month: 'Aug', value: 17100 },
-    { month: 'Sep', value: 17800 },
-    { month: 'Oct', value: 18100 },
-    { month: 'Nov', value: 18200 },
-    { month: 'Dec', value: 18400 },
-  ];
+  // Real data from API
+  const [financials, setFinancials] = useState(null);
+  const [clients, setClients] = useState([]);
 
-  // Mock renewal data
-  const renewalData = [
-    {
-      id: 1,
-      client: 'TechStartup Inc',
-      plan: 'Premium',
-      mrr: 4200,
-      renewalDate: '2026-04-05',
-      daysUntil: 17,
-      status: 'on-track',
-    },
-    {
-      id: 2,
-      client: 'Creative Agency Co',
-      plan: 'Standard',
-      mrr: 2800,
-      renewalDate: '2026-04-12',
-      daysUntil: 24,
-      status: 'on-track',
-    },
-    {
-      id: 3,
-      client: 'E-Commerce Plus',
-      plan: 'Premium',
-      mrr: 3600,
-      renewalDate: '2026-04-18',
-      daysUntil: 30,
-      status: 'at-risk',
-    },
-    {
-      id: 4,
-      client: 'Local Services',
-      plan: 'Basic',
-      mrr: 1200,
-      renewalDate: '2026-03-28',
-      daysUntil: 9,
-      status: 'critical',
-    },
-    {
-      id: 5,
-      client: 'Growth Marketing',
-      plan: 'Enterprise',
-      mrr: 5200,
-      renewalDate: '2026-05-02',
-      daysUntil: 44,
-      status: 'on-track',
-    },
-  ];
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const [finRes, usersRes] = await Promise.allSettled([
+        axios.get(`${API}/dashboard/financial-stats`),
+        axios.get(`${API}/users`),
+      ]);
 
-  // Mock revenue by service
-  const revenueByService = [
-    { name: 'Meta Ads', value: 8200 },
-    { name: 'Content', value: 4800 },
-    { name: 'Copywriting', value: 2600 },
-    { name: 'Video', value: 1900 },
-    { name: 'Strategy', value: 900 },
-  ];
+      if (finRes.status === 'fulfilled') {
+        setFinancials(finRes.value.data);
+      }
 
-  // Mock client data
-  const clientData = [
-    {
-      id: 1,
-      name: 'TechStartup Inc',
-      plan: 'Premium',
-      mrr: 4200,
-      requestsUsed: '112/150',
-      deliveries: 8,
-      lastDelivery: '2 days ago',
-      health: 'good',
-    },
-    {
-      id: 2,
-      name: 'Creative Agency Co',
-      plan: 'Standard',
-      mrr: 2800,
-      requestsUsed: '85/100',
-      deliveries: 6,
-      lastDelivery: '1 day ago',
-      health: 'good',
-    },
-    {
-      id: 3,
-      name: 'E-Commerce Plus',
-      plan: 'Premium',
-      mrr: 3600,
-      requestsUsed: '142/150',
-      deliveries: 5,
-      lastDelivery: '5 days ago',
-      health: 'warn',
-    },
-    {
-      id: 4,
-      name: 'Local Services',
-      plan: 'Basic',
-      mrr: 1200,
-      requestsUsed: '48/50',
-      deliveries: 2,
-      lastDelivery: '12 days ago',
-      health: 'danger',
-    },
-    {
-      id: 5,
-      name: 'Growth Marketing',
-      plan: 'Enterprise',
-      mrr: 5200,
-      requestsUsed: '187/200',
-      deliveries: 12,
-      lastDelivery: 'Today',
-      health: 'good',
-    },
-    {
-      id: 6,
-      name: 'Design Studio Hub',
-      plan: 'Standard',
-      mrr: 2100,
-      requestsUsed: '72/100',
-      deliveries: 4,
-      lastDelivery: '3 days ago',
-      health: 'good',
-    },
-    {
-      id: 7,
-      name: 'Social Media Co',
-      plan: 'Premium',
-      mrr: 3400,
-      requestsUsed: '131/150',
-      deliveries: 7,
-      lastDelivery: '1 day ago',
-      health: 'good',
-    },
-    {
-      id: 8,
-      name: 'Brand Academy',
-      plan: 'Standard',
-      mrr: 1900,
-      requestsUsed: '91/100',
-      deliveries: 3,
-      lastDelivery: '4 days ago',
-      health: 'warn',
-    },
-  ];
-
-  const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 1000);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'on-track':
-        return '#22c55e';
-      case 'at-risk':
-        return '#f59e0b';
-      case 'critical':
-        return '#c92a3e';
-      default:
-        return '#606060';
+      if (usersRes.status === 'fulfilled') {
+        const all = Array.isArray(usersRes.value.data) ? usersRes.value.data : usersRes.value.data?.items || [];
+        const mediaClients = all.filter(u => u.account_type === 'Media Client');
+        setClients(mediaClients);
+      }
+    } catch (err) {
+      toast.error('Failed to load financial data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'on-track':
-        return 'On track';
-      case 'at-risk':
-        return 'At risk';
-      case 'critical':
-        return 'Critical';
-      default:
-        return status;
-    }
-  };
+  useEffect(() => { fetchData(); }, []);
+
+  const handleRefresh = () => fetchData(true);
+
+  // Compute metrics from real data
+  const mrr = financials?.mrr || 0;
+  const arr = mrr * 12;
+  const activeClients = financials?.active_subscribers || financials?.total_clients || clients.length;
+  const newClientsMtd = financials?.new_clients_mtd || 0;
+  const requestsMtd = financials?.requests_mtd || 0;
+  const requestsPrev = financials?.requests_prev_month || 0;
+  const deliveredMtd = financials?.delivered_mtd || 0;
+
+  if (loading) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <Loader2 size={24} className="spin" style={{ color: 'var(--tx-3)' }} />
+      </div>
+    );
+  }
 
   return (
-    <div className="page-content">
+    <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', padding: '24px 28px' }}>
       {/* Header */}
-      <div className="finance-header">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1>Financial Overview</h1>
-          <p className="text-secondary">Retainer business health monitor</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Financial Overview</h1>
+          <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--tx-3)' }}>Retainer business health monitor</p>
         </div>
-        <button className="btn-primary btn-sm" onClick={handleRefresh} disabled={loading}>
-          <RefreshCw size={16} style={{ marginRight: '6px' }} />
-          {loading ? 'Refreshing...' : 'Refresh'}
+        <button onClick={handleRefresh} className="btn-primary btn-sm" disabled={refreshing} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <RefreshCw size={14} className={refreshing ? 'spin' : ''} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
       {/* Top Metrics Row */}
-      <div className="metrics-grid">
-        {/* MRR Card */}
-        <div className="metric-card">
-          <div className="metric-label">Monthly Recurring Revenue</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px' }}>
-            <div className="metric-value">$18,400</div>
-            <div className="metric-change positive">
-              <TrendingUp size={16} />
-              <span>+8%</span>
-            </div>
-          </div>
-          <div className="metric-subtext">vs last month</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 24 }}>
+        {/* MRR */}
+        <div className="card" style={{ padding: '18px 20px' }}>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Monthly Recurring Revenue</span>
+          <p style={{ margin: '10px 0 4px', fontSize: 28, fontWeight: 800, color: 'var(--tx-1)', lineHeight: 1 }}>
+            ${mrr.toLocaleString()}
+          </p>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>Billed monthly</span>
         </div>
 
-        {/* ARR Card */}
-        <div className="metric-card">
-          <div className="metric-label">Annual Recurring Revenue</div>
-          <div className="metric-value">$220,800</div>
-          <div className="metric-subtext">Annualized from MRR</div>
+        {/* ARR */}
+        <div className="card" style={{ padding: '18px 20px' }}>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Annual Recurring Revenue</span>
+          <p style={{ margin: '10px 0 4px', fontSize: 28, fontWeight: 800, color: 'var(--tx-1)', lineHeight: 1 }}>
+            ${arr.toLocaleString()}
+          </p>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>Annualized from MRR</span>
         </div>
 
-        {/* Active Clients Card */}
-        <div className="metric-card">
-          <div className="metric-label">Active Clients</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px' }}>
-            <div className="metric-value">14</div>
-            <Users size={20} style={{ color: 'var(--blue)' }} />
+        {/* Active Clients */}
+        <div className="card" style={{ padding: '18px 20px' }}>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Clients</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '10px 0 4px' }}>
+            <span style={{ fontSize: 28, fontWeight: 800, color: 'var(--tx-1)', lineHeight: 1 }}>{activeClients}</span>
+            {newClientsMtd > 0 && (
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#22c55e', display: 'flex', alignItems: 'center', gap: 3 }}>
+                <TrendingUp size={12} /> +{newClientsMtd} this month
+              </span>
+            )}
           </div>
-          <div className="metric-subtext">All paying, healthy portfolio</div>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>Paying accounts</span>
         </div>
 
-        {/* Churn Card */}
-        <div className="metric-card">
-          <div className="metric-label">90-Day Churn</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px' }}>
-            <div className="metric-value">1</div>
-            <div className="metric-change negative">
-              <TrendingDown size={16} />
-              <span>-$1.2K MRR</span>
-            </div>
+        {/* Requests This Month */}
+        <div className="card" style={{ padding: '18px 20px' }}>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Requests This Month</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '10px 0 4px' }}>
+            <span style={{ fontSize: 28, fontWeight: 800, color: 'var(--tx-1)', lineHeight: 1 }}>{requestsMtd}</span>
+            {requestsPrev > 0 && (
+              <span style={{ fontSize: 12, fontWeight: 600, color: requestsMtd >= requestsPrev ? '#22c55e' : '#ef4444', display: 'flex', alignItems: 'center', gap: 3 }}>
+                {requestsMtd >= requestsPrev ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {requestsPrev > 0 ? `${Math.round(((requestsMtd - requestsPrev) / requestsPrev) * 100)}%` : '—'} vs prev
+              </span>
+            )}
           </div>
-          <div className="metric-subtext">1 client lost</div>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{deliveredMtd} delivered</span>
         </div>
       </div>
 
-      {/* MRR Chart */}
-      <div className="card" style={{ marginBottom: '24px' }}>
-        <div className="card-header">
-          <h2>MRR Trend (12 Months)</h2>
-          <BarChart2 size={18} style={{ color: 'var(--tx-2)' }} />
+      {/* Client Portfolio Table */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>Client Portfolio</h3>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{clients.length} clients</span>
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={mrrChartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-            <CartesianGrid stroke="var(--border)" />
-            <XAxis dataKey="month" tick={{ fill: 'var(--tx-3)', fontSize: 12 }} />
-            <YAxis tick={{ fill: 'var(--tx-3)', fontSize: 12 }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
-                borderRadius: '6px',
-                color: 'var(--tx-1)',
-              }}
-              formatter={(value) => `$${value.toLocaleString()}`}
-            />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="var(--red)"
-              dot={{ fill: 'var(--red)', r: 4 }}
-              activeDot={{ r: 6 }}
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Two Column Section */}
-      <div className="two-column-section">
-        {/* Left: Upcoming Renewals */}
-        <div className="card">
-          <div className="card-header">
-            <h2>Upcoming Renewals</h2>
-            <Calendar size={18} style={{ color: 'var(--tx-2)' }} />
-          </div>
+        {clients.length === 0 ? (
+          <p style={{ padding: 20, color: 'var(--tx-3)', fontSize: 13 }}>No client accounts found. Create clients from the Clients page.</p>
+        ) : (
           <table className="data-table">
             <thead>
               <tr>
                 <th>Client</th>
+                <th>Email</th>
                 <th>Plan</th>
-                <th>MRR</th>
-                <th>Renewal Date</th>
-                <th>Days</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {renewalData.map((renewal) => (
-                <tr key={renewal.id}>
-                  <td className="font-medium">{renewal.client}</td>
-                  <td>{renewal.plan}</td>
-                  <td className="font-medium">${renewal.mrr.toLocaleString()}</td>
-                  <td>{renewal.renewalDate}</td>
+              {clients.map(c => (
+                <tr key={c.id || c._id}>
+                  <td style={{ fontWeight: 600 }}>{c.name}</td>
+                  <td style={{ color: 'var(--tx-2)', fontSize: 12 }}>{c.email}</td>
+                  <td>{c.subscription_plan_name || '—'}</td>
                   <td>
-                    <span className="metric-subtext">{renewal.daysUntil}d</span>
-                  </td>
-                  <td>
-                    <span
-                      className={`pill pill-${renewal.status === 'on-track' ? 'green' : renewal.status === 'at-risk' ? 'yellow' : 'red'}`}
-                    >
-                      {getStatusLabel(renewal.status)}
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 5,
+                      background: c.active ? '#22c55e22' : '#ef444422',
+                      color: c.active ? '#22c55e' : '#ef4444'
+                    }}>
+                      {c.active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Right: Revenue by Service */}
-        <div className="card">
-          <div className="card-header">
-            <h2>Revenue by Service</h2>
-            <DollarSign size={18} style={{ color: 'var(--tx-2)' }} />
-          </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={revenueByService} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid stroke="var(--border)" />
-              <XAxis dataKey="name" tick={{ fill: 'var(--tx-3)', fontSize: 11 }} angle={-15} textAnchor="end" height={60} />
-              <YAxis tick={{ fill: 'var(--tx-3)', fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--bg-elevated)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '6px',
-                  color: 'var(--tx-1)',
-                }}
-                formatter={(value) => `$${value.toLocaleString()}`}
-              />
-              <Bar dataKey="value" fill="var(--red)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Client Breakdown Table */}
-      <div className="card">
-        <div className="card-header">
-          <h2>Client Portfolio</h2>
-          <Users size={18} style={{ color: 'var(--tx-2)' }} />
-        </div>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Client</th>
-              <th>Plan</th>
-              <th>MRR</th>
-              <th>Requests Used</th>
-              <th>Deliveries</th>
-              <th>Last Delivery</th>
-              <th>Health</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clientData.map((client) => (
-              <tr key={client.id}>
-                <td className="font-medium">{client.name}</td>
-                <td>{client.plan}</td>
-                <td className="font-medium">${client.mrr.toLocaleString()}</td>
-                <td className="text-secondary">{client.requestsUsed}</td>
-                <td>{client.deliveries}</td>
-                <td className="text-secondary">{client.lastDelivery}</td>
-                <td>
-                  <div className="health-indicator">
-                    <span
-                      className="health-dot"
-                      style={{
-                        backgroundColor:
-                          client.health === 'good'
-                            ? 'var(--green)'
-                            : client.health === 'warn'
-                              ? 'var(--yellow)'
-                              : 'var(--red)',
-                      }}
-                    ></span>
-                    <span className="capitalize">{client.health}</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        )}
       </div>
     </div>
   );

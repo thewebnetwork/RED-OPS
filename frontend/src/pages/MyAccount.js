@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,8 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function MyAccount() {
-  const { t } = useTranslation();
-  const { user, refreshUser } = useAuth();
+const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -65,7 +63,7 @@ export default function MyAccount() {
       payload.phone = profileData.phone || '';
       await axios.patch(`${API}/auth/profile`, payload);
       await refreshUser();
-      toast.success(t('myAccount.profileUpdated', 'Profile updated successfully'));
+      toast.success('Profile updated successfully');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to update profile');
     } finally { setLoading(false); }
@@ -90,7 +88,7 @@ export default function MyAccount() {
 
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(" ").map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   if (!user) return null;
@@ -99,23 +97,23 @@ export default function MyAccount() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('myAccount.title', 'My Account')}</h1>
-          <p className="text-muted-foreground mt-1">{t('myAccount.subtitle', 'Manage your profile and account settings')}</p>
+          <h1 className="text-3xl font-bold text-foreground">{'My Account'}</h1>
+          <p className="text-muted-foreground mt-1">{'Manage your profile and account settings'}</p>
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              {t('myAccount.tabs.profile', 'Profile')}
+              {'Profile'}
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Key className="h-4 w-4" />
-              {t('myAccount.tabs.security', 'Security')}
+              {'Security'}
             </TabsTrigger>
             <TabsTrigger value="account" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              {t('myAccount.tabs.account', 'Account Info')}
+              {'Account Info'}
             </TabsTrigger>
           </TabsList>
 
@@ -123,8 +121,8 @@ export default function MyAccount() {
             <form onSubmit={handleProfileUpdate}>
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('myAccount.profile.title', 'Profile Information')}</CardTitle>
-                  <CardDescription>{t('myAccount.profile.desc', 'Update your personal details and public profile')}</CardDescription>
+                  <CardTitle>{'Profile Information'}</CardTitle>
+                  <CardDescription>{'Update your personal details and public profile'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex flex-col items-center gap-4">
@@ -146,22 +144,22 @@ export default function MyAccount() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4" />{t('myAccount.profile.name', 'Full Name')}</Label>
+                    <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4" />{'Full Name'}</Label>
                     <Input id="name" value={profileData.name} onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))} placeholder="Your full name" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4" />{t('myAccount.profile.email', 'Email Address')}</Label>
+                    <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4" />{'Email Address'}</Label>
                     <Input id="email" type="email" value={profileData.email} onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))} placeholder="your@email.com" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="h-4 w-4" />{t('myAccount.profile.phone', 'Phone Number')}</Label>
+                    <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="h-4 w-4" />{'Phone Number'}</Label>
                     <Input id="phone" type="tel" value={profileData.phone} onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))} placeholder="+1 (555) 000-0000" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio" className="flex items-center gap-2"><FileText className="h-4 w-4" />{t('myAccount.profile.bio', 'Bio')}</Label>
+                    <Label htmlFor="bio" className="flex items-center gap-2"><FileText className="h-4 w-4" />{'Bio'}</Label>
                     <textarea id="bio" rows={4} maxLength={300} value={profileData.bio}
                       onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                       placeholder="Tell us a bit about yourself..."
@@ -181,22 +179,22 @@ export default function MyAccount() {
             <form onSubmit={handlePasswordChange}>
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('myAccount.security.title', 'Change Password')}</CardTitle>
-                  <CardDescription>{t('myAccount.security.desc', 'Keep your account secure with a strong password')}</CardDescription>
+                  <CardTitle>{'Change Password'}</CardTitle>
+                  <CardDescription>{'Keep your account secure with a strong password'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current_password">{t('myAccount.security.current', 'Current Password')}</Label>
+                    <Label htmlFor="current_password">{'Current Password'}</Label>
                     <Input id="current_password" type="password" value={passwordData.current_password}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, current_password: e.target.value }))} placeholder="••••••••" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new_password">{t('myAccount.security.new', 'New Password')}</Label>
+                    <Label htmlFor="new_password">{'New Password'}</Label>
                     <Input id="new_password" type="password" value={passwordData.new_password}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, new_password: e.target.value }))} placeholder="Min 8 characters" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm_password">{t('myAccount.security.confirm', 'Confirm New Password')}</Label>
+                    <Label htmlFor="confirm_password">{'Confirm New Password'}</Label>
                     <Input id="confirm_password" type="password" value={passwordData.confirm_password}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, confirm_password: e.target.value }))} placeholder="Repeat new password" />
                   </div>
@@ -211,37 +209,37 @@ export default function MyAccount() {
           <TabsContent value="account" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t('myAccount.account.title', 'Account Details')}</CardTitle>
-                <CardDescription>{t('myAccount.account.desc', 'Your account type and permissions')}</CardDescription>
+                <CardTitle>{'Account Details'}</CardTitle>
+                <CardDescription>{'Your account type and permissions'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t('myAccount.account.role', 'Role')}</p>
+                    <p className="text-sm text-muted-foreground">{'Role'}</p>
                     <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="capitalize">{user.role || 'user'}</Badge>
                   </div>
                   {user.account_type && (
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">{t('myAccount.account.type', 'Account Type')}</p>
+                      <p className="text-sm text-muted-foreground">{'Account Type'}</p>
                       <Badge variant="outline" className="capitalize">{user.account_type}</Badge>
                     </div>
                   )}
                   {user.specialty && (
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">{t('myAccount.account.specialty', 'Specialty')}</p>
+                      <p className="text-sm text-muted-foreground">{'Specialty'}</p>
                       <p className="text-sm font-medium">{user.specialty}</p>
                     </div>
                   )}
                   {user.team && (
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">{t('myAccount.account.team', 'Team')}</p>
+                      <p className="text-sm text-muted-foreground">{'Team'}</p>
                       <p className="text-sm font-medium">{user.team}</p>
                     </div>
                   )}
                 </div>
                 <div className="pt-4 border-t">
                   <p className="text-xs text-muted-foreground">
-                    {t('myAccount.account.id', 'Account ID')}: <span className="font-mono">{user.id}</span>
+                    {'Account ID'}: <span className="font-mono">{user.id}</span>
                   </p>
                 </div>
               </CardContent>

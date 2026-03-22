@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -44,8 +43,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function RibbonBoard() {
   const { user } = useAuth();
-  const { t } = useTranslation();
-  const [pool1Requests, setPool1Requests] = useState([]);
+const [pool1Requests, setPool1Requests] = useState([]);
   const [pool2Requests, setPool2Requests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -72,7 +70,7 @@ export default function RibbonBoard() {
 
   const fetchSpecialties = async () => {
     try {
-      const response = await axios.get(`${API}/specialties`);
+      const response = await axios.geAPI;
       setSpecialties(response.data);
     } catch (error) {
       console.error('Failed to fetch specialties');
@@ -82,13 +80,13 @@ export default function RibbonBoard() {
   const fetchPools = async () => {
     try {
       const [pool1Res, pool2Res] = await Promise.all([
-        canViewPool1 ? axios.get(`${API}/orders/pool/1`) : Promise.resolve({ data: [] }),
-        canViewPool2 ? axios.get(`${API}/orders/pool/2`) : Promise.resolve({ data: [] })
+        canViewPool1 ? axios.geAPI : Promise.resolve({ data: [] }),
+        canViewPool2 ? axios.geAPI : Promise.resolve({ data: [] })
       ]);
       setPool1Requests(pool1Res.data);
       setPool2Requests(pool2Res.data);
     } catch (error) {
-      toast.error(t('ribbon.failedToFetchPool'));
+      toast.error("Failed To Fetch Pool");
     } finally {
       setLoading(false);
     }
@@ -97,13 +95,13 @@ export default function RibbonBoard() {
   const handlePickRequest = async () => {
     if (!requestToPick) return;
     try {
-      await axios.post(`${API}/orders/${requestToPick.id}/pick`);
-      toast.success(t('ribbon.requestPickedSuccess', 'Request picked successfully'));
+      await axios.posrequestToPick.id;
+      toast.success('Request picked successfully');
       setPickDialogOpen(false);
       setRequestToPick(null);
       fetchPools();
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('ribbon.failedToPick'));
+      toast.error(error.response?.data?.detail || "Failed To Pick");
     }
   };
 
@@ -118,7 +116,7 @@ export default function RibbonBoard() {
   };
 
   const formatTimeInPool = (enteredAt) => {
-    if (!enteredAt) return t('ribbon.justAdded');
+    if (!enteredAt) return "Just Added";
     const diff = Date.now() - new Date(enteredAt).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -138,7 +136,7 @@ export default function RibbonBoard() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-sm">{request.order_code}</span>
               <Badge variant="outline" className="text-xs">
-                {request.category_name || t('ribbon.general')}
+                {request.category_name || "General"}
               </Badge>
               {request.specialty_name && (
                 <Badge style={{ background: "#a855f718", color: "#a855f7", fontSize: 11, padding: "2px 7px", borderRadius: 4 }}>
@@ -151,16 +149,16 @@ export default function RibbonBoard() {
             <div className="flex items-center gap-4 mt-2 text-sm">
               <span className="flex items-center gap-1">
                 <Timer size={14} />
-                {t('ribbon.inPool')}: {formatTimeInPool(request.pool_entered_at)}
+                {"In Pool"}: {formatTimeInPool(request.pool_entered_at)}
               </span>
-              <span>{t('ribbon.priority')}: {request.priority || t('ribbon.normal')}</span>
+              <span>{"Priority"}: {request.priority || "Normal"}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <Link to={`/requests/${request.id}`}>
               <Button variant="outline" size="sm">
                 <Eye size={14} className="mr-1" />
-                {t('common.view')}
+                {"View"}
               </Button>
             </Link>
             {canPick && (
@@ -174,7 +172,7 @@ export default function RibbonBoard() {
                 data-testid={`pick-request-${request.id}`}
               >
                 <Hand size={14} className="mr-1" />
-                {t('ribbon.pick')}
+                {"Pick"}
               </Button>
             )}
           </div>
@@ -200,12 +198,12 @@ export default function RibbonBoard() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Layers className="text-[#A2182C]" />
-          {t('ribbon.title')}
+          {"Title"}
         </h1>
         <p className="mt-1">
-          {isPartner && t('ribbon.partnerDescription')}
-          {isVendor && t('ribbon.vendorDescription')}
-          {(isAdmin || isOperator) && t('ribbon.adminDescription')}
+          {isPartner && "Partner Description"}
+          {isVendor && "Vendor Description"}
+          {(isAdmin || isOperator) && "Admin Description"}
         </p>
       </div>
 
@@ -214,7 +212,7 @@ export default function RibbonBoard() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" size={18} />
           <Input
-            placeholder={t('ribbon.searchRequests', 'Search requests...')}
+            placeholder={'Search requests...'}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -224,10 +222,10 @@ export default function RibbonBoard() {
         <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
           <SelectTrigger className="w-[200px]" data-testid="specialty-filter">
             <Filter size={16} className="mr-2" />
-            <SelectValue placeholder={t('ribbon.filterBySpecialty')} />
+            <SelectValue placeholder={"Filter By Specialty"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('ribbon.allSpecialties')}</SelectItem>
+            <SelectItem value="all">{"All Specialties"}</SelectItem>
             {specialties.map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
@@ -241,14 +239,14 @@ export default function RibbonBoard() {
           {canViewPool1 && (
             <TabsTrigger value="pool1" className="flex items-center gap-2" data-testid="pool1-tab">
               <Users size={16} />
-              {t('ribbon.pool1Partners')}
+              {"Pool1 Partners"}
               <Badge variant="secondary" className="ml-1">{pool1Requests.length}</Badge>
             </TabsTrigger>
           )}
           {canViewPool2 && (
             <TabsTrigger value="pool2" className="flex items-center gap-2" data-testid="pool2-tab">
               <Briefcase size={16} />
-              {t('ribbon.pool2Vendors')}
+              {"Pool2 Vendors"}
               <Badge variant="secondary" className="ml-1">{pool2Requests.length}</Badge>
             </TabsTrigger>
           )}
@@ -261,9 +259,9 @@ export default function RibbonBoard() {
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2">
                   <Users size={18} />
-                  <span className="font-medium">{t('ribbon.partnerPool')}</span>
+                  <span className="font-medium">{"Partner Pool"}</span>
                   <span className="text-sm ">
-                    {t('ribbon.partnerPoolDescription')}
+                    {"Partner Pool Description"}
                   </span>
                 </div>
               </CardContent>
@@ -273,7 +271,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p style={{ color: "var(--tx-3)" }}>{t('ribbon.noRequestsPool1', 'No requests in Pool 1')}</p>
+                  <p style={{ color: "var(--tx-3)" }}>{'No requests in Pool 1'}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -298,9 +296,9 @@ export default function RibbonBoard() {
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2">
                   <Briefcase size={18} />
-                  <span className="font-medium">{t('ribbon.vendorPool')}</span>
+                  <span className="font-medium">{"Vendor Pool"}</span>
                   <span className="text-sm ">
-                    {t('ribbon.vendorPoolDescription')}
+                    {"Vendor Pool Description"}
                   </span>
                 </div>
               </CardContent>
@@ -310,7 +308,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p style={{ color: "var(--tx-3)" }}>{t('ribbon.noRequestsPool2', 'No requests in Pool 2')}</p>
+                  <p style={{ color: "var(--tx-3)" }}>{'No requests in Pool 2'}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -333,21 +331,21 @@ export default function RibbonBoard() {
       <AlertDialog open={pickDialogOpen} onOpenChange={setPickDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('ribbon.pickThisRequest', 'Pick this request?')}</AlertDialogTitle>
+            <AlertDialogTitle>{'Pick this request?'}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('ribbon.pickConfirmation', { code: requestToPick?.order_code, title: requestToPick?.title })}
               <br /><br />
-              {t('ribbon.pickResponsibility', 'You will be responsible for completing this request.')}
+              {'You will be responsible for completing this request.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{"Cancel"}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handlePickRequest}
               className="bg-red-700 hover:bg-red-800"
             >
               <Hand size={16} className="mr-2" />
-              {t('ribbon.confirmPick')}
+              {"Confirm Pick"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

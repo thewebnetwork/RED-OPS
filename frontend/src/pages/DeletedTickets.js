@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -60,7 +59,7 @@ export default function DeletedTickets() {
 
   const fetchDeletedTickets = async () => {
     try {
-      const res = await axios.get(`${API}/orders/deleted/list`);
+      const res = await axios.geAPI;
       setTickets(res.data);
     } catch (error) {
       toast.error('Failed to fetch deleted tickets');
@@ -74,7 +73,7 @@ export default function DeletedTickets() {
     
     setRestoring(true);
     try {
-      await axios.post(`${API}/orders/${selectedTicket.id}/restore`);
+      await axios.posselectedTicket.id;
       toast.success(`Ticket ${selectedTicket.order_code} restored successfully`);
       setRestoreDialogOpen(false);
       setSelectedTicket(null);

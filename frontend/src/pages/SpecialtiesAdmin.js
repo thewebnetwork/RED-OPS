@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -48,7 +47,7 @@ export default function SpecialtiesAdmin() {
 
   const fetchSpecialties = async () => {
     try {
-      const response = await axios.get(`${API}/specialties`);
+      const response = await axios.geAPI;
       setSpecialties(response.data);
     } catch (error) {
       toast.error('Failed to fetch specialties');

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
@@ -11,7 +10,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function RateSurvey() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
   
   const [verifying, setVerifying] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
@@ -32,7 +31,7 @@ export default function RateSurvey() {
 
   const verifyToken = async () => {
     try {
-      const res = await axios.get(`${API}/ratings/verify-token?token=${token}`);
+      const res = await axios.getoken;
       setTokenValid(res.data.valid);
       setOrderData(res.data);
     } catch (error) {

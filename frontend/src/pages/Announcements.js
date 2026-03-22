@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -49,8 +48,7 @@ const formatDateTimeLocal = (isoString) => {
 };
 
 export default function Announcements() {
-  const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState('list');
+const [activeTab, setActiveTab] = useState('list');
   const [announcements, setAnnouncements] = useState([]);
   const [teams, setTeams] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -85,10 +83,10 @@ export default function Announcements() {
   const fetchData = async () => {
     try {
       const [announcementsRes, teamsRes, rolesRes, specialtiesRes] = await Promise.all([
-        axios.get(`${API}/announcements`).catch(() => ({ data: [] })),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
-        axios.get(`${API}/specialties`)
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI,
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI
       ]);
       
       setAnnouncements(announcementsRes.data || []);
@@ -96,7 +94,7 @@ export default function Announcements() {
       setRoles(rolesRes.data || []);
       setSpecialties(specialtiesRes.data || []);
     } catch (error) {
-      toast.error(t('announcements.failedToLoad'));
+      toast.error("Failed To Load");
     } finally {
       setLoading(false);
     }
@@ -141,12 +139,12 @@ export default function Announcements() {
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.message.trim()) {
-      toast.error(t('announcements.titleMessageRequired'));
+      toast.error("Title Message Required");
       return;
     }
     
     if (!form.send_to_all && !form.target_teams.length && !form.target_roles.length && !form.target_specialties.length) {
-      toast.error(t('announcements.selectTargetOrAll'));
+      toast.error("Select Target Or All");
       return;
     }
     
@@ -159,27 +157,27 @@ export default function Announcements() {
       
       if (editingAnnouncement) {
         await axios.patch(`${API}/announcements/${editingAnnouncement.id}`, payload);
-        toast.success(t('announcements.announcementUpdated'));
+        toast.success("Announcement Updated");
       } else {
         await axios.post(`${API}/announcements`, payload);
-        toast.success(t('announcements.announcementCreated'));
+        toast.success("Announcement Created");
       }
       
       setDialogOpen(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('announcements.failedToSave'));
+      toast.error(error.response?.data?.detail || "Failed To Save");
     }
   };
 
   const handleDelete = async () => {
     try {
       await axios.delete(`${API}/announcements/${deleteDialog.item.id}`);
-      toast.success(t('announcements.announcementDeleted'));
+      toast.success("Announcement Deleted");
       setDeleteDialog({ open: false, item: null });
       fetchData();
     } catch (error) {
-      toast.error(t('announcements.failedToDelete'));
+      toast.error("Failed To Delete");
     }
   };
 
@@ -216,13 +214,13 @@ export default function Announcements() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Megaphone className="text-[#A2182C]" />
-            {t('announcements.title')}
+            {"Title"}
           </h1>
-          <p className="mt-1">{t('announcements.description')}</p>
+          <p className="mt-1">{"Description"}</p>
         </div>
         <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
           <Plus size={16} className="mr-2" />
-          {t('announcements.newAnnouncement')}
+          {"New Announcement"}
         </Button>
       </div>
 
@@ -231,25 +229,25 @@ export default function Announcements() {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.length}</p>
-            <p className="text-sm">{t('announcements.total')}</p>
+            <p className="text-sm">{"Total"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.filter(a => a.is_active).length}</p>
-            <p className="text-sm">{t('common.active')}</p>
+            <p className="text-sm">{"Active"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-yellow-600">{announcements.filter(a => a.start_at && new Date(a.start_at) > new Date()).length}</p>
-            <p className="text-sm">{t('announcements.scheduled')}</p>
+            <p className="text-sm">{"Scheduled"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.filter(a => !a.is_active).length}</p>
-            <p className="text-sm">{t('common.inactive')}</p>
+            <p className="text-sm">{"Inactive"}</p>
           </CardContent>
         </Card>
       </div>
@@ -257,16 +255,16 @@ export default function Announcements() {
       {/* Announcements List */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('announcements.allAnnouncements')}</CardTitle>
-          <CardDescription>{t('announcements.displayDescription')}</CardDescription>
+          <CardTitle>{"All Announcements"}</CardTitle>
+          <CardDescription>{"Display Description"}</CardDescription>
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
             <div className="py-12 text-center">
               <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
-              <p>{t('announcements.noAnnouncements')}</p>
+              <p>{"No Announcements"}</p>
               <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
-                {t('announcements.createFirst')}
+                {"Create First"}
               </Button>
             </div>
           ) : (
@@ -282,12 +280,12 @@ export default function Announcements() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold">{ann.title}</h3>
                         {getStatusBadge(ann)}
-                        <Badge variant="outline" className="text-xs">{t('announcements.priority')}: {ann.priority}</Badge>
+                        <Badge variant="outline" className="text-xs">{"Priority"}: {ann.priority}</Badge>
                       </div>
                       <p className="text-sm mt-1 line-clamp-2">{ann.message}</p>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs">
                         {ann.send_to_all ? (
-                          <span className="flex items-center gap-1"><Globe size={12} /> {t('announcements.allUsers')}</span>
+                          <span className="flex items-center gap-1"><Globe size={12} /> {"All Users"}</span>
                         ) : (
                           <>
                             {ann.target_team_names?.length > 0 && (
@@ -304,13 +302,13 @@ export default function Announcements() {
                         {ann.start_at && (
                           <span className="flex items-center gap-1">
                             <Calendar size={12} /> 
-                            {t('announcements.starts')}: {format(new Date(ann.start_at), 'MMM d, yyyy HH:mm')}
+                            {"Starts"}: {format(new Date(ann.start_at), 'MMM d, yyyy HH:mm')}
                           </span>
                         )}
                         {ann.end_at && (
                           <span className="flex items-center gap-1">
                             <Calendar size={12} /> 
-                            {t('announcements.ends')}: {format(new Date(ann.end_at), 'MMM d, yyyy HH:mm')}
+                            {"Ends"}: {format(new Date(ann.end_at), 'MMM d, yyyy HH:mm')}
                           </span>
                         )}
                       </div>
@@ -335,9 +333,9 @@ export default function Announcements() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingAnnouncement ? t('announcements.editAnnouncement') : t('announcements.createAnnouncement')}</DialogTitle>
+            <DialogTitle>{editingAnnouncement ? "Edit Announcement" : "Create Announcement"}</DialogTitle>
             <DialogDescription>
-              {t('announcements.createDescription')}
+              {"Create Description"}
             </DialogDescription>
           </DialogHeader>
           
@@ -345,20 +343,20 @@ export default function Announcements() {
             {/* Basic Info */}
             <div className="grid gap-4">
               <div>
-                <Label>{t('announcements.titleLabel')} *</Label>
+                <Label>{"Title Label"} *</Label>
                 <Input 
                   value={form.title} 
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder={t('announcements.titlePlaceholder')}
+                  placeholder={"Title Placeholder"}
                   data-testid="announcement-title-input"
                 />
               </div>
               <div>
-                <Label>{t('announcements.messageLabel')} *</Label>
+                <Label>{"Message Label"} *</Label>
                 <Textarea 
                   value={form.message} 
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder={t('announcements.messagePlaceholder')}
+                  placeholder={"Message Placeholder"}
                   rows={3}
                   data-testid="announcement-message-input"
                 />
@@ -373,10 +371,10 @@ export default function Announcements() {
                   onCheckedChange={(v) => setForm({ ...form, is_active: v })}
                   data-testid="announcement-active-switch"
                 />
-                <Label>{t('common.active')}</Label>
+                <Label>{"Active"}</Label>
               </div>
               <div>
-                <Label>{t('announcements.priorityLabel')}</Label>
+                <Label>{"Priority Label"}</Label>
                 <Input 
                   type="number" 
                   min={1} 
@@ -390,7 +388,7 @@ export default function Announcements() {
             {/* Schedule */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t('announcements.startAt')}</Label>
+                <Label>{"Start At"}</Label>
                 <Input 
                   type="datetime-local" 
                   value={form.start_at} 
@@ -398,7 +396,7 @@ export default function Announcements() {
                 />
               </div>
               <div>
-                <Label>{t('announcements.endAt')}</Label>
+                <Label>{"End At"}</Label>
                 <Input 
                   type="datetime-local" 
                   value={form.end_at} 
@@ -416,7 +414,7 @@ export default function Announcements() {
                 />
                 <Label className="flex items-center gap-2">
                   <Globe size={16} />
-                  {t('announcements.sendToAllUsers')}
+                  {"Send To All Users"}
                 </Label>
               </div>
 
@@ -425,13 +423,13 @@ export default function Announcements() {
                   {!form.send_to_all && form.target_teams.length === 0 && form.target_roles.length === 0 && form.target_specialties.length === 0 && (
                     <div className="flex items-center gap-2 text-amber-600 text-sm">
                       <AlertCircle size={16} />
-                      {t('announcements.selectAtLeastOne')}
+                      {"Select At Least One"}
                     </div>
                   )}
                   
                   {/* Teams */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Users size={14} /> {t('announcements.targetTeams')}</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Users size={14} /> {"Target Teams"}</Label>
                     <div className="flex flex-wrap gap-2">
                       {teams.map((team) => (
                         <Badge 
@@ -443,13 +441,13 @@ export default function Announcements() {
                           {team.name}
                         </Badge>
                       ))}
-                      {teams.length === 0 && <span className="text-sm">{t('announcements.noTeamsAvailable')}</span>}
+                      {teams.length === 0 && <span className="text-sm">{"No Teams Available"}</span>}
                     </div>
                   </div>
 
                   {/* Roles */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Shield size={14} /> {t('announcements.targetRoles')}</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Shield size={14} /> {"Target Roles"}</Label>
                     <div className="flex flex-wrap gap-2">
                       {roles.map((role) => (
                         <Badge 
@@ -461,13 +459,13 @@ export default function Announcements() {
                           {role.name}
                         </Badge>
                       ))}
-                      {roles.length === 0 && <span className="text-sm">{t('announcements.noRolesAvailable')}</span>}
+                      {roles.length === 0 && <span className="text-sm">{"No Roles Available"}</span>}
                     </div>
                   </div>
 
                   {/* Specialties */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2"><Briefcase size={14} /> {t('announcements.targetSpecialties')}</Label>
+                    <Label className="flex items-center gap-2 mb-2"><Briefcase size={14} /> {"Target Specialties"}</Label>
                     <div className="flex flex-wrap gap-2">
                       {specialties.map((spec) => (
                         <Badge 
@@ -479,7 +477,7 @@ export default function Announcements() {
                           {spec.name}
                         </Badge>
                       ))}
-                      {specialties.length === 0 && <span className="text-sm">{t('announcements.noSpecialtiesAvailable')}</span>}
+                      {specialties.length === 0 && <span className="text-sm">{"No Specialties Available"}</span>}
                     </div>
                   </div>
                 </div>
@@ -489,7 +487,7 @@ export default function Announcements() {
             {/* Colors */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{t('announcements.backgroundColor')}</Label>
+                <Label>{"Background Color"}</Label>
                 <div className="flex gap-2">
                   <Input 
                     type="color" 
@@ -504,7 +502,7 @@ export default function Announcements() {
                 </div>
               </div>
               <div>
-                <Label>{t('announcements.textColor')}</Label>
+                <Label>{"Text Color"}</Label>
                 <div className="flex gap-2">
                   <Input 
                     type="color" 
@@ -522,21 +520,21 @@ export default function Announcements() {
 
             {/* Preview */}
             <div>
-              <Label className="mb-2 block">{t('announcements.preview')}</Label>
+              <Label className="mb-2 block">{"Preview"}</Label>
               <div 
                 className="p-4 rounded-lg text-center"
                 style={{ backgroundColor: form.background_color, color: form.text_color }}
               >
-                <p className="font-medium">{form.title || t('announcements.titleLabel')}</p>
-                <p className="text-sm opacity-90">{form.message || t('announcements.previewPlaceholder')}</p>
+                <p className="font-medium">{form.title || "Title Label"}</p>
+                <p className="text-sm opacity-90">{form.message || "Preview Placeholder"}</p>
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>{"Cancel"}</Button>
               <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleSave} data-testid="save-announcement-btn">
-                {editingAnnouncement ? t('common.update') : t('common.create')} {t('announcements.announcement')}
+                {editingAnnouncement ? "Update" : "Create"} {"Announcement"}
               </Button>
             </div>
           </div>
@@ -547,14 +545,14 @@ export default function Announcements() {
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('announcements.deleteAnnouncement')}</AlertDialogTitle>
+            <AlertDialogTitle>{"Delete Announcement"}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('announcements.deleteConfirmation', { title: deleteDialog.item?.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">{t('common.delete')}</AlertDialogAction>
+            <AlertDialogCancel>{"Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">{"Delete"}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

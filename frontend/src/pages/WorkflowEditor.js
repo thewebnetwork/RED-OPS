@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useBlocker } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import ReactFlow, {
@@ -139,8 +138,7 @@ const nodePalette = [
 export default function WorkflowEditor() {
   const { workflowId } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const reactFlowWrapper = useRef(null);
+const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   
   const [workflow, setWorkflow] = useState(null);
@@ -217,7 +215,7 @@ export default function WorkflowEditor() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await axios.get(`${API}/workflows/${workflowId}`);
+        const res = await axios.geworkflowId;
         setWorkflow(res.data);
         
         // Convert stored nodes to React Flow format
@@ -247,7 +245,7 @@ export default function WorkflowEditor() {
         // Store initial state for change tracking
         initialStateRef.current = { nodes: flowNodes, edges: flowEdges };
       } catch (error) {
-        toast.error(t('workflow.failedToLoad'));
+        toast.error("Failed To Load");
         navigate('/settings/workflows');
       } finally {
         setLoading(false);
@@ -264,7 +262,7 @@ export default function WorkflowEditor() {
 
   const fetchRoles = async () => {
     try {
-      const res = await axios.get(`${API}/roles`);
+      const res = await axios.geAPI;
       setRoles(res.data);
     } catch (error) {
       console.error('Failed to fetch roles');
@@ -273,7 +271,7 @@ export default function WorkflowEditor() {
 
   const fetchTeams = async () => {
     try {
-      const res = await axios.get(`${API}/teams`);
+      const res = await axios.geAPI;
       setTeams(res.data);
     } catch (error) {
       console.error('Failed to fetch teams');
@@ -283,8 +281,8 @@ export default function WorkflowEditor() {
   const fetchCategories = async () => {
     try {
       const [l1Res, l2Res] = await Promise.all([
-        axios.get(`${API}/categories/l1`),
-        axios.get(`${API}/categories/l2`)
+        axios.geAPI,
+        axios.geAPI
       ]);
       setCategories([
         ...l1Res.data.map(c => ({ ...c, type: 'L1' })),
@@ -297,7 +295,7 @@ export default function WorkflowEditor() {
 
   const fetchSpecialties = async () => {
     try {
-      const res = await axios.get(`${API}/specialties`);
+      const res = await axios.geAPI;
       setSpecialties(res.data);
     } catch (error) {
       console.error('Failed to fetch specialties');
@@ -306,7 +304,7 @@ export default function WorkflowEditor() {
 
   const fetchAccessTiers = async () => {
     try {
-      const res = await axios.get(`${API}/access-tiers`);
+      const res = await axios.geAPI;
       setAccessTiers(res.data);
     } catch (error) {
       console.error('Failed to fetch access tiers');
@@ -318,9 +316,9 @@ export default function WorkflowEditor() {
     try {
       await axios.patch(`${API}/workflows/${workflowId}`, { [field]: value });
       setWorkflow(prev => ({ ...prev, [field]: value }));
-      toast.success(t('workflow.settingsUpdated'));
+      toast.success("Settings Updated");
     } catch (error) {
-      toast.error(t('workflow.failedToUpdateSettings'));
+      toast.error("Failed To Update Settings");
     }
   };
 
@@ -406,9 +404,9 @@ export default function WorkflowEditor() {
       initialStateRef.current = { nodes, edges };
       setHasChanges(false);
       
-      toast.success(t('workflow.workflowSaved'));
+      toast.success("Workflow Saved");
     } catch (error) {
-      toast.error(t('workflow.failedToSave'));
+      toast.error("Failed To Save");
     } finally {
       setSaving(false);
     }
@@ -480,12 +478,12 @@ export default function WorkflowEditor() {
           </Button>
           <div>
             <h1 className="font-semibold">{workflow?.name}</h1>
-            <p className="text-xs">{workflow?.description || t('workflow.noDescription')}</p>
+            <p className="text-xs">{workflow?.description || "No Description"}</p>
           </div>
           {hasChanges && (
             <Badge className="text-amber-700 ml-2">
               <AlertTriangle size={12} className="mr-1" />
-              {t('workflow.unsaved')}
+              {"Unsaved"}
             </Badge>
           )}
         </div>
@@ -496,7 +494,7 @@ export default function WorkflowEditor() {
             data-testid="workflow-settings-btn"
           >
             <Settings size={16} className="mr-2" />
-            {t('workflow.settings')}
+            {"Settings"}
           </Button>
           <Button
             variant={hasChanges ? "default" : "outline"}
@@ -506,7 +504,7 @@ export default function WorkflowEditor() {
             data-testid="save-workflow-btn"
           >
             <Save size={16} className="mr-2" />
-            {saving ? t('workflow.saving') : t('common.save')}
+            {saving ? "Saving" : "Save"}
           </Button>
         </div>
       </div>
@@ -516,8 +514,8 @@ export default function WorkflowEditor() {
         {/* Node Palette */}
         <div className="w-64 border-r flex flex-col">
           <div className="p-4 border-b">
-            <h2 className="font-semibold">{t('workflow.nodePalette')}</h2>
-            <p className="text-xs mt-1">{t('workflow.dragNodesToCanvas')}</p>
+            <h2 className="font-semibold">{"Node Palette"}</h2>
+            <p className="text-xs mt-1">{"Drag Nodes To Canvas"}</p>
           </div>
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-2">
@@ -585,7 +583,7 @@ export default function WorkflowEditor() {
                 }}
               >
                 <Trash2 size={14} className="mr-1" />
-                {t('common.clear')}
+                {"Clear"}
               </Button>
             </Panel>
           </ReactFlow>
@@ -600,7 +598,7 @@ export default function WorkflowEditor() {
                 {t('workflow.configureNode', { type: selectedNode?.type })}
               </SheetTitle>
               <SheetDescription>
-                {t('workflow.customizeNodeBehavior')}
+                {"Customize Node Behavior"}
               </SheetDescription>
             </SheetHeader>
 
@@ -609,11 +607,11 @@ export default function WorkflowEditor() {
                 {/* Common Settings */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>{t('workflow.nodeLabel')}</Label>
+                    <Label>{"Node Label"}</Label>
                     <Input
                       value={selectedNode.data?.label || ''}
                       onChange={(e) => updateNodeData('label', e.target.value)}
-                      placeholder={t('workflow.enterNodeLabel')}
+                      placeholder={"Enter Node Label"}
                       data-testid="node-label-input"
                     />
                   </div>
@@ -663,7 +661,7 @@ export default function WorkflowEditor() {
                   data-testid="delete-node-btn"
                 >
                   <Trash2 size={16} className="mr-2" />
-                  {t('workflow.deleteNode')}
+                  {"Delete Node"}
                 </Button>
               </div>
             )}
@@ -676,18 +674,18 @@ export default function WorkflowEditor() {
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Settings size={18} />
-                {t('workflow.workflowSettings')}
+                {"Workflow Settings"}
               </SheetTitle>
               <SheetDescription>
-                {t('workflow.configureAssignmentTriggers')}
+                {"Configure Assignment Triggers"}
               </SheetDescription>
             </SheetHeader>
 
             <div className="mt-6 space-y-6">
               {/* Assign to Roles */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{t('workflow.assignToRoles')}</Label>
-                <p className="text-xs">{t('workflow.selectRolesDescription')}</p>
+                <Label className="text-sm font-medium">{"Assign To Roles"}</Label>
+                <p className="text-xs">{"Select Roles Description"}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {roles.filter(r => r.can_pick_orders).map((role) => (
                     <div key={role.id} className="flex items-center gap-2">
@@ -721,8 +719,8 @@ export default function WorkflowEditor() {
 
               {/* Assign to Teams */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{t('workflow.assignToTeams')}</Label>
-                <p className="text-xs">{t('workflow.selectTeamsDescription')}</p>
+                <Label className="text-sm font-medium">{"Assign To Teams"}</Label>
+                <p className="text-xs">{"Select Teams Description"}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {teams.map((team) => (
                     <div key={team.id} className="flex items-center gap-2">
@@ -743,7 +741,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {teams.length === 0 && (
-                    <p className="text-xs text-center py-2">{t('workflow.noTeamsAvailable')}</p>
+                    <p className="text-xs text-center py-2">{"No Teams Available"}</p>
                   )}
                 </div>
                 {workflow?.assigned_team_names?.length > 0 && (
@@ -759,8 +757,8 @@ export default function WorkflowEditor() {
 
               {/* Target by Specialty */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{t('workflow.targetBySpecialty')}</Label>
-                <p className="text-xs">{t('workflow.targetSpecialtyDescription')}</p>
+                <Label className="text-sm font-medium">{"Target By Specialty"}</Label>
+                <p className="text-xs">{"Target Specialty Description"}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {specialties.map((specialty) => (
                     <div key={specialty.id} className="flex items-center gap-2">
@@ -781,7 +779,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {specialties.length === 0 && (
-                    <p className="text-xs text-center py-2">{t('workflow.noSpecialtiesAvailable')}</p>
+                    <p className="text-xs text-center py-2">{"No Specialties Available"}</p>
                   )}
                 </div>
                 {workflow?.assigned_specialty_names?.length > 0 && (
@@ -797,8 +795,8 @@ export default function WorkflowEditor() {
 
               {/* Target by Access Tier */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{t('workflow.targetByAccessTier')}</Label>
-                <p className="text-xs">{t('workflow.targetAccessTierDescription')}</p>
+                <Label className="text-sm font-medium">{"Target By Access Tier"}</Label>
+                <p className="text-xs">{"Target Access Tier Description"}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {accessTiers.map((tier) => (
                     <div key={tier.id} className="flex items-center gap-2">
@@ -819,7 +817,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {accessTiers.length === 0 && (
-                    <p className="text-xs text-center py-2">{t('workflow.noAccessTiersAvailable')}</p>
+                    <p className="text-xs text-center py-2">{"No Access Tiers Available"}</p>
                   )}
                 </div>
                 {workflow?.assigned_access_tier_names?.length > 0 && (
@@ -835,8 +833,8 @@ export default function WorkflowEditor() {
 
               {/* Trigger by Category */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{t('workflow.triggerByCategory')}</Label>
-                <p className="text-xs">{t('workflow.triggerCategoryDescription')}</p>
+                <Label className="text-sm font-medium">{"Trigger By Category"}</Label>
+                <p className="text-xs">{"Trigger Category Description"}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {categories.map((cat) => (
                     <div key={cat.id} className="flex items-center gap-2">
@@ -858,7 +856,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {categories.length === 0 && (
-                    <p className="text-xs text-center py-2">{t('workflow.noCategoriesAvailable')}</p>
+                    <p className="text-xs text-center py-2">{"No Categories Available"}</p>
                   )}
                 </div>
                 {workflow?.trigger_category_names?.length > 0 && (
@@ -880,21 +878,21 @@ export default function WorkflowEditor() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {t('workflow.unsavedChanges')}
+              {"Unsaved Changes"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('workflow.unsavedChangesDescription')}
+              {"Unsaved Changes Description"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
-              {t('common.cancel')}
+              {"Cancel"}
             </AlertDialogCancel>
             <Button variant="outline" onClick={handleDiscardChanges}>
-              {t('workflow.discardChanges')}
+              {"Discard Changes"}
             </Button>
             <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-rose-600 hover:bg-rose-700">
-              {t('workflow.saveAndLeave')}
+              {"Save And Leave"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1261,7 +1259,7 @@ function FormNodeConfig({ data, updateData }) {
                         <span className="text-xs">Options (comma separated)</span>
                         <Input
                           value={(subField.options || []).join(', ')}
-                          onChange={(e) => updateSubField(field.id, subField.id, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                          onChange={(e) => updateSubField(field.id, subField.id, 'options', e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
                           className="h-7 text-xs"
                           placeholder="1, 2, 3, 4+"
                         />
@@ -1292,7 +1290,7 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
-        const res = await axios.get(`${API}/sla-policies`);
+        const res = await axios.geAPI;
         setSlaPolicies(res.data);
       } catch (error) {
         console.error('Failed to fetch SLA policies');

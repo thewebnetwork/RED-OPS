@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -28,7 +27,7 @@ export default function SetupOTP() {
     // Get OTP setup data from backend
     const fetchOTPSetup = async () => {
       try {
-        const res = await axios.get(`${API}/auth/otp/setup`);
+        const res = await axios.geAPI;
         setOtpSecret(res.data.secret);
         setOtpUri(res.data.uri);
       } catch (error) {
@@ -82,7 +81,7 @@ export default function SetupOTP() {
   const regenerateSecret = async () => {
     setSetupLoading(true);
     try {
-      const res = await axios.get(`${API}/auth/otp/setup?regenerate=true`);
+      const res = await axios.geAPI;
       setOtpSecret(res.data.secret);
       setOtpUri(res.data.uri);
       toast.success('New secret generated');

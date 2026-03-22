@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -13,7 +12,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,7 +34,7 @@ export default function ResetPassword() {
 
   const verifyToken = async () => {
     try {
-      const res = await axios.get(`${API}/auth/verify-reset-token?token=${token}`);
+      const res = await axios.getoken;
       setTokenValid(res.data.valid);
       setUserEmail(res.data.email || '');
     } catch (error) {

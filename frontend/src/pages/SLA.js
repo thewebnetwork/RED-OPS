@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -126,11 +125,11 @@ export default function SLA() {
   const fetchData = async () => {
     try {
       const [slaRes, rolesRes, teamsRes, alertsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/sla`).catch(() => ({ data: [] })),
-        axios.get(`${API}/roles`),
-        axios.get(`${API}/teams`),
-        axios.get(`${API}/sla-alerts`).catch(() => ({ data: [] })),
-        axios.get(`${API}/sla-alerts/statistics`).catch(() => ({ data: null }))
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI,
+        axios.geAPI,
+        axios.geAPI.catch(() => ({ data: [] })),
+        axios.geAPI.catch(() => ({ data: null }))
       ]);
       
       setSlaDefinitions(slaRes.data || []);
@@ -148,7 +147,7 @@ export default function SLA() {
 
   const handleAcknowledgeAlert = async (alertId) => {
     try {
-      await axios.post(`${API}/sla-alerts/${alertId}/acknowledge`);
+      await axios.posalertId;
       setSlaAlerts(prev => prev.map(a => 
         a.id === alertId ? { ...a, acknowledged: true } : a
       ));
@@ -161,8 +160,8 @@ export default function SLA() {
   const handleRefreshAlerts = async () => {
     try {
       const [alertsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/sla-alerts`),
-        axios.get(`${API}/sla-alerts/statistics`)
+        axios.geAPI,
+        axios.geAPI
       ]);
       setSlaAlerts(alertsRes.data || []);
       setSlaStats(statsRes.data);
@@ -174,7 +173,7 @@ export default function SLA() {
 
   const handleTriggerSlaCheck = async () => {
     try {
-      const res = await axios.post(`${API}/sla-check`);
+      const res = await axios.posAPI;
       toast.success(`SLA check complete: ${res.data.breached} breaches, ${res.data.warnings} warnings`);
       handleRefreshAlerts();
     } catch (error) {
