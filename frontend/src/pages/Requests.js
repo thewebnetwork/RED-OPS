@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
   Plus,
   Search,
   X,
-  Circle,
-  MoreHorizontal,
   AlertCircle,
-  Clock,
-  Calendar,
-  User,
   ArrowUp,
   Minus,
   ArrowDown,
   MessageSquare,
-  CheckCircle2,
 } from 'lucide-react';
 
 // ── Mock data ────────────────────────────────────────────────────────────────
@@ -64,7 +67,7 @@ function PriorityIcon({ priority, size = 12 }) {
 
 function Assignee({ assignee, size = 22 }) {
   return (
-    <div style={{ width:size, height:size, borderRadius:'50%', background:assignee.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize: size > 26 ? 11 : 9, fontWeight:700, color:'#fff', flexShrink:0, title: assignee.name }}>
+    <div title={assignee.name} style={{ width:size, height:size, borderRadius:'50%', background:assignee.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize: size > 26 ? 11 : 9, fontWeight:700, color:'#fff', flexShrink:0 }}>
       {assignee.avatar}
     </div>
   );
@@ -79,20 +82,25 @@ function StagePill({ stage }) {
   );
 }
 
-function RequestCard({ req, onClick }) {
+// Pure display card — used both inline and inside DragOverlay
+function RequestCard({ req, onClick, ghost = false }) {
   const overdue = isOverdue(req.due_date);
   return (
-    <div className="kanban-card" onClick={onClick} style={{ cursor:'pointer' }}>
-      {/* Priority + Title */}
+    <div
+      className="kanban-card"
+      onClick={onClick}
+      style={{
+        cursor: ghost ? 'grabbing' : 'pointer',
+        boxShadow: ghost ? '0 8px 24px rgba(0,0,0,0.5)' : undefined,
+        opacity: ghost ? 0.95 : 1,
+      }}
+    >
       <div style={{ display:'flex', gap:6, marginBottom:6 }}>
         <PriorityIcon priority={req.priority} size={11} />
         <span style={{ fontSize:12, fontWeight:500, color:'var(--tx-1)', lineHeight:1.35, flex:1 }}>{req.title}</span>
       </div>
-      {/* Service */}
       <span className="pill pill-gray" style={{ fontSize:10 }}>{req.service}</span>
-      {/* Client */}
       <p style={{ margin:'5px 0 0', fontSize:11, color:'var(--tx-2)' }}>{req.client}</p>
-      {/* Footer */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:8, paddingTop:8, borderTop:'1px solid var(--border)' }}>
         <Assignee assignee={req.assignee} size={20} />
         <span style={{ fontSize:10, color: overdue ? '#ef4444' : 'var(--tx-3)', fontWeight: overdue ? 600 : 400 }}>
@@ -103,19 +111,66 @@ function RequestCard({ req, onClick }) {
   );
 }
 
+// Draggable wrapper — hides original while dragging (DragOverlay shows the ghost)
+function DraggableCard({ req, onOpen }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: req.id });
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={{ opacity: isDragging ? 0 : 1, touchAction: 'none' }}
+    >
+      <RequestCard req={req} onClick={onOpen} />
+    </div>
+  );
+}
+
+// Droppable column body — highlights on hover
+function DroppableColumn({ stage, children, isEmpty }) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage });
+  const color = STAGE_COLORS[stage];
+  return (
+    <div
+      ref={setNodeRef}
+      className="kanban-col-body"
+      style={{
+        minHeight: 80,
+        transition: 'background 0.15s, border-color 0.15s',
+        background: isOver ? `${color}14` : undefined,
+        borderRadius: 6,
+        outline: isOver ? `1px dashed ${color}60` : '1px dashed transparent',
+      }}
+    >
+      {children}
+      {isEmpty && !isOver && (
+        <div style={{ textAlign:'center', padding:'20px 8px', color:'var(--tx-3)', fontSize:12 }}>No requests</div>
+      )}
+      {isEmpty && isOver && (
+        <div style={{ textAlign:'center', padding:'20px 8px', color: color, fontSize:12, fontWeight:500 }}>Drop here</div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 export default function Requests() {
-  const [requests,       setRequests]       = useState(MOCK_REQUESTS);
-  const [view,           setView]           = useState('kanban');
-  const [search,         setSearch]         = useState('');
-  const [priFilter,      setPriFilter]      = useState('');
-  const [showModal,      setShowModal]      = useState(false);
-  const [selectedReq,    setSelectedReq]    = useState(null);
+  const [requests,    setRequests]    = useState(MOCK_REQUESTS);
+  const [view,        setView]        = useState('kanban');
+  const [search,      setSearch]      = useState('');
+  const [priFilter,   setPriFilter]   = useState('');
+  const [showModal,   setShowModal]   = useState(false);
+  const [selectedReq, setSelectedReq] = useState(null);
+  const [activeId,    setActiveId]    = useState(null);
   const [form, setForm] = useState({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true);
   }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
 
   const filtered = requests.filter(r => {
     const q = search.toLowerCase();
@@ -123,9 +178,27 @@ export default function Requests() {
         && (!priFilter || r.priority === priFilter);
   });
 
-  const byStage = STAGES.reduce((a, s) => { a[s] = filtered.filter(r => r.stage === s); return a; }, {});
-  const open    = filtered.filter(r => !['Delivered','Closed'].includes(r.stage)).length;
-  const overdue = filtered.filter(r => isOverdue(r.due_date) && !['Delivered','Closed'].includes(r.stage)).length;
+  const byStage   = STAGES.reduce((a, s) => { a[s] = filtered.filter(r => r.stage === s); return a; }, {});
+  const open      = filtered.filter(r => !['Delivered','Closed'].includes(r.stage)).length;
+  const overdue   = filtered.filter(r => isOverdue(r.due_date) && !['Delivered','Closed'].includes(r.stage)).length;
+  const activeDrag = requests.find(r => r.id === activeId) || null;
+
+  const updateStage = (id, stage) => {
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, stage } : r));
+    if (selectedReq?.id === id) setSelectedReq(prev => ({ ...prev, stage }));
+  };
+
+  const handleDragStart = ({ active }) => setActiveId(active.id);
+
+  const handleDragEnd = ({ active, over }) => {
+    setActiveId(null);
+    if (!over) return;
+    const req = requests.find(r => r.id === active.id);
+    if (!req || req.stage === over.id) return;
+    updateStage(active.id, over.id);
+  };
+
+  const handleDragCancel = () => setActiveId(null);
 
   const createRequest = () => {
     if (!form.title || !form.client || !form.service) return;
@@ -133,11 +206,6 @@ export default function Requests() {
     setRequests(prev => [...prev, { ...form, id:next, assignee:{ name:'Unassigned', avatar:'?', color:'#606060' }, created_at: new Date().toISOString().split('T')[0], stage:'Submitted' }]);
     setShowModal(false);
     setForm({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
-  };
-
-  const updateStage = (id, stage) => {
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, stage } : r));
-    if (selectedReq?.id === id) setSelectedReq(prev => ({ ...prev, stage }));
   };
 
   return (
@@ -148,7 +216,7 @@ export default function Requests() {
         <div>
           <span style={{ fontSize:18, fontWeight:700, color:'var(--tx-1)' }}>Requests</span>
           <span style={{ marginLeft:10, fontSize:12, color:'var(--tx-3)' }}>
-            {filtered.length} total &bull; {open} open{overdue > 0 ? ` · ` : ''}{overdue > 0 && <span style={{ color:'#ef4444' }}>{overdue} overdue</span>}
+            {filtered.length} total &bull; {open} open{overdue > 0 ? ' · ' : ''}{overdue > 0 && <span style={{ color:'#ef4444' }}>{overdue} overdue</span>}
           </span>
         </div>
 
@@ -185,25 +253,34 @@ export default function Requests() {
       <div style={{ flex:1, overflow: view === 'kanban' ? 'hidden' : 'auto', display:'flex', flexDirection:'column' }}>
 
         {view === 'kanban' ? (
-          <div style={{ flex:1, overflowX:'auto', overflowY:'hidden', padding:'14px 20px', display:'flex', gap:10 }}>
-            {STAGES.map(stage => (
-              <div key={stage} className="kanban-col" style={{ flex:'0 0 248px' }}>
-                <div className="kanban-col-header" style={{ gap:8 }}>
-                  <span style={{ width:8, height:8, borderRadius:'50%', background:STAGE_COLORS[stage], flexShrink:0, display:'inline-block' }} />
-                  <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{stage}</span>
-                  <span style={{ marginLeft:'auto', fontSize:11, color:'var(--tx-3)', background:'var(--bg-overlay)', padding:'1px 6px', borderRadius:4 }}>{byStage[stage].length}</span>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <div style={{ flex:1, overflowX:'auto', overflowY:'hidden', padding:'14px 20px', display:'flex', gap:10 }}>
+              {STAGES.map(stage => (
+                <div key={stage} className="kanban-col" style={{ flex:'0 0 248px' }}>
+                  <div className="kanban-col-header" style={{ gap:8 }}>
+                    <span style={{ width:8, height:8, borderRadius:'50%', background:STAGE_COLORS[stage], flexShrink:0, display:'inline-block' }} />
+                    <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{stage}</span>
+                    <span style={{ marginLeft:'auto', fontSize:11, color:'var(--tx-3)', background:'var(--bg-overlay)', padding:'1px 6px', borderRadius:4 }}>{byStage[stage].length}</span>
+                  </div>
+                  <DroppableColumn stage={stage} isEmpty={byStage[stage].length === 0}>
+                    {byStage[stage].map(req => (
+                      <DraggableCard key={req.id} req={req} onOpen={() => setSelectedReq(req)} />
+                    ))}
+                  </DroppableColumn>
                 </div>
-                <div className="kanban-col-body">
-                  {byStage[stage].map(req => (
-                    <RequestCard key={req.id} req={req} onClick={() => setSelectedReq(req)} />
-                  ))}
-                  {byStage[stage].length === 0 && (
-                    <div style={{ textAlign:'center', padding:'20px 8px', color:'var(--tx-3)', fontSize:12 }}>No requests</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Ghost card that follows the cursor */}
+            <DragOverlay dropAnimation={null}>
+              {activeDrag && <RequestCard req={activeDrag} onClick={() => {}} ghost />}
+            </DragOverlay>
+          </DndContext>
         ) : (
           <div style={{ margin:16 }}>
             <div className="card">
@@ -216,7 +293,7 @@ export default function Requests() {
                 </thead>
                 <tbody>
                   {filtered.map(req => (
-                    <tr key={req.id} onClick={() => setSelectedReq(req)}>
+                    <tr key={req.id} onClick={() => setSelectedReq(req)} style={{ cursor:'pointer' }}>
                       <td style={{ color:'var(--red)', fontWeight:600, fontSize:12 }}>{req.id}</td>
                       <td style={{ fontWeight:500, maxWidth:220 }}>{req.title}</td>
                       <td style={{ color:'var(--tx-2)' }}>{req.client}</td>
@@ -253,14 +330,10 @@ export default function Requests() {
               <button onClick={() => setShowModal(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)' }}><X size={18} /></button>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-              {[
-                { label:'Title', key:'title', type:'text', placeholder:'Request title...' },
-              ].map(({ label, key, type, placeholder }) => (
-                <div key={key}>
-                  <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>{label}</label>
-                  <input type={type} className="input-field" placeholder={placeholder} value={form[key]} onChange={e => setForm(p => ({ ...p, [key]:e.target.value }))} />
-                </div>
-              ))}
+              <div>
+                <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Title</label>
+                <input type="text" className="input-field" placeholder="Request title..." value={form.title} onChange={e => setForm(p => ({ ...p, title:e.target.value }))} />
+              </div>
               <div>
                 <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Client</label>
                 <select className="input-field" value={form.client} onChange={e => setForm(p => ({ ...p, client:e.target.value }))}>
