@@ -39,7 +39,7 @@ import {
   Users,
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_API_URL || 'https://red-ops-production.up.railway.app';
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const COLUMNS = [
   { id: 'backlog',          label: 'Backlog',      color: '#94a3b8' },

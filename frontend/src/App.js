@@ -63,6 +63,8 @@ import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
 import Finance from "./pages/Finance";
 import SOPs from "./pages/SOPs";
+import CRM from "./pages/CRM";
+import Ambassador from "./pages/Ambassador";
 import AIAssistant from "./pages/AIAssistant";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
@@ -302,6 +304,8 @@ function AppRoutes() {
       <Route path="/projects" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Projects /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/sops" element={<PrivateRoute><SOPs /></PrivateRoute>} />
+      <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
+      <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />

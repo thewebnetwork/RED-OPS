@@ -42,6 +42,8 @@ from routes import (
     organizations_router,
     projects_router,
     knowledge_base_router,
+    crm_router,
+    ambassador_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -257,6 +259,8 @@ app.include_router(service_templates_router, prefix="/api")  # Service Templates
 app.include_router(organizations_router, prefix="/api")  # Multi-tenant Organizations
 app.include_router(projects_router, prefix="/api")  # Projects (Phase 1)
 app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base / SOPs (Phase 2)
+app.include_router(crm_router, prefix="/api")  # CRM / Pipeline (Phase 3)
+app.include_router(ambassador_router, prefix="/api")  # Ambassador + Marketplace (Phase 4)
 
 
 @app.get("/")

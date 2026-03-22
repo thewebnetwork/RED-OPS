@@ -6,7 +6,7 @@ import {
   Globe, Folder, Star, ArrowLeft, Trash2, X, Lock, History, Loader,
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_API_URL || '';
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // ── Folder config ────────────────────────────────────────────────────────────
 const FOLDERS = [
@@ -62,7 +62,7 @@ export default function SOPs() {
       const params = {};
       if (activeFolder) params.folder = activeFolder;
       if (searchQuery) params.search = searchQuery;
-      const { data } = await axios.get(`${API}/api/knowledge-base/documents`, { headers, params });
+      const { data } = await axios.get(`${API}/knowledge-base/documents`, { headers, params });
       setDocs(data);
     } catch (err) {
       console.error('Failed to load documents', err);
@@ -74,7 +74,7 @@ export default function SOPs() {
 
   const fetchFolderStats = useCallback(async () => {
     try {
-      const { data } = await axios.get(`${API}/api/knowledge-base/folders/stats`, { headers });
+      const { data } = await axios.get(`${API}/knowledge-base/folders/stats`, { headers });
       setFolderStats(data);
     } catch { /* silent */ }
   }, []);
@@ -109,10 +109,10 @@ export default function SOPs() {
     setSaving(true);
     try {
       if (editingDoc) {
-        await axios.patch(`${API}/api/knowledge-base/documents/${editingDoc.id}`, form, { headers });
+        await axios.patch(`${API}/knowledge-base/documents/${editingDoc.id}`, form, { headers });
         toast.success('Document updated');
       } else {
-        await axios.post(`${API}/api/knowledge-base/documents`, form, { headers });
+        await axios.post(`${API}/knowledge-base/documents`, form, { headers });
         toast.success('Document created');
       }
       setShowEditor(false);
@@ -132,7 +132,7 @@ export default function SOPs() {
         label: 'Delete',
         onClick: async () => {
           try {
-            await axios.delete(`${API}/api/knowledge-base/documents/${doc.id}`, { headers });
+            await axios.delete(`${API}/knowledge-base/documents/${doc.id}`, { headers });
             if (selectedDoc?.id === doc.id) setSelectedDoc(null);
             toast.success('Document deleted');
             fetchDocs();
@@ -149,7 +149,7 @@ export default function SOPs() {
   const toggleStar = async (doc, e) => {
     e?.stopPropagation();
     try {
-      const { data } = await axios.post(`${API}/api/knowledge-base/documents/${doc.id}/star`, {}, { headers });
+      const { data } = await axios.post(`${API}/knowledge-base/documents/${doc.id}/star`, {}, { headers });
       // Update local state
       setDocs(prev => prev.map(d => {
         if (d.id !== doc.id) return d;
@@ -172,7 +172,7 @@ export default function SOPs() {
 
   const loadVersions = async (docId) => {
     try {
-      const { data } = await axios.get(`${API}/api/knowledge-base/documents/${docId}/versions`, { headers });
+      const { data } = await axios.get(`${API}/knowledge-base/documents/${docId}/versions`, { headers });
       setVersions(data);
       setShowVersions(true);
     } catch {
@@ -182,7 +182,7 @@ export default function SOPs() {
 
   const selectDoc = async (doc) => {
     try {
-      const { data } = await axios.get(`${API}/api/knowledge-base/documents/${doc.id}`, { headers });
+      const { data } = await axios.get(`${API}/knowledge-base/documents/${doc.id}`, { headers });
       setSelectedDoc(data);
     } catch {
       setSelectedDoc(doc);

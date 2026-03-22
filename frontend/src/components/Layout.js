@@ -24,6 +24,8 @@ import {
   ShoppingBag,
   Plug,
   User,
+  Contact,
+  Gift,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -43,9 +45,11 @@ const NAV_BUSINESS = [
   { path: '/finance',  icon: DollarSign, label: 'Finance',         roles: ['Administrator'] },
   { path: '/reports',  icon: BarChart2,  label: 'Reports',         roles: ['Administrator','Operator'] },
   { path: '/sops',     icon: BookOpen,   label: 'SOPs & Playbooks',roles: ['Administrator','Operator','Standard User'] },
+  { path: '/crm',      icon: Contact,    label: 'CRM',             roles: ['Administrator','Operator'] },
 ];
 const NAV_SERVICES = [
   { path: '/services',     icon: ShoppingBag, label: 'RRG Services',    roles: ['Administrator','Operator','Standard User'], isNew: true },
+  { path: '/ambassador',   icon: Gift,        label: 'Ambassador',      roles: ['Administrator','Operator','Standard User'], isNew: true },
   { path: '/integrations', icon: Plug,        label: 'Integrations',   roles: ['Administrator'] },
 ];
 const NAV_SYSTEM = [
@@ -74,6 +78,8 @@ const CMD_ITEMS = [
   { label:'Finance',         icon:'💰', to:'/finance',       group:'Navigate' },
   { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
   { label:'SOPs',            icon:'📚', to:'/sops',          group:'Navigate' },
+  { label:'CRM',             icon:'📇', to:'/crm',           group:'Navigate' },
+  { label:'Ambassador',      icon:'🎁', to:'/ambassador',    group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
   { label:'RRG Services',    icon:'🛍', to:'/services',      group:'Navigate' },
   { label:'Integrations',    icon:'🔌', to:'/integrations',  group:'Navigate' },

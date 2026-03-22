@@ -26,6 +26,8 @@ from .service_templates import router as service_templates_router
 from .organizations import router as organizations_router
 from .projects import router as projects_router
 from .knowledge_base import router as knowledge_base_router
+from .crm import router as crm_router
+from .ambassador import router as ambassador_router
 
 __all__ = [
     "auth_router",
@@ -53,4 +55,6 @@ __all__ = [
     "organizations_router",
     "projects_router",
     "knowledge_base_router",
+    "crm_router",
+    "ambassador_router",
 ]
