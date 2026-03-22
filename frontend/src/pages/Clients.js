@@ -258,29 +258,55 @@ function AddClientWizard({ onClose, onCreated }) {
 
   const handleLaunch = async () => {
     setSending(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setSending(false);
-    setDone(true);
-    if (onCreated) onCreated({
-      _id: `c${Date.now()}`,
-      name: form.name,
-      plan: form.plan,
-      mrr: PLAN_CONFIG[form.plan]?.price || 0,
-      score: 75,
-      renewal: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
-      requests_open: 0,
-      deliveries: 0,
-      last_delivery: '—',
-      am: form.am,
-      tags: ['New'],
-      notes: form.notes,
-      portal: form.send_invite ? 'invited' : 'none',
-      contact: { name: form.contact_name, email: form.contact_email, phone: form.contact_phone },
-      industry: form.industry,
-      website: form.website,
-      last_login: 'Never',
-      login_count: 0,
-    });
+    try {
+      // Generate a temporary password for the new client user
+      const tempPass = `RRG-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+      // Create the user account via the real API
+      const res = await axios.post(`${API}/users`, {
+        name: form.contact_name,
+        email: form.contact_email,
+        password: tempPass,
+        role: 'Standard User',
+        account_type: 'Media Client',
+        force_password_change: true,
+        force_otp_setup: false,
+        send_welcome_email: form.send_invite,
+      });
+
+      const userId = res.data?.id || res.data?._id;
+
+      // Build client object for local state
+      const newClient = {
+        _id: userId || `c${Date.now()}`,
+        name: form.name,
+        plan: form.plan,
+        mrr: PLAN_CONFIG[form.plan]?.price || 0,
+        score: 75,
+        renewal: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
+        requests_open: 0,
+        deliveries: 0,
+        last_delivery: '—',
+        am: form.am,
+        tags: ['New'],
+        notes: form.notes,
+        portal: form.send_invite ? 'invited' : 'none',
+        contact: { name: form.contact_name, email: form.contact_email, phone: form.contact_phone },
+        industry: form.industry,
+        website: form.website,
+        last_login: 'Never',
+        login_count: 0,
+      };
+
+      setDone(true);
+      if (onCreated) onCreated(newClient);
+      toast.success(`Client account created for ${form.contact_name}`);
+    } catch (err) {
+      const detail = err.response?.data?.detail || 'Failed to create client account';
+      toast.error(detail);
+    } finally {
+      setSending(false);
+    }
   };
 
   if (done) return (

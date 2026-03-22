@@ -152,9 +152,12 @@ export default function Layout({ children }) {
   }, []);
   const closeCmd = useCallback(() => setCmdOpen(false), []);
 
+  // Client users only see client-relevant command palette items
+  const clientPaths = ['/', '/services', '/my-requests', '/my-account', '/sops'];
+  const cmdBase = isClient ? CMD_ITEMS.filter(i => clientPaths.includes(i.to) || i.to?.startsWith('/my-')) : CMD_ITEMS;
   const filtered = cmdQuery.trim()
-    ? CMD_ITEMS.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
-    : CMD_ITEMS;
+    ? cmdBase.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
+    : cmdBase;
 
   useEffect(() => {
     const onKey = (e) => {
@@ -265,7 +268,7 @@ export default function Layout({ children }) {
         {/* User */}
         <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(isClient ? '/my-account' : '/profile')}
             onMouseEnter={e => e.currentTarget.style.background='var(--bg-elevated)'}
             onMouseLeave={e => e.currentTarget.style.background='transparent'}>
             <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
@@ -321,7 +324,7 @@ export default function Layout({ children }) {
               {unread > 0 && <div className="notif-dot" />}
             </div>
 
-            <button onClick={() => navigate('/requests?new=1')} className="btn-primary btn-sm" style={{ gap:5 }}>
+            <button onClick={() => navigate(isClient ? '/services' : '/requests?new=1')} className="btn-primary btn-sm" style={{ gap:5 }}>
               <Plus size={13} />
               New Request
             </button>

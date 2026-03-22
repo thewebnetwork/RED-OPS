@@ -16,20 +16,23 @@ import {
   X,
   Plus,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const CANCELLABLE_STATUSES = ['New', 'Open', 'In Progress', 'Pending'];
+const CANCELLABLE_STATUSES = ['New', 'Open', 'Submitted', 'In Progress', 'Pending', 'Pending Review'];
 
 const STATUS_CONFIG = {
-  'New':         { color: '#3b82f6', bg: '#3b82f618', label: 'New' },
-  'Open':        { color: '#f59e0b', bg: '#f59e0b18', label: 'Open' },
-  'In Progress': { color: '#a855f7', bg: '#a855f718', label: 'In Progress' },
-  'Pending':     { color: '#f97316', bg: '#f9731618', label: 'Pending' },
-  'Delivered':   { color: '#22c55e', bg: '#22c55e18', label: 'Delivered' },
-  'Closed':      { color: '#606060', bg: '#60606018', label: 'Closed' },
-  'Canceled':    { color: '#ef4444', bg: '#ef444418', label: 'Canceled' },
+  'New':            { color: '#3b82f6', bg: '#3b82f618', label: 'New' },
+  'Open':           { color: '#3b82f6', bg: '#3b82f618', label: 'Open' },
+  'Submitted':      { color: '#3b82f6', bg: '#3b82f618', label: 'Submitted' },
+  'In Progress':    { color: '#a855f7', bg: '#a855f718', label: 'In Progress' },
+  'Pending':        { color: '#f97316', bg: '#f9731618', label: 'Pending' },
+  'Pending Review': { color: '#f59e0b', bg: '#f59e0b18', label: 'Pending Review' },
+  'Delivered':      { color: '#22c55e', bg: '#22c55e18', label: 'Delivered' },
+  'Closed':         { color: '#606060', bg: '#60606018', label: 'Closed' },
+  'Canceled':       { color: '#ef4444', bg: '#ef444418', label: 'Canceled' },
 };
 
 function StatusPill({ status }) {
@@ -71,19 +74,26 @@ export default function MyRequests() {
   const [canceling, setCanceling] = useState(false);
   const [cancelReasons, setCancelReasons] = useState([]);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     fetchMyRequests();
     fetchCancelReasons();
-  }, []);
+  }, []); // eslint-disable-line
 
-  const fetchMyRequests = async () => {
+  const fetchMyRequests = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const res = await axios.get(`${API}/orders/my-requests`);
-      setOrders(res.data);
+      const data = res.data;
+      const list = Array.isArray(data) ? data : data?.items || data?.orders || [];
+      setOrders(list);
     } catch {
       toast.error('Failed to load your requests');
+      setOrders([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -110,15 +120,16 @@ export default function MyRequests() {
       return;
     }
     setCanceling(true);
+    const tid = cancelTarget._id || cancelTarget.id;
     try {
-      await axios.post(`${API}/orders/${cancelTarget.id}/cancel`, {
+      await axios.post(`${API}/orders/${tid}/cancel`, {
         reason: cancelReason,
         notes: cancelNotes.trim() || null,
       });
       toast.success('Request canceled');
       setCancelOpen(false);
       setOrders(prev => prev.map(o =>
-        o.id === cancelTarget.id ? { ...o, status: 'Canceled' } : o
+        (o._id || o.id) === tid ? { ...o, status: 'Canceled' } : o
       ));
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to cancel request');
@@ -127,18 +138,20 @@ export default function MyRequests() {
     }
   };
 
+  const q = search.toLowerCase();
   const filtered = orders.filter(o => {
-    const matchSearch =
-      o.order_code?.toLowerCase().includes(search.toLowerCase()) ||
-      o.title?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !q ||
+      o.order_code?.toLowerCase().includes(q) ||
+      o.title?.toLowerCase().includes(q) ||
+      o.service_name?.toLowerCase().includes(q);
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
   const counts = {
     total: orders.length,
-    open: orders.filter(o => ['New', 'Open'].includes(o.status)).length,
-    inProgress: orders.filter(o => o.status === 'In Progress').length,
+    open: orders.filter(o => ['New', 'Open', 'Submitted'].includes(o.status)).length,
+    inProgress: orders.filter(o => ['In Progress', 'Pending', 'Pending Review'].includes(o.status)).length,
     done: orders.filter(o => ['Delivered', 'Closed'].includes(o.status)).length,
   };
 
@@ -158,10 +171,15 @@ export default function MyRequests() {
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0, letterSpacing: '-0.03em' }}>My Requests</h1>
           <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '4px 0 0' }}>Track all your submitted service requests</p>
         </div>
-        <Link to="/services" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Plus size={14} />
-          New Request
-        </Link>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => fetchMyRequests(true)} className="btn-ghost btn-sm" style={{ gap: 5 }} disabled={refreshing}>
+            <RefreshCw size={12} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} /> Refresh
+          </button>
+          <Link to="/services" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={14} />
+            New Request
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
@@ -232,9 +250,10 @@ export default function MyRequests() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {filtered.map(order => {
+            const oid = order._id || order.id;
             const canCancel = CANCELLABLE_STATUSES.includes(order.status);
             return (
-              <div key={order.id} style={{
+              <div key={oid} style={{
                 background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
                 padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
                 transition: 'border-color .15s',
@@ -283,7 +302,7 @@ export default function MyRequests() {
                     </button>
                   )}
                   <Link
-                    to={`/requests/${order.id}`}
+                    to={`/requests/${oid}`}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 5,
                       padding: '6px 12px', borderRadius: 7, fontSize: 12, fontWeight: 600,
