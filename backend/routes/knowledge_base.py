@@ -8,14 +8,13 @@ Full CRUD for org-scoped documents with:
 - RBAC: owner/admin/manager can create/edit, member/viewer read-only
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from bson import ObjectId
 from datetime import datetime, timezone
 from typing import Optional, List
+import uuid
 
-from ..database import get_db
-from ..auth import get_current_user
-from ..models.document import (
+from database import db
+from utils.auth import get_current_user
+from models.document import (
     DocumentCreate,
     DocumentUpdate,
     DocumentResponse,
@@ -27,40 +26,51 @@ router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
-async def _get_org_id(user: dict, db: AsyncIOMotorDatabase) -> str:
-    """Get org_id from user's active membership."""
-    if user.get("active_org_id"):
-        return user["active_org_id"]
-    mem = await db.org_memberships.find_one({"user_id": str(user["_id"])})
-    if not mem:
-        raise HTTPException(404, "No organization membership found")
-    return mem["org_id"]
+def _get_org_id(user: dict) -> str:
+    """Extract org_id from authenticated user."""
+    org_id = user.get("org_id") or user.get("team_id")
+    if not org_id:
+        raise HTTPException(400, "No organization context. Join or create an organization first.")
+    return org_id
 
 
-async def _get_org_role(user_id: str, org_id: str, db: AsyncIOMotorDatabase) -> str:
-    """Get user's role within the org."""
-    mem = await db.org_memberships.find_one({"user_id": user_id, "org_id": org_id})
-    if not mem:
-        raise HTTPException(403, "Not a member of this organization")
-    return mem.get("role", "viewer")
+def _get_org_role(user: dict) -> str:
+    """Get user's org role, falling back to system role mapping."""
+    org_role = user.get("org_role")
+    if org_role:
+        return org_role
+    sys_role = user.get("role", "")
+    if sys_role == "Administrator":
+        return "admin"
+    if sys_role == "Operator":
+        return "manager"
+    return "member"
 
 
 def _can_edit(role: str) -> bool:
     return role in ("owner", "admin", "manager")
 
 
-async def _enrich_doc(doc: dict, db: AsyncIOMotorDatabase) -> dict:
+async def _enrich_doc(doc: dict) -> dict:
     """Add user names to a document dict."""
-    doc["id"] = str(doc["_id"])
+    # Ensure id field
+    if "id" not in doc and "_id" in doc:
+        doc["id"] = str(doc["_id"])
 
     # Created by name
     if doc.get("created_by_user_id"):
-        u = await db.users.find_one({"_id": ObjectId(doc["created_by_user_id"])})
+        u = await db.users.find_one(
+            {"id": doc["created_by_user_id"]},
+            {"_id": 0, "name": 1, "email": 1}
+        )
         doc["created_by_name"] = u.get("name", u.get("email", "Unknown")) if u else None
 
     # Updated by name
     if doc.get("updated_by_user_id"):
-        u = await db.users.find_one({"_id": ObjectId(doc["updated_by_user_id"])})
+        u = await db.users.find_one(
+            {"id": doc["updated_by_user_id"]},
+            {"_id": 0, "name": 1, "email": 1}
+        )
         doc["updated_by_name"] = u.get("name", u.get("email", "Unknown")) if u else None
 
     return doc
@@ -71,18 +81,19 @@ async def _enrich_doc(doc: dict, db: AsyncIOMotorDatabase) -> dict:
 @router.post("/documents", response_model=DocumentResponse)
 async def create_document(
     payload: DocumentCreate,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    role = await _get_org_role(user_id, org_id, db)
+    user_id = current_user["id"]
+    org_id = _get_org_id(current_user)
+    role = _get_org_role(current_user)
 
     if not _can_edit(role):
         raise HTTPException(403, "You don't have permission to create documents")
 
     now = datetime.now(timezone.utc)
+    doc_id = str(uuid.uuid4())
     doc = {
+        "id": doc_id,
         "org_id": org_id,
         "title": payload.title,
         "folder": payload.folder,
@@ -94,23 +105,23 @@ async def create_document(
         "updated_by_user_id": user_id,
         "version": 1,
         "starred_by": [],
-        "created_at": now,
-        "updated_at": now,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat(),
     }
-    result = await db.documents.insert_one(doc)
-    doc["_id"] = result.inserted_id
+    await db.documents.insert_one(doc)
 
     # Save initial version snapshot
     await db.document_versions.insert_one({
-        "document_id": str(result.inserted_id),
+        "id": str(uuid.uuid4()),
+        "document_id": doc_id,
         "version": 1,
         "title": payload.title,
         "body": payload.body,
         "edited_by_user_id": user_id,
-        "created_at": now,
+        "created_at": now.isoformat(),
     })
 
-    enriched = await _enrich_doc(doc, db)
+    enriched = await _enrich_doc(doc)
     return DocumentResponse(**enriched)
 
 
@@ -125,12 +136,10 @@ async def list_documents(
     starred: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)  # Verify membership
+    user_id = current_user["id"]
+    org_id = _get_org_id(current_user)
 
     query = {"org_id": org_id}
 
@@ -149,10 +158,10 @@ async def list_documents(
             {"tags": {"$regex": search, "$options": "i"}},
         ]
 
-    cursor = db.documents.find(query).sort("updated_at", -1).skip(skip).limit(limit)
+    cursor = db.documents.find(query, {"_id": 0}).sort("updated_at", -1).skip(skip).limit(limit)
     docs = []
     async for doc in cursor:
-        enriched = await _enrich_doc(doc, db)
+        enriched = await _enrich_doc(doc)
         docs.append(DocumentResponse(**enriched))
     return docs
 
@@ -162,18 +171,15 @@ async def list_documents(
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)
+    org_id = _get_org_id(current_user)
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
-    enriched = await _enrich_doc(doc, db)
+    enriched = await _enrich_doc(doc)
     return DocumentResponse(**enriched)
 
 
@@ -183,17 +189,16 @@ async def get_document(
 async def update_document(
     document_id: str,
     payload: DocumentUpdate,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    role = await _get_org_role(user_id, org_id, db)
+    user_id = current_user["id"]
+    org_id = _get_org_id(current_user)
+    role = _get_org_role(current_user)
 
     if not _can_edit(role):
         raise HTTPException(403, "You don't have permission to edit documents")
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
@@ -202,7 +207,7 @@ async def update_document(
         raise HTTPException(400, "No fields to update")
 
     now = datetime.now(timezone.utc)
-    updates["updated_at"] = now
+    updates["updated_at"] = now.isoformat()
     updates["updated_by_user_id"] = user_id
 
     # If body or title changed, bump version and save snapshot
@@ -212,20 +217,21 @@ async def update_document(
         new_version += 1
         updates["version"] = new_version
 
-    await db.documents.update_one({"_id": ObjectId(document_id)}, {"$set": updates})
+    await db.documents.update_one({"id": document_id}, {"$set": updates})
 
     if content_changed:
         await db.document_versions.insert_one({
+            "id": str(uuid.uuid4()),
             "document_id": document_id,
             "version": new_version,
             "title": updates.get("title", doc["title"]),
             "body": updates.get("body", doc["body"]),
             "edited_by_user_id": user_id,
-            "created_at": now,
+            "created_at": now.isoformat(),
         })
 
-    updated = await db.documents.find_one({"_id": ObjectId(document_id)})
-    enriched = await _enrich_doc(updated, db)
+    updated = await db.documents.find_one({"id": document_id}, {"_id": 0})
+    enriched = await _enrich_doc(updated)
     return DocumentResponse(**enriched)
 
 
@@ -234,21 +240,19 @@ async def update_document(
 @router.delete("/documents/{document_id}")
 async def delete_document(
     document_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    role = await _get_org_role(user_id, org_id, db)
+    org_id = _get_org_id(current_user)
+    role = _get_org_role(current_user)
 
     if role not in ("owner", "admin"):
         raise HTTPException(403, "Only owners and admins can delete documents")
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
-    await db.documents.delete_one({"_id": ObjectId(document_id)})
+    await db.documents.delete_one({"id": document_id})
     await db.document_versions.delete_many({"document_id": document_id})
 
     return {"status": "deleted", "id": document_id}
@@ -259,29 +263,25 @@ async def delete_document(
 @router.post("/documents/{document_id}/star")
 async def star_document(
     document_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)
+    user_id = current_user["id"]
+    org_id = _get_org_id(current_user)
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
     starred = doc.get("starred_by", [])
     if user_id in starred:
-        # Unstar
         await db.documents.update_one(
-            {"_id": ObjectId(document_id)},
+            {"id": document_id},
             {"$pull": {"starred_by": user_id}},
         )
         return {"status": "unstarred", "id": document_id}
     else:
-        # Star
         await db.documents.update_one(
-            {"_id": ObjectId(document_id)},
+            {"id": document_id},
             {"$addToSet": {"starred_by": user_id}},
         )
         return {"status": "starred", "id": document_id}
@@ -292,24 +292,22 @@ async def star_document(
 @router.get("/documents/{document_id}/versions", response_model=List[DocumentVersionResponse])
 async def list_versions(
     document_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)
+    org_id = _get_org_id(current_user)
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
-    cursor = db.document_versions.find({"document_id": document_id}).sort("version", -1)
+    cursor = db.document_versions.find({"document_id": document_id}, {"_id": 0}).sort("version", -1)
     versions = []
     async for v in cursor:
-        v["id"] = str(v["_id"])
-        # Enrich editor name
         if v.get("edited_by_user_id"):
-            u = await db.users.find_one({"_id": ObjectId(v["edited_by_user_id"])})
+            u = await db.users.find_one(
+                {"id": v["edited_by_user_id"]},
+                {"_id": 0, "name": 1, "email": 1}
+            )
             v["edited_by_name"] = u.get("name", u.get("email", "Unknown")) if u else None
         versions.append(DocumentVersionResponse(**v))
     return versions
@@ -319,27 +317,26 @@ async def list_versions(
 async def get_version(
     document_id: str,
     version_number: int,
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)
+    org_id = _get_org_id(current_user)
 
-    doc = await db.documents.find_one({"_id": ObjectId(document_id), "org_id": org_id})
+    doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Document not found")
 
-    v = await db.document_versions.find_one({
-        "document_id": document_id,
-        "version": version_number,
-    })
+    v = await db.document_versions.find_one(
+        {"document_id": document_id, "version": version_number},
+        {"_id": 0}
+    )
     if not v:
         raise HTTPException(404, f"Version {version_number} not found")
 
-    v["id"] = str(v["_id"])
     if v.get("edited_by_user_id"):
-        u = await db.users.find_one({"_id": ObjectId(v["edited_by_user_id"])})
+        u = await db.users.find_one(
+            {"id": v["edited_by_user_id"]},
+            {"_id": 0, "name": 1, "email": 1}
+        )
         v["edited_by_name"] = u.get("name", u.get("email", "Unknown")) if u else None
     return DocumentVersionResponse(**v)
 
@@ -348,13 +345,11 @@ async def get_version(
 
 @router.get("/folders/stats")
 async def folder_stats(
-    db: AsyncIOMotorDatabase = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get document counts per folder for the current org."""
-    user_id = str(current_user["_id"])
-    org_id = await _get_org_id(current_user, db)
-    await _get_org_role(user_id, org_id, db)
+    user_id = current_user["id"]
+    org_id = _get_org_id(current_user)
 
     pipeline = [
         {"$match": {"org_id": org_id}},
