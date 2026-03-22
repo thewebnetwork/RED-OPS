@@ -965,3 +965,310 @@ kbd {
 .stagger-4 { animation: staggerUp 0.2s ease 0.20s both; }
 .stagger-5 { animation: staggerUp 0.2s ease 0.25s both; }
 .stagger-6 { animation: staggerUp 0.2s ease 0.30s both; }
+
+/* ── 29. FINANCE PAGE ──────────────────────────────────────── */
+.finance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.finance-header h1 { font-size: 22px; font-weight: 700; }
+
+/* finance metrics grid — 4-col alias */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .metrics-grid { grid-template-columns: 1fr; } }
+
+/* metric card text elements */
+.metric-label {
+  font-size: 11.5px;
+  color: var(--tx-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.metric-subtext {
+  font-size: 12px;
+  color: var(--tx-3);
+  margin-top: 3px;
+}
+
+.metric-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.metric-change.positive { color: var(--green); }
+.metric-change.negative { color: var(--red-status); }
+
+/* two-column section (Finance: renewals + chart side by side) */
+.two-column-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) { .two-column-section { grid-template-columns: 1fr; } }
+
+/* health indicator */
+.health-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* workload table wrapper */
+.workload-overview-table { overflow-x: auto; }
+
+/* ── 30. UTILITY ALIASES ───────────────────────────────────── */
+.text-secondary { color: var(--tx-2) !important; }
+.text-muted     { color: var(--tx-3) !important; }
+.font-medium    { font-weight: 500; }
+.font-semibold  { font-weight: 600; }
+.capitalize     { text-transform: capitalize; }
+
+/* ── 31. PROGRESS BARS ─────────────────────────────────────── */
+.progress-bar-wrap {
+  height: 6px;
+  background: var(--bg-overlay);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ── 32. STAT CARDS — INLINE ROW VARIANT ───────────────────── */
+.stat-row-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.15s;
+}
+
+.stat-row-card:hover { border-color: var(--border-hi); }
+
+/* ── 33. FILTER TABS (reusable) ────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 2px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+}
+
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--tx-3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: background 0.1s, color 0.1s;
+  font-family: inherit;
+}
+
+.filter-tab:hover { color: var(--tx-1); }
+.filter-tab.active { background: var(--bg-card); color: var(--tx-1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+/* ── 34. PAGE LOADING STATE ────────────────────────────────── */
+.page-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 200px;
+  color: var(--tx-3);
+}
+
+.spinner-ring {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── 35. SECTION DIVIDER WITH LABEL ────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 14px;
+  color: var(--tx-3);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── 36. COMMAND CENTER QUICK ACTION GRID ───────────────────── */
+.quick-actions-grid {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ── 37. AVATAR GROUP (stacked) ────────────────────────────── */
+.avatar-group {
+  display: flex;
+}
+
+.avatar-group .avatar-sm {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--bg-card);
+  margin-left: -6px;
+  flex-shrink: 0;
+}
+
+.avatar-group .avatar-sm:first-child { margin-left: 0; }
+
+/* ── 38. CARD INNER PADDING VARIANTS ───────────────────────── */
+.card-body   { padding: 16px; }
+.card-body-sm{ padding: 12px 14px; }
+
+/* ── 39. MISC NAV EXTRAS ───────────────────────────────────── */
+.nav-sub {
+  padding: 4px 8px 4px 30px;
+  font-size: 12px;
+  color: var(--tx-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.nav-sub:hover { background: var(--bg-elevated); color: var(--tx-1); }
+
+/* ── 40. TOAST (internal, non-sonner) ───────────────────────── */
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-hi);
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--tx-1);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+  animation: fadeUp 0.2s ease both;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── 41. SLIDE-IN PANEL ────────────────────────────────────── */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 500;
+  animation: fadeIn 0.15s ease;
+}
+
+.panel-slide {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  box-shadow: -16px 0 48px rgba(0,0,0,0.5);
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideLeft 0.2s ease;
+}
+
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* ── 42. MATRIX HOVER CARD ─────────────────────────────────── */
+.hover-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.hover-card:hover {
+  border-color: var(--border-hi);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}

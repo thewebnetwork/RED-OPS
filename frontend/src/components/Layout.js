@@ -18,6 +18,7 @@ import {
   Search,
   Plus,
   Bell,
+  BarChart2,
   ChevronRight,
   Cloud,
   ShoppingBag,
@@ -39,6 +40,7 @@ const NAV_BUSINESS = [
   { path: '/clients',  icon: Users,      label: 'Clients',         roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',            roles: ['Administrator','Operator'] },
   { path: '/finance',  icon: DollarSign, label: 'Finance',         roles: ['Administrator'] },
+  { path: '/reports',  icon: BarChart2,  label: 'Reports',         roles: ['Administrator','Operator'] },
   { path: '/sops',     icon: BookOpen,   label: 'SOPs & Playbooks',roles: ['Administrator','Operator','Standard User'] },
 ];
 const NAV_SERVICES = [
@@ -60,13 +62,16 @@ const CMD_ITEMS = [
   { label:'Clients',         icon:'👥', to:'/clients',       group:'Navigate' },
   { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
   { label:'Finance',         icon:'💰', to:'/finance',       group:'Navigate' },
+  { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
   { label:'SOPs',            icon:'📚', to:'/sops',          group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
   { label:'RRG Services',    icon:'🛍', to:'/services',      group:'Navigate' },
   { label:'Integrations',    icon:'🔌', to:'/integrations',  group:'Navigate' },
-  { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'C' },
+  { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'T' },
   { label:'New Request',     icon:'📝', to:'/requests?new=1',    group:'Create', shortcut:'R' },
   { label:'New Project',     icon:'🗂',  to:'/projects?new=1',   group:'Create', shortcut:'P' },
+  { label:'New Client',      icon:'👤', to:'/clients?new=1',     group:'Create', shortcut:'C' },
+  { label:'Settings',        icon:'⚙️',  to:'/settings',          group:'Navigate' },
 ];
 
 // ─────────────────────────────────────────────
@@ -247,7 +252,8 @@ export default function Layout({ children }) {
 
         {/* User */}
         <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'default' }}
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
+            onClick={() => navigate('/profile')}
             onMouseEnter={e => e.currentTarget.style.background='var(--bg-elevated)'}
             onMouseLeave={e => e.currentTarget.style.background='transparent'}>
             <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
@@ -257,7 +263,7 @@ export default function Layout({ children }) {
               <div style={{ fontSize:12.5, fontWeight:600, color:'var(--tx-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name || 'User'}</div>
               <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:1 }}>{user?.role || ''}</div>
             </div>
-            <button onClick={handleLogout} title="Sign out"
+            <button onClick={e => { e.stopPropagation(); handleLogout(); }} title="Sign out"
               style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', display:'flex', alignItems:'center', padding:4, borderRadius:5, flexShrink:0 }}
               onMouseEnter={e => { e.currentTarget.style.color='#ef4444'; e.currentTarget.style.background='rgba(239,68,68,.12)'; }}
               onMouseLeave={e => { e.currentTarget.style.color='var(--tx-3)'; e.currentTarget.style.background='none'; }}>
@@ -303,7 +309,7 @@ export default function Layout({ children }) {
               {unread > 0 && <div className="notif-dot" />}
             </div>
 
-            <button onClick={() => navigate('/command-center')} className="btn-primary btn-sm" style={{ gap:5 }}>
+            <button onClick={() => navigate('/requests?new=1')} className="btn-primary btn-sm" style={{ gap:5 }}>
               <Plus size={13} />
               New Request
             </button>

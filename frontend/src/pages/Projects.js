@@ -520,6 +520,7 @@ export default function Projects() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '16px',
+                padding: '18px 20px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 position: 'relative',
