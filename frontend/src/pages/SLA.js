@@ -307,10 +307,10 @@ export default function SLA() {
   };
 
   const priorityColors = {
-    'Urgent': 'bg-red-100 text-red-700',
-    'High': 'bg-orange-100 text-orange-700',
-    'Normal': 'bg-blue-100 text-blue-700',
-    'Low': 'bg-slate-100 text-slate-600'
+    'Urgent': { background: '#ef444418', color: '#ef4444' },
+    'High':   { background: '#f9731618', color: '#f97316' },
+    'Normal': { background: 'var(--bg-elevated)', color: 'var(--tx-2)' },
+    'Low':    { background: 'var(--bg-elevated)', color: 'var(--tx-3)' },
   };
 
   if (loading) {
@@ -326,8 +326,8 @@ export default function SLA() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">SLA Management</h1>
-          <p className="text-slate-500 mt-1">Define, monitor, and manage Service Level Agreements</p>
+          <h1 className="text-2xl font-bold">SLA Management</h1>
+          <p className="mt-1">Define, monitor, and manage Service Level Agreements</p>
         </div>
       </div>
 
@@ -338,7 +338,7 @@ export default function SLA() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">On Track</p>
+                  <p className="text-sm">On Track</p>
                   <p className="text-2xl font-bold text-green-600">{slaStats.orders?.on_track || 0}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-green-500" />
@@ -349,7 +349,7 @@ export default function SLA() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">At Risk</p>
+                  <p className="text-sm">At Risk</p>
                   <p className="text-2xl font-bold text-amber-600">{slaStats.orders?.at_risk || 0}</p>
                 </div>
                 <Clock className="h-8 w-8 text-amber-500" />
@@ -360,7 +360,7 @@ export default function SLA() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">Breached</p>
+                  <p className="text-sm">Breached</p>
                   <p className="text-2xl font-bold text-red-600">{slaStats.orders?.breached || 0}</p>
                 </div>
                 <XCircle className="h-8 w-8 text-red-500" />
@@ -371,10 +371,10 @@ export default function SLA() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">Unacknowledged Alerts</p>
-                  <p className="text-2xl font-bold text-slate-700">{slaStats.alerts?.unacknowledged || 0}</p>
+                  <p className="text-sm">Unacknowledged Alerts</p>
+                  <p className="text-2xl font-bold">{slaStats.alerts?.unacknowledged || 0}</p>
                 </div>
-                <Bell className="h-8 w-8 text-slate-400" />
+                <Bell className="h-8 w-8" />
               </div>
             </CardContent>
           </Card>
@@ -441,7 +441,7 @@ export default function SLA() {
                     className="mt-1.5"
                     data-testid="response-time-input"
                   />
-                  <p className="text-xs text-slate-500 mt-1">First response target</p>
+                  <p className="text-xs mt-1">First response target</p>
                 </div>
                 <div>
                   <Label>Resolution Time (hours) *</Label>
@@ -453,7 +453,7 @@ export default function SLA() {
                     className="mt-1.5"
                     data-testid="resolution-time-input"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Full resolution target</p>
+                  <p className="text-xs mt-1">Full resolution target</p>
                 </div>
               </div>
 
@@ -544,8 +544,8 @@ export default function SLA() {
       {/* SLA Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {slaDefinitions.length === 0 ? (
-          <Card className="col-span-full border-slate-200">
-            <CardContent className="p-12 text-center text-slate-500">
+          <Card className="col-span-full">
+            <CardContent className="p-12 text-center">
               <Clock size={48} className="mx-auto text-slate-300 mb-3" />
               <p>No SLAs defined yet</p>
               <p className="text-sm mt-1">Create your first SLA to define response time targets</p>
@@ -555,7 +555,7 @@ export default function SLA() {
           slaDefinitions.map(sla => (
             <Card 
               key={sla.id} 
-              className={`border-slate-200 ${!sla.is_active ? 'opacity-60' : ''}`}
+              className={`${!sla.is_active ? 'opacity-60' : ''}`}
               data-testid={`sla-card-${sla.id}`}
             >
               <CardHeader className="pb-3">
@@ -563,10 +563,10 @@ export default function SLA() {
                   <div>
                     <CardTitle className="text-lg">{sla.name}</CardTitle>
                     {sla.description && (
-                      <p className="text-sm text-slate-500 mt-1">{sla.description}</p>
+                      <p className="text-sm mt-1">{sla.description}</p>
                     )}
                   </div>
-                  <Badge className={sla.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
+                  <Badge className={sla.is_active ? 'text-green-700' : ''}>
                     {sla.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
@@ -574,28 +574,28 @@ export default function SLA() {
               <CardContent className="space-y-4">
                 {/* Time Targets */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500 mb-1">Response Time</p>
-                    <p className="text-xl font-bold text-slate-900">{formatHours(sla.response_time_hours)}</p>
+                  <div className="p-3 rounded-lg">
+                    <p className="text-xs mb-1">Response Time</p>
+                    <p className="text-xl font-bold">{formatHours(sla.response_time_hours)}</p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500 mb-1">Resolution Time</p>
-                    <p className="text-xl font-bold text-slate-900">{formatHours(sla.resolution_time_hours)}</p>
+                  <div className="p-3 rounded-lg">
+                    <p className="text-xs mb-1">Resolution Time</p>
+                    <p className="text-xl font-bold">{formatHours(sla.resolution_time_hours)}</p>
                   </div>
                 </div>
 
                 {/* Priority & Assignment */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge className={priorityColors[sla.priority]}>{sla.priority}</Badge>
-                  <Badge className="bg-slate-100 text-slate-600">
+                  <span style={{ ...priorityColors[sla.priority], fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4 }}>{sla.priority}</span>
+                  <Badge className="">
                     {sla.applies_to_type === 'role' ? <Shield size={12} className="mr-1" /> : <Users size={12} className="mr-1" />}
                     {sla.applies_to_name}
                   </Badge>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                  <span className="text-xs text-slate-400">
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <span className="text-xs">
                     Created {format(new Date(sla.created_at), 'MMM d, yyyy')}
                   </span>
                   <div className="flex items-center gap-1">
@@ -617,7 +617,7 @@ export default function SLA() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-500 hover:text-red-400"
                       onClick={() => handleDelete(sla.id)}
                     >
                       <Trash2 size={16} />
@@ -648,7 +648,7 @@ export default function SLA() {
             </CardHeader>
             <CardContent>
               {slaAlerts.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center">
                   <Bell size={48} className="mx-auto text-slate-300 mb-3" />
                   <p>No SLA alerts</p>
                   <p className="text-sm mt-1">All orders are within SLA targets</p>
@@ -660,8 +660,8 @@ export default function SLA() {
                       key={alert.id} 
                       className={`p-4 rounded-lg border ${
                         alert.alert_type === 'breach' 
-                          ? 'bg-red-50 border-red-200' 
-                          : 'bg-amber-50 border-amber-200'
+                          ? 'border-red-500/30 bg-red-500/10' 
+                          : ''
                       } ${alert.acknowledged ? 'opacity-60' : ''}`}
                     >
                       <div className="flex items-start justify-between">
@@ -672,20 +672,20 @@ export default function SLA() {
                             <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                           )}
                           <div>
-                            <p className="font-medium text-slate-900">
+                            <p className="font-medium">
                               {alert.alert_type === 'breach' ? 'SLA Breached' : 'SLA Warning'} - {alert.order_code}
                             </p>
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="text-sm mt-1">
                               Deadline: {format(new Date(alert.sla_deadline), 'MMM d, yyyy h:mm a')}
                             </p>
-                            <p className="text-xs text-slate-500 mt-1">
+                            <p className="text-xs mt-1">
                               Triggered: {format(new Date(alert.triggered_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {alert.acknowledged ? (
-                            <Badge className="bg-slate-100 text-slate-600">
+                            <Badge className="">
                               <CheckCheck size={12} className="mr-1" />
                               Acknowledged
                             </Badge>

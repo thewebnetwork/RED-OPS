@@ -104,15 +104,15 @@ function SortableWidgetItem({ widget, onRemove, onResize }) {
       className={`p-4 border rounded-lg bg-white shadow-sm ${isDragging ? 'ring-2 ring-rose-500' : ''}`}
     >
       <div className="flex items-center gap-3">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:text-slate-600">
           <GripVertical size={20} />
         </button>
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${widget.config?.color || 'bg-slate-500'}`}>
           <Icon size={20} className="text-white" />
         </div>
         <div className="flex-1">
-          <p className="font-medium text-slate-900">{widget.title}</p>
-          <p className="text-xs text-slate-500">{widget.widget_type} · {sizeInfo.label}</p>
+          <p className="font-medium">{widget.title}</p>
+          <p className="text-xs">{widget.widget_type} · {sizeInfo.label}</p>
         </div>
         <Select value={widget.size} onValueChange={(value) => onResize(widget.id, value)}>
           <SelectTrigger className="w-32">
@@ -138,7 +138,7 @@ function WidgetLibraryItem({ widget, onAdd }) {
 
   return (
     <div 
-      className="p-3 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer transition-colors"
+      className="p-3 border rounded-lg bg-white cursor-pointer transition-colors"
       onClick={() => onAdd(widget)}
     >
       <div className="flex items-center gap-3">
@@ -146,10 +146,10 @@ function WidgetLibraryItem({ widget, onAdd }) {
           <Icon size={16} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-slate-900 truncate">{widget.title}</p>
-          <p className="text-xs text-slate-500">{widget.category}</p>
+          <p className="font-medium text-sm truncate">{widget.title}</p>
+          <p className="text-xs">{widget.category}</p>
         </div>
-        <Plus size={16} className="text-slate-400" />
+        <Plus size={16} className="" />
       </div>
     </div>
   );
@@ -158,7 +158,7 @@ function WidgetLibraryItem({ widget, onAdd }) {
 // Dashboard Card
 function DashboardCard({ dashboard, onEdit, onClone, onDelete, onPreview }) {
   return (
-    <Card className="border-slate-200 hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -166,17 +166,17 @@ function DashboardCard({ dashboard, onEdit, onClone, onDelete, onPreview }) {
               <LayoutDashboard size={24} className="text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">{dashboard.name}</h3>
-              <p className="text-sm text-slate-500 line-clamp-1">{dashboard.description}</p>
+              <h3 className="font-semibold">{dashboard.name}</h3>
+              <p className="text-sm line-clamp-1">{dashboard.description}</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline" className="text-xs">
                   {dashboard.widgets?.length || 0} widgets
                 </Badge>
                 {dashboard.is_system && (
-                  <Badge className="bg-blue-100 text-blue-700 text-xs">System</Badge>
+                  <Badge className="text-xs">System</Badge>
                 )}
                 {dashboard.is_default_for && (
-                  <Badge className="bg-emerald-100 text-emerald-700 text-xs">
+                  <Badge className="text-xs">
                     Default: {dashboard.is_default_for}
                   </Badge>
                 )}
@@ -433,8 +433,8 @@ export default function DashboardBuilder() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Edit Dashboard</h1>
-              <p className="text-slate-500">Drag and drop widgets to customize layout</p>
+              <h1 className="text-2xl font-bold">Edit Dashboard</h1>
+              <p className="">Drag and drop widgets to customize layout</p>
             </div>
           </div>
           <Button onClick={handleSave} className="bg-rose-600 hover:bg-rose-700 gap-2">
@@ -447,7 +447,7 @@ export default function DashboardBuilder() {
         <div className="grid grid-cols-12 gap-6">
           {/* Widget Library */}
           <div className="col-span-4">
-            <Card className="border-slate-200 sticky top-4">
+            <Card className="sticky top-4">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Widget Library</CardTitle>
                 <CardDescription>Click to add widgets</CardDescription>
@@ -479,7 +479,7 @@ export default function DashboardBuilder() {
 
           {/* Dashboard Canvas */}
           <div className="col-span-8">
-            <Card className="border-slate-200">
+            <Card className="">
               <CardHeader className="border-b">
                 <div className="space-y-3">
                   <div>
@@ -506,7 +506,7 @@ export default function DashboardBuilder() {
               <CardContent className="p-4">
                 <div className="min-h-[400px]">
                   {editorWidgets.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-slate-400 border-2 border-dashed rounded-lg">
+                    <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg">
                       <LayoutDashboard size={48} className="mb-3" />
                       <p className="text-lg font-medium">No widgets added</p>
                       <p className="text-sm">Click widgets from the library to add them</p>
@@ -549,8 +549,8 @@ export default function DashboardBuilder() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard Builder</h1>
-          <p className="text-slate-500 mt-1">Create and manage dashboard templates</p>
+          <h1 className="text-2xl font-bold">Dashboard Builder</h1>
+          <p className="mt-1">Create and manage dashboard templates</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} className="bg-rose-600 hover:bg-rose-700 gap-2">
           <Plus size={18} />
@@ -560,7 +560,7 @@ export default function DashboardBuilder() {
 
       {/* System Dashboards */}
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">System Dashboards</h2>
+        <h2 className="text-lg font-semibold mb-3">System Dashboards</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {dashboards.filter(d => d.is_system).map(dashboard => (
             <DashboardCard
@@ -578,7 +578,7 @@ export default function DashboardBuilder() {
       {/* Custom Dashboards */}
       {dashboards.filter(d => !d.is_system).length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-3">Custom Dashboards</h2>
+          <h2 className="text-lg font-semibold mb-3">Custom Dashboards</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {dashboards.filter(d => !d.is_system).map(dashboard => (
               <DashboardCard
@@ -703,7 +703,7 @@ export default function DashboardBuilder() {
                     </span>
                   )}
                 </div>
-                <div className="border rounded-lg p-4 bg-slate-50 max-h-[400px] overflow-y-auto">
+                <div className="border rounded-lg p-4 max-h-[400px] overflow-y-auto">
                   <h4 className="font-medium mb-3">Visible Widgets:</h4>
                   <div className="space-y-2">
                     {previewData.dashboard?.widgets?.map((widget, idx) => (
@@ -716,7 +716,7 @@ export default function DashboardBuilder() {
                       </div>
                     ))}
                     {previewData.dashboard?.widgets?.length === 0 && (
-                      <p className="text-slate-500 text-sm">No widgets visible for this role</p>
+                      <p className="text-sm">No widgets visible for this role</p>
                     )}
                   </div>
                 </div>

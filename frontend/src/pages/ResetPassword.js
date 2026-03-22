@@ -82,14 +82,14 @@ export default function ResetPassword() {
   if (verifying) {
     return (
       <div 
-        className="min-h-screen flex items-center justify-center bg-slate-900 p-4"
+        className="min-h-screen flex items-center justify-center bg-[#0d0d0d] p-4"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1574867022210-bd9ecc413bf3?crop=entropy&cs=srgb&fm=jpg&q=85)',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
-        <div className="absolute inset-0 bg-slate-900/80" />
+        <div className="absolute inset-0 bg-[#0d0d0d]/80" />
         <div className="relative">
           <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
         </div>
@@ -99,25 +99,25 @@ export default function ResetPassword() {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center bg-slate-900 p-4"
+      className="min-h-screen flex items-center justify-center bg-[#0d0d0d] p-4"
       style={{
         backgroundImage: 'url(https://images.unsplash.com/photo-1574867022210-bd9ecc413bf3?crop=entropy&cs=srgb&fm=jpg&q=85)',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
     >
-      <div className="absolute inset-0 bg-slate-900/80" />
+      <div className="absolute inset-0 bg-[#0d0d0d]/80" />
       
       <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-[#161616] border border-[#2a2a2a] rounded-2xl shadow-2xl p-8">
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-xl">RR</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">Red Ribbon Ops</h1>
-              <p className="text-xs text-slate-500">Operations Portal</p>
+              <h1 className="text-xl font-bold">Red Ribbon Ops</h1>
+              <p className="text-xs">Operations Portal</p>
             </div>
           </div>
 
@@ -127,8 +127,8 @@ export default function ResetPassword() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <XCircle size={32} className="text-red-600" />
               </div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-2">Invalid Reset Link</h2>
-              <p className="text-slate-600 mb-6">
+              <h2 className="text-xl font-semibold mb-2">Invalid Reset Link</h2>
+              <p className="mb-6">
                 This password reset link is invalid or has expired. Please request a new one.
               </p>
               <Link to="/forgot-password">
@@ -148,11 +148,11 @@ export default function ResetPassword() {
           {/* Success State */}
           {success && (
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} className="text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-2">Password Reset!</h2>
-              <p className="text-slate-600 mb-6">
+              <h2 className="text-xl font-semibold mb-2">Password Reset!</h2>
+              <p className="mb-6">
                 Your password has been successfully reset. You can now log in with your new password.
               </p>
               <Link to="/login">
@@ -167,9 +167,9 @@ export default function ResetPassword() {
           {token && tokenValid && !success && (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold text-slate-900">Reset Your Password</h2>
+                <h2 className="text-xl font-semibold">Reset Your Password</h2>
                 {userEmail && (
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm mt-1">
                     For account: <strong>{userEmail}</strong>
                   </p>
                 )}
@@ -177,7 +177,7 @@ export default function ResetPassword() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <Label htmlFor="password" className="text-slate-700">New Password</Label>
+                  <Label htmlFor="password" className="">New Password</Label>
                   <div className="relative mt-1.5">
                     <Input
                       id="password"
@@ -191,16 +191,16 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-[#a0a0a0]"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Must be at least 6 characters</p>
+                  <p className="text-xs mt-1">Must be at least 6 characters</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="confirmPassword" className="text-slate-700">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
                     type={showPassword ? 'text' : 'password'}
@@ -238,7 +238,7 @@ export default function ResetPassword() {
               <div className="mt-6 text-center">
                 <Link 
                   to="/login" 
-                  className="text-sm text-slate-600 hover:text-rose-600 inline-flex items-center gap-1"
+                  className="text-sm hover:text-rose-600 inline-flex items-center gap-1"
                 >
                   <ArrowLeft size={14} />
                   Back to Login

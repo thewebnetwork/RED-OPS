@@ -451,13 +451,13 @@ export default function IAMPage() {
   };
 
   const getRoleColor = (role) => {
-    const colors = { 'Administrator': 'bg-rose-100 text-rose-700', 'Operator': 'bg-blue-100 text-blue-700', 'Standard User': 'bg-emerald-100 text-emerald-700' };
-    return colors[role] || 'bg-slate-100 text-slate-700';
+    const colors = { 'Administrator': 'text-rose-700', 'Operator': '', 'Standard User': '' };
+    return colors[role] || '';
   };
 
   const getAccountTypeColor = (type) => {
-    const colors = { 'Partner': 'bg-purple-100 text-purple-700', 'Media Client': 'bg-cyan-100 text-cyan-700', 'Internal Staff': 'bg-orange-100 text-orange-700', 'Vendor/Freelancer': 'bg-emerald-100 text-emerald-700' };
-    return colors[type] || 'bg-slate-100 text-slate-700';
+    const colors = { 'Partner': '', 'Media Client': '', 'Internal Staff': 'bg-orange-100 text-orange-700', 'Vendor/Freelancer': '' };
+    return colors[type] || '';
   };
 
   // Get ALL specialties - NOT filtered by team (teams can suggest but not restrict)
@@ -494,20 +494,20 @@ export default function IAMPage() {
   return (
     <div className="space-y-6 animate-fade-in" data-testid="iam-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
           <KeyRound className="text-[#A2182C]" />
           {t('iam.title')}
         </h1>
-        <p className="text-slate-500 mt-1">{t('iam.subtitle')}</p>
+        <p className="mt-1">{t('iam.subtitle')}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm text-slate-500">{t('iam.users')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm text-slate-500">{t('iam.teams')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm text-slate-500">{t('iam.specialties')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm text-slate-500">{t('iam.roles')}</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm text-slate-500">{t('iam.accountTypes')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.length}</p><p className="text-sm">{t('iam.users')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{teams.length}</p><p className="text-sm">{t('iam.teams')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{specialties.length}</p><p className="text-sm">{t('iam.specialties')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roles.length || identityConfig?.roles?.length || 3}</p><p className="text-sm">{t('iam.roles')}</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{accountTypes.length || identityConfig?.account_types?.length || 4}</p><p className="text-sm">{t('iam.accountTypes')}</p></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -523,7 +523,7 @@ export default function IAMPage() {
         <TabsContent value="users" className="mt-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder={t('iam.searchUsers')} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
@@ -533,23 +533,23 @@ export default function IAMPage() {
           <Card>
             <CardContent className="p-0">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b">
+                <thead className="border-b">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.user')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.role')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('iam.accountTypes')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.specialty')}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">{t('common.actions')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.user')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.role')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('iam.accountTypes')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.specialty')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{t('common.status')}</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {filteredUsers.map(user => (
-                    <tr key={user.id} className="hover:bg-slate-50">
+                    <tr key={user.id} className="">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-medium text-sm">{user.name.charAt(0)}</div>
-                          <div><p className="font-medium">{user.name}</p><p className="text-sm text-slate-500">{user.email}</p></div>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-rose-600 font-medium text-sm">{user.name.charAt(0)}</div>
+                          <div><p className="font-medium">{user.name}</p><p className="text-sm">{user.email}</p></div>
                         </div>
                       </td>
                       <td className="px-4 py-3"><Badge className={getRoleColor(user.role)}>{user.role}</Badge></td>
@@ -589,7 +589,7 @@ export default function IAMPage() {
         <TabsContent value="teams" className="mt-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder="Search teams..." value={teamSearch} onChange={(e) => setTeamSearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openTeamDialog()}>
@@ -603,11 +603,11 @@ export default function IAMPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-medium">{team.name}</h3>
-                      {team.description && <p className="text-sm text-slate-500 mt-1">{team.description}</p>}
-                      <p className="text-xs text-slate-400 mt-2">{team.member_count || 0} members</p>
+                      {team.description && <p className="text-sm mt-1">{team.description}</p>}
+                      <p className="text-xs mt-2">{team.member_count || 0} members</p>
                       {team.related_specialty_names && team.related_specialty_names.length > 0 && (
                         <div className="mt-2">
-                          <p className="text-xs text-slate-500 mb-1">Related Specialties:</p>
+                          <p className="text-xs mb-1">Related Specialties:</p>
                           <div className="flex flex-wrap gap-1">
                             {team.related_specialty_names.slice(0, 3).map((name, i) => (
                               <Badge key={i} variant="secondary" className="text-xs">{name}</Badge>
@@ -634,7 +634,7 @@ export default function IAMPage() {
         <TabsContent value="specialties" className="mt-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder="Search specialties..." value={specialtySearch} onChange={(e) => setSpecialtySearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openSpecialtyDialog()}>
@@ -650,7 +650,7 @@ export default function IAMPage() {
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ backgroundColor: s.color || '#6366F1' }}>{s.name.charAt(0)}</div>
                       <div>
                         <p className="font-medium text-sm">{s.name}</p>
-                        <p className="text-xs text-slate-400">{s.user_count || 0} users</p>
+                        <p className="text-xs">{s.user_count || 0} users</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -692,7 +692,7 @@ export default function IAMPage() {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">Key Permissions:</p>
+                      <p className="text-sm font-medium mb-2">Key Permissions:</p>
                       <div className="flex flex-wrap gap-1">
                         {Object.entries(role.permissions || ROLE_TEMPLATES[role.name]?.permissions || {}).filter(([_, perms]) => Object.values(perms).some(v => v)).slice(0, 5).map(([module]) => (
                           <Badge key={module} variant="secondary" className="text-xs">{PERMISSION_MODULES[module]?.label || module}</Badge>
@@ -701,7 +701,7 @@ export default function IAMPage() {
                     </div>
                     {role.is_system && <Badge variant="outline" className="text-xs">System</Badge>}
                   </div>
-                  {role.user_count !== undefined && <p className="text-xs text-slate-400 mt-3">{role.user_count} users</p>}
+                  {role.user_count !== undefined && <p className="text-xs mt-3">{role.user_count} users</p>}
                 </CardContent>
               </Card>
             ))}
@@ -723,7 +723,7 @@ export default function IAMPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <Badge className={getAccountTypeColor(at.name)}>{at.name}</Badge>
-                      <p className="text-sm text-slate-500 mt-2">
+                      <p className="text-sm mt-2">
                         {at.description || (
                           at.name === 'Partner' ? 'Business partners' :
                           at.name === 'Media Client' ? 'Media service clients (A La Carte)' :
@@ -740,7 +740,7 @@ export default function IAMPage() {
                     </div>
                   </div>
                   {at.is_system && <Badge variant="outline" className="mt-2 text-xs">System</Badge>}
-                  {at.user_count !== undefined && <p className="text-xs text-slate-400 mt-3">{at.user_count} users</p>}
+                  {at.user_count !== undefined && <p className="text-xs mt-3">{at.user_count} users</p>}
                 </CardContent>
               </Card>
             ))}
@@ -797,7 +797,7 @@ export default function IAMPage() {
                   </Button>
                 )}
               </div>
-              {!editingUser && <p className="text-xs text-slate-500 mt-1">This password will be sent to the user via email</p>}
+              {!editingUser && <p className="text-xs mt-1">This password will be sent to the user via email</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -840,7 +840,7 @@ export default function IAMPage() {
                 data-testid="user-team-select"
               />
               {userForm.team_id && getTeamSuggestedSpecialties().length > 0 && (
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs mt-1">
                   <Info size={12} className="inline mr-1" />
                   Team has {getTeamSuggestedSpecialties().length} suggested specialties (not restricted)
                 </p>
@@ -852,13 +852,13 @@ export default function IAMPage() {
                 Specialties {userForm.account_type !== 'Media Client' ? '*' : ''} (Select multiple)
               </Label>
               {userForm.account_type === 'Media Client' && (
-                <p className="text-xs text-slate-500 mb-1">
+                <p className="text-xs mb-1">
                   Optional for Media Clients (they submit requests, not execute work)
                 </p>
               )}
               {/* Searchable specialty input */}
               <div className="relative mb-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={16} />
                 <Input
                   placeholder="Search specialties..."
                   value={userSpecialtySearch}
@@ -869,7 +869,7 @@ export default function IAMPage() {
                 {userSpecialtySearch && (
                   <button 
                     onClick={() => setUserSpecialtySearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-slate-600"
                   >
                     <X size={16} />
                   </button>
@@ -886,7 +886,7 @@ export default function IAMPage() {
                   const teamSuggested = getTeamSuggestedSpecialties();
                   
                   if (filtered.length === 0) {
-                    return <p className="text-sm text-slate-500 p-2 text-center">
+                    return <p className="text-sm p-2 text-center">
                       {userSpecialtySearch ? 'No specialties match your search' : 'No specialties available'}
                     </p>;
                   }
@@ -896,8 +896,8 @@ export default function IAMPage() {
                     return (
                       <label 
                         key={spec.value} 
-                        className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-slate-50 ${
-                          userForm.specialty_ids.includes(spec.value) ? 'bg-rose-50 border border-rose-200' : ''
+                        className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+                          userForm.specialty_ids.includes(spec.value) ? 'border border-rose-200' : ''
                         } ${isSuggested && !userForm.specialty_ids.includes(spec.value) ? 'bg-blue-50/50' : ''}`}
                       >
                         <Checkbox 
@@ -939,7 +939,7 @@ export default function IAMPage() {
                 })()}
               </div>
               {userForm.specialty_ids.length > 0 && (
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs mt-1">
                   Selected: {userForm.specialty_ids.length} specialt{userForm.specialty_ids.length === 1 ? 'y' : 'ies'}
                   {userForm.primary_specialty_id && (
                     <span className="text-rose-600 ml-1">
@@ -958,9 +958,9 @@ export default function IAMPage() {
               
               {/* Pool Access Dropdown - only shown when can_pick is true */}
               {userForm.can_pick && (
-                <div className="ml-8 p-3 bg-slate-50 rounded-lg">
+                <div className="ml-8 p-3 rounded-lg">
                   <Label className="text-sm">Pool Access Level</Label>
-                  <p className="text-xs text-slate-500 mb-2">Which pools can this user access?</p>
+                  <p className="text-xs mb-2">Which pools can this user access?</p>
                   <Select
                     value={userForm.pool_access || 'both'}
                     onValueChange={(v) => setUserForm({ ...userForm, pool_access: v })}
@@ -996,7 +996,7 @@ export default function IAMPage() {
             {/* Dashboard Type Assignment */}
             <div>
               <Label>Dashboard Type *</Label>
-              <p className="text-xs text-slate-500 mb-2">Select the dashboard experience for this user</p>
+              <p className="text-xs mb-2">Select the dashboard experience for this user</p>
               <Select
                 value={userForm.dashboard_type_id}
                 onValueChange={(v) => setUserForm({ ...userForm, dashboard_type_id: v })}
@@ -1007,7 +1007,7 @@ export default function IAMPage() {
                 <SelectContent>
                   {dashboardTemplates.map(d => (
                     <SelectItem key={d.id} value={d.id}>
-                      {d.name} {d.is_default_for && <span className="text-slate-500">({d.is_default_for})</span>}
+                      {d.name} {d.is_default_for && <span className="">({d.is_default_for})</span>}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1035,7 +1035,7 @@ export default function IAMPage() {
             <div><Label>Description</Label><Input value={teamForm.description} onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })} /></div>
             <div>
               <Label>Related Specialties</Label>
-              <p className="text-xs text-slate-500 mb-2">Users in this team will have specialty options filtered to these selections</p>
+              <p className="text-xs mb-2">Users in this team will have specialty options filtered to these selections</p>
               <SearchableMultiSelect
                 options={specialtyOptions}
                 value={teamForm.related_specialty_ids}
@@ -1113,7 +1113,7 @@ export default function IAMPage() {
             </div>
             
             {/* Permission Matrix */}
-            <div className="border rounded-lg p-4 bg-slate-50">
+            <div className="border rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Shield size={18} className="text-rose-600" />
                 <Label className="text-base font-semibold">Permission Matrix</Label>
@@ -1123,8 +1123,8 @@ export default function IAMPage() {
                 {Object.entries(PERMISSION_MODULES).map(([moduleKey, moduleConfig]) => (
                   <Collapsible key={moduleKey} defaultOpen={true}>
                     <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                      <CollapsibleTrigger className="flex items-center gap-2 flex-1 hover:bg-slate-50 rounded p-1">
-                        <ChevronDown size={16} className="text-slate-400" />
+                      <CollapsibleTrigger className="flex items-center gap-2 flex-1 rounded p-1">
+                        <ChevronDown size={16} className="" />
                         <span className="font-medium">{moduleConfig.label}</span>
                         <Badge variant="secondary" className="ml-2 text-xs">
                           {moduleConfig.actions.filter(a => roleForm.permissions?.[moduleKey]?.[a]).length}/{moduleConfig.actions.length}

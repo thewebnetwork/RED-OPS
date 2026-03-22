@@ -96,12 +96,12 @@ export default function ServiceCatalog() {
     return (
       <div className="max-w-2xl mx-auto animate-fade-in" data-testid="service-request-page">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900" data-testid="form-heading">
+          <h1 className="text-2xl font-bold" data-testid="form-heading">
             {selectedTemplate.name}
           </h1>
-          <p className="text-slate-500 mt-1">{selectedTemplate.description}</p>
+          <p className="mt-1">{selectedTemplate.description}</p>
         </div>
-        <Card className="border-slate-200">
+        <Card className="">
           <CardContent className="p-6">
             <ServiceRequestForm template={selectedTemplate} onBack={() => setSelectedTemplate(null)} />
           </CardContent>
@@ -128,14 +128,14 @@ export default function ServiceCatalog() {
               <IconComponent size={24} className="text-[#A2182C] group-hover:text-white transition-colors" />
             )}
           </div>
-          <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-[#A2182C] transition-colors">
+          <h3 className="font-semibold mb-1 group-hover:text-[#A2182C] transition-colors">
             {template.name}
           </h3>
-          <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+          <p className="text-sm mb-4 line-clamp-2">
             {template.description}
           </p>
           <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1 text-slate-400">
+            <div className="flex items-center gap-1">
               <Clock size={14} />
               <span>{template.turnaround_text}</span>
             </div>
@@ -144,7 +144,7 @@ export default function ServiceCatalog() {
                 Book a Call
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-slate-500">
+              <Badge variant="outline" className="">
                 {template.form_schema?.length || 0} fields
               </Badge>
             )}
@@ -166,10 +166,10 @@ export default function ServiceCatalog() {
     <div className="space-y-6 animate-fade-in" data-testid="service-catalog-page">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="text-3xl font-bold">
           {t('catalog.title', 'Request a Service')}
         </h1>
-        <p className="text-slate-500 mt-2">
+        <p className="mt-2">
           {t('catalog.subtitle', 'Choose a service below and fill out the tailored form')}
         </p>
       </div>
@@ -177,7 +177,7 @@ export default function ServiceCatalog() {
       {/* Search */}
       <div className="max-w-md mx-auto">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
           <Input
             placeholder={t('catalog.searchPlaceholder', 'Search services...')}
             value={search}
@@ -199,7 +199,7 @@ export default function ServiceCatalog() {
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
                 selectedCategory === cat
                   ? 'bg-[#A2182C] text-white border-[#A2182C] shadow-sm'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#A2182C]/40 hover:text-[#A2182C]'
+                  : 'bg-white hover:border-[#A2182C]/40 hover:text-[#A2182C]'
               }`}
             >
               {cat}
@@ -212,11 +212,11 @@ export default function ServiceCatalog() {
       {groups.map(group => (
         <div key={group.key} data-testid={`service-group-${group.key}`}>
           {group.secondary ? (
-            <div className="border-t border-slate-200 pt-6 mt-2">
-              <h2 className="text-base font-medium text-slate-500 mb-4">{group.label}</h2>
+            <div className="border-t pt-6 mt-2">
+              <h2 className="text-base font-medium mb-4">{group.label}</h2>
             </div>
           ) : (
-            <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-slate-400" />
               {group.label}
             </h2>
@@ -231,7 +231,7 @@ export default function ServiceCatalog() {
       {filtered.length === 0 && (
         <div className="text-center py-12">
           <Package size={48} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500">No services match your search</p>
+          <p className="">No services match your search</p>
           <Button
             variant="link"
             onClick={() => { setSearch(''); setSelectedCategory('All'); }}

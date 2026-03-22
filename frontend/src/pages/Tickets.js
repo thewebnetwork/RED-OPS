@@ -36,8 +36,8 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusColors = {
-  'Open': 'text-blue-700',
-  'Waiting': 'bg-amber-100 text-amber-700',
+  'Open': '',
+  'Waiting': '',
   'Closed': 'bg-neutral-800',
 };
 
@@ -208,11 +208,11 @@ export default function Tickets() {
       </div>
 
       {/* Filters */}
-      <Card className="border-slate-200">
+      <Card className="">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
                 placeholder={t('tickets.searchPlaceholder')}
                 value={search}

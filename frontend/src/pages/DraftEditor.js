@@ -148,15 +148,15 @@ export default function DraftEditor() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900">Edit Draft</h1>
-            <Badge className="bg-slate-200 text-slate-600">Draft</Badge>
+            <h1 className="text-2xl font-bold">Edit Draft</h1>
+            <Badge className="">Draft</Badge>
           </div>
-          <p className="text-slate-500 text-sm">{draft.order_code || draft.request_code || draft.report_code}</p>
+          <p className="text-sm">{draft.order_code || draft.request_code || draft.report_code}</p>
         </div>
       </div>
 
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
+      <Card className="">
+        <CardHeader className="border-b pb-4">
           <CardTitle>Request Details</CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -269,7 +269,7 @@ export default function DraftEditor() {
           )}
 
           {/* Action Buttons */}
-          <div className="sticky bottom-0 pt-4 pb-2 bg-white border-t border-slate-100 flex gap-3">
+          <div className="sticky bottom-0 pt-4 pb-2 bg-white border-t flex gap-3">
             <Button 
               type="button" 
               variant="outline" 

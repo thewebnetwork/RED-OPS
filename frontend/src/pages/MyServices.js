@@ -81,7 +81,7 @@ export default function MyServices() {
 
   const getAccountTypeBadge = () => {
     const colors = {
-      'Partner': 'bg-purple-100',
+      'Partner': '',
       'Media Client': { background: '#06b6d418', color: '#06b6d4' },
       'Client': { background: '#06b6d418', color: '#06b6d4' },
       'Internal Staff': { background: '#f9731618', color: '#f97316' },
@@ -185,7 +185,7 @@ For support, email support@example.com"
               <div className="flex items-center justify-between">
                 <span className="text-sm">Specialty</span>
                 <span className="text-sm font-medium flex items-center gap-1">
-                  <Briefcase size={14} className="text-slate-400" />
+                  <Briefcase size={14} className="" />
                   {user.specialty_name}
                 </span>
               </div>
@@ -194,7 +194,7 @@ For support, email support@example.com"
               <div className="flex items-center justify-between">
                 <span className="text-sm">Team</span>
                 <span className="text-sm font-medium flex items-center gap-1">
-                  <Users size={14} className="text-slate-400" />
+                  <Users size={14} className="" />
                   {user.team_name}
                 </span>
               </div>

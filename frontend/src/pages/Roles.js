@@ -260,15 +260,15 @@ export default function Roles() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Role Permissions</h1>
-          <p className="text-slate-500 mt-1">Configure access permissions for each role</p>
+          <h1 className="text-2xl font-bold">Role Permissions</h1>
+          <p className="mt-1">Configure access permissions for each role</p>
         </div>
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-blue-800">
+      <div className="border rounded-lg p-4 flex gap-3">
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="text-sm">
           <p className="font-medium">Identity & Access Management</p>
           <p className="mt-1">
             The platform uses 3 fixed roles: <strong>Administrator</strong>, <strong>Privileged User</strong>, and <strong>Standard User</strong>. 
@@ -280,7 +280,7 @@ export default function Roles() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Role Cards - Left Side */}
         <div className="lg:col-span-1 space-y-4">
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">System Roles</h2>
+          <h2 className="text-sm font-medium uppercase tracking-wider">System Roles</h2>
           {roles.map((role) => {
             const config = roleConfig[role.name] || roleConfig['Standard User'];
             const Icon = config.icon;
@@ -307,8 +307,8 @@ export default function Roles() {
                       <Icon size={20} style={{ color: config.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900">{role.display_name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{config.description}</p>
+                      <p className="font-semibold">{role.display_name}</p>
+                      <p className="text-xs mt-0.5 line-clamp-2">{config.description}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-xs">
                           <Users size={12} className="mr-1" />
@@ -358,7 +358,7 @@ export default function Roles() {
                   </div>
                   <div className="flex items-center gap-2">
                     {hasChanges && (
-                      <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                      <Badge className="">
                         Unsaved changes
                       </Badge>
                     )}
@@ -392,20 +392,20 @@ export default function Roles() {
                       onOpenChange={() => toggleModuleExpanded(module)}
                     >
                       <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center justify-between px-4 py-3 transition-colors">
                           <div className="flex items-center gap-3">
                             {expandedModules[module] ? (
-                              <ChevronDown className="w-4 h-4 text-slate-400" />
+                              <ChevronDown className="w-4 h-4" />
                             ) : (
-                              <ChevronRight className="w-4 h-4 text-slate-400" />
+                              <ChevronRight className="w-4 h-4" />
                             )}
-                            <span className="font-medium text-slate-900">{getModuleLabel(module)}</span>
+                            <span className="font-medium">{getModuleLabel(module)}</span>
                             <Badge variant="outline" className="text-xs">
                               {Object.values(actions).filter(v => v).length}/{Object.keys(actions).length}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <span className="text-xs text-slate-500 mr-2">
+                            <span className="text-xs mr-2">
                               {isModuleFullyEnabled(module) ? 'All enabled' : isModulePartiallyEnabled(module) ? 'Partial' : 'Disabled'}
                             </span>
                             <Switch
@@ -425,7 +425,7 @@ export default function Roles() {
                                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
                                   enabled 
                                     ? 'bg-white border-rose-200 text-rose-700' 
-                                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                    : 'bg-white hover:border-slate-300'
                                 }`}
                                 data-testid={`permission-${module}-${action}`}
                               >
@@ -446,7 +446,7 @@ export default function Roles() {
             </Card>
           ) : (
             <Card>
-              <CardContent className="p-12 text-center text-slate-500">
+              <CardContent className="p-12 text-center">
                 <Shield className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                 <p>Select a role to view and edit its permissions</p>
               </CardContent>

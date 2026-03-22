@@ -80,7 +80,7 @@ export default function ForcePasswordChange() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200">
       <Card className="w-full max-w-md shadow-xl" data-testid="force-password-change-page">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <Lock className="w-8 h-8 text-rose-600" />
           </div>
           <CardTitle className="text-2xl">Password Change Required</CardTitle>
@@ -105,7 +105,7 @@ export default function ForcePasswordChange() {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-[#a0a0a0]"
                 >
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -127,14 +127,14 @@ export default function ForcePasswordChange() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-[#a0a0a0]"
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+            <div className="rounded-lg p-3 text-sm">
               <p className="font-medium mb-2 flex items-center gap-2">
                 <ShieldCheck size={16} className="text-green-600" />
                 Password Requirements:
@@ -167,7 +167,7 @@ export default function ForcePasswordChange() {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-slate-500"
+              className="w-full"
               onClick={handleLogout}
             >
               Logout and Cancel

@@ -68,7 +68,7 @@ export default function VerifyOTP() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200">
       <Card className="w-full max-w-md shadow-xl" data-testid="verify-otp-page">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <ShieldCheck className="w-8 h-8 text-green-600" />
           </div>
           <CardTitle className="text-2xl">Two-Factor Authentication</CardTitle>
@@ -94,13 +94,13 @@ export default function VerifyOTP() {
                 autoFocus
                 data-testid="verify-otp-code-input"
               />
-              <p className="text-xs text-slate-500 text-center">
+              <p className="text-xs text-center">
                 Open your authenticator app and enter the 6-digit code
               </p>
             </div>
 
             {/* Trust Device Option */}
-            <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-3 p-4 rounded-lg border">
               <Checkbox
                 id="trust-device"
                 checked={trustDevice}
@@ -112,7 +112,7 @@ export default function VerifyOTP() {
                 <Label htmlFor="trust-device" className="font-medium text-blue-900 cursor-pointer">
                   Trust this computer for 30 days
                 </Label>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-xs mt-1">
                   You won't be asked for a verification code on this device for 30 days.
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function VerifyOTP() {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-slate-500"
+              className="w-full"
               onClick={handleLogout}
             >
               Use a Different Account

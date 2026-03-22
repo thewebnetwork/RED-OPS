@@ -300,8 +300,8 @@ export default function Categories() {
     <div className="space-y-6 animate-fade-in" data-testid="categories-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('categories.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('categories.description')}</p>
+          <h1 className="text-2xl font-bold">{t('categories.title')}</h1>
+          <p className="mt-1">{t('categories.description')}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -315,8 +315,8 @@ export default function Categories() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Level 1 Categories */}
-        <Card className="border-slate-200">
-          <CardHeader className="border-b border-slate-100 pb-4">
+        <Card className="">
+          <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <FolderTree size={18} className="text-rose-600" />
               {t('categories.level1Categories')}
@@ -324,29 +324,29 @@ export default function Categories() {
           </CardHeader>
           <CardContent className="p-0">
             {categoriesL1.length === 0 ? (
-              <div className="p-6 text-center text-slate-500">
+              <div className="p-6 text-center">
                 {t('categories.noCategoriesYet')}
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y">
                 {categoriesL1.map(cat => {
                   const Icon = getIcon(cat.icon);
                   return (
                     <div 
                       key={cat.id}
                       className={`flex items-center gap-3 p-4 cursor-pointer transition-colors ${
-                        selectedL1 === cat.id ? 'bg-rose-50 border-l-2 border-rose-600' : 'hover:bg-slate-50'
+                        selectedL1 === cat.id ? 'border-l-2 border-rose-600' : ''
                       }`}
                       onClick={() => setSelectedL1(cat.id)}
                       data-testid={`category-l1-${cat.id}`}
                     >
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <Icon size={16} className="text-slate-600" />
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                        <Icon size={16} className="" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">{cat.name}</p>
+                        <p className="font-medium truncate">{cat.name}</p>
                         {cat.description && (
-                          <p className="text-xs text-slate-500 truncate">{cat.description}</p>
+                          <p className="text-xs truncate">{cat.description}</p>
                         )}
                       </div>
                       <div className="flex gap-1">
@@ -377,8 +377,8 @@ export default function Categories() {
 
         {/* Level 2 Categories */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Tag size={18} className="text-rose-600" />
@@ -404,27 +404,27 @@ export default function Categories() {
             </CardHeader>
             <CardContent className="p-0">
               {!selectedL1 ? (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center">
                   {t('categories.selectCategoryToViewSub')}
                 </div>
               ) : categoriesL2.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center">
                   {t('categories.noSubcategoriesYet')}
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y">
                   {categoriesL2.map(cat => (
                     <div 
                       key={cat.id}
-                      className="flex items-center gap-3 p-4 hover:bg-slate-50"
+                      className="flex items-center gap-3 p-4"
                       data-testid={`category-l2-${cat.id}`}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-slate-900">{cat.name}</p>
+                          <p className="font-medium">{cat.name}</p>
                         </div>
                         {cat.description && (
-                          <p className="text-sm text-slate-500 mt-1">{cat.description}</p>
+                          <p className="text-sm mt-1">{cat.description}</p>
                         )}
                       </div>
                       <div className="flex gap-1">
@@ -482,8 +482,8 @@ export default function Categories() {
             </div>
             
             {/* Multi-language name fields */}
-            <div className="border rounded-lg p-3 space-y-3 bg-slate-50">
-              <p className="text-xs font-semibold text-slate-600 uppercase">{t('categories.translations')}</p>
+            <div className="border rounded-lg p-3 space-y-3">
+              <p className="text-xs font-semibold uppercase">{t('categories.translations')}</p>
               <div>
                 <Label className="flex items-center gap-2">
                   <span>🇺🇸</span> English
@@ -559,7 +559,7 @@ export default function Categories() {
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs text-slate-500 ml-1">({t('categories.changeToMove')})</span>}</Label>
+                  <Label>{t('categories.parentCategory')} {editingCategory && <span className="text-xs ml-1">({t('categories.changeToMove')})</span>}</Label>
                   <Select 
                     value={formData.category_l1_id} 
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}

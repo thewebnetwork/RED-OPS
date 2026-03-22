@@ -178,8 +178,8 @@ export default function Teams() {
     <div className="space-y-6 animate-fade-in" data-testid="teams-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('teams.title')}</h1>
-          <p className="text-slate-500 mt-1">{t('teams.subtitle')}</p>
+          <h1 className="text-2xl font-bold">{t('teams.title')}</h1>
+          <p className="mt-1">{t('teams.subtitle')}</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -193,43 +193,43 @@ export default function Teams() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-slate-200">
+        <Card className="">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center">
                 <UsersRound size={20} className="text-rose-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{teams.length}</p>
-                <p className="text-sm text-slate-500">{t('teams.totalTeams')}</p>
+                <p className="text-sm">{t('teams.totalTeams')}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-slate-200">
+        <Card className="">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users size={20} className="text-blue-600" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+                <Users size={20} className="" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{teams.reduce((acc, team) => acc + team.member_count, 0)}</p>
-                <p className="text-sm text-slate-500">{t('teams.totalMembers')}</p>
+                <p className="text-sm">{t('teams.totalMembers')}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-slate-200">
+        <Card className="">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center">
                 <Users size={20} className="text-green-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
                   {teams.length > 0 ? Math.round(teams.reduce((acc, team) => acc + team.member_count, 0) / teams.length) : 0}
                 </p>
-                <p className="text-sm text-slate-500">{t('teams.avgTeamSize')}</p>
+                <p className="text-sm">{t('teams.avgTeamSize')}</p>
               </div>
             </div>
           </CardContent>
@@ -238,8 +238,8 @@ export default function Teams() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Teams List */}
-        <Card className="border-slate-200">
-          <CardHeader className="border-b border-slate-100 pb-4">
+        <Card className="">
+          <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <UsersRound size={18} className="text-rose-600" />
               {t('teams.title')}
@@ -247,16 +247,16 @@ export default function Teams() {
           </CardHeader>
           <CardContent className="p-0">
             {teams.length === 0 ? (
-              <div className="p-6 text-center text-slate-500">
+              <div className="p-6 text-center">
                 {t('common.noResults')}
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y">
                 {teams.map(team => (
                   <div 
                     key={team.id}
                     className={`flex items-center gap-3 p-4 cursor-pointer transition-colors ${
-                      selectedTeam?.id === team.id ? 'bg-rose-50 border-l-2 border-rose-600' : 'hover:bg-slate-50'
+                      selectedTeam?.id === team.id ? 'border-l-2 border-rose-600' : ''
                     }`}
                     onClick={() => setSelectedTeam(team)}
                     data-testid={`team-item-${team.id}`}
@@ -268,10 +268,10 @@ export default function Teams() {
                       <UsersRound size={18} style={{ color: team.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900">{team.name}</p>
-                      <p className="text-xs text-slate-500">{team.member_count} {t('teams.members')}</p>
+                      <p className="font-medium">{team.name}</p>
+                      <p className="text-xs">{team.member_count} {t('teams.members')}</p>
                     </div>
-                    <ChevronRight size={16} className="text-slate-400" />
+                    <ChevronRight size={16} className="" />
                   </div>
                 ))}
               </div>
@@ -284,7 +284,7 @@ export default function Teams() {
           {selectedTeam ? (
             <>
               {/* Team Header */}
-              <Card className="border-slate-200">
+              <Card className="">
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex items-center gap-4">
@@ -295,11 +295,11 @@ export default function Teams() {
                         <UsersRound size={28} style={{ color: selectedTeam.color }} />
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold text-slate-900">{selectedTeam.name}</h2>
+                        <h2 className="text-xl font-bold">{selectedTeam.name}</h2>
                         {selectedTeam.description && (
-                          <p className="text-sm text-slate-500 mt-1">{selectedTeam.description}</p>
+                          <p className="text-sm mt-1">{selectedTeam.description}</p>
                         )}
-                        <p className="text-sm text-slate-600 mt-2">
+                        <p className="text-sm mt-2">
                           <strong>{selectedTeam.member_count}</strong> {t('teams.members')}
                         </p>
                       </div>
@@ -328,8 +328,8 @@ export default function Teams() {
               </Card>
 
               {/* Team Members */}
-              <Card className="border-slate-200">
-                <CardHeader className="border-b border-slate-100 pb-4">
+              <Card className="">
+                <CardHeader className="border-b pb-4">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Users size={18} className="text-rose-600" />
                     {t('teams.members')}
@@ -341,29 +341,29 @@ export default function Teams() {
                       <div className="animate-spin h-6 w-6 border-3 border-rose-600 border-t-transparent rounded-full" />
                     </div>
                   ) : teamMembers.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500">
+                    <div className="p-8 text-center">
                       <Users size={32} className="mx-auto mb-2 text-slate-300" />
                       <p>{t('teams.noMembers')}</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y">
                       {teamMembers.map(member => (
                         <div 
                           key={member.id}
                           className="flex items-center gap-3 p-4"
                         >
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
                             {member.avatar ? (
                               <img src={member.avatar} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <span className="font-medium text-slate-600">{member.name.charAt(0)}</span>
+                              <span className="font-medium">{member.name.charAt(0)}</span>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-900">{member.name}</p>
-                            <p className="text-sm text-slate-500">{member.email}</p>
+                            <p className="font-medium">{member.name}</p>
+                            <p className="text-sm">{member.email}</p>
                           </div>
-                          <Badge className="bg-slate-100 text-slate-600">{member.role}</Badge>
+                          <Badge className="">{member.role}</Badge>
                         </div>
                       ))}
                     </div>
@@ -372,8 +372,8 @@ export default function Teams() {
               </Card>
             </>
           ) : (
-            <Card className="border-slate-200">
-              <CardContent className="p-12 text-center text-slate-500">
+            <Card className="">
+              <CardContent className="p-12 text-center">
                 <UsersRound size={48} className="mx-auto mb-4 text-slate-300" />
                 <p>{t('teams.selectTeam')}</p>
               </CardContent>

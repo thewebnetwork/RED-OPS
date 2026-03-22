@@ -36,7 +36,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const LOG_LEVELS = {
   'ERROR': { color: 'bg-red-100 text-red-700', icon: AlertCircle },
-  'WARNING': { color: 'text-amber-700', icon: AlertTriangle },
+  'WARNING': { color: '', icon: AlertTriangle },
   'INFO': { color: '', icon: Info },
   'SUCCESS': { color: '', icon: CheckCircle },
   'DEBUG': { color: '', icon: Activity }

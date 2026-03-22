@@ -375,12 +375,12 @@ export default function Users() {
                   <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y">
                 {filteredUsers.map((user) => (
                   <tr key={user.id} style={{ cursor: 'default' }} data-testid={`user-row-${user.id}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-medium text-sm">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-rose-600 font-medium text-sm">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -581,7 +581,7 @@ export default function Users() {
                         {specialties.map((s) => (
                           <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                         ))}
-                        <SelectItem value="__new__" className="text-blue-600 font-medium">
+                        <SelectItem value="__new__" className="font-medium">
                           <Plus size={14} className="inline mr-1" /> Create new specialty
                         </SelectItem>
                       </SelectContent>
@@ -652,7 +652,7 @@ export default function Users() {
 
                 {showPermissions && (
                   <div className="space-y-2">
-                    <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+                    <p className="text-sm text-amber-600 p-3 rounded-lg">
                       Checked = granted, Unchecked = denied. These overrides will take precedence over role defaults.
                     </p>
                     {Object.entries(permissionModules).map(([moduleKey, moduleConfig]) => (

@@ -152,11 +152,11 @@ export default function SubscriptionPlansAdmin() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <CreditCard className="text-[#A2182C]" />
             Subscription Plans
           </h1>
-          <p className="text-slate-500 mt-1">Manage Partner subscription plans and features</p>
+          <p className="mt-1">Manage Partner subscription plans and features</p>
         </div>
         <Button
           className="bg-rose-600 hover:bg-rose-700"
@@ -170,7 +170,7 @@ export default function SubscriptionPlansAdmin() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" size={18} />
         <Input
           placeholder="Search plans..."
           value={search}
@@ -218,7 +218,7 @@ export default function SubscriptionPlansAdmin() {
                 </div>
               </div>
               {plan.description && (
-                <p className="text-sm text-slate-500">{plan.description}</p>
+                <p className="text-sm">{plan.description}</p>
               )}
             </CardHeader>
             <CardContent>
@@ -228,17 +228,17 @@ export default function SubscriptionPlansAdmin() {
                   {plan.price_monthly && (
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl font-bold">${plan.price_monthly}</span>
-                      <span className="text-sm text-slate-500">/month</span>
+                      <span className="text-sm">/month</span>
                     </div>
                   )}
                   {plan.price_yearly && (
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm">
                       or ${plan.price_yearly}/year
                     </p>
                   )}
                 </div>
               ) : (
-                <div className="mb-4 text-sm text-slate-400">No pricing set</div>
+                <div className="mb-4 text-sm">No pricing set</div>
               )}
 
               {/* Features */}
@@ -247,11 +247,11 @@ export default function SubscriptionPlansAdmin() {
                   {plan.features.slice(0, 4).map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
-                      <span className="text-slate-600">{feature}</span>
+                      <span className="">{feature}</span>
                     </li>
                   ))}
                   {plan.features.length > 4 && (
-                    <li className="text-xs text-slate-400">
+                    <li className="text-xs">
                       +{plan.features.length - 4} more features
                     </li>
                   )}
@@ -259,7 +259,7 @@ export default function SubscriptionPlansAdmin() {
               )}
 
               {/* User count */}
-              <div className="flex items-center gap-1 mt-4 pt-4 border-t text-xs text-slate-400">
+              <div className="flex items-center gap-1 mt-4 pt-4 border-t text-xs">
                 <Users size={12} />
                 <span>{plan.user_count || 0} partners</span>
               </div>
@@ -269,7 +269,7 @@ export default function SubscriptionPlansAdmin() {
       </div>
 
       {filteredPlans.length === 0 && (
-        <div className="text-center py-12 text-slate-500">
+        <div className="text-center py-12">
           <CreditCard size={48} className="mx-auto mb-4 text-slate-300" />
           <p>No subscription plans found</p>
           <p className="text-sm mt-1">Create your first plan to get started</p>

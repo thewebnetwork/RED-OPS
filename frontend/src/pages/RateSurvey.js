@@ -107,14 +107,14 @@ export default function RateSurvey() {
   // Loading
   if (verifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
@@ -132,8 +132,8 @@ export default function RateSurvey() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <XCircle size={32} className="text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-slate-900 mb-2">Invalid Survey Link</h2>
-                <p className="text-slate-600 mb-6">
+                <h2 className="text-xl font-semibold mb-2">Invalid Survey Link</h2>
+                <p className="mb-6">
                   This survey link is invalid or has already been completed.
                 </p>
                 <Link to="/login">
@@ -148,11 +148,11 @@ export default function RateSurvey() {
             {/* Success State */}
             {submitted && (
               <div className="text-center py-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-slate-900 mb-2">Thank You!</h2>
-                <p className="text-slate-600 mb-4">
+                <h2 className="text-xl font-semibold mb-2">Thank You!</h2>
+                <p className="mb-4">
                   Your feedback has been submitted successfully.
                 </p>
                 <div className="mb-6">
@@ -171,31 +171,31 @@ export default function RateSurvey() {
               <div className="py-4">
                 {/* Resolver Info */}
                 <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden">
                     {orderData?.resolver_avatar ? (
                       <img src={orderData.resolver_avatar} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-2xl font-bold text-slate-500">
+                      <span className="text-2xl font-bold">
                         {orderData?.resolver_name?.charAt(0) || '?'}
                       </span>
                     )}
                   </div>
-                  <h2 className="text-xl font-semibold text-slate-900">
+                  <h2 className="text-xl font-semibold">
                     How was {orderData?.resolver_name}?
                   </h2>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm mt-1">
                     Order: {orderData?.order_code}
                   </p>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm">
                     {orderData?.order_title}
                   </p>
                 </div>
 
                 {/* Star Rating - Google Review Style */}
                 <div className="mb-6">
-                  <div className="bg-slate-50 rounded-xl p-6">
+                  <div className="rounded-xl p-6">
                     {renderStars(true)}
-                    <p className="text-center mt-3 text-lg font-medium text-slate-700">
+                    <p className="text-center mt-3 text-lg font-medium">
                       {getRatingText()}
                     </p>
                   </div>
@@ -237,7 +237,7 @@ export default function RateSurvey() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-4">
+        <p className="text-center text-xs mt-4">
           Your feedback helps maintain quality service
         </p>
       </div>

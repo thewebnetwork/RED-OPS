@@ -177,11 +177,11 @@ export default function TranslationEditorPage() {
             {t('common.back')}
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
               <Languages className="text-[#A2182C]" />
               {t('settings.translations.title')}
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-sm mt-1">
               {t('settings.translations.description')}
             </p>
           </div>
@@ -222,7 +222,7 @@ export default function TranslationEditorPage() {
             <div className="flex-1">
               <Label>{t('settings.translations.searchKeys')}</Label>
               <div className="relative mt-1.5">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
                 <Input
                   placeholder={t('settings.translations.searchKeys')}
                   value={searchQuery}
@@ -237,9 +237,9 @@ export default function TranslationEditorPage() {
       </Card>
       
       {/* Info Banner */}
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="">
         <CardContent className="p-4">
-          <p className="text-sm text-blue-800">
+          <p className="text-sm">
             <strong>{t('common.tip')}:</strong> Edit translations below. Changes are saved in memory and logged to console. 
             For permanent changes, export the translations and update the JSON files.
           </p>
@@ -264,10 +264,10 @@ export default function TranslationEditorPage() {
                   return (
                     <div 
                       key={key} 
-                      className={`p-3 rounded-lg border ${isModified ? 'border-amber-300 bg-amber-50' : 'border-slate-200'}`}
+                      className={`p-3 rounded-lg border ${isModified ? 'border-amber-300' : ''}`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <code className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        <code className="text-xs px-2 py-0.5 rounded">
                           {key}
                         </code>
                         {isModified && (
@@ -285,14 +285,14 @@ export default function TranslationEditorPage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs text-slate-500">{t('settings.translations.english')}</Label>
-                          <div className="mt-1 p-2 bg-slate-50 rounded text-sm text-slate-700 min-h-[38px]">
+                          <Label className="text-xs">{t('settings.translations.english')}</Label>
+                          <div className="mt-1 p-2 rounded text-sm min-h-[38px]">
                             {englishValue}
                           </div>
                         </div>
                         
                         <div>
-                          <Label className="text-xs text-slate-500">{t('settings.translations.translation')}</Label>
+                          <Label className="text-xs">{t('settings.translations.translation')}</Label>
                           {englishValue.length > 100 ? (
                             <Textarea
                               value={currentValue}
@@ -320,7 +320,7 @@ export default function TranslationEditorPage() {
       
       {/* Floating save indicator */}
       {hasChanges && (
-        <div className="fixed bottom-4 right-4 bg-amber-100 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
+        <div className="fixed bottom-4 right-4 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
           <p className="text-amber-800 text-sm font-medium">{t('settings.poolRules.unsavedChanges')}</p>
         </div>
       )}

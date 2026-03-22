@@ -110,8 +110,8 @@ export default function SetupOTP() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200">
       <Card className="w-full max-w-lg shadow-xl" data-testid="setup-otp-page">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Smartphone className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">
+            <Smartphone className="w-8 h-8" />
           </div>
           <CardTitle className="text-2xl">Set Up Two-Factor Authentication</CardTitle>
           <CardDescription>
@@ -125,10 +125,10 @@ export default function SetupOTP() {
               <div className="w-6 h-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
               <Label className="text-base font-medium">Scan QR Code</Label>
             </div>
-            <p className="text-sm text-slate-500 ml-8">
+            <p className="text-sm ml-8">
               Open your authenticator app and scan this QR code:
             </p>
-            <div className="flex justify-center p-4 bg-white rounded-lg border">
+            <div className="flex justify-center p-4 bg-[#1e1e1e] rounded-lg border border-[#2a2a2a]">
               {otpUri && (
                 <QRCodeSVG 
                   value={otpUri} 
@@ -143,7 +143,7 @@ export default function SetupOTP() {
           {/* Manual Entry */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-slate-400 text-white rounded-full flex items-center justify-center text-sm font-bold">
+              <div className="w-6 h-6 bg-[#606060] text-white rounded-full flex items-center justify-center text-sm font-bold">
                 <KeyRound size={14} />
               </div>
               <Label className="text-base font-medium">Or Enter Manually</Label>
@@ -152,7 +152,7 @@ export default function SetupOTP() {
               <Input 
                 value={otpSecret} 
                 readOnly 
-                className="font-mono text-sm bg-slate-50"
+                className="font-mono text-sm"
               />
               <Button variant="outline" size="icon" onClick={copySecret} title="Copy secret">
                 <Copy size={16} />
@@ -170,7 +170,7 @@ export default function SetupOTP() {
                 <div className="w-6 h-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
                 <Label className="text-base font-medium">Verify Setup</Label>
               </div>
-              <p className="text-sm text-slate-500 ml-8">
+              <p className="text-sm ml-8">
                 Enter the 6-digit code from your authenticator app:
               </p>
               <div className="ml-8">
@@ -187,7 +187,7 @@ export default function SetupOTP() {
             </div>
 
             {/* Trust Device Option */}
-            <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-3 p-4 rounded-lg border">
               <Checkbox
                 id="trust-device"
                 checked={trustDevice}
@@ -199,7 +199,7 @@ export default function SetupOTP() {
                 <Label htmlFor="trust-device" className="font-medium text-blue-900 cursor-pointer">
                   Trust this computer for 30 days
                 </Label>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-xs mt-1">
                   You won't be asked for a verification code on this device for 30 days.
                 </p>
               </div>
@@ -224,7 +224,7 @@ export default function SetupOTP() {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-slate-500"
+              className="w-full"
               onClick={handleLogout}
             >
               Logout and Setup Later

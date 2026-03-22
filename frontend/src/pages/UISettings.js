@@ -150,8 +150,8 @@ export default function UISettings() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('nav.settings')} - UI Customization</h1>
-          <p className="text-slate-500 mt-1">Customize text, labels, and messages across the platform</p>
+          <h1 className="text-2xl font-bold">{t('nav.settings')} - UI Customization</h1>
+          <p className="mt-1">Customize text, labels, and messages across the platform</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -176,7 +176,7 @@ export default function UISettings() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" />
         <Input
           placeholder="Search settings..."
           value={searchQuery}
@@ -188,8 +188,8 @@ export default function UISettings() {
 
       {/* Info Banner */}
       {hasChanges && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
-          <p className="text-sm text-amber-700">
+        <div className="p-3 border rounded-lg flex items-center justify-between">
+          <p className="text-sm">
             You have unsaved changes. Click &quot;Save Changes&quot; to apply them.
           </p>
           <Button size="sm" variant="outline" onClick={() => {
@@ -225,7 +225,7 @@ export default function UISettings() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Type size={32} className="text-slate-300 mb-4" />
-                <p className="text-slate-500">No settings found</p>
+                <p className="">No settings found</p>
               </CardContent>
             </Card>
           ) : (
@@ -234,7 +234,7 @@ export default function UISettings() {
                 <Card key={setting.key} data-testid={`setting-card-${setting.key}`}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-slate-700">
+                      <CardTitle className="text-sm font-medium">
                         {setting.key}
                       </CardTitle>
                       <Badge variant="outline" className="text-xs capitalize">

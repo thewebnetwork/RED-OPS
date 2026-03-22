@@ -82,8 +82,8 @@ export default function DocumentationPage() {
       case 'pdf': return <FileDown className="h-5 w-5 text-red-500" />;
       case 'docx': return <FileType className="h-5 w-5 text-blue-500" />;
       case 'html': return <FileText className="h-5 w-5 text-orange-500" />;
-      case 'md': return <File className="h-5 w-5 text-slate-500" />;
-      default: return <File className="h-5 w-5 text-slate-500" />;
+      case 'md': return <File className="h-5 w-5" />;
+      default: return <File className="h-5 w-5" />;
     }
   };
 
@@ -274,7 +274,7 @@ export default function DocumentationPage() {
       <div className="flex items-center justify-center min-h-[400px]" data-testid="documentation-loading">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#A2182C] mx-auto mb-2" />
-          <p className="text-slate-500">Loading documentation...</p>
+          <p className="">Loading documentation...</p>
         </div>
       </div>
     );
@@ -313,11 +313,11 @@ export default function DocumentationPage() {
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
               <FileText className="text-[#A2182C]" />
               System Documentation
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-sm mt-1">
               System Logic Snapshot for UAT and reference
             </p>
           </div>
@@ -355,7 +355,7 @@ export default function DocumentationPage() {
 
       {/* Last Modified Info */}
       {lastModified && (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4" />
           Last updated: {formatDate(lastModified)}
         </div>
@@ -363,13 +363,13 @@ export default function DocumentationPage() {
 
       {/* System Documentation Pack - Download Center */}
       {docPackFiles.length > 0 && (
-        <Card className="border-emerald-200 bg-emerald-50" data-testid="doc-pack-section">
+        <Card className="" data-testid="doc-pack-section">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-emerald-800">
               <Package className="h-5 w-5" />
               System Documentation Pack
             </CardTitle>
-            <CardDescription className="text-emerald-700">
+            <CardDescription className="">
               Complete documentation bundle ready for download (PDF, DOCX, Markdown, HTML)
             </CardDescription>
           </CardHeader>
@@ -380,7 +380,7 @@ export default function DocumentationPage() {
                   key={file.filename}
                   onClick={() => downloadDocPackFile(file)}
                   disabled={downloadingFile === file.filename}
-                  className="flex items-center gap-3 p-4 bg-white rounded-lg border border-emerald-200 hover:border-emerald-400 hover:shadow-md transition-all text-left disabled:opacity-50"
+                  className="flex items-center gap-3 p-4 bg-white rounded-lg border hover:border-emerald-400 hover:shadow-md transition-all text-left disabled:opacity-50"
                   data-testid={`download-${file.format}-btn`}
                 >
                   {downloadingFile === file.filename ? (
@@ -389,12 +389,12 @@ export default function DocumentationPage() {
                     getFileIcon(file.format)
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-800 truncate text-sm">
+                    <p className="font-medium truncate text-sm">
                       {file.format.toUpperCase()}
                     </p>
-                    <p className="text-xs text-slate-500">{file.size_kb} KB</p>
+                    <p className="text-xs">{file.size_kb} KB</p>
                   </div>
-                  <Download className="h-4 w-4 text-slate-400" />
+                  <Download className="h-4 w-4" />
                 </button>
               ))}
             </div>

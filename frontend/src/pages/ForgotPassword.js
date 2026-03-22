@@ -65,11 +65,11 @@ export default function ForgotPassword() {
 
           {submitted ? (
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} className="text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-2">{t('auth.resetLinkSent')}</h2>
-              <p className="text-slate-600 mb-6">
+              <h2 className="text-xl font-semibold mb-2">{t('auth.resetLinkSent')}</h2>
+              <p className="mb-6">
                 {email}
               </p>
               <Link to="/login">
@@ -83,14 +83,14 @@ export default function ForgotPassword() {
             <>
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-[#A2182C]">{t('auth.forgotPasswordTitle')}</h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm mt-1">
                   {t('auth.forgotPasswordSubtitle')}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <Label htmlFor="email" className="text-slate-700">{t('auth.email')}</Label>
+                  <Label htmlFor="email" className="">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -128,7 +128,7 @@ export default function ForgotPassword() {
               <div className="mt-6 text-center">
                 <Link 
                   to="/login" 
-                  className="text-sm text-slate-600 hover:text-[#A2182C] inline-flex items-center gap-1"
+                  className="text-sm hover:text-[#A2182C] inline-flex items-center gap-1"
                 >
                   <ArrowLeft size={14} />
                   {t('auth.backToLogin')}

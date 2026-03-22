@@ -131,7 +131,7 @@ export default function PoolPickerRulesPage() {
       <div className="flex items-center justify-center min-h-[400px]" data-testid="pool-rules-loading">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#A2182C] mx-auto mb-2" />
-          <p className="text-slate-500">Loading pool picker rules...</p>
+          <p className="">Loading pool picker rules...</p>
         </div>
       </div>
     );
@@ -147,11 +147,11 @@ export default function PoolPickerRulesPage() {
             Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
               <Shield className="text-[#A2182C]" />
               Pool Picker Rules
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-sm mt-1">
               Configure which account types can pick from which pools
             </p>
           </div>
@@ -184,11 +184,11 @@ export default function PoolPickerRulesPage() {
       </div>
 
       {/* Info Banner */}
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="">
         <CardContent className="p-4">
           <div className="flex gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
               <p className="font-medium mb-1">How Pool Eligibility Works</p>
               <ul className="list-disc pl-4 space-y-1">
                 <li><strong>Account Type Config:</strong> Controls which pools each account type can access</li>
@@ -208,7 +208,7 @@ export default function PoolPickerRulesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="h-5 w-5 text-slate-500" />
+                    <Users className="h-5 w-5" />
                     {rule.account_type}
                   </CardTitle>
                   <CardDescription>
@@ -216,7 +216,7 @@ export default function PoolPickerRulesPage() {
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor={`can-pick-${rule.account_type}`} className="text-sm text-slate-600">
+                  <Label htmlFor={`can-pick-${rule.account_type}`} className="text-sm">
                     Can Pick Opportunities
                   </Label>
                   <Switch
@@ -230,15 +230,15 @@ export default function PoolPickerRulesPage() {
             </CardHeader>
             <CardContent>
               <div className={`transition-opacity ${rule.can_pick ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                <Label className="text-sm text-slate-600 mb-3 block">Allowed Pools</Label>
+                <Label className="text-sm mb-3 block">Allowed Pools</Label>
                 <div className="flex flex-wrap gap-4">
                   {POOL_OPTIONS.map((pool) => (
                     <label
                       key={pool.value}
                       className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                         rule.allowed_pools?.includes(pool.value)
-                          ? 'border-[#A2182C] bg-rose-50'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'border-[#A2182C]'
+                          : 'hover:border-slate-300'
                       }`}
                     >
                       <Checkbox
@@ -249,7 +249,7 @@ export default function PoolPickerRulesPage() {
                       />
                       <div>
                         <p className="font-medium text-sm">{pool.label}</p>
-                        <p className="text-xs text-slate-500">{pool.description}</p>
+                        <p className="text-xs">{pool.description}</p>
                       </div>
                     </label>
                   ))}
@@ -257,7 +257,7 @@ export default function PoolPickerRulesPage() {
                 
                 {/* Current Config Summary */}
                 <div className="mt-4 pt-4 border-t">
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs">
                     Current: {rule.can_pick ? (
                       rule.allowed_pools?.length > 0 ? (
                         <>Can pick from {rule.allowed_pools.map(p => (
@@ -269,7 +269,7 @@ export default function PoolPickerRulesPage() {
                         <span className="text-amber-600">Can pick enabled but no pools selected</span>
                       )
                     ) : (
-                      <span className="text-slate-400">Cannot pick opportunities</span>
+                      <span className="">Cannot pick opportunities</span>
                     )}
                   </p>
                 </div>
@@ -281,7 +281,7 @@ export default function PoolPickerRulesPage() {
 
       {/* Unsaved Changes Warning */}
       {hasChanges && (
-        <div className="fixed bottom-4 right-4 bg-amber-100 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
+        <div className="fixed bottom-4 right-4 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
           <p className="text-amber-800 text-sm font-medium">You have unsaved changes</p>
         </div>
       )}

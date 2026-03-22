@@ -125,11 +125,11 @@ export default function SpecialtiesAdmin() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <Briefcase className="text-[#A2182C]" />
             Specialty Management
           </h1>
-          <p className="text-slate-500 mt-1">{specialties.length} specialties defined</p>
+          <p className="mt-1">{specialties.length} specialties defined</p>
         </div>
         <Button
           className="bg-rose-600 hover:bg-rose-700"
@@ -143,7 +143,7 @@ export default function SpecialtiesAdmin() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" size={18} />
         <Input
           placeholder="Search specialties..."
           value={search}
@@ -167,11 +167,11 @@ export default function SpecialtiesAdmin() {
                     {specialty.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="font-medium text-slate-900">{specialty.name}</h3>
+                    <h3 className="font-medium">{specialty.name}</h3>
                     {specialty.description && (
-                      <p className="text-sm text-slate-500 line-clamp-1">{specialty.description}</p>
+                      <p className="text-sm line-clamp-1">{specialty.description}</p>
                     )}
-                    <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
+                    <div className="flex items-center gap-1 mt-1 text-xs">
                       <Users size={12} />
                       <span>{specialty.user_count || 0} users</span>
                     </div>
@@ -205,7 +205,7 @@ export default function SpecialtiesAdmin() {
       </div>
 
       {filteredSpecialties.length === 0 && (
-        <div className="text-center py-12 text-slate-500">
+        <div className="text-center py-12">
           <Briefcase size={48} className="mx-auto mb-4 text-slate-300" />
           <p>No specialties found</p>
           {search && <p className="text-sm mt-1">Try a different search term</p>}

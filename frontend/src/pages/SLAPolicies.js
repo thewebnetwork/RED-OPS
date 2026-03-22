@@ -143,7 +143,7 @@ export default function SLAPolicies() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+        <RefreshCw className="w-8 h-8 animate-spin" />
       </div>
     );
   }
@@ -153,8 +153,8 @@ export default function SLAPolicies() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">SLA & Escalation Policies</h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold">SLA & Escalation Policies</h1>
+          <p className="text-sm mt-1">
             Configure SLA rules and escalation actions in one place
           </p>
         </div>
@@ -176,12 +176,12 @@ export default function SLAPolicies() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
+                <div className="p-2 rounded-lg">
                   <Check className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{monitoringStats.orders?.on_track || 0}</p>
-                  <p className="text-xs text-slate-500">On Track</p>
+                  <p className="text-xs">On Track</p>
                 </div>
               </div>
             </CardContent>
@@ -189,12 +189,12 @@ export default function SLAPolicies() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg">
+                <div className="p-2 rounded-lg">
                   <Clock className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{monitoringStats.orders?.at_risk || 0}</p>
-                  <p className="text-xs text-slate-500">At Risk</p>
+                  <p className="text-xs">At Risk</p>
                 </div>
               </div>
             </CardContent>
@@ -207,7 +207,7 @@ export default function SLAPolicies() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{monitoringStats.orders?.breached || 0}</p>
-                  <p className="text-xs text-slate-500">Breached</p>
+                  <p className="text-xs">Breached</p>
                 </div>
               </div>
             </CardContent>
@@ -215,12 +215,12 @@ export default function SLAPolicies() {
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Bell className="w-5 h-5 text-purple-600" />
+                <div className="p-2 rounded-lg">
+                  <Bell className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{monitoringStats.escalations?.unacknowledged || 0}</p>
-                  <p className="text-xs text-slate-500">Unacknowledged</p>
+                  <p className="text-xs">Unacknowledged</p>
                 </div>
               </div>
             </CardContent>
@@ -256,7 +256,7 @@ export default function SLAPolicies() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Shield className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-500">No policies created yet</p>
+                  <p className="">No policies created yet</p>
                   <Button 
                     variant="outline" 
                     className="mt-4"
@@ -312,7 +312,7 @@ export default function SLAPolicies() {
               <CardContent>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {atRiskOrders.length === 0 ? (
-                    <p className="text-sm text-slate-400 text-center py-4">No at-risk orders</p>
+                    <p className="text-sm text-center py-4">No at-risk orders</p>
                   ) : (
                     atRiskOrders.map((order) => (
                       <OrderCard key={order.id} order={order} status="at_risk" />
@@ -334,7 +334,7 @@ export default function SLAPolicies() {
               <CardContent>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {breachedOrders.length === 0 ? (
-                    <p className="text-sm text-slate-400 text-center py-4">No breached orders</p>
+                    <p className="text-sm text-center py-4">No breached orders</p>
                   ) : (
                     breachedOrders.map((order) => (
                       <OrderCard key={order.id} order={order} status="breached" />
@@ -356,12 +356,12 @@ export default function SLAPolicies() {
             <CardContent>
               <div className="space-y-3">
                 {escalationHistory.length === 0 ? (
-                  <p className="text-sm text-slate-400 text-center py-8">No escalation history</p>
+                  <p className="text-sm text-center py-8">No escalation history</p>
                 ) : (
                   escalationHistory.map((entry) => (
                     <div 
                       key={entry.id} 
-                      className={`p-3 rounded-lg border ${entry.acknowledged ? 'bg-slate-50' : 'bg-amber-50 border-amber-200'}`}
+                      className={`p-3 rounded-lg border ${entry.acknowledged ? '' : ''}`}
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -370,13 +370,13 @@ export default function SLAPolicies() {
                               {entry.trigger_type}
                             </Badge>
                             <span className="font-medium text-sm">{entry.order_code}</span>
-                            <span className="text-slate-400">•</span>
-                            <span className="text-sm text-slate-600">Level {entry.level}</span>
+                            <span className="">•</span>
+                            <span className="text-sm">Level {entry.level}</span>
                           </div>
-                          <p className="text-xs text-slate-500 mt-1">
+                          <p className="text-xs mt-1">
                             Policy: {entry.policy_name} • {entry.level_name}
                           </p>
-                          <p className="text-xs text-slate-400 mt-1">
+                          <p className="text-xs mt-1">
                             {new Date(entry.created_at).toLocaleString()}
                           </p>
                         </div>
@@ -451,12 +451,12 @@ function PolicyCard({ policy, onEdit, onDelete }) {
               )}
             </div>
             {policy.description && (
-              <p className="text-sm text-slate-500 mt-1">{policy.description}</p>
+              <p className="text-sm mt-1">{policy.description}</p>
             )}
             
             {/* SLA Info */}
             <div className="flex items-center gap-4 mt-3 text-sm">
-              <div className="flex items-center gap-1 text-slate-600">
+              <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
                 <span>
                   {policy.sla_rules?.duration_minutes >= 60 
@@ -465,7 +465,7 @@ function PolicyCard({ policy, onEdit, onDelete }) {
                   } SLA
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-slate-600">
+              <div className="flex items-center gap-1">
                 <Layers className="w-4 h-4" />
                 <span>{policy.escalation_levels?.length || 0} levels</span>
               </div>
@@ -474,7 +474,7 @@ function PolicyCard({ policy, onEdit, onDelete }) {
             {/* Scope */}
             {scopeLabels.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs text-slate-400">{scopeLabels.join(' • ')}</p>
+                <p className="text-xs">{scopeLabels.join(' • ')}</p>
               </div>
             )}
             
@@ -482,23 +482,23 @@ function PolicyCard({ policy, onEdit, onDelete }) {
             {policy.escalation_levels?.length > 0 && (
               <div className="mt-3">
                 <button 
-                  className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
+                  className="flex items-center gap-1 text-sm hover:text-slate-900"
                   onClick={() => setExpanded(!expanded)}
                 >
                   {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   {expanded ? 'Hide' : 'Show'} escalation levels
                 </button>
                 {expanded && (
-                  <div className="mt-2 pl-4 border-l-2 border-slate-200 space-y-2">
+                  <div className="mt-2 pl-4 border-l-2 space-y-2">
                     {policy.escalation_levels.map((level, idx) => (
                       <div key={idx} className="text-sm">
                         <span className="font-medium">Level {level.level}: {level.name}</span>
-                        <span className="text-slate-400 ml-2">
+                        <span className="ml-2">
                           {level.trigger === 'at_risk' && '• On At Risk'}
                           {level.trigger === 'breach' && '• On Breach'}
                           {level.trigger === 'breach_plus_minutes' && `• ${level.delay_minutes}m after Breach`}
                         </span>
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs mt-1">
                           {level.actions?.length || 0} action(s)
                         </p>
                       </div>
@@ -526,7 +526,7 @@ function PolicyCard({ policy, onEdit, onDelete }) {
 // Order Card Component for Monitoring
 function OrderCard({ order, status }) {
   const statusColors = {
-    at_risk: 'bg-amber-100 text-amber-700 border-amber-200',
+    at_risk: '',
     breached: 'bg-red-100 text-red-700 border-red-200'
   };
   
@@ -540,12 +540,12 @@ function OrderCard({ order, status }) {
           </div>
           <p className="text-sm truncate max-w-xs mt-1">{order.title}</p>
           {order.policy_name && (
-            <p className="text-xs text-slate-500 mt-1">Policy: {order.policy_name}</p>
+            <p className="text-xs mt-1">Policy: {order.policy_name}</p>
           )}
         </div>
         <div className="text-right">
           <p className="text-sm font-medium">{order.time_remaining || 'N/A'}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs">
             {order.current_escalation_level > 0 && `Level ${order.current_escalation_level}`}
           </p>
         </div>
@@ -722,7 +722,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                 <Target className="w-4 h-4" />
                 Policy Scope
               </h4>
-              <p className="text-sm text-slate-500">Select which roles, teams, specialties, or access tiers this policy applies to</p>
+              <p className="text-sm">Select which roles, teams, specialties, or access tiers this policy applies to</p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -814,7 +814,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                 </div>
               </div>
             </div>
-            <p className="text-xs text-slate-400">Leave all empty to apply to all orders</p>
+            <p className="text-xs">Leave all empty to apply to all orders</p>
           </div>
 
           <Separator />
@@ -838,7 +838,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                     sla_rules: { ...formData.sla_rules, duration_minutes: parseInt(e.target.value) || 0 }
                   })}
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs">
                   = {Math.floor(formData.sla_rules.duration_minutes / 60)}h {formData.sla_rules.duration_minutes % 60}m
                 </p>
               </div>
@@ -876,7 +876,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
                   <Layers className="w-4 h-4" />
                   Escalation Levels
                 </h4>
-                <p className="text-sm text-slate-500">Define multi-level escalation rules</p>
+                <p className="text-sm">Define multi-level escalation rules</p>
               </div>
               <Button variant="outline" size="sm" onClick={addEscalationLevel}>
                 <Plus className="w-4 h-4 mr-1" />
@@ -886,7 +886,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
 
             <div className="space-y-4">
               {formData.escalation_levels.map((level, levelIdx) => (
-                <div key={levelIdx} className="border rounded-lg p-4 space-y-3 bg-slate-50">
+                <div key={levelIdx} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <h5 className="font-medium">Level {level.level}</h5>
                     <Button variant="ghost" size="icon" onClick={() => removeLevel(levelIdx)}>
@@ -1029,7 +1029,7 @@ function PolicyDialog({ open, onOpenChange, policy, roles, teams, specialties, a
               ))}
               
               {formData.escalation_levels.length === 0 && (
-                <div className="text-center py-6 text-slate-400 border rounded-lg border-dashed">
+                <div className="text-center py-6 border rounded-lg border-dashed">
                   No escalation levels defined. Add levels to configure automated responses.
                 </div>
               )}
@@ -1297,7 +1297,7 @@ function PolicyTemplates({ roles, teams, specialties, accessTiers, onApplyTempla
         <CardContent>
           {categories.map(category => (
             <div key={category} className="mb-6 last:mb-0">
-              <h3 className="text-sm font-semibold text-slate-600 mb-3 uppercase tracking-wide">{category}</h3>
+              <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide">{category}</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {templates.filter(t => t.category === category).map(template => (
                   <Card key={template.id} className="hover:border-rose-300 transition-colors">
@@ -1305,8 +1305,8 @@ function PolicyTemplates({ roles, teams, specialties, accessTiers, onApplyTempla
                       <div className="flex items-start gap-3">
                         <span className="text-2xl">{template.icon}</span>
                         <div className="flex-1">
-                          <h4 className="font-medium text-slate-900">{template.name}</h4>
-                          <p className="text-sm text-slate-500 mt-1 line-clamp-2">{template.description}</p>
+                          <h4 className="font-medium">{template.name}</h4>
+                          <p className="text-sm mt-1 line-clamp-2">{template.description}</p>
                           <div className="flex items-center gap-2 mt-3">
                             <Badge variant="outline" className="text-xs">
                               {template.config.sla_rules.duration_minutes / 60}h SLA

@@ -156,15 +156,15 @@ export default function EmailSettings() {
     <div className="space-y-6 animate-fade-in" data-testid="email-settings-page">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Email Settings</h1>
-        <p className="text-slate-500 mt-1">Configure SMTP settings for email notifications</p>
+        <h1 className="text-2xl font-bold">Email Settings</h1>
+        <p className="mt-1">Configure SMTP settings for email notifications</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* SMTP Configuration */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="flex items-center gap-2">
                 <Mail size={20} />
                 SMTP Configuration
@@ -219,12 +219,12 @@ export default function EmailSettings() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-slate-600"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Leave blank to keep existing password</p>
+                  <p className="text-xs mt-1">Leave blank to keep existing password</p>
                 </div>
               </div>
 
@@ -236,13 +236,13 @@ export default function EmailSettings() {
                   placeholder="noreply@yourdomain.com"
                   className="mt-1.5"
                 />
-                <p className="text-xs text-slate-500 mt-1">Email address shown in the &quot;From&quot; field. Defaults to username if empty.</p>
+                <p className="text-xs mt-1">Email address shown in the &quot;From&quot; field. Defaults to username if empty.</p>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 rounded-lg">
                 <div>
                   <p className="font-medium text-sm">Use TLS/STARTTLS</p>
-                  <p className="text-xs text-slate-500">Enable secure connection (recommended)</p>
+                  <p className="text-xs">Enable secure connection (recommended)</p>
                 </div>
                 <Switch
                   checked={config.smtp_use_tls}
@@ -251,7 +251,7 @@ export default function EmailSettings() {
               </div>
 
               {hasFormChanges && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                <div className="p-3 border rounded-lg text-sm text-amber-800">
                   You have unsaved changes.
                 </div>
               )}
@@ -272,20 +272,20 @@ export default function EmailSettings() {
         {/* Status & Test */}
         <div className="space-y-6">
           {/* Status Card */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <CardTitle>Status</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Configuration</span>
+                <span className="text-sm">Configuration</span>
                 {status.is_configured ? (
-                  <Badge className="bg-green-100 text-green-700">
+                  <Badge className="text-green-700">
                     <CheckCircle size={12} className="mr-1" />
                     Configured
                   </Badge>
                 ) : (
-                  <Badge className="bg-amber-100 text-amber-700">
+                  <Badge className="">
                     <AlertCircle size={12} className="mr-1" />
                     Not Configured
                   </Badge>
@@ -295,9 +295,9 @@ export default function EmailSettings() {
               {status.last_test_at && (
                 <>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Last Test</span>
+                    <span className="text-sm">Last Test</span>
                     {status.last_test_status === 'success' ? (
-                      <Badge className="bg-green-100 text-green-700">
+                      <Badge className="text-green-700">
                         <CheckCircle size={12} className="mr-1" />
                         Passed
                       </Badge>
@@ -308,7 +308,7 @@ export default function EmailSettings() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs">
                     {format(new Date(status.last_test_at), 'MMM d, yyyy h:mm a')}
                   </p>
                   {status.last_test_status && status.last_test_status !== 'success' && (
@@ -320,8 +320,8 @@ export default function EmailSettings() {
           </Card>
 
           {/* Test Email Card */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <CardTitle>Test Email</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -355,10 +355,10 @@ export default function EmailSettings() {
           </Card>
 
           {/* Help Card */}
-          <Card className="border-slate-200">
+          <Card className="">
             <CardContent className="p-4">
               <h4 className="font-medium text-sm mb-2">Common SMTP Settings</h4>
-              <div className="space-y-2 text-xs text-slate-500">
+              <div className="space-y-2 text-xs">
                 <div>
                   <strong>Gmail:</strong><br />
                   Host: smtp.gmail.com, Port: 587<br />

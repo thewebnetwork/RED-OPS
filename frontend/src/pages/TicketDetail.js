@@ -216,7 +216,7 @@ export default function TicketDetail() {
               <div>
                 <Label className="text-xs">{t('tickets.owner')}</Label>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <User size={16} className="text-slate-400" />
+                  <User size={16} className="" />
                   <span className="font-medium">{ticket.owner_name}</span>
                 </div>
               </div>

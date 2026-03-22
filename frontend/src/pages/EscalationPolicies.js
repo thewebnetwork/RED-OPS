@@ -287,7 +287,7 @@ export default function EscalationPolicies() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Escalation Policies</h1>
+          <h1 className="text-2xl font-bold">Escalation Policies</h1>
           <p className="text-gray-600">Configure automatic escalation rules for SLA breaches</p>
         </div>
         <div className="flex gap-2">
@@ -319,7 +319,7 @@ export default function EscalationPolicies() {
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold text-blue-600">{stats.escalations_today}</div>
+              <div className="text-2xl font-bold">{stats.escalations_today}</div>
               <div className="text-sm text-gray-600">Today</div>
             </CardContent>
           </Card>
@@ -351,7 +351,7 @@ export default function EscalationPolicies() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Shield className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900">No Escalation Policies</h3>
+                <h3 className="text-lg font-medium">No Escalation Policies</h3>
                 <p className="text-gray-600 mt-1">Create your first policy to automate escalations</p>
                 <Button onClick={handleCreatePolicy} className="mt-4">
                   <Plus className="w-4 h-4 mr-2" />
@@ -385,21 +385,21 @@ export default function EscalationPolicies() {
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Trigger:</span>
+                        <span className="">Trigger:</span>
                         <Badge variant="outline" className="ml-2">
                           {policy.trigger === 'both' ? 'Warning & Breach' : policy.trigger}
                         </Badge>
                       </div>
                       <div>
-                        <span className="text-gray-500">Levels:</span>
+                        <span className="">Levels:</span>
                         <span className="ml-2 font-medium">{policy.levels?.length || 0}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Cooldown:</span>
+                        <span className="">Cooldown:</span>
                         <span className="ml-2">{policy.cooldown_minutes} min</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Priorities:</span>
+                        <span className="">Priorities:</span>
                         <span className="ml-2">{policy.priorities?.length > 0 ? policy.priorities.join(', ') : 'All'}</span>
                       </div>
                     </div>
@@ -407,12 +407,12 @@ export default function EscalationPolicies() {
                     {/* Levels preview */}
                     <div className="mt-4 flex flex-wrap gap-2">
                       {policy.levels?.map((level, i) => (
-                        <div key={i} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                        <div key={i} className="px-3 py-1 rounded-full text-sm flex items-center gap-2">
                           <span className="w-5 h-5 bg-[#A2182C] text-white rounded-full text-xs flex items-center justify-center">
                             {level.level}
                           </span>
                           <span>{level.name}</span>
-                          <span className="text-gray-500">({level.time_threshold_minutes}m)</span>
+                          <span className="">({level.time_threshold_minutes}m)</span>
                         </div>
                       ))}
                     </div>
@@ -429,7 +429,7 @@ export default function EscalationPolicies() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Check className="w-12 h-12 mx-auto text-green-500 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900">No Escalated Orders</h3>
+                <h3 className="text-lg font-medium">No Escalated Orders</h3>
                 <p className="text-gray-600 mt-1">All tickets are within SLA thresholds</p>
               </CardContent>
             </Card>
@@ -445,13 +445,13 @@ export default function EscalationPolicies() {
                           <Badge variant="destructive">Level {order.current_escalation_level}</Badge>
                           <Badge variant="outline">{order.order_priority}</Badge>
                         </div>
-                        <p className="text-gray-700 mt-1">{order.order_title}</p>
-                        <div className="text-sm text-gray-500 mt-1">
+                        <p className="mt-1">{order.order_title}</p>
+                        <div className="text-sm mt-1">
                           Policy: {order.policy_name} • Escalated {order.time_in_escalation} ago
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-gray-500">Assigned to</div>
+                        <div className="text-sm">Assigned to</div>
                         <div className="font-medium">{order.assigned_to || 'Unassigned'}</div>
                       </div>
                     </div>
@@ -577,7 +577,7 @@ export default function EscalationPolicies() {
                   onChange={(e) => setFormData({ ...formData, cooldown_minutes: parseInt(e.target.value) || 30 })}
                   className="w-32"
                 />
-                <p className="text-xs text-gray-500 mt-1">Minimum time between escalations for the same order</p>
+                <p className="text-xs mt-1">Minimum time between escalations for the same order</p>
               </div>
             </div>
 
@@ -594,7 +594,7 @@ export default function EscalationPolicies() {
               {formData.levels.map((level, levelIndex) => (
                 <div key={levelIndex} className="border rounded-lg overflow-hidden">
                   <div
-                    className="bg-gray-50 px-4 py-3 flex items-center justify-between cursor-pointer"
+                    className="px-4 py-3 flex items-center justify-between cursor-pointer"
                     onClick={() => setExpandedLevels({ ...expandedLevels, [levelIndex]: !expandedLevels[levelIndex] })}
                   >
                     <div className="flex items-center gap-3">
@@ -661,7 +661,7 @@ export default function EscalationPolicies() {
                         </div>
 
                         {(level.actions || []).map((action, actionIndex) => (
-                          <div key={actionIndex} className="flex flex-wrap gap-2 items-start bg-gray-50 p-3 rounded">
+                          <div key={actionIndex} className="flex flex-wrap gap-2 items-start p-3 rounded">
                             <Select
                               value={action.type}
                               onValueChange={(v) => updateAction(levelIndex, actionIndex, { type: v })}
@@ -790,7 +790,7 @@ export default function EscalationPolicies() {
                         ))}
 
                         {(!level.actions || level.actions.length === 0) && (
-                          <p className="text-sm text-gray-500 text-center py-2">
+                          <p className="text-sm text-center py-2">
                             No actions configured. Add actions to define what happens at this level.
                           </p>
                         )}
