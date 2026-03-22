@@ -39,6 +39,9 @@ from routes import (
     sla_policies_router,
     tasks_router,
     service_templates_router,
+    organizations_router,
+    projects_router,
+    knowledge_base_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -185,6 +188,9 @@ app.include_router(dashboard_v2_router, prefix="/api")
 app.include_router(dashboard_builder_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")  # MVP Task Board
 app.include_router(service_templates_router, prefix="/api")  # Service Templates
+app.include_router(organizations_router, prefix="/api")  # Multi-tenant Organizations
+app.include_router(projects_router, prefix="/api")  # Projects (Phase 1)
+app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base / SOPs (Phase 2)
 
 
 @app.get("/")
@@ -197,44 +203,8 @@ async def health():
     return {"status": "healthy", "version": "2.0.0"}
 
 
-# TEMPORARY SETUP ENDPOINTS - Remove after setup is complete
-@app.post("/api/setup/bootstrap")
-async def bootstrap_admin(reset: bool = False):
-    """Create or reset the first admin user."""
-    if reset:
-        await db.users.delete_many({})
-    
-    count = await db.users.count_documents({})
-    if count > 0:
-        # Return info about existing user to help debug
-        existing = await db.users.find_one({}, {"_id": 0, "email": 1, "role": 1, "active": 1})
-        return {"status": "already_setup", "message": f"{count} user(s) exist.", "sample": existing}
-
-    import uuid
-    from utils.helpers import hash_password, get_utc_now
-
-    pw = "Fmtvvl171**"
-    hashed = hash_password(pw)
-    admin_user = {
-        "id": str(uuid.uuid4()),
-        "name": "G",
-        "email": "redops@redribbongroup.ca",
-        "password": hashed,
-        "role": "Administrator",
-        "account_type": "Internal Staff",
-        "active": True,
-        "force_password_change": False,
-        "force_otp_setup": False,
-        "otp_verified": False,
-        "can_pick": True,
-        "pool_access": "both",
-        "created_at": get_utc_now(),
-    }
-    await db.users.insert_one(admin_user)
-    return {
-        "status": "created",
-        "credentials": {"email": "redops@redribbongroup.ca", "password": pw},
-    }
+# Bootstrap endpoint REMOVED — was unauthenticated with hardcoded credentials and ?reset=true could wipe all users.
+# Admin users are now created via POST /api/users by an existing admin.
 
 
 
