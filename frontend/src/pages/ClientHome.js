@@ -1,309 +1,512 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  ArrowRight, 
-  FileText, 
-  Clock, 
-  CheckCircle2, 
+import {
+  FileText,
+  Clock,
+  CheckCircle2,
   AlertCircle,
   Plus,
   ChevronRight,
-  User,
-  ListTodo
+  Phone,
+  MessageSquare,
+  FolderOpen,
+  BookOpen,
+  LifeBuoy,
+  DollarSign,
+  Upload,
+  Star,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const mockRequests = [
+  {
+    id: 'RRG-000001',
+    service: 'Graphic Design',
+    status: 'In Progress',
+    date: '2026-03-15',
+  },
+  {
+    id: 'RRG-000002',
+    service: 'Video Editing',
+    status: 'Delivered',
+    date: '2026-03-10',
+  },
+  {
+    id: 'RRG-000003',
+    service: 'Social Media Pack',
+    status: 'Submitted',
+    date: '2026-03-18',
+  },
+  {
+    id: 'RRG-000004',
+    service: 'Email Sequence',
+    status: 'Pending Review',
+    date: '2026-03-19',
+  },
+  {
+    id: 'RRG-000005',
+    service: 'Meta Ads Setup',
+    status: 'Closed',
+    date: '2026-03-05',
+  },
+];
 
-export default function ClientHome() {
-  const { t } = useTranslation();
+function ClientHome() {
   const { user } = useAuth();
-  const [recentRequests, setRecentRequests] = useState([]);
-  const [stats, setStats] = useState({ active: 0, completed: 0, pending: 0 });
-  const [accountManager, setAccountManager] = useState(null);
-  const [taskStats, setTaskStats] = useState({ open: 0, waiting: 0 });
-  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState(mockRequests);
+  const [loading, setLoading] = useState(false);
+
+  const firstName = user?.name?.split(' ')[0] || 'there';
 
   useEffect(() => {
-    fetchData();
+    const fetchRequests = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/api/orders/my-requests');
+        setRequests(response.data);
+      } catch (error) {
+        console.error('Failed to fetch requests:', error);
+        setRequests(mockRequests);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      // Fetch user's recent requests and slice client-side to 5
-      const res = await axios.get(`${API}/orders/my-requests`);
-      const allRequests = res.data;
-      const requests = allRequests.slice(0, 5);
-      setRecentRequests(requests);
-      
-      // Calculate stats from all requests
-      const active = allRequests.filter(r => ['Open', 'In Progress'].includes(r.status)).length;
-      const completed = allRequests.filter(r => ['Delivered', 'Closed'].includes(r.status)).length;
-      const pending = allRequests.filter(r => r.status === 'Pending').length;
-      setStats({ active, completed, pending });
-      
-      // Fetch account manager
-      try {
-        const amRes = await axios.get(`${API}/tasks/account-manager/${user?.id}`);
-        setAccountManager(amRes.data?.account_manager || null);
-      } catch { /* no AM assigned */ }
-      
-      // Fetch task stats
-      try {
-        const tasksRes = await axios.get(`${API}/tasks`);
-        const allTasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
-        const openCount = allTasks.filter(t => t.status !== 'done').length;
-        const waitingCount = allTasks.filter(t => ['todo', 'waiting_on_client'].includes(t.status)).length;
-        setTaskStats({ open: openCount, waiting: waitingCount });
-      } catch { /* tasks not available */ }
-    } catch (error) {
-      console.error('Failed to fetch data');
-    } finally {
-      setLoading(false);
-    }
+  const getStatusPill = (status) => {
+    const pillMap = {
+      'In Progress': 'pill-blue',
+      Delivered: 'pill-green',
+      'Pending Review': 'pill-yellow',
+      Submitted: 'pill-blue',
+      Closed: 'pill-gray',
+    };
+    return pillMap[status] || 'pill-gray';
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Open': return 'bg-blue-100 text-blue-700';
-      case 'In Progress': return 'bg-amber-100 text-amber-700';
-      case 'Pending': return 'bg-slate-100 text-slate-700';
-      case 'Delivered': return 'bg-emerald-100 text-emerald-700';
-      case 'Closed': return 'bg-slate-100 text-slate-600';
-      default: return 'bg-slate-100 text-slate-700';
-    }
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin h-8 w-8 border-4 border-[#A2182C] border-t-transparent rounded-full" />
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="client-home-page">
-      {/* Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="page-content">
+      {/* Header Section */}
+      <div style={styles.headerSection}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {t('clientHome.welcome', 'Welcome back')}, {user?.name?.split(' ')[0]}!
-          </h1>
-          <p className="text-slate-500 mt-1">
-            {t('clientHome.subtitle', "Here's what's happening with your requests")}
-          </p>
+          <h1 style={styles.greeting}>Welcome back, {firstName}</h1>
+          <p style={styles.subtitle}>Here's what's happening with your account</p>
         </div>
-        <Link to="/services">
-          <Button className="bg-[#A2182C] hover:bg-[#8B1526]" data-testid="new-request-btn">
-            <Plus size={18} className="mr-2" />
-            {t('clientHome.newRequest', 'New Request')}
-          </Button>
-        </Link>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Clock size={20} className="text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
-                <p className="text-xs text-slate-500">{t('clientHome.activeRequests', 'Active')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-l-4 border-l-emerald-500">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-100 rounded-lg">
-                <CheckCircle2 size={20} className="text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.completed}</p>
-                <p className="text-xs text-slate-500">{t('clientHome.completed', 'Completed')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-l-4 border-l-amber-500">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 rounded-lg">
-                <AlertCircle size={20} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.pending}</p>
-                <p className="text-xs text-slate-500">{t('clientHome.needsAttention', 'Needs Attention')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Metrics Grid */}
+      <div style={styles.metricsGrid}>
+        <div className="metric-card">
+          <div style={{ ...styles.iconWrapper, backgroundColor: 'var(--blue)', opacity: 0.2 }}>
+            <Clock size={20} style={{ color: 'var(--blue)' }} />
+          </div>
+          <div style={styles.metricContent}>
+            <p style={styles.metricLabel}>Active Requests</p>
+            <p className="metric-value">3</p>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div style={{ ...styles.iconWrapper, backgroundColor: 'var(--yellow)', opacity: 0.2 }}>
+            <AlertCircle size={20} style={{ color: 'var(--yellow)' }} />
+          </div>
+          <div style={styles.metricContent}>
+            <p style={styles.metricLabel}>In Review</p>
+            <p className="metric-value">1</p>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div style={{ ...styles.iconWrapper, backgroundColor: 'var(--green)', opacity: 0.2 }}>
+            <CheckCircle2 size={20} style={{ color: 'var(--green)' }} />
+          </div>
+          <div style={styles.metricContent}>
+            <p style={styles.metricLabel}>Delivered This Month</p>
+            <p className="metric-value">5</p>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div style={{ ...styles.iconWrapper, backgroundColor: 'var(--purple)', opacity: 0.2 }}>
+            <FileText size={20} style={{ color: 'var(--purple)' }} />
+          </div>
+          <div style={styles.metricContent}>
+            <p style={styles.metricLabel}>Open Tasks</p>
+            <p className="metric-value">2</p>
+          </div>
+        </div>
       </div>
 
-      {/* My Tasks Card */}
-      <Card className="border-l-4 border-l-[#A2182C]" data-testid="my-tasks-card">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#A2182C]/10 rounded-lg">
-                <ListTodo size={20} className="text-[#A2182C]" />
+      {/* Two Column Layout */}
+      <div style={styles.layoutContainer}>
+        {/* Left Column */}
+        <div style={styles.leftColumn}>
+          {/* My Requests Card */}
+          <div className="card" style={styles.cardContainer}>
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardTitle}>My Requests</h2>
+            </div>
+
+            <table className="data-table" style={styles.table}>
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((req) => (
+                  <tr key={req.id}>
+                    <td>
+                      <span style={styles.requestId}>{req.id}</span>
+                    </td>
+                    <td>{req.service}</td>
+                    <td>
+                      <span className={`pill ${getStatusPill(req.status)}`}>
+                        {req.status}
+                      </span>
+                    </td>
+                    <td style={{ color: 'var(--tx-2)' }}>{formatDate(req.date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div style={styles.cardFooter}>
+              <a href="/requests" className="btn btn-ghost btn-sm" style={styles.viewAllBtn}>
+                View All Requests
+                <ChevronRight size={16} />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div style={styles.rightColumn}>
+          {/* Account Manager Card */}
+          <div className="card" style={styles.cardContainer}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Your Account Manager</h3>
+            </div>
+            <div style={styles.managerContent}>
+              <div style={styles.managerAvatar}>JK</div>
+              <div style={styles.managerInfo}>
+                <p style={styles.managerName}>Jordan Kim</p>
+                <p style={styles.managerRole}>Account Manager</p>
               </div>
-              <div>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">My Tasks</p>
-                <div className="flex items-center gap-4 mt-0.5">
-                  <span className="text-lg font-bold text-slate-900" data-testid="tasks-open-count">{taskStats.open} <span className="text-xs font-normal text-slate-500">open</span></span>
-                  <span className="text-lg font-bold text-amber-600" data-testid="tasks-waiting-count">{taskStats.waiting} <span className="text-xs font-normal text-slate-500">waiting on you</span></span>
+            </div>
+            <div style={styles.managerActions}>
+              <button className="btn btn-primary btn-sm" style={styles.actionBtn}>
+                <Phone size={16} />
+                Schedule a Call
+              </button>
+              <button className="btn btn-ghost btn-sm" style={styles.actionBtn}>
+                <MessageSquare size={16} />
+                Send Message
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Actions Card */}
+          <div className="card" style={styles.cardContainer}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Quick Actions</h3>
+            </div>
+            <div style={styles.quickActionsGrid}>
+              <a href="/services" className="btn" style={styles.quickActionBtn}>
+                <Plus size={18} />
+                <span>New Request</span>
+              </a>
+              <button className="btn" style={styles.quickActionBtn}>
+                <Upload size={18} />
+                <span>Upload Files</span>
+              </button>
+              <button className="btn" style={styles.quickActionBtn}>
+                <BookOpen size={18} />
+                <span>View SOPs</span>
+              </button>
+              <button className="btn" style={styles.quickActionBtn}>
+                <LifeBuoy size={18} />
+                <span>Contact Support</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Upcoming Renewals Card */}
+          <div className="card" style={styles.cardContainer}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.cardTitle}>Upcoming Renewals</h3>
+            </div>
+            <div style={styles.renewalsList}>
+              <div style={styles.renewalItem}>
+                <div style={styles.renewalIcon}>
+                  <DollarSign size={16} />
+                </div>
+                <div style={styles.renewalInfo}>
+                  <p style={styles.renewalLabel}>Monthly Service Plan</p>
+                  <p style={styles.renewalDate}>Renews on Apr 15, 2026</p>
+                </div>
+              </div>
+              <div style={styles.renewalItem}>
+                <div style={styles.renewalIcon}>
+                  <Star size={16} />
+                </div>
+                <div style={styles.renewalInfo}>
+                  <p style={styles.renewalLabel}>Premium Support Add-on</p>
+                  <p style={styles.renewalDate}>Renews on May 1, 2026</p>
                 </div>
               </div>
             </div>
-            <Link to="/tasks">
-              <Button variant="outline" size="sm" className="text-[#A2182C] border-[#A2182C]/30 hover:bg-[#A2182C]/5" data-testid="view-tasks-btn">
-                View Tasks
-                <ChevronRight size={16} className="ml-1" />
-              </Button>
-            </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Recent Requests */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileText size={18} className="text-[#A2182C]" />
-              {t('clientHome.recentRequests', 'Recent Requests')}
-            </CardTitle>
-            <Link to="/my-requests">
-              <Button variant="ghost" size="sm" className="text-[#A2182C]">
-                {t('clientHome.viewAll', 'View All')}
-                <ChevronRight size={16} className="ml-1" />
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {recentRequests.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText size={40} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-slate-500 mb-4">{t('clientHome.noRequests', "You haven't submitted any requests yet")}</p>
-              <Link to="/services">
-                <Button className="bg-[#A2182C] hover:bg-[#8B1526]">
-                  {t('clientHome.submitFirst', 'Submit Your First Request')}
-                  <ArrowRight size={16} className="ml-2" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentRequests.map((request) => (
-                <Link 
-                  key={request.id}
-                  to={`/requests/${request.id}`}
-                  className="block"
-                >
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-[#A2182C]/30 hover:bg-slate-50 transition-all group">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-slate-400">{request.order_code}</span>
-                        <Badge className={getStatusColor(request.status)}>
-                          {t(`requests.status.${request.status.toLowerCase().replace(' ', '')}`, request.status)}
-                        </Badge>
-                      </div>
-                      <p className="font-medium text-slate-900 truncate mt-1 group-hover:text-[#A2182C] transition-colors">
-                        {request.title}
-                      </p>
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="text-xs text-slate-400">{formatDate(request.created_at)}</p>
-                      <ChevronRight size={16} className="text-slate-300 group-hover:text-[#A2182C] transition-colors ml-auto mt-1" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Account Manager */}
-      {accountManager && (
-        <Card className="border-l-4 border-l-[#A2182C]" data-testid="account-manager-card">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-[#A2182C]/10 rounded-full">
-                <User size={22} className="text-[#A2182C]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Your Account Manager</p>
-                <p className="font-semibold text-slate-900 truncate" data-testid="am-name">{accountManager.name}</p>
-                {accountManager.email && (
-                  <p className="text-sm text-slate-500 truncate" data-testid="am-email">{accountManager.email}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Link to="/services" className="block">
-          <Card className="hover:shadow-md hover:border-[#A2182C]/30 transition-all cursor-pointer group h-full">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3 bg-[#A2182C]/10 rounded-xl group-hover:bg-[#A2182C] transition-colors">
-                <Plus size={24} className="text-[#A2182C] group-hover:text-white transition-colors" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-[#A2182C] transition-colors">
-                  {t('clientHome.browseServices', 'Browse Services')}
-                </h3>
-                <p className="text-sm text-slate-500">
-                  {t('clientHome.browseServicesDesc', 'See all available services')}
-                </p>
-              </div>
-              <ArrowRight size={20} className="text-slate-300 group-hover:text-[#A2182C] ml-auto transition-colors" />
-            </CardContent>
-          </Card>
-        </Link>
-        
-        <Link to="/my-account" className="block">
-          <Card className="hover:shadow-md hover:border-[#A2182C]/30 transition-all cursor-pointer group h-full">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="p-3 bg-slate-100 rounded-xl group-hover:bg-[#A2182C] transition-colors">
-                <FileText size={24} className="text-slate-600 group-hover:text-white transition-colors" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-[#A2182C] transition-colors">
-                  {t('clientHome.manageAccount', 'Manage Account')}
-                </h3>
-                <p className="text-sm text-slate-500">
-                  {t('clientHome.manageAccountDesc', 'Profile, plan & billing')}
-                </p>
-              </div>
-              <ArrowRight size={20} className="text-slate-300 group-hover:text-[#A2182C] ml-auto transition-colors" />
-            </CardContent>
-          </Card>
-        </Link>
+      {/* CTA Section */}
+      <div style={styles.ctaCard}>
+        <div style={styles.ctaContent}>
+          <h2 style={styles.ctaTitle}>Need something done?</h2>
+          <p style={styles.ctaSubtitle}>
+            Browse our services and submit a new request in minutes
+          </p>
+        </div>
+        <a href="/services" className="btn btn-primary">
+          Browse Services
+          <ChevronRight size={18} />
+        </a>
       </div>
     </div>
   );
 }
+
+const styles = {
+  headerSection: {
+    marginBottom: '32px',
+  },
+  greeting: {
+    fontSize: '28px',
+    fontWeight: '600',
+    color: 'var(--tx-1)',
+    margin: '0 0 8px 0',
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: 'var(--tx-2)',
+    margin: '0',
+  },
+  metricsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '16px',
+    marginBottom: '32px',
+  },
+  iconWrapper: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '12px',
+  },
+  metricContent: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  metricLabel: {
+    fontSize: '12px',
+    color: 'var(--tx-2)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    margin: '0 0 4px 0',
+  },
+  layoutContainer: {
+    display: 'flex',
+    gap: '24px',
+    marginBottom: '32px',
+  },
+  leftColumn: {
+    flex: 1,
+  },
+  rightColumn: {
+    width: '300px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  cardContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  cardHeader: {
+    paddingBottom: '12px',
+    borderBottom: '1px solid var(--border)',
+    marginBottom: '16px',
+  },
+  cardTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'var(--tx-1)',
+    margin: '0',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginBottom: '16px',
+  },
+  requestId: {
+    color: 'var(--red)',
+    fontWeight: '600',
+  },
+  cardFooter: {
+    paddingTop: '12px',
+    borderTop: '1px solid var(--border)',
+    display: 'flex',
+  },
+  viewAllBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  managerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '16px',
+  },
+  managerAvatar: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '8px',
+    backgroundColor: 'var(--green)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '600',
+    color: 'var(--bg)',
+    fontSize: '16px',
+  },
+  managerInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  managerName: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'var(--tx-1)',
+    margin: '0',
+  },
+  managerRole: {
+    fontSize: '12px',
+    color: 'var(--tx-2)',
+    margin: '0',
+  },
+  managerActions: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  actionBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  quickActionsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '12px',
+  },
+  quickActionBtn: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    padding: '12px',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    color: 'var(--tx-2)',
+    fontSize: '12px',
+    transition: 'all 0.2s',
+  },
+  renewalsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  renewalItem: {
+    display: 'flex',
+    gap: '12px',
+    padding: '12px',
+    backgroundColor: 'var(--bg)',
+    borderRadius: '8px',
+  },
+  renewalIcon: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '6px',
+    backgroundColor: 'var(--bg-elevated)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'var(--yellow)',
+    flexShrink: 0,
+  },
+  renewalInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+  },
+  renewalLabel: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'var(--tx-1)',
+    margin: '0',
+  },
+  renewalDate: {
+    fontSize: '12px',
+    color: 'var(--tx-3)',
+    margin: '0',
+  },
+  ctaCard: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '24px',
+    borderRadius: '12px',
+    background: 'linear-gradient(135deg, #c92a3e22, #c92a3e08)',
+    border: '1px solid var(--border)',
+    marginTop: '16px',
+  },
+  ctaContent: {
+    flex: 1,
+  },
+  ctaTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: 'var(--tx-1)',
+    margin: '0 0 6px 0',
+  },
+  ctaSubtitle: {
+    fontSize: '14px',
+    color: 'var(--tx-2)',
+    margin: '0',
+  },
+};
+
+export default ClientHome;

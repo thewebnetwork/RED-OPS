@@ -23,6 +23,8 @@ import Clients from "./pages/Clients";
 import ServiceCatalog from "./pages/ServiceCatalog";
 import MyAccount from "./pages/MyAccount";
 import Orders from "./pages/Orders";
+import Requests from "./pages/Requests";
+import Settings from "./pages/Settings";
 import OrderDetail from "./pages/OrderDetail";
 import Users from "./pages/Users";
 import Notifications from "./pages/Notifications";
@@ -300,7 +302,7 @@ function AppRoutes() {
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
-      <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Orders /></PrivateRoute>} />
+      <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Requests /></PrivateRoute>} />
 
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}
       {/* Task Board - All roles (legacy) */}
@@ -460,7 +462,7 @@ function AppRoutes() {
         path="/settings" 
         element={
           <PrivateRoute roles={["Administrator"]}>
-            <SettingsHub />
+            <Settings />
           </PrivateRoute>
         } 
       />

@@ -177,8 +177,10 @@ const Services = () => {
 
   const styles = {
     pageContainer: {
+      flex: 1,
+      overflowY: 'auto',
+      overflowX: 'hidden',
       backgroundColor: 'var(--bg)',
-      minHeight: '100vh',
       color: 'var(--tx-1)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
