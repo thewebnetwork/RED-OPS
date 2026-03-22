@@ -363,8 +363,8 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('reports.title')}</h1>
-          <p className="text-slate-500">{t('reports.description')}</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{t('reports.title')}</h1>
+          <p style={{ color: 'var(--tx-3)' }}>{t('reports.description')}</p>
         </div>
       </div>
 
@@ -381,7 +381,7 @@ export default function Reports() {
             <CardContent className="p-0 max-h-[600px] overflow-y-auto">
               {Object.entries(reportsByCategory).map(([category, reports]) => (
                 <div key={category} className="border-b border-slate-100 last:border-0">
-                  <div className="px-4 py-2 bg-slate-50 flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <div style={{ padding: '8px 16px', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: 'var(--tx-2)' }}>
                     {categoryIcons[category] || <FileText size={16} />}
                     {category}
                   </div>
@@ -392,15 +392,16 @@ export default function Reports() {
                         setSelectedReport(report);
                         setReportData(null);
                       }}
-                      className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-l-2 ${
-                        selectedReport?.id === report.id
-                          ? 'border-l-rose-600 bg-rose-50'
-                          : 'border-l-transparent'
-                      }`}
+                      style={{
+                        width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
+                        border: 'none', borderLeft: `2px solid ${selectedReport?.id === report.id ? 'var(--red)' : 'transparent'}`,
+                        background: selectedReport?.id === report.id ? 'var(--red-bg)' : 'none',
+                        cursor: 'pointer', transition: 'all .15s',
+                      }}
                       data-testid={`report-${report.id}`}
                     >
-                      <p className="font-medium text-sm text-slate-900">{report.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{report.description}</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>{report.name}</p>
+                      <p style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 3 }}>{report.description}</p>
                     </button>
                   ))}
                 </div>
@@ -432,7 +433,7 @@ export default function Reports() {
               <CardContent className="p-4">
                 {/* Date Range */}
                 <div className="mb-4">
-                  <Label className="text-xs text-slate-500 mb-2 block">{t('reports.quickDateRange')}</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 8, display: 'block' }}>{t('reports.quickDateRange')}</Label>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { key: 'today', label: t('reports.today') },
@@ -640,7 +641,7 @@ export default function Reports() {
                   <div className="col-span-2">
                     <Label className="text-xs">{t('common.search')}</Label>
                     <div className="relative mt-1">
-                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
                       <Input
                         placeholder={t('reports.searchPlaceholder')}
                         value={filters.search}
@@ -694,7 +695,7 @@ export default function Reports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base">{selectedReport.name}</CardTitle>
-                    <p className="text-sm text-slate-500">{selectedReport.description}</p>
+                    <p style={{ fontSize: 13, color: 'var(--tx-3)' }}>{selectedReport.description}</p>
                   </div>
                   {reportData && (
                     <div className="flex gap-2">
@@ -724,24 +725,24 @@ export default function Reports() {
               </CardHeader>
               <CardContent className="p-0">
                 {!reportData ? (
-                  <div className="p-12 text-center text-slate-500">
-                    <BarChart3 size={48} className="mx-auto text-slate-300 mb-3" />
+                  <div style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tx-3)' }}>
+                    <BarChart3 size={48} style={{ color: 'var(--tx-3)', margin: '0 auto 12px', opacity: 0.5 }} />
                     <p>{t('reports.clickGenerateReport')}</p>
                   </div>
                 ) : (
                   <div>
                     {/* Summary Cards */}
                     {reportData.summary && (
-                      <div className="p-4 bg-slate-50 border-b border-slate-100">
+                      <div style={{ padding: 16, background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                           {Object.entries(reportData.summary)
                             .filter(([k, v]) => typeof v !== 'object')
                             .map(([key, value]) => (
-                              <div key={key} className="bg-white rounded-lg p-3 border border-slate-200">
-                                <p className="text-xs text-slate-500 capitalize">
+                              <div key={key} style={{ background: 'var(--bg-elevated)', borderRadius: 8, padding: 12, border: '1px solid var(--border)' }}>
+                                <p style={{ fontSize: 11, color: 'var(--tx-3)', textTransform: 'capitalize' }}>
                                   {key.replace(/_/g, ' ')}
                                 </p>
-                                <p className="text-lg font-bold text-slate-900 mt-1">
+                                <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', marginTop: 4 }}>
                                   {typeof value === 'number' && key.includes('rate') 
                                     ? `${value}%` 
                                     : typeof value === 'number' && key.includes('hours')
@@ -771,25 +772,13 @@ export default function Reports() {
                             <TableRow key={idx}>
                               {reportData.columns.map(col => (
                                 <TableCell key={col} className="text-sm whitespace-nowrap">
-                                  {col === 'sla_state' ? (
-                                    <Badge className={
-                                      row[col] === 'on_track' ? 'bg-green-100 text-green-700' :
-                                      row[col] === 'at_risk' ? 'bg-amber-100 text-amber-700' :
-                                      row[col] === 'breached' ? 'bg-red-100 text-red-700' :
-                                      'bg-slate-100 text-slate-700'
-                                    }>
-                                      {row[col]}
-                                    </Badge>
-                                  ) : col === 'workflow_status' ? (
-                                    <Badge className={
-                                      row[col] === 'Responded' ? 'bg-green-100 text-green-700' :
-                                      row[col] === 'Auto-close pending' ? 'bg-red-100 text-red-700' :
-                                      row[col] === 'Email reminder sent' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-slate-100 text-slate-700'
-                                    }>
-                                      {row[col]}
-                                    </Badge>
-                                  ) : col.includes('_at') && row[col] ? (
+                                  {col === 'sla_state' ? (() => {
+                                    const s = { on_track: { bg:'#22c55e18',c:'#22c55e' }, at_risk: { bg:'#f59e0b18',c:'#f59e0b' }, breached: { bg:'#ef444418',c:'#ef4444' } }[row[col]] || { bg:'var(--bg-elevated)',c:'var(--tx-3)' };
+                                    return <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, background: s.bg, color: s.c }}>{row[col]}</span>;
+                                  })() : col === 'workflow_status' ? (() => {
+                                    const s = { Responded: { bg:'#22c55e18',c:'#22c55e' }, 'Auto-close pending': { bg:'#ef444418',c:'#ef4444' }, 'Email reminder sent': { bg:'#f59e0b18',c:'#f59e0b' } }[row[col]] || { bg:'var(--bg-elevated)',c:'var(--tx-3)' };
+                                    return <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, background: s.bg, color: s.c }}>{row[col]}</span>;
+                                  })() : col.includes('_at') && row[col] ? (
                                     format(new Date(row[col]), 'MMM d, yyyy HH:mm')
                                   ) : (
                                     String(row[col] ?? '-')
@@ -802,14 +791,14 @@ export default function Reports() {
                       </Table>
                       
                       {reportData.data.length > 100 && (
-                        <div className="p-3 text-center text-sm text-slate-500 border-t border-slate-100">
+                        <div style={{ padding: 12, textAlign: 'center', fontSize: 13, color: 'var(--tx-3)', borderTop: '1px solid var(--border)' }}>
                           {t('reports.showingRows', { shown: 100, total: reportData.total_rows })}
                         </div>
                       )}
                       
                       {reportData.data.length === 0 && (
-                        <div className="p-8 text-center text-slate-500">
-                          <FileText size={32} className="mx-auto text-slate-300 mb-2" />
+                        <div style={{ padding: 32, textAlign: 'center', color: 'var(--tx-3)' }}>
+                          <FileText size={32} style={{ color: 'var(--tx-3)', margin: '0 auto 8px', opacity: 0.5 }} />
                           {t('reports.noDataFound')}
                         </div>
                       )}

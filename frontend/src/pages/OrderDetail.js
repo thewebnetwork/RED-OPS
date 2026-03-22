@@ -486,27 +486,18 @@ export default function OrderDetail() {
       </div>
 
       {/* Plain Language Status Banner */}
-      {statusExplanations[order.status] && (
-        <div className={`flex items-start gap-3 p-4 rounded-lg border ${
-          order.status === 'Pending' ? 'bg-purple-50 border-purple-200' :
-          order.status === 'Delivered' ? 'bg-green-50 border-green-200' :
-          order.status === 'In Progress' ? 'bg-amber-50 border-amber-200' :
-          'bg-blue-50 border-blue-200'
-        }`} data-testid="status-banner">
-          {order.status === 'Pending' ? <Hourglass size={18} className="text-purple-600 mt-0.5 shrink-0" /> :
-           order.status === 'Delivered' ? <CheckCircle2 size={18} className="text-green-600 mt-0.5 shrink-0" /> :
-           order.status === 'In Progress' ? <Play size={18} className="text-amber-600 mt-0.5 shrink-0" /> :
-           <CircleDot size={18} className="text-blue-600 mt-0.5 shrink-0" />}
-          <div>
-            <p className={`text-sm font-medium ${
-              order.status === 'Pending' ? 'text-purple-800' :
-              order.status === 'Delivered' ? 'text-green-800' :
-              order.status === 'In Progress' ? 'text-amber-800' :
-              'text-blue-800'
-            }`}>{statusExplanations[order.status]}</p>
+      {statusExplanations[order.status] && (() => {
+        const bannerStyle = statusConfig[order.status]?.style || { background: '#3b82f618', color: '#3b82f6' };
+        const BannerIcon = order.status === 'Pending' ? Hourglass :
+                           order.status === 'Delivered' ? CheckCircle2 :
+                           order.status === 'In Progress' ? Play : CircleDot;
+        return (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', borderRadius: 10, background: bannerStyle.background, border: `1px solid ${bannerStyle.color}33` }} data-testid="status-banner">
+            <BannerIcon size={16} style={{ color: bannerStyle.color, flexShrink: 0, marginTop: 2 }} />
+            <p style={{ fontSize: 13, fontWeight: 500, color: bannerStyle.color, margin: 0 }}>{statusExplanations[order.status]}</p>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
@@ -753,7 +744,7 @@ export default function OrderDetail() {
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
-                className="border-slate-300 text-slate-700 hover:bg-slate-100"
+                className="btn-ghost"
                 data-testid="close-ticket-btn"
               >
                 <XCircle size={18} className="mr-2" />
@@ -789,7 +780,7 @@ export default function OrderDetail() {
                     Cancel
                   </Button>
                   <Button 
-                    className="bg-slate-700 hover:bg-slate-800"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--tx-1)', border: '1px solid var(--border)' }}
                     onClick={handleCloseOrder}
                     disabled={closingOrder || !closeReason.trim()}
                     data-testid="confirm-close-btn"
@@ -1145,7 +1136,7 @@ export default function OrderDetail() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{finalFile.label}</p>
-                          <p className="text-sm text-slate-500">{finalFile.file_type}</p>
+                          <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>{finalFile.file_type}</p>
                         </div>
                         <a 
                           href={finalFile.url} 
@@ -1255,7 +1246,7 @@ export default function OrderDetail() {
                   {showAsClient ? (
                     <span className="font-medium">RRM Team</span>
                   ) : (
-                    <span className={`font-medium ${order.editor_name ? '' : 'text-slate-400 italic'}`}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: order.editor_name ? 'var(--tx-1)' : 'var(--tx-3)', fontStyle: order.editor_name ? 'normal' : 'italic' }}>
                       {order.editor_name || 'Unassigned'}
                     </span>
                   )}

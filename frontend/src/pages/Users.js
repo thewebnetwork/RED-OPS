@@ -327,8 +327,8 @@ export default function Users() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('users.title')}</h1>
-          <p className="text-slate-500 mt-1">{users.length} users</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{t('users.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>{users.length} users</p>
         </div>
         <Button 
           className="bg-rose-600 hover:bg-rose-700"
@@ -342,7 +342,7 @@ export default function Users() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+        <Search style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} size={13} />
         <Input
           placeholder="Search users by name, email, specialty, or account type..."
           value={search}
@@ -357,28 +357,28 @@ export default function Users() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b">
+              <thead style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">User</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Account Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Specialty</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Team</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>User</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Role</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Account Type</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Specialty</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Team</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Status</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50" data-testid={`user-row-${user.id}`}>
+                  <tr key={user.id} style={{ cursor: 'default' }} data-testid={`user-row-${user.id}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-medium text-sm">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900">{user.name}</p>
-                          <p className="text-sm text-slate-500">{user.email}</p>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{user.name}</p>
+                          <p style={{ fontSize: 12, color: 'var(--tx-3)' }}>{user.email}</p>
                         </div>
                       </div>
                     </td>
@@ -392,21 +392,21 @@ export default function Users() {
                           {user.account_type}
                         </Badge>
                       ) : (
-                        <span className="text-sm text-slate-400">—</span>
+                        <span style={{ fontSize: 13, color: 'var(--tx-3)' }}>—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {user.specialty_name ? (
-                        <span className="text-sm text-slate-700 flex items-center gap-1">
-                          <Briefcase size={14} className="text-slate-400" />
+                        <span style={{ fontSize: 13, color: 'var(--tx-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Briefcase size={14}style={{ color: 'var(--tx-3)' }} />
                           {user.specialty_name}
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400">—</span>
+                        <span style={{ fontSize: 13, color: 'var(--tx-3)' }}>—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-sm text-slate-700">{user.team_name || '—'}</span>
+                      <span style={{ fontSize: 13, color: 'var(--tx-2)' }}>{user.team_name || '—'}</span>
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={user.active ? 'success' : 'secondary'}>
@@ -536,7 +536,7 @@ export default function Users() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-slate-500">
+                  <p style={{ fontSize: 11, color: 'var(--tx-3)' }}>
                     Determines routing, pricing logic, and UI experience
                   </p>
                 </div>
@@ -603,11 +603,11 @@ export default function Users() {
 
                 {/* Security Options */}
                 <div className="border-t pt-4 space-y-3">
-                  <h4 className="text-sm font-medium text-slate-700">Security Options</h4>
+                  <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-2)' }}>Security Options</h4>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Force Password Change</p>
-                      <p className="text-xs text-slate-500">User must change password on next login</p>
+                      <p style={{ fontSize: 11, color: 'var(--tx-3)' }}>User must change password on next login</p>
                     </div>
                     <Switch
                       checked={formData.force_password_change}
@@ -617,7 +617,7 @@ export default function Users() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Force OTP Setup</p>
-                      <p className="text-xs text-slate-500">User must set up two-factor authentication</p>
+                      <p style={{ fontSize: 11, color: 'var(--tx-3)' }}>User must set up two-factor authentication</p>
                     </div>
                     <Switch
                       checked={formData.force_otp_setup}
@@ -632,7 +632,7 @@ export default function Users() {
                 <div className="flex items-center justify-between pb-4 border-b">
                   <div>
                     <p className="font-medium">Per-User Permission Overrides</p>
-                    <p className="text-sm text-slate-500">
+                    <p style={{ fontSize: 12, color: 'var(--tx-3)' }}>
                       Override default permissions from the "{formData.role}" role
                     </p>
                   </div>
@@ -650,7 +650,7 @@ export default function Users() {
                     </p>
                     {Object.entries(permissionModules).map(([moduleKey, moduleConfig]) => (
                       <Collapsible key={moduleKey} className="border rounded-lg">
-                        <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-50">
+                        <CollapsibleTrigger style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '12px 16px' }}>
                           <span className="font-medium">{moduleConfig.label}</span>
                           <ChevronDown className="w-4 h-4" />
                         </CollapsibleTrigger>
@@ -677,8 +677,8 @@ export default function Users() {
                 )}
 
                 {!showPermissions && (
-                  <div className="text-center py-8 text-slate-500">
-                    <Shield className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                  <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--tx-3)' }}>
+                    <Shield style={{ color: 'var(--tx-3)', margin: '0 auto 12px' }} />
                     <p>Using default permissions from "{formData.role}" role</p>
                     <p className="text-sm mt-1">Enable overrides to customize for this user</p>
                   </div>
