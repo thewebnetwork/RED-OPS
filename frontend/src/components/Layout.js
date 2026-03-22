@@ -23,6 +23,7 @@ import {
   Cloud,
   ShoppingBag,
   Plug,
+  User,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -51,6 +52,15 @@ const NAV_SYSTEM = [
   { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
   { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'], external: true },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
+];
+
+// Client portal nav (shown only to Media Client role)
+const NAV_CLIENT = [
+  { path: '/',             icon: LayoutDashboard, label: 'Dashboard',      roles: ['Media Client'] },
+  { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
+  { path: '/services',     icon: ShoppingBag,     label: 'Request Services',roles: ['Media Client'] },
+  { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
+  { path: '/sops',         icon: BookOpen,        label: 'Resources',      roles: ['Media Client'] },
 ];
 
 // Command palette items
@@ -124,13 +134,15 @@ export default function Layout({ children }) {
 
   // Filter items by role
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
-  const mainItems     = filter(NAV_MAIN);
-  const businessItems = filter(NAV_BUSINESS);
-  const servicesItems = filter(NAV_SERVICES);
-  const systemItems   = filter(NAV_SYSTEM);
+  const isClient    = user?.role === 'Media Client' || user?.account_type === 'Media Client';
+  const mainItems     = isClient ? filter(NAV_CLIENT) : filter(NAV_MAIN);
+  const businessItems = isClient ? [] : filter(NAV_BUSINESS);
+  const servicesItems = isClient ? [] : filter(NAV_SERVICES);
+  const systemItems   = isClient ? [] : filter(NAV_SYSTEM);
 
   // Page title for breadcrumb
-  const pageTitle = [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SERVICES, ...NAV_SYSTEM]
+  const allNavItems = isClient ? NAV_CLIENT : [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SERVICES, ...NAV_SYSTEM];
+  const pageTitle = allNavItems
     .find(i => i.path && (i.path === '/' ? location.pathname === '/' : location.pathname.startsWith(i.path)))?.label || '';
 
   // ── Command palette ──
@@ -226,7 +238,7 @@ export default function Layout({ children }) {
         <nav style={{ flex:1, overflowY:'auto', padding:'2px 8px 8px' }}>
           {mainItems.length > 0 && (
             <>
-              <div className="nav-section-label" style={{ marginTop:10 }}>Menu</div>
+              <div className="nav-section-label" style={{ marginTop:10 }}>{isClient ? 'Portal' : 'Menu'}</div>
               {mainItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} badgeCount={badges[i.path === '/tasks' ? 'tasks' : 'requests']} />)}
             </>
           )}
