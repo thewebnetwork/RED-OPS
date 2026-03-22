@@ -1,11 +1,11 @@
 """
-Task Model - Shared work orchestration for Red Ops MVP
+Task Model - Shared work orchestration for Red Ops
 
 Tasks are action objects assigned to humans. They can optionally link to
-requests but exist independently. No pool or routing concepts.
+requests and/or projects. Supports subtasks (via parent_task_id) and comments.
 """
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional, List, Literal
 from datetime import datetime
 
 # Task status enum
@@ -27,6 +27,8 @@ TaskPriority = Literal["urgent", "high", "medium", "low"]
 class TaskCreate(BaseModel):
     """Task creation request"""
     org_id: Optional[str] = None  # Auto-filled from user if not provided
+    project_id: Optional[str] = None  # Link to project
+    parent_task_id: Optional[str] = None  # Subtask support
     request_id: Optional[str] = None
     title: str
     description: Optional[str] = None
@@ -51,6 +53,7 @@ class TaskUpdate(BaseModel):
     due_at: Optional[datetime] = None
     position: Optional[float] = None
     completed_at: Optional[datetime] = None
+    project_id: Optional[str] = None
 
 
 class TaskReorder(BaseModel):
@@ -60,10 +63,27 @@ class TaskReorder(BaseModel):
     new_position: float
 
 
+class TaskCommentCreate(BaseModel):
+    """Comment on a task"""
+    content: str
+
+
+class TaskCommentResponse(BaseModel):
+    """Comment response"""
+    id: str
+    task_id: str
+    user_id: str
+    user_name: Optional[str] = None
+    content: str
+    created_at: datetime
+
+
 class TaskResponse(BaseModel):
     """Task response"""
     id: str
     org_id: Optional[str] = None
+    project_id: Optional[str] = None
+    parent_task_id: Optional[str] = None
     request_id: Optional[str] = None
     title: str
     description: Optional[str] = None
@@ -82,7 +102,15 @@ class TaskResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # Subtask count
+    subtask_count: int = 0
+    completed_subtask_count: int = 0
+
+    # Comment count
+    comment_count: int = 0
+
     # Optional enriched fields (populated from joins)
     assignee_name: Optional[str] = None
     created_by_name: Optional[str] = None
     request_title: Optional[str] = None
+    project_name: Optional[str] = None

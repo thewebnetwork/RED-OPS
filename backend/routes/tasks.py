@@ -20,7 +20,9 @@ from models.task import (
     TaskResponse,
     TaskStatus,
     TaskVisibility,
-    CreatedSource
+    CreatedSource,
+    TaskCommentCreate,
+    TaskCommentResponse,
 )
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -376,7 +378,26 @@ async def list_tasks(
             )
             if request:
                 task["request_title"] = request.get("title")
-        
+
+        # Enrich project name
+        if task.get("project_id"):
+            proj = await db.projects.find_one(
+                {"id": task["project_id"]},
+                {"_id": 0, "name": 1}
+            )
+            if proj:
+                task["project_name"] = proj.get("name")
+
+        # Subtask counts
+        subtask_count = await db.tasks.count_documents({"parent_task_id": task["id"]})
+        completed_subtasks = await db.tasks.count_documents({"parent_task_id": task["id"], "status": "done"})
+        task["subtask_count"] = subtask_count
+        task["completed_subtask_count"] = completed_subtasks
+
+        # Comment count
+        comment_count = await db.task_comments.count_documents({"task_id": task["id"]})
+        task["comment_count"] = comment_count
+
         result.append(TaskResponse(**task))
     
     return result
@@ -453,9 +474,29 @@ async def create_task(
 
     created_source = "client" if is_client else "admin"
 
+    # Validate project_id if provided
+    if task_data.project_id:
+        project = await db.projects.find_one(
+            {"id": task_data.project_id, "org_id": effective_org_id},
+            {"_id": 0, "id": 1}
+        )
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found in this organization")
+
+    # Validate parent_task_id if provided (subtask)
+    if task_data.parent_task_id:
+        parent = await db.tasks.find_one(
+            {"id": task_data.parent_task_id, "org_id": effective_org_id},
+            {"_id": 0, "id": 1}
+        )
+        if not parent:
+            raise HTTPException(status_code=404, detail="Parent task not found")
+
     task = {
         "id": task_id,
         "org_id": effective_org_id,
+        "project_id": task_data.project_id,
+        "parent_task_id": task_data.parent_task_id,
         "request_id": task_data.request_id,
         "title": task_data.title,
         "description": task_data.description,
@@ -586,4 +627,165 @@ async def update_task(
     update_data["updated_at"] = datetime.now(timezone.utc)
     await db.tasks.update_one({"id": task_id}, {"$set": update_data})
     updated_task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+
+    # Enrich subtask and comment counts
+    updated_task["subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id})
+    updated_task["completed_subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id, "status": "done"})
+    updated_task["comment_count"] = await db.task_comments.count_documents({"task_id": task_id})
+
     return TaskResponse(**updated_task)
+
+
+@router.delete("/{task_id}")
+async def delete_task(
+    task_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Delete a task and its subtasks/comments.
+    Admin/Owner can delete any task. Creators can delete their own.
+    """
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    is_admin = current_user.get("role") == "Administrator"
+    is_creator = task.get("created_by_user_id") == current_user["id"]
+    same_org = task.get("org_id") == user_org_id
+
+    if not same_org:
+        raise HTTPException(status_code=403, detail="Cannot delete tasks from other organizations")
+
+    if not is_admin and not is_creator:
+        raise HTTPException(status_code=403, detail="Only admins or task creators can delete tasks")
+
+    # Delete subtasks
+    await db.tasks.delete_many({"parent_task_id": task_id})
+    # Delete comments
+    await db.task_comments.delete_many({"task_id": task_id})
+    # Delete task
+    await db.tasks.delete_one({"id": task_id})
+
+    return {"success": True, "deleted_task_id": task_id}
+
+
+# ── Task Comments ──────────────────────────────────────────────────────────────
+
+@router.get("/{task_id}/comments", response_model=List[TaskCommentResponse])
+async def list_task_comments(
+    task_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """List comments on a task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    if task.get("org_id") != user_org_id and current_user.get("role") != "Administrator":
+        raise HTTPException(status_code=403, detail="Cannot access comments from other organizations")
+
+    comments = await db.task_comments.find(
+        {"task_id": task_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(200)
+
+    # Enrich with user names
+    for c in comments:
+        user = await db.users.find_one(
+            {"id": c["user_id"]},
+            {"_id": 0, "full_name": 1, "name": 1}
+        )
+        if user:
+            c["user_name"] = user.get("full_name") or user.get("name")
+
+    return [TaskCommentResponse(**c) for c in comments]
+
+
+@router.post("/{task_id}/comments", response_model=TaskCommentResponse, status_code=201)
+async def add_task_comment(
+    task_id: str,
+    data: TaskCommentCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add a comment to a task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    if task.get("org_id") != user_org_id and current_user.get("role") != "Administrator":
+        raise HTTPException(status_code=403, detail="Cannot comment on tasks from other organizations")
+
+    comment = {
+        "id": str(uuid.uuid4()),
+        "task_id": task_id,
+        "user_id": current_user["id"],
+        "content": data.content,
+        "created_at": datetime.now(timezone.utc),
+    }
+
+    await db.task_comments.insert_one(comment)
+
+    # Update task's updated_at
+    await db.tasks.update_one(
+        {"id": task_id},
+        {"$set": {"updated_at": datetime.now(timezone.utc)}}
+    )
+
+    # Enrich
+    comment["user_name"] = current_user.get("full_name") or current_user.get("name") or current_user.get("email")
+    comment.pop("_id", None)
+
+    return TaskCommentResponse(**comment)
+
+
+@router.delete("/{task_id}/comments/{comment_id}")
+async def delete_task_comment(
+    task_id: str,
+    comment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a comment. Only the comment author or admin can delete."""
+    comment = await db.task_comments.find_one({"id": comment_id, "task_id": task_id}, {"_id": 0})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    is_admin = current_user.get("role") == "Administrator"
+    is_author = comment.get("user_id") == current_user["id"]
+
+    if not is_admin and not is_author:
+        raise HTTPException(status_code=403, detail="Only the comment author or admin can delete comments")
+
+    await db.task_comments.delete_one({"id": comment_id})
+    return {"success": True, "deleted_comment_id": comment_id}
+
+
+# ── Subtasks ───────────────────────────────────────────────────────────────────
+
+@router.get("/{task_id}/subtasks")
+async def list_subtasks(
+    task_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """List subtasks of a parent task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    subtasks = await db.tasks.find(
+        {"parent_task_id": task_id},
+        {"_id": 0}
+    ).sort("position", 1).to_list(100)
+
+    # Enrich
+    for st in subtasks:
+        if st.get("assignee_user_id"):
+            assignee = await db.users.find_one(
+                {"id": st["assignee_user_id"]},
+                {"_id": 0, "full_name": 1, "name": 1}
+            )
+            if assignee:
+                st["assignee_name"] = assignee.get("full_name") or assignee.get("name")
+
+    return subtasks
