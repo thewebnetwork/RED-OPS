@@ -184,7 +184,8 @@ async def lifespan(app: FastAPI):
     try:
         await ensure_admin_account()
     except Exception as e:
-        logger.error(f"Admin seed error (non-fatal): {e}")
+        import traceback
+        logger.error(f"Admin seed error (non-fatal): {e}\n{traceback.format_exc()}")
 
     # Start SLA monitor background task
     sla_monitor_task = asyncio.create_task(sla_monitor_loop())
@@ -265,6 +266,19 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy", "version": "2.0.0"}
+
+
+@app.post("/api/setup/seed-admin")
+async def seed_admin_endpoint():
+    """Manually trigger admin account creation. Safe to call multiple times."""
+    try:
+        await ensure_admin_account()
+        admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
+        user = await db.users.find_one({"email": admin_email}, {"_id": 0, "password": 0})
+        return {"status": "ok", "email": admin_email, "user_exists": user is not None, "user_id": user.get("id") if user else None, "role": user.get("role") if user else None, "active": user.get("active") if user else None}
+    except Exception as e:
+        import traceback
+        return {"status": "error", "detail": str(e), "trace": traceback.format_exc()}
 
 
 # Bootstrap endpoint REMOVED — was unauthenticated with hardcoded credentials and ?reset=true could wipe all users.
