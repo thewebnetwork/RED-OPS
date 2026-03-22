@@ -278,14 +278,21 @@ export default function Users() {
   };
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      await axios.delete(`${API}/users/${userId}`);
-      toast.success('User deleted');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to delete user');
-    }
+    toast('Delete this user? This cannot be undone.', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await axios.delete(`${API}/users/${userId}`);
+            toast.success('User deleted');
+            fetchData();
+          } catch (error) {
+            toast.error(error.response?.data?.detail || 'Failed to delete user');
+          }
+        },
+      },
+      cancel: { label: 'Cancel' },
+    });
   };
 
   const togglePermission = (module, action) => {
