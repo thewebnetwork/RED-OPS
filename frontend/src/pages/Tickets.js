@@ -162,7 +162,7 @@ const [tickets, setTickets] = useState([]);
                         <SelectValue placeholder={"Select Client"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{"None"}</SelectItem>
+                        <SelectItem value="__none__">{"None"}</SelectItem>
                         {clients.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
@@ -179,7 +179,7 @@ const [tickets, setTickets] = useState([]);
                         <SelectValue placeholder={"Link To Order"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{"None"}</SelectItem>
+                        <SelectItem value="__none__">{"None"}</SelectItem>
                         {orders.map(o => (
                           <SelectItem key={o.id} value={o.id}>{o.order_code} - {o.title}</SelectItem>
                         ))}
