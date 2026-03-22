@@ -136,19 +136,19 @@ export default function RibbonBoard() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-sm text-slate-500">{request.order_code}</span>
+              <span className="font-mono text-sm">{request.order_code}</span>
               <Badge variant="outline" className="text-xs">
                 {request.category_name || t('ribbon.general')}
               </Badge>
               {request.specialty_name && (
-                <Badge className="bg-purple-100 text-purple-700 text-xs">
+                <Badge style={{ background: "#a855f718", color: "#a855f7", fontSize: 11, padding: "2px 7px", borderRadius: 4 }}>
                   <Briefcase size={10} className="mr-1" />
                   {request.specialty_name}
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-slate-900 mt-2 line-clamp-2">{request.title}</h3>
-            <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+            <h3 className="font-medium mt-2 line-clamp-2">{request.title}</h3>
+            <div className="flex items-center gap-4 mt-2 text-sm">
               <span className="flex items-center gap-1">
                 <Timer size={14} />
                 {t('ribbon.inPool')}: {formatTimeInPool(request.pool_entered_at)}
@@ -166,7 +166,7 @@ export default function RibbonBoard() {
             {canPick && (
               <Button 
                 size="sm" 
-                className="bg-emerald-600 hover:bg-emerald-700"
+                className="bg-red-700 hover:bg-red-800"
                 onClick={() => {
                   setRequestToPick(request);
                   setPickDialogOpen(true);
@@ -198,11 +198,11 @@ export default function RibbonBoard() {
     <div className="space-y-6 animate-fade-in" data-testid="ribbon-board-page">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
           <Layers className="text-[#A2182C]" />
           {t('ribbon.title')}
         </h1>
-        <p className="text-slate-500 mt-1">
+        <p className="mt-1">
           {isPartner && t('ribbon.partnerDescription')}
           {isVendor && t('ribbon.vendorDescription')}
           {(isAdmin || isOperator) && t('ribbon.adminDescription')}
@@ -257,12 +257,12 @@ export default function RibbonBoard() {
         {/* Pool 1 - Partners */}
         {canViewPool1 && (
           <TabsContent value="pool1" className="mt-6">
-            <Card className="mb-4 bg-purple-50 border-purple-200">
+            <Card className="mb-4" style={{ background: "#a855f715", border: "1px solid #a855f730" }}>
               <CardContent className="py-3 px-4">
-                <div className="flex items-center gap-2 text-purple-800">
+                <div className="flex items-center gap-2">
                   <Users size={18} />
                   <span className="font-medium">{t('ribbon.partnerPool')}</span>
-                  <span className="text-sm text-purple-600">
+                  <span className="text-sm ">
                     {t('ribbon.partnerPoolDescription')}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">{t('ribbon.noRequestsPool1', 'No requests in Pool 1')}</p>
+                  <p style={{ color: "var(--tx-3)" }}>{t('ribbon.noRequestsPool1', 'No requests in Pool 1')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -294,12 +294,12 @@ export default function RibbonBoard() {
         {/* Pool 2 - Vendors */}
         {canViewPool2 && (
           <TabsContent value="pool2" className="mt-6">
-            <Card className="mb-4 bg-emerald-50 border-emerald-200">
+            <Card className="mb-4" style={{ background: "#22c55e12", border: "1px solid #22c55e25" }}>
               <CardContent className="py-3 px-4">
-                <div className="flex items-center gap-2 text-emerald-800">
+                <div className="flex items-center gap-2">
                   <Briefcase size={18} />
                   <span className="font-medium">{t('ribbon.vendorPool')}</span>
-                  <span className="text-sm text-emerald-600">
+                  <span className="text-sm ">
                     {t('ribbon.vendorPoolDescription')}
                   </span>
                 </div>
@@ -310,7 +310,7 @@ export default function RibbonBoard() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Layers size={48} className="mx-auto mb-4 text-slate-300" />
-                  <p className="text-slate-500">{t('ribbon.noRequestsPool2', 'No requests in Pool 2')}</p>
+                  <p style={{ color: "var(--tx-3)" }}>{t('ribbon.noRequestsPool2', 'No requests in Pool 2')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -344,7 +344,7 @@ export default function RibbonBoard() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handlePickRequest}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-red-700 hover:bg-red-800"
             >
               <Hand size={16} className="mr-2" />
               {t('ribbon.confirmPick')}

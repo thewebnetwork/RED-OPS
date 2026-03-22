@@ -103,14 +103,21 @@ export default function SLAPolicies() {
   }, [fetchPolicies, fetchMonitoringData, fetchReferenceData]);
 
   const handleDeletePolicy = async (policyId) => {
-    if (!window.confirm('Are you sure you want to delete this policy?')) return;
-    try {
-      await axios.delete(`${API}/sla-policies/${policyId}`);
-      toast.success('Policy deleted');
-      fetchPolicies();
-    } catch (error) {
-      toast.error('Failed to delete policy');
-    }
+    toast('Delete this SLA policy? This cannot be undone.', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await axios.delete(`${API}/sla-policies/${policyId}`);
+            toast.success('Policy deleted');
+            fetchPolicies();
+          } catch (error) {
+            toast.error('Failed to delete policy');
+          }
+        },
+      },
+      cancel: { label: 'Cancel' },
+    });
   };
 
   const handleAcknowledge = async (escalationId) => {

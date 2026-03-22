@@ -102,7 +102,16 @@ export default function PoolPickerRulesPage() {
   };
 
   const resetToDefaults = async () => {
-    if (!window.confirm('Reset all pool picker rules to default values?')) return;
+    toast('Reset all pool picker rules to default values?', {
+      action: {
+        label: 'Reset',
+        onClick: async () => { await _doReset(); },
+      },
+      cancel: { label: 'Cancel' },
+    });
+  };
+
+  const _doReset = async () => {
     
     try {
       setSaving(true);

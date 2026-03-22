@@ -36,9 +36,9 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusColors = {
-  'Open': 'bg-blue-100 text-blue-700',
+  'Open': 'text-blue-700',
   'Waiting': 'bg-amber-100 text-amber-700',
-  'Closed': 'bg-slate-100 text-slate-500',
+  'Closed': 'bg-neutral-800',
 };
 
 const TICKET_STATUSES = ["Open", "Waiting", "Closed"];
@@ -127,8 +127,8 @@ export default function Tickets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('tickets.title')}</h1>
-          <p className="text-slate-500 mt-1">{tickets.length} {t('tickets.title').toLowerCase()}</p>
+          <h1 className="text-2xl font-bold">{t('tickets.title')}</h1>
+          <p className="mt-1">{tickets.length} {t('tickets.title').toLowerCase()}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -237,13 +237,13 @@ export default function Tickets() {
       </Card>
 
       {/* Tickets List */}
-      <Card className="border-slate-200 overflow-hidden">
+      <Card className="overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
           </div>
         ) : filteredTickets.length === 0 ? (
-          <CardContent className="p-12 text-center text-slate-500">
+          <CardContent className="p-12 text-center">
             {search || statusFilter ? t('tickets.noTicketsMatch') : t('tickets.noTicketsYet')}
           </CardContent>
         ) : (
@@ -268,7 +268,7 @@ export default function Tickets() {
                         className="hover:text-rose-600"
                         data-testid={`ticket-link-${ticket.ticket_code}`}
                       >
-                        <span className="font-mono text-xs text-slate-500 block">{ticket.ticket_code}</span>
+                        <span className="font-mono text-xs block">{ticket.ticket_code}</span>
                         <span className="font-medium">{ticket.subject}</span>
                       </Link>
                     </td>
@@ -294,7 +294,7 @@ export default function Tickets() {
                       </Select>
                     </td>
                     <td>{ticket.owner_name}</td>
-                    <td className="text-slate-600">
+                    <td >
                       {format(new Date(ticket.updated_at), 'MMM d, yyyy')}
                     </td>
                   </tr>

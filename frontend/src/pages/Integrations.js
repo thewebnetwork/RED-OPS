@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 
 const Integrations = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,11 +144,16 @@ const Integrations = () => {
   };
 
   const handleDisconnect = (name) => {
-    const confirmed = window.confirm(`Are you sure you want to disconnect ${name}?`);
-    if (confirmed) {
-      setConnectedIntegrations(connectedIntegrations.filter(i => i !== name));
-      window.alert(`${name} has been disconnected.`);
-    }
+    toast(`Disconnect ${name}?`, {
+      action: {
+        label: 'Disconnect',
+        onClick: () => {
+          setConnectedIntegrations(connectedIntegrations.filter(i => i !== name));
+          toast.success(`${name} disconnected`);
+        },
+      },
+      cancel: { label: 'Cancel' },
+    });
   };
 
   const closeModal = () => {
@@ -156,7 +162,7 @@ const Integrations = () => {
   };
 
   const handleModalConnect = () => {
-    window.alert(`To connect ${selectedIntegration.name}, contact your Red Ops admin or email support@redribbongroup.ca`);
+    toast.info(`To connect ${selectedIntegration.name}, contact your Red Ops admin or email support@redribbongroup.ca`);
     closeModal();
   };
 

@@ -81,13 +81,13 @@ export default function MyServices() {
 
   const getAccountTypeBadge = () => {
     const colors = {
-      'Partner': 'bg-purple-100 text-purple-700',
-      'Media Client': 'bg-cyan-100 text-cyan-700',
-      'Client': 'bg-cyan-100 text-cyan-700',
-      'Internal Staff': 'bg-orange-100 text-orange-700',
-      'Vendor/Freelancer': 'bg-emerald-100 text-emerald-700'
+      'Partner': 'bg-purple-100',
+      'Media Client': { background: '#06b6d418', color: '#06b6d4' },
+      'Client': { background: '#06b6d418', color: '#06b6d4' },
+      'Internal Staff': { background: '#f9731618', color: '#f97316' },
+      'Vendor/Freelancer': { background: '#22c55e18', color: '#22c55e' }
     };
-    return colors[user?.account_type] || 'bg-slate-100 text-slate-700';
+    return colors[user?.account_type] || { background: 'var(--bg-elevated)', color: 'var(--tx-2)' };
   };
 
   if (loading) {
@@ -103,11 +103,11 @@ export default function MyServices() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <PackageOpen className="text-[#A2182C]" />
             My Services
           </h1>
-          <p className="text-slate-500 mt-1">View your account details and service information</p>
+          <p className="mt-1">View your account details and service information</p>
         </div>
         {isAdmin && (
           <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -166,24 +166,24 @@ For support, email support@example.com"
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 size={20} className="text-slate-500" />
+              <Building2 size={20} className="" />
               Account Details
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">Account Type</span>
-              <Badge className={getAccountTypeBadge()}>
+              <span className="text-sm">Account Type</span>
+              <Badge style={getAccountTypeBadge()}>
                 {user?.account_type || 'Not set'}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">Role</span>
+              <span className="text-sm">Role</span>
               <Badge variant="outline">{user?.role}</Badge>
             </div>
             {user?.specialty_name && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">Specialty</span>
+                <span className="text-sm">Specialty</span>
                 <span className="text-sm font-medium flex items-center gap-1">
                   <Briefcase size={14} className="text-slate-400" />
                   {user.specialty_name}
@@ -192,7 +192,7 @@ For support, email support@example.com"
             )}
             {user?.team_name && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">Team</span>
+                <span className="text-sm">Team</span>
                 <span className="text-sm font-medium flex items-center gap-1">
                   <Users size={14} className="text-slate-400" />
                   {user.team_name}
@@ -204,9 +204,9 @@ For support, email support@example.com"
 
         {/* Subscription Plan Card - Only for Partners */}
         {user?.account_type === 'Partner' && (
-          <Card className="border-purple-200 bg-purple-50/30">
+          <Card >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-purple-800">
+              <CardTitle className="flex items-center gap-2">
                 <CreditCard size={20} />
                 Subscription Plan
               </CardTitle>
@@ -214,21 +214,21 @@ For support, email support@example.com"
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-purple-600">Current Plan</span>
+                <span className="text-sm ">Current Plan</span>
                 <Badge className="bg-purple-600 text-white">
                   {subscriptionPlan?.name || user?.subscription_plan_name || 'Unknown'}
                 </Badge>
               </div>
               {subscriptionPlan?.description && (
-                <p className="text-sm text-purple-700">{subscriptionPlan.description}</p>
+                <p className="text-sm">{subscriptionPlan.description}</p>
               )}
               {subscriptionPlan?.features && subscriptionPlan.features.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-purple-800 mb-2">Plan Features:</p>
+                  <p className="text-sm font-medium mb-2">Plan Features:</p>
                   <ul className="space-y-1">
                     {subscriptionPlan.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm text-purple-700 flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-purple-500" />
+                      <li key={idx} className="text-sm flex items-center gap-2">
+                        <CheckCircle2 size={14} className="" />
                         {feature}
                       </li>
                     ))}
@@ -249,22 +249,22 @@ For support, email support@example.com"
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm">
                 As a <strong>{displayAccountType(user.account_type)}</strong>, you have access to request services 
                 and manage your work within the platform.
               </p>
               {user.account_type === 'Media Client' && (
-                <p className="text-sm text-slate-500 mt-3">
+                <p className="text-sm mt-3">
                   Your services are billed on an A La Carte basis. Contact support for pricing details.
                 </p>
               )}
               {user.account_type === 'Vendor/Freelancer' && (
-                <p className="text-sm text-slate-500 mt-3">
+                <p className="text-sm mt-3">
                   Pick available work from the pool to earn based on completed services.
                 </p>
               )}
               {user.account_type === 'Internal Staff' && (
-                <p className="text-sm text-slate-500 mt-3">
+                <p className="text-sm mt-3">
                   Access all operational features as part of the internal team.
                 </p>
               )}
@@ -291,13 +291,13 @@ For support, email support@example.com"
                 } else if (line.startsWith('- ')) {
                   return <li key={idx} className="ml-4">{line.slice(2)}</li>;
                 } else if (line.trim()) {
-                  return <p key={idx} className="text-slate-600 my-1">{line}</p>;
+                  return <p key={idx} className="my-1">{line}</p>;
                 }
                 return null;
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8">
               <PackageOpen size={40} className="mx-auto mb-3 text-slate-300" />
               <p>No service information has been configured.</p>
               {isAdmin && (

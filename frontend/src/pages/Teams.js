@@ -146,18 +146,24 @@ export default function Teams() {
   };
 
   const handleDelete = async (teamId) => {
-    if (!window.confirm(t('common.confirm'))) return;
-    
-    try {
-      await axios.delete(`${API}/teams/${teamId}`);
-      if (selectedTeam?.id === teamId) {
-        setSelectedTeam(null);
-      }
-      fetchTeams();
-      toast.success(t('success.deleted'));
-    } catch (error) {
-      toast.error(t('errors.generic'));
-    }
+    toast('Delete this team? This cannot be undone.', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await axios.delete(`${API}/teams/${teamId}`);
+            if (selectedTeam?.id === teamId) {
+              setSelectedTeam(null);
+            }
+            fetchTeams();
+            toast.success(t('success.deleted'));
+          } catch (error) {
+            toast.error(t('errors.generic'));
+          }
+        },
+      },
+      cancel: { label: 'Cancel' },
+    });
   };
 
   if (loading) {

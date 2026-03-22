@@ -276,14 +276,20 @@ export default function SLA() {
   };
 
   const handleDelete = async (slaId) => {
-    if (!window.confirm('Are you sure you want to delete this SLA?')) return;
-    
-    try {
-      setSlaDefinitions(prev => prev.filter(sla => sla.id !== slaId));
-      toast.success('SLA deleted');
-    } catch (error) {
-      toast.error('Failed to delete SLA');
-    }
+    toast('Delete this SLA? This cannot be undone.', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            setSlaDefinitions(prev => prev.filter(sla => sla.id !== slaId));
+            toast.success('SLA deleted');
+          } catch (error) {
+            toast.error('Failed to delete SLA');
+          }
+        },
+      },
+      cancel: { label: 'Cancel' },
+    });
   };
 
   const handleToggleActive = async (slaId) => {

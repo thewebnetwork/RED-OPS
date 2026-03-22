@@ -263,7 +263,16 @@ export default function Categories() {
   };
 
   const handleDelete = async (type, id) => {
-    if (!window.confirm(t('categories.confirmDeactivate'))) return;
+    toast('Deactivate this category? This cannot be undone.', {
+      action: {
+        label: 'Deactivate',
+        onClick: async () => { await _doDelete(type, id); },
+      },
+      cancel: { label: 'Cancel' },
+    });
+  };
+
+  const _doDelete = async (type, id) => {
     
     try {
       if (type === 'l1') {
