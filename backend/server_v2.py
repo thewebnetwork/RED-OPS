@@ -138,7 +138,8 @@ async def ensure_admin_account():
                 "active": True,
                 "force_password_change": False,
                 "force_otp_setup": False,
-                "otp_verified": True,
+                "otp_verified": False,
+                "otp_secret": None,
             }}
         )
         logger.info(f"Admin account verified: {admin_email}")
@@ -164,7 +165,7 @@ async def ensure_admin_account():
             "pool_access": "both",
             "force_password_change": False,
             "force_otp_setup": False,
-            "otp_verified": True,
+            "otp_verified": False,
             "otp_secret": None,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }

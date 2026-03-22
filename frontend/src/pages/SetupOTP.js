@@ -99,14 +99,14 @@ export default function SetupOTP() {
 
   if (setupLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="animate-spin h-10 w-10 border-4 border-rose-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
       <Card className="w-full max-w-lg shadow-xl" data-testid="setup-otp-page">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">

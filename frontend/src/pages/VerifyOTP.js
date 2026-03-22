@@ -64,7 +64,7 @@ export default function VerifyOTP() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
       <Card className="w-full max-w-md shadow-xl" data-testid="verify-otp-page">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4">
