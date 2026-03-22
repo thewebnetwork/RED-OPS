@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Users, Plus, Search, X, ChevronRight, FileText, Activity,
   Mail, Phone, Globe, Building2, UserCheck, CreditCard,
   CheckCircle2, Circle, AlertCircle, MoreHorizontal,
   Copy, RefreshCw, ShieldOff, Send, Eye, Lock,
   Zap, Star, TrendingUp, Clock, DollarSign,
+  Edit3, Save, MessageSquare, ArrowUpRight, Calendar,
+  Layers, Trash2, PenLine, Hash, ExternalLink,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -32,7 +35,14 @@ const PORTAL_STATUS = {
   none:     { label:'No Portal',      color:'#606060', bg:'var(--bg-overlay)', icon: Circle },
 };
 
-// ── Mock data (enriched with portal fields) ──────────────────────────────────
+const STAGE_COLORS = {
+  'Submitted':'#3b82f6','Assigned':'#a855f7','In Progress':'#f59e0b',
+  'Pending Review':'#06b6d4','Revision':'#ef4444','Delivered':'#22c55e','Closed':'#606060',
+};
+
+const PRI_COLORS = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#606060' };
+
+// ── Mock data ────────────────────────────────────────────────────────────────
 const MOCK_CLIENTS = [
   { _id:'c1', name:'Thompson Real Estate',   plan:'Growth', mrr:2500, score:82, renewal:'2026-05-15', requests_open:2,  deliveries:18, last_delivery:'Today',       am:'Jordan K.',  tags:['VIP'],     notes:'Strong Q1, needs Q2 strategy call.', portal:'active',  contact:{ name:'Mike Thompson',  email:'mike@thompsonre.ca',   phone:'403-555-0101' }, industry:'Real Estate', website:'thompsonre.ca',   last_login:'2 hours ago',   login_count:47 },
   { _id:'c2', name:'Riverside Realty Group', plan:'Starter',mrr:1200, score:91, renewal:'2026-06-01', requests_open:1,  deliveries:9,  last_delivery:'Yesterday',   am:'Jordan K.',  tags:['New'],     notes:'Just onboarded. First campaign live.', portal:'active', contact:{ name:'Sarah Riverside', email:'sarah@riverside.ca',   phone:'403-555-0202' }, industry:'Real Estate', website:'riverside.ca',    last_login:'Yesterday',     login_count:12 },
@@ -43,6 +53,130 @@ const MOCK_CLIENTS = [
   { _id:'c7', name:'Summit Realty Calgary',  plan:'Growth', mrr:2500, score:62, renewal:'2026-06-20', requests_open:2,  deliveries:15, last_delivery:'4 days ago',  am:'Jordan K.',  tags:[],          notes:'Average engagement. Needs check-in.', portal:'none',    contact:{ name:'Tom Summit',     email:'tom@summitrealty.ca',  phone:'403-555-0707' }, industry:'Real Estate', website:'summitrealty.ca', last_login:'Never',         login_count:0  },
   { _id:'c8', name:'Park Ave Properties',    plan:'Starter',mrr:1200, score:71, renewal:'2026-07-10', requests_open:0,  deliveries:7,  last_delivery:'3 days ago',  am:'Jordan K.',  tags:['New'],     notes:'Second month in. Progressing well.', portal:'invited',  contact:{ name:'Amy Park',       email:'amy@parkave.ca',       phone:'403-555-0808' }, industry:'Real Estate', website:'parkave.ca',      last_login:'Never',         login_count:0  },
 ];
+
+// Mock linked requests per client
+const CLIENT_REQUESTS = {
+  c1: [
+    { id:'RRG-00001', title:'April Ad Creative Pack',      stage:'In Progress',    priority:'Urgent', assignee:'Taryn P.',   due:'Mar 22' },
+    { id:'RRG-00009', title:'Thompson Q2 Strategy Deck',   stage:'Submitted',      priority:'High',   assignee:'—',          due:'Mar 30' },
+  ],
+  c2: [
+    { id:'RRG-00012', title:'Riverside Launch Campaign',    stage:'Delivered',      priority:'Normal', assignee:'Lucca R.',   due:'Mar 18' },
+  ],
+  c3: [
+    { id:'RRG-00003', title:'Apex Listing Video #4',        stage:'In Progress',    priority:'High',   assignee:'Marcus Obi', due:'Mar 25' },
+    { id:'RRG-00004', title:'Apex Social Content March',    stage:'Pending Review', priority:'Normal', assignee:'Sarah Chen', due:'Mar 23' },
+    { id:'RRG-00007', title:'Apex Email Nurture Sequence',  stage:'Revision',       priority:'Urgent', assignee:'Taryn P.',   due:'Mar 20' },
+    { id:'RRG-00008', title:'Apex Google Ads Setup',        stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 1'  },
+  ],
+  c4: [],
+  c5: [
+    { id:'RRG-00015', title:'Burnham Strategy Presentation',stage:'In Progress',    priority:'Urgent', assignee:'Marcus Obi', due:'Mar 24' },
+  ],
+  c6: [
+    { id:'RRG-00011', title:'Lakeside Monthly Report Mar',  stage:'Pending Review', priority:'Normal', assignee:'Jordan K.',  due:'Mar 28' },
+    { id:'RRG-00014', title:'Lakeside Listing Video #9',    stage:'In Progress',    priority:'High',   assignee:'Marcus Obi', due:'Mar 27' },
+    { id:'RRG-00016', title:'Lakeside Q2 Ad Refresh',       stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 5'  },
+  ],
+  c7: [
+    { id:'RRG-00017', title:'Summit Social Content April',  stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 3'  },
+    { id:'RRG-00018', title:'Summit CMA Template Design',   stage:'In Progress',    priority:'High',   assignee:'Sarah Chen', due:'Mar 29' },
+  ],
+  c8: [],
+};
+
+// Mock activity timeline per client
+const CLIENT_ACTIVITY = {
+  c1: [
+    { ts:'2026-03-22 09:14', type:'request', text:'New request submitted: April Ad Creative Pack', actor:'Mike Thompson' },
+    { ts:'2026-03-21 16:30', type:'delivery', text:'Delivered: March Monthly Report', actor:'Jordan K.' },
+    { ts:'2026-03-20 11:00', type:'note', text:'Strategy call completed. Client happy with Q1 results, wants to double down on video.', actor:'Jordan K.' },
+    { ts:'2026-03-18 14:22', type:'login', text:'Client logged in to portal', actor:'Mike Thompson' },
+    { ts:'2026-03-15 10:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
+    { ts:'2026-03-10 09:30', type:'request', text:'Request completed: March Ad Creative', actor:'Taryn P.' },
+  ],
+  c2: [
+    { ts:'2026-03-21 10:00', type:'delivery', text:'Delivered: Launch Campaign Assets', actor:'Lucca R.' },
+    { ts:'2026-03-19 14:00', type:'note', text:'Onboarding call — set expectations for first 30 days.', actor:'Jordan K.' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
+  ],
+  c3: [
+    { ts:'2026-03-22 08:30', type:'alert', text:'4 open requests aging — SLA at risk', actor:'System' },
+    { ts:'2026-03-20 11:00', type:'request', text:'Revision requested: Email Nurture Sequence', actor:'David Apex' },
+    { ts:'2026-03-17 09:00', type:'note', text:'Client expressed frustration with turnaround times.', actor:'Vitto P.' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $3,800.00', actor:'Stripe' },
+  ],
+  c4: [
+    { ts:'2026-03-22 07:00', type:'alert', text:'No delivery in 12 days — needs escalation', actor:'System' },
+    { ts:'2026-03-10 09:00', type:'delivery', text:'Delivered: Blog Post Series Batch 2', actor:'Sarah Chen' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
+  ],
+  c5: [
+    { ts:'2026-03-22 10:00', type:'request', text:'New request submitted: Strategy Presentation', actor:'Chris Burnham' },
+    { ts:'2026-03-20 16:00', type:'delivery', text:'Delivered: Case Study Design', actor:'Marcus Obi' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
+  ],
+  c6: [
+    { ts:'2026-03-22 11:00', type:'login', text:'Client logged in to portal', actor:'Lisa Lakeside' },
+    { ts:'2026-03-22 09:00', type:'delivery', text:'Delivered: Listing Video #8', actor:'Marcus Obi' },
+    { ts:'2026-03-21 15:30', type:'note', text:'Lisa mentioned wanting to upgrade plan. Scheduled renewal call.', actor:'Vitto P.' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $3,800.00', actor:'Stripe' },
+    { ts:'2026-03-12 10:00', type:'request', text:'New request submitted: Q2 Ad Refresh', actor:'Lisa Lakeside' },
+  ],
+  c7: [
+    { ts:'2026-03-20 09:00', type:'request', text:'New request submitted: CMA Template Design', actor:'Tom Summit' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
+  ],
+  c8: [
+    { ts:'2026-03-20 14:00', type:'delivery', text:'Delivered: Welcome Kit Design', actor:'Jordan K.' },
+    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
+  ],
+};
+
+// Mock billing per client
+const CLIENT_BILLING = {
+  c1: [
+    { date:'2026-03-15', amount:2500, status:'paid', invoice:'INV-0041' },
+    { date:'2026-02-15', amount:2500, status:'paid', invoice:'INV-0033' },
+    { date:'2026-01-15', amount:2500, status:'paid', invoice:'INV-0025' },
+    { date:'2025-12-15', amount:2500, status:'paid', invoice:'INV-0017' },
+  ],
+  c3: [
+    { date:'2026-03-15', amount:3800, status:'paid', invoice:'INV-0043' },
+    { date:'2026-02-15', amount:3800, status:'paid', invoice:'INV-0035' },
+    { date:'2026-01-15', amount:3800, status:'late', invoice:'INV-0027' },
+  ],
+  c4: [
+    { date:'2026-03-15', amount:2500, status:'paid', invoice:'INV-0042' },
+    { date:'2026-02-15', amount:2500, status:'paid', invoice:'INV-0034' },
+  ],
+  c6: [
+    { date:'2026-03-15', amount:3800, status:'paid', invoice:'INV-0044' },
+    { date:'2026-02-15', amount:3800, status:'paid', invoice:'INV-0036' },
+    { date:'2026-01-15', amount:3800, status:'paid', invoice:'INV-0028' },
+    { date:'2025-12-15', amount:3800, status:'paid', invoice:'INV-0020' },
+    { date:'2025-11-15', amount:3800, status:'paid', invoice:'INV-0012' },
+  ],
+};
+
+// Mock notes/comments per client
+const CLIENT_NOTES_INIT = {
+  c1: [
+    { id:'n1', text:'Strategy call completed. Client happy with Q1 results, wants to double down on video content in Q2.', author:'Jordan K.', ts:'2026-03-20 11:00' },
+    { id:'n2', text:'Mike asked about adding Google Ads. Sent proposal — waiting on response.', author:'Vitto P.', ts:'2026-03-14 09:30' },
+  ],
+  c3: [
+    { id:'n3', text:'Client expressed frustration with turnaround times. Need to address capacity.', author:'Vitto P.', ts:'2026-03-17 09:00' },
+    { id:'n4', text:'Discussed Q2 roadmap. Client wants more listing videos and market updates.', author:'Vitto P.', ts:'2026-03-05 14:00' },
+  ],
+  c4: [
+    { id:'n5', text:'No delivery in 12 days. Escalating to team lead for prioritisation.', author:'Vitto P.', ts:'2026-03-22 07:00' },
+  ],
+  c6: [
+    { id:'n6', text:'Lisa mentioned wanting to upgrade plan. Scheduled renewal call for next week.', author:'Vitto P.', ts:'2026-03-21 15:30' },
+    { id:'n7', text:'Top performer — 44 deliveries, 88 health score. Great case study candidate.', author:'Jordan K.', ts:'2026-03-10 12:00' },
+  ],
+};
 
 const TEAM_MEMBERS = ['Jordan Kim','Vitto Pessanha','Taryn Pessanha','Lucca Rossini','Sarah Chen','Marcus Obi'];
 const INDUSTRIES   = ['Real Estate','Coaching','Finance','E-Commerce','Health & Wellness','Marketing Agency','Law Firm','Consulting','Retail','Technology'];
@@ -76,6 +210,25 @@ function PortalBadge({ status }) {
   );
 }
 
+function StagePill({ stage }) {
+  const c = STAGE_COLORS[stage] || 'var(--tx-3)';
+  return <span style={{ fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:4, background:`${c}22`, color:c }}>{stage}</span>;
+}
+
+function PriPill({ priority }) {
+  const c = PRI_COLORS[priority] || 'var(--tx-3)';
+  return <span style={{ fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:4, background:`${c}22`, color:c }}>{priority}</span>;
+}
+
+const ACTIVITY_ICONS = {
+  request:  { icon: FileText,      color:'#3b82f6' },
+  delivery: { icon: CheckCircle2,  color:'#22c55e' },
+  note:     { icon: MessageSquare, color:'#a855f7' },
+  login:    { icon: ArrowUpRight,  color:'#06b6d4' },
+  payment:  { icon: DollarSign,    color:'#22c55e' },
+  alert:    { icon: AlertCircle,   color:'#ef4444' },
+};
+
 // ── Multi-step Add Client Wizard ──────────────────────────────────────────────
 const WIZARD_STEPS = [
   { id:1, label:'Business',  icon: Building2,   title:'Business Info',       sub:'Company name, industry, website' },
@@ -90,17 +243,9 @@ function AddClientWizard({ onClose, onCreated }) {
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
-    // Step 1
     name: '', industry: '', website: '', phone: '',
-    // Step 2
     contact_name: '', contact_email: '', contact_phone: '',
-    // Step 3
-    plan: '',
-    // Step 4
-    am: '', notes: '',
-    // Step 5
-    send_invite: true,
-    tags: [],
+    plan: '', am: '', notes: '', send_invite: true, tags: [],
   });
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -108,13 +253,12 @@ function AddClientWizard({ onClose, onCreated }) {
     if (step === 1) return form.name.trim().length > 0;
     if (step === 2) return form.contact_name.trim() && form.contact_email.includes('@');
     if (step === 3) return form.plan !== '';
-    if (step === 4) return true;
     return true;
   };
 
   const handleLaunch = async () => {
     setSending(true);
-    await new Promise(r => setTimeout(r, 1400)); // simulate API
+    await new Promise(r => setTimeout(r, 1400));
     setSending(false);
     setDone(true);
     if (onCreated) onCreated({
@@ -163,8 +307,6 @@ function AddClientWizard({ onClose, onCreated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()} style={{ width:560, padding:0, overflow:'hidden' }}>
-
-        {/* ── Wizard Header ── */}
         <div style={{ padding:'20px 24px 0', borderBottom:'1px solid var(--border)', background:'var(--bg-elevated)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
             <div>
@@ -173,10 +315,8 @@ function AddClientWizard({ onClose, onCreated }) {
             </div>
             <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4 }}><X size={16} /></button>
           </div>
-
-          {/* Step indicators */}
           <div style={{ display:'flex', gap:0, marginBottom:-1 }}>
-            {WIZARD_STEPS.map((s, i) => {
+            {WIZARD_STEPS.map((s) => {
               const isActive   = step === s.id;
               const isComplete = step >  s.id;
               return (
@@ -195,14 +335,12 @@ function AddClientWizard({ onClose, onCreated }) {
           </div>
         </div>
 
-        {/* ── Step content ── */}
         <div style={{ padding:'24px 24px 16px', minHeight:280 }}>
           <div style={{ marginBottom:16 }}>
             <h3 style={{ fontSize:14, fontWeight:700, margin:'0 0 3px' }}>{WIZARD_STEPS[step-1].title}</h3>
             <p style={{ fontSize:12, color:'var(--tx-3)', margin:0 }}>{WIZARD_STEPS[step-1].sub}</p>
           </div>
 
-          {/* STEP 1 – Business Info */}
           {step === 1 && (
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
               <div>
@@ -229,7 +367,6 @@ function AddClientWizard({ onClose, onCreated }) {
             </div>
           )}
 
-          {/* STEP 2 – Portal Contact */}
           {step === 2 && (
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
               <div style={{ padding:'10px 12px', background:'#3b82f618', border:'1px solid #3b82f630', borderRadius:8, fontSize:12, color:'#3b82f6', display:'flex', alignItems:'center', gap:8 }}>
@@ -250,7 +387,6 @@ function AddClientWizard({ onClose, onCreated }) {
             </div>
           )}
 
-          {/* STEP 3 – Plan */}
           {step === 3 && (
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               {Object.entries(PLAN_CONFIG).map(([name, cfg]) => (
@@ -275,7 +411,6 @@ function AddClientWizard({ onClose, onCreated }) {
             </div>
           )}
 
-          {/* STEP 4 – Team */}
           {step === 4 && (
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
               <div>
@@ -303,10 +438,8 @@ function AddClientWizard({ onClose, onCreated }) {
             </div>
           )}
 
-          {/* STEP 5 – Review & Launch */}
           {step === 5 && (
             <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-              {/* Summary card */}
               <div style={{ background:'var(--bg-elevated)', borderRadius:10, padding:'14px 16px', display:'flex', flexDirection:'column', gap:10 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <div style={{ width:40, height:40, borderRadius:9, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:800, color:'var(--red)' }}>{form.name.charAt(0)}</div>
@@ -330,7 +463,6 @@ function AddClientWizard({ onClose, onCreated }) {
                   ))}
                 </div>
               </div>
-              {/* Invite toggle */}
               <div style={{ padding:'12px 14px', background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:9, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                 <div>
                   <div style={{ fontSize:13, fontWeight:600, color:'var(--tx-1)' }}>Send Portal Invite</div>
@@ -340,7 +472,6 @@ function AddClientWizard({ onClose, onCreated }) {
                   <div style={{ width:20, height:20, borderRadius:'50%', background:'#fff', transition:'transform .2s', transform: form.send_invite ? 'translateX(20px)' : 'translateX(0)' }} />
                 </button>
               </div>
-              {/* Onboarding note */}
               <div style={{ padding:'10px 12px', background:'#a855f718', border:'1px solid #a855f730', borderRadius:8, fontSize:12, color:'#a855f7', display:'flex', alignItems:'center', gap:8 }}>
                 <Zap size={13} /><span>A 16-step onboarding project will be auto-created for this client.</span>
               </div>
@@ -348,7 +479,6 @@ function AddClientWizard({ onClose, onCreated }) {
           )}
         </div>
 
-        {/* ── Footer ── */}
         <div style={{ padding:'12px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <button onClick={() => step > 1 ? setStep(s => s-1) : onClose()} className="btn-ghost btn-sm">
             {step === 1 ? 'Cancel' : '← Back'}
@@ -358,7 +488,7 @@ function AddClientWizard({ onClose, onCreated }) {
             {step < 5
               ? <button className="btn-primary btn-sm" onClick={() => setStep(s => s+1)} disabled={!canNext()}>Continue →</button>
               : <button className="btn-primary btn-sm" onClick={handleLaunch} disabled={sending} style={{ minWidth:120 }}>
-                  {sending ? <><div style={{ width:12, height:12, border:'2px solid rgba(255,255,255,.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin 0.7s linear infinite', marginRight:6 }} />Creating...</> : '🚀 Create & Launch'}
+                  {sending ? 'Creating...' : 'Create & Launch'}
                 </button>
             }
           </div>
@@ -370,8 +500,484 @@ function AddClientWizard({ onClose, onCreated }) {
 
 const labelStyle = { fontSize:11, fontWeight:600, color:'var(--tx-3)', display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' };
 
-// ── Inline style injection ────────────────────────────────────────────────────
-const SPIN_CSS = `@keyframes spin { to { transform: rotate(360deg) } }`;
+// ── Detail Panel Tabs ────────────────────────────────────────────────────────
+const TABS = [
+  { id:'overview',  label:'Overview',  icon: Eye },
+  { id:'requests',  label:'Requests',  icon: Layers },
+  { id:'activity',  label:'Activity',  icon: Activity },
+  { id:'notes',     label:'Notes',     icon: MessageSquare },
+  { id:'billing',   label:'Billing',   icon: DollarSign },
+];
+
+function ClientDetailPanel({ client, onClose, onUpdate }) {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState('overview');
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [newNote, setNewNote] = useState('');
+  const [notes, setNotes] = useState(CLIENT_NOTES_INIT[client._id] || []);
+
+  // Reset tab & notes when client changes
+  useEffect(() => {
+    setTab('overview');
+    setEditing(false);
+    setNotes(CLIENT_NOTES_INIT[client._id] || []);
+  }, [client._id]);
+
+  const startEdit = () => {
+    setEditForm({
+      name: client.name,
+      industry: client.industry || '',
+      website: client.website || '',
+      plan: client.plan,
+      am: client.am || '',
+      notes: client.notes || '',
+    });
+    setEditing(true);
+  };
+
+  const saveEdit = () => {
+    onUpdate({
+      ...client,
+      ...editForm,
+      mrr: PLAN_CONFIG[editForm.plan]?.price || client.mrr,
+    });
+    setEditing(false);
+    toast.success('Client updated');
+  };
+
+  const addNote = () => {
+    if (!newNote.trim()) return;
+    const note = { id: `n${Date.now()}`, text: newNote, author: 'You', ts: new Date().toLocaleString() };
+    setNotes(prev => [note, ...prev]);
+    setNewNote('');
+    toast.success('Note added');
+  };
+
+  const requests  = CLIENT_REQUESTS[client._id] || [];
+  const activity  = CLIENT_ACTIVITY[client._id] || [];
+  const billing   = CLIENT_BILLING[client._id] || [];
+
+  return (
+    <div style={{ width:480, borderLeft:'1px solid var(--border)', display:'flex', flexDirection:'column', flexShrink:0, overflowY:'auto', background:'var(--bg-card)', animation:'slideRight 0.18s ease both' }}>
+
+      {/* Panel header */}
+      <div style={{ padding:'14px 18px', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ width:44, height:44, borderRadius:10, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:800, color:'var(--red)', flexShrink:0 }}>
+              {client.name.charAt(0)}
+            </div>
+            <div>
+              <div style={{ fontSize:15, fontWeight:800, marginBottom:2 }}>{client.name}</div>
+              <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center' }}>
+                <span style={{ fontSize:11, padding:'1px 7px', background:`${PLAN_CONFIG[client.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[client.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>{client.plan}</span>
+                <PortalBadge status={client.portal || 'none'} />
+                {client.tags?.map(t=><TagPill key={t} tag={t}/>)}
+              </div>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:4 }}>
+            <button onClick={startEdit} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}
+              title="Edit client">
+              <Edit3 size={14} />
+            </button>
+            <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}>
+              <X size={15}/>
+            </button>
+          </div>
+        </div>
+
+        {/* Score + quick stats */}
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:12 }}>
+          <ScoreBadge score={client.score||0} />
+          <span style={{ fontSize:11, color:'var(--tx-3)' }}>·</span>
+          <span style={{ fontSize:11, color:'var(--tx-2)' }}>${(client.mrr||0).toLocaleString()}/mo</span>
+          <span style={{ fontSize:11, color:'var(--tx-3)' }}>·</span>
+          <span style={{ fontSize:11, color:'var(--tx-2)' }}>{client.requests_open||0} open</span>
+          <span style={{ fontSize:11, color:'var(--tx-3)' }}>·</span>
+          <span style={{ fontSize:11, color:'var(--tx-2)' }}>{client.deliveries||0} delivered</span>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display:'flex', gap:0, marginBottom:-1 }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              style={{ flex:1, padding:'6px 4px 8px', background:'transparent', border:'none', borderBottom: tab === t.id ? '2px solid var(--red)' : '2px solid transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5, transition:'all .12s' }}>
+              <t.icon size={12} color={tab === t.id ? 'var(--red)' : 'var(--tx-3)'} />
+              <span style={{ fontSize:11, fontWeight:600, color: tab === t.id ? 'var(--tx-1)' : 'var(--tx-3)' }}>{t.label}</span>
+              {t.id === 'requests' && requests.length > 0 && (
+                <span style={{ fontSize:9, fontWeight:700, background:'var(--red-bg)', color:'var(--red)', padding:'0 5px', borderRadius:8, lineHeight:'16px' }}>{requests.length}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      <div style={{ flex:1, overflowY:'auto', padding:'16px 18px' }}>
+
+        {/* ─── OVERVIEW TAB ─── */}
+        {tab === 'overview' && !editing && (
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+
+            {/* Contact info */}
+            <div>
+              <div style={sectionHeader}>Contact</div>
+              <div style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', display:'flex', flexDirection:'column', gap:6 }}>
+                {client.contact && (
+                  <>
+                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <UserCheck size={11} color="var(--tx-3)" />
+                      <span style={{ fontSize:12, color:'var(--tx-1)', fontWeight:500 }}>{client.contact.name}</span>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <Mail size={11} color="var(--tx-3)" />
+                      <span style={{ fontSize:11.5, color:'var(--tx-2)' }}>{client.contact.email}</span>
+                    </div>
+                    {client.contact.phone && (
+                      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                        <Phone size={11} color="var(--tx-3)" />
+                        <span style={{ fontSize:11.5, color:'var(--tx-2)' }}>{client.contact.phone}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Portal access */}
+            <div>
+              <div style={sectionHeader}>Portal Access</div>
+              <div style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', display:'flex', flexDirection:'column', gap:8 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                  <PortalBadge status={client.portal || 'none'} />
+                  {client.portal === 'active' && (
+                    <span style={{ fontSize:11, color:'var(--tx-3)' }}>Last login: <strong style={{ color:'var(--tx-2)' }}>{client.last_login}</strong></span>
+                  )}
+                </div>
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                  {(!client.portal || client.portal === 'none') && (
+                    <button className="btn-primary btn-sm" style={{ gap:4 }}
+                      onClick={() => { onUpdate({ ...client, portal:'invited' }); toast.success(`Invite sent to ${client.contact?.email}`); }}>
+                      <Send size={11}/> Send Invite
+                    </button>
+                  )}
+                  {client.portal === 'invited' && (
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => toast.success(`Invite resent to ${client.contact?.email}`)}>
+                      <RefreshCw size={11}/> Resend Invite
+                    </button>
+                  )}
+                  {client.portal === 'active' && (
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { navigator.clipboard?.writeText('https://redops.redribbongroup.ca/login'); toast.success('Portal link copied!'); }}>
+                      <Copy size={11}/> Copy Login Link
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Stats grid */}
+            <div>
+              <div style={sectionHeader}>Stats</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                {[
+                  { label:'Monthly Retainer', value:`$${(client.mrr||0).toLocaleString()}`, icon: DollarSign, color:'#22c55e' },
+                  { label:'Open Requests',    value:client.requests_open||0,                icon: Layers,     color:'#3b82f6' },
+                  { label:'Total Deliveries', value:client.deliveries||0,                   icon: CheckCircle2,color:'#22c55e' },
+                  { label:'Last Delivery',    value:client.last_delivery||'—',              icon: Clock,      color:'#f59e0b' },
+                  { label:'Renewal',          value:client.renewal?new Date(client.renewal).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}):'—', icon: Calendar, color:'#06b6d4' },
+                  { label:'Account Manager',  value:client.am||'—',                         icon: Users,      color:'#a855f7' },
+                ].map(m=>(
+                  <div key={m.label} style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'flex-start', gap:8 }}>
+                    <div style={{ width:28, height:28, borderRadius:7, background:`${m.color}18`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <m.icon size={13} color={m.color} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize:10, color:'var(--tx-3)', marginBottom:2 }}>{m.label}</div>
+                      <div style={{ fontSize:13, fontWeight:600, color:'var(--tx-1)' }}>{m.value}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Business info */}
+            {(client.website || client.industry) && (
+              <div>
+                <div style={sectionHeader}>Business Info</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:5, background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px' }}>
+                  {client.industry && (
+                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <Building2 size={11} color="var(--tx-3)" />
+                      <span style={{ fontSize:12, color:'var(--tx-2)' }}>{client.industry}</span>
+                    </div>
+                  )}
+                  {client.website && (
+                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <Globe size={11} color="var(--tx-3)" />
+                      <span style={{ fontSize:12, color:'var(--tx-2)' }}>{client.website}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Internal notes */}
+            {client.notes && (
+              <div>
+                <div style={sectionHeader}>Internal Notes</div>
+                <div style={{ fontSize:12, color:'var(--tx-2)', lineHeight:1.6, background:'var(--bg-elevated)', padding:'10px 12px', borderRadius:8 }}>
+                  {client.notes}
+                </div>
+              </div>
+            )}
+
+            {/* Quick actions */}
+            <div style={{ display:'flex', gap:7 }}>
+              <button onClick={() => navigate('/requests')} className="btn-ghost btn-sm" style={{ flex:1, justifyContent:'center', gap:4 }}><FileText size={11}/> View Requests</button>
+              <button onClick={() => navigate('/projects')} className="btn-ghost btn-sm" style={{ flex:1, justifyContent:'center', gap:4 }}><Activity size={11}/> View Projects</button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── EDIT MODE (overlay on overview) ─── */}
+        {tab === 'overview' && editing && (
+          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <span style={{ fontSize:13, fontWeight:700, color:'var(--tx-1)' }}>Edit Client</span>
+              <div style={{ display:'flex', gap:6 }}>
+                <button className="btn-ghost btn-sm" onClick={() => setEditing(false)}>Cancel</button>
+                <button className="btn-primary btn-sm" onClick={saveEdit} style={{ gap:4 }}><Save size={11}/> Save</button>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Company Name</label>
+              <input className="input-field" value={editForm.name} onChange={e => setEditForm(p=>({...p,name:e.target.value}))} />
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              <div>
+                <label style={labelStyle}>Industry</label>
+                <select className="input-field" value={editForm.industry} onChange={e => setEditForm(p=>({...p,industry:e.target.value}))}>
+                  <option value="">—</option>
+                  {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Website</label>
+                <input className="input-field" value={editForm.website} onChange={e => setEditForm(p=>({...p,website:e.target.value}))} />
+              </div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              <div>
+                <label style={labelStyle}>Plan</label>
+                <select className="input-field" value={editForm.plan} onChange={e => setEditForm(p=>({...p,plan:e.target.value}))}>
+                  {Object.keys(PLAN_CONFIG).map(p => <option key={p} value={p}>{p} — ${PLAN_CONFIG[p].price}/mo</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Account Manager</label>
+                <select className="input-field" value={editForm.am} onChange={e => setEditForm(p=>({...p,am:e.target.value}))}>
+                  <option value="">Unassigned</option>
+                  {TEAM_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Internal Notes</label>
+              <textarea className="input-field" rows={3} value={editForm.notes} onChange={e => setEditForm(p=>({...p,notes:e.target.value}))} />
+            </div>
+          </div>
+        )}
+
+        {/* ─── REQUESTS TAB ─── */}
+        {tab === 'requests' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <span style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)' }}>{requests.length} Linked Request{requests.length !== 1 ? 's' : ''}</span>
+              <button className="btn-primary btn-sm" style={{ gap:4 }} onClick={() => navigate('/requests')}>
+                <Plus size={11}/> New Request
+              </button>
+            </div>
+
+            {requests.length === 0 && (
+              <div style={{ padding:'32px 16px', textAlign:'center', background:'var(--bg-elevated)', borderRadius:10 }}>
+                <Layers size={24} color="var(--tx-3)" style={{ marginBottom:8 }} />
+                <p style={{ fontSize:13, color:'var(--tx-3)', margin:0 }}>No requests yet for this client.</p>
+              </div>
+            )}
+
+            {requests.map(r => (
+              <div key={r.id} style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'12px 14px', display:'flex', flexDirection:'column', gap:8, cursor:'pointer', border:'1px solid var(--border)', transition:'border-color .12s' }}
+                onClick={() => navigate('/requests')}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                  <span style={{ fontSize:11, fontWeight:700, color:'var(--red)' }}>{r.id}</span>
+                  <StagePill stage={r.stage} />
+                </div>
+                <div style={{ fontSize:13, fontWeight:600, color:'var(--tx-1)' }}>{r.title}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:12, fontSize:11, color:'var(--tx-3)' }}>
+                  <PriPill priority={r.priority} />
+                  <span>{r.assignee}</span>
+                  <span style={{ marginLeft:'auto' }}>Due: {r.due}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ─── ACTIVITY TAB ─── */}
+        {tab === 'activity' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:12 }}>Recent Activity</div>
+            {activity.length === 0 && (
+              <div style={{ padding:'32px 16px', textAlign:'center', background:'var(--bg-elevated)', borderRadius:10 }}>
+                <Activity size={24} color="var(--tx-3)" style={{ marginBottom:8 }} />
+                <p style={{ fontSize:13, color:'var(--tx-3)', margin:0 }}>No activity recorded yet.</p>
+              </div>
+            )}
+            {activity.map((a, i) => {
+              const cfg = ACTIVITY_ICONS[a.type] || ACTIVITY_ICONS.note;
+              const Icon = cfg.icon;
+              return (
+                <div key={i} style={{ display:'flex', gap:12, paddingBottom:16, position:'relative' }}>
+                  {/* Timeline line */}
+                  {i < activity.length - 1 && (
+                    <div style={{ position:'absolute', left:14, top:28, bottom:0, width:1, background:'var(--border)' }} />
+                  )}
+                  {/* Icon */}
+                  <div style={{ width:28, height:28, borderRadius:7, background:`${cfg.color}18`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, position:'relative', zIndex:1 }}>
+                    <Icon size={12} color={cfg.color} />
+                  </div>
+                  {/* Content */}
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, color:'var(--tx-1)', lineHeight:1.5 }}>{a.text}</div>
+                    <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:3, display:'flex', gap:8 }}>
+                      <span>{a.actor}</span>
+                      <span>·</span>
+                      <span>{a.ts}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ─── NOTES TAB ─── */}
+        {tab === 'notes' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+            {/* Add note */}
+            <div style={{ display:'flex', gap:8 }}>
+              <textarea
+                className="input-field"
+                rows={2}
+                placeholder="Add a note about this client..."
+                value={newNote}
+                onChange={e => setNewNote(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addNote(); }}}
+                style={{ flex:1, resize:'none' }}
+              />
+              <button className="btn-primary btn-sm" onClick={addNote} disabled={!newNote.trim()} style={{ alignSelf:'flex-end', height:34 }}>
+                <Send size={12} />
+              </button>
+            </div>
+
+            <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)' }}>{notes.length} Note{notes.length !== 1 ? 's' : ''}</div>
+
+            {notes.map(n => (
+              <div key={n.id} style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'12px 14px', borderLeft:'3px solid #a855f7' }}>
+                <div style={{ fontSize:12.5, color:'var(--tx-1)', lineHeight:1.6, marginBottom:6 }}>{n.text}</div>
+                <div style={{ fontSize:10.5, color:'var(--tx-3)', display:'flex', gap:8 }}>
+                  <span style={{ fontWeight:600 }}>{n.author}</span>
+                  <span>·</span>
+                  <span>{n.ts}</span>
+                </div>
+              </div>
+            ))}
+
+            {notes.length === 0 && (
+              <div style={{ padding:'32px 16px', textAlign:'center', background:'var(--bg-elevated)', borderRadius:10 }}>
+                <MessageSquare size={24} color="var(--tx-3)" style={{ marginBottom:8 }} />
+                <p style={{ fontSize:13, color:'var(--tx-3)', margin:0 }}>No notes yet. Add one above.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── BILLING TAB ─── */}
+        {tab === 'billing' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            {/* MRR card */}
+            <div style={{ background:'var(--bg-elevated)', borderRadius:10, padding:'16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div>
+                <div style={{ fontSize:10, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.05em', fontWeight:600, marginBottom:4 }}>Monthly Retainer</div>
+                <div style={{ fontSize:24, fontWeight:800, color:'#22c55e' }}>${(client.mrr||0).toLocaleString()}</div>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <div style={{ fontSize:10, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.05em', fontWeight:600, marginBottom:4 }}>Plan</div>
+                <span style={{ fontSize:13, padding:'3px 10px', background:`${PLAN_CONFIG[client.plan]?.color || '#606060'}18`, borderRadius:5, color:PLAN_CONFIG[client.plan]?.color || 'var(--tx-3)', fontWeight:700 }}>{client.plan}</span>
+              </div>
+            </div>
+
+            {/* Renewal */}
+            <div style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <Calendar size={12} color="var(--tx-3)" />
+                <span style={{ fontSize:12, color:'var(--tx-2)' }}>Renewal Date</span>
+              </div>
+              <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>
+                {client.renewal ? new Date(client.renewal).toLocaleDateString('en-CA',{month:'long',day:'numeric',year:'numeric'}) : '—'}
+              </span>
+            </div>
+
+            {/* Invoice history */}
+            <div>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:10 }}>Payment History</div>
+              {billing.length === 0 && (
+                <div style={{ padding:'24px 16px', textAlign:'center', background:'var(--bg-elevated)', borderRadius:10 }}>
+                  <DollarSign size={24} color="var(--tx-3)" style={{ marginBottom:8 }} />
+                  <p style={{ fontSize:13, color:'var(--tx-3)', margin:0 }}>No payment records.</p>
+                </div>
+              )}
+              {billing.map((b, i) => (
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:'var(--bg-elevated)', borderRadius:8, marginBottom:6 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: b.status === 'paid' ? '#22c55e18' : '#ef444418', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {b.status === 'paid'
+                      ? <CheckCircle2 size={13} color="#22c55e" />
+                      : <AlertCircle size={13} color="#ef4444" />
+                    }
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>${b.amount.toLocaleString()}</div>
+                    <div style={{ fontSize:10.5, color:'var(--tx-3)' }}>{b.invoice} · {new Date(b.date).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})}</div>
+                  </div>
+                  <span style={{ fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:4, background: b.status === 'paid' ? '#22c55e18' : '#ef444418', color: b.status === 'paid' ? '#22c55e' : '#ef4444' }}>
+                    {b.status === 'paid' ? 'Paid' : 'Late'}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* LTV */}
+            {billing.length > 0 && (
+              <div style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <TrendingUp size={12} color="#22c55e" />
+                  <span style={{ fontSize:12, color:'var(--tx-2)' }}>Lifetime Value</span>
+                </div>
+                <span style={{ fontSize:14, fontWeight:800, color:'#22c55e' }}>
+                  ${billing.reduce((s,b) => s + b.amount, 0).toLocaleString()}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const sectionHeader = { fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 };
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function Clients() {
@@ -384,7 +990,6 @@ export default function Clients() {
   const [selected, setSelected] = useState(null);
   const [showWizard, setShowWizard] = useState(searchParams.get('new') === '1');
   const [portalFilter, setPortalFilter] = useState('');
-  const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -398,8 +1003,6 @@ export default function Clients() {
     };
     load();
   }, []);
-
-  const toast = msg => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 2500); };
 
   const source = clients.length > 0 ? clients : MOCK_CLIENTS;
 
@@ -419,35 +1022,18 @@ export default function Clients() {
     setClients(prev => [newClient, ...prev.length > 0 ? prev : MOCK_CLIENTS]);
     setShowWizard(false);
     setSelected(newClient._id);
-    toast(`✓ ${newClient.name} created — ${newClient.portal === 'invited' ? 'invite sent!' : 'no invite sent'}`);
+    toast.success(`${newClient.name} created — ${newClient.portal === 'invited' ? 'invite sent!' : 'no invite sent'}`);
   };
 
-  const handleCopyLink = (c) => {
-    navigator.clipboard?.writeText(`https://redops.redribbongroup.ca/login`).catch(()=>{});
-    toast('Portal login link copied!');
-  };
-
-  const handleResendInvite = (c) => {
-    toast(`Invite resent to ${c.contact?.email || 'client'}`);
-  };
-
-  const handleRevokePortal = (c) => {
-    setClients(prev => (prev.length > 0 ? prev : MOCK_CLIENTS).map(x => x._id === c._id ? { ...x, portal:'none' } : x));
-    toast(`Portal access revoked for ${c.name}`);
-    setSelected(null);
+  const handleUpdateClient = (updated) => {
+    setClients(prev => {
+      const src = prev.length > 0 ? prev : [...MOCK_CLIENTS];
+      return src.map(c => c._id === updated._id ? updated : c);
+    });
   };
 
   return (
     <div className="page-fill" style={{ flexDirection:'row' }}>
-      <style>{SPIN_CSS}</style>
-
-      {/* Toast */}
-      {toastMsg && (
-        <div style={{ position:'fixed', bottom:24, left:'50%', transform:'translateX(-50%)', background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 18px', fontSize:13, fontWeight:500, color:'var(--tx-1)', zIndex:9999, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', animation:'fadeUp 0.2s ease' }}>
-          {toastMsg}
-        </div>
-      )}
-
       {showWizard && <AddClientWizard onClose={() => setShowWizard(false)} onCreated={handleCreated} />}
 
       {/* ── Main list ── */}
@@ -463,7 +1049,6 @@ export default function Clients() {
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clients or email..."
               style={{ background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'6px 10px 6px 28px', fontSize:12.5, color:'var(--tx-1)', outline:'none', width:200 }} />
           </div>
-          {/* Portal filter */}
           <div style={{ display:'flex', gap:4 }}>
             {[['','All'],['active','Active'],['invited','Invited'],['none','No Portal']].map(([v,l]) => (
               <button key={v} onClick={() => setPortalFilter(v)}
@@ -548,10 +1133,8 @@ export default function Clients() {
                     <td style={{ fontSize:12, color:'var(--tx-2)' }}>{c.am||'—'}</td>
                     <td>
                       <button onClick={e=>{e.stopPropagation();setSelected(isSelected?null:c._id);}}
-                        style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}
-                        onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-overlay)';e.currentTarget.style.color='var(--tx-1)';}}
-                        onMouseLeave={e=>{e.currentTarget.style.background='none';e.currentTarget.style.color='var(--tx-3)';}}>
-                        <ChevronRight size={13}/>
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}>
+                        <ChevronRight size={13} style={{ transform: isSelected ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
                       </button>
                     </td>
                   </tr>
@@ -567,141 +1150,11 @@ export default function Clients() {
 
       {/* ── Detail Panel ── */}
       {sel && (
-        <div style={{ width:340, borderLeft:'1px solid var(--border)', display:'flex', flexDirection:'column', flexShrink:0, overflowY:'auto', background:'var(--bg-card)', animation:'slideRight 0.18s ease both' }}>
-          {/* Panel header */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
-            <span style={{ fontSize:13, fontWeight:700 }}>Client Profile</span>
-            <button onClick={() => setSelected(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', display:'flex', padding:2 }}><X size={15}/></button>
-          </div>
-
-          <div style={{ padding:16, display:'flex', flexDirection:'column', gap:16, flex:1 }}>
-
-            {/* Identity */}
-            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              <div style={{ width:48, height:48, borderRadius:10, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, fontWeight:800, color:'var(--red)', flexShrink:0 }}>
-                {sel.name.charAt(0)}
-              </div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:15, fontWeight:800, marginBottom:3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{sel.name}</div>
-                <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                  <span style={{ fontSize:11, padding:'1px 7px', background:`${PLAN_CONFIG[sel.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[sel.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>{sel.plan}</span>
-                  {sel.tags?.map(t=><TagPill key={t} tag={t}/>)}
-                </div>
-              </div>
-            </div>
-
-            <ScoreBadge score={sel.score||0} />
-
-            {/* Portal Access Section */}
-            <div style={{ background:'var(--bg-elevated)', borderRadius:10, overflow:'hidden', border:'1px solid var(--border)' }}>
-              <div style={{ padding:'10px 12px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                <span style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)' }}>Portal Access</span>
-                <PortalBadge status={sel.portal || 'none'} />
-              </div>
-              <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:8 }}>
-                {sel.contact && (
-                  <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                      <UserCheck size={11} color="var(--tx-3)" />
-                      <span style={{ fontSize:12, color:'var(--tx-1)', fontWeight:500 }}>{sel.contact.name}</span>
-                    </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                      <Mail size={11} color="var(--tx-3)" />
-                      <span style={{ fontSize:11.5, color:'var(--tx-2)' }}>{sel.contact.email}</span>
-                    </div>
-                    {sel.contact.phone && (
-                      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                        <Phone size={11} color="var(--tx-3)" />
-                        <span style={{ fontSize:11.5, color:'var(--tx-2)' }}>{sel.contact.phone}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {(sel.portal === 'active') && (
-                  <div style={{ display:'flex', gap:5, fontSize:11, color:'var(--tx-3)', paddingTop:4, borderTop:'1px solid var(--border)' }}>
-                    <Clock size={11} /><span>Last login: <strong style={{ color:'var(--tx-2)' }}>{sel.last_login || 'Unknown'}</strong></span>
-                    <span style={{ marginLeft:'auto' }}>{sel.login_count || 0} sessions</span>
-                  </div>
-                )}
-                {/* Portal actions */}
-                <div style={{ display:'flex', gap:6, flexWrap:'wrap', paddingTop:4 }}>
-                  {(!sel.portal || sel.portal === 'none') && (
-                    <button onClick={() => { const updated = { ...sel, portal:'invited' }; setClients(prev => (prev.length>0?prev:MOCK_CLIENTS).map(x=>x._id===sel._id?updated:x)); setSelected(sel._id); toast(`Invite sent to ${sel.contact?.email||'client'}`); }}
-                      className="btn-primary btn-sm" style={{ gap:4 }}>
-                      <Send size={11}/> Send Invite
-                    </button>
-                  )}
-                  {sel.portal === 'invited' && (
-                    <button onClick={() => handleResendInvite(sel)} className="btn-ghost btn-sm" style={{ gap:4 }}>
-                      <RefreshCw size={11}/> Resend Invite
-                    </button>
-                  )}
-                  {sel.portal === 'active' && (
-                    <button onClick={() => handleCopyLink(sel)} className="btn-ghost btn-sm" style={{ gap:4 }}>
-                      <Copy size={11}/> Copy Login Link
-                    </button>
-                  )}
-                  {sel.portal !== 'none' && sel.portal && (
-                    <button onClick={() => handleRevokePortal(sel)} className="btn-ghost btn-sm" style={{ gap:4, color:'#ef4444', borderColor:'#ef444430' }}
-                      onMouseEnter={e=>{e.currentTarget.style.background='#ef444410';}}
-                      onMouseLeave={e=>{e.currentTarget.style.background='transparent';}}>
-                      <ShieldOff size={11}/> Revoke
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              {[
-                { label:'Monthly Retainer', value:`$${(sel.mrr||0).toLocaleString()}` },
-                { label:'Open Requests',    value:sel.requests_open||0 },
-                { label:'Total Deliveries', value:sel.deliveries||0 },
-                { label:'Last Delivery',    value:sel.last_delivery||'—' },
-                { label:'Renewal Date',     value:sel.renewal?new Date(sel.renewal).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}):'—' },
-                { label:'Account Manager',  value:sel.am||'—' },
-              ].map(m=>(
-                <div key={m.label} style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'9px 11px' }}>
-                  <div style={{ fontSize:10, color:'var(--tx-3)', marginBottom:3 }}>{m.label}</div>
-                  <div style={{ fontSize:12.5, fontWeight:600, color:'var(--tx-1)' }}>{m.value}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Business info */}
-            {(sel.website || sel.industry) && (
-              <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-                {sel.industry && (
-                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                    <Building2 size={11} color="var(--tx-3)" />
-                    <span style={{ fontSize:12, color:'var(--tx-2)' }}>{sel.industry}</span>
-                  </div>
-                )}
-                {sel.website && (
-                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                    <Globe size={11} color="var(--tx-3)" />
-                    <span style={{ fontSize:12, color:'var(--tx-2)' }}>{sel.website}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Notes */}
-            {sel.notes && (
-              <div>
-                <div style={{ fontSize:11, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em', fontWeight:600 }}>Notes</div>
-                <div style={{ fontSize:12, color:'var(--tx-2)', lineHeight:1.6, background:'var(--bg-elevated)', padding:'9px 11px', borderRadius:8 }}>{sel.notes}</div>
-              </div>
-            )}
-
-            {/* Quick actions */}
-            <div style={{ display:'flex', gap:7 }}>
-              <button onClick={() => navigate('/requests')} className="btn-ghost btn-sm" style={{ flex:1, justifyContent:'center', gap:4 }}><FileText size={11}/> Requests</button>
-              <button onClick={() => navigate('/projects')} className="btn-ghost btn-sm" style={{ flex:1, justifyContent:'center', gap:4 }}><Activity size={11}/> Projects</button>
-            </div>
-          </div>
-        </div>
+        <ClientDetailPanel
+          client={sel}
+          onClose={() => setSelected(null)}
+          onUpdate={handleUpdateClient}
+        />
       )}
     </div>
   );
