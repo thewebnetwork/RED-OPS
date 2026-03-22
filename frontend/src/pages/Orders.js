@@ -1,20 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
-import { Search, Filter, X, Inbox } from 'lucide-react';
+import { Search, Filter, X, Inbox, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -32,15 +19,27 @@ const QUEUE_OPTIONS = [
   { value: 'WEB_UPDATES', label: 'Web Updates' },
 ];
 
-const statusColors = {
-  'Open': 'bg-blue-100 text-blue-700',
-  'In Progress': 'bg-amber-100 text-amber-700',
-  'Needs Client Review': 'bg-purple-100 text-purple-700',
-  'Revision Requested': 'bg-orange-100 text-orange-700',
-  'Delivered': 'bg-green-100 text-green-700',
-  'Closed': 'bg-slate-100 text-slate-700',
-  'Canceled': 'bg-red-100 text-red-700',
+const STATUS_COLORS = {
+  'Open':                 { color: '#3b82f6', bg: '#3b82f618' },
+  'In Progress':          { color: '#f59e0b', bg: '#f59e0b18' },
+  'Needs Client Review':  { color: '#a855f7', bg: '#a855f718' },
+  'Revision Requested':   { color: '#f97316', bg: '#f9731618' },
+  'Delivered':            { color: '#22c55e', bg: '#22c55e18' },
+  'Closed':               { color: '#606060', bg: '#60606020' },
+  'Canceled':             { color: '#ef4444', bg: '#ef444418' },
 };
+
+function StatusPill({ status }) {
+  const c = STATUS_COLORS[status] || { color: 'var(--tx-3)', bg: 'var(--bg-elevated)' };
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5,
+      background: c.bg, color: c.color, whiteSpace: 'nowrap',
+    }}>
+      {status}
+    </span>
+  );
+}
 
 const queueLabel = (key) => {
   if (!key) return '—';
@@ -49,23 +48,16 @@ const queueLabel = (key) => {
 };
 
 export default function Orders() {
-  const { t } = useTranslation();
   const location = useLocation();
   const isAllRequests = location.pathname === '/all-requests';
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    status: '',
-    assigned_queue_key: '',
-    q: ''
-  });
-  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({ status: '', assigned_queue_key: '', q: '' });
 
-  useEffect(() => {
-    fetchOrders();
-  }, [filters]);
+  useEffect(() => { fetchOrders(); }, [filters]); // eslint-disable-line
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filters.status && filters.status !== 'all') params.append('status', filters.status);
@@ -73,7 +65,7 @@ export default function Orders() {
       if (filters.q) params.append('q', filters.q);
       const res = await axios.get(`${API}/orders?${params.toString()}`);
       setOrders(res.data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load requests');
     } finally {
       setLoading(false);
@@ -83,141 +75,152 @@ export default function Orders() {
   const clearFilters = () => setFilters({ status: '', assigned_queue_key: '', q: '' });
   const hasActiveFilters = Object.values(filters).some(v => v);
 
-  const pageTitle = isAllRequests ? 'All Requests' : 'My Queue';
-
   return (
-    <div className="space-y-6 animate-fade-in" data-testid="orders-page">
+    <div className="page-content">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900" data-testid="page-title">{pageTitle}</h1>
-        <p className="text-slate-500 mt-1">{orders.length} request{orders.length !== 1 ? 's' : ''}</p>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0, letterSpacing: '-0.03em' }}>
+          {isAllRequests ? 'All Requests' : 'My Queue'}
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>
+          {orders.length} request{orders.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {/* Filters */}
-      <Card className="border-slate-200">
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row gap-3">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <Input
-                placeholder="Search by code, title, or service..."
-                value={filters.q}
-                onChange={(e) => setFilters(prev => ({ ...prev, q: e.target.value }))}
-                className="pl-10"
-                data-testid="search-input"
-              />
-            </div>
+      <div style={{
+        display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16,
+        padding: '14px 16px', background: 'var(--bg-card)',
+        border: '1px solid var(--border)', borderRadius: 10,
+      }}>
+        {/* Search */}
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
+          <input
+            placeholder="Search by code, title, or service..."
+            value={filters.q}
+            onChange={e => setFilters(p => ({ ...p, q: e.target.value }))}
+            style={{
+              width: '100%', padding: '7px 10px 7px 30px', background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)', borderRadius: 7, color: 'var(--tx-1)',
+              fontSize: 13, outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+        </div>
 
-            <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="lg:hidden">
-              <Filter size={18} className="mr-2" />Filters
-            </Button>
+        {/* Status filter */}
+        <select
+          value={filters.status}
+          onChange={e => setFilters(p => ({ ...p, status: e.target.value }))}
+          style={{ padding: '7px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--tx-2)', fontSize: 13, outline: 'none', cursor: 'pointer' }}
+        >
+          <option value="">All Statuses</option>
+          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
 
-            <div className={`flex flex-col sm:flex-row gap-3 ${showFilters ? 'block' : 'hidden lg:flex'}`}>
-              {/* Status */}
-              <Select value={filters.status} onValueChange={(v) => setFilters(prev => ({ ...prev, status: v }))}>
-                <SelectTrigger className="w-full sm:w-44" data-testid="status-filter">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  {STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
+        {/* Queue filter */}
+        <select
+          value={filters.assigned_queue_key}
+          onChange={e => setFilters(p => ({ ...p, assigned_queue_key: e.target.value }))}
+          style={{ padding: '7px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--tx-2)', fontSize: 13, outline: 'none', cursor: 'pointer' }}
+        >
+          <option value="">All Queues</option>
+          {QUEUE_OPTIONS.map(q => <option key={q.value} value={q.value}>{q.label}</option>)}
+        </select>
 
-              {/* Queue */}
-              <Select value={filters.assigned_queue_key} onValueChange={(v) => setFilters(prev => ({ ...prev, assigned_queue_key: v }))}>
-                <SelectTrigger className="w-full sm:w-44" data-testid="queue-filter">
-                  <SelectValue placeholder="Queue" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Queues</SelectItem>
-                  {QUEUE_OPTIONS.map(q => <SelectItem key={q.value} value={q.value}>{q.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', background: 'none', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--tx-3)', fontSize: 13, cursor: 'pointer' }}
+          >
+            <X size={13} /> Clear
+          </button>
+        )}
+      </div>
 
-              {hasActiveFilters && (
-                <Button variant="ghost" onClick={clearFilters} className="text-slate-500" data-testid="clear-filters-btn">
-                  <X size={16} className="mr-1" />Clear
-                </Button>
-              )}
-            </div>
+      {/* Table */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+            <div className="spinner-ring" />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Requests Table */}
-      <Card className="border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="animate-spin h-8 w-8 border-4 border-[#A2182C] border-t-transparent rounded-full" />
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="p-12 text-center">
-              <Inbox size={40} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-slate-500">No requests found</p>
-              {hasActiveFilters && (
-                <Button variant="link" onClick={clearFilters} className="mt-2 text-[#A2182C]">Clear filters</Button>
-              )}
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Request</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Service</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Queue</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Client</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Assigned</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Created</th>
+        ) : orders.length === 0 ? (
+          <div style={{ padding: '56px 24px', textAlign: 'center' }}>
+            <Inbox size={36} style={{ color: 'var(--tx-3)', marginBottom: 12 }} />
+            <p style={{ fontSize: 14, color: 'var(--tx-3)', margin: '0 0 12px' }}>No requests found</p>
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="btn btn-ghost btn-sm">Clear filters</button>
+            )}
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  {['Request', 'Service', 'Status', 'Queue', 'Client', 'Assigned', 'Created'].map(h => (
+                    <th key={h} style={{
+                      padding: '10px 16px', textAlign: 'left', fontSize: 10.5,
+                      fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase',
+                      letterSpacing: '.06em', whiteSpace: 'nowrap',
+                      background: 'var(--bg-elevated)',
+                    }}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {orders.map(order => (
-                  <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <Link 
-                        to={`/requests/${order.id}`}
-                        className="hover:text-[#A2182C] transition-colors"
-                        data-testid={`request-link-${order.id}`}
-                      >
-                        <span className="font-mono text-xs text-slate-400 block">{order.order_code}</span>
-                        <span className="font-medium text-slate-900">{order.title}</span>
+              <tbody>
+                {orders.map((order, idx) => (
+                  <tr key={order.id}
+                    style={{ borderBottom: idx < orders.length - 1 ? '1px solid var(--border)' : 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '12px 16px' }}>
+                      <Link to={`/requests/${order.id}`} style={{ textDecoration: 'none' }}>
+                        <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--tx-3)', display: 'block' }}>
+                          {order.order_code}
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>
+                          {order.title}
+                        </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-3">
-                      {order.service_name ? (
-                        <span className="text-sm text-slate-600">{order.service_name}</span>
-                      ) : (
-                        <span className="text-sm text-slate-400">—</span>
-                      )}
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: order.service_name ? 'var(--tx-2)' : 'var(--tx-3)' }}>
+                      {order.service_name || '—'}
                     </td>
-                    <td className="px-4 py-3">
-                      <Badge className={statusColors[order.status] || 'bg-slate-100 text-slate-700'}>
-                        {order.status}
-                      </Badge>
+                    <td style={{ padding: '12px 16px' }}>
+                      <StatusPill status={order.status} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td style={{ padding: '12px 16px' }}>
                       {order.assigned_queue_key ? (
-                        <Badge variant="outline" className="text-xs">{queueLabel(order.assigned_queue_key)}</Badge>
+                        <span style={{
+                          fontSize: 11, padding: '3px 8px', borderRadius: 5,
+                          background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+                          color: 'var(--tx-2)', whiteSpace: 'nowrap',
+                        }}>
+                          {queueLabel(order.assigned_queue_key)}
+                        </span>
                       ) : (
-                        <span className="text-sm text-slate-400">—</span>
+                        <span style={{ color: 'var(--tx-3)', fontSize: 13 }}>—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{order.client_name || '—'}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{order.editor_name || <span className="text-slate-400 italic">Unassigned</span>}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500">
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--tx-2)' }}>
+                      {order.client_name || '—'}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: order.editor_name ? 'var(--tx-2)' : 'var(--tx-3)' }}>
+                      {order.editor_name || 'Unassigned'}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--tx-3)', whiteSpace: 'nowrap' }}>
                       {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy') : '—'}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-      </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

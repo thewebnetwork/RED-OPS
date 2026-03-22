@@ -55,13 +55,13 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusConfig = {
-  'Draft': { class: 'bg-slate-200 text-slate-600', color: 'bg-slate-400' },
-  'Open': { class: 'bg-blue-100 text-blue-700', color: 'bg-blue-500' },
-  'In Progress': { class: 'bg-amber-100 text-amber-700', color: 'bg-amber-500' },
-  'Pending': { class: 'bg-purple-100 text-purple-700', color: 'bg-purple-500' },
-  'Delivered': { class: 'bg-green-100 text-green-700', color: 'bg-green-500' },
-  'Closed': { class: 'bg-slate-100 text-slate-500', color: 'bg-slate-500' },
-  'Canceled': { class: 'bg-red-100 text-red-600', color: 'bg-red-500' },
+  'Draft':      { style: { background: '#60606020', color: '#888' }, dot: '#888' },
+  'Open':       { style: { background: '#3b82f618', color: '#3b82f6' }, dot: '#3b82f6' },
+  'In Progress':{ style: { background: '#f59e0b18', color: '#f59e0b' }, dot: '#f59e0b' },
+  'Pending':    { style: { background: '#a855f718', color: '#a855f7' }, dot: '#a855f7' },
+  'Delivered':  { style: { background: '#22c55e18', color: '#22c55e' }, dot: '#22c55e' },
+  'Closed':     { style: { background: '#60606018', color: '#606060' }, dot: '#606060' },
+  'Canceled':   { style: { background: '#ef444418', color: '#ef4444' }, dot: '#ef4444' },
 };
 
 const statusExplanations = {
@@ -75,19 +75,19 @@ const statusExplanations = {
 };
 
 const taskStatusBadge = {
-  'backlog': 'bg-slate-100 text-slate-600',
-  'todo': 'bg-blue-100 text-blue-700',
-  'doing': 'bg-amber-100 text-amber-700',
-  'waiting_on_client': 'bg-purple-100 text-purple-700',
-  'review': 'bg-indigo-100 text-indigo-700',
-  'done': 'bg-green-100 text-green-700',
+  'backlog':           { background: '#60606020', color: '#888' },
+  'todo':              { background: '#3b82f618', color: '#3b82f6' },
+  'doing':             { background: '#f59e0b18', color: '#f59e0b' },
+  'waiting_on_client': { background: '#a855f718', color: '#a855f7' },
+  'review':            { background: '#6366f118', color: '#6366f1' },
+  'done':              { background: '#22c55e18', color: '#22c55e' },
 };
 
 const priorityConfig = {
-  'Low': 'bg-slate-100 text-slate-600',
-  'Normal': 'bg-blue-100 text-blue-600',
-  'High': 'bg-orange-100 text-orange-600',
-  'Urgent': 'bg-red-100 text-red-600',
+  'Low':    { background: '#60606018', color: '#888' },
+  'Normal': { background: '#3b82f618', color: '#3b82f6' },
+  'High':   { background: '#f9731618', color: '#f97316' },
+  'Urgent': { background: '#ef444418', color: '#ef4444' },
 };
 
 const FILE_TYPES = ["Raw Footage", "Reference", "Export", "Final Delivery", "Other"];
@@ -459,23 +459,29 @@ export default function OrderDetail() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="font-mono text-sm text-slate-500">{order.order_code}</span>
-            <Badge className={statusConfig[order.status]?.class}>{order.status}</Badge>
-            <Badge className={priorityConfig[order.priority]}>{order.priority}</Badge>
+            <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--tx-3)' }}>{order.order_code}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5, ...(statusConfig[order.status]?.style || { background: 'var(--bg-elevated)', color: 'var(--tx-3)' }) }}>
+              {order.status}
+            </span>
+            {order.priority && (
+              <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5, ...(priorityConfig[order.priority] || { background: 'var(--bg-elevated)', color: 'var(--tx-3)' }) }}>
+                {order.priority}
+              </span>
+            )}
             {order.service_name && (
-              <Badge variant="outline" className="border-[#A2182C]/30 text-[#A2182C]" data-testid="service-badge">
-                <Package size={12} className="mr-1" />
+              <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5, background: 'var(--red-bg)', color: 'var(--red)', border: '1px solid var(--red)33', display: 'flex', alignItems: 'center', gap: 4 }} data-testid="service-badge">
+                <Package size={11} />
                 {order.service_name}
-              </Badge>
+              </span>
             )}
             {order.is_sla_breached && (
-              <Badge className="bg-red-100 text-red-700">
-                <AlertTriangle size={12} className="mr-1" />
+              <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5, background: '#ef444418', color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <AlertTriangle size={11} />
                 SLA Breach
-              </Badge>
+              </span>
             )}
           </div>
-          <h1 className="text-xl font-bold text-slate-900 mt-1" data-testid="request-title">{order.title}</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', margin: '6px 0 0', letterSpacing: '-0.02em' }} data-testid="request-title">{order.title}</h1>
         </div>
       </div>
 
@@ -868,8 +874,8 @@ export default function OrderDetail() {
                     const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                     return (
                       <div key={key}>
-                        <Label className="text-xs text-slate-500">{label}</Label>
-                        <p className="mt-1 text-slate-700 whitespace-pre-wrap">{value}</p>
+                        <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>{label}</Label>
+                        <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{value}</p>
                       </div>
                     );
                   })}
@@ -877,43 +883,43 @@ export default function OrderDetail() {
               ) : (
                 <>
                   <div>
-                    <Label className="text-xs text-slate-500">Description</Label>
-                    <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.description}</p>
+                    <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Description</Label>
+                    <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{order.description}</p>
                   </div>
                   {order.video_script && (
                     <div>
-                      <Label className="text-xs text-slate-500">Video Script</Label>
-                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.video_script}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Video Script</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{order.video_script}</p>
                     </div>
                   )}
                   {order.reference_links && (
                     <div>
-                      <Label className="text-xs text-slate-500">Reference Links</Label>
-                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.reference_links}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Reference Links</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{order.reference_links}</p>
                     </div>
                   )}
                   {order.footage_links && (
                     <div>
-                      <Label className="text-xs text-slate-500">Footage Links</Label>
-                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.footage_links}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Footage Links</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{order.footage_links}</p>
                     </div>
                   )}
                   {order.music_preference && (
                     <div>
-                      <Label className="text-xs text-slate-500">Music Preference</Label>
-                      <p className="mt-1 text-slate-700">{order.music_preference}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Music Preference</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)' }}>{order.music_preference}</p>
                     </div>
                   )}
                   {order.delivery_format && (
                     <div>
-                      <Label className="text-xs text-slate-500">Delivery Format</Label>
-                      <p className="mt-1 text-slate-700">{order.delivery_format}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Delivery Format</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)' }}>{order.delivery_format}</p>
                     </div>
                   )}
                   {order.special_instructions && (
                     <div>
-                      <Label className="text-xs text-slate-500">Special Instructions</Label>
-                      <p className="mt-1 text-slate-700 whitespace-pre-wrap">{order.special_instructions}</p>
+                      <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Special Instructions</Label>
+                      <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-2)', whiteSpace: 'pre-wrap' }}>{order.special_instructions}</p>
                     </div>
                   )}
                 </>
@@ -967,43 +973,44 @@ export default function OrderDetail() {
               <Card className="border-slate-200">
                 <CardContent className="p-4">
                   {linkedTasks.length === 0 ? (
-                    <div className="text-center text-slate-500 py-8">
-                      <ListTodo size={32} className="mx-auto text-slate-300 mb-2" />
-                      <p className="text-sm">No tasks linked to this request yet</p>
+                    <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+                      <ListTodo size={32} style={{ color: 'var(--tx-3)', margin: '0 auto 10px' }} />
+                      <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: 0 }}>No tasks linked to this request yet</p>
                       {!isClient && (
-                        <p className="text-xs text-slate-400 mt-1">Tasks will appear here when assigned to this request</p>
+                        <p style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, opacity: 0.7 }}>Tasks will appear here when assigned to this request</p>
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-2" data-testid="linked-tasks-list">
-                      {linkedTasks.map(task => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-testid="linked-tasks-list">
+                      {linkedTasks.map(task => {
+                        const tsStyle = taskStatusBadge[task.status] || { background: 'var(--bg-elevated)', color: 'var(--tx-3)' };
+                        const dotColor = task.status === 'done' ? '#22c55e' : task.status === 'doing' ? '#f59e0b' : task.status === 'waiting_on_client' ? '#a855f7' : 'var(--tx-3)';
+                        return (
                         <div
                           key={task.id}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: 8, cursor: 'pointer', transition: 'all .15s', border: '1px solid var(--border)' }}
                           onClick={() => navigate('/task-board')}
+                          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-hi)'}
+                          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                           data-testid={`linked-task-${task.id}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-2 h-2 rounded-full ${
-                              task.status === 'done' ? 'bg-green-500' :
-                              task.status === 'doing' ? 'bg-amber-500' :
-                              task.status === 'waiting_on_client' ? 'bg-purple-500' :
-                              'bg-slate-400'
-                            }`} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor, flexShrink: 0 }} />
                             <div>
-                              <p className="text-sm font-medium text-slate-800">{task.title}</p>
+                              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>{task.title}</p>
                               {task.assignee_name && (
-                                <p className="text-xs text-slate-500">{task.assignee_name}</p>
+                                <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: 0 }}>{task.assignee_name}</p>
                               )}
                             </div>
                           </div>
-                          <Badge className={taskStatusBadge[task.status] || 'bg-slate-100 text-slate-600'}>
+                          <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 5, ...tsStyle, whiteSpace: 'nowrap' }}>
                             {task.status === 'waiting_on_client' ? 'Waiting on you' :
                              task.status === 'doing' ? 'In Progress' :
                              task.status?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'}
-                          </Badge>
+                          </span>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>
@@ -1015,27 +1022,31 @@ export default function OrderDetail() {
                 <CardContent className="p-0">
                   <div className="h-80 overflow-y-auto p-4 space-y-4">
                     {messages.length === 0 ? (
-                      <div className="text-center text-slate-500 py-8">
+                      <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--tx-3)', fontSize: 13 }}>
                         No messages yet. Start the conversation!
                       </div>
                     ) : (
-                      messages.map(msg => (
-                        <div 
-                          key={msg.id}
-                          className={`flex ${msg.author_user_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-[80%] ${msg.author_user_id === user?.id ? 'bg-rose-50' : 'bg-slate-100'} rounded-lg p-4`}>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-medium text-sm">{msg.author_name}</span>
-                              <Badge variant="outline" className="text-xs">{msg.author_role}</Badge>
+                      messages.map(msg => {
+                        const isMe = msg.author_user_id === user?.id;
+                        return (
+                        <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
+                          <div style={{
+                            maxWidth: '80%', borderRadius: 10, padding: '12px 14px',
+                            background: isMe ? 'var(--red-bg)' : 'var(--bg-elevated)',
+                            border: `1px solid ${isMe ? 'var(--red)33' : 'var(--border)'}`,
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{msg.author_name}</span>
+                              <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-elevated)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}>{msg.author_role}</span>
                             </div>
-                            <p className="text-sm text-slate-700 whitespace-pre-wrap">{msg.message_body}</p>
-                            <p className="text-xs text-slate-400 mt-2">
+                            <p style={{ fontSize: 13, color: 'var(--tx-2)', margin: 0, whiteSpace: 'pre-wrap' }}>{msg.message_body}</p>
+                            <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: '6px 0 0' }}>
                               {format(new Date(msg.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           </div>
                         </div>
-                      ))
+                        );
+                      })
                     )}
                     <div ref={messagesEndRef} />
                   </div>
@@ -1150,41 +1161,41 @@ export default function OrderDetail() {
 
                   {/* Files List */}
                   {files.length === 0 ? (
-                    <div className="text-center text-slate-500 py-8">
+                    <div style={{ textAlign: 'center', padding: '40px 16px', fontSize: 13, color: 'var(--tx-3)' }}>
                       No files uploaded yet
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {files.filter(f => !f.is_final_delivery).map(file => (
-                        <div 
+                        <div
                           key={file.id}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)' }}
                         >
                           <div>
-                            <p className="font-medium text-sm">{file.label}</p>
-                            <p className="text-xs text-slate-500">
+                            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>{file.label}</p>
+                            <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: 0 }}>
                               {file.file_type} • by {file.uploaded_by_name}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             {user?.role === 'Editor' && order.editor_id === user?.id && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
+                              <button
                                 onClick={() => handleMarkFinal(file.id)}
-                                className="text-slate-600"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 6, borderRadius: 6, display: 'flex' }}
                                 data-testid={`mark-final-${file.id}`}
                               >
-                                <Star size={16} />
-                              </Button>
+                                <Star size={15} />
+                              </button>
                             )}
-                            <a 
-                              href={file.url} 
-                              target="_blank" 
+                            <a
+                              href={file.url}
+                              target="_blank"
                               rel="noopener noreferrer"
-                              className="p-2 text-slate-600 hover:text-rose-600"
+                              style={{ padding: 6, color: 'var(--tx-3)', display: 'flex', borderRadius: 6 }}
+                              onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--tx-3)'}
                             >
-                              <Download size={18} />
+                              <Download size={15} />
                             </a>
                           </div>
                         </div>
@@ -1206,37 +1217,41 @@ export default function OrderDetail() {
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div>
-                <Label className="text-xs text-slate-500">Status</Label>
-                <Badge className={`mt-1.5 ${statusConfig[order.status]?.class}`}>{order.status}</Badge>
+                <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Status</Label>
+                <div style={{ marginTop: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, ...(statusConfig[order.status]?.style || { background: 'var(--bg-elevated)', color: 'var(--tx-3)' }) }}>
+                    {order.status}
+                  </span>
+                </div>
               </div>
 
               {order.service_name && (
                 <div>
-                  <Label className="text-xs text-slate-500">Service</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Service</Label>
                   <p className="font-medium mt-1.5">{order.service_name}</p>
                 </div>
               )}
 
               {!order.service_name && order.category_l1_name && !isClient && (
                 <div>
-                  <Label className="text-xs text-slate-500">Category</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Category</Label>
                   <p className="font-medium mt-1.5">{order.category_l1_name}</p>
                 </div>
               )}
 
               <div>
-                <Label className="text-xs text-slate-500">Requester</Label>
+                <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Requester</Label>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <User size={16} className="text-slate-400" />
+                  <User size={16} style={{ color: 'var(--tx-3)' }} />
                   <span className="font-medium">{order.requester_name}</span>
                 </div>
-                <p className="text-xs text-slate-500 ml-6">{order.requester_email}</p>
+                <p style={{ fontSize: 11, color: 'var(--tx-3)' }} className=" ml-6">{order.requester_email}</p>
               </div>
 
               <div>
-                <Label className="text-xs text-slate-500">Assigned to</Label>
+                <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Assigned to</Label>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <User size={16} className="text-slate-400" />
+                  <User size={16} style={{ color: 'var(--tx-3)' }} />
                   {showAsClient ? (
                     <span className="font-medium">RRM Team</span>
                   ) : (
@@ -1250,7 +1265,7 @@ export default function OrderDetail() {
               {/* Queue label — internal users only */}
               {!showAsClient && order.assigned_queue_key && (
                 <div data-testid="queue-info">
-                  <Label className="text-xs text-slate-500">Queue</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Queue</Label>
                   <p className="font-medium mt-1.5 text-sm" data-testid="queue-label">
                     {order.assigned_queue_key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </p>
@@ -1259,22 +1274,22 @@ export default function OrderDetail() {
 
               {accountManager && (
                 <div data-testid="account-manager-info">
-                  <Label className="text-xs text-slate-500">Account Manager</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Account Manager</Label>
                   <div className="flex items-center gap-2 mt-1.5">
                     <User size={16} className="text-[#A2182C]" />
                     <span className="font-medium">{accountManager.name}</span>
                   </div>
                   {accountManager.email && (
-                    <p className="text-xs text-slate-500 ml-6">{accountManager.email}</p>
+                    <p style={{ fontSize: 11, color: 'var(--tx-3)' }} className=" ml-6">{accountManager.email}</p>
                   )}
                 </div>
               )}
 
               {order.sla_deadline && (
                 <div>
-                  <Label className="text-xs text-slate-500">Deadline</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Deadline</Label>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <Calendar size={16} className="text-slate-400" />
+                    <Calendar size={16} style={{ color: 'var(--tx-3)' }} />
                     <span className={`font-medium ${order.is_sla_breached ? 'text-red-600' : ''}`}>
                       {format(new Date(order.sla_deadline), 'MMM d, yyyy')}
                     </span>
@@ -1286,9 +1301,9 @@ export default function OrderDetail() {
               )}
 
               <div>
-                <Label className="text-xs text-slate-500">Created</Label>
+                <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Created</Label>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <Clock size={16} className="text-slate-400" />
+                  <Clock size={16} style={{ color: 'var(--tx-3)' }} />
                   <span className="font-medium">
                     {format(new Date(order.created_at), 'MMM d, yyyy')}
                   </span>
@@ -1297,7 +1312,7 @@ export default function OrderDetail() {
 
               {order.delivered_at && (
                 <div>
-                  <Label className="text-xs text-slate-500">Delivered</Label>
+                  <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Delivered</Label>
                   <p className="font-medium mt-1.5">
                     {format(new Date(order.delivered_at), 'MMM d, yyyy')}
                   </p>
