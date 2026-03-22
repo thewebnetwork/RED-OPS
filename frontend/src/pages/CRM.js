@@ -38,8 +38,8 @@ const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } })
 const CONTACT_STATUS = {
   active: { label: 'Active', color: '#22c55e', icon: CheckCircle2 },
   inactive: { label: 'Inactive', color: '#606060', icon: XCircle },
-  prospect: { label: 'Prospect', color: '#3b82f6', icon: AlertCircle },
-  lost: { label: 'Lost', color: '#ef4444', icon: XCircle },
+  lead: { label: 'Lead', color: '#3b82f6', icon: AlertCircle },
+  churned: { label: 'Churned', color: '#ef4444', icon: XCircle },
 };
 
 const DEAL_STATUS = {
@@ -75,7 +75,7 @@ function LoadingSpinner() {
 
 // ── Status Badge ────────────────────────────────────────────────────────────
 function ContactStatusBadge({ status }) {
-  const cfg = CONTACT_STATUS[status] || CONTACT_STATUS.prospect;
+  const cfg = CONTACT_STATUS[status] || CONTACT_STATUS.lead;
   const IconComp = cfg.icon;
   return (
     <span style={{
@@ -99,7 +99,7 @@ function ContactsTab({ token, onRefresh }) {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [showNewModal, setShowNewModal] = useState(false);
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
@@ -110,7 +110,7 @@ function ContactsTab({ token, onRefresh }) {
     email: '',
     phone: '',
     company: '',
-    status: 'prospect',
+    status: 'lead',
     tags: '',
     notes: '',
   });
@@ -140,7 +140,7 @@ function ContactsTab({ token, onRefresh }) {
         c.name?.toLowerCase().includes(search.toLowerCase()) ||
         c.email?.toLowerCase().includes(search.toLowerCase()) ||
         c.company?.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = !statusFilter || c.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [contacts, search, statusFilter]);
@@ -163,7 +163,7 @@ function ContactsTab({ token, onRefresh }) {
       });
       toast.success('Contact created');
       setShowNewModal(false);
-      setNewForm({ name: '', email: '', phone: '', company: '', status: 'prospect', tags: '', notes: '' });
+      setNewForm({ name: '', email: '', phone: '', company: '', status: 'lead', tags: '', notes: '' });
       await fetchContacts();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to create contact');
@@ -242,7 +242,7 @@ function ContactsTab({ token, onRefresh }) {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {Object.entries(CONTACT_STATUS).map(([key, cfg]) => (
                   <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
                 ))}
@@ -770,15 +770,23 @@ function PipelineTab({ token, onRefresh }) {
       return;
     }
     try {
-      const stages = newPipelineForm.stages
+      const stageNames = newPipelineForm.stages
         .split(',')
         .map(s => s.trim())
         .filter(s => s);
 
-      if (stages.length === 0) {
+      if (stageNames.length === 0) {
         toast.error('At least one stage is required');
         return;
       }
+
+      const stageColors = ['#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#22c55e', '#ef4444', '#ec4899'];
+      const stages = stageNames.map((name, idx) => ({
+        id: crypto.randomUUID ? crypto.randomUUID() : `stage-${Date.now()}-${idx}`,
+        name,
+        order: idx,
+        color: stageColors[idx % stageColors.length],
+      }));
 
       await ax().post(`${API}/crm/pipelines`, {
         name: newPipelineForm.name,
@@ -800,14 +808,16 @@ function PipelineTab({ token, onRefresh }) {
       return;
     }
     try {
+      const pipe = pipelines.find(p => p.id === newDealForm.pipeline_id);
+      const firstStage = (pipe?.stages || []).sort((a, b) => (a.order || 0) - (b.order || 0))[0];
       await ax().post(`${API}/crm/deals`, {
         title: newDealForm.title,
         contact_id: newDealForm.contact_id,
         value: parseFloat(newDealForm.value) || 0,
         probability: parseInt(newDealForm.probability) || 50,
-        assigned_to: newDealForm.assigned_to || null,
+        assigned_to_user_id: newDealForm.assigned_to || null,
         pipeline_id: newDealForm.pipeline_id,
-        stage: deals.find(d => d.pipeline_id === newDealForm.pipeline_id)?.stage || 'Lead',
+        stage_id: firstStage?.id || '',
       });
       toast.success('Deal created');
       setShowNewDeal(false);
@@ -826,10 +836,10 @@ function PipelineTab({ token, onRefresh }) {
   };
 
   // Move deal
-  const handleMoveDeal = async (dealId, newStage) => {
+  const handleMoveDeal = async (dealId, newStageId) => {
     try {
       await ax().patch(`${API}/crm/deals/${dealId}/move`, {
-        stage: newStage,
+        stage_id: newStageId,
       });
       toast.success('Deal moved');
       await fetchData();
@@ -841,7 +851,7 @@ function PipelineTab({ token, onRefresh }) {
   // Get pipeline stages
   const getPipelineStages = () => {
     const pipe = pipelines.find(p => p.id === selectedPipeline);
-    return pipe?.stages || [];
+    return (pipe?.stages || []).sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
   // Get deals for pipeline
@@ -849,12 +859,12 @@ function PipelineTab({ token, onRefresh }) {
     ? deals.filter(d => d.pipeline_id === selectedPipeline)
     : [];
 
-  // Organize deals by stage
+  // Organize deals by stage_id
   const dealsByStage = useMemo(() => {
     const stages = getPipelineStages();
     const organized = {};
     stages.forEach(stage => {
-      organized[stage] = pipelineDeals.filter(d => d.stage === stage);
+      organized[stage.id] = pipelineDeals.filter(d => d.stage_id === stage.id);
     });
     return organized;
   }, [pipelineDeals, selectedPipeline]);
@@ -879,7 +889,7 @@ function PipelineTab({ token, onRefresh }) {
             Sales Pipeline
           </h2>
           <div style={{ display: 'flex', gap: 12 }}>
-            <Select value={selectedPipeline || ''} onValueChange={setSelectedPipeline}>
+            <Select value={selectedPipeline || undefined} onValueChange={setSelectedPipeline}>
               <SelectTrigger style={{ minWidth: 200 }}>
                 <SelectValue placeholder="Select pipeline" />
               </SelectTrigger>
@@ -953,7 +963,7 @@ function PipelineTab({ token, onRefresh }) {
               <div>
                 <Label style={{ color: 'var(--tx-2)', marginBottom: 6 }}>Pipeline *</Label>
                 <Select
-                  value={newDealForm.pipeline_id}
+                  value={newDealForm.pipeline_id || undefined}
                   onValueChange={(val) => setNewDealForm(p => ({ ...p, pipeline_id: val }))}
                 >
                   <SelectTrigger>
@@ -971,7 +981,7 @@ function PipelineTab({ token, onRefresh }) {
               <div>
                 <Label style={{ color: 'var(--tx-2)', marginBottom: 6 }}>Contact *</Label>
                 <Select
-                  value={newDealForm.contact_id}
+                  value={newDealForm.contact_id || undefined}
                   onValueChange={(val) => setNewDealForm(p => ({ ...p, contact_id: val }))}
                 >
                   <SelectTrigger>
@@ -1131,19 +1141,19 @@ function PipelineTab({ token, onRefresh }) {
             gap: 16,
           }}>
             {getPipelineStages().map(stage => (
-              <div key={stage}>
+              <div key={stage.id}>
                 <h3 style={{
                   fontSize: 14,
                   fontWeight: 700,
                   color: 'var(--tx-1)',
                   marginBottom: 12,
                   paddingBottom: 12,
-                  borderBottom: `1px solid var(--border)`,
+                  borderBottom: `2px solid ${stage.color || 'var(--border)'}`,
                 }}>
-                  {stage} ({dealsByStage[stage]?.length || 0})
+                  {stage.name} ({dealsByStage[stage.id]?.length || 0})
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {(dealsByStage[stage] || []).map(deal => {
+                  {(dealsByStage[stage.id] || []).map(deal => {
                     const contact = contacts.find(c => c.id === deal.contact_id);
                     return (
                       <div
@@ -1160,13 +1170,13 @@ function PipelineTab({ token, onRefresh }) {
                           <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', flex: 1 }}>
                             {deal.title}
                           </h4>
-                          {deal.status && (
+                          {deal.status && deal.status !== 'open' && (
                             <div style={{
                               fontSize: 10,
                               fontWeight: 700,
                               padding: '2px 8px',
                               borderRadius: 4,
-                              background: DEAL_STATUS[deal.status]?.color + '22',
+                              background: (DEAL_STATUS[deal.status]?.color || '#666') + '22',
                               color: DEAL_STATUS[deal.status]?.color || 'var(--tx-2)',
                             }}>
                               {DEAL_STATUS[deal.status]?.label || deal.status}
@@ -1174,7 +1184,7 @@ function PipelineTab({ token, onRefresh }) {
                           )}
                         </div>
                         <p style={{ fontSize: 12, color: 'var(--tx-2)', marginBottom: 8 }}>
-                          {contact?.name || 'Unknown'}
+                          {deal.contact_name || contact?.name || 'Unknown'}
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>
@@ -1184,22 +1194,22 @@ function PipelineTab({ token, onRefresh }) {
                             {deal.probability || 0}%
                           </span>
                         </div>
-                        {deal.assigned_to && (
+                        {deal.assigned_to_name && (
                           <p style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 8 }}>
-                            👤 {deal.assigned_to}
+                            👤 {deal.assigned_to_name}
                           </p>
                         )}
                         <Select
-                          value={stage}
-                          onValueChange={(newStage) => handleMoveDeal(deal.id, newStage)}
+                          value={stage.id}
+                          onValueChange={(newStageId) => handleMoveDeal(deal.id, newStageId)}
                         >
                           <SelectTrigger style={{ fontSize: 12 }}>
                             <SelectValue placeholder="Move to..." />
                           </SelectTrigger>
                           <SelectContent>
                             {getPipelineStages().map(s => (
-                              <SelectItem key={s} value={s}>
-                                Move to {s}
+                              <SelectItem key={s.id} value={s.id}>
+                                Move to {s.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
