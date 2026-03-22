@@ -111,13 +111,13 @@ export default function Profile() {
   return (
     <div className="space-y-6 max-w-2xl animate-fade-in" data-testid="profile-page">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Profile Settings</h1>
-        <p className="text-slate-500 mt-1">Manage your account settings</p>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Profile Settings</h1>
+        <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>Manage your account settings</p>
       </div>
 
       {/* Profile Information */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
+      <Card>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <User size={20} className="text-rose-600" />
             Profile Information
@@ -129,13 +129,13 @@ export default function Profile() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div 
-                  className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                  style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-elevated)', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', cursor: 'pointer', flexShrink: 0 }}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-3xl font-medium text-slate-500">
+                    <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--red)' }}>
                       {user?.name?.charAt(0) || 'U'}
                     </span>
                   )}
@@ -157,8 +157,8 @@ export default function Profile() {
                 />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-900">Profile Picture</p>
-                <p className="text-xs text-slate-500 mt-1">Click to upload. Max 2MB.</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>Profile Picture</p>
+                <p style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 4 }}>Click to upload. Max 2MB.</p>
               </div>
             </div>
 
@@ -191,9 +191,9 @@ export default function Profile() {
               <Input
                 value={user?.role || ''}
                 disabled
-                className="mt-1.5 bg-slate-50"
+                className="mt-1.5"
               />
-              <p className="text-xs text-slate-500 mt-1">Role can only be changed by an admin</p>
+              <p style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4 }}>Role can only be changed by an admin</p>
             </div>
 
             <Button 
@@ -210,8 +210,8 @@ export default function Profile() {
       </Card>
 
       {/* Change Password */}
-      <Card className="border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-4">
+      <Card>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <Lock size={20} className="text-rose-600" />
             Change Password
