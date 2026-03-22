@@ -196,14 +196,14 @@ export default function Announcements() {
     const startAt = ann.start_at ? new Date(ann.start_at) : null;
     const endAt = ann.end_at ? new Date(ann.end_at) : null;
     
-    if (!ann.is_active) return <Badge variant="outline" className="text-slate-500">Inactive</Badge>;
-    if (startAt && now < startAt) return <Badge className="bg-yellow-100 text-yellow-700">Scheduled</Badge>;
+    if (!ann.is_active) return <Badge variant="outline" className="">Inactive</Badge>;
+    if (startAt && now < startAt) return <Badge className="">Scheduled</Badge>;
     if (endAt && now > endAt) return (
-      <Badge className="bg-slate-100 text-slate-600" title="Will be auto-deleted after 24 hours">
+      <Badge className="" title="Will be auto-deleted after 24 hours">
         Expired (24h retention)
       </Badge>
     );
-    return <Badge className="bg-emerald-100 text-emerald-700">Active</Badge>;
+    return <Badge className="">Active</Badge>;
   };
 
   if (loading) {
@@ -214,11 +214,11 @@ export default function Announcements() {
     <div className="space-y-6 animate-fade-in" data-testid="announcements-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <Megaphone className="text-[#A2182C]" />
             {t('announcements.title')}
           </h1>
-          <p className="text-slate-500 mt-1">{t('announcements.description')}</p>
+          <p className="mt-1">{t('announcements.description')}</p>
         </div>
         <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
           <Plus size={16} className="mr-2" />
@@ -231,25 +231,25 @@ export default function Announcements() {
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.length}</p>
-            <p className="text-sm text-slate-500">{t('announcements.total')}</p>
+            <p className="text-sm">{t('announcements.total')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{announcements.filter(a => a.is_active).length}</p>
-            <p className="text-sm text-slate-500">{t('common.active')}</p>
+            <p className="text-2xl font-bold">{announcements.filter(a => a.is_active).length}</p>
+            <p className="text-sm">{t('common.active')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-yellow-600">{announcements.filter(a => a.start_at && new Date(a.start_at) > new Date()).length}</p>
-            <p className="text-sm text-slate-500">{t('announcements.scheduled')}</p>
+            <p className="text-sm">{t('announcements.scheduled')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-slate-400">{announcements.filter(a => !a.is_active).length}</p>
-            <p className="text-sm text-slate-500">{t('common.inactive')}</p>
+            <p className="text-2xl font-bold">{announcements.filter(a => !a.is_active).length}</p>
+            <p className="text-sm">{t('common.inactive')}</p>
           </CardContent>
         </Card>
       </div>
@@ -262,7 +262,7 @@ export default function Announcements() {
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">
+            <div className="py-12 text-center">
               <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
               <p>{t('announcements.noAnnouncements')}</p>
               <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
@@ -274,18 +274,18 @@ export default function Announcements() {
               {announcements.map((ann) => (
                 <div 
                   key={ann.id} 
-                  className="p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                  className="p-4 border rounded-lg transition-colors"
                   style={{ borderLeftColor: ann.background_color, borderLeftWidth: '4px' }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-slate-900">{ann.title}</h3>
+                        <h3 className="font-semibold">{ann.title}</h3>
                         {getStatusBadge(ann)}
                         <Badge variant="outline" className="text-xs">{t('announcements.priority')}: {ann.priority}</Badge>
                       </div>
-                      <p className="text-sm text-slate-600 mt-1 line-clamp-2">{ann.message}</p>
-                      <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500">
+                      <p className="text-sm mt-1 line-clamp-2">{ann.message}</p>
+                      <div className="flex flex-wrap items-center gap-4 mt-2 text-xs">
                         {ann.send_to_all ? (
                           <span className="flex items-center gap-1"><Globe size={12} /> {t('announcements.allUsers')}</span>
                         ) : (
@@ -421,7 +421,7 @@ export default function Announcements() {
               </div>
 
               {!form.send_to_all && (
-                <div className="space-y-4 p-4 border rounded-lg bg-slate-50">
+                <div className="space-y-4 p-4 border rounded-lg">
                   {!form.send_to_all && form.target_teams.length === 0 && form.target_roles.length === 0 && form.target_specialties.length === 0 && (
                     <div className="flex items-center gap-2 text-amber-600 text-sm">
                       <AlertCircle size={16} />
@@ -443,7 +443,7 @@ export default function Announcements() {
                           {team.name}
                         </Badge>
                       ))}
-                      {teams.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noTeamsAvailable')}</span>}
+                      {teams.length === 0 && <span className="text-sm">{t('announcements.noTeamsAvailable')}</span>}
                     </div>
                   </div>
 
@@ -461,7 +461,7 @@ export default function Announcements() {
                           {role.name}
                         </Badge>
                       ))}
-                      {roles.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noRolesAvailable')}</span>}
+                      {roles.length === 0 && <span className="text-sm">{t('announcements.noRolesAvailable')}</span>}
                     </div>
                   </div>
 
@@ -479,7 +479,7 @@ export default function Announcements() {
                           {spec.name}
                         </Badge>
                       ))}
-                      {specialties.length === 0 && <span className="text-sm text-slate-400">{t('announcements.noSpecialtiesAvailable')}</span>}
+                      {specialties.length === 0 && <span className="text-sm">{t('announcements.noSpecialtiesAvailable')}</span>}
                     </div>
                   </div>
                 </div>

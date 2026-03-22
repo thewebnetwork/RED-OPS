@@ -36,10 +36,10 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const LOG_LEVELS = {
   'ERROR': { color: 'bg-red-100 text-red-700', icon: AlertCircle },
-  'WARNING': { color: 'bg-amber-100 text-amber-700', icon: AlertTriangle },
-  'INFO': { color: 'bg-blue-100 text-blue-700', icon: Info },
-  'SUCCESS': { color: 'bg-green-100 text-green-700', icon: CheckCircle },
-  'DEBUG': { color: 'bg-slate-100 text-slate-700', icon: Activity }
+  'WARNING': { color: 'text-amber-700', icon: AlertTriangle },
+  'INFO': { color: '', icon: Info },
+  'SUCCESS': { color: '', icon: CheckCircle },
+  'DEBUG': { color: '', icon: Activity }
 };
 
 export default function Logs() {
@@ -195,8 +195,8 @@ export default function Logs() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">System Logs</h1>
-          <p className="text-slate-500 mt-1">View and export application logs across all modules</p>
+          <h1 className="text-2xl font-bold">System Logs</h1>
+          <p className="mt-1">View and export application logs across all modules</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -242,9 +242,9 @@ export default function Logs() {
 
       {/* Streaming Status Banner */}
       {isStreaming && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 border border-rose-200 rounded-lg">
+        <div className="flex items-center gap-2 px-4 py-2 border border-rose-200 rounded-lg">
           <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
-          <span className="text-sm font-medium text-rose-700">
+          <span className="text-sm font-medium">
             Live streaming logs for {activeTab}
           </span>
           <span className="text-sm text-rose-500">
@@ -274,12 +274,12 @@ export default function Logs() {
         </TabsList>
 
         <div className="mt-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Search */}
                 <div className="relative flex-1">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -320,10 +320,10 @@ export default function Logs() {
                   <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
                 </div>
               ) : filteredLogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-slate-500 p-8">
+                <div className="flex flex-col items-center justify-center h-64 p-8">
                   <FileText size={48} className="text-slate-300 mb-3" />
                   <p className="text-lg font-medium mb-2">No logs found</p>
-                  <p className="text-sm text-center text-slate-400 max-w-md">
+                  <p className="text-sm text-center max-w-md">
                     {activeTab === 'system' && 'System logs track server events, startup, and scheduled tasks. Logs appear here as system activity occurs.'}
                     {activeTab === 'api' && 'API logs record HTTP requests and responses. Logs appear as API calls are made.'}
                     {activeTab === 'ui' && 'UI logs track user interface events and component activity.'}
@@ -341,18 +341,18 @@ export default function Logs() {
                     return (
                       <div 
                         key={log.id || index}
-                        className={`flex items-start gap-3 px-4 py-2 border-b border-slate-100 hover:bg-slate-50 ${
-                          index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
+                        className={`flex items-start gap-3 px-4 py-2 border-b ${
+                          index % 2 === 0 ? '' : 'bg-[#1e1e1e30]'
                         }`}
                       >
-                        <span className="text-xs text-slate-400 shrink-0 w-44">
+                        <span className="text-xs shrink-0 w-44">
                           {format(new Date(log.timestamp), 'MMM dd HH:mm:ss.SSS')}
                         </span>
-                        <Badge className={`shrink-0 ${LOG_LEVELS[log.level]?.color || 'bg-slate-100'}`}>
+                        <Badge className={`shrink-0 ${LOG_LEVELS[log.level]?.color || ''}`}>
                           <LevelIcon size={12} className="mr-1" />
                           {log.level}
                         </Badge>
-                        <span className="text-slate-700 break-all">{log.message}</span>
+                        <span className="break-all">{log.message}</span>
                       </div>
                     );
                   })}
@@ -362,7 +362,7 @@ export default function Logs() {
           </Card>
           
           {/* Stats Footer */}
-          <div className="flex items-center justify-between mt-4 text-sm text-slate-500">
+          <div className="flex items-center justify-between mt-4 text-sm">
             <span>Showing {filteredLogs.length} of {logs.length} logs</span>
             <Button variant="link" onClick={scrollToBottom} className="text-rose-600">
               Scroll to latest

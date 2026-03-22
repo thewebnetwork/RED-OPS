@@ -27,9 +27,9 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusColors = {
-  'Open': 'bg-blue-100 text-blue-700',
-  'Waiting': 'bg-amber-100 text-amber-700',
-  'Closed': 'bg-slate-100 text-slate-500',
+  'Open':    { background: '#3b82f618', color: '#3b82f6' },
+  'Waiting': { background: '#f59e0b18', color: '#f59e0b' },
+  'Closed':  { background: '#60606020', color: '#606060' },
 };
 
 const TICKET_STATUSES = ["Open", "Waiting", "Closed"];
@@ -124,24 +124,24 @@ export default function TicketDetail() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-sm text-slate-500">{ticket.ticket_code}</span>
-            <Badge className={statusColors[ticket.status]}>{ticket.status}</Badge>
+            <span className="font-mono text-sm">{ticket.ticket_code}</span>
+            <span style={{ ...statusColors[ticket.status], fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 5 }}>{ticket.status}</span>
           </div>
-          <h1 className="text-xl font-bold text-slate-900 mt-1">{ticket.subject}</h1>
+          <h1 className="text-xl font-bold mt-1">{ticket.subject}</h1>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="var(--border)">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="text-lg">{t('tickets.messages')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-96 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
-                  <div className="text-center text-slate-500 py-8">
+                  <div className="text-center py-8">
                     {t('tickets.noMessagesYet')}
                   </div>
                 ) : (
@@ -150,13 +150,13 @@ export default function TicketDetail() {
                       key={msg.id}
                       className={`flex ${msg.author_user_id === user?.id ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[80%] ${msg.author_user_id === user?.id ? 'bg-rose-50' : 'bg-slate-100'} rounded-lg p-4`}>
+                      <div style={{ maxWidth: '80%', background: msg.author_user_id === user?.id ? '#c92a3e18' : 'var(--bg-elevated)', borderRadius: 10, padding: 16 }}>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-medium text-sm">{msg.author_name}</span>
                           <Badge variant="outline" className="text-xs">{msg.author_role}</Badge>
                         </div>
-                        <p className="text-sm text-slate-700 whitespace-pre-wrap">{msg.message_body}</p>
-                        <p className="text-xs text-slate-400 mt-2">
+                        <p style={{ fontSize: 13, whiteSpace: "pre-wrap", color: "var(--tx-1)" }}>{msg.message_body}</p>
+                        <p className="text-xs mt-2">
                           {format(new Date(msg.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
@@ -167,7 +167,7 @@ export default function TicketDetail() {
               </div>
               
               {/* Message Composer */}
-              <form onSubmit={handleSendMessage} className="border-t border-slate-100 p-4">
+              <form onSubmit={handleSendMessage} className="border-t p-4">
                 <div className="flex gap-3">
                   <Textarea
                     value={newMessage}
@@ -192,14 +192,14 @@ export default function TicketDetail() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="var(--border)">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="text-base">{t('tickets.ticketDetails')}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {/* Status */}
               <div>
-                <Label className="text-xs text-slate-500">{t('common.status')}</Label>
+                <Label className="text-xs">{t('common.status')}</Label>
                 <Select value={ticket.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="mt-1.5" data-testid="ticket-status-select">
                     <SelectValue />
@@ -214,7 +214,7 @@ export default function TicketDetail() {
 
               {/* Owner */}
               <div>
-                <Label className="text-xs text-slate-500">{t('tickets.owner')}</Label>
+                <Label className="text-xs">{t('tickets.owner')}</Label>
                 <div className="flex items-center gap-2 mt-1.5">
                   <User size={16} className="text-slate-400" />
                   <span className="font-medium">{ticket.owner_name}</span>
@@ -224,7 +224,7 @@ export default function TicketDetail() {
               {/* Client */}
               {ticket.client_name && (
                 <div>
-                  <Label className="text-xs text-slate-500">{t('tickets.client')}</Label>
+                  <Label className="text-xs">{t('tickets.client')}</Label>
                   <p className="font-medium mt-1.5">{ticket.client_name}</p>
                 </div>
               )}
@@ -232,7 +232,7 @@ export default function TicketDetail() {
               {/* Related Order */}
               {ticket.related_order_code && (
                 <div>
-                  <Label className="text-xs text-slate-500">{t('tickets.relatedOrder')}</Label>
+                  <Label className="text-xs">{t('tickets.relatedOrder')}</Label>
                   <Link 
                     to={`/orders/${ticket.related_order_id}`}
                     className="flex items-center gap-2 mt-1.5 text-rose-600 hover:text-rose-700"
@@ -245,7 +245,7 @@ export default function TicketDetail() {
 
               {/* Created */}
               <div>
-                <Label className="text-xs text-slate-500">{t('tickets.created')}</Label>
+                <Label className="text-xs">{t('tickets.created')}</Label>
                 <p className="font-medium mt-1.5">
                   {format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}
                 </p>

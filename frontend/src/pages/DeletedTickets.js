@@ -36,12 +36,12 @@ import { format } from 'date-fns';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusConfig = {
-  'Draft': { class: 'bg-slate-200 text-slate-600' },
-  'Open': { class: 'bg-blue-100 text-blue-700' },
-  'In Progress': { class: 'bg-amber-100 text-amber-700' },
-  'Pending': { class: 'bg-purple-100 text-purple-700' },
-  'Delivered': { class: 'bg-green-100 text-green-700' },
-  'Closed': { class: 'bg-slate-100 text-slate-500' },
+  'Draft': { class: '' },
+  'Open': { class: '' },
+  'In Progress': { class: 'text-amber-700' },
+  'Pending': { class: '' },
+  'Delivered': { class: '' },
+  'Closed': { class: '' },
   'Canceled': { class: 'bg-red-100 text-red-600' },
 };
 
@@ -115,11 +115,11 @@ export default function DeletedTickets() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <Trash2 className="h-6 w-6 text-red-500" />
             Deleted Tickets
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="mt-1">
             View and restore soft-deleted tickets. {tickets.length} ticket(s) in trash.
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function DeletedTickets() {
       <Card>
         <CardContent className="pt-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
             <Input
               placeholder="Search by ticket code, title, requester, or deletion reason..."
               value={searchQuery}
@@ -145,13 +145,13 @@ export default function DeletedTickets() {
       {filteredTickets.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="rounded-full bg-slate-100 p-4 mb-4">
-              <Trash2 className="h-8 w-8 text-slate-400" />
+            <div className="rounded-full p-4 mb-4">
+              <Trash2 className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-medium text-slate-700 mb-1">
+            <h3 className="text-lg font-medium mb-1">
               {searchQuery ? 'No matching tickets found' : 'No deleted tickets'}
             </h3>
-            <p className="text-slate-500 text-center max-w-sm">
+            <p className="text-center max-w-sm">
               {searchQuery 
                 ? 'Try adjusting your search query to find deleted tickets.' 
                 : 'When administrators soft-delete tickets, they will appear here for review and potential restoration.'
@@ -188,26 +188,26 @@ export default function DeletedTickets() {
                   <TableRow key={ticket.id} data-testid={`deleted-ticket-row-${ticket.id}`}>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        <span className="font-mono text-sm text-slate-500">{ticket.order_code}</span>
-                        <span className="font-medium text-slate-900 line-clamp-1">{ticket.title}</span>
+                        <span className="font-mono text-sm">{ticket.order_code}</span>
+                        <span className="font-medium line-clamp-1">{ticket.title}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-slate-400" />
-                        <span className="text-slate-700">{ticket.requester_name}</span>
+                        <User className="h-4 w-4" />
+                        <span className="">{ticket.requester_name}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusConfig[ticket.status]?.class || 'bg-gray-100'}>
+                      <Badge className={statusConfig[ticket.status]?.class || ''}>
                         {ticket.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="text-slate-700">{ticket.deleted_by_name || 'Unknown'}</span>
+                      <span className="">{ticket.deleted_by_name || 'Unknown'}</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2 text-slate-600">
+                      <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         <span className="text-sm">
                           {ticket.deleted_at 
@@ -218,7 +218,7 @@ export default function DeletedTickets() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-slate-600 text-sm line-clamp-2" title={ticket.deletion_reason}>
+                      <span className="text-sm line-clamp-2" title={ticket.deletion_reason}>
                         {ticket.deletion_reason || 'No reason provided'}
                       </span>
                     </TableCell>
@@ -227,7 +227,7 @@ export default function DeletedTickets() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          className="hover:bg-blue-50"
                           onClick={() => navigate(`/orders/${ticket.id}`)}
                           data-testid={`view-deleted-ticket-${ticket.id}`}
                         >
@@ -268,25 +268,25 @@ export default function DeletedTickets() {
             </DialogDescription>
           </DialogHeader>
           {selectedTicket && (
-            <div className="bg-slate-50 p-4 rounded-lg space-y-2">
+            <div className="p-4 rounded-lg space-y-2">
               <div className="flex justify-between">
-                <span className="text-slate-500">Title:</span>
-                <span className="font-medium text-slate-900">{selectedTicket.title}</span>
+                <span className="">Title:</span>
+                <span className="font-medium">{selectedTicket.title}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Status:</span>
-                <Badge className={statusConfig[selectedTicket.status]?.class || 'bg-gray-100'}>
+                <span className="">Status:</span>
+                <Badge className={statusConfig[selectedTicket.status]?.class || ''}>
                   {selectedTicket.status}
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Requester:</span>
-                <span className="text-slate-700">{selectedTicket.requester_name}</span>
+                <span className="">Requester:</span>
+                <span className="">{selectedTicket.requester_name}</span>
               </div>
               {selectedTicket.deletion_reason && (
                 <div className="pt-2 border-t">
-                  <span className="text-slate-500 text-sm">Deletion Reason:</span>
-                  <p className="text-slate-700 text-sm mt-1">{selectedTicket.deletion_reason}</p>
+                  <span className="text-sm">Deletion Reason:</span>
+                  <p className="text-sm mt-1">{selectedTicket.deletion_reason}</p>
                 </div>
               )}
             </div>

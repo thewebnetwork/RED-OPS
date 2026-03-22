@@ -466,9 +466,9 @@ export default function WorkflowEditor() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50" data-testid="workflow-editor">
+    <div className="h-screen flex flex-col" data-testid="workflow-editor">
       {/* Header */}
-      <div className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-10">
+      <div className="h-14 border-b flex items-center justify-between px-4 z-10">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -479,11 +479,11 @@ export default function WorkflowEditor() {
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="font-semibold text-slate-900">{workflow?.name}</h1>
-            <p className="text-xs text-slate-500">{workflow?.description || t('workflow.noDescription')}</p>
+            <h1 className="font-semibold">{workflow?.name}</h1>
+            <p className="text-xs">{workflow?.description || t('workflow.noDescription')}</p>
           </div>
           {hasChanges && (
-            <Badge className="bg-amber-100 text-amber-700 ml-2">
+            <Badge className="text-amber-700 ml-2">
               <AlertTriangle size={12} className="mr-1" />
               {t('workflow.unsaved')}
             </Badge>
@@ -514,17 +514,17 @@ export default function WorkflowEditor() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Node Palette */}
-        <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200">
-            <h2 className="font-semibold text-slate-900">{t('workflow.nodePalette')}</h2>
-            <p className="text-xs text-slate-500 mt-1">{t('workflow.dragNodesToCanvas')}</p>
+        <div className="w-64 border-r flex flex-col">
+          <div className="p-4 border-b">
+            <h2 className="font-semibold">{t('workflow.nodePalette')}</h2>
+            <p className="text-xs mt-1">{t('workflow.dragNodesToCanvas')}</p>
           </div>
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-2">
               {nodePalette.map((item) => (
                 <div
                   key={item.type}
-                  className="p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-grab hover:border-slate-300 hover:shadow-sm transition-all"
+                  className="p-3 rounded-lg border cursor-grab hover:border-slate-300 hover:shadow-sm transition-all"
                   draggable
                   onDragStart={(e) => onDragStart(e, item.type)}
                   data-testid={`palette-${item.type}`}
@@ -537,8 +537,8 @@ export default function WorkflowEditor() {
                       <item.icon size={16} className="text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm text-slate-900">{item.label}</p>
-                      <p className="text-xs text-slate-500">{item.description}</p>
+                      <p className="font-medium text-sm">{item.label}</p>
+                      <p className="text-xs">{item.description}</p>
                     </div>
                   </div>
                 </div>
@@ -575,7 +575,7 @@ export default function WorkflowEditor() {
               }}
               maskColor="rgba(0, 0, 0, 0.1)"
             />
-            <Panel position="top-right" className="bg-white rounded-lg shadow-lg p-2 flex gap-2">
+            <Panel position="top-right" className="rounded-lg shadow-lg p-2 flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -687,7 +687,7 @@ export default function WorkflowEditor() {
               {/* Assign to Roles */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t('workflow.assignToRoles')}</Label>
-                <p className="text-xs text-slate-500">{t('workflow.selectRolesDescription')}</p>
+                <p className="text-xs">{t('workflow.selectRolesDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {roles.filter(r => r.can_pick_orders).map((role) => (
                     <div key={role.id} className="flex items-center gap-2">
@@ -722,7 +722,7 @@ export default function WorkflowEditor() {
               {/* Assign to Teams */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t('workflow.assignToTeams')}</Label>
-                <p className="text-xs text-slate-500">{t('workflow.selectTeamsDescription')}</p>
+                <p className="text-xs">{t('workflow.selectTeamsDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {teams.map((team) => (
                     <div key={team.id} className="flex items-center gap-2">
@@ -743,7 +743,7 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {teams.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noTeamsAvailable')}</p>
+                    <p className="text-xs text-center py-2">{t('workflow.noTeamsAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_team_names?.length > 0 && (
@@ -760,7 +760,7 @@ export default function WorkflowEditor() {
               {/* Target by Specialty */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t('workflow.targetBySpecialty')}</Label>
-                <p className="text-xs text-slate-500">{t('workflow.targetSpecialtyDescription')}</p>
+                <p className="text-xs">{t('workflow.targetSpecialtyDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {specialties.map((specialty) => (
                     <div key={specialty.id} className="flex items-center gap-2">
@@ -781,13 +781,13 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {specialties.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noSpecialtiesAvailable')}</p>
+                    <p className="text-xs text-center py-2">{t('workflow.noSpecialtiesAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_specialty_names?.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {workflow.assigned_specialty_names.map((name, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs bg-purple-100 text-purple-700">{name}</Badge>
+                      <Badge key={idx} variant="secondary" className="text-xs">{name}</Badge>
                     ))}
                   </div>
                 )}
@@ -798,7 +798,7 @@ export default function WorkflowEditor() {
               {/* Target by Access Tier */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t('workflow.targetByAccessTier')}</Label>
-                <p className="text-xs text-slate-500">{t('workflow.targetAccessTierDescription')}</p>
+                <p className="text-xs">{t('workflow.targetAccessTierDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {accessTiers.map((tier) => (
                     <div key={tier.id} className="flex items-center gap-2">
@@ -819,13 +819,13 @@ export default function WorkflowEditor() {
                     </div>
                   ))}
                   {accessTiers.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noAccessTiersAvailable')}</p>
+                    <p className="text-xs text-center py-2">{t('workflow.noAccessTiersAvailable')}</p>
                   )}
                 </div>
                 {workflow?.assigned_access_tier_names?.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {workflow.assigned_access_tier_names.map((name, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs bg-emerald-100 text-emerald-700">{name}</Badge>
+                      <Badge key={idx} variant="secondary" className="text-xs">{name}</Badge>
                     ))}
                   </div>
                 )}
@@ -836,7 +836,7 @@ export default function WorkflowEditor() {
               {/* Trigger by Category */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t('workflow.triggerByCategory')}</Label>
-                <p className="text-xs text-slate-500">{t('workflow.triggerCategoryDescription')}</p>
+                <p className="text-xs">{t('workflow.triggerCategoryDescription')}</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {categories.map((cat) => (
                     <div key={cat.id} className="flex items-center gap-2">
@@ -852,19 +852,19 @@ export default function WorkflowEditor() {
                         }}
                       />
                       <Label htmlFor={`cat-${cat.id}`} className="text-sm cursor-pointer">
-                        <span className="text-xs text-slate-400 mr-1">[{cat.type}]</span>
+                        <span className="text-xs mr-1">[{cat.type}]</span>
                         {cat.name}
                       </Label>
                     </div>
                   ))}
                   {categories.length === 0 && (
-                    <p className="text-xs text-slate-400 text-center py-2">{t('workflow.noCategoriesAvailable')}</p>
+                    <p className="text-xs text-center py-2">{t('workflow.noCategoriesAvailable')}</p>
                   )}
                 </div>
                 {workflow?.trigger_category_names?.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {workflow.trigger_category_names.map((name, idx) => (
-                      <Badge key={idx} variant="default" className="text-xs bg-rose-100 text-rose-700">{name}</Badge>
+                      <Badge key={idx} variant="default" className="text-xs">{name}</Badge>
                     ))}
                   </div>
                 )}
@@ -907,7 +907,7 @@ export default function WorkflowEditor() {
 function TriggerNodeConfig({ data, updateData }) {
   return (
     <div className="space-y-4">
-      <h4 className="font-medium text-sm text-slate-900">Trigger Settings</h4>
+      <h4 className="font-medium text-sm">Trigger Settings</h4>
       <div className="space-y-2">
         <Label>Trigger Type</Label>
         <Select
@@ -1050,7 +1050,7 @@ function FormNodeConfig({ data, updateData }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-sm text-slate-900">Form Fields</h4>
+        <h4 className="font-medium text-sm">Form Fields</h4>
         <Button size="sm" variant="outline" onClick={addField}>
           <Plus size={14} className="mr-1" />
           Add Field
@@ -1059,12 +1059,12 @@ function FormNodeConfig({ data, updateData }) {
 
       <div className="space-y-3">
         {fields.map((field, idx) => (
-          <div key={field.id} className="p-3 bg-slate-50 rounded-lg border space-y-3">
+          <div key={field.id} className="p-3 rounded-lg border space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-slate-500">Field {idx + 1}</span>
+                <span className="text-xs font-medium">Field {idx + 1}</span>
                 {field.is_trigger && (
-                  <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">Trigger</Badge>
+                  <Badge variant="secondary" className="text-xs text-amber-700">Trigger</Badge>
                 )}
               </div>
               <div className="flex items-center gap-1">
@@ -1135,9 +1135,9 @@ function FormNodeConfig({ data, updateData }) {
 
             {/* Options for select/multiselect fields */}
             {(field.field_type === 'select' || field.field_type === 'multiselect') && (
-              <div className="space-y-2 pl-3 border-l-2 border-blue-200">
+              <div className="space-y-2 pl-3 border-l-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-blue-600">Options</span>
+                  <span className="text-xs font-medium">Options</span>
                   <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => addOption(field.id)}>
                     <Plus size={10} className="mr-1" />
                     Add Option
@@ -1166,27 +1166,27 @@ function FormNodeConfig({ data, updateData }) {
 
             {/* Expanded settings with sub-fields */}
             {expandedField === field.id && (
-              <div className="space-y-3 pt-2 border-t border-slate-200">
+              <div className="space-y-3 pt-2 border-t">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-purple-600">Conditional Sub-Fields</span>
+                  <span className="text-xs font-medium">Conditional Sub-Fields</span>
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="h-6 text-xs text-purple-600"
+                    className="h-6 text-xs"
                     onClick={() => addSubField(field.id, field.options?.[0] || '')}
                   >
                     <Plus size={10} className="mr-1" />
                     Add Sub-Field
                   </Button>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs">
                   Sub-fields appear when this field has a specific value (e.g., if Category = &quot;Renovation&quot;, show &quot;How many bedrooms?&quot;)
                 </p>
                 
                 {(field.sub_fields || []).map((subField, sfIdx) => (
-                  <div key={subField.id} className="p-2 bg-purple-50 rounded border border-purple-200 space-y-2">
+                  <div key={subField.id} className="p-2 rounded border space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-purple-700">Sub-Field {sfIdx + 1}</span>
+                      <span className="text-xs font-medium">Sub-Field {sfIdx + 1}</span>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -1199,7 +1199,7 @@ function FormNodeConfig({ data, updateData }) {
                     
                     {/* Show when parent value equals */}
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-600 whitespace-nowrap">Show when =</span>
+                      <span className="text-xs whitespace-nowrap">Show when =</span>
                       {field.field_type === 'select' || field.field_type === 'multiselect' ? (
                         <Select
                           value={subField.parent_value}
@@ -1258,7 +1258,7 @@ function FormNodeConfig({ data, updateData }) {
                     {/* Options for select sub-fields */}
                     {subField.field_type === 'select' && (
                       <div className="space-y-1">
-                        <span className="text-xs text-slate-500">Options (comma separated)</span>
+                        <span className="text-xs">Options (comma separated)</span>
                         <Input
                           value={(subField.options || []).join(', ')}
                           onChange={(e) => updateSubField(field.id, subField.id, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
@@ -1276,7 +1276,7 @@ function FormNodeConfig({ data, updateData }) {
       </div>
       
       {fields.length === 0 && (
-        <p className="text-xs text-slate-400 text-center py-4">
+        <p className="text-xs text-center py-4">
           No fields yet. Add fields to collect data from users.
         </p>
       )}
@@ -1342,7 +1342,7 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-sm text-slate-900">Actions</h4>
+        <h4 className="font-medium text-sm">Actions</h4>
       </div>
 
       {/* Action selector */}
@@ -1367,10 +1367,10 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
         {actions.map((action, idx) => {
           const actionInfo = actionTypes.find(a => a.type === action.action_type);
           return (
-            <div key={action.id} className="p-3 bg-slate-50 rounded-lg border space-y-2">
+            <div key={action.id} className="p-3 rounded-lg border space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {actionInfo && <actionInfo.icon size={14} className="text-slate-600" />}
+                  {actionInfo && <actionInfo.icon size={14} className="" />}
                   <span className="text-sm font-medium">{actionInfo?.label}</span>
                 </div>
                 <Button
@@ -1445,7 +1445,7 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
                       <SelectItem value="any_specialty">Assign to any available specialty</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-slate-400">Routes ticket to users with the selected specialty</p>
+                  <p className="text-xs">Routes ticket to users with the selected specialty</p>
                 </div>
               )}
 
@@ -1537,8 +1537,8 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
 
               {action.action_type === 'apply_sla_policy' && (
                 <div className="space-y-2">
-                  <div className="p-2 bg-blue-50 rounded border border-blue-200">
-                    <p className="text-xs text-blue-700">
+                  <div className="p-2 rounded border">
+                    <p className="text-xs">
                       Apply an SLA & Escalation policy to this ticket. The policy defines SLA duration and escalation rules.
                     </p>
                   </div>
@@ -1558,7 +1558,7 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-slate-400">Leave empty to auto-apply the best matching policy based on role/team/specialty</p>
+                  <p className="text-xs">Leave empty to auto-apply the best matching policy based on role/team/specialty</p>
                 </div>
               )}
             </div>
@@ -1602,7 +1602,7 @@ function ConditionNodeConfig({ data, updateData }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-sm text-slate-900">Conditions</h4>
+        <h4 className="font-medium text-sm">Conditions</h4>
         <Button size="sm" variant="outline" onClick={addCondition}>
           <Plus size={14} className="mr-1" />
           Add Condition
@@ -1611,9 +1611,9 @@ function ConditionNodeConfig({ data, updateData }) {
 
       <div className="space-y-3">
         {conditions.map((cond, idx) => (
-          <div key={cond.id} className="p-3 bg-slate-50 rounded-lg border space-y-2">
+          <div key={cond.id} className="p-3 rounded-lg border space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Condition {idx + 1}</span>
+              <span className="text-xs font-medium">Condition {idx + 1}</span>
               <Button
                 size="icon"
                 variant="ghost"
@@ -1658,7 +1658,7 @@ function ConditionNodeConfig({ data, updateData }) {
         ))}
       </div>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs">
         Connect &quot;Yes&quot; output to the path when conditions are met, &quot;No&quot; output otherwise.
       </p>
     </div>

@@ -372,8 +372,8 @@ export default function Workflows() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Workflow Builder</h1>
-          <p className="text-slate-500 mt-1">Create and manage automated workflows</p>
+          <h1 className="text-2xl font-bold">Workflow Builder</h1>
+          <p className="mt-1">Create and manage automated workflows</p>
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
@@ -408,7 +408,7 @@ export default function Workflows() {
         <TabsContent value="workflows" className="mt-6 space-y-6">
           {/* Search */}
           <div className="relative max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
               placeholder="Search workflows..."
               value={searchQuery}
@@ -422,11 +422,11 @@ export default function Workflows() {
           {filteredWorkflows.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <GitBranch size={32} className="text-slate-400" />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                  <GitBranch size={32} className="" />
                 </div>
-                <h3 className="text-lg font-medium text-slate-900 mb-2">No workflows yet</h3>
-                <p className="text-slate-500 text-center max-w-md mb-4">
+                <h3 className="text-lg font-medium mb-2">No workflows yet</h3>
+                <p className="text-center max-w-md mb-4">
                   Create your first workflow to automate processes like ticket routing, 
                   notifications, and more.
                 </p>
@@ -504,7 +504,7 @@ export default function Workflows() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4 text-sm text-slate-500">
+                <div className="flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
                     {getNodeCount(workflow)} nodes
@@ -519,13 +519,13 @@ export default function Workflows() {
                     {workflow.assigned_role_names.slice(0, 3).map((role, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full"
+                        className="px-2 py-0.5 text-xs rounded-full"
                       >
                         {role}
                       </span>
                     ))}
                     {workflow.assigned_role_names.length > 3 && (
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
+                      <span className="px-2 py-0.5 text-xs rounded-full">
                         +{workflow.assigned_role_names.length - 3} more
                       </span>
                     )}
@@ -536,7 +536,7 @@ export default function Workflows() {
                     {workflow.assigned_specialty_names?.slice(0, 2).map((name, idx) => (
                       <span
                         key={`spec-${idx}`}
-                        className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full"
+                        className="px-2 py-0.5 text-xs rounded-full"
                       >
                         {name}
                       </span>
@@ -544,7 +544,7 @@ export default function Workflows() {
                     {workflow.assigned_access_tier_names?.slice(0, 2).map((name, idx) => (
                       <span
                         key={`tier-${idx}`}
-                        className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full"
+                        className="px-2 py-0.5 text-xs rounded-full"
                       >
                         {name}
                       </span>
@@ -562,11 +562,11 @@ export default function Workflows() {
         <TabsContent value="templates" className="mt-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Sparkles size={20} className="text-amber-500" />
                 Workflow Templates Gallery
               </h2>
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-sm mt-1">
                 Pre-built workflows you can install with one click
               </p>
             </div>
@@ -599,7 +599,7 @@ export default function Workflows() {
               return (
                 <Card
                   key={template.id}
-                  className="group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-slate-300"
+                  className="group hover:shadow-lg transition-all duration-200 hover:border-slate-300"
                   data-testid={`template-card-${template.id}`}
                 >
                   <CardHeader className="pb-3">
@@ -610,7 +610,7 @@ export default function Workflows() {
                       >
                         <IconComponent size={24} className="text-white" />
                       </div>
-                      <Badge className="bg-slate-100 text-slate-600 text-xs">
+                      <Badge className="text-xs">
                         {template.category}
                       </Badge>
                     </div>
@@ -623,7 +623,7 @@ export default function Workflows() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-sm text-slate-500">
+                      <div className="flex items-center gap-3 text-sm">
                         <span className="flex items-center gap-1">
                           <div className="w-2 h-2 rounded-full bg-blue-500" />
                           {template.nodes?.length || 0} nodes
@@ -666,11 +666,11 @@ export default function Workflows() {
           {filteredTemplates.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <LayoutTemplate size={32} className="text-slate-400" />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                  <LayoutTemplate size={32} className="" />
                 </div>
-                <h3 className="text-lg font-medium text-slate-900 mb-2">No templates in this category</h3>
-                <p className="text-slate-500 text-center max-w-md">
+                <h3 className="text-lg font-medium mb-2">No templates in this category</h3>
+                <p className="text-center max-w-md">
                   Try selecting a different category or view all templates.
                 </p>
               </CardContent>
@@ -680,8 +680,8 @@ export default function Workflows() {
 
         {/* Workflow Triggers Tab */}
         <TabsContent value="triggers" className="mt-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="flex items-center gap-2">
                 <Zap size={20} />
                 Category Workflow Triggers
@@ -692,42 +692,42 @@ export default function Workflows() {
             </CardHeader>
             <CardContent className="p-0">
               {categories.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center">
                   <FolderTree size={48} className="mx-auto text-slate-300 mb-3" />
                   <p>No categories configured</p>
                   <p className="text-sm mt-1">Create categories first to set up workflow triggers</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y">
                   {categories.map(category => (
                     <div 
                       key={category.id} 
-                      className="flex items-center justify-between p-4 hover:bg-slate-50"
+                      className="flex items-center justify-between p-4"
                       data-testid={`trigger-${category.id}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-900">{category.name}</span>
+                          <span className="font-medium">{category.name}</span>
                           {category.parent_name && (
-                            <Badge className="bg-slate-100 text-slate-600 text-xs">
+                            <Badge className="text-xs">
                               {category.parent_name}
                             </Badge>
                           )}
                           {category.triggers_editor_workflow && (
-                            <Badge className="bg-green-100 text-green-700 text-xs">
+                            <Badge className="text-xs">
                               <Zap size={10} className="mr-1" />
                               Active
                             </Badge>
                           )}
                         </div>
                         {category.description && (
-                          <p className="text-sm text-slate-500 mt-1">{category.description}</p>
+                          <p className="text-sm mt-1">{category.description}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-xs text-slate-500">Trigger workflow</p>
-                          <p className="text-xs text-slate-400">on order creation</p>
+                          <p className="text-xs">Trigger workflow</p>
+                          <p className="text-xs">on order creation</p>
                         </div>
                         <Switch
                           checked={category.triggers_editor_workflow}
@@ -745,8 +745,8 @@ export default function Workflows() {
 
         {/* Workflow Executions Tab */}
         <TabsContent value="executions" className="mt-6">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="flex items-center gap-2">
                 <History size={20} />
                 Workflow Execution Logs
@@ -757,31 +757,31 @@ export default function Workflows() {
             </CardHeader>
             <CardContent className="p-0">
               {executions.length === 0 ? (
-                <div className="p-12 text-center text-slate-500">
+                <div className="p-12 text-center">
                   <History size={48} className="mx-auto text-slate-300 mb-3" />
                   <p>No executions yet</p>
                   <p className="text-sm mt-1">Workflow executions will appear here once workflows are triggered</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y">
                   {executions.map(execution => (
                     <div 
                       key={execution.id} 
-                      className="flex items-center justify-between p-4 hover:bg-slate-50"
+                      className="flex items-center justify-between p-4"
                       data-testid={`execution-${execution.id}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-900">{execution.workflow_name}</span>
+                          <span className="font-medium">{execution.workflow_name}</span>
                           <Badge 
                             className={`text-xs ${
                               execution.status === 'completed' 
-                                ? 'bg-green-100 text-green-700' 
+                                ? '' 
                                 : execution.status === 'failed'
                                 ? 'bg-red-100 text-red-700'
                                 : execution.status === 'running'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-slate-100 text-slate-600'
+                                ? ''
+                                : ''
                             }`}
                           >
                             {execution.status === 'completed' && <CheckCircle size={10} className="mr-1" />}
@@ -791,7 +791,7 @@ export default function Workflows() {
                             {execution.status}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+                        <div className="flex items-center gap-4 text-sm mt-1">
                           <span>Started: {format(new Date(execution.started_at), 'MMM d, yyyy HH:mm')}</span>
                           {execution.completed_at && (
                             <span>Completed: {format(new Date(execution.completed_at), 'MMM d, yyyy HH:mm')}</span>
