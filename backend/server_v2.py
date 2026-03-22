@@ -114,18 +114,82 @@ async def sla_monitor_loop():
         await asyncio.sleep(300)  # Check every 5 minutes
 
 
+async def ensure_admin_account():
+    """Ensure the platform admin account exists on startup."""
+    from passlib.context import CryptContext
+    import uuid
+    from datetime import datetime, timezone
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+    admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "Fmtvvl171**")
+
+    existing = await db.users.find_one({"email": admin_email})
+
+    if existing:
+        # Ensure password is current and account is admin
+        hashed = pwd_context.hash(admin_password)
+        await db.users.update_one(
+            {"email": admin_email},
+            {"$set": {
+                "password": hashed,
+                "role": "Administrator",
+                "active": True,
+                "force_password_change": False,
+                "force_otp_setup": False,
+                "otp_verified": True,
+            }}
+        )
+        logger.info(f"Admin account verified: {admin_email}")
+    else:
+        hashed = pwd_context.hash(admin_password)
+        user = {
+            "id": str(uuid.uuid4()),
+            "name": "Red Ops Admin",
+            "email": admin_email,
+            "password": hashed,
+            "role": "Administrator",
+            "account_type": "Internal Staff",
+            "specialty_ids": [],
+            "primary_specialty_id": None,
+            "specialty_id": None,
+            "team_id": None,
+            "subscription_plan_id": None,
+            "dashboard_type_id": None,
+            "permissions": {},
+            "permission_overrides": None,
+            "active": True,
+            "can_pick": True,
+            "pool_access": "both",
+            "force_password_change": False,
+            "force_otp_setup": False,
+            "otp_verified": True,
+            "otp_secret": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.users.insert_one(user)
+        logger.info(f"Admin account created: {admin_email}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler for startup and shutdown events"""
     global sla_monitor_task
-    
+
     # Startup
     logger.info("Starting Red Ribbon Ops Portal API V2...")
-    
+
+    # Ensure admin account exists
+    try:
+        await ensure_admin_account()
+    except Exception as e:
+        logger.error(f"Admin seed error (non-fatal): {e}")
+
     # Start SLA monitor background task
     sla_monitor_task = asyncio.create_task(sla_monitor_loop())
     logger.info("SLA monitor started")
-    
+
     yield
     
     # Shutdown
