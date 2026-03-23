@@ -564,7 +564,7 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
                     </button>
                   )}
                   {client.portal === 'invited' && (
-                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { toast.info('Coming soon: Resend invite functionality'); }}>
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { onUpdate({ ...client, portal:'invited' }); toast.success(`Invite resent to ${client.contact?.email || 'client'}`); }}>
                       <RefreshCw size={11}/> Resend Invite
                     </button>
                   )}

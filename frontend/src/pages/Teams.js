@@ -82,7 +82,7 @@ const [teams, setTeams] = useState([]);
         setSelectedTeam(res.data[0]);
       }
     } catch (error) {
-      toast.error("Generic");
+      toast.error("Failed to load teams");
     } finally {
       setLoading(false);
     }
@@ -124,22 +124,22 @@ const [teams, setTeams] = useState([]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error("Validation");
+      toast.error("Team name is required");
       return;
     }
 
     try {
       if (editingTeam) {
         await axios.patch(`${API}/teams/${editingTeam.id}`, formData);
-        toast.success("Updated");
+        toast.success("Team updated");
       } else {
         await axios.post(`${API}/teams`, formData);
-        toast.success("Created");
+        toast.success("Team created");
       }
       fetchTeams();
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Generic");
+      toast.error(error.response?.data?.detail || "Failed to save team");
     }
   };
 
@@ -154,9 +154,9 @@ const [teams, setTeams] = useState([]);
               setSelectedTeam(null);
             }
             fetchTeams();
-            toast.success("Deleted");
+            toast.success("Team deleted");
           } catch (error) {
-            toast.error("Generic");
+            toast.error("Failed to delete team");
           }
         },
       },

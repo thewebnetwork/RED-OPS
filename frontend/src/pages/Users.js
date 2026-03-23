@@ -146,7 +146,7 @@ const { user: currentUser } = useAuth();
       setPermissionModules(modulesRes.data.modules || {});
       setDefaultPermissions(modulesRes.data.default_permissions || {});
     } catch (error) {
-      toast.error("Generic");
+      toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -332,7 +332,7 @@ const { user: currentUser } = useAuth();
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>{"Title"}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Users</h1>
           <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>{users.length} users</p>
         </div>
         <Button 

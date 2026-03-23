@@ -111,7 +111,7 @@ export default function Logs() {
       };
       
       eventSourceRef.current.onerror = () => {
-        console.log('SSE connection error, falling back to polling');
+        // SSE failed, fall back to polling
         stopStreaming();
         setIsStreaming(false);
         setAutoRefresh(true);

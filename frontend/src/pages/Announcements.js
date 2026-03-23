@@ -144,7 +144,7 @@ const [activeTab, setActiveTab] = useState('list');
     }
     
     if (!form.send_to_all && !form.target_teams.length && !form.target_roles.length && !form.target_specialties.length) {
-      toast.error("Select Target Or All");
+      toast.error("Select at least one target audience or check 'Send to All'");
       return;
     }
     

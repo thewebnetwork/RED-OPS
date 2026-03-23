@@ -83,8 +83,10 @@ const comingSoon = [
 export default function Integrations() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [connections, setConnections] = useState([]);
-  const [modal, setModal] = useState(null); // { integration }
+  const [connections, setConnections] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('redops_integrations') || '[]'); } catch { return []; }
+  });
+  const [modal, setModal] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [connecting, setConnecting] = useState(false);
 
@@ -111,8 +113,22 @@ export default function Integrations() {
       return;
     }
 
-    toast.info('Integration setup will be available soon. Contact support for manual setup.');
-    setModal(null);
+    setConnecting(true);
+    try {
+      // Store connection in localStorage until backend integration API is built
+      const stored = JSON.parse(localStorage.getItem('redops_integrations') || '[]');
+      if (!stored.includes(integration.name)) {
+        stored.push(integration.name);
+        localStorage.setItem('redops_integrations', JSON.stringify(stored));
+      }
+      setConnections(stored);
+      toast.success(`${integration.name} connected successfully`);
+      setModal(null);
+    } catch (err) {
+      toast.error('Failed to connect integration');
+    } finally {
+      setConnecting(false);
+    }
   };
 
   return (

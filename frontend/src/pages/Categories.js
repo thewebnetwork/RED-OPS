@@ -68,12 +68,10 @@ const [categoriesL1, setCategoriesL1] = useState([]);
   
   // Helper function to get translated category name
   const getCategoryName = (category) => {
-    const lang = i18n.language || 'en';
-    // Check if category has language-specific name
+    const lang = navigator.language?.split('-')[0] || 'en';
     if (category[`name_${lang}`]) {
       return category[`name_${lang}`];
     }
-    // Fallback to default name
     return category.name;
   };
   
@@ -152,7 +150,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
         setSelectedL1(res.data[0].id);
       }
     } catch (error) {
-      toast.error("Generic");
+      toast.error("Failed to load categories");
     } finally {
       setLoading(false);
     }
@@ -204,7 +202,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name) {
-      toast.error("Validation");
+      toast.error("Category name is required");
       return;
     }
 
@@ -221,18 +219,18 @@ const [categoriesL1, setCategoriesL1] = useState([]);
         
         if (editingCategory) {
           await axios.patch(`${API}/categories/l1/${editingCategory.id}`, payload);
-          toast.success("Updated");
+          toast.success("Category updated");
         } else {
           await axios.post(`${API}/categories/l1`, payload);
-          toast.success("Created");
+          toast.success("Category created");
         }
         fetchCategories();
       } else {
         if (!formData.category_l1_id) {
-          toast.error("Validation");
+          toast.error("Please select a parent category");
           return;
         }
-        
+
         const payload = {
           name: formData.name,
           name_en: formData.name_en || null,
@@ -242,13 +240,13 @@ const [categoriesL1, setCategoriesL1] = useState([]);
           description: formData.description || null,
           triggers_editor_workflow: formData.triggers_editor_workflow
         };
-        
+
         if (editingCategory) {
           await axios.patch(`${API}/categories/l2/${editingCategory.id}`, payload);
-          toast.success("Updated");
+          toast.success("Subcategory updated");
         } else {
           await axios.post(`${API}/categories/l2`, payload);
-          toast.success("Created");
+          toast.success("Subcategory created");
         }
         fetchCategoriesL2(selectedL1);
       }
@@ -256,7 +254,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
       initialFormRef.current = null;
       setDialogOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Generic");
+      toast.error(error.response?.data?.detail || "Failed to save category");
     }
   };
 
