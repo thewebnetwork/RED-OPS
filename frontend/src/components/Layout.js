@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -20,12 +21,16 @@ import {
   Bell,
   BarChart2,
   ChevronRight,
+  ChevronDown,
   Cloud,
   ShoppingBag,
   Plug,
   User,
   Contact,
   Gift,
+  Building2,
+  ArrowLeftRight,
+  Eye,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -84,6 +89,226 @@ const CMD_ITEMS = [
   { label:'New Project',     icon:'🗂',  to:'/projects?new=1',   group:'Create', shortcut:'P' },
   { label:'New Client',      icon:'👤', to:'/clients?new=1',     group:'Create', shortcut:'C' },
 ];
+
+// ─────────────────────────────────────────────
+// Account Switcher (GHL-style sub-account dropdown)
+// ─────────────────────────────────────────────
+function AccountSwitcher({ user }) {
+  const [open, setOpen] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropRef = useRef(null);
+  const navigate = useNavigate();
+
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Operator';
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const previewName = typeof window !== 'undefined' && localStorage.getItem('preview_client_name');
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Fetch client accounts when dropdown opens
+  useEffect(() => {
+    if (!open || accounts.length > 0) return;
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => {
+        const clients = (r.data || []).filter(u =>
+          u.account_type === 'Media Client' || u.role === 'Media Client'
+        );
+        setAccounts(clients);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open]); // eslint-disable-line
+
+  const handleSwitchToClient = (client) => {
+    localStorage.setItem('preview_as_client', 'true');
+    localStorage.setItem('preview_client_id', client.id);
+    localStorage.setItem('preview_client_name', client.name || client.company_name || client.email);
+    setOpen(false);
+    navigate('/');
+    window.location.reload();
+  };
+
+  const handleBackToAdmin = () => {
+    localStorage.removeItem('preview_as_client');
+    localStorage.removeItem('preview_client_id');
+    localStorage.removeItem('preview_client_name');
+    setOpen(false);
+    navigate('/');
+    window.location.reload();
+  };
+
+  if (!isAdmin) return null;
+
+  const filtered = search.trim()
+    ? accounts.filter(a =>
+        (a.name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (a.company_name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (a.email || '').toLowerCase().includes(search.toLowerCase()))
+    : accounts;
+
+  return (
+    <div ref={dropRef} style={{ padding: '4px 10px 0', position: 'relative' }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+        padding: '7px 9px', background: isPreview ? 'rgba(168,85,247,.12)' : 'var(--bg-elevated)',
+        border: `1px solid ${isPreview ? 'rgba(168,85,247,.3)' : 'var(--border)'}`,
+        borderRadius: 8, cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, transition: 'all .1s',
+      }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: 5,
+          background: isPreview ? '#a855f7' : 'var(--red)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
+        }}>
+          {isPreview ? <Eye size={11} /> : <Building2 size={11} />}
+        </div>
+        <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
+          <div style={{
+            fontSize: 11.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            color: isPreview ? '#a855f7' : 'var(--tx-1)',
+          }}>
+            {isPreview ? (previewName || 'Client View') : 'Agency View'}
+          </div>
+          <div style={{ fontSize: 9.5, color: 'var(--tx-3)', marginTop: 0 }}>
+            {isPreview ? 'Viewing as client' : 'Red Ribbon Group'}
+          </div>
+        </div>
+        <ChevronDown size={12} color="var(--tx-3)" style={{ flexShrink: 0, transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 10, right: 10, marginTop: 4,
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
+          boxShadow: '0 8px 30px rgba(0,0,0,.35)', zIndex: 999, overflow: 'hidden',
+          maxHeight: 400, display: 'flex', flexDirection: 'column',
+        }}>
+          {/* Header */}
+          <div style={{ padding: '10px 12px 6px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+              Switch Account
+            </div>
+            <input
+              placeholder="Search clients..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoFocus
+              style={{
+                width: '100%', padding: '5px 8px', fontSize: 12, background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)', borderRadius: 5, color: 'var(--tx-1)', outline: 'none',
+              }}
+            />
+          </div>
+
+          {/* Agency view option */}
+          <div style={{ borderBottom: '1px solid var(--border)' }}>
+            <button
+              onClick={isPreview ? handleBackToAdmin : () => setOpen(false)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px', background: !isPreview ? 'var(--bg-elevated)' : 'transparent',
+                border: 'none', cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, textAlign: 'left',
+                transition: 'background .08s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+              onMouseLeave={e => { if (isPreview) e.currentTarget.style.background = 'transparent'; }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: 6, background: 'var(--red)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: 11, color: '#fff', flexShrink: 0,
+              }}>
+                <Building2 size={13} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 600 }}>Agency View</div>
+                <div style={{ fontSize: 10, color: 'var(--tx-3)' }}>Red Ribbon Group — Admin</div>
+              </div>
+              {!isPreview && (
+                <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#22c55e22', color: '#22c55e' }}>ACTIVE</span>
+              )}
+            </button>
+          </div>
+
+          {/* Client accounts */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
+            {loading ? (
+              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12, color: 'var(--tx-3)' }}>Loading accounts...</div>
+            ) : filtered.length === 0 ? (
+              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12, color: 'var(--tx-3)' }}>
+                {accounts.length === 0 ? 'No client accounts yet' : 'No clients match your search'}
+              </div>
+            ) : (
+              filtered.map(client => {
+                const isViewing = isPreview && localStorage.getItem('preview_client_id') === client.id;
+                const initials = (client.name || client.email || '??').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+                return (
+                  <button key={client.id}
+                    onClick={() => handleSwitchToClient(client)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 12px', background: isViewing ? 'rgba(168,85,247,.08)' : 'transparent',
+                      border: 'none', cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, textAlign: 'left',
+                      transition: 'background .08s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = isViewing ? 'rgba(168,85,247,.12)' : 'var(--bg-elevated)'}
+                    onMouseLeave={e => e.currentTarget.style.background = isViewing ? 'rgba(168,85,247,.08)' : 'transparent'}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 6,
+                      background: isViewing ? '#a855f7' : 'var(--bg-elevated)',
+                      border: `1px solid ${isViewing ? '#a855f7' : 'var(--border)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 700, fontSize: 10, color: isViewing ? '#fff' : 'var(--tx-2)', flexShrink: 0,
+                    }}>
+                      {initials}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        color: isViewing ? '#a855f7' : 'var(--tx-1)',
+                      }}>
+                        {client.company_name || client.name || client.email}
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--tx-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {client.company_name ? (client.name || client.email) : (client.subscription_plan_name || 'Media Client')}
+                      </div>
+                    </div>
+                    {isViewing && (
+                      <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#a855f722', color: '#a855f7' }}>VIEWING</span>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', display: 'flex', gap: 6 }}>
+            <button onClick={() => { setOpen(false); navigate('/clients?new=1'); }}
+              style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                padding: '6px 8px', background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+                borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600, color: 'var(--tx-2)',
+              }}>
+              <Plus size={11} /> New Client
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────
 // Single nav item
@@ -225,6 +450,9 @@ export default function Layout({ children }) {
           </button>
         </div>
 
+        {/* Account Switcher — GHL-style sub-account dropdown */}
+        <AccountSwitcher user={user} />
+
         {/* Search trigger */}
         <div style={{ padding:'8px 10px 4px' }}>
           <button onClick={openCmd} style={{
@@ -291,6 +519,31 @@ export default function Layout({ children }) {
 
       {/* ══ MAIN ══ */}
       <div className="app-main">
+
+        {/* Preview banner */}
+        {typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true' && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            padding: '5px 16px', background: 'rgba(168,85,247,.12)', borderBottom: '1px solid rgba(168,85,247,.2)',
+            fontSize: 11, fontWeight: 600, color: '#a855f7', flexShrink: 0,
+          }}>
+            <Eye size={12} />
+            <span>Viewing as {localStorage.getItem('preview_client_name') || 'client'}</span>
+            <button onClick={() => {
+              localStorage.removeItem('preview_as_client');
+              localStorage.removeItem('preview_client_id');
+              localStorage.removeItem('preview_client_name');
+              navigate('/');
+              window.location.reload();
+            }} style={{
+              background: 'rgba(168,85,247,.18)', border: '1px solid rgba(168,85,247,.3)',
+              borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
+              fontSize: 10, fontWeight: 600, color: '#a855f7', marginLeft: 4,
+            }}>
+              Exit Preview
+            </button>
+          </div>
+        )}
 
         {/* Top bar */}
         <div className="top-bar">
