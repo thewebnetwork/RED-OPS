@@ -14,93 +14,132 @@ import {
   Briefcase,
 } from 'lucide-react';
 import axios from 'axios';
-;
 
 const Team = () => {
   const navigate = useNavigate();
   const [selectedMember, setSelectedMember] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock team members
-  const teamMembers = [
-    {
-      id: 1,
-      name: 'Vitto Pessanha',
-      role: 'Founder/CEO',
-      specialty: ['Strategy', 'Meta Ads', 'Sales'],
-      avatar: 'VP',
-      color: 'red',
-      tasksThisWeek: 3,
-      maxTasks: 8,
-      tasksCompletedMonth: 18,
-      avgDeliveryTime: '1.2 days',
-      satisfactionScore: 4.9,
-    },
-    {
-      id: 2,
-      name: 'Taryn Pessanha',
-      role: 'Creative Director',
-      specialty: ['Video Editing', 'Design', 'Creative Strategy'],
-      avatar: 'TP',
-      color: 'purple',
-      tasksThisWeek: 8,
-      maxTasks: 12,
-      tasksCompletedMonth: 32,
-      avgDeliveryTime: '1.8 days',
-      satisfactionScore: 4.8,
-    },
-    {
-      id: 3,
-      name: 'Lucca Rossini',
-      role: 'Media Buyer',
-      specialty: ['Meta Ads', 'Google Ads', 'Analytics'],
-      avatar: 'LR',
-      color: 'blue',
-      tasksThisWeek: 11,
-      maxTasks: 14,
-      tasksCompletedMonth: 28,
-      avgDeliveryTime: '1.5 days',
-      satisfactionScore: 4.7,
-    },
-    {
-      id: 4,
-      name: 'Sarah Chen',
-      role: 'Copywriter',
-      specialty: ['Copywriting', 'Email Marketing', 'Strategy'],
-      avatar: 'SC',
-      color: 'green',
-      tasksThisWeek: 7,
-      maxTasks: 10,
-      tasksCompletedMonth: 24,
-      avgDeliveryTime: '1.3 days',
-      satisfactionScore: 4.9,
-    },
-    {
-      id: 5,
-      name: 'Marcus Obi',
-      role: 'Video Editor',
-      specialty: ['Video Editing', 'Motion Graphics', 'Reels'],
-      avatar: 'MO',
-      color: 'yellow',
-      tasksThisWeek: 9,
-      maxTasks: 12,
-      tasksCompletedMonth: 31,
-      avgDeliveryTime: '2.1 days',
-      satisfactionScore: 4.8,
-    },
-    {
-      id: 6,
-      name: 'Jordan Kim',
-      role: 'Account Manager',
-      specialty: ['Client Success', 'Project Management', 'Reporting'],
-      avatar: 'JK',
-      color: 'red',
-      tasksThisWeek: 6,
-      maxTasks: 11,
-      tasksCompletedMonth: 20,
-      avgDeliveryTime: '1.1 days',
-      satisfactionScore: 5.0,
-    },
-  ];
+  // Initialize API
+  const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+  // Generate initials from name
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map((n) => n[0].toUpperCase())
+      .join('');
+  };
+
+  // Get avatar color based on user ID
+  const getColorForUserId = (userId) => {
+    const colors = ['red', 'blue', 'green', 'purple', 'yellow'];
+    return colors[userId % colors.length];
+  };
+
+  // Fetch team members from API
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Authentication required. Please log in.');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch users
+        const usersResponse = await axios.get(`${API}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        let users = usersResponse.data.data || usersResponse.data || [];
+        if (!Array.isArray(users)) {
+          users = [];
+        }
+
+        // Fetch tasks to calculate stats
+        let taskStats = {};
+        try {
+          const tasksResponse = await axios.get(`${API}/tasks`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const tasks = tasksResponse.data.data || tasksResponse.data || [];
+
+          // Calculate tasks this week and completed this month per user
+          const now = new Date();
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+
+          taskStats = users.reduce((acc, user) => {
+            acc[user.id] = {
+              tasksThisWeek: 0,
+              tasksCompletedMonth: 0,
+              avgDeliveryTime: '—',
+              satisfactionScore: '—',
+            };
+            return acc;
+          }, {});
+
+          // Count tasks
+          tasks.forEach((task) => {
+            const assigneeId = task.assignee_id || task.assignedTo?.id;
+            if (assigneeId && taskStats[assigneeId]) {
+              // Tasks this week
+              const createdDate = new Date(task.created_at || task.createdAt);
+              if (createdDate >= weekAgo) {
+                taskStats[assigneeId].tasksThisWeek += 1;
+              }
+
+              // Completed this month
+              if (task.status === 'completed' || task.status === 'done') {
+                const completedDate = new Date(task.completed_at || task.completedAt || task.updated_at || task.updatedAt);
+                if (completedDate >= monthAgo) {
+                  taskStats[assigneeId].tasksCompletedMonth += 1;
+                }
+              }
+            }
+          });
+        } catch (taskError) {
+          console.warn('Could not fetch task stats:', taskError);
+        }
+
+        // Transform users to match component format
+        const transformedMembers = users.map((user) => ({
+          id: user.id,
+          name: user.name || user.username || 'Unknown User',
+          role: user.role || user.title || 'Team Member',
+          specialty: user.specialty ? (Array.isArray(user.specialty) ? user.specialty : [user.specialty]) : [],
+          avatar: getInitials(user.name || user.username || 'User'),
+          color: getColorForUserId(user.id),
+          tasksThisWeek: taskStats[user.id]?.tasksThisWeek || 0,
+          maxTasks: user.maxTasks || 15,
+          tasksCompletedMonth: taskStats[user.id]?.tasksCompletedMonth || 0,
+          avgDeliveryTime: taskStats[user.id]?.avgDeliveryTime || '—',
+          satisfactionScore: taskStats[user.id]?.satisfactionScore || '—',
+        }));
+
+        setTeamMembers(transformedMembers);
+      } catch (err) {
+        console.error('Error fetching team members:', err);
+        setError(err.response?.data?.message || 'Failed to load team members');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [API]);
 
   // Calculate workload percentage
   const getWorkloadPercentage = (current, max) => {
@@ -125,6 +164,62 @@ const Team = () => {
     };
     return colorMap[color] || 'var(--purple)';
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="page-content">
+        <div className="team-header">
+          <div>
+            <h1>Team Hub</h1>
+            <p className="text-secondary">Manage and monitor team capacity</p>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--tx-2)' }}>
+          <p>Loading team members...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="page-content">
+        <div className="team-header">
+          <div>
+            <h1>Team Hub</h1>
+            <p className="text-secondary">Manage and monitor team capacity</p>
+          </div>
+        </div>
+        <div style={{ padding: '20px', backgroundColor: 'var(--error-bg)', borderRadius: '6px', color: 'var(--error)' }}>
+          <p>Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (teamMembers.length === 0) {
+    return (
+      <div className="page-content">
+        <div className="team-header">
+          <div>
+            <h1>Team Hub</h1>
+            <p className="text-secondary">Manage and monitor team capacity</p>
+          </div>
+          <button className="btn-primary btn-sm">
+            <Plus size={16} style={{ marginRight: '6px' }} />
+            Add Member
+          </button>
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--tx-2)' }}>
+          <Users size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+          <p>No team members found. Start by adding a member.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-content">

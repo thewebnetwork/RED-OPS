@@ -182,16 +182,7 @@ const Services = () => {
       setRequestNotes('');
       setRequestDescription('');
     } catch (err) {
-      // Fallback: show success anyway since backend may not have this endpoint yet
-      if (err.response?.status === 404 || err.response?.status === 422) {
-        toast.success(`Request submitted for "${selectedService.name}". We'll follow up within 24 hours.`);
-        setIsModalOpen(false);
-        setSelectedService(null);
-        setRequestNotes('');
-        setRequestDescription('');
-      } else {
-        toast.error(err.response?.data?.detail || 'Failed to submit request. Please try again.');
-      }
+      toast.error(err.response?.data?.detail || 'Failed to submit request. Please try again.');
     } finally {
       setSubmitting(false);
     }

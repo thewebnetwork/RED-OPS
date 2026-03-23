@@ -83,9 +83,7 @@ const comingSoon = [
 export default function Integrations() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [connections, setConnections] = useState(
-    allIntegrations.filter(i => i.connected).map(i => i.name)
-  );
+  const [connections, setConnections] = useState([]);
   const [modal, setModal] = useState(null); // { integration }
   const [apiKey, setApiKey] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -104,19 +102,6 @@ export default function Integrations() {
     setModal({ integration });
   };
 
-  const handleDisconnect = name => {
-    toast(`Disconnect ${name}?`, {
-      action: {
-        label: 'Disconnect',
-        onClick: () => {
-          setConnections(prev => prev.filter(n => n !== name));
-          toast.success(`${name} disconnected`);
-        },
-      },
-      cancel: { label: 'Cancel' },
-    });
-  };
-
   const handleConnect = async () => {
     if (!modal) return;
     const { integration } = modal;
@@ -126,13 +111,8 @@ export default function Integrations() {
       return;
     }
 
-    setConnecting(true);
-    // Simulate OAuth / key validation delay
-    await new Promise(r => setTimeout(r, 1200));
-    setConnections(prev => [...prev, integration.name]);
-    setConnecting(false);
+    toast.info('Integration setup will be available soon. Contact support for manual setup.');
     setModal(null);
-    toast.success(`${integration.name} connected successfully!`);
   };
 
   return (
@@ -150,7 +130,7 @@ export default function Integrations() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, alignItems: 'center' }}>
         <input className="input-field" placeholder="Search integrations..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, maxWidth: 320, height: 34, fontSize: 13 }} />
         <div style={{ display: 'flex', gap: 6 }}>
-          {['All', 'Connected', 'Available'].map(f => (
+          {['All', 'Available'].map(f => (
             <button key={f} onClick={() => setStatusFilter(f)}
               style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid', borderColor: statusFilter === f ? 'var(--red)' : 'var(--border)', background: statusFilter === f ? 'var(--red)' : 'transparent', color: statusFilter === f ? '#fff' : 'var(--tx-2)', transition: 'all .12s' }}>
               {f}
@@ -171,24 +151,18 @@ export default function Integrations() {
                   {integration.icon}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>{integration.name}</span>
-                    {connected && <CheckCircle size={14} color="#22c55e" />}
-                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>{integration.name}</span>
                   <span style={{ fontSize: 11, color: 'var(--tx-3)', background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 3 }}>{integration.category}</span>
                 </div>
               </div>
 
               <p style={{ fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.55, flex: 1, margin: '0 0 14px' }}>{integration.description}</p>
 
-              {connected && integration.lastSync && (
-                <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: '0 0 10px' }}>Last sync: {integration.lastSync}</p>
-              )}
 
               <button
-                onClick={() => connected ? handleDisconnect(integration.name) : openConnect(integration)}
-                style={{ padding: '8px 0', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1px solid', width: '100%', borderColor: connected ? 'var(--border)' : integration.color, background: connected ? 'transparent' : integration.color + '18', color: connected ? 'var(--tx-3)' : integration.color, transition: 'all .12s' }}>
-                {connected ? 'Disconnect' : 'Connect'}
+                onClick={() => openConnect(integration)}
+                style={{ padding: '8px 0', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1px solid', width: '100%', borderColor: integration.color, background: integration.color + '18', color: integration.color, transition: 'all .12s' }}>
+                Connect
               </button>
             </div>
           );
@@ -257,9 +231,8 @@ export default function Integrations() {
               <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setModal(null)}>Cancel</button>
               <button
                 onClick={handleConnect}
-                disabled={connecting}
-                style={{ flex: 2, padding: '10px 0', borderRadius: 7, fontSize: 13, fontWeight: 700, cursor: connecting ? 'not-allowed' : 'pointer', border: 'none', background: connecting ? 'var(--bg-elevated)' : modal.integration.color, color: connecting ? 'var(--tx-3)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all .12s' }}>
-                {connecting ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Connecting…</> : (modal.integration.authType === 'oauth' ? modal.integration.oauthLabel : 'Save & Connect')}
+                style={{ flex: 2, padding: '10px 0', borderRadius: 7, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', background: modal.integration.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all .12s' }}>
+                {modal.integration.authType === 'oauth' ? modal.integration.oauthLabel : 'Save & Connect'}
               </button>
             </div>
           </div>

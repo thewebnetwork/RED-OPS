@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Bell,
   X,
@@ -13,98 +13,98 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-const mockNotifications = [
-  {
-    id: 1,
-    type: 'request',
-    title: 'New request from Riverside Realty',
-    description: 'They submitted a design project request',
-    timestamp: '5 mins ago',
-    isRead: false,
-    icon: FileText,
-    color: 'var(--blue)',
-  },
-  {
-    id: 2,
-    type: 'task',
-    title: 'Task assigned: April Creative Brief',
-    description: 'You have been assigned a new task',
-    timestamp: '12 mins ago',
-    isRead: false,
-    icon: CheckSquare,
-    color: 'var(--purple)',
-  },
-  {
-    id: 3,
-    type: 'comment',
-    title: 'Jordan Kim left a comment on RRG-000003',
-    description: 'Added feedback to your Social Media Pack request',
-    timestamp: '1 hour ago',
-    isRead: false,
-    icon: MessageSquare,
-    color: 'var(--green)',
-  },
-  {
-    id: 4,
-    type: 'update',
-    title: 'Dani K. Rebrand Package is 90% complete',
-    description: 'Your project is almost finished',
-    timestamp: '2 hours ago',
-    isRead: true,
-    icon: CheckCircle2,
-    color: 'var(--green)',
-  },
-  {
-    id: 5,
-    type: 'invoice',
-    title: 'Invoice #1042 is due in 3 days',
-    description: 'Payment reminder for your monthly invoice',
-    timestamp: '3 hours ago',
-    isRead: true,
-    icon: DollarSign,
-    color: 'var(--yellow)',
-  },
-  {
-    id: 6,
-    type: 'delivered',
-    title: 'Thompson RE campaign delivered',
-    description: 'Your campaign has been completed and delivered',
-    timestamp: 'Yesterday',
-    isRead: true,
-    icon: CheckCircle2,
-    color: 'var(--green)',
-  },
-  {
-    id: 7,
-    type: 'alert',
-    title: 'System maintenance scheduled',
-    description: 'Platform maintenance on Sunday, 2am - 4am EST',
-    timestamp: '2 days ago',
-    isRead: true,
-    icon: AlertCircle,
-    color: 'var(--red)',
-  },
-  {
-    id: 8,
-    type: 'message',
-    title: 'New message from support team',
-    description: 'Response to your help ticket #3847',
-    timestamp: '3 days ago',
-    isRead: true,
-    icon: MessageSquare,
-    color: 'var(--blue)',
-  },
-];
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const iconMap = {
+  request: FileText,
+  task: CheckSquare,
+  comment: MessageSquare,
+  update: CheckCircle2,
+  invoice: DollarSign,
+  delivered: CheckCircle2,
+  alert: AlertCircle,
+  message: MessageSquare,
+};
+
+const colorMap = {
+  request: 'var(--blue)',
+  task: 'var(--purple)',
+  comment: 'var(--green)',
+  update: 'var(--green)',
+  invoice: 'var(--yellow)',
+  delivered: 'var(--green)',
+  alert: 'var(--red)',
+  message: 'var(--blue)',
+};
 
 function Notifications() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/notifications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setNotifications([]);
+        } else {
+          throw new Error('Failed to fetch notifications');
+        }
+      } else {
+        const data = await response.json();
+        const normalized = (Array.isArray(data) ? data : []).map((n) => ({
+          ...n,
+          icon: iconMap[n.type] || MessageSquare,
+          color: colorMap[n.type] || 'var(--blue)',
+        }));
+        setNotifications(normalized);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${API}/notifications/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_read: true }),
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+    }
+  };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const filteredNotifications = notifications.filter((n) => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'unread') return !n.isRead;
+    if (activeTab === 'unread') return !n.is_read;
     if (activeTab === 'mentions')
       return ['comment', 'message'].includes(n.type);
     if (activeTab === 'system')
@@ -112,12 +112,28 @@ function Notifications() {
     return true;
   });
 
-  const handleDismiss = (id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-  };
+  const handleMarkAllRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const unreadIds = notifications
+        .filter((n) => !n.is_read)
+        .map((n) => n.id);
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      for (const id of unreadIds) {
+        await fetch(`${API}/notifications/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ is_read: true }),
+        });
+      }
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    }
   };
 
   const groupByDate = (notifs) => {
@@ -136,6 +152,14 @@ function Notifications() {
 
     return { today, yesterday, thisWeek, older };
   };
+
+  if (loading) {
+    return (
+      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
+        <div className="spinner-ring" />
+      </div>
+    );
+  }
 
   return (
     <div className="page-content">
@@ -193,7 +217,7 @@ function Notifications() {
                 key={notification.id}
                 style={{
                   ...styles.notificationItem,
-                  ...(notification.isRead
+                  ...(notification.is_read
                     ? styles.notificationRead
                     : styles.notificationUnread),
                 }}
@@ -215,14 +239,14 @@ function Notifications() {
                       <p
                         style={{
                           ...styles.notificationTitle,
-                          fontWeight: notification.isRead ? '500' : '600',
+                          fontWeight: notification.is_read ? '500' : '600',
                         }}
                       >
                         {notification.title}
                       </p>
-                      {!notification.isRead && (
+                      {!notification.is_read && (
                         <button
-                          onClick={() => handleDismiss(notification.id)}
+                          onClick={() => handleMarkAsRead(notification.id)}
                           style={styles.dismissBtn}
                           title="Dismiss"
                         >

@@ -46,7 +46,8 @@ const PRI_COLORS = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#6
 const getToken = () => localStorage.getItem('token');
 const getHeaders = () => ({ Authorization: `Bearer ${getToken()}` });
 
-const TEAM_MEMBERS = ['Jordan Kim','Vitto Pessanha','Taryn Pessanha','Lucca Rossini','Sarah Chen','Marcus Obi'];
+// ── Static Config ────────────────────────────────────────────────────────────
+// INDUSTRIES: Dropdown options list (static config, not mock data)
 const INDUSTRIES   = ['Real Estate','Coaching','Finance','E-Commerce','Health & Wellness','Marketing Agency','Law Firm','Consulting','Retail','Technology'];
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -106,7 +107,7 @@ const WIZARD_STEPS = [
   { id:5, label:'Launch',    icon: Zap,         title:'Review & Launch',     sub:'Create account & send invite' },
 ];
 
-function AddClientWizard({ onClose, onCreated }) {
+function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
   const [step, setStep] = useState(1);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -311,7 +312,7 @@ function AddClientWizard({ onClose, onCreated }) {
                 <label style={labelStyle}>Account Manager</label>
                 <select className="input-field" value={form.am} onChange={e => f('am', e.target.value)}>
                   <option value="">Select account manager...</option>
-                  {TEAM_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                  {teamMembers.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
               <div>
@@ -403,7 +404,7 @@ const TABS = [
   { id:'billing',   label:'Billing',   icon: DollarSign },
 ];
 
-function ClientDetailPanel({ client, onClose, onUpdate }) {
+function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
   const navigate = useNavigate();
   const [tab, setTab] = useState('overview');
   const [editing, setEditing] = useState(false);
@@ -563,12 +564,18 @@ function ClientDetailPanel({ client, onClose, onUpdate }) {
                     </button>
                   )}
                   {client.portal === 'invited' && (
-                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => toast.success(`Invite resent to ${client.contact?.email}`)}>
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { toast.info('Coming soon: Resend invite functionality'); }}>
                       <RefreshCw size={11}/> Resend Invite
                     </button>
                   )}
                   {client.portal === 'active' && (
-                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { navigator.clipboard?.writeText('https://redops.redribbongroup.ca/login'); toast.success('Portal link copied!'); }}>
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => {
+                      const domain = new URL(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000').hostname;
+                      const protocol = new URL(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000').protocol;
+                      const portalUrl = `${protocol}//${domain}/login`;
+                      navigator.clipboard?.writeText(portalUrl);
+                      toast.success('Portal link copied!');
+                    }}>
                       <Copy size={11}/> Copy Login Link
                     </button>
                   )}
@@ -678,7 +685,7 @@ function ClientDetailPanel({ client, onClose, onUpdate }) {
                 <label style={labelStyle}>Account Manager</label>
                 <select className="input-field" value={editForm.am} onChange={e => setEditForm(p=>({...p,am:e.target.value}))}>
                   <option value="">Unassigned</option>
-                  {TEAM_MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                  {teamMembers.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
             </div>
@@ -889,15 +896,23 @@ export default function Clients() {
   const [selected, setSelected] = useState(null);
   const [showWizard, setShowWizard] = useState(searchParams.get('new') === '1');
   const [portalFilter, setPortalFilter] = useState('');
+  const [teamMembers, setTeamMembers] = useState([]);
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Fetch all users, then filter for Media Client account types
+        // Fetch all users
         const r = await ax().get(`${API}/users`);
         const d = r.data;
         const arr = Array.isArray(d) ? d : d?.items || [];
-        // Map API user objects to the shape the page expects
+
+        // Extract team members (staff)
+        const staff = arr
+          .filter(u => u.account_type === 'Staff')
+          .map(u => u.name || u.email);
+        setTeamMembers(staff);
+
+        // Map API user objects to the shape the page expects (Media Clients)
         const mapped = arr
           .filter(u => u.account_type === 'Media Client')
           .map(u => ({
@@ -957,7 +972,7 @@ export default function Clients() {
 
   return (
     <div className="page-fill" style={{ flexDirection:'row' }}>
-      {showWizard && <AddClientWizard onClose={() => setShowWizard(false)} onCreated={handleCreated} />}
+      {showWizard && <AddClientWizard onClose={() => setShowWizard(false)} onCreated={handleCreated} teamMembers={teamMembers} />}
 
       {/* ── Main list ── */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0, overflow:'hidden' }}>
@@ -1077,6 +1092,7 @@ export default function Clients() {
           client={sel}
           onClose={() => setSelected(null)}
           onUpdate={handleUpdateClient}
+          teamMembers={teamMembers}
         />
       )}
     </div>

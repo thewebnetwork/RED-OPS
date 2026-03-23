@@ -36,8 +36,9 @@ const STAGE_COLORS = {
   'Closed':        '#606060',
 };
 
+// ── Static Config ────────────────────────────────────────────────────────────
+// SERVICES: Dropdown options list (static config, not mock data)
 const SERVICES = ['Video Editing','Graphic Design','Copywriting','Social Media Pack','Meta Ads Setup','Email Sequence','Blog Post','Landing Page','Branding Package'];
-const CLIENTS  = ['Thompson Realty','Dani K. Coaching','Riverside Realty','Metro Financial','Verde Cafe','Coastal Living Mag','Bright Futures','Serenity Spa','Summit Events','TechStart Ventures','Urban Bistro','Fitness Plus','Green Energy Co.','Apex Marketing','Burnham Capital'];
 
 const PRIORITY_COLOR = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#606060' };
 const PRIORITY_ICON  = { Urgent: AlertCircle, High: ArrowUp, Normal: Minus, Low: ArrowDown };
@@ -142,6 +143,7 @@ function DroppableColumn({ stage, children, isEmpty }) {
 // ── Main component ───────────────────────────────────────────────────────────
 export default function Requests() {
   const [requests,    setRequests]    = useState([]);
+  const [clients,     setClients]     = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [view,        setView]        = useState('kanban');
   const [search,      setSearch]      = useState('');
@@ -149,16 +151,32 @@ export default function Requests() {
   const [showModal,   setShowModal]   = useState(false);
   const [selectedReq, setSelectedReq] = useState(null);
   const [activeId,    setActiveId]    = useState(null);
+  const [comment,     setComment]     = useState('');
   const [form, setForm] = useState({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
 
   useEffect(() => {
-    fetchRequests();
+    fetchData();
     if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true);
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
+
+      // Fetch clients (Media Client users)
+      const usersRes = await fetch(`${API}/users`, {
+        headers: getHeaders(),
+      });
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        const arr = Array.isArray(usersData) ? usersData : usersData?.items || [];
+        const clientNames = arr
+          .filter(u => u.account_type === 'Media Client')
+          .map(u => u.name || u.email);
+        setClients(clientNames);
+      }
+
+      // Fetch requests/tasks
       const res = await fetch(`${API}/tasks`, {
         headers: getHeaders(),
       });
@@ -183,7 +201,7 @@ export default function Requests() {
 
       setRequests(transformed);
     } catch (err) {
-      console.error('Failed to fetch tasks:', err);
+      console.error('Failed to fetch data:', err);
       setRequests([]);
     } finally {
       setLoading(false);
@@ -380,7 +398,7 @@ export default function Requests() {
                 <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Client</label>
                 <select className="input-field" value={form.client} onChange={e => setForm(p => ({ ...p, client:e.target.value }))}>
                   <option value="">Select client...</option>
-                  {CLIENTS.map(c => <option key={c} value={c}>{c}</option>)}
+                  {clients.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
@@ -502,8 +520,17 @@ export default function Requests() {
               </div>
               {/* Add comment */}
               <div style={{ marginTop:12, display:'flex', gap:8 }}>
-                <input className="input-field" placeholder="Add a comment..." style={{ flex:1, fontSize:12 }} />
-                <button className="btn-ghost btn-sm"><MessageSquare size={13} /></button>
+                <input
+                  className="input-field"
+                  placeholder="Add a comment..."
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && comment.trim()) { setComment(''); } }}
+                  style={{ flex:1, fontSize:12 }}
+                />
+                <button className="btn-ghost btn-sm" onClick={() => { if (comment.trim()) setComment(''); }} disabled={!comment.trim()}>
+                  <MessageSquare size={13} />
+                </button>
               </div>
             </div>
           </div>
