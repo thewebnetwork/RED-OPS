@@ -192,14 +192,14 @@ const { login } = useAuth();
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">RED-OPS</h1>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            {'Sign in to your account'}
+            Sign in to your account
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {'Email'}
+              Email
             </Label>
             <Input
               id="email"
@@ -216,7 +216,7 @@ const { login } = useAuth();
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {'Password'}
+              Password
             </Label>
             <div className="relative">
               <Input

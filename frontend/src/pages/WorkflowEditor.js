@@ -483,7 +483,7 @@ const reactFlowWrapper = useRef(null);
           {hasChanges && (
             <Badge className="text-amber-700 ml-2">
               <AlertTriangle size={12} className="mr-1" />
-              {"Unsaved"}
+              Unsaved
             </Badge>
           )}
         </div>
@@ -494,7 +494,7 @@ const reactFlowWrapper = useRef(null);
             data-testid="workflow-settings-btn"
           >
             <Settings size={16} className="mr-2" />
-            {"Settings"}
+            Settings
           </Button>
           <Button
             variant={hasChanges ? "default" : "outline"}
@@ -514,8 +514,8 @@ const reactFlowWrapper = useRef(null);
         {/* Node Palette */}
         <div className="w-64 border-r flex flex-col">
           <div className="p-4 border-b">
-            <h2 className="font-semibold">{"Node Palette"}</h2>
-            <p className="text-xs mt-1">{"Drag Nodes To Canvas"}</p>
+            <h2 className="font-semibold">Node Palette</h2>
+            <p className="text-xs mt-1">Drag nodes to the canvas to build your workflow</p>
           </div>
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-2">
@@ -583,7 +583,7 @@ const reactFlowWrapper = useRef(null);
                 }}
               >
                 <Trash2 size={14} className="mr-1" />
-                {"Clear"}
+                Clear
               </Button>
             </Panel>
           </ReactFlow>
@@ -598,7 +598,7 @@ const reactFlowWrapper = useRef(null);
                 {t('workflow.configureNode', { type: selectedNode?.type })}
               </SheetTitle>
               <SheetDescription>
-                {"Customize Node Behavior"}
+                Customize the behavior and settings for this node
               </SheetDescription>
             </SheetHeader>
 
@@ -607,11 +607,11 @@ const reactFlowWrapper = useRef(null);
                 {/* Common Settings */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>{"Node Label"}</Label>
+                    <Label>Node Label</Label>
                     <Input
                       value={selectedNode.data?.label || ''}
                       onChange={(e) => updateNodeData('label', e.target.value)}
-                      placeholder={"Enter Node Label"}
+                      placeholder="Enter a descriptive label for this node"
                       data-testid="node-label-input"
                     />
                   </div>
@@ -661,7 +661,7 @@ const reactFlowWrapper = useRef(null);
                   data-testid="delete-node-btn"
                 >
                   <Trash2 size={16} className="mr-2" />
-                  {"Delete Node"}
+                  Delete Node
                 </Button>
               </div>
             )}
@@ -674,18 +674,18 @@ const reactFlowWrapper = useRef(null);
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Settings size={18} />
-                {"Workflow Settings"}
+                Workflow Settings
               </SheetTitle>
               <SheetDescription>
-                {"Configure Assignment Triggers"}
+                Configure roles, teams, and triggers for this workflow
               </SheetDescription>
             </SheetHeader>
 
             <div className="mt-6 space-y-6">
               {/* Assign to Roles */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{"Assign To Roles"}</Label>
-                <p className="text-xs">{"Select Roles Description"}</p>
+                <Label className="text-sm font-medium">Assign to Roles</Label>
+                <p className="text-xs">Select which roles can access and execute this workflow</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {roles.filter(r => r.can_pick_orders).map((role) => (
                     <div key={role.id} className="flex items-center gap-2">
@@ -719,8 +719,8 @@ const reactFlowWrapper = useRef(null);
 
               {/* Assign to Teams */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{"Assign To Teams"}</Label>
-                <p className="text-xs">{"Select Teams Description"}</p>
+                <Label className="text-sm font-medium">Assign to Teams</Label>
+                <p className="text-xs">Select which teams can access and execute this workflow</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {teams.map((team) => (
                     <div key={team.id} className="flex items-center gap-2">
@@ -741,7 +741,7 @@ const reactFlowWrapper = useRef(null);
                     </div>
                   ))}
                   {teams.length === 0 && (
-                    <p className="text-xs text-center py-2">{"No Teams Available"}</p>
+                    <p className="text-xs text-center py-2">No teams available</p>
                   )}
                 </div>
                 {workflow?.assigned_team_names?.length > 0 && (
@@ -757,8 +757,8 @@ const reactFlowWrapper = useRef(null);
 
               {/* Target by Specialty */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{"Target By Specialty"}</Label>
-                <p className="text-xs">{"Target Specialty Description"}</p>
+                <Label className="text-sm font-medium">Target by Specialty</Label>
+                <p className="text-xs">Select specialties to target with this workflow</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {specialties.map((specialty) => (
                     <div key={specialty.id} className="flex items-center gap-2">
@@ -779,7 +779,7 @@ const reactFlowWrapper = useRef(null);
                     </div>
                   ))}
                   {specialties.length === 0 && (
-                    <p className="text-xs text-center py-2">{"No Specialties Available"}</p>
+                    <p className="text-xs text-center py-2">No specialties available</p>
                   )}
                 </div>
                 {workflow?.assigned_specialty_names?.length > 0 && (
@@ -795,8 +795,8 @@ const reactFlowWrapper = useRef(null);
 
               {/* Target by Access Tier */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{"Target By Access Tier"}</Label>
-                <p className="text-xs">{"Target Access Tier Description"}</p>
+                <Label className="text-sm font-medium">Target by Access Tier</Label>
+                <p className="text-xs">Select access tiers that should trigger this workflow</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {accessTiers.map((tier) => (
                     <div key={tier.id} className="flex items-center gap-2">
@@ -817,7 +817,7 @@ const reactFlowWrapper = useRef(null);
                     </div>
                   ))}
                   {accessTiers.length === 0 && (
-                    <p className="text-xs text-center py-2">{"No Access Tiers Available"}</p>
+                    <p className="text-xs text-center py-2">No access tiers available</p>
                   )}
                 </div>
                 {workflow?.assigned_access_tier_names?.length > 0 && (
@@ -833,8 +833,8 @@ const reactFlowWrapper = useRef(null);
 
               {/* Trigger by Category */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">{"Trigger By Category"}</Label>
-                <p className="text-xs">{"Trigger Category Description"}</p>
+                <Label className="text-sm font-medium">Trigger by Category</Label>
+                <p className="text-xs">Select categories that should trigger this workflow</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {categories.map((cat) => (
                     <div key={cat.id} className="flex items-center gap-2">
@@ -856,7 +856,7 @@ const reactFlowWrapper = useRef(null);
                     </div>
                   ))}
                   {categories.length === 0 && (
-                    <p className="text-xs text-center py-2">{"No Categories Available"}</p>
+                    <p className="text-xs text-center py-2">No categories available</p>
                   )}
                 </div>
                 {workflow?.trigger_category_names?.length > 0 && (
@@ -878,21 +878,21 @@ const reactFlowWrapper = useRef(null);
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {"Unsaved Changes"}
+              Unsaved Changes
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {"Unsaved Changes Description"}
+              You have made changes to this workflow. Do you want to save before leaving?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
-              {"Cancel"}
+              Cancel
             </AlertDialogCancel>
             <Button variant="outline" onClick={handleDiscardChanges}>
-              {"Discard Changes"}
+              Discard Changes
             </Button>
             <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-rose-600 hover:bg-rose-700">
-              {"Save And Leave"}
+              Save and Leave
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -42,141 +42,9 @@ const STAGE_COLORS = {
 
 const PRI_COLORS = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#606060' };
 
-// ── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_CLIENTS = [
-  { _id:'c1', name:'Thompson Real Estate',   plan:'Growth', mrr:2500, score:82, renewal:'2026-05-15', requests_open:2,  deliveries:18, last_delivery:'Today',       am:'Jordan K.',  tags:['VIP'],     notes:'Strong Q1, needs Q2 strategy call.', portal:'active',  contact:{ name:'Mike Thompson',  email:'mike@thompsonre.ca',   phone:'403-555-0101' }, industry:'Real Estate', website:'thompsonre.ca',   last_login:'2 hours ago',   login_count:47 },
-  { _id:'c2', name:'Riverside Realty Group', plan:'Starter',mrr:1200, score:91, renewal:'2026-06-01', requests_open:1,  deliveries:9,  last_delivery:'Yesterday',   am:'Jordan K.',  tags:['New'],     notes:'Just onboarded. First campaign live.', portal:'active', contact:{ name:'Sarah Riverside', email:'sarah@riverside.ca',   phone:'403-555-0202' }, industry:'Real Estate', website:'riverside.ca',    last_login:'Yesterday',     login_count:12 },
-  { _id:'c3', name:'Apex Home Group',        plan:'Pro',    mrr:3800, score:55, renewal:'2026-04-30', requests_open:4,  deliveries:31, last_delivery:'5 days ago',  am:'Vitto P.',   tags:['Watch'],   notes:'4 open requests aging. Follow up.', portal:'invited',  contact:{ name:'David Apex',     email:'david@apexhomes.ca',   phone:'403-555-0303' }, industry:'Real Estate', website:'apexhomes.ca',    last_login:'Never',         login_count:0  },
-  { _id:'c4', name:'Dani K. Coaching',       plan:'Growth', mrr:2500, score:38, renewal:'2026-05-10', requests_open:0,  deliveries:22, last_delivery:'12 days ago', am:'Vitto P.',   tags:['At Risk'], notes:'No delivery in 12 days. Need to escalate.', portal:'active', contact:{ name:'Dani Kowalski', email:'dani@danik.ca',        phone:'403-555-0404' }, industry:'Coaching',    website:'danik.ca',        last_login:'5 days ago',    login_count:31 },
-  { _id:'c5', name:'Burnham & Associates',   plan:'Starter',mrr:1200, score:76, renewal:'2026-07-01', requests_open:1,  deliveries:11, last_delivery:'2 days ago',  am:'Jordan K.',  tags:[],          notes:'Quiet but consistent.', portal:'active',          contact:{ name:'Chris Burnham',  email:'chris@burnham.ca',     phone:'403-555-0505' }, industry:'Finance',     website:'burnham.ca',      last_login:'3 days ago',    login_count:8  },
-  { _id:'c6', name:'Lakeside Homes Group',   plan:'Pro',    mrr:3800, score:88, renewal:'2026-08-15', requests_open:3,  deliveries:44, last_delivery:'Today',       am:'Vitto P.',   tags:['VIP'],     notes:'Top performer. Considering upgrade.', portal:'active',  contact:{ name:'Lisa Lakeside',  email:'lisa@lakeside.ca',     phone:'403-555-0606' }, industry:'Real Estate', website:'lakeside.ca',     last_login:'1 hour ago',    login_count:89 },
-  { _id:'c7', name:'Summit Realty Calgary',  plan:'Growth', mrr:2500, score:62, renewal:'2026-06-20', requests_open:2,  deliveries:15, last_delivery:'4 days ago',  am:'Jordan K.',  tags:[],          notes:'Average engagement. Needs check-in.', portal:'none',    contact:{ name:'Tom Summit',     email:'tom@summitrealty.ca',  phone:'403-555-0707' }, industry:'Real Estate', website:'summitrealty.ca', last_login:'Never',         login_count:0  },
-  { _id:'c8', name:'Park Ave Properties',    plan:'Starter',mrr:1200, score:71, renewal:'2026-07-10', requests_open:0,  deliveries:7,  last_delivery:'3 days ago',  am:'Jordan K.',  tags:['New'],     notes:'Second month in. Progressing well.', portal:'invited',  contact:{ name:'Amy Park',       email:'amy@parkave.ca',       phone:'403-555-0808' }, industry:'Real Estate', website:'parkave.ca',      last_login:'Never',         login_count:0  },
-];
-
-// Mock linked requests per client
-const CLIENT_REQUESTS = {
-  c1: [
-    { id:'RRG-00001', title:'April Ad Creative Pack',      stage:'In Progress',    priority:'Urgent', assignee:'Taryn P.',   due:'Mar 22' },
-    { id:'RRG-00009', title:'Thompson Q2 Strategy Deck',   stage:'Submitted',      priority:'High',   assignee:'—',          due:'Mar 30' },
-  ],
-  c2: [
-    { id:'RRG-00012', title:'Riverside Launch Campaign',    stage:'Delivered',      priority:'Normal', assignee:'Lucca R.',   due:'Mar 18' },
-  ],
-  c3: [
-    { id:'RRG-00003', title:'Apex Listing Video #4',        stage:'In Progress',    priority:'High',   assignee:'Marcus Obi', due:'Mar 25' },
-    { id:'RRG-00004', title:'Apex Social Content March',    stage:'Pending Review', priority:'Normal', assignee:'Sarah Chen', due:'Mar 23' },
-    { id:'RRG-00007', title:'Apex Email Nurture Sequence',  stage:'Revision',       priority:'Urgent', assignee:'Taryn P.',   due:'Mar 20' },
-    { id:'RRG-00008', title:'Apex Google Ads Setup',        stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 1'  },
-  ],
-  c4: [],
-  c5: [
-    { id:'RRG-00015', title:'Burnham Strategy Presentation',stage:'In Progress',    priority:'Urgent', assignee:'Marcus Obi', due:'Mar 24' },
-  ],
-  c6: [
-    { id:'RRG-00011', title:'Lakeside Monthly Report Mar',  stage:'Pending Review', priority:'Normal', assignee:'Jordan K.',  due:'Mar 28' },
-    { id:'RRG-00014', title:'Lakeside Listing Video #9',    stage:'In Progress',    priority:'High',   assignee:'Marcus Obi', due:'Mar 27' },
-    { id:'RRG-00016', title:'Lakeside Q2 Ad Refresh',       stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 5'  },
-  ],
-  c7: [
-    { id:'RRG-00017', title:'Summit Social Content April',  stage:'Submitted',      priority:'Normal', assignee:'—',          due:'Apr 3'  },
-    { id:'RRG-00018', title:'Summit CMA Template Design',   stage:'In Progress',    priority:'High',   assignee:'Sarah Chen', due:'Mar 29' },
-  ],
-  c8: [],
-};
-
-// Mock activity timeline per client
-const CLIENT_ACTIVITY = {
-  c1: [
-    { ts:'2026-03-22 09:14', type:'request', text:'New request submitted: April Ad Creative Pack', actor:'Mike Thompson' },
-    { ts:'2026-03-21 16:30', type:'delivery', text:'Delivered: March Monthly Report', actor:'Jordan K.' },
-    { ts:'2026-03-20 11:00', type:'note', text:'Strategy call completed. Client happy with Q1 results, wants to double down on video.', actor:'Jordan K.' },
-    { ts:'2026-03-18 14:22', type:'login', text:'Client logged in to portal', actor:'Mike Thompson' },
-    { ts:'2026-03-15 10:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
-    { ts:'2026-03-10 09:30', type:'request', text:'Request completed: March Ad Creative', actor:'Taryn P.' },
-  ],
-  c2: [
-    { ts:'2026-03-21 10:00', type:'delivery', text:'Delivered: Launch Campaign Assets', actor:'Lucca R.' },
-    { ts:'2026-03-19 14:00', type:'note', text:'Onboarding call — set expectations for first 30 days.', actor:'Jordan K.' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
-  ],
-  c3: [
-    { ts:'2026-03-22 08:30', type:'alert', text:'4 open requests aging — SLA at risk', actor:'System' },
-    { ts:'2026-03-20 11:00', type:'request', text:'Revision requested: Email Nurture Sequence', actor:'David Apex' },
-    { ts:'2026-03-17 09:00', type:'note', text:'Client expressed frustration with turnaround times.', actor:'Vitto P.' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $3,800.00', actor:'Stripe' },
-  ],
-  c4: [
-    { ts:'2026-03-22 07:00', type:'alert', text:'No delivery in 12 days — needs escalation', actor:'System' },
-    { ts:'2026-03-10 09:00', type:'delivery', text:'Delivered: Blog Post Series Batch 2', actor:'Sarah Chen' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
-  ],
-  c5: [
-    { ts:'2026-03-22 10:00', type:'request', text:'New request submitted: Strategy Presentation', actor:'Chris Burnham' },
-    { ts:'2026-03-20 16:00', type:'delivery', text:'Delivered: Case Study Design', actor:'Marcus Obi' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
-  ],
-  c6: [
-    { ts:'2026-03-22 11:00', type:'login', text:'Client logged in to portal', actor:'Lisa Lakeside' },
-    { ts:'2026-03-22 09:00', type:'delivery', text:'Delivered: Listing Video #8', actor:'Marcus Obi' },
-    { ts:'2026-03-21 15:30', type:'note', text:'Lisa mentioned wanting to upgrade plan. Scheduled renewal call.', actor:'Vitto P.' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $3,800.00', actor:'Stripe' },
-    { ts:'2026-03-12 10:00', type:'request', text:'New request submitted: Q2 Ad Refresh', actor:'Lisa Lakeside' },
-  ],
-  c7: [
-    { ts:'2026-03-20 09:00', type:'request', text:'New request submitted: CMA Template Design', actor:'Tom Summit' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $2,500.00', actor:'Stripe' },
-  ],
-  c8: [
-    { ts:'2026-03-20 14:00', type:'delivery', text:'Delivered: Welcome Kit Design', actor:'Jordan K.' },
-    { ts:'2026-03-15 09:00', type:'payment', text:'Payment received: $1,200.00', actor:'Stripe' },
-  ],
-};
-
-// Mock billing per client
-const CLIENT_BILLING = {
-  c1: [
-    { date:'2026-03-15', amount:2500, status:'paid', invoice:'INV-0041' },
-    { date:'2026-02-15', amount:2500, status:'paid', invoice:'INV-0033' },
-    { date:'2026-01-15', amount:2500, status:'paid', invoice:'INV-0025' },
-    { date:'2025-12-15', amount:2500, status:'paid', invoice:'INV-0017' },
-  ],
-  c3: [
-    { date:'2026-03-15', amount:3800, status:'paid', invoice:'INV-0043' },
-    { date:'2026-02-15', amount:3800, status:'paid', invoice:'INV-0035' },
-    { date:'2026-01-15', amount:3800, status:'late', invoice:'INV-0027' },
-  ],
-  c4: [
-    { date:'2026-03-15', amount:2500, status:'paid', invoice:'INV-0042' },
-    { date:'2026-02-15', amount:2500, status:'paid', invoice:'INV-0034' },
-  ],
-  c6: [
-    { date:'2026-03-15', amount:3800, status:'paid', invoice:'INV-0044' },
-    { date:'2026-02-15', amount:3800, status:'paid', invoice:'INV-0036' },
-    { date:'2026-01-15', amount:3800, status:'paid', invoice:'INV-0028' },
-    { date:'2025-12-15', amount:3800, status:'paid', invoice:'INV-0020' },
-    { date:'2025-11-15', amount:3800, status:'paid', invoice:'INV-0012' },
-  ],
-};
-
-// Mock notes/comments per client
-const CLIENT_NOTES_INIT = {
-  c1: [
-    { id:'n1', text:'Strategy call completed. Client happy with Q1 results, wants to double down on video content in Q2.', author:'Jordan K.', ts:'2026-03-20 11:00' },
-    { id:'n2', text:'Mike asked about adding Google Ads. Sent proposal — waiting on response.', author:'Vitto P.', ts:'2026-03-14 09:30' },
-  ],
-  c3: [
-    { id:'n3', text:'Client expressed frustration with turnaround times. Need to address capacity.', author:'Vitto P.', ts:'2026-03-17 09:00' },
-    { id:'n4', text:'Discussed Q2 roadmap. Client wants more listing videos and market updates.', author:'Vitto P.', ts:'2026-03-05 14:00' },
-  ],
-  c4: [
-    { id:'n5', text:'No delivery in 12 days. Escalating to team lead for prioritisation.', author:'Vitto P.', ts:'2026-03-22 07:00' },
-  ],
-  c6: [
-    { id:'n6', text:'Lisa mentioned wanting to upgrade plan. Scheduled renewal call for next week.', author:'Vitto P.', ts:'2026-03-21 15:30' },
-    { id:'n7', text:'Top performer — 44 deliveries, 88 health score. Great case study candidate.', author:'Jordan K.', ts:'2026-03-10 12:00' },
-  ],
-};
+// ── API Configuration ────────────────────────────────────────────────────────────
+const getToken = () => localStorage.getItem('token');
+const getHeaders = () => ({ Authorization: `Bearer ${getToken()}` });
 
 const TEAM_MEMBERS = ['Jordan Kim','Vitto Pessanha','Taryn Pessanha','Lucca Rossini','Sarah Chen','Marcus Obi'];
 const INDUSTRIES   = ['Real Estate','Coaching','Finance','E-Commerce','Health & Wellness','Marketing Agency','Law Firm','Consulting','Retail','Technology'];
@@ -541,13 +409,13 @@ function ClientDetailPanel({ client, onClose, onUpdate }) {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [newNote, setNewNote] = useState('');
-  const [notes, setNotes] = useState(CLIENT_NOTES_INIT[client._id] || []);
+  const [notes, setNotes] = useState([]);
 
   // Reset tab & notes when client changes
   useEffect(() => {
     setTab('overview');
     setEditing(false);
-    setNotes(CLIENT_NOTES_INIT[client._id] || []);
+    setNotes([]);
   }, [client._id]);
 
   const startEdit = () => {
@@ -580,9 +448,14 @@ function ClientDetailPanel({ client, onClose, onUpdate }) {
     toast.success('Note added');
   };
 
-  const requests  = CLIENT_REQUESTS[client._id] || [];
-  const activity  = CLIENT_ACTIVITY[client._id] || [];
-  const billing   = CLIENT_BILLING[client._id] || [];
+  // Empty states for activities without real API endpoints
+  // In the future, these would come from real API calls:
+  // - requests: /api/tasks?client_id=X
+  // - activity: /api/crm/contacts/{id}/activity
+  // - billing: /api/billing/invoices?client_id=X
+  const requests  = [];
+  const activity  = [];
+  const billing   = [];
 
   return (
     <div style={{ width:480, borderLeft:'1px solid var(--border)', display:'flex', flexDirection:'column', flexShrink:0, overflowY:'auto', background:'var(--bg-card)', animation:'slideRight 0.18s ease both' }}>

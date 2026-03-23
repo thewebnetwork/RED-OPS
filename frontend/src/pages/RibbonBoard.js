@@ -149,21 +149,21 @@ const [pool1Requests, setPool1Requests] = useState([]);
             <div className="flex items-center gap-4 mt-2 text-sm">
               <span className="flex items-center gap-1">
                 <Timer size={14} />
-                {"In Pool"}: {formatTimeInPool(request.pool_entered_at)}
+                In Pool: {formatTimeInPool(request.pool_entered_at)}
               </span>
-              <span>{"Priority"}: {request.priority || "Normal"}</span>
+              <span>Priority: {request.priority || "Normal"}</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <Link to={`/requests/${request.id}`}>
               <Button variant="outline" size="sm">
                 <Eye size={14} className="mr-1" />
-                {"View"}
+                View
               </Button>
             </Link>
             {canPick && (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="bg-red-700 hover:bg-red-800"
                 onClick={() => {
                   setRequestToPick(request);
@@ -172,7 +172,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
                 data-testid={`pick-request-${request.id}`}
               >
                 <Hand size={14} className="mr-1" />
-                {"Pick"}
+                Pick
               </Button>
             )}
           </div>
@@ -198,12 +198,12 @@ const [pool1Requests, setPool1Requests] = useState([]);
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Layers className="text-[#A2182C]" />
-          {"Title"}
+          Request Pools
         </h1>
         <p className="mt-1">
-          {isPartner && "Partner Description"}
-          {isVendor && "Vendor Description"}
-          {(isAdmin || isOperator) && "Admin Description"}
+          {isPartner && "Browse available requests and pick work from the partner pool"}
+          {isVendor && "Browse available requests and pick work from the vendor pool"}
+          {(isAdmin || isOperator) && "Manage and monitor request pools for partners and vendors"}
         </p>
       </div>
 
@@ -212,7 +212,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" size={18} />
           <Input
-            placeholder={'Search requests...'}
+            placeholder="Search requests by code or title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -222,10 +222,10 @@ const [pool1Requests, setPool1Requests] = useState([]);
         <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
           <SelectTrigger className="w-[200px]" data-testid="specialty-filter">
             <Filter size={16} className="mr-2" />
-            <SelectValue placeholder={"Filter By Specialty"} />
+            <SelectValue placeholder="Filter by specialty..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{"All Specialties"}</SelectItem>
+            <SelectItem value="all">All Specialties</SelectItem>
             {specialties.map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
@@ -239,14 +239,14 @@ const [pool1Requests, setPool1Requests] = useState([]);
           {canViewPool1 && (
             <TabsTrigger value="pool1" className="flex items-center gap-2" data-testid="pool1-tab">
               <Users size={16} />
-              {"Pool1 Partners"}
+              Partner Pool
               <Badge variant="secondary" className="ml-1">{pool1Requests.length}</Badge>
             </TabsTrigger>
           )}
           {canViewPool2 && (
             <TabsTrigger value="pool2" className="flex items-center gap-2" data-testid="pool2-tab">
               <Briefcase size={16} />
-              {"Pool2 Vendors"}
+              Vendor Pool
               <Badge variant="secondary" className="ml-1">{pool2Requests.length}</Badge>
             </TabsTrigger>
           )}
@@ -259,9 +259,9 @@ const [pool1Requests, setPool1Requests] = useState([]);
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2">
                   <Users size={18} />
-                  <span className="font-medium">{"Partner Pool"}</span>
+                  <span className="font-medium">Partner Pool</span>
                   <span className="text-sm ">
-                    {"Partner Pool Description"}
+                    Requests assigned to and available for partners to pick
                   </span>
                 </div>
               </CardContent>
@@ -296,9 +296,9 @@ const [pool1Requests, setPool1Requests] = useState([]);
               <CardContent className="py-3 px-4">
                 <div className="flex items-center gap-2">
                   <Briefcase size={18} />
-                  <span className="font-medium">{"Vendor Pool"}</span>
+                  <span className="font-medium">Vendor Pool</span>
                   <span className="text-sm ">
-                    {"Vendor Pool Description"}
+                    Requests assigned to and available for vendors to pick
                   </span>
                 </div>
               </CardContent>
@@ -331,21 +331,21 @@ const [pool1Requests, setPool1Requests] = useState([]);
       <AlertDialog open={pickDialogOpen} onOpenChange={setPickDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{'Pick this request?'}</AlertDialogTitle>
+            <AlertDialogTitle>Pick this request?</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('ribbon.pickConfirmation', { code: requestToPick?.order_code, title: requestToPick?.title })}
+              You are picking request {requestToPick?.order_code}: {requestToPick?.title}
               <br /><br />
-              {'You will be responsible for completing this request.'}
+              You will be responsible for completing this request.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{"Cancel"}</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={handlePickRequest}
               className="bg-red-700 hover:bg-red-800"
             >
               <Hand size={16} className="mr-2" />
-              {"Confirm Pick"}
+              Confirm Pick
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

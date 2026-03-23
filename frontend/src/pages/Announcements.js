@@ -214,9 +214,9 @@ const [activeTab, setActiveTab] = useState('list');
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Megaphone className="text-[#A2182C]" />
-            {"Title"}
+            {"Announcements"}
           </h1>
-          <p className="mt-1">{"Description"}</p>
+          <p className="mt-1">{"Create and manage platform announcements for users"}</p>
         </div>
         <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
           <Plus size={16} className="mr-2" />
@@ -229,25 +229,25 @@ const [activeTab, setActiveTab] = useState('list');
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.length}</p>
-            <p className="text-sm">{"Total"}</p>
+            <p className="text-sm">{"Total Announcements"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.filter(a => a.is_active).length}</p>
-            <p className="text-sm">{"Active"}</p>
+            <p className="text-sm">{"Active Announcements"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-yellow-600">{announcements.filter(a => a.start_at && new Date(a.start_at) > new Date()).length}</p>
-            <p className="text-sm">{"Scheduled"}</p>
+            <p className="text-sm">{"Scheduled Announcements"}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{announcements.filter(a => !a.is_active).length}</p>
-            <p className="text-sm">{"Inactive"}</p>
+            <p className="text-sm">{"Inactive Announcements"}</p>
           </CardContent>
         </Card>
       </div>
@@ -256,15 +256,15 @@ const [activeTab, setActiveTab] = useState('list');
       <Card>
         <CardHeader>
           <CardTitle>{"All Announcements"}</CardTitle>
-          <CardDescription>{"Display Description"}</CardDescription>
+          <CardDescription>{"Announcements are displayed by priority (highest first). One announcement shown at a time per user."}</CardDescription>
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
             <div className="py-12 text-center">
               <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
-              <p>{"No Announcements"}</p>
+              <p>{"No announcements yet"}</p>
               <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
-                {"Create First"}
+                {"Create Your First Announcement"}
               </Button>
             </div>
           ) : (
@@ -280,7 +280,7 @@ const [activeTab, setActiveTab] = useState('list');
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold">{ann.title}</h3>
                         {getStatusBadge(ann)}
-                        <Badge variant="outline" className="text-xs">{"Priority"}: {ann.priority}</Badge>
+                        <Badge variant="outline" className="text-xs">{"Priority (higher = shown first)"}: {ann.priority}</Badge>
                       </div>
                       <p className="text-sm mt-1 line-clamp-2">{ann.message}</p>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs">
@@ -335,7 +335,7 @@ const [activeTab, setActiveTab] = useState('list');
           <DialogHeader>
             <DialogTitle>{editingAnnouncement ? "Edit Announcement" : "Create Announcement"}</DialogTitle>
             <DialogDescription>
-              {"Create Description"}
+              {"Create announcements that will be displayed to users in a banner."}
             </DialogDescription>
           </DialogHeader>
           
@@ -343,20 +343,20 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Basic Info */}
             <div className="grid gap-4">
               <div>
-                <Label>{"Title Label"} *</Label>
-                <Input 
-                  value={form.title} 
+                <Label>{"Title"} *</Label>
+                <Input
+                  value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder={"Title Placeholder"}
+                  placeholder={"Announcement title"}
                   data-testid="announcement-title-input"
                 />
               </div>
               <div>
-                <Label>{"Message Label"} *</Label>
-                <Textarea 
-                  value={form.message} 
+                <Label>{"Message"} *</Label>
+                <Textarea
+                  value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder={"Message Placeholder"}
+                  placeholder={"The announcement message to display"}
                   rows={3}
                   data-testid="announcement-message-input"
                 />
@@ -366,20 +366,20 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Active & Priority */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3">
-                <Switch 
-                  checked={form.is_active} 
+                <Switch
+                  checked={form.is_active}
                   onCheckedChange={(v) => setForm({ ...form, is_active: v })}
                   data-testid="announcement-active-switch"
                 />
                 <Label>{"Active"}</Label>
               </div>
               <div>
-                <Label>{"Priority Label"}</Label>
-                <Input 
-                  type="number" 
-                  min={1} 
+                <Label>{"Priority (higher = shown first)"}</Label>
+                <Input
+                  type="number"
+                  min={1}
                   max={100}
-                  value={form.priority} 
+                  value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 1 })}
                 />
               </div>
@@ -388,18 +388,18 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Schedule */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>{"Start At"}</Label>
-                <Input 
-                  type="datetime-local" 
-                  value={form.start_at} 
+                <Label>{"Start At (optional)"}</Label>
+                <Input
+                  type="datetime-local"
+                  value={form.start_at}
                   onChange={(e) => setForm({ ...form, start_at: e.target.value })}
                 />
               </div>
               <div>
-                <Label>{"End At"}</Label>
-                <Input 
-                  type="datetime-local" 
-                  value={form.end_at} 
+                <Label>{"End At (optional)"}</Label>
+                <Input
+                  type="datetime-local"
+                  value={form.end_at}
                   onChange={(e) => setForm({ ...form, end_at: e.target.value })}
                 />
               </div>
@@ -408,13 +408,13 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Targeting */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Switch 
-                  checked={form.send_to_all} 
+                <Switch
+                  checked={form.send_to_all}
                   onCheckedChange={(v) => setForm({ ...form, send_to_all: v })}
                 />
                 <Label className="flex items-center gap-2">
                   <Globe size={16} />
-                  {"Send To All Users"}
+                  {"Send to All Users"}
                 </Label>
               </div>
 
@@ -423,7 +423,7 @@ const [activeTab, setActiveTab] = useState('list');
                   {!form.send_to_all && form.target_teams.length === 0 && form.target_roles.length === 0 && form.target_specialties.length === 0 && (
                     <div className="flex items-center gap-2 text-amber-600 text-sm">
                       <AlertCircle size={16} />
-                      {"Select At Least One"}
+                      {"Select at least one team, role, or specialty"}
                     </div>
                   )}
                   
@@ -441,7 +441,7 @@ const [activeTab, setActiveTab] = useState('list');
                           {team.name}
                         </Badge>
                       ))}
-                      {teams.length === 0 && <span className="text-sm">{"No Teams Available"}</span>}
+                      {teams.length === 0 && <span className="text-sm">{"No teams available"}</span>}
                     </div>
                   </div>
 
@@ -459,7 +459,7 @@ const [activeTab, setActiveTab] = useState('list');
                           {role.name}
                         </Badge>
                       ))}
-                      {roles.length === 0 && <span className="text-sm">{"No Roles Available"}</span>}
+                      {roles.length === 0 && <span className="text-sm">{"No roles available"}</span>}
                     </div>
                   </div>
 
@@ -477,7 +477,7 @@ const [activeTab, setActiveTab] = useState('list');
                           {spec.name}
                         </Badge>
                       ))}
-                      {specialties.length === 0 && <span className="text-sm">{"No Specialties Available"}</span>}
+                      {specialties.length === 0 && <span className="text-sm">{"No specialties available"}</span>}
                     </div>
                   </div>
                 </div>
@@ -489,14 +489,14 @@ const [activeTab, setActiveTab] = useState('list');
               <div>
                 <Label>{"Background Color"}</Label>
                 <div className="flex gap-2">
-                  <Input 
-                    type="color" 
-                    value={form.background_color} 
+                  <Input
+                    type="color"
+                    value={form.background_color}
                     onChange={(e) => setForm({ ...form, background_color: e.target.value })}
                     className="w-16 h-10 p-1"
                   />
-                  <Input 
-                    value={form.background_color} 
+                  <Input
+                    value={form.background_color}
                     onChange={(e) => setForm({ ...form, background_color: e.target.value })}
                   />
                 </div>
@@ -504,14 +504,14 @@ const [activeTab, setActiveTab] = useState('list');
               <div>
                 <Label>{"Text Color"}</Label>
                 <div className="flex gap-2">
-                  <Input 
-                    type="color" 
-                    value={form.text_color} 
+                  <Input
+                    type="color"
+                    value={form.text_color}
                     onChange={(e) => setForm({ ...form, text_color: e.target.value })}
                     className="w-16 h-10 p-1"
                   />
-                  <Input 
-                    value={form.text_color} 
+                  <Input
+                    value={form.text_color}
                     onChange={(e) => setForm({ ...form, text_color: e.target.value })}
                   />
                 </div>
@@ -521,12 +521,12 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Preview */}
             <div>
               <Label className="mb-2 block">{"Preview"}</Label>
-              <div 
+              <div
                 className="p-4 rounded-lg text-center"
                 style={{ backgroundColor: form.background_color, color: form.text_color }}
               >
-                <p className="font-medium">{form.title || "Title Label"}</p>
-                <p className="text-sm opacity-90">{form.message || "Preview Placeholder"}</p>
+                <p className="font-medium">{form.title || "Title"}</p>
+                <p className="text-sm opacity-90">{form.message || "Your announcement message will appear here"}</p>
               </div>
             </div>
 
@@ -545,9 +545,9 @@ const [activeTab, setActiveTab] = useState('list');
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{"Delete Announcement"}</AlertDialogTitle>
+            <AlertDialogTitle>{"Delete Announcement?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('announcements.deleteConfirmation', { title: deleteDialog.item?.title })}
+              {`Are you sure you want to delete "${deleteDialog.item?.title}"? This action cannot be undone.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -176,10 +176,10 @@ const [teams, setTeams] = useState([]);
     <div className="space-y-6 animate-fade-in" data-testid="teams-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{"Title"}</h1>
-          <p className="mt-1">{"Subtitle"}</p>
+          <h1 className="text-2xl font-bold">{"Teams"}</h1>
+          <p className="mt-1">{"Organize team members into groups"}</p>
         </div>
-        <Button 
+        <Button
           className="bg-rose-600 hover:bg-rose-700"
           onClick={() => openDialog()}
           data-testid="add-team-btn"
@@ -227,7 +227,7 @@ const [teams, setTeams] = useState([]);
                 <p className="text-2xl font-bold">
                   {teams.length > 0 ? Math.round(teams.reduce((acc, team) => acc + team.member_count, 0) / teams.length) : 0}
                 </p>
-                <p className="text-sm">{"Avg Team Size"}</p>
+                <p className="text-sm">{"Avg. Team Size"}</p>
               </div>
             </div>
           </CardContent>
@@ -240,13 +240,13 @@ const [teams, setTeams] = useState([]);
           <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <UsersRound size={18} className="text-rose-600" />
-              {"Title"}
+              {"Teams"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {teams.length === 0 ? (
               <div className="p-6 text-center">
-                {"No Results"}
+                {"No results"}
               </div>
             ) : (
               <div className="divide-y">
@@ -303,16 +303,16 @@ const [teams, setTeams] = useState([]);
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => openDialog(selectedTeam)}
                       >
                         <Edit size={14} className="mr-1" />
                         {"Edit"}
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="text-red-500 border-red-200 hover:bg-red-50"
                         onClick={() => handleDelete(selectedTeam.id)}
@@ -341,7 +341,7 @@ const [teams, setTeams] = useState([]);
                   ) : teamMembers.length === 0 ? (
                     <div className="p-8 text-center">
                       <Users size={32} className="mx-auto mb-2 text-slate-300" />
-                      <p>{"No Members"}</p>
+                      <p>{"No members"}</p>
                     </div>
                   ) : (
                     <div className="divide-y">
@@ -373,7 +373,7 @@ const [teams, setTeams] = useState([]);
             <Card className="">
               <CardContent className="p-12 text-center">
                 <UsersRound size={48} className="mx-auto mb-4 text-slate-300" />
-                <p>{"Select Team"}</p>
+                <p>{"Select a team"}</p>
               </CardContent>
             </Card>
           )}
@@ -386,9 +386,9 @@ const [teams, setTeams] = useState([]);
           <DialogHeader>
             <DialogTitle>{editingTeam ? "Edit Team" : "New Team"}</DialogTitle>
             <DialogDescription>
-              {editingTeam 
-                ? "Edit Team" 
-                : "Subtitle"
+              {editingTeam
+                ? "Edit team information"
+                : "Create a new team to organize members"
               }
             </DialogDescription>
           </DialogHeader>
@@ -398,12 +398,12 @@ const [teams, setTeams] = useState([]);
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={"Team Name"}
+                placeholder={"Team name"}
                 className="mt-1.5"
                 data-testid="team-name-input"
               />
             </div>
-            
+
             <div>
               <Label>{"Description"}</Label>
               <Input
@@ -416,8 +416,8 @@ const [teams, setTeams] = useState([]);
 
             <div>
               <Label>{"Color"}</Label>
-              <Select 
-                value={formData.color} 
+              <Select
+                value={formData.color}
                 onValueChange={(v) => setFormData(prev => ({ ...prev, color: v }))}
               >
                 <SelectTrigger className="mt-1.5">
@@ -427,9 +427,9 @@ const [teams, setTeams] = useState([]);
                   {colorOptions.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: opt.value }} 
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: opt.value }}
                         />
                         {opt.label}
                       </div>

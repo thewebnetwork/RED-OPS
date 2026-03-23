@@ -494,9 +494,9 @@ const { user: currentUser } = useAuth();
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <KeyRound className="text-[#A2182C]" />
-          {"Title"}
+          {"Identity & Access"}
         </h1>
-        <p className="mt-1">{"Subtitle"}</p>
+        <p className="mt-1">{"Manage users, teams, roles, and specialties"}</p>
       </div>
 
       {/* Stats */}
@@ -522,7 +522,7 @@ const { user: currentUser } = useAuth();
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
-              <Input placeholder={"Search Users"} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
+              <Input placeholder={"Search users..."} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
             </div>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
               <Plus size={16} className="mr-2" />{"New User"}
@@ -535,7 +535,7 @@ const { user: currentUser } = useAuth();
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"User"}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Role"}</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Account Types"}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Account Type"}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Specialty"}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase">{"Status"}</th>
                     <th className="px-4 py-3 text-right text-xs font-medium uppercase">{"Actions"}</th>

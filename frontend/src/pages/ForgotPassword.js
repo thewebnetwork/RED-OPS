@@ -18,7 +18,7 @@ const [email, setEmail] = useState('');
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
-      toast.error("Email" + ' required');
+      toast.error('Email is required');
       return;
     }
 
@@ -66,35 +66,35 @@ const [email, setEmail] = useState('');
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} className="text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">{"Reset Link Sent"}</h2>
+              <h2 className="text-xl font-semibold mb-2">Reset Link Sent</h2>
               <p className="mb-6">
                 {email}
               </p>
               <Link to="/login">
                 <Button variant="outline" className="w-full">
                   <ArrowLeft size={18} className="mr-2" />
-                  {"Back To Login"}
+                  Back to Login
                 </Button>
               </Link>
             </div>
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold text-[#A2182C]">{"Forgot Password Title"}</h2>
+                <h2 className="text-xl font-semibold text-[#A2182C]">Forgot Your Password?</h2>
                 <p className="text-sm mt-1">
-                  {"Forgot Password Subtitle"}
+                  Enter your email address and we'll send you a link to reset your password.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <Label htmlFor="email" className="">{"Email"}</Label>
+                  <Label htmlFor="email" className="">Email Address</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={"Email"}
+                    placeholder="you@redribbongroup.ca"
                     className="mt-1.5 border-slate-300 focus:border-[#A2182C] focus:ring-[#A2182C]"
                     data-testid="forgot-email-input"
                   />
@@ -112,24 +112,24 @@ const [email, setEmail] = useState('');
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      {"Loading"}
+                      Sending...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <Mail size={18} />
-                      {"Send Reset Link"}
+                      Send Reset Link
                     </span>
                   )}
                 </Button>
               </form>
 
               <div className="mt-6 text-center">
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="text-sm hover:text-[#A2182C] inline-flex items-center gap-1"
                 >
                   <ArrowLeft size={14} />
-                  {"Back To Login"}
+                  Back to Login
                 </Link>
               </div>
             </>

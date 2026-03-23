@@ -172,15 +172,15 @@ const [selectedLang, setSelectedLang] = useState('es');
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            {"Back"}
+            Back
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Languages className="text-[#A2182C]" />
-              {"Title"}
+              Translation Editor
             </h1>
             <p className="text-sm mt-1">
-              {"Description"}
+              Edit and manage translations for all supported languages
             </p>
           </div>
         </div>
@@ -196,7 +196,7 @@ const [selectedLang, setSelectedLang] = useState('es');
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          {"Save Translations"}
+          Save Translations
         </Button>
       </div>
       
@@ -205,7 +205,7 @@ const [selectedLang, setSelectedLang] = useState('es');
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-48">
-              <Label>{"Select Language"}</Label>
+              <Label>Select Language</Label>
               <Select value={selectedLang} onValueChange={setSelectedLang}>
                 <SelectTrigger className="mt-1.5" data-testid="language-select">
                   <SelectValue />
@@ -218,11 +218,11 @@ const [selectedLang, setSelectedLang] = useState('es');
             </div>
             
             <div className="flex-1">
-              <Label>{"Search Keys"}</Label>
+              <Label>Search Keys</Label>
               <div className="relative mt-1.5">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
                 <Input
-                  placeholder={"Search Keys"}
+                  placeholder="Search translation keys..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -238,7 +238,7 @@ const [selectedLang, setSelectedLang] = useState('es');
       <Card className="">
         <CardContent className="p-4">
           <p className="text-sm">
-            <strong>{"Tip"}:</strong> Edit translations below. Changes are saved in memory and logged to console. 
+            <strong>Tip:</strong> Edit translations below. Changes are saved in memory and logged to console.
             For permanent changes, export the translations and update the JSON files.
           </p>
         </CardContent>
@@ -269,28 +269,28 @@ const [selectedLang, setSelectedLang] = useState('es');
                           {key}
                         </code>
                         {isModified && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="h-6 px-2 text-xs"
                             onClick={() => resetToOriginal(key)}
                           >
                             <RotateCcw size={12} className="mr-1" />
-                            {"Reset To Original"}
+                            Reset to Original
                           </Button>
                         )}
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs">{"English"}</Label>
+                          <Label className="text-xs">English</Label>
                           <div className="mt-1 p-2 rounded text-sm min-h-[38px]">
                             {englishValue}
                           </div>
                         </div>
-                        
+
                         <div>
-                          <Label className="text-xs">{"Translation"}</Label>
+                          <Label className="text-xs">Translation</Label>
                           {englishValue.length > 100 ? (
                             <Textarea
                               value={currentValue}
@@ -319,7 +319,7 @@ const [selectedLang, setSelectedLang] = useState('es');
       {/* Floating save indicator */}
       {hasChanges && (
         <div className="fixed bottom-4 right-4 border border-amber-300 rounded-lg p-4 shadow-lg animate-fade-in">
-          <p className="text-amber-800 text-sm font-medium">{"Unsaved Changes"}</p>
+          <p className="text-amber-800 text-sm font-medium">Unsaved Changes</p>
         </div>
       )}
     </div>

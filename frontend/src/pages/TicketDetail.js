@@ -118,7 +118,7 @@ const messagesEndRef = useRef(null);
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/tickets')} className="w-fit">
           <ArrowLeft size={18} className="mr-2" />
-          {"Back To Tickets"}
+          Back to Tickets
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
@@ -134,13 +134,13 @@ const messagesEndRef = useRef(null);
         <div className="lg:col-span-2">
           <Card className="var(--border)">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">{"Messages"}</CardTitle>
+              <CardTitle className="text-lg">Messages</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-96 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-8">
-                    {"No Messages Yet"}
+                    No messages yet
                   </div>
                 ) : (
                   messages.map(msg => (
@@ -170,7 +170,7 @@ const messagesEndRef = useRef(null);
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={"Type Your Message"}
+                    placeholder="Type your message here..."
                     className="flex-1 min-h-[60px] resize-none"
                     data-testid="ticket-message-input"
                   />
@@ -192,12 +192,12 @@ const messagesEndRef = useRef(null);
         <div className="space-y-6">
           <Card className="var(--border)">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-base">{"Ticket Details"}</CardTitle>
+              <CardTitle className="text-base">Ticket Details</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {/* Status */}
               <div>
-                <Label className="text-xs">{"Status"}</Label>
+                <Label className="text-xs">Status</Label>
                 <Select value={ticket.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="mt-1.5" data-testid="ticket-status-select">
                     <SelectValue />
@@ -212,7 +212,7 @@ const messagesEndRef = useRef(null);
 
               {/* Owner */}
               <div>
-                <Label className="text-xs">{"Owner"}</Label>
+                <Label className="text-xs">Owner</Label>
                 <div className="flex items-center gap-2 mt-1.5">
                   <User size={16} className="" />
                   <span className="font-medium">{ticket.owner_name}</span>
@@ -222,7 +222,7 @@ const messagesEndRef = useRef(null);
               {/* Client */}
               {ticket.client_name && (
                 <div>
-                  <Label className="text-xs">{"Client"}</Label>
+                  <Label className="text-xs">Client</Label>
                   <p className="font-medium mt-1.5">{ticket.client_name}</p>
                 </div>
               )}
@@ -230,7 +230,7 @@ const messagesEndRef = useRef(null);
               {/* Related Order */}
               {ticket.related_order_code && (
                 <div>
-                  <Label className="text-xs">{"Related Order"}</Label>
+                  <Label className="text-xs">Related Order</Label>
                   <Link 
                     to={`/orders/${ticket.related_order_id}`}
                     className="flex items-center gap-2 mt-1.5 text-rose-600 hover:text-rose-700"
@@ -243,7 +243,7 @@ const messagesEndRef = useRef(null);
 
               {/* Created */}
               <div>
-                <Label className="text-xs">{"Created"}</Label>
+                <Label className="text-xs">Created</Label>
                 <p className="font-medium mt-1.5">
                   {format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}
                 </p>

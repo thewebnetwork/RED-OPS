@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   User,
   Settings as SettingsIcon,
@@ -24,8 +26,15 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+const API = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
+
 export default function Settings() {
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+
   const [activeSection, setActiveSection] = useState('profile');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSessionSignOut, setShowSessionSignOut] = useState(null);
 
   // Profile state
   const [profile, setProfile] = useState({
@@ -152,6 +161,261 @@ export default function Settings() {
     { name: 'pink', hex: '#ec4899' },
   ];
 
+  // Handler functions
+  const handleChangeAvatar = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      toast.error('Only JPG, PNG, and GIF images are supported');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/users/me/avatar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Failed to upload avatar');
+      toast.success('Avatar updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to upload avatar');
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    // Validation
+    if (!profile.firstName.trim()) {
+      toast.error('First name is required');
+      return;
+    }
+    if (!profile.lastName.trim()) {
+      toast.error('Last name is required');
+      return;
+    }
+    if (profile.phone && !/^[\d\s\-\(\)\+]+$/.test(profile.phone)) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/users/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          phone: profile.phone,
+          bio: profile.bio,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save profile');
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to save profile');
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/users/me`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to delete account');
+
+      localStorage.removeItem('token');
+      toast.success('Account deleted successfully');
+      navigate('/login');
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete account');
+    }
+    setShowDeleteConfirm(false);
+  };
+
+  const handleRemoveTeamMember = async (memberId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/team/members/${memberId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to remove team member');
+      toast.success('Team member removed successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to remove team member');
+    }
+  };
+
+  const handleUpgradePlan = () => {
+    toast.info('Billing management coming soon');
+  };
+
+  const handleManagePaymentMethod = () => {
+    toast.info('Payment management coming soon');
+  };
+
+  const handleConfigureIntegration = (integrationName) => {
+    toast.info(`${integrationName} configuration coming soon`);
+  };
+
+  const handleConnectIntegration = (integrationName) => {
+    toast.info(`${integrationName} setup coming soon`);
+  };
+
+  const handleUpdatePassword = async () => {
+    // Validation
+    if (!security.currentPassword) {
+      toast.error('Current password is required');
+      return;
+    }
+    if (!security.newPassword) {
+      toast.error('New password is required');
+      return;
+    }
+    if (security.newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters');
+      return;
+    }
+    if (security.newPassword !== security.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    if (security.currentPassword === security.newPassword) {
+      toast.error('New password must be different from current password');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: security.currentPassword,
+          newPassword: security.newPassword,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update password');
+
+      toast.success('Password updated successfully');
+      setSecurity({ currentPassword: '', newPassword: '', confirmPassword: '', twoFactorEnabled: security.twoFactorEnabled });
+    } catch (error) {
+      toast.error(error.message || 'Failed to update password');
+    }
+  };
+
+  const handleSignOutSession = async (sessionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/auth/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to sign out session');
+      toast.success('Session signed out');
+    } catch (error) {
+      toast.error(error.message || 'Failed to sign out session');
+    }
+  };
+
+  const handleSignOutAllDevices = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/auth/sessions`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to sign out from all devices');
+
+      localStorage.removeItem('token');
+      toast.success('Signed out from all devices');
+      navigate('/login');
+    } catch (error) {
+      toast.error(error.message || 'Failed to sign out from all devices');
+    }
+  };
+
+  const handleSendInvite = async () => {
+    // Validation
+    if (!inviteForm.email) {
+      toast.error('Email address is required');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/team/invites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: inviteForm.email,
+          role: inviteForm.role,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to send invite');
+
+      toast.success('Invite sent successfully');
+      setInviteForm({ email: '', role: 'Standard User' });
+      setShowInviteModal(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to send invite');
+    }
+  };
+
   return (
     <div className="page-content">
       <div className="settings-layout">
@@ -174,8 +438,8 @@ export default function Settings() {
                 className={`settings-nav-item ${activeSection === item.id ? 'active' : ''}`}
                 onClick={() => setActiveSection(item.id)}
                 style={{
-                  backgroundColor: activeSection === item.id ? '#2a1819' : 'transparent',
-                  color: activeSection === item.id ? '#e8404e' : 'var(--tx-2)',
+                  backgroundColor: activeSection === item.id ? 'var(--bg-elevated)' : 'transparent',
+                  color: activeSection === item.id ? 'var(--accent)' : 'var(--tx-2)',
                 }}
               >
                 <IconComp size={16} />
@@ -204,21 +468,28 @@ export default function Settings() {
                     width: '64px',
                     height: '64px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--red)',
+                    backgroundColor: 'var(--accent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '24px',
                     fontWeight: '700',
-                    color: '#fff',
+                    color: 'var(--tx-1)',
                     margin: '0 auto 12px',
                   }}
                 >
                   G
                 </div>
-                <button className="btn-sm" style={{ marginBottom: '16px' }}>
+                <button className="btn-sm" style={{ marginBottom: '16px' }} onClick={handleChangeAvatar}>
                   Change Avatar
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif"
+                  onChange={handleAvatarFileSelect}
+                  style={{ display: 'none' }}
+                />
               </div>
 
               {/* Form Fields */}
@@ -258,7 +529,7 @@ export default function Settings() {
                   <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--tx-2)', display: 'block', marginBottom: '6px' }}>
                     Role (Read-only)
                   </label>
-                  <div className="pill" style={{ display: 'inline-block', backgroundColor: 'var(--red)', padding: '4px 10px', borderRadius: '4px', color: '#fff', fontSize: '12px' }}>
+                  <div className="pill" style={{ display: 'inline-block', backgroundColor: 'var(--accent)', padding: '4px 10px', borderRadius: '4px', color: 'var(--tx-1)', fontSize: '12px' }}>
                     {profile.role}
                   </div>
                 </div>
@@ -287,7 +558,7 @@ export default function Settings() {
                   />
                 </div>
 
-                <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleSaveProfile}>
                   <Save size={16} /> Save Changes
                 </button>
               </div>
@@ -347,7 +618,7 @@ export default function Settings() {
             <div className="card" style={{ padding: '20px', border: '1px solid var(--red)', backgroundColor: 'rgba(201, 42, 62, 0.05)' }}>
               <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--red)', marginBottom: '12px' }}>Danger Zone</h3>
               <p style={{ fontSize: '12px', color: 'var(--tx-2)', marginBottom: '12px' }}>Deleting your account is permanent and cannot be undone.</p>
-              <button className="btn-ghost" style={{ color: 'var(--red)', borderColor: 'var(--red)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button className="btn-ghost" style={{ color: 'var(--red)', borderColor: 'var(--red)', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleDeleteAccount}>
                 <Trash2 size={16} /> Delete Account
               </button>
             </div>
@@ -406,8 +677,8 @@ export default function Settings() {
                         </span>
                       </td>
                       <td style={{ padding: '12px 16px', fontSize: '13px' }}>
-                        <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }}>
-                          Manage
+                        <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleRemoveTeamMember(member.id)}>
+                          Remove
                         </button>
                       </td>
                     </tr>
@@ -467,7 +738,7 @@ export default function Settings() {
                         position: 'absolute',
                         inset: 0,
                         borderRadius: '10px',
-                        backgroundColor: notifications[item.key] ? 'var(--red)' : 'var(--bg-overlay)',
+                        backgroundColor: notifications[item.key] ? 'var(--accent)' : 'var(--bg-overlay)',
                         transition: 'background 0.2s',
                       }}
                     />
@@ -479,7 +750,7 @@ export default function Settings() {
                         width: '16px',
                         height: '16px',
                         borderRadius: '50%',
-                        backgroundColor: '#fff',
+                        backgroundColor: 'var(--tx-1)',
                         transition: 'left 0.2s',
                       }}
                     />
@@ -539,8 +810,8 @@ export default function Settings() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-primary">Upgrade Plan</button>
-                <button className="btn-ghost">Manage Payment Method</button>
+                <button className="btn-primary" onClick={handleUpgradePlan}>Upgrade Plan</button>
+                <button className="btn-ghost" onClick={handleManagePaymentMethod}>Manage Payment Method</button>
               </div>
             </div>
 
@@ -613,12 +884,12 @@ export default function Settings() {
                       </span>
                     )}
                     {int.connected && (
-                      <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }}>
+                      <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleConfigureIntegration(int.name)}>
                         Configure
                       </button>
                     )}
                     {!int.connected && (
-                      <button className="btn-primary" style={{ padding: '4px 8px', fontSize: '12px' }}>
+                      <button className="btn-primary" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleConnectIntegration(int.name)}>
                         Connect
                       </button>
                     )}
@@ -672,7 +943,7 @@ export default function Settings() {
                 />
               </div>
 
-              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleUpdatePassword}>
                 <Check size={16} /> Update Password
               </button>
             </div>
@@ -701,7 +972,7 @@ export default function Settings() {
                       position: 'absolute',
                       inset: 0,
                       borderRadius: '10px',
-                      backgroundColor: security.twoFactorEnabled ? 'var(--red)' : 'var(--bg-overlay)',
+                      backgroundColor: security.twoFactorEnabled ? 'var(--accent)' : 'var(--bg-overlay)',
                       transition: 'background 0.2s',
                     }}
                   />
@@ -713,7 +984,7 @@ export default function Settings() {
                       width: '16px',
                       height: '16px',
                       borderRadius: '50%',
-                      backgroundColor: '#fff',
+                      backgroundColor: 'var(--tx-1)',
                       transition: 'left 0.2s',
                     }}
                   />
@@ -745,7 +1016,7 @@ export default function Settings() {
                         <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--tx-2)' }}>{session.location}</td>
                         <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--tx-2)' }}>{session.lastActive}</td>
                         <td style={{ padding: '12px 16px', fontSize: '13px' }}>
-                          <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--tx-3)' }}>
+                          <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--tx-3)' }} onClick={() => handleSignOutSession(session.id)}>
                             Sign Out
                           </button>
                         </td>
@@ -755,7 +1026,7 @@ export default function Settings() {
                 </table>
               </div>
 
-              <button className="btn-ghost" style={{ marginTop: '12px', color: 'var(--red)', borderColor: 'var(--red)' }}>
+              <button className="btn-ghost" style={{ marginTop: '12px', color: 'var(--red)', borderColor: 'var(--red)' }} onClick={handleSignOutAllDevices}>
                 <LogOut size={14} style={{ display: 'inline-block', marginRight: '6px' }} />
                 Sign Out All Devices
               </button>
@@ -830,7 +1101,7 @@ export default function Settings() {
                       position: 'absolute',
                       inset: 0,
                       borderRadius: '10px',
-                      backgroundColor: appearance.compactMode ? 'var(--red)' : 'var(--bg-overlay)',
+                      backgroundColor: appearance.compactMode ? 'var(--accent)' : 'var(--bg-overlay)',
                       transition: 'background 0.2s',
                     }}
                   />
@@ -842,7 +1113,7 @@ export default function Settings() {
                       width: '16px',
                       height: '16px',
                       borderRadius: '50%',
-                      backgroundColor: '#fff',
+                      backgroundColor: 'var(--tx-1)',
                       transition: 'left 0.2s',
                     }}
                   />
@@ -933,10 +1204,42 @@ export default function Settings() {
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn-primary" style={{ flex: 1 }}>
+              <button className="btn-primary" style={{ flex: 1 }} onClick={handleSendInvite}>
                 Send Invite
               </button>
               <button className="btn-ghost" onClick={() => setShowInviteModal(false)} style={{ flex: 1 }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowDeleteConfirm(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ padding: '20px', maxWidth: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--red)' }}>Delete Account</h3>
+              <button onClick={() => setShowDeleteConfirm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ fontSize: '14px', color: 'var(--tx-2)', marginBottom: '12px' }}>
+                Are you sure you want to delete your account? This action is permanent and cannot be undone.
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--tx-3)' }}>
+                All your data, including team memberships, settings, and integrations will be permanently deleted.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn-ghost" style={{ flex: 1, color: 'var(--red)', borderColor: 'var(--red)' }} onClick={confirmDeleteAccount}>
+                Delete Account
+              </button>
+              <button className="btn-primary" style={{ flex: 1 }} onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </button>
             </div>

@@ -125,27 +125,27 @@ const [tickets, setTickets] = useState([]);
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{"Title"}</h1>
-          <p className="mt-1">{tickets.length} {"Title".toLowerCase()}</p>
+          <h1 className="text-2xl font-bold">Support Tickets</h1>
+          <p className="mt-1">{tickets.length} tickets</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-ticket-btn">
               <Plus size={18} className="mr-2" />
-              {"Create New Ticket"}
+              Create New Ticket
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{"Create New Ticket"}</DialogTitle>
+              <DialogTitle>Create New Ticket</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>{"Subject"} *</Label>
+                <Label>Subject *</Label>
                 <Input
                   value={formData.subject}
                   onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder={"Subject Placeholder"}
+                  placeholder="Enter ticket subject"
                   className="mt-1.5"
                   data-testid="ticket-subject-input"
                 />
@@ -153,16 +153,16 @@ const [tickets, setTickets] = useState([]);
               {hasRole('Admin', 'Manager') && (
                 <>
                   <div>
-                    <Label>{"Client"} ({"Optional"})</Label>
-                    <Select 
-                      value={formData.client_id} 
+                    <Label>Client (Optional)</Label>
+                    <Select
+                      value={formData.client_id}
                       onValueChange={(v) => setFormData(prev => ({ ...prev, client_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder={"Select Client"} />
+                        <SelectValue placeholder="Select a client" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">{"None"}</SelectItem>
+                        <SelectItem value="__none__">None</SelectItem>
                         {clients.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
@@ -170,16 +170,16 @@ const [tickets, setTickets] = useState([]);
                     </Select>
                   </div>
                   <div>
-                    <Label>{"Related Order"} ({"Optional"})</Label>
-                    <Select 
-                      value={formData.related_order_id} 
+                    <Label>Related Order (Optional)</Label>
+                    <Select
+                      value={formData.related_order_id}
                       onValueChange={(v) => setFormData(prev => ({ ...prev, related_order_id: v }))}
                     >
                       <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder={"Link To Order"} />
+                        <SelectValue placeholder="Link to an order" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">{"None"}</SelectItem>
+                        <SelectItem value="__none__">None</SelectItem>
                         {orders.map(o => (
                           <SelectItem key={o.id} value={o.id}>{o.order_code} - {o.title}</SelectItem>
                         ))}
@@ -189,16 +189,16 @@ const [tickets, setTickets] = useState([]);
                 </>
               )}
               <div>
-                <Label>{"Initial Message"} ({"Optional"})</Label>
+                <Label>Initial Message (Optional)</Label>
                 <Textarea
                   value={formData.message_body}
                   onChange={(e) => setFormData(prev => ({ ...prev, message_body: e.target.value }))}
-                  placeholder={"Describe Issue"}
+                  placeholder="Describe the issue or provide details"
                   className="mt-1.5"
                 />
               </div>
               <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">
-                {"Create New Ticket"}
+                Create New Ticket
               </Button>
             </form>
           </DialogContent>
@@ -212,7 +212,7 @@ const [tickets, setTickets] = useState([]);
             <div className="relative flex-1">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" />
               <Input
-                placeholder={"Search Placeholder"}
+                placeholder="Search by ticket code or subject..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -221,10 +221,10 @@ const [tickets, setTickets] = useState([]);
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40" data-testid="status-filter">
-                <SelectValue placeholder={"All Statuses"} />
+                <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{"All Statuses"}</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {TICKET_STATUSES.map(s => (
                   <SelectItem key={s} value={s}>{s.toLowerCase()}</SelectItem>
                 ))}
@@ -249,12 +249,12 @@ const [tickets, setTickets] = useState([]);
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>{"Ticket"}</th>
-                  <th>{"Client"}</th>
-                  <th>{"Linked Order"}</th>
-                  <th>{"Status"}</th>
-                  <th>{"Owner"}</th>
-                  <th>{"Updated"}</th>
+                  <th>Ticket</th>
+                  <th>Client</th>
+                  <th>Linked Order</th>
+                  <th>Status</th>
+                  <th>Owner</th>
+                  <th>Updated</th>
                 </tr>
               </thead>
               <tbody>

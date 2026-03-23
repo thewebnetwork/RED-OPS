@@ -11,18 +11,18 @@ import axios from 'axios';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok  = () => localStorage.getItem('token');
 const ax   = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
-const health = s => s >= 70 ? '#22c55e' : s >= 40 ? '#f59e0b' : '#ef4444';
+const health = s => s >= 70 ? 'var(--green)' : s >= 40 ? 'var(--yellow)' : 'var(--red)';
 const PRIORITY_COLORS = { Urgent:'#ef4444', High:'#f59e0b', Normal:'var(--tx-2)', Low:'var(--tx-3)' };
 
 function PulseCard({ icon: Icon, label, value, sub, color='var(--red)', trend }) {
   return (
     <div className="metric-card">
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-        <div style={{ width:32, height:32, background:`${color}22`, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <div style={{ width:32, height:32, background:`${color}22`, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center' }} className="icon-box">
           <Icon size={15} style={{ color }} />
         </div>
         {trend !== undefined && (
-          <span style={{ fontSize:11, color: trend >= 0 ? '#22c55e' : '#ef4444', fontWeight:600 }}>
+          <span style={{ fontSize:11, color: trend >= 0 ? 'var(--green)' : 'var(--red)', fontWeight:600 }}>
             {trend >= 0 ? '+' : ''}{trend}%
           </span>
         )}
@@ -52,58 +52,67 @@ function QuickAction({ icon: Icon, label, to, color='var(--red)' }) {
   );
 }
 
-const MOCK_ACTIVITY = [
-  { id:1, type:'task',    text:'Taryn completed "April Ad Creative Pack — final round"',   time:'2 min ago' },
-  { id:2, type:'request', text:'New request submitted — Video Edit (Thompson RE)',          time:'14 min ago' },
-  { id:3, type:'file',    text:'Lucca uploaded 3 files to "Dani K. May Campaign"',         time:'38 min ago' },
-  { id:4, type:'task',    text:'Vitto closed "Set up GHL pipeline — Burnham"',             time:'1 hr ago' },
-  { id:5, type:'client',  text:'New client onboarded — Riverside Realty Group',            time:'2 hrs ago' },
-  { id:6, type:'request', text:'Revision requested — Email Copy (Apex Home Group)',        time:'3 hrs ago' },
-  { id:7, type:'task',    text:'Lucca completed "Design thumbnail set — Apex May batch"',  time:'4 hrs ago' },
-];
-
-const MOCK_CLIENTS = [
-  { id:1, name:'Thompson Real Estate',   mrr:2500, score:82, open:2, last:'Today' },
-  { id:2, name:'Riverside Realty Group', mrr:1200, score:91, open:1, last:'Yesterday' },
-  { id:3, name:'Apex Home Group',        mrr:3800, score:55, open:4, last:'5 days ago' },
-  { id:4, name:'Dani K. Real Estate',    mrr:2500, score:38, open:0, last:'12 days ago' },
-  { id:5, name:'Burnham & Associates',   mrr:1200, score:76, open:1, last:'2 days ago' },
-];
-
-const MOCK_TASKS = [
-  { _id:'t1', title:'Review April ad creative — Thompson RE',     priority:'Urgent', status:'In Progress' },
-  { _id:'t2', title:'Write email sequence — Riverside campaign',  priority:'High',   status:'Todo' },
-  { _id:'t3', title:'Record Loom walkthrough — Burnham strategy', priority:'Normal', status:'Todo' },
-  { _id:'t4', title:'Update GHL pipeline — Apex Home Group',      priority:'Normal', status:'Backlog' },
-  { _id:'t5', title:'QA deliverables — Dani K. package',          priority:'High',   status:'In Review' },
-];
 
 export default function CommandCenter() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tasks, setTasks]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [doneIds, setDoneIds] = useState(new Set());
-  const [pulse, setPulse]     = useState({ requests:3, overdue:2, utilization:68, mrr:18400, target:22000 });
+  const [tasks, setTasks]       = useState([]);
+  const [clients, setClients]   = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [doneIds, setDoneIds]   = useState(new Set());
+  const [pulse, setPulse]       = useState({ requests:0, overdue:0, utilization:0, mrr:0, target:0 });
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const firstName = user?.name?.split(' ')[0] || 'Vitto';
+  const firstName = user?.name?.split(' ')[0] || 'there';
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [tRes, dRes] = await Promise.allSettled([
-          ax().get(`${API}/tasks?limit=6`),
-          ax().get(`${API}/dashboard`),
+        const instance = ax();
+        const [tRes, cRes, aRes, dRes] = await Promise.allSettled([
+          instance.get(`${API}/tasks?limit=6`),
+          instance.get(`${API}/organizations/me/current/members`),
+          instance.get(`${API}/dashboard/activity?limit=10`),
+          instance.get(`${API}/dashboard/financial-stats`),
         ]);
+
+        // Load tasks
         if (tRes.status === 'fulfilled') {
           const d = tRes.value.data;
           setTasks(Array.isArray(d) ? d : d?.items || []);
         }
+
+        // Load clients/members
+        if (cRes.status === 'fulfilled') {
+          const d = cRes.value.data;
+          setClients(Array.isArray(d) ? d : d?.members || d?.items || []);
+        }
+
+        // Load activity
+        if (aRes.status === 'fulfilled') {
+          const d = aRes.value.data;
+          const items = Array.isArray(d) ? d : d?.activity || [];
+          // Transform order data to activity format
+          setActivity(items.map((item, idx) => ({
+            id: item.id || item._id || idx,
+            type: item.request_type ? 'request' : 'task',
+            text: item.title || item.order_code || '',
+            time: item.updated_at ? formatTimeAgo(new Date(item.updated_at)) : 'recently',
+          })));
+        }
+
+        // Load financial stats
         if (dRes.status === 'fulfilled') {
           const d = dRes.value.data;
-          setPulse({ requests:d.new_requests_today??3, overdue:d.overdue_tasks??2, utilization:d.team_utilization??68, mrr:d.mrr??18400, target:d.mrr_target??22000 });
+          setPulse({
+            requests: d.requests_mtd ?? 0,
+            overdue: d.overdue ?? 0,
+            utilization: d.team_utilization ?? 0,
+            mrr: d.mrr ?? 0,
+            target: d.mrr_target ?? 22000,
+          });
         }
       } catch(_) {}
       setLoading(false);
@@ -111,8 +120,18 @@ export default function CommandCenter() {
     load();
   }, []);
 
-  const dt = tasks.length > 0 ? tasks : MOCK_TASKS;
-  const mrrPct = Math.round((pulse.mrr / pulse.target) * 100);
+  const formatTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  const mrrPct = pulse.target > 0 ? Math.round((pulse.mrr / pulse.target) * 100) : 0;
   const toggleTask = id => setDoneIds(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
 
   return (
@@ -163,13 +182,15 @@ export default function CommandCenter() {
               All <ArrowRight size={10}/>
             </button>
           </div>
-          {loading ? <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div> :
-            dt.slice(0,5).map(t => {
+          {loading ? (
+            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+          ) : tasks.length > 0 ? (
+            tasks.slice(0,5).map(t => {
               const done = doneIds.has(t._id) || t.status==='Done';
               return (
                 <div key={t._id} style={{ display:'flex', alignItems:'center', gap:9, padding:'7px 0', borderBottom:'1px solid var(--border)' }}>
-                  <button onClick={() => toggleTask(t._id)} style={{ background:'none', border:'none', cursor:'pointer', color:done?'#22c55e':'var(--tx-3)', padding:0, flexShrink:0, display:'flex' }}>
-                    {done ? <CheckCircle2 size={14}/> : <Circle size={14}/>}
+                  <button onClick={() => toggleTask(t._id)} style={{ background:'none', border:'none', cursor:'pointer', color:done?'var(--green)':'var(--tx-3)', padding:0, flexShrink:0, display:'flex' }}>
+                    {done ? <CheckCircle2 size={14} style={{color:'var(--green)'}}/> : <Circle size={14}/>}
                   </button>
                   <span style={{ flex:1, fontSize:12.5, color:done?'var(--tx-3)':'var(--tx-1)', textDecoration:done?'line-through':'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                     {t.title}
@@ -178,7 +199,11 @@ export default function CommandCenter() {
                 </div>
               );
             })
-          }
+          ) : (
+            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'12px 0',textAlign:'center'}}>
+              No tasks yet
+            </div>
+          )}
           <button onClick={() => navigate('/tasks?new=1')} style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 0 0', color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer', fontSize:12 }}>
             <Plus size={12}/> Add task
           </button>
@@ -187,59 +212,76 @@ export default function CommandCenter() {
         {/* Clients */}
         <div className="card" style={{ padding:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-            <span style={{ fontSize:13, fontWeight:700 }}>Active Clients</span>
+            <span style={{ fontSize:13, fontWeight:700 }}>Team Members</span>
             <button onClick={() => navigate('/clients')} style={{ display:'flex', alignItems:'center', gap:3, fontSize:11.5, color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer' }}>
               All <ArrowRight size={10}/>
             </button>
           </div>
-          {MOCK_CLIENTS.map(c => (
-            <div key={c.id} onClick={() => navigate('/clients')} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid var(--border)', cursor:'pointer' }}
-              onMouseEnter={e=>e.currentTarget.style.opacity='.75'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
-              <div style={{ width:7, height:7, borderRadius:'50%', background:health(c.score), flexShrink:0 }}/>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontSize:12.5, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.name}</div>
-                <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:1 }}>{c.open} open · {c.last}</div>
+          {loading ? (
+            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+          ) : clients.length > 0 ? (
+            clients.slice(0, 5).map(c => (
+              <div key={c.user_id || c.id} onClick={() => navigate('/clients')} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid var(--border)', cursor:'pointer' }}
+                onMouseEnter={e=>e.currentTarget.style.opacity='.75'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                <div style={{ width:7, height:7, borderRadius:'50%', background:'var(--green)', flexShrink:0 }}/>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:12.5, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.name || c.email}</div>
+                  <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:1 }}>{c.org_role || 'Member'}</div>
+                </div>
               </div>
-              <span style={{ fontSize:11.5, color:'var(--tx-3)', flexShrink:0 }}>${c.mrr.toLocaleString()}</span>
+            ))
+          ) : (
+            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'12px 0',textAlign:'center'}}>
+              No team members yet
             </div>
-          ))}
+          )}
           <button onClick={() => navigate('/clients?new=1')} style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 0 0', color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer', fontSize:12 }}>
-            <Plus size={12}/> Add client
+            <Plus size={12}/> Add member
           </button>
         </div>
 
         {/* Activity */}
         <div className="card" style={{ padding:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-            <span style={{ fontSize:13, fontWeight:700 }}>Team Activity</span>
-            <div style={{ width:7, height:7, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 5px #22c55e80' }}/>
+            <span style={{ fontSize:13, fontWeight:700 }}>Recent Activity</span>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 5px var(--green)80' }}/>
           </div>
-          {MOCK_ACTIVITY.map(e => {
-            const icons = { task:<CheckSquare size={12}/>, request:<FileText size={12}/>, file:<Package size={12}/>, client:<UserPlus size={12}/> };
-            return (
-              <div key={e.id} style={{ display:'flex', gap:9, padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
-                <div style={{ width:22, height:22, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:5, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-3)', flexShrink:0, marginTop:1 }}>
-                  {icons[e.type]||<Activity size={12}/>}
+          {loading ? (
+            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+          ) : activity.length > 0 ? (
+            activity.slice(0, 6).map(e => {
+              const icons = { task:<CheckSquare size={12}/>, request:<FileText size={12}/>, file:<Package size={12}/>, client:<UserPlus size={12}/> };
+              return (
+                <div key={e.id} style={{ display:'flex', gap:9, padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
+                  <div style={{ width:22, height:22, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:5, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-3)', flexShrink:0, marginTop:1 }}>
+                    {icons[e.type]||<Activity size={12}/>}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:12, color:'var(--tx-1)', lineHeight:1.4 }}>{e.text}</div>
+                    <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:2 }}>{e.time}</div>
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize:12, color:'var(--tx-1)', lineHeight:1.4 }}>{e.text}</div>
-                  <div style={{ fontSize:10.5, color:'var(--tx-3)', marginTop:2 }}>{e.time}</div>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'12px 0',textAlign:'center'}}>
+              No recent activity
+            </div>
+          )}
         </div>
       </div>
 
       {/* At-risk */}
-      <div className="insight danger" style={{ marginTop:14 }}>
-        <AlertCircle size={14} style={{ color:'#ef4444', flexShrink:0 }}/>
-        <span style={{ flex:1, fontSize:13 }}>
-          <strong style={{ color:'var(--tx-1)' }}>2 clients need attention</strong>
-          <span style={{ color:'var(--tx-2)' }}> — Dani K. hasn't received a delivery in 12 days. Apex has 4 open unassigned requests.</span>
-        </span>
-        <button onClick={() => navigate('/clients')} className="btn-ghost btn-sm">Review</button>
-      </div>
+      {pulse.overdue > 0 && (
+        <div className="insight danger" style={{ marginTop:14 }}>
+          <AlertCircle size={14} style={{ color:'var(--red)', flexShrink:0 }}/>
+          <span style={{ flex:1, fontSize:13 }}>
+            <strong style={{ color:'var(--tx-1)' }}>{pulse.overdue} overdue item{pulse.overdue !== 1 ? 's' : ''}</strong>
+            <span style={{ color:'var(--tx-2)' }}> — Review and prioritize these urgent tasks.</span>
+          </span>
+          <button onClick={() => navigate('/tasks')} className="btn-ghost btn-sm">Review</button>
+        </div>
+      )}
 
     </div>
   );

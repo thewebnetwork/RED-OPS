@@ -298,10 +298,10 @@ const [categoriesL1, setCategoriesL1] = useState([]);
     <div className="space-y-6 animate-fade-in" data-testid="categories-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{"Title"}</h1>
-          <p className="mt-1">{"Description"}</p>
+          <h1 className="text-2xl font-bold">{"Categories"}</h1>
+          <p className="mt-1">{"Manage request categories (2-level hierarchy)"}</p>
         </div>
-        <Button 
+        <Button
           className="bg-rose-600 hover:bg-rose-700"
           onClick={() => openDialog('l1')}
           data-testid="add-category-l1-btn"
@@ -317,13 +317,13 @@ const [categoriesL1, setCategoriesL1] = useState([]);
           <CardHeader className="border-b pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <FolderTree size={18} className="text-rose-600" />
-              {"Level1 Categories"}
+              {"Level 1 Categories"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {categoriesL1.length === 0 ? (
               <div className="p-6 text-center">
-                {"No Categories Yet"}
+                {"No categories yet"}
               </div>
             ) : (
               <div className="divide-y">
@@ -403,11 +403,11 @@ const [categoriesL1, setCategoriesL1] = useState([]);
             <CardContent className="p-0">
               {!selectedL1 ? (
                 <div className="p-12 text-center">
-                  {"Select Category To View Sub"}
+                  {"Select a category to view subcategories"}
                 </div>
               ) : categoriesL2.length === 0 ? (
                 <div className="p-12 text-center">
-                  {"No Subcategories Yet"}
+                  {"No subcategories yet"}
                 </div>
               ) : (
                 <div className="divide-y">
@@ -458,12 +458,12 @@ const [categoriesL1, setCategoriesL1] = useState([]);
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? "Edit" : "Create"} {dialogType === 'l1' ? "Title" : "Subcategory"}
+              {editingCategory ? "Edit" : "Create"} {dialogType === 'l1' ? "Category" : "Subcategory"}
             </DialogTitle>
             <DialogDescription>
-              {dialogType === 'l1' 
-                ? "Level1 Description" 
-                : "Level2 Description"
+              {dialogType === 'l1'
+                ? "Top-level category for grouping"
+                : "Subcategory under a parent category"
               }
             </DialogDescription>
           </DialogHeader>
@@ -473,7 +473,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={"Category Name"}
+                placeholder={"Category name"}
                 className="mt-1.5"
                 data-testid="category-name-input"
               />
@@ -530,8 +530,8 @@ const [categoriesL1, setCategoriesL1] = useState([]);
             {dialogType === 'l1' && (
               <div>
                 <Label>{"Icon"}</Label>
-                <Select 
-                  value={formData.icon} 
+                <Select
+                  value={formData.icon}
                   onValueChange={(v) => setFormData(prev => ({ ...prev, icon: v }))}
                 >
                   <SelectTrigger className="mt-1.5">
@@ -557,13 +557,13 @@ const [categoriesL1, setCategoriesL1] = useState([]);
             {dialogType === 'l2' && (
               <>
                 <div>
-                  <Label>{"Parent Category"} {editingCategory && <span className="text-xs ml-1">({"Change To Move"})</span>}</Label>
-                  <Select 
-                    value={formData.category_l1_id} 
+                  <Label>{"Parent Category"} {editingCategory && <span className="text-xs ml-1">({"change to move"})</span>}</Label>
+                  <Select
+                    value={formData.category_l1_id}
                     onValueChange={(v) => setFormData(prev => ({ ...prev, category_l1_id: v }))}
                   >
                     <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder={"Select Parent"} />
+                      <SelectValue placeholder={"Select parent category"} />
                     </SelectTrigger>
                     <SelectContent>
                       {categoriesL1.map(cat => (
@@ -573,7 +573,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
                   </Select>
                   {editingCategory && formData.category_l1_id !== editingCategory.category_l1_id && (
                     <p className="text-xs text-amber-600 mt-1">
-                      {"Subcategory Will Be Moved"}
+                      {"This subcategory will be moved to a different parent category"}
                     </p>
                   )}
                 </div>
@@ -591,9 +591,9 @@ const [categoriesL1, setCategoriesL1] = useState([]);
       <AlertDialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
         <AlertDialogContent data-testid="unsaved-changes-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>{"Unsaved Changes"}</AlertDialogTitle>
+            <AlertDialogTitle>{"Unsaved changes"}</AlertDialogTitle>
             <AlertDialogDescription>
-              {"Unsaved Changes Description"}
+              {"You have unsaved changes. Save before leaving?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -605,7 +605,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
               className="bg-slate-600 hover:bg-slate-700"
               data-testid="leave-btn"
             >
-              {"Leave Without Saving"}
+              {"Leave without saving"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

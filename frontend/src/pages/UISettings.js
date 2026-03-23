@@ -148,7 +148,7 @@ const [settings, setSettings] = useState([]);
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold">{"Settings"} - UI Customization</h1>
+          <h1 className="text-2xl font-bold">UI Customization</h1>
           <p className="mt-1">Customize text, labels, and messages across the platform</p>
         </div>
         <div className="flex gap-2">

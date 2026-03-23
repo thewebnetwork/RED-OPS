@@ -19,24 +19,10 @@ import {
   MessageSquare,
 } from 'lucide-react';
 
-// ── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_REQUESTS = [
-  { id:'RRG-00001', title:'Thompson RE — April Ad Creative',   client:'Thompson Realty',     service:'Video Editing',    priority:'Urgent', assignee:{ name:'Taryn Pessanha', avatar:'TP', color:'#a855f7' }, created_at:'2026-03-01', due_date:'2026-03-22', stage:'In Progress',    description:'Create 3 promotional videos for spring listing campaign.' },
-  { id:'RRG-00002', title:'Dani K. Blog Post Series',          client:'Dani K. Coaching',    service:'Copywriting',      priority:'High',   assignee:{ name:'Sarah Chen',     avatar:'SC', color:'#22c55e' }, created_at:'2026-03-05', due_date:'2026-03-28', stage:'Pending Review', description:'5 long-form blog posts about wellness and transformation.' },
-  { id:'RRG-00003', title:'Riverside Realty Social Pack',      client:'Riverside Realty',    service:'Graphic Design',   priority:'High',   assignee:{ name:'Marcus Obi',     avatar:'MO', color:'#f59e0b' }, created_at:'2026-03-08', due_date:'2026-03-30', stage:'Assigned',       description:'Design 20 social media graphics for the monthly campaign.' },
-  { id:'RRG-00004', title:'Metro Bank Email Nurture',          client:'Metro Financial',     service:'Email Sequence',   priority:'Normal', assignee:{ name:'Jordan Kim',     avatar:'JK', color:'#3b82f6' }, created_at:'2026-03-10', due_date:'2026-04-05', stage:'Submitted',      description:'8-email nurture sequence for new account holders onboarding.' },
-  { id:'RRG-00005', title:'Verde Cafe Meta Ads Q2',            client:'Verde Cafe',          service:'Meta Ads Setup',   priority:'High',   assignee:{ name:'Lucca Rossini',  avatar:'LR', color:'#3b82f6' }, created_at:'2026-03-03', due_date:'2026-03-26', stage:'In Progress',    description:'Full Meta Ads campaign setup and optimization for Q2 growth.' },
-  { id:'RRG-00006', title:'Coastal Living Feature Video',      client:'Coastal Living Mag',  service:'Video Editing',    priority:'Urgent', assignee:{ name:'Taryn Pessanha', avatar:'TP', color:'#a855f7' }, created_at:'2026-03-15', due_date:'2026-03-21', stage:'Revision',       description:'Edit and color grade 2-minute feature video — needs revised intro.' },
-  { id:'RRG-00007', title:'Bright Futures Landing Page Copy',  client:'Bright Futures',      service:'Copywriting',      priority:'Normal', assignee:{ name:'Sarah Chen',     avatar:'SC', color:'#22c55e' }, created_at:'2026-02-28', due_date:'2026-03-31', stage:'Delivered',      description:'Landing page copy focused on spring enrollment campaign.' },
-  { id:'RRG-00008', title:'Luxury Spa Brand Guidelines',       client:'Serenity Spa',        service:'Graphic Design',   priority:'High',   assignee:{ name:'Marcus Obi',     avatar:'MO', color:'#f59e0b' }, created_at:'2026-03-02', due_date:'2026-04-10', stage:'In Progress',    description:'Full brand guidelines, colour system and typography spec.' },
-  { id:'RRG-00009', title:'Summit Events Social Calendar',     client:'Summit Events',       service:'Social Media Pack',priority:'Low',    assignee:{ name:'Jordan Kim',     avatar:'JK', color:'#3b82f6' }, created_at:'2026-03-09', due_date:'2026-04-15', stage:'Assigned',       description:'30 social media posts for the April content calendar.' },
-  { id:'RRG-00010', title:'TechStart Pitch Deck Redesign',     client:'TechStart Ventures',  service:'Graphic Design',   priority:'Normal', assignee:{ name:'Marcus Obi',     avatar:'MO', color:'#f59e0b' }, created_at:'2026-03-12', due_date:'2026-03-29', stage:'Pending Review', description:'Redesign investor pitch deck with updated 2026 branding.' },
-  { id:'RRG-00011', title:'Urban Bistro Website Copy',         client:'Urban Bistro',        service:'Copywriting',      priority:'Low',    assignee:{ name:'Sarah Chen',     avatar:'SC', color:'#22c55e' }, created_at:'2026-03-01', due_date:'2026-04-20', stage:'Closed',         description:'Rewrite website copy emphasising farm-to-table concept.' },
-  { id:'RRG-00012', title:'Fitness Plus App Promo Video',      client:'Fitness Plus',        service:'Video Editing',    priority:'High',   assignee:{ name:'Taryn Pessanha', avatar:'TP', color:'#a855f7' }, created_at:'2026-03-17', due_date:'2026-04-02', stage:'Submitted',      description:'30-second promotional video for new app launch campaign.' },
-  { id:'RRG-00013', title:'Green Energy Blog Series',          client:'Green Energy Co.',    service:'Copywriting',      priority:'Normal', assignee:{ name:'Sarah Chen',     avatar:'SC', color:'#22c55e' }, created_at:'2026-02-25', due_date:'2026-03-27', stage:'Delivered',      description:'4 in-depth blog posts on renewable energy for B2B audience.' },
-  { id:'RRG-00014', title:'Apex Marketing Q2 Ads Creative',   client:'Apex Marketing',      service:'Graphic Design',   priority:'High',   assignee:{ name:'Marcus Obi',     avatar:'MO', color:'#f59e0b' }, created_at:'2026-03-18', due_date:'2026-04-01', stage:'Submitted',      description:'Full creative set for Q2 paid ad campaigns — 12 assets.' },
-  { id:'RRG-00015', title:'Burnham Strategy Presentation',    client:'Burnham Capital',     service:'Graphic Design',   priority:'Urgent', assignee:{ name:'Marcus Obi',     avatar:'MO', color:'#f59e0b' }, created_at:'2026-03-19', due_date:'2026-03-24', stage:'In Progress',    description:'Investor presentation for Series A fundraise.' },
-];
+// ── API Configuration ────────────────────────────────────────────────────────────
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const getToken = () => localStorage.getItem('token');
+const getHeaders = () => ({ Authorization: `Bearer ${getToken()}` });
 
 const STAGES = ['Submitted','Assigned','In Progress','Pending Review','Revision','Delivered','Closed'];
 
@@ -155,7 +141,8 @@ function DroppableColumn({ stage, children, isEmpty }) {
 
 // ── Main component ───────────────────────────────────────────────────────────
 export default function Requests() {
-  const [requests,    setRequests]    = useState(MOCK_REQUESTS);
+  const [requests,    setRequests]    = useState([]);
+  const [loading,     setLoading]     = useState(true);
   const [view,        setView]        = useState('kanban');
   const [search,      setSearch]      = useState('');
   const [priFilter,   setPriFilter]   = useState('');
@@ -165,8 +152,43 @@ export default function Requests() {
   const [form, setForm] = useState({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
 
   useEffect(() => {
+    fetchRequests();
     if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true);
   }, []);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API}/tasks`, {
+        headers: getHeaders(),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      // Transform tasks to requests format
+      const transformed = data.map(task => ({
+        id: task.id,
+        title: task.title,
+        client: task.project_name || 'Unassigned Project',
+        service: task.task_type || 'Task',
+        priority: (['Urgent', 'High', 'Normal', 'Low'].includes(task.priority) ? task.priority : 'Normal'),
+        assignee: task.assignee_name ?
+          { name: task.assignee_name, avatar: task.assignee_name.split(' ').map(w => w[0]).join(''), color: '#3b82f6' } :
+          { name: 'Unassigned', avatar: '?', color: '#606060' },
+        created_at: task.created_at ? new Date(task.created_at).toISOString().split('T')[0] : '',
+        due_date: task.due_at ? new Date(task.due_at).toISOString().split('T')[0] : '',
+        stage: task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Submitted',
+        description: task.description || '',
+      }));
+
+      setRequests(transformed);
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err);
+      setRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -208,6 +230,14 @@ export default function Requests() {
     setForm({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
   };
 
+  if (loading) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', flex:1, overflow:'hidden', background:'var(--bg)', alignItems:'center', justifyContent:'center' }}>
+        <div style={{ fontSize:14, color:'var(--tx-3)' }}>Loading requests...</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display:'flex', flexDirection:'column', flex:1, overflow:'hidden', background:'var(--bg)' }}>
 
@@ -216,7 +246,7 @@ export default function Requests() {
         <div>
           <span style={{ fontSize:18, fontWeight:700, color:'var(--tx-1)' }}>Requests</span>
           <span style={{ marginLeft:10, fontSize:12, color:'var(--tx-3)' }}>
-            {filtered.length} total &bull; {open} open{overdue > 0 ? ' · ' : ''}{overdue > 0 && <span style={{ color:'#ef4444' }}>{overdue} overdue</span>}
+            {requests.length === 0 ? 'No requests yet' : `${filtered.length} total · ${open} open${overdue > 0 ? ' · ' : ''}${overdue > 0 ? <span style={{ color:'#ef4444' }}>{overdue} overdue</span> : ''}`}
           </span>
         </div>
 
@@ -252,7 +282,15 @@ export default function Requests() {
       {/* ── Board / Table ── */}
       <div style={{ flex:1, overflow: view === 'kanban' ? 'hidden' : 'auto', display:'flex', flexDirection:'column' }}>
 
-        {view === 'kanban' ? (
+        {requests.length === 0 ? (
+          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16 }}>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:16, fontWeight:600, color:'var(--tx-1)', marginBottom:8 }}>No requests yet</div>
+              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16 }}>Create your first request to get started</div>
+              <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}><Plus size={14} /> New Request</button>
+            </div>
+          </div>
+        ) : view === 'kanban' ? (
           <DndContext
             sensors={sensors}
             onDragStart={handleDragStart}
@@ -292,7 +330,11 @@ export default function Requests() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(req => (
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" style={{ textAlign:'center', padding:'40px', color:'var(--tx-3)' }}>No requests match your filters</td>
+                    </tr>
+                  ) : filtered.map(req => (
                     <tr key={req.id} onClick={() => setSelectedReq(req)} style={{ cursor:'pointer' }}>
                       <td style={{ color:'var(--red)', fontWeight:600, fontSize:12 }}>{req.id}</td>
                       <td style={{ fontWeight:500, maxWidth:220 }}>{req.title}</td>
