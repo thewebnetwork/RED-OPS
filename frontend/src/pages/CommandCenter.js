@@ -61,7 +61,7 @@ export default function CommandCenter() {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [doneIds, setDoneIds]   = useState(new Set());
-  const [pulse, setPulse]       = useState({ requests:0, overdue:0, utilization:0, mrr:0, target:0 });
+  const [pulse, setPulse]       = useState({ requests:0, overdue:0, utilization:0, mrr:0, target:0, sla_on_track:0, sla_breached:0 });
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -111,7 +111,11 @@ export default function CommandCenter() {
             overdue: d.overdue ?? 0,
             utilization: d.team_utilization ?? 0,
             mrr: d.mrr ?? 0,
-            target: d.mrr_target ?? 22000,
+            target: d.mrr_target ?? 0,
+            sla_on_track: d.sla_on_track ?? 0,
+            sla_breached: d.sla_breached ?? 0,
+            requests_trend: d.requests_trend ?? null,
+            mrr_trend: d.mrr_trend ?? null,
           });
         }
       } catch(_) {}
@@ -131,11 +135,11 @@ export default function CommandCenter() {
     return `${days}d ago`;
   };
 
-  const mrrPct = pulse.target > 0 ? Math.round((pulse.mrr / pulse.target) * 100) : 0;
+  const mrrPct = pulse.target > 0 ? Math.round((pulse.mrr / pulse.target) * 100) : null;
   const toggleTask = async (id) => {
     const task = tasks.find(t => (t._id || t.id) === id);
     if (!task) return;
-    const isDone = doneIds.has(id) || task.status === 'done' || task.status === 'Done';
+    const isDone = doneIds.has(id) || ['done','Done','delivered'].includes(task.status);
     const newStatus = isDone ? 'todo' : 'done';
     // Optimistic toggle
     setDoneIds(p => { const n = new Set(p); isDone ? n.delete(id) : n.add(id); return n; });
@@ -168,10 +172,10 @@ export default function CommandCenter() {
 
       {/* Pulse */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
-        <PulseCard icon={FileText}    label="Requests today"   value={pulse.requests}          color='#3b82f6' trend={12} />
-        <PulseCard icon={AlertCircle} label="Overdue items"    value={pulse.overdue}           color='#ef4444' />
-        <PulseCard icon={Users}       label="Team utilization" value={`${pulse.utilization}%`} color='#22c55e' />
-        <PulseCard icon={DollarSign}  label="MRR vs target"    value={`$${pulse.mrr.toLocaleString()}`} sub={`${mrrPct}% of $${pulse.target.toLocaleString()}`} color='var(--red)' trend={8} />
+        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='#3b82f6' trend={pulse.requests_trend} />
+        <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? '#ef4444' : '#22c55e'} />
+        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='#22c55e' />
+        <PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} />
       </div>
 
       {/* Quick actions */}
@@ -199,10 +203,11 @@ export default function CommandCenter() {
             <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
           ) : tasks.length > 0 ? (
             tasks.slice(0,5).map(t => {
-              const done = doneIds.has(t._id) || t.status==='Done';
+              const tid = t._id || t.id;
+              const done = doneIds.has(tid) || ['Done','done','delivered'].includes(t.status);
               return (
-                <div key={t._id} style={{ display:'flex', alignItems:'center', gap:9, padding:'7px 0', borderBottom:'1px solid var(--border)' }}>
-                  <button onClick={() => toggleTask(t._id)} style={{ background:'none', border:'none', cursor:'pointer', color:done?'var(--green)':'var(--tx-3)', padding:0, flexShrink:0, display:'flex' }}>
+                <div key={tid} style={{ display:'flex', alignItems:'center', gap:9, padding:'7px 0', borderBottom:'1px solid var(--border)' }}>
+                  <button onClick={() => toggleTask(tid)} style={{ background:'none', border:'none', cursor:'pointer', color:done?'var(--green)':'var(--tx-3)', padding:0, flexShrink:0, display:'flex' }}>
                     {done ? <CheckCircle2 size={14} style={{color:'var(--green)'}}/> : <Circle size={14}/>}
                   </button>
                   <span style={{ flex:1, fontSize:12.5, color:done?'var(--tx-3)':'var(--tx-1)', textDecoration:done?'line-through':'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>

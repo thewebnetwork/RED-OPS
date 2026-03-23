@@ -254,6 +254,66 @@ export default function ClientHome() {
             </div>
           )}
 
+          {/* Recent Deliverables */}
+          {!loading && requests.filter(r => r.status === 'Delivered').length > 0 && (
+            <div className="card" style={{ padding:'16px 18px' }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:12, display:'flex', alignItems:'center', gap:6 }}>
+                <CheckCircle2 size={13} color="#22c55e" /> Recent Deliverables
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {requests.filter(r => r.status === 'Delivered').slice(0, 4).map((r, i) => (
+                  <div key={r.id || i} onClick={() => navigate(`/requests/${r._id || r.id}`)}
+                    style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', padding:'6px 8px', borderRadius:6, transition:'background .1s' }}
+                    onMouseEnter={e => e.currentTarget.style.background='var(--bg-elevated)'}
+                    onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                    <div style={{ width:28, height:28, borderRadius:6, background:'#22c55e18', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <CheckCircle2 size={12} color="#22c55e" />
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:12, fontWeight:500, color:'var(--tx-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {r.title || r.service_name || 'Delivery'}
+                      </div>
+                      <div style={{ fontSize:10, color:'var(--tx-3)' }}>
+                        {r.delivered_at ? new Date(r.delivered_at).toLocaleDateString('en-CA',{month:'short',day:'numeric'}) : 'Recently'}
+                      </div>
+                    </div>
+                    <ChevronRight size={12} color="var(--tx-3)" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Activity Timeline */}
+          {!loading && requests.length > 0 && (
+            <div className="card" style={{ padding:'16px 18px' }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:12, display:'flex', alignItems:'center', gap:6 }}>
+                <Activity size={13} color="var(--tx-2)" /> Recent Activity
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+                {requests.slice(0, 5).map((r, i) => {
+                  const isLast = i === Math.min(requests.length, 5) - 1;
+                  return (
+                    <div key={r.id || i} style={{ display:'flex', gap:10, paddingBottom: isLast ? 0 : 10 }}>
+                      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', width:16 }}>
+                        <div style={{ width:6, height:6, borderRadius:'50%', background: STATUS_COLORS[r.status] || '#606060', flexShrink:0, marginTop:4 }} />
+                        {!isLast && <div style={{ width:1, flex:1, background:'var(--border)', marginTop:4 }} />}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:12, color:'var(--tx-1)', fontWeight:500, lineHeight:1.3 }}>
+                          {r.title || r.service_name || 'Request'} — <span style={{ color: STATUS_COLORS[r.status] || '#606060', fontWeight:600 }}>{r.status}</span>
+                        </div>
+                        <div style={{ fontSize:10, color:'var(--tx-3)', marginTop:2 }}>
+                          {r.updated_at ? new Date(r.updated_at).toLocaleDateString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Help Card */}
           <div style={{ background:'linear-gradient(135deg, #c92a3e22, #c92a3e08)', border:'1px solid var(--border)', borderRadius:10, padding:'16px 18px' }}>
             <div style={{ fontSize:13, fontWeight:700, color:'var(--tx-1)', marginBottom:4 }}>Need something done?</div>
