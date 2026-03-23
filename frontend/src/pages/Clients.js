@@ -132,7 +132,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
       const tempPass = `RRG-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
       // Create the user account via the real API
-      const res = await axios.post(`${API}/users`, {
+      const res = await ax().post(`${API}/users`, {
         name: form.contact_name,
         email: form.contact_email,
         password: tempPass,
@@ -141,6 +141,14 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
         force_password_change: true,
         force_otp_setup: false,
         send_welcome_email: form.send_invite,
+        company_name: form.name,
+        industry: form.industry,
+        website: form.website,
+        phone: form.contact_phone || form.phone,
+        subscription_plan_name: form.plan,
+        account_manager: form.am,
+        tags: form.tags,
+        notes: form.notes,
       });
 
       const userId = res.data?.id || res.data?._id;

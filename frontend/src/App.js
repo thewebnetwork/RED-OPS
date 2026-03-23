@@ -164,7 +164,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/my-account'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/sops'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests');
     if (!allowed) {
@@ -312,7 +312,7 @@ function AppRoutes() {
       
       {/* ========== CORE APP ROUTES ========== */}
       <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
-      <Route path="/projects" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Projects /></PrivateRoute>} />
+      <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/sops" element={<PrivateRoute><SOPs /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />

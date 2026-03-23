@@ -57,10 +57,12 @@ const NAV_SYSTEM = [
 // Client portal nav (shown only to Media Client role)
 const NAV_CLIENT = [
   { path: '/',             icon: LayoutDashboard, label: 'Dashboard',      roles: ['Media Client'] },
+  { path: '/tasks',        icon: CheckSquare,     label: 'My Tasks',       roles: ['Media Client'] },
+  { path: '/projects',     icon: FolderKanban,    label: 'My Projects',    roles: ['Media Client'] },
   { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
-  { path: '/services',     icon: ShoppingBag,     label: 'Request Services',roles: ['Media Client'] },
-  { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
+  { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
   { path: '/sops',         icon: BookOpen,        label: 'Resources',      roles: ['Media Client'] },
+  { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
 ];
 
 // Command palette items
@@ -152,7 +154,7 @@ export default function Layout({ children }) {
   const closeCmd = useCallback(() => setCmdOpen(false), []);
 
   // Client users only see client-relevant command palette items
-  const clientPaths = ['/', '/services', '/my-requests', '/my-account', '/sops'];
+  const clientPaths = ['/', '/tasks', '/projects', '/services', '/my-requests', '/my-account', '/sops'];
   const cmdBase = isClient ? CMD_ITEMS.filter(i => clientPaths.includes(i.to) || i.to?.startsWith('/my-')) : CMD_ITEMS;
   const filtered = cmdQuery.trim()
     ? cmdBase.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
