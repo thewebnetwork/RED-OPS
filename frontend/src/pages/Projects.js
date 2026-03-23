@@ -164,8 +164,8 @@ function ProjectModal({ project, onClose, onSave, loading }) {
 }
 
 // ── (Legacy) Milestone Manager — moved to ProjectPage.js ─────────────────────
-// Keep minimal version for reference; full implementation in ProjectPage.js
-function _LegacyMilestoneSection({ project, onToggle, onAdd, onDelete }) {
+// eslint-disable-next-line no-unused-vars
+function LegacyMilestoneSection({ project, onToggle, onAdd, onDelete }) {
   const [newLabel, setNewLabel] = useState('');
   const completedMilestones = (project.milestones || []).filter(m => m.done).length;
 
