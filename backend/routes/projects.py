@@ -29,12 +29,29 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-def _get_org_id(user: dict) -> str:
-    """Extract org_id from authenticated user."""
+async def _get_org_id(user: dict) -> str:
+    """Extract org_id from authenticated user. Auto-provisions platform org for admins."""
     org_id = user.get("org_id") or user.get("team_id")
-    if not org_id:
-        raise HTTPException(status_code=400, detail="No organization context. Join or create an organization first.")
-    return org_id
+    if org_id:
+        return org_id
+    if user.get("role") == "Administrator":
+        platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
+        if platform_org:
+            org_id = platform_org["id"]
+        else:
+            import uuid as _uuid
+            from datetime import timezone as _tz
+            org_id = str(_uuid.uuid4())
+            now = datetime.now(_tz.utc).isoformat()
+            await db.organizations.insert_one({
+                "id": org_id, "name": "RRG Platform", "slug": "rrg-platform",
+                "org_type": "platform", "status": "active",
+                "created_by_user_id": user["id"], "created_at": now, "updated_at": now,
+                "members": [{"user_id": user["id"], "role": "owner", "joined_at": now}],
+            })
+        await db.users.update_one({"id": user["id"]}, {"$set": {"org_id": org_id}})
+        return org_id
+    raise HTTPException(status_code=400, detail="No organization context. Join or create an organization first.")
 
 
 def _get_org_role(user: dict) -> str:
@@ -113,7 +130,7 @@ async def create_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Create a new project within the user's org."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):
@@ -176,7 +193,7 @@ async def list_projects(
     current_user: dict = Depends(get_current_user),
 ):
     """List projects in the user's org."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     query = {"org_id": org_id}
 
@@ -207,7 +224,7 @@ async def get_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a single project by ID."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     project = await db.projects.find_one(
         {"id": project_id, "org_id": org_id},
@@ -227,7 +244,7 @@ async def update_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Update a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):
@@ -261,7 +278,7 @@ async def delete_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete a project and optionally its tasks."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if org_role not in ("owner", "admin"):
@@ -292,7 +309,7 @@ async def add_milestone(
     current_user: dict = Depends(get_current_user),
 ):
     """Add a milestone to a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):
@@ -331,7 +348,7 @@ async def toggle_milestone(
     current_user: dict = Depends(get_current_user),
 ):
     """Toggle a milestone's done status."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     project = await db.projects.find_one(
         {"id": project_id, "org_id": org_id},
@@ -370,7 +387,7 @@ async def delete_milestone(
     current_user: dict = Depends(get_current_user),
 ):
     """Remove a milestone from a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):
@@ -399,7 +416,7 @@ async def list_project_tasks(
     current_user: dict = Depends(get_current_user),
 ):
     """List all tasks belonging to a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     # Verify project exists in org
     project = await db.projects.find_one(
@@ -437,7 +454,7 @@ async def add_team_member(
     current_user: dict = Depends(get_current_user),
 ):
     """Add a team member to a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):
@@ -469,7 +486,7 @@ async def remove_team_member(
     current_user: dict = Depends(get_current_user),
 ):
     """Remove a team member from a project."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if not _can_manage_project(org_role):

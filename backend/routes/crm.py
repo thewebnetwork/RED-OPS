@@ -37,12 +37,30 @@ router = APIRouter(prefix="/crm", tags=["CRM"])
 
 # ── HELPERS ──────────────────────────────────────────────────────────
 
-def _get_org_id(user: dict) -> str:
-    """Extract org_id from authenticated user."""
+async def _get_org_id(user: dict) -> str:
+    """Extract org_id from authenticated user. Auto-provisions platform org for admins."""
     org_id = user.get("org_id") or user.get("team_id")
-    if not org_id:
-        raise HTTPException(400, "No organization context. Join or create an organization first.")
-    return org_id
+    if org_id:
+        return org_id
+    # Platform admins without org_id: find or create default platform org
+    if user.get("role") == "Administrator":
+        platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
+        if platform_org:
+            org_id = platform_org["id"]
+        else:
+            import uuid as _uuid
+            org_id = str(_uuid.uuid4())
+            now = datetime.now(timezone.utc).isoformat()
+            await db.organizations.insert_one({
+                "id": org_id, "name": "RRG Platform", "slug": "rrg-platform",
+                "org_type": "platform", "status": "active",
+                "created_by_user_id": user["id"], "created_at": now, "updated_at": now,
+                "members": [{"user_id": user["id"], "role": "owner", "joined_at": now}],
+            })
+        # Stamp org_id on user doc for future calls
+        await db.users.update_one({"id": user["id"]}, {"$set": {"org_id": org_id}})
+        return org_id
+    raise HTTPException(400, "No organization context. Join or create an organization first.")
 
 
 def _get_org_role(user: dict) -> str:
@@ -174,7 +192,7 @@ async def create_contact(
 ):
     """Create a new contact."""
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -218,7 +236,7 @@ async def list_contacts(
     current_user: dict = Depends(get_current_user),
 ):
     """List contacts with filtering."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     query = {"org_id": org_id}
 
@@ -250,7 +268,7 @@ async def get_contact(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a single contact."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     contact = await db.contacts.find_one(
         {"id": contact_id, "org_id": org_id},
@@ -270,7 +288,7 @@ async def update_contact(
     current_user: dict = Depends(get_current_user),
 ):
     """Update a contact."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -303,7 +321,7 @@ async def delete_contact(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete a contact (admin/owner only)."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_delete(role):
@@ -331,7 +349,7 @@ async def add_activity_log(
 ):
     """Add an activity log entry to a contact."""
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     contact = await db.contacts.find_one(
         {"id": contact_id, "org_id": org_id},
@@ -370,7 +388,7 @@ async def create_pipeline(
 ):
     """Create a new pipeline."""
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -400,7 +418,7 @@ async def list_pipelines(
     current_user: dict = Depends(get_current_user),
 ):
     """List all pipelines for the org."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     cursor = db.pipelines.find({"org_id": org_id}, {"_id": 0}).sort("created_at", -1)
     pipelines = []
@@ -416,7 +434,7 @@ async def get_pipeline(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a single pipeline."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     pipeline = await db.pipelines.find_one(
         {"id": pipeline_id, "org_id": org_id},
@@ -436,7 +454,7 @@ async def update_pipeline(
     current_user: dict = Depends(get_current_user),
 ):
     """Update a pipeline."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -473,7 +491,7 @@ async def delete_pipeline(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete a pipeline (admin/owner only)."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_delete(role):
@@ -502,7 +520,7 @@ async def create_deal(
 ):
     """Create a new deal."""
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -570,7 +588,7 @@ async def list_deals(
     current_user: dict = Depends(get_current_user),
 ):
     """List deals with filtering."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     query = {"org_id": org_id}
 
@@ -599,7 +617,7 @@ async def get_deal(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a single deal."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     deal = await db.deals.find_one(
         {"id": deal_id, "org_id": org_id},
@@ -619,7 +637,7 @@ async def update_deal(
     current_user: dict = Depends(get_current_user),
 ):
     """Update a deal."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -676,7 +694,7 @@ async def move_deal(
     current_user: dict = Depends(get_current_user),
 ):
     """Move a deal to a different stage."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -723,7 +741,7 @@ async def delete_deal(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete a deal (admin/owner only)."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_delete(role):
@@ -749,7 +767,7 @@ async def get_pipeline_stats(
     current_user: dict = Depends(get_current_user),
 ):
     """Get pipeline statistics (total deals, value by stage, won/lost counts)."""
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     # Get pipelines
     pipeline_query = {"org_id": org_id}

@@ -47,7 +47,7 @@ export default function SpecialtiesAdmin() {
 
   const fetchSpecialties = async () => {
     try {
-      const response = await axios.geAPI;
+      const response = await axios.get(`${API}/specialties`);
       setSpecialties(response.data);
     } catch (error) {
       toast.error('Failed to fetch specialties');

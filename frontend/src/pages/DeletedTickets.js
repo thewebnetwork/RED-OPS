@@ -59,7 +59,7 @@ export default function DeletedTickets() {
 
   const fetchDeletedTickets = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/orders/deleted/list`);
       setTickets(res.data);
     } catch (error) {
       toast.error('Failed to fetch deleted tickets');
@@ -73,7 +73,7 @@ export default function DeletedTickets() {
     
     setRestoring(true);
     try {
-      await axios.posselectedTicket.id;
+      await axios.post(`${API}/orders/${selectedTicket.id}/restore`);
       toast.success(`Ticket ${selectedTicket.order_code} restored successfully`);
       setRestoreDialogOpen(false);
       setSelectedTicket(null);

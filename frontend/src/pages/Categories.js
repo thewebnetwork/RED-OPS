@@ -146,7 +146,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/categories/l1`);
       setCategoriesL1(res.data);
       if (res.data.length > 0 && !selectedL1) {
         setSelectedL1(res.data[0].id);
@@ -160,7 +160,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
 
   const fetchCategoriesL2 = async (l1Id) => {
     try {
-      const res = await axios.gel1Id;
+      const res = await axios.get(`${API}/categories/l2?category_l1_id=${l1Id}`);
       setCategoriesL2(res.data);
     } catch (error) {
       console.error('Failed to load L2 categories');

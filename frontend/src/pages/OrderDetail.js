@@ -152,7 +152,7 @@ export default function OrderDetail() {
 
   const fetchCancellationReasons = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/orders/cancellation-reasons`);
       setCancellationReasons(res.data.reasons || []);
     } catch (error) {
       console.error('Failed to fetch cancellation reasons');
@@ -166,9 +166,9 @@ export default function OrderDetail() {
   const fetchOrderData = async () => {
     try {
       const [orderRes, messagesRes, filesRes] = await Promise.all([
-        axios.georderId,
-        axios.georderId,
-        axios.georderId
+        axios.get(`${API}/orders/${orderId}`),
+        axios.get(`${API}/orders/${orderId}/messages`),
+        axios.get(`${API}/orders/${orderId}/files`)
       ]);
       setOrder(orderRes.data);
       setMessages(messagesRes.data);
@@ -184,7 +184,7 @@ export default function OrderDetail() {
       
       // Fetch account manager for the requester
       try {
-        const amRes = await axios.georderRes.data.requester_id;
+        const amRes = await axios.get(`${API}/tasks/account-manager/${orderRes.data.requester_id}`);
         setAccountManager(amRes.data?.account_manager || null);
       } catch {
         setAccountManager(null);
@@ -207,7 +207,7 @@ export default function OrderDetail() {
         message_body: newMessage.trim()
       });
       setNewMessage('');
-      const messagesRes = await axios.georderId;
+      const messagesRes = await axios.get(`${API}/orders/${orderId}/messages`);
       setMessages(messagesRes.data);
     } catch (error) {
       toast.error('Failed to send message');
@@ -218,7 +218,7 @@ export default function OrderDetail() {
 
   const handlePickOrder = async () => {
     try {
-      await axios.posorderId;
+      await axios.post(`${API}/orders/${orderId}/pick`);
       toast.success('Order picked successfully!');
       fetchOrderData();
     } catch (error) {
@@ -228,7 +228,7 @@ export default function OrderDetail() {
 
   const handleSubmitForReview = async () => {
     try {
-      await axios.posorderId;
+      await axios.post(`${API}/orders/${orderId}/submit-for-review`);
       toast.success('Order submitted for review');
       fetchOrderData();
     } catch (error) {
@@ -238,7 +238,7 @@ export default function OrderDetail() {
 
   const handleRespondToOrder = async () => {
     try {
-      await axios.posorderId;
+      await axios.post(`${API}/orders/${orderId}/respond`);
       toast.success('Response sent to editor');
       fetchOrderData();
     } catch (error) {
@@ -299,7 +299,7 @@ export default function OrderDetail() {
   // Reassign handlers
   const openReassignDialog = async () => {
     try {
-      const res = await axios.georderId;
+      const res = await axios.get(`${API}/orders/${orderId}/reassign-options`);
       setReassignOptions(res.data);
       setReassignDialogOpen(true);
     } catch (error) {

@@ -27,7 +27,7 @@ export default function SetupOTP() {
     // Get OTP setup data from backend
     const fetchOTPSetup = async () => {
       try {
-        const res = await axios.geAPI;
+        const res = await axios.get(`${API}/auth/otp/setup`);
         setOtpSecret(res.data.secret);
         setOtpUri(res.data.uri);
       } catch (error) {
@@ -81,7 +81,7 @@ export default function SetupOTP() {
   const regenerateSecret = async () => {
     setSetupLoading(true);
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/auth/otp/setup?regenerate=true`);
       setOtpSecret(res.data.secret);
       setOtpUri(res.data.uri);
       toast.success('New secret generated');

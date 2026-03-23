@@ -76,7 +76,7 @@ const [teams, setTeams] = useState([]);
 
   const fetchTeams = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/teams`);
       setTeams(res.data);
       if (res.data.length > 0 && !selectedTeam) {
         setSelectedTeam(res.data[0]);
@@ -91,7 +91,7 @@ const [teams, setTeams] = useState([]);
   const fetchTeamMembers = async (teamId) => {
     setLoadingMembers(true);
     try {
-      const res = await axios.geteamId;
+      const res = await axios.get(`${API}/teams/${teamId}/members`);
       // API returns {team: {...}, members: [...]} - extract members array
       setTeamMembers(res.data.members || []);
     } catch (error) {

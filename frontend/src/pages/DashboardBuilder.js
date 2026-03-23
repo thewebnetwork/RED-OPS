@@ -241,9 +241,9 @@ const navigate = useNavigate();
     setLoading(true);
     try {
       const [dashboardsRes, widgetsRes, rolesRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI
+        axios.get(`${API}/dashboards/list`),
+        axios.get(`${API}/dashboards/widgets`),
+        axios.get(`${API}/roles`)
       ]);
       setDashboards(dashboardsRes.data.dashboards || []);
       setWidgetLibrary(widgetsRes.data || { widgets: [], categories: {} });
@@ -294,7 +294,7 @@ const navigate = useNavigate();
     }
 
     try {
-      await axios.posencodeURIComponent(cloneName);
+      await axios.post(`${API}/dashboards/${selectedDashboard.id}/clone?name=${encodeURIComponent(cloneName)}`);
       toast.success('Dashboard cloned successfully');
       setShowCloneDialog(false);
       setCloneName('');
@@ -391,7 +391,7 @@ const navigate = useNavigate();
     setShowPreviewDialog(true);
     
     try {
-      const res = await axios.gepreviewRole;
+      const res = await axios.get(`${API}/dashboards/${dashboard.id}/preview?role=${previewRole}`);
       setPreviewData(res.data);
     } catch (error) {
       toast.error('Failed to load preview');
@@ -403,7 +403,7 @@ const navigate = useNavigate();
     setPreviewRole(role);
     if (selectedDashboard) {
       try {
-        const res = await axios.gerole;
+        const res = await axios.get(`${API}/dashboards/${selectedDashboard.id}/preview?role=${role}`);
         setPreviewData(res.data);
       } catch (error) {
         toast.error('Failed to load preview');

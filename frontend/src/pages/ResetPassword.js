@@ -34,7 +34,7 @@ export default function ResetPassword() {
 
   const verifyToken = async () => {
     try {
-      const res = await axios.getoken;
+      const res = await axios.get(`${API}/auth/verify-reset-token?token=${token}`);
       setTokenValid(res.data.valid);
       setUserEmail(res.data.email || '');
     } catch (error) {

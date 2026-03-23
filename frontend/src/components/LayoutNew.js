@@ -79,7 +79,7 @@ const { user, logout } = useAuth();
   useEffect(() => {
     const fetchRatingStats = async () => {
       try {
-        const res = await axios.geAPI;
+        const res = await axios.get(`${API}/ratings/my-stats`);
         setRatingStats(res.data);
       } catch (error) {
         // Silently fail

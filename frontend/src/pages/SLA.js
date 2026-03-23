@@ -125,11 +125,11 @@ export default function SLA() {
   const fetchData = async () => {
     try {
       const [slaRes, rolesRes, teamsRes, alertsRes, statsRes] = await Promise.all([
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI.catch(() => ({ data: null }))
+        axios.get(`${API}/sla`).catch(() => ({ data: [] })),
+        axios.get(`${API}/roles`),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/sla-alerts`).catch(() => ({ data: [] })),
+        axios.get(`${API}/sla-alerts/statistics`).catch(() => ({ data: null }))
       ]);
       
       setSlaDefinitions(slaRes.data || []);
@@ -147,7 +147,7 @@ export default function SLA() {
 
   const handleAcknowledgeAlert = async (alertId) => {
     try {
-      await axios.posalertId;
+      await axios.post(`${API}/sla-alerts/${alertId}/acknowledge`);
       setSlaAlerts(prev => prev.map(a => 
         a.id === alertId ? { ...a, acknowledged: true } : a
       ));
@@ -160,8 +160,8 @@ export default function SLA() {
   const handleRefreshAlerts = async () => {
     try {
       const [alertsRes, statsRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI
+        axios.get(`${API}/sla-alerts`),
+        axios.get(`${API}/sla-alerts/statistics`)
       ]);
       setSlaAlerts(alertsRes.data || []);
       setSlaStats(statsRes.data);
@@ -173,7 +173,7 @@ export default function SLA() {
 
   const handleTriggerSlaCheck = async () => {
     try {
-      const res = await axios.posAPI;
+      const res = await axios.post(`${API}/sla-check`);
       toast.success(`SLA check complete: ${res.data.breached} breaches, ${res.data.warnings} warnings`);
       handleRefreshAlerts();
     } catch (error) {

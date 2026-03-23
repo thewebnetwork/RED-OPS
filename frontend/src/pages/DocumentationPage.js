@@ -41,7 +41,7 @@ export default function DocumentationPage() {
   const fetchDocPack = async () => {
     try {
       setLoadingDocPack(true);
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/documentation/system-docs-pack`);
       setDocPackFiles(res.data.files || []);
     } catch (err) {
       console.error('Error fetching doc pack:', err);
@@ -90,7 +90,7 @@ export default function DocumentationPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/documentation/system-logic-snapshot`);
       setContent(res.data.content);
       setLastModified(res.data.last_modified);
     } catch (err) {
@@ -104,7 +104,7 @@ export default function DocumentationPage() {
   const downloadMarkdown = async () => {
     try {
       setDownloadingMd(true);
-      const res = await axios.get(`${API}/api/documentation/system-logic-snapshot/download?format=md`, {
+      const res = await axios.get(`${API}/documentation/system-logic-snapshot/download?format=md`, {
         responseType: 'blob'
       });
       

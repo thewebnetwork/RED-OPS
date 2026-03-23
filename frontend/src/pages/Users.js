@@ -133,11 +133,11 @@ const { user: currentUser } = useAuth();
   const fetchData = async () => {
     try {
       const [usersRes, teamsRes, specialtiesRes, configRes, modulesRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI.catch(() => ({ data: { modules: {}, default_permissions: {} } }))
+        axios.get(`${API}/users`),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/specialties`),
+        axios.get(`${API}/users/identity-config`),
+        axios.get(`${API}/users/permissions/modules`).catch(() => ({ data: { modules: {}, default_permissions: {} } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);

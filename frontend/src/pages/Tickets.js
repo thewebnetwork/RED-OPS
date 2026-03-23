@@ -68,9 +68,9 @@ const [tickets, setTickets] = useState([]);
       if (statusFilter) params.append('status', statusFilter);
       
       const [ticketsRes, clientsRes, ordersRes] = await Promise.all([
-        axios.geparams.toString(),
-        hasRole('Admin', 'Manager') ? axios.geAPI : Promise.resolve({ data: [] }),
-        hasRole('Admin', 'Manager') ? axios.geAPI : Promise.resolve({ data: [] })
+        axios.get(`${API}/tickets?${params.toString()}`),
+        hasRole('Admin', 'Manager') ? axios.get(`${API}/clients`) : Promise.resolve({ data: [] }),
+        hasRole('Admin', 'Manager') ? axios.get(`${API}/orders`) : Promise.resolve({ data: [] })
       ]);
       setTickets(ticketsRes.data);
       setClients(clientsRes.data);

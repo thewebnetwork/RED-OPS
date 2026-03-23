@@ -70,7 +70,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
 
   const fetchSpecialties = async () => {
     try {
-      const response = await axios.geAPI;
+      const response = await axios.get(`${API}/specialties`);
       setSpecialties(response.data);
     } catch (error) {
       console.error('Failed to fetch specialties');
@@ -80,8 +80,8 @@ const [pool1Requests, setPool1Requests] = useState([]);
   const fetchPools = async () => {
     try {
       const [pool1Res, pool2Res] = await Promise.all([
-        canViewPool1 ? axios.geAPI : Promise.resolve({ data: [] }),
-        canViewPool2 ? axios.geAPI : Promise.resolve({ data: [] })
+        canViewPool1 ? axios.get(`${API}/orders/pool/1`) : Promise.resolve({ data: [] }),
+        canViewPool2 ? axios.get(`${API}/orders/pool/2`) : Promise.resolve({ data: [] })
       ]);
       setPool1Requests(pool1Res.data);
       setPool2Requests(pool2Res.data);
@@ -95,7 +95,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
   const handlePickRequest = async () => {
     if (!requestToPick) return;
     try {
-      await axios.posrequestToPick.id;
+      await axios.post(`${API}/orders/${requestToPick.id}/pick`);
       toast.success('Request picked successfully');
       setPickDialogOpen(false);
       setRequestToPick(null);

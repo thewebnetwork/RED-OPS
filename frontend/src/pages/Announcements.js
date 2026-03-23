@@ -83,10 +83,10 @@ const [activeTab, setActiveTab] = useState('list');
   const fetchData = async () => {
     try {
       const [announcementsRes, teamsRes, rolesRes, specialtiesRes] = await Promise.all([
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI,
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI
+        axios.get(`${API}/announcements`).catch(() => ({ data: [] })),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
+        axios.get(`${API}/specialties`)
       ]);
       
       setAnnouncements(announcementsRes.data || []);

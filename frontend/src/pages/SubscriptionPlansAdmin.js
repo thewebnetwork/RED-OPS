@@ -51,7 +51,7 @@ export default function SubscriptionPlansAdmin() {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.geAPI;
+      const response = await axios.get(`${API}/subscription-plans`);
       setPlans(response.data);
     } catch (error) {
       toast.error('Failed to fetch subscription plans');

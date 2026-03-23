@@ -31,12 +31,27 @@ router = APIRouter(prefix="/ambassador", tags=["Ambassador & Marketplace"])
 # HELPER FUNCTIONS
 # =====================
 
-def _get_org_id(user: dict) -> str:
-    """Extract org_id from user context."""
+async def _get_org_id(user: dict) -> str:
+    """Extract org_id from user context. Auto-provisions platform org for admins."""
     org_id = user.get("org_id") or user.get("team_id")
-    if not org_id:
-        raise HTTPException(status_code=400, detail="No organization context.")
-    return org_id
+    if org_id:
+        return org_id
+    if user.get("role") == "Administrator":
+        platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
+        if platform_org:
+            org_id = platform_org["id"]
+        else:
+            org_id = str(uuid.uuid4())
+            now = datetime.now().isoformat()
+            await db.organizations.insert_one({
+                "id": org_id, "name": "RRG Platform", "slug": "rrg-platform",
+                "org_type": "platform", "status": "active",
+                "created_by_user_id": user["id"], "created_at": now, "updated_at": now,
+                "members": [{"user_id": user["id"], "role": "owner", "joined_at": now}],
+            })
+        await db.users.update_one({"id": user["id"]}, {"$set": {"org_id": org_id}})
+        return org_id
+    raise HTTPException(status_code=400, detail="No organization context.")
 
 
 def _get_org_role(user: dict) -> str:
@@ -83,7 +98,7 @@ async def create_referral(payload: ReferralCreate, current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     referral_code = _get_unique_referral_code()
@@ -126,7 +141,7 @@ async def list_referrals(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
@@ -161,7 +176,7 @@ async def get_referral(referral_id: str, current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
@@ -188,7 +203,7 @@ async def update_referral(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
@@ -238,7 +253,7 @@ async def get_referral_stats(current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
@@ -288,7 +303,7 @@ async def approve_commission(referral_id: str, current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if org_role != "admin":
@@ -337,7 +352,7 @@ async def create_marketplace_listing(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     listing_doc = {
@@ -377,7 +392,7 @@ async def list_marketplace_listings(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     query = {
         "org_id": org_id,
@@ -411,7 +426,7 @@ async def get_marketplace_listing(listing_id: str, current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     listing = db.marketplace_listings.find_one(
         {"id": listing_id, "org_id": org_id}, {"_id": 0}
@@ -433,7 +448,7 @@ async def update_marketplace_listing(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     listing = db.marketplace_listings.find_one(
@@ -488,7 +503,7 @@ async def delete_marketplace_listing(listing_id: str, current_user: dict = None)
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
@@ -519,7 +534,7 @@ async def get_my_listings(
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     query = {
@@ -557,7 +572,7 @@ async def create_marketplace_order(
     if not current_user:
         current_user = get_current_user()
 
-    buyer_org_id = _get_org_id(current_user)
+    buyer_org_id = await _get_org_id(current_user)
     buyer_user_id = current_user["id"]
 
     listing = db.marketplace_listings.find_one(
@@ -607,7 +622,7 @@ async def list_marketplace_orders(
     if not current_user:
         current_user = get_current_user()
 
-    buyer_org_id = _get_org_id(current_user)
+    buyer_org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     query = {
@@ -643,7 +658,7 @@ async def get_marketplace_order(order_id: str, current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    buyer_org_id = _get_org_id(current_user)
+    buyer_org_id = await _get_org_id(current_user)
 
     order = db.marketplace_orders.find_one(
         {
@@ -672,7 +687,7 @@ async def update_marketplace_order_status(
     if not current_user:
         current_user = get_current_user()
 
-    buyer_org_id = _get_org_id(current_user)
+    buyer_org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
     order = db.marketplace_orders.find_one(
@@ -731,7 +746,7 @@ async def get_marketplace_stats(current_user: dict = None):
     if not current_user:
         current_user = get_current_user()
 
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 

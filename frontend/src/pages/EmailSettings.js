@@ -82,7 +82,7 @@ export default function EmailSettings() {
 
   const fetchConfig = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/smtp-config`);
       const loadedConfig = {
         smtp_host: res.data.smtp_host || '',
         smtp_port: res.data.smtp_port || 587,

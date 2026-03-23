@@ -186,7 +186,7 @@ export default function Workflows() {
 
   const fetchWorkflows = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/workflows`);
       setWorkflows(res.data);
     } catch (error) {
       toast.error('Failed to load workflows');
@@ -197,7 +197,7 @@ export default function Workflows() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/categories/l2`);
       setCategories(res.data || []);
     } catch (error) {
       console.error('Failed to load categories');
@@ -206,7 +206,7 @@ export default function Workflows() {
 
   const fetchExecutions = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/workflow-executions`);
       setExecutions(res.data || []);
     } catch (error) {
       console.error('Failed to load executions');
@@ -215,7 +215,7 @@ export default function Workflows() {
 
   const fetchTemplates = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/workflow-templates`);
       setTemplates(res.data.templates || []);
       setTemplateCategories(res.data.categories || []);
     } catch (error) {
@@ -259,7 +259,7 @@ export default function Workflows() {
 
   const handleTestWorkflow = async (workflowId) => {
     try {
-      const res = await axios.posworkflowId;
+      const res = await axios.post(`${API}/workflows/${workflowId}/test`);
       if (res.data) {
         toast.success(`Workflow test completed: ${res.data.status}`);
         fetchExecutions();
@@ -322,7 +322,9 @@ export default function Workflows() {
     }
 
     try {
-      const res = await axios.posencodeURIComponent(newWorkflowName);
+      const res = await axios.post(
+        `${API}/workflows/${selectedWorkflow.id}/duplicate?new_name=${encodeURIComponent(newWorkflowName)}`
+      );
       toast.success('Workflow duplicated!');
       setShowDuplicateDialog(false);
       setNewWorkflowName('');

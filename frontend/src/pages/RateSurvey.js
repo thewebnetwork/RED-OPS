@@ -31,7 +31,7 @@ export default function RateSurvey() {
 
   const verifyToken = async () => {
     try {
-      const res = await axios.getoken;
+      const res = await axios.get(`${API}/ratings/verify-token?token=${token}`);
       setTokenValid(res.data.valid);
       setOrderData(res.data);
     } catch (error) {

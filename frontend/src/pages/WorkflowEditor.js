@@ -215,7 +215,7 @@ const reactFlowWrapper = useRef(null);
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await axios.geworkflowId;
+        const res = await axios.get(`${API}/workflows/${workflowId}`);
         setWorkflow(res.data);
         
         // Convert stored nodes to React Flow format
@@ -262,7 +262,7 @@ const reactFlowWrapper = useRef(null);
 
   const fetchRoles = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/roles`);
       setRoles(res.data);
     } catch (error) {
       console.error('Failed to fetch roles');
@@ -271,7 +271,7 @@ const reactFlowWrapper = useRef(null);
 
   const fetchTeams = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/teams`);
       setTeams(res.data);
     } catch (error) {
       console.error('Failed to fetch teams');
@@ -281,8 +281,8 @@ const reactFlowWrapper = useRef(null);
   const fetchCategories = async () => {
     try {
       const [l1Res, l2Res] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI
+        axios.get(`${API}/categories/l1`),
+        axios.get(`${API}/categories/l2`)
       ]);
       setCategories([
         ...l1Res.data.map(c => ({ ...c, type: 'L1' })),
@@ -295,7 +295,7 @@ const reactFlowWrapper = useRef(null);
 
   const fetchSpecialties = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/specialties`);
       setSpecialties(res.data);
     } catch (error) {
       console.error('Failed to fetch specialties');
@@ -304,7 +304,7 @@ const reactFlowWrapper = useRef(null);
 
   const fetchAccessTiers = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/access-tiers`);
       setAccessTiers(res.data);
     } catch (error) {
       console.error('Failed to fetch access tiers');
@@ -1290,7 +1290,7 @@ function ActionNodeConfig({ data, updateData, roles, teams, specialties }) {
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
-        const res = await axios.geAPI;
+        const res = await axios.get(`${API}/sla-policies`);
         setSlaPolicies(res.data);
       } catch (error) {
         console.error('Failed to fetch SLA policies');

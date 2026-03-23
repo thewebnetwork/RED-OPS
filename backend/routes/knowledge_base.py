@@ -26,12 +26,27 @@ router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
-def _get_org_id(user: dict) -> str:
-    """Extract org_id from authenticated user."""
+async def _get_org_id(user: dict) -> str:
+    """Extract org_id from authenticated user. Auto-provisions platform org for admins."""
     org_id = user.get("org_id") or user.get("team_id")
-    if not org_id:
-        raise HTTPException(400, "No organization context. Join or create an organization first.")
-    return org_id
+    if org_id:
+        return org_id
+    if user.get("role") == "Administrator":
+        platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
+        if platform_org:
+            org_id = platform_org["id"]
+        else:
+            org_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc).isoformat()
+            await db.organizations.insert_one({
+                "id": org_id, "name": "RRG Platform", "slug": "rrg-platform",
+                "org_type": "platform", "status": "active",
+                "created_by_user_id": user["id"], "created_at": now, "updated_at": now,
+                "members": [{"user_id": user["id"], "role": "owner", "joined_at": now}],
+            })
+        await db.users.update_one({"id": user["id"]}, {"$set": {"org_id": org_id}})
+        return org_id
+    raise HTTPException(400, "No organization context. Join or create an organization first.")
 
 
 def _get_org_role(user: dict) -> str:
@@ -84,7 +99,7 @@ async def create_document(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -139,7 +154,7 @@ async def list_documents(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     query = {"org_id": org_id}
 
@@ -173,7 +188,7 @@ async def get_document(
     document_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
@@ -192,7 +207,7 @@ async def update_document(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if not _can_edit(role):
@@ -242,7 +257,7 @@ async def delete_document(
     document_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
     role = _get_org_role(current_user)
 
     if role not in ("owner", "admin"):
@@ -266,7 +281,7 @@ async def star_document(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
@@ -294,7 +309,7 @@ async def list_versions(
     document_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
@@ -319,7 +334,7 @@ async def get_version(
     version_number: int,
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     doc = await db.documents.find_one({"id": document_id, "org_id": org_id}, {"_id": 0})
     if not doc:
@@ -349,7 +364,7 @@ async def folder_stats(
 ):
     """Get document counts per folder for the current org."""
     user_id = current_user["id"]
-    org_id = _get_org_id(current_user)
+    org_id = await _get_org_id(current_user)
 
     pipeline = [
         {"$match": {"org_id": org_id}},

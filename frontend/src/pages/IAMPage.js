@@ -155,13 +155,13 @@ const { user: currentUser } = useAuth();
   const fetchAllData = async () => {
     try {
       const [usersRes, teamsRes, specialtiesRes, configRes, rolesRes, accountTypesRes, dashboardsRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI.catch(() => ({ data: [] })),
-        axios.geAPI.catch(() => ({ data: { dashboards: [] } }))
+        axios.get(`${API}/users`),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/specialties`),
+        axios.get(`${API}/users/identity-config`),
+        axios.get(`${API}/iam/roles`).catch(() => ({ data: [] })),
+        axios.get(`${API}/iam/account-types`).catch(() => ({ data: [] })),
+        axios.get(`${API}/dashboards/list`).catch(() => ({ data: { dashboards: [] } }))
       ]);
       setUsers(usersRes.data);
       setTeams(teamsRes.data);

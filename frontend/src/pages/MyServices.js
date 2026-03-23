@@ -48,13 +48,13 @@ export default function MyServices() {
   const fetchServiceContent = async () => {
     try {
       // Fetch service content from settings
-      const contentRes = await axios.geAPI.catch(() => ({ data: null }));
+      const contentRes = await axios.get(`${API}/settings/my-services-content`).catch(() => ({ data: null }));
       setServiceContent(contentRes.data);
       setEditContent(contentRes.data?.content || '');
 
       // Fetch user's subscription plan if they're a Partner
       if (user?.subscription_plan_id) {
-        const planRes = await axios.geuser.subscription_plan_id.catch(() => ({ data: null }));
+        const planRes = await axios.get(`${API}/subscription-plans/${user.subscription_plan_id}`).catch(() => ({ data: null }));
         setSubscriptionPlan(planRes.data);
       }
     } catch (error) {

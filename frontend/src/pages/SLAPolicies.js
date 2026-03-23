@@ -50,7 +50,7 @@ const [searchParams] = useSearchParams();
 
   const fetchPolicies = useCallback(async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/sla-policies`);
       setPolicies(res.data);
     } catch (error) {
       console.error('Failed to fetch policies');
@@ -60,10 +60,10 @@ const [searchParams] = useSearchParams();
   const fetchMonitoringData = useCallback(async () => {
     try {
       const [statsRes, atRiskRes, breachedRes, historyRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI
+        axios.get(`${API}/sla-policies/monitoring/stats`),
+        axios.get(`${API}/sla-policies/monitoring/at-risk`),
+        axios.get(`${API}/sla-policies/monitoring/breached`),
+        axios.get(`${API}/sla-policies/monitoring/history?limit=50`)
       ]);
       setMonitoringStats(statsRes.data);
       setAtRiskOrders(atRiskRes.data);
@@ -77,10 +77,10 @@ const [searchParams] = useSearchParams();
   const fetchReferenceData = useCallback(async () => {
     try {
       const [rolesRes, teamsRes, specialtiesRes, tiersRes] = await Promise.all([
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI,
-        axios.geAPI
+        axios.get(`${API}/roles`),
+        axios.get(`${API}/teams`),
+        axios.get(`${API}/specialties`),
+        axios.get(`${API}/access-tiers`)
       ]);
       setRoles(rolesRes.data);
       setTeams(teamsRes.data);
@@ -120,7 +120,7 @@ const [searchParams] = useSearchParams();
 
   const handleAcknowledge = async (escalationId) => {
     try {
-      await axios.posescalationId;
+      await axios.post(`${API}/sla-policies/monitoring/history/${escalationId}/acknowledge`);
       toast.success('Escalation acknowledged');
       fetchMonitoringData();
     } catch (error) {
@@ -130,7 +130,7 @@ const [searchParams] = useSearchParams();
 
   const handleTriggerCheck = async () => {
     try {
-      const res = await axios.posAPI;
+      const res = await axios.post(`${API}/sla-policies/check`);
       toast.success(`Policy check completed: ${res.data.escalations_created || 0} escalations`);
       fetchMonitoringData();
     } catch (error) {

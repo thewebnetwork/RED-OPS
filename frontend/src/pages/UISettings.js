@@ -70,7 +70,7 @@ const [settings, setSettings] = useState([]);
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.geAPI;
+      const res = await axios.get(`${API}/ui-settings`);
       setSettings(res.data);
       // Initialize edited settings with current values
       const edits = {};
@@ -114,7 +114,7 @@ const [settings, setSettings] = useState([]);
 
   const handleReset = async () => {
     try {
-      await axios.posAPI;
+      await axios.post(`${API}/ui-settings/reset`);
       toast.success('Settings reset to defaults');
       setShowResetDialog(false);
       fetchSettings();
