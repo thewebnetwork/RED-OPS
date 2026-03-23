@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   DndContext,
   DragOverlay,
@@ -17,6 +18,7 @@ import {
   Minus,
   ArrowDown,
   MessageSquare,
+  Loader2,
 } from 'lucide-react';
 
 // ── API Configuration ────────────────────────────────────────────────────────────
@@ -66,6 +68,83 @@ function StagePill({ stage }) {
     <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'2px 8px', borderRadius:4, fontSize:11, fontWeight:600, background:`${color}22`, color }}>
       {stage}
     </span>
+  );
+}
+
+// Comments component — fetches and posts real comments
+function RequestComments({ requestId, comment, setComment }) {
+  const [comments, setComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (!requestId) return;
+    setLoadingComments(true);
+    fetch(`${API}/tasks/${requestId}/comments`, { headers: getHeaders() })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setComments(Array.isArray(data) ? data : []))
+      .catch(() => setComments([]))
+      .finally(() => setLoadingComments(false));
+  }, [requestId]);
+
+  const addComment = async () => {
+    if (!comment.trim() || sending) return;
+    setSending(true);
+    try {
+      const res = await fetch(`${API}/tasks/${requestId}/comments`, {
+        method: 'POST',
+        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: comment.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      const newComment = await res.json();
+      setComments(prev => [...prev, newComment]);
+      setComment('');
+    } catch {
+      toast.error('Failed to add comment');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div style={{ borderTop:'1px solid var(--border)', paddingTop:16 }}>
+      <h4 style={{ margin:'0 0 12px', fontSize:12, fontWeight:600, color:'var(--tx-1)', display:'flex', alignItems:'center', gap:6 }}>
+        <MessageSquare size={13} /> Comments ({comments.length})
+      </h4>
+      {loadingComments && (
+        <div style={{ textAlign:'center', padding:12, color:'var(--tx-3)' }}>
+          <Loader2 size={14} style={{ animation:'spin 1s linear infinite' }} />
+        </div>
+      )}
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {comments.map((c, i) => (
+          <div key={c.id || i} style={{ padding:'8px 10px', background:'var(--bg-elevated)', borderRadius:7, borderLeft:'2px solid var(--border-hi)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+              <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{c.user_name || 'Unknown'}</span>
+              <span style={{ fontSize:11, color:'var(--tx-3)' }}>{c.created_at ? new Date(c.created_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : ''}</span>
+            </div>
+            <p style={{ margin:0, fontSize:12, color:'var(--tx-2)' }}>{c.content}</p>
+          </div>
+        ))}
+        {!loadingComments && comments.length === 0 && (
+          <div style={{ textAlign:'center', padding:'12px 0', color:'var(--tx-3)', fontSize:12 }}>No comments yet</div>
+        )}
+      </div>
+      <div style={{ marginTop:12, display:'flex', gap:8 }}>
+        <input
+          className="input-field"
+          placeholder="Add a comment..."
+          value={comment}
+          onChange={e => setComment(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) addComment(); }}
+          style={{ flex:1, fontSize:12 }}
+        />
+        <button className="btn-ghost btn-sm" onClick={addComment} disabled={!comment.trim() || sending}>
+          {sending ? <Loader2 size={13} style={{ animation:'spin 1s linear infinite' }} /> : <MessageSquare size={13} />}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -223,9 +302,21 @@ export default function Requests() {
   const overdue   = filtered.filter(r => isOverdue(r.due_date) && !['Delivered','Closed'].includes(r.stage)).length;
   const activeDrag = requests.find(r => r.id === activeId) || null;
 
-  const updateStage = (id, stage) => {
+  const updateStage = async (id, stage) => {
+    // Optimistic update
     setRequests(prev => prev.map(r => r.id === id ? { ...r, stage } : r));
     if (selectedReq?.id === id) setSelectedReq(prev => ({ ...prev, stage }));
+    // Persist to API — map stage name to task status
+    const statusMap = { 'Submitted':'open', 'Assigned':'assigned', 'In Progress':'doing', 'Pending Review':'review', 'Revision':'revision', 'Delivered':'delivered', 'Closed':'done' };
+    try {
+      await fetch(`${API}/tasks/${id}`, {
+        method: 'PATCH',
+        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: statusMap[stage] || 'open' }),
+      });
+    } catch {
+      toast.error('Failed to update stage');
+    }
   };
 
   const handleDragStart = ({ active }) => setActiveId(active.id);
@@ -240,12 +331,39 @@ export default function Requests() {
 
   const handleDragCancel = () => setActiveId(null);
 
-  const createRequest = () => {
-    if (!form.title || !form.client || !form.service) return;
-    const next = `RRG-${String(requests.length + 1).padStart(5,'0')}`;
-    setRequests(prev => [...prev, { ...form, id:next, assignee:{ name:'Unassigned', avatar:'?', color:'#606060' }, created_at: new Date().toISOString().split('T')[0], stage:'Submitted' }]);
-    setShowModal(false);
-    setForm({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
+  const [creating, setCreating] = useState(false);
+
+  const createRequest = async () => {
+    if (!form.title || !form.client || !form.service) {
+      toast.error('Please fill in title, client, and service.');
+      return;
+    }
+    setCreating(true);
+    try {
+      const priorityMap = { Urgent:'urgent', High:'high', Normal:'medium', Low:'low' };
+      const res = await fetch(`${API}/tasks`, {
+        method: 'POST',
+        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description || null,
+          status: 'open',
+          priority: priorityMap[form.priority] || 'medium',
+          task_type: form.service,
+          due_at: form.due_date ? new Date(form.due_date + 'T00:00:00Z').toISOString() : null,
+          visibility: 'both',
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success('Request created');
+      setShowModal(false);
+      setForm({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
+      fetchData(); // Refresh from API
+    } catch (err) {
+      toast.error('Failed to create request');
+    } finally {
+      setCreating(false);
+    }
   };
 
   if (loading) {
@@ -427,7 +545,9 @@ export default function Requests() {
               </div>
               <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:4 }}>
                 <button className="btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="btn-primary" onClick={createRequest}>Create Request</button>
+                <button className="btn-primary" onClick={createRequest} disabled={creating}>
+                  {creating ? 'Creating...' : 'Create Request'}
+                </button>
               </div>
             </div>
           </div>
@@ -469,7 +589,11 @@ export default function Requests() {
               <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Priority</label>
               <div style={{ display:'flex', gap:5 }}>
                 {['Urgent','High','Normal','Low'].map(p => (
-                  <button key={p} onClick={() => { const u = { ...selectedReq, priority:p }; setSelectedReq(u); setRequests(prev => prev.map(r => r.id === u.id ? u : r)); }}
+                  <button key={p} onClick={async () => {
+                    const u = { ...selectedReq, priority:p }; setSelectedReq(u); setRequests(prev => prev.map(r => r.id === u.id ? u : r));
+                    const priMap = { Urgent:'urgent', High:'high', Normal:'medium', Low:'low' };
+                    try { await fetch(`${API}/tasks/${selectedReq.id}`, { method:'PATCH', headers:{ ...getHeaders(), 'Content-Type':'application/json' }, body:JSON.stringify({ priority: priMap[p] || 'medium' }) }); } catch { toast.error('Failed to update priority'); }
+                  }}
                     style={{ padding:'3px 9px', borderRadius:5, fontSize:11, fontWeight:600, cursor:'pointer', border:'1px solid', borderColor: selectedReq.priority === p ? PRIORITY_COLOR[p] : 'var(--border)', background: selectedReq.priority === p ? `${PRIORITY_COLOR[p]}22` : 'transparent', color: selectedReq.priority === p ? PRIORITY_COLOR[p] : 'var(--tx-3)' }}>
                     {p}
                   </button>
@@ -502,38 +626,8 @@ export default function Requests() {
                 <p style={{ margin:0, fontSize:12.5, color:'var(--tx-2)', lineHeight:1.6, background:'var(--bg-elevated)', padding:'10px 12px', borderRadius:7 }}>{selectedReq.description}</p>
               </div>
             )}
-            {/* Activity */}
-            <div style={{ borderTop:'1px solid var(--border)', paddingTop:16 }}>
-              <h4 style={{ margin:'0 0 12px', fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>Activity</h4>
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {[
-                  { author:'Jordan Kim',     time:'2 hours ago', text:'Moved to In Progress and assigned to team.' },
-                  { author:'Vitto Pessanha', time:'1 day ago',   text:'Created this request and set priority to High.' },
-                ].map((a,i) => (
-                  <div key={i} style={{ padding:'8px 10px', background:'var(--bg-elevated)', borderRadius:7, borderLeft:'2px solid var(--border-hi)' }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
-                      <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{a.author}</span>
-                      <span style={{ fontSize:11, color:'var(--tx-3)' }}>{a.time}</span>
-                    </div>
-                    <p style={{ margin:0, fontSize:12, color:'var(--tx-2)' }}>{a.text}</p>
-                  </div>
-                ))}
-              </div>
-              {/* Add comment */}
-              <div style={{ marginTop:12, display:'flex', gap:8 }}>
-                <input
-                  className="input-field"
-                  placeholder="Add a comment..."
-                  value={comment}
-                  onChange={e => setComment(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && comment.trim()) { setComment(''); } }}
-                  style={{ flex:1, fontSize:12 }}
-                />
-                <button className="btn-ghost btn-sm" onClick={() => { if (comment.trim()) setComment(''); }} disabled={!comment.trim()}>
-                  <MessageSquare size={13} />
-                </button>
-              </div>
-            </div>
+            {/* Comments */}
+            <RequestComments requestId={selectedReq.id} comment={comment} setComment={setComment} />
           </div>
         </div>
       )}

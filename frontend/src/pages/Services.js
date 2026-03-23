@@ -513,19 +513,33 @@ const Services = () => {
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Attach Files</label>
-            <button 
-              style={styles.attachButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-hi)';
-                e.currentTarget.style.color = 'var(--tx-1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.color = 'var(--tx-2)';
-              }}
-            >
-              + Choose Files
-            </button>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <input
+                type="file"
+                id="service-file-input"
+                multiple
+                style={{ display:'none' }}
+                onChange={(e) => {
+                  const names = Array.from(e.target.files).map(f => f.name).join(', ');
+                  if (names) toast.success(`Files selected: ${names}`);
+                }}
+              />
+              <button
+                style={styles.attachButton}
+                onClick={() => document.getElementById('service-file-input').click()}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-hi)';
+                  e.currentTarget.style.color = 'var(--tx-1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.color = 'var(--tx-2)';
+                }}
+              >
+                + Choose Files
+              </button>
+              <span style={{ fontSize:12, color:'var(--tx-3)' }}>Files will be attached to your request</span>
+            </div>
           </div>
 
           <div style={styles.formGroup}>

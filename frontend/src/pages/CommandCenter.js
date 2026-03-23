@@ -132,7 +132,20 @@ export default function CommandCenter() {
   };
 
   const mrrPct = pulse.target > 0 ? Math.round((pulse.mrr / pulse.target) * 100) : 0;
-  const toggleTask = id => setDoneIds(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
+  const toggleTask = async (id) => {
+    const task = tasks.find(t => (t._id || t.id) === id);
+    if (!task) return;
+    const isDone = doneIds.has(id) || task.status === 'done' || task.status === 'Done';
+    const newStatus = isDone ? 'todo' : 'done';
+    // Optimistic toggle
+    setDoneIds(p => { const n = new Set(p); isDone ? n.delete(id) : n.add(id); return n; });
+    try {
+      await ax().patch(`${API}/tasks/${id}`, { status: newStatus });
+    } catch {
+      // Revert on failure
+      setDoneIds(p => { const n = new Set(p); isDone ? n.add(id) : n.delete(id); return n; });
+    }
+  };
 
   return (
     <div className="page-content" style={{ paddingBottom:40 }}>
