@@ -47,7 +47,8 @@ const NAV_MAIN = [
 ];
 const NAV_BUSINESS = [
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
-  { path: '/crm',      icon: Contact,    label: 'Pipeline',  roles: ['Administrator','Operator'] },
+  // Pipeline removed — managed in GHL
+  // { path: '/crm',      icon: Contact,    label: 'Pipeline',  roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
   { path: '/reports',  icon: BarChart2,  label: 'Reports',  roles: ['Administrator','Operator'] },
 ];

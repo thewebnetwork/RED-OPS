@@ -13,6 +13,7 @@
  *   • Capacity heatmap summary
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -49,6 +50,7 @@ const ROLE_ICONS = {
    MAIN TEAM PAGE
    ═══════════════════════════════════════════════════════════ */
 export default function Team() {
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [specialties, setSpecialties] = useState([]);
@@ -402,7 +404,7 @@ export default function Team() {
                         key={m.id}
                         member={m}
                         teams={teams}
-                        onClick={() => setViewMember(m)}
+                        onClick={() => navigate(`/team/${m.id}`)}
                         onEdit={() => setEditMember(m)}
                         onRemove={() => handleRemove(m)}
                         onRestore={() => handleRestore(m)}
@@ -413,7 +415,7 @@ export default function Team() {
                   <MemberTable
                     members={group.members}
                     teams={teams}
-                    onView={setViewMember}
+                    onView={(m) => navigate(`/team/${m.id}`)}
                     onEdit={setEditMember}
                     onRemove={handleRemove}
                     onRestore={handleRestore}

@@ -71,11 +71,12 @@ function PriorityPill({ priority }) {
 }
 
 // ── Add Task Modal ────────────────────────────────────────────────────────────
-function AddTaskModal({ projectId, onClose, onCreated }) {
+function AddTaskModal({ projectId, teamMembers, onClose, onCreated }) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('medium');
   const [status, setStatus] = useState('todo');
   const [dueDate, setDueDate] = useState('');
+  const [assignee, setAssignee] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -87,6 +88,7 @@ function AddTaskModal({ projectId, onClose, onCreated }) {
         project_id: projectId,
         priority,
         status,
+        assignee_user_id: assignee || undefined,
         due_at: dueDate ? new Date(dueDate + 'T00:00:00Z').toISOString() : null,
         visibility: 'both',
       });
@@ -124,6 +126,13 @@ function AddTaskModal({ projectId, onClose, onCreated }) {
                 {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Assignee</label>
+            <select className="input-field" value={assignee} onChange={e => setAssignee(e.target.value)}>
+              <option value="">Unassigned</option>
+              {(teamMembers || []).map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
           </div>
           <div>
             <label style={labelStyle}>Due Date</label>
@@ -453,12 +462,125 @@ function DocumentsTab({ projectId }) {
   );
 }
 
+// ── Task Edit Drawer ──────────────────────────────────────────────────────────
+function TaskEditDrawer({ task, teamMembers, onClose, onUpdated }) {
+  const [form, setForm] = useState({
+    title: task.title || '',
+    description: task.description || '',
+    status: task.status || 'todo',
+    priority: task.priority || 'medium',
+    assignee_user_id: task.assignee_user_id || task.assignee_id || '',
+    due_at: task.due_at ? task.due_at.split('T')[0] : '',
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const saveTimer = useRef(null);
+
+  const save = useCallback(async (data) => {
+    setSaving(true);
+    try {
+      const payload = { ...data };
+      if (payload.due_at) payload.due_at = new Date(payload.due_at + 'T00:00:00Z').toISOString();
+      else payload.due_at = null;
+      if (!payload.assignee_user_id) payload.assignee_user_id = null;
+      await ax().patch(`${API}/tasks/${task.id}`, payload);
+      onUpdated();
+    } catch { toast.error('Failed to save'); }
+    finally { setSaving(false); }
+  }, [task.id, onUpdated]);
+
+  const autoSave = (field, value) => {
+    const newForm = { ...form, [field]: value };
+    set(field, value);
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => save(newForm), 600);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this task?')) return;
+    try {
+      await ax().delete(`${API}/tasks/${task.id}`);
+      toast.success('Task deleted');
+      onClose();
+      onUpdated();
+    } catch { toast.error('Failed to delete'); }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100 }} onClick={onClose}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.4)', backdropFilter: 'blur(2px)' }} />
+      <div onClick={e => e.stopPropagation()} style={{
+        position: 'absolute', right: 0, top: 0, bottom: 0, width: 400, maxWidth: '90vw',
+        background: 'var(--card)', borderLeft: '1px solid var(--border)',
+        display: 'flex', flexDirection: 'column', overflow: 'auto',
+      }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>Task Details</span>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            {saving && <Loader2 size={12} className="spin" style={{ color: 'var(--tx-3)' }} />}
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={16} /></button>
+          </div>
+        </div>
+        <div style={{ padding: 18, overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={labelStyle}>Title</label>
+            <input className="input-field" value={form.title} onChange={e => autoSave('title', e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea className="input-field" rows={4} placeholder="Add details…" value={form.description}
+              onChange={e => autoSave('description', e.target.value)}
+              style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={labelStyle}>Status</label>
+              <select className="input-field" value={form.status} onChange={e => autoSave('status', e.target.value)}>
+                {Object.entries(TASK_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Priority</label>
+              <select className="input-field" value={form.priority} onChange={e => autoSave('priority', e.target.value)}>
+                {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Assignee</label>
+            <select className="input-field" value={form.assignee_user_id} onChange={e => autoSave('assignee_user_id', e.target.value)}>
+              <option value="">Unassigned</option>
+              {(teamMembers || []).map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Due Date</label>
+            <input type="date" className="input-field" value={form.due_at} onChange={e => autoSave('due_at', e.target.value)} />
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+            <button onClick={handleDelete} style={{
+              display: 'flex', alignItems: 'center', gap: 6, width: '100%', justifyContent: 'center',
+              padding: '8px 16px', background: 'rgba(201,42,62,.08)', color: 'var(--red)',
+              border: '1px solid rgba(201,42,62,.15)', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}>
+              <Trash2 size={13} /> Delete Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Tasks Tab ─────────────────────────────────────────────────────────────────
-function TasksTab({ projectId, taskCount }) {
+function TasksTab({ projectId, taskCount, teamMembers }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [editTask, setEditTask] = useState(null);
+  const [quickAdd, setQuickAdd] = useState('');
+  const [adding, setAdding] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -482,6 +604,23 @@ function TasksTab({ projectId, taskCount }) {
     }
   };
 
+  const handleQuickAdd = async () => {
+    if (!quickAdd.trim()) return;
+    setAdding(true);
+    try {
+      await ax().post(`${API}/tasks`, {
+        title: quickAdd.trim(),
+        project_id: projectId,
+        status: 'todo',
+        priority: 'medium',
+        visibility: 'both',
+      });
+      setQuickAdd('');
+      fetchTasks();
+    } catch { toast.error('Failed to add task'); }
+    finally { setAdding(false); }
+  };
+
   const filtered = filter === 'all' ? tasks : filter === 'active' ? tasks.filter(t => t.status !== 'done') : tasks.filter(t => t.status === 'done');
   const doneCount = tasks.filter(t => t.status === 'done').length;
 
@@ -490,12 +629,21 @@ function TasksTab({ projectId, taskCount }) {
       {showModal && (
         <AddTaskModal
           projectId={projectId}
+          teamMembers={teamMembers}
           onClose={() => setShowModal(false)}
           onCreated={fetchTasks}
         />
       )}
+      {editTask && (
+        <TaskEditDrawer
+          task={editTask}
+          teamMembers={teamMembers}
+          onClose={() => setEditTask(null)}
+          onUpdated={() => { fetchTasks(); setEditTask(null); }}
+        />
+      )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Tasks</h3>
           <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>{doneCount}/{tasks.length} completed</p>
@@ -503,6 +651,22 @@ function TasksTab({ projectId, taskCount }) {
         <button onClick={() => setShowModal(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
           <Plus size={12} /> Add Task
         </button>
+      </div>
+
+      {/* Inline quick-add */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <Plus size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)' }} />
+          <input
+            className="input-field"
+            placeholder="Quick add task… (Enter to create)"
+            value={quickAdd}
+            onChange={e => setQuickAdd(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); }}
+            disabled={adding}
+            style={{ paddingLeft: 30 }}
+          />
+        </div>
       </div>
 
       {/* Filter pills */}
@@ -528,13 +692,8 @@ function TasksTab({ projectId, taskCount }) {
             {tasks.length === 0 ? 'No tasks yet' : 'No tasks match this filter'}
           </p>
           <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: '0 0 16px' }}>
-            {tasks.length === 0 ? 'Add your first task to start tracking work.' : 'Try a different filter.'}
+            {tasks.length === 0 ? 'Add your first task above or use the Add Task button.' : 'Try a different filter.'}
           </p>
-          {tasks.length === 0 && (
-            <button onClick={() => setShowModal(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
-              <Plus size={12} /> Add Task
-            </button>
-          )}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -543,10 +702,11 @@ function TasksTab({ projectId, taskCount }) {
             const stCfg = TASK_STATUS_CONFIG[t.status] || TASK_STATUS_CONFIG.todo;
             const prCfg = PRIORITY_CONFIG[t.priority] || PRIORITY_CONFIG.medium;
             return (
-              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, transition: 'background .08s' }}
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', transition: 'background .08s' }}
+                onClick={() => setEditTask(t)}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-card)'}>
-                <button onClick={() => toggleDone(t.id, t.status)}
+                <button onClick={(e) => { e.stopPropagation(); toggleDone(t.id, t.status); }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: isDone ? '#22c55e' : 'var(--tx-3)', padding: 0, flexShrink: 0, display: 'flex' }}>
                   {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                 </button>
@@ -672,6 +832,7 @@ export default function ProjectPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
+  const [allUsers, setAllUsers] = useState([]);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -688,6 +849,14 @@ export default function ProjectPage() {
   }, [id, navigate]);
 
   useEffect(() => { fetchProject(); }, [fetchProject]);
+
+  // Load team members for assignee dropdowns
+  useEffect(() => {
+    ax().get(`${API}/users`).then(r => {
+      const list = r.data?.data || r.data || [];
+      setAllUsers(Array.isArray(list) ? list.map(u => ({ id: u.id, name: u.name || u.username || 'Unknown' })) : []);
+    }).catch(() => {});
+  }, []);
 
   if (loading) {
     return (
@@ -840,7 +1009,7 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {tab === 'tasks' && <TasksTab projectId={project.id} taskCount={project.task_count} />}
+        {tab === 'tasks' && <TasksTab projectId={project.id} taskCount={project.task_count} teamMembers={allUsers} />}
         {tab === 'documents' && <DocumentsTab projectId={project.id} />}
         {tab === 'milestones' && <MilestonesTab project={project} onRefresh={fetchProject} />}
       </div>
