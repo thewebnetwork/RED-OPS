@@ -50,6 +50,7 @@ from routes.iam import router as iam_router
 from routes.documentation import router as documentation_router
 from routes.dashboard_v2 import router as dashboard_v2_router
 from routes.dashboard_builder import router as dashboard_builder_router
+from routes.files import router as files_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
@@ -261,6 +262,7 @@ app.include_router(projects_router, prefix="/api")  # Projects (Phase 1)
 app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base / SOPs (Phase 2)
 app.include_router(crm_router, prefix="/api")  # CRM / Pipeline (Phase 3)
 app.include_router(ambassador_router, prefix="/api")  # Ambassador + Marketplace (Phase 4)
+app.include_router(files_router, prefix="/api")  # Universal File Management
 
 
 @app.get("/")

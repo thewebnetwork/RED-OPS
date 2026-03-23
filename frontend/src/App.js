@@ -68,6 +68,7 @@ import SOPs from "./pages/SOPs";
 import CRM from "./pages/CRM";
 import Ambassador from "./pages/Ambassador";
 import AIAssistant from "./pages/AIAssistant";
+import Files from "./pages/Files";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
@@ -320,6 +321,7 @@ function AppRoutes() {
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
+      <Route path="/files" element={<PrivateRoute><Files /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
       <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Requests /></PrivateRoute>} />

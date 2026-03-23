@@ -55,7 +55,7 @@ const NAV_SERVICES = [];
 const NAV_SYSTEM = [
   { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
   { path: '/sops',     icon: BookOpen,   label: 'Knowledge Base', roles: ['Administrator','Operator','Standard User'] },
-  { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'], external: true },
+  { path: '/files', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'] },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
 
