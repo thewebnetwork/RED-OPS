@@ -1079,7 +1079,11 @@ export default function Clients() {
                 );
               })}
               {display.length === 0 && (
-                <tr><td colSpan={10}><div className="empty-state">No clients found</div></td></tr>
+                <tr><td colSpan={10}><div className="empty-state" style={{ padding:'32px 0', textAlign:'center' }}>
+                  <div style={{ fontSize:32, marginBottom:10, opacity:0.5 }}>👥</div>
+                  <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No clients yet</div>
+                  <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16 }}>Add your first client to start managing their work and tracking delivery.</div>
+                </div></td></tr>
               )}
             </tbody>
           </table>

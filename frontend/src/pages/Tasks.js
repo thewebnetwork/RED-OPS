@@ -461,7 +461,11 @@ export default function Tasks() {
       ) : view === 'list' ? (
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           {filtered.length === 0 ? (
-            <div className="empty-state">No tasks match your filter.</div>
+            <div className="empty-state" style={{ padding:'48px 0', textAlign:'center' }}>
+              <div style={{ fontSize:32, marginBottom:10, opacity:0.5 }}>✅</div>
+              <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>{tasks.length === 0 ? 'No tasks yet' : 'No tasks match your filter'}</div>
+              <div style={{ fontSize:13, color:'var(--tx-3)' }}>{tasks.length === 0 ? 'Create your first task to start tracking work.' : 'Try adjusting your filters or search.'}</div>
+            </div>
           ) : filtered.map(t => (
             <TaskRow key={t._id} task={t} onToggle={toggleDone} onClick={() => setSelectedTask(t)} />
           ))}

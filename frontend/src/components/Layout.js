@@ -34,26 +34,22 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 // Navigation config
 // ─────────────────────────────────────────────
 const NAV_MAIN = [
-  { path: '/',         icon: LayoutDashboard, label: 'Command Center', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/tasks',    icon: CheckSquare,     label: 'Tasks',          roles: ['Administrator','Operator','Standard User'], badge: true },
-  { path: '/projects', icon: FolderKanban,    label: 'Projects',       roles: ['Administrator','Operator','Standard User'] },
-  { path: '/requests', icon: FileText,        label: 'Requests',       roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/',         icon: LayoutDashboard, label: 'Home',     roles: ['Administrator','Operator','Standard User'] },
+  { path: '/tasks',    icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/services', icon: ShoppingBag,     label: 'Services', roles: ['Administrator','Operator','Standard User'] },
 ];
 const NAV_BUSINESS = [
-  { path: '/clients',  icon: Users,      label: 'Clients',         roles: ['Administrator','Operator'] },
-  { path: '/team',     icon: UsersRound, label: 'Team',            roles: ['Administrator','Operator'] },
-  { path: '/finance',  icon: DollarSign, label: 'Finance',         roles: ['Administrator'] },
-  { path: '/reports',  icon: BarChart2,  label: 'Reports',         roles: ['Administrator','Operator'] },
-  { path: '/sops',     icon: BookOpen,   label: 'SOPs & Playbooks',roles: ['Administrator','Operator','Standard User'] },
-  { path: '/crm',      icon: Contact,    label: 'CRM',             roles: ['Administrator','Operator'] },
+  { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
+  { path: '/crm',      icon: Contact,    label: 'Pipeline',  roles: ['Administrator','Operator'] },
+  { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
+  { path: '/reports',  icon: BarChart2,  label: 'Reports',  roles: ['Administrator','Operator'] },
 ];
-const NAV_SERVICES = [
-  { path: '/services',     icon: ShoppingBag, label: 'RRG Services',    roles: ['Administrator','Operator','Standard User'], isNew: true },
-  { path: '/ambassador',   icon: Gift,        label: 'Ambassador',      roles: ['Administrator','Operator','Standard User'], isNew: true },
-  { path: '/integrations', icon: Plug,        label: 'Integrations',   roles: ['Administrator'] },
-];
+const NAV_SERVICES = [];
 const NAV_SYSTEM = [
   { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/sops',     icon: BookOpen,   label: 'Knowledge Base', roles: ['Administrator','Operator','Standard User'] },
   { href: 'https://ops.redribbongroup.ca', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'], external: true },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
@@ -69,25 +65,22 @@ const NAV_CLIENT = [
 
 // Command palette items
 const CMD_ITEMS = [
-  { label:'Command Center',  icon:'🏠', to:'/',              group:'Navigate' },
+  { label:'Home',            icon:'🏠', to:'/',              group:'Navigate' },
   { label:'Tasks',           icon:'✅', to:'/tasks',         group:'Navigate' },
   { label:'Projects',        icon:'📁', to:'/projects',      group:'Navigate' },
   { label:'Requests',        icon:'📋', to:'/requests',      group:'Navigate' },
+  { label:'Services',        icon:'🛍', to:'/services',      group:'Navigate' },
   { label:'Clients',         icon:'👥', to:'/clients',       group:'Navigate' },
+  { label:'Pipeline',        icon:'📇', to:'/crm',           group:'Navigate' },
   { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
-  { label:'Finance',         icon:'💰', to:'/finance',       group:'Navigate' },
   { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
-  { label:'SOPs',            icon:'📚', to:'/sops',          group:'Navigate' },
-  { label:'CRM',             icon:'📇', to:'/crm',           group:'Navigate' },
-  { label:'Ambassador',      icon:'🎁', to:'/ambassador',    group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
-  { label:'RRG Services',    icon:'🛍', to:'/services',      group:'Navigate' },
-  { label:'Integrations',    icon:'🔌', to:'/integrations',  group:'Navigate' },
+  { label:'Knowledge Base',  icon:'📚', to:'/sops',          group:'Navigate' },
+  { label:'Settings',        icon:'⚙️',  to:'/settings',      group:'Navigate' },
   { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'T' },
   { label:'New Request',     icon:'📝', to:'/requests?new=1',    group:'Create', shortcut:'R' },
   { label:'New Project',     icon:'🗂',  to:'/projects?new=1',   group:'Create', shortcut:'P' },
   { label:'New Client',      icon:'👤', to:'/clients?new=1',     group:'Create', shortcut:'C' },
-  { label:'Settings',        icon:'⚙️',  to:'/settings',          group:'Navigate' },
 ];
 
 // ─────────────────────────────────────────────
@@ -247,7 +240,7 @@ export default function Layout({ children }) {
         <nav style={{ flex:1, overflowY:'auto', padding:'2px 8px 8px' }}>
           {mainItems.length > 0 && (
             <>
-              <div className="nav-section-label" style={{ marginTop:10 }}>{isClient ? 'Portal' : 'Menu'}</div>
+              <div className="nav-section-label" style={{ marginTop:10 }}>{isClient ? 'Portal' : 'Workspace'}</div>
               {mainItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} badgeCount={badges[i.path === '/tasks' ? 'tasks' : 'requests']} />)}
             </>
           )}
@@ -259,13 +252,13 @@ export default function Layout({ children }) {
           )}
           {servicesItems.length > 0 && (
             <>
-              <div className="nav-section-label">Ecosystem</div>
+              <div className="nav-section-label">More</div>
               {servicesItems.map(i => <NavItem key={i.path} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
             </>
           )}
           {systemItems.length > 0 && (
             <>
-              <div className="nav-section-label">System</div>
+              <div className="nav-section-label">Tools</div>
               {systemItems.map(i => <NavItem key={i.path || i.href} item={i} location={location} onClick={() => setSidebarOpen(false)} />)}
             </>
           )}

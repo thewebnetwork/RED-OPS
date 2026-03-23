@@ -624,9 +624,12 @@ export default function Projects() {
           })}
           {filtered.length === 0 && (
             <div style={{ gridColumn: '1/-1', padding: '60px 20px', textAlign: 'center' }}>
-              <FolderKanban size={32} color="var(--tx-3)" style={{ marginBottom: 12 }} />
-              <p style={{ fontSize: 14, color: 'var(--tx-3)' }}>
-                {projects.length === 0 ? 'No projects yet. Create your first project to get started.' : 'No projects match your filters.'}
+              <div style={{ fontSize:32, marginBottom:12, opacity:0.5 }}>📋</div>
+              <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>
+                {projects.length === 0 ? 'No projects yet' : 'No projects match your filters'}
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '0 auto', maxWidth: 360 }}>
+                {projects.length === 0 ? 'Projects organize tasks, deadlines, and deliverables for each client engagement.' : 'Try adjusting your search or filters.'}
               </p>
             </div>
           )}

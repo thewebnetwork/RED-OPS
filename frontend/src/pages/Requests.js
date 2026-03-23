@@ -301,10 +301,11 @@ export default function Requests() {
       <div style={{ flex:1, overflow: view === 'kanban' ? 'hidden' : 'auto', display:'flex', flexDirection:'column' }}>
 
         {requests.length === 0 ? (
-          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16 }}>
+          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:12 }}>
             <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:16, fontWeight:600, color:'var(--tx-1)', marginBottom:8 }}>No requests yet</div>
-              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16 }}>Create your first request to get started</div>
+              <div style={{ fontSize:32, marginBottom:12, opacity:0.5 }}>📋</div>
+              <div style={{ fontSize:16, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No requests yet</div>
+              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16, maxWidth:380 }}>Requests are how work gets done — clients submit them, your team delivers. Create your first one or invite a client to submit theirs.</div>
               <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}><Plus size={14} /> New Request</button>
             </div>
           </div>

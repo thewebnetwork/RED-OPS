@@ -346,7 +346,12 @@ function ContactsTab({ token, onRefresh }) {
             border: `1px solid var(--border)`,
             color: 'var(--tx-3)',
           }}>
-            No contacts found
+            <div style={{ textAlign:'center', padding:'20px 0' }}>
+              <div style={{ fontSize:32, marginBottom:12, opacity:0.5 }}>📇</div>
+              <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No contacts yet</div>
+              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16, maxWidth:340, margin:'0 auto 16px' }}>Add your first contact to start tracking relationships and building your pipeline.</div>
+              <button onClick={() => setShowAddContact(true)} className="btn-primary btn-sm" style={{ gap:6 }}>+ Add First Contact</button>
+            </div>
           </div>
         ) : (
           filteredContacts.map(contact => (
