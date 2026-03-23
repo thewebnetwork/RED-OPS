@@ -62,6 +62,7 @@ import DashboardBuilder from "./pages/DashboardBuilder";
 import TaskBoard from "./pages/TaskBoard";
 import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
+import ProjectPage from "./pages/ProjectPage";
 import Finance from "./pages/Finance";
 import SOPs from "./pages/SOPs";
 import CRM from "./pages/CRM";
@@ -166,7 +167,7 @@ function PrivateRoute({ children, roles }) {
   if (isPreview) {
     const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/sops'];
     const path = location.pathname;
-    const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests');
+    const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
       return <Navigate to="/" replace />;
     }
@@ -313,6 +314,7 @@ function AppRoutes() {
       {/* ========== CORE APP ROUTES ========== */}
       <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
+      <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/sops" element={<PrivateRoute><SOPs /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />

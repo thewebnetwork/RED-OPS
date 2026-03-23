@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -163,8 +163,9 @@ function ProjectModal({ project, onClose, onSave, loading }) {
   );
 }
 
-// ── Milestone Manager ────────────────────────────────────────────────────────
-function MilestoneSection({ project, onToggle, onAdd, onDelete }) {
+// ── (Legacy) Milestone Manager — moved to ProjectPage.js ─────────────────────
+// Keep minimal version for reference; full implementation in ProjectPage.js
+function _LegacyMilestoneSection({ project, onToggle, onAdd, onDelete }) {
   const [newLabel, setNewLabel] = useState('');
   const completedMilestones = (project.milestones || []).filter(m => m.done).length;
 
@@ -426,13 +427,13 @@ function ProjectDetail({ project, onClose, onDelete, onRefresh }) {
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function Projects() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState(null);
   const [modal, setModal] = useState(null);
 
   // Fetch projects
@@ -458,8 +459,6 @@ export default function Projects() {
       .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.client_name || '').toLowerCase().includes(search.toLowerCase()));
   }, [filter, search, projects]);
 
-  const selProject = selected ? projects.find(p => p.id === selected) : null;
-
   const handleSave = async (form) => {
     setSaving(true);
     try {
@@ -468,8 +467,8 @@ export default function Projects() {
         toast.success('Project updated');
       } else {
         const r = await ax().post(`${API}/projects`, form);
-        setSelected(r.data.id);
         toast.success(`${form.name} created`);
+        navigate(`/projects/${r.data.id}`);
       }
       setModal(null);
       fetchProjects();
@@ -483,7 +482,6 @@ export default function Projects() {
   const handleDelete = async (id) => {
     try {
       await ax().delete(`${API}/projects/${id}`);
-      setSelected(null);
       toast.success('Project deleted');
       fetchProjects();
     } catch {
@@ -567,11 +565,10 @@ export default function Projects() {
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14, alignContent: 'start' }}>
           {filtered.map(p => {
             const dl = daysLeft(p.due_date);
-            const isSelected = selected === p.id;
 
             return (
-              <div key={p.id} onClick={() => setSelected(isSelected ? null : p.id)}
-                className="card" style={{ padding: '16px 18px', cursor: 'pointer', borderColor: isSelected ? 'var(--red)' : undefined, transition: 'all .12s' }}>
+              <div key={p.id} onClick={() => navigate(`/projects/${p.id}`)}
+                className="card" style={{ padding: '16px 18px', cursor: 'pointer', transition: 'all .12s' }}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -636,15 +633,6 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Detail panel */}
-      {selProject && (
-        <ProjectDetail
-          project={selProject}
-          onClose={() => setSelected(null)}
-          onDelete={handleDelete}
-          onRefresh={fetchProjects}
-        />
-      )}
     </div>
   );
 }

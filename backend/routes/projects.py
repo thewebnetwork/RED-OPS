@@ -504,3 +504,181 @@ async def remove_team_member(
         raise HTTPException(status_code=404, detail="Project not found")
 
     return {"success": True, "removed_user_id": user_id}
+
+
+# ── Project Documents (Notion-like) ──────────────────────────────────────────
+
+@router.get("/{project_id}/documents")
+async def list_project_documents(
+    project_id: str,
+    parent_id: Optional[str] = Query(None),
+    current_user: dict = Depends(get_current_user),
+):
+    """List documents in a project. If parent_id given, list sub-docs."""
+    org_id = await _get_org_id(current_user)
+
+    # Verify project
+    project = await db.projects.find_one(
+        {"id": project_id, "org_id": org_id}, {"_id": 0, "id": 1}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    query = {"project_id": project_id, "org_id": org_id}
+    if parent_id:
+        query["parent_id"] = parent_id
+    else:
+        query["$or"] = [{"parent_id": None}, {"parent_id": {"$exists": False}}]
+
+    docs = await db.project_documents.find(query, {"_id": 0}).sort("position", 1).to_list(500)
+
+    # Enrich with child count
+    for doc in docs:
+        doc["child_count"] = await db.project_documents.count_documents(
+            {"parent_id": doc["id"], "org_id": org_id}
+        )
+
+    return docs
+
+
+@router.post("/{project_id}/documents", status_code=201)
+async def create_project_document(
+    project_id: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Create a document or sub-document in a project."""
+    org_id = await _get_org_id(current_user)
+
+    project = await db.projects.find_one(
+        {"id": project_id, "org_id": org_id}, {"_id": 0, "id": 1}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    parent_id = data.get("parent_id")
+    if parent_id:
+        parent = await db.project_documents.find_one(
+            {"id": parent_id, "project_id": project_id}, {"_id": 0, "id": 1}
+        )
+        if not parent:
+            raise HTTPException(status_code=404, detail="Parent document not found")
+
+    # Get max position for ordering
+    sibling_query = {"project_id": project_id, "org_id": org_id}
+    if parent_id:
+        sibling_query["parent_id"] = parent_id
+    else:
+        sibling_query["$or"] = [{"parent_id": None}, {"parent_id": {"$exists": False}}]
+
+    max_pos_doc = await db.project_documents.find_one(
+        sibling_query, {"_id": 0, "position": 1}, sort=[("position", -1)]
+    )
+    position = (max_pos_doc.get("position", 0) if max_pos_doc else 0) + 1
+
+    now = datetime.now(timezone.utc)
+    doc = {
+        "id": str(uuid.uuid4()),
+        "project_id": project_id,
+        "org_id": org_id,
+        "parent_id": parent_id,
+        "title": data.get("title", "Untitled"),
+        "content": data.get("content", ""),
+        "icon": data.get("icon", "📄"),
+        "position": position,
+        "created_by_user_id": current_user["id"],
+        "created_by_name": current_user.get("name") or current_user.get("full_name", ""),
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    await db.project_documents.insert_one(doc)
+    doc.pop("_id", None)
+    doc["child_count"] = 0
+    return doc
+
+
+@router.get("/{project_id}/documents/{doc_id}")
+async def get_project_document(
+    project_id: str,
+    doc_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Get a single document with its content."""
+    org_id = await _get_org_id(current_user)
+
+    doc = await db.project_documents.find_one(
+        {"id": doc_id, "project_id": project_id, "org_id": org_id}, {"_id": 0}
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Get children
+    children = await db.project_documents.find(
+        {"parent_id": doc_id, "org_id": org_id}, {"_id": 0}
+    ).sort("position", 1).to_list(100)
+
+    doc["children"] = children
+    doc["child_count"] = len(children)
+    return doc
+
+
+@router.patch("/{project_id}/documents/{doc_id}")
+async def update_project_document(
+    project_id: str,
+    doc_id: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Update a document's title, content, or icon."""
+    org_id = await _get_org_id(current_user)
+
+    doc = await db.project_documents.find_one(
+        {"id": doc_id, "project_id": project_id, "org_id": org_id}, {"_id": 0, "id": 1}
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    update = {"updated_at": datetime.now(timezone.utc)}
+    for field in ["title", "content", "icon", "position", "parent_id"]:
+        if field in data:
+            update[field] = data[field]
+
+    await db.project_documents.update_one({"id": doc_id}, {"$set": update})
+
+    updated = await db.project_documents.find_one({"id": doc_id}, {"_id": 0})
+    updated["child_count"] = await db.project_documents.count_documents(
+        {"parent_id": doc_id, "org_id": org_id}
+    )
+    return updated
+
+
+@router.delete("/{project_id}/documents/{doc_id}")
+async def delete_project_document(
+    project_id: str,
+    doc_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Delete a document and all its sub-documents."""
+    org_id = await _get_org_id(current_user)
+
+    doc = await db.project_documents.find_one(
+        {"id": doc_id, "project_id": project_id, "org_id": org_id}, {"_id": 0, "id": 1}
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Recursive delete: gather all descendant IDs
+    async def get_descendants(parent):
+        children = await db.project_documents.find(
+            {"parent_id": parent, "org_id": org_id}, {"_id": 0, "id": 1}
+        ).to_list(500)
+        ids = [c["id"] for c in children]
+        for cid in list(ids):
+            ids.extend(await get_descendants(cid))
+        return ids
+
+    all_ids = [doc_id] + await get_descendants(doc_id)
+    await db.project_documents.delete_many({"id": {"$in": all_ids}})
+
+    return {"success": True, "deleted_count": len(all_ids)}
