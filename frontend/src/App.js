@@ -55,6 +55,7 @@ import DeletedTickets from "./pages/DeletedTickets";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
 import VerifyOTP from "./pages/VerifyOTP";
+import OnboardingWizard from "./pages/OnboardingWizard";
 import DocumentationPage from "./pages/DocumentationPage";
 import TranslationEditorPage from "./pages/TranslationEditorPage";
 import DashboardBuilder from "./pages/DashboardBuilder";
@@ -152,6 +153,14 @@ function PrivateRoute({ children, roles }) {
     return <Navigate to="/" />;
   }
 
+  // Check if user needs onboarding (after password + OTP are done)
+  if (!user?.onboarding_completed &&
+      !user?.force_password_change &&
+      !(user?.force_otp_setup && !user?.otp_verified) &&
+      location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
@@ -209,7 +218,9 @@ function AppRoutes() {
       <Route path="/setup-otp" element={<SetupOTP />} />
       {/* OTP Verify - requires auth but not full session */}
       <Route path="/verify-otp" element={<VerifyOTP />} />
-      <Route 
+      {/* Onboarding wizard - requires auth but not full layout */}
+      <Route path="/onboarding" element={<OnboardingWizard />} />
+      <Route
         path="/reset-password" 
         element={
           <PublicRoute>

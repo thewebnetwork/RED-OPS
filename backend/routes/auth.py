@@ -50,6 +50,7 @@ class UserResponse(BaseModel):
     otp_verified: bool = False
     can_pick: bool = True  # Whether user can pick from pools
     pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
+    onboarding_completed: bool = False  # Whether user has completed the onboarding wizard
     # Organization context
     primary_org_id: Optional[str] = None
     org_ids: list = []
@@ -151,6 +152,7 @@ async def build_user_response(user: dict) -> UserResponse:
         otp_verified=user.get("otp_verified", False),
         can_pick=user.get("can_pick", True),  # Default to True for existing users
         pool_access=user.get("pool_access", "both"),  # Default to both for existing users
+        onboarding_completed=user.get("onboarding_completed", False),
         # Organization context
         primary_org_id=user.get("primary_org_id"),
         org_ids=user.get("org_ids", []),
@@ -243,6 +245,16 @@ async def update_profile(profile_data: ProfileUpdate, current_user: dict = Depen
     
     updated = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "password": 0})
     return await build_user_response(updated)
+
+
+@router.post("/complete-onboarding")
+async def complete_onboarding(current_user: dict = Depends(get_current_user)):
+    """Mark the current user's onboarding as completed"""
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"onboarding_completed": True}}
+    )
+    return {"message": "Onboarding completed successfully"}
 
 
 @router.post("/change-password")
