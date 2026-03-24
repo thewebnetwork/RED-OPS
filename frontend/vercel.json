@@ -1,7 +1,0 @@
-{
-  "buildCommand": "npx craco build",
-  "outputDirectory": "build",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
