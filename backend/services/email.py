@@ -58,10 +58,18 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
         
         # Send via SMTP
         logging.info(f"Sending email via {config['host']}:{config['port']} from {config['from_addr']} to {to_email}")
-        with smtplib.SMTP(config['host'], config['port']) as server:
-            server.starttls()
-            server.login(config['user'], config['password'])
-            server.send_message(msg)
+        port = config['port']
+        if port in (465, 2465):
+            # SSL connection for port 465/2465
+            with smtplib.SMTP_SSL(config['host'], port) as server:
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
+        else:
+            # STARTTLS for port 587/2587/25
+            with smtplib.SMTP(config['host'], port, timeout=15) as server:
+                server.starttls()
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
         
         logging.info(f"✅ Email sent successfully to {to_email}: {subject}")
         print("\n" + "="*50)
