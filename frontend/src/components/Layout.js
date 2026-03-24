@@ -55,8 +55,7 @@ const NAV_BUSINESS = [
 const NAV_SERVICES = [];
 const NAV_SYSTEM = [
   { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/sops',     icon: BookOpen,   label: 'Knowledge Base', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/files', icon: Cloud, label: 'Files', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/files', icon: Cloud, label: 'Files & Docs', roles: ['Administrator','Operator','Standard User'] },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
 
@@ -67,7 +66,7 @@ const NAV_CLIENT = [
   { path: '/projects',     icon: FolderKanban,    label: 'My Projects',    roles: ['Media Client'] },
   { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
   { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
-  { path: '/sops',         icon: BookOpen,        label: 'Resources',      roles: ['Media Client'] },
+  { path: '/files?context=knowledge_base', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
   { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
 ];
 
@@ -83,7 +82,7 @@ const CMD_ITEMS = [
   { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
   { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
-  { label:'Knowledge Base',  icon:'📚', to:'/sops',          group:'Navigate' },
+  { label:'Knowledge Base',  icon:'📚', to:'/files?context=knowledge_base', group:'Navigate' },
   { label:'Settings',        icon:'⚙️',  to:'/settings',      group:'Navigate' },
   { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'T' },
   { label:'New Request',     icon:'📝', to:'/requests?new=1',    group:'Create', shortcut:'R' },
@@ -380,7 +379,7 @@ export default function Layout({ children }) {
   const closeCmd = useCallback(() => setCmdOpen(false), []);
 
   // Client users only see client-relevant command palette items
-  const clientPaths = ['/', '/tasks', '/projects', '/services', '/my-requests', '/my-account', '/sops'];
+  const clientPaths = ['/', '/tasks', '/projects', '/services', '/my-requests', '/my-account', '/files', '/files?context=knowledge_base'];
   const cmdBase = isClient ? CMD_ITEMS.filter(i => clientPaths.includes(i.to) || i.to?.startsWith('/my-')) : CMD_ITEMS;
   const filtered = cmdQuery.trim()
     ? cmdBase.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))

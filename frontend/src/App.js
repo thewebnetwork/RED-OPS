@@ -167,7 +167,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/sops'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
@@ -318,7 +318,7 @@ function AppRoutes() {
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
-      <Route path="/sops" element={<PrivateRoute><SOPs /></PrivateRoute>} />
+      <Route path="/sops" element={<Navigate to="/files?context=knowledge_base" replace />} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />

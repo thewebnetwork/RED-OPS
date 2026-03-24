@@ -129,7 +129,7 @@ export default function ClientHome() {
       <div style={{ display:'flex', gap:8, marginBottom:24 }}>
         <QuickAction icon={Plus}       label="New Request"     onClick={() => navigate('/services')}    color='#3b82f6' />
         <QuickAction icon={FileText}   label="My Requests"     onClick={() => navigate('/my-requests')} color='var(--red)' />
-        <QuickAction icon={BookOpen}   label="Resources"       onClick={() => navigate('/sops')}        color='#a855f7' />
+        <QuickAction icon={BookOpen}   label="Resources"       onClick={() => navigate('/files?context=knowledge_base')} color='#a855f7' />
         <QuickAction icon={LifeBuoy}   label="Get Help"        onClick={() => navigate('/my-account')}  color='#22c55e' />
       </div>
 
