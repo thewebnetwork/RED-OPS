@@ -179,7 +179,7 @@ export default function ClientPage() {
       const { data } = await ax().get(`${API}/orders`);
       const arr = Array.isArray(data) ? data : data?.items || [];
       const clientOrders = arr.filter(o =>
-        o.client_id === id || o.created_by === id || o.requested_by === id
+        o.requester_id === id || o.client_id === id || o.created_by === id || o.requested_by === id
       );
       setOrders(clientOrders);
     } catch { setOrders([]); }
@@ -367,6 +367,18 @@ export default function ClientPage() {
           style={{ ...btnSecondary }}
         >
           <ShoppingBag size={14} /> View Requests
+        </button>
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => {
+            localStorage.setItem('preview_as_client', 'true');
+            localStorage.setItem('preview_client_id', client.id);
+            localStorage.setItem('preview_client_name', client.name || client.company_name || client.email);
+            window.location.href = '/';
+          }}
+          style={{ ...btnSecondary, background: '#8b5cf618', borderColor: '#8b5cf640', color: '#8b5cf6' }}
+        >
+          <ExternalLink size={14} /> View as Client
         </button>
       </div>
 
