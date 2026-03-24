@@ -249,7 +249,7 @@ async def get_requester_dashboard(current_user: dict = Depends(require_roles(["R
     in_progress = await db.orders.find({"requester_id": current_user["id"], "status": "In Progress"}, {"_id": 0}).to_list(100)
     needs_review = await db.orders.find({"requester_id": current_user["id"], "status": "Pending"}, {"_id": 0}).to_list(100)
     delivered = await db.orders.find({"requester_id": current_user["id"], "status": "Delivered"}, {"_id": 0}).sort("delivered_at", -1).limit(20).to_list(20)
-    
+
     return {
         "open_orders": enrich_orders(open_orders),
         "in_progress": enrich_orders(in_progress),
@@ -257,6 +257,224 @@ async def get_requester_dashboard(current_user: dict = Depends(require_roles(["R
         "delivered": enrich_orders(delivered)
     }
 
+
+@router.get("/agency")
+async def get_agency_dashboard(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """
+    Admin agency view with per-client sub-account data and aggregate metrics.
+    Shows all active Media Client accounts with their health, stats, and recent events.
+    """
+    from datetime import timedelta
+
+    now = datetime.now(timezone.utc)
+    thirty_days_ago = now - timedelta(days=30)
+
+    # ============ FETCH ALL ACTIVE MEDIA CLIENTS ============
+    clients = await db.users.find(
+        {"account_type": "Media Client", "active": True},
+        {"_id": 0}
+    ).to_list(1000)
+
+    client_stats = []
+    total_open_requests = 0
+    total_active_projects = 0
+    total_completed_projects = 0
+    total_pending_deliveries = 0
+    total_sla_breached = 0
+    total_deliveries_mtd = 0
+    all_response_times = []
+    team_utilization_count = 0
+
+    # ============ PROCESS EACH CLIENT ============
+    for client in clients:
+        client_id = client.get("id")
+        client_name = client.get("name")
+
+        # Count open_requests: orders where requester_id == client.id and status in ["Open", "In Progress", "Pending"]
+        open_requests = await db.orders.count_documents({
+            "requester_id": client_id,
+            "status": {"$in": ["Open", "In Progress", "Pending"]}
+        })
+
+        # Count active_projects: projects where client_name == client.name and status in ["active", "planning"]
+        active_projects = await db.projects.count_documents({
+            "client_name": client_name,
+            "status": {"$in": ["active", "planning"]}
+        })
+
+        # Count completed_projects: projects where client_name == client.name and status == "completed"
+        completed_projects = await db.projects.count_documents({
+            "client_name": client_name,
+            "status": "completed"
+        })
+
+        # Count total_tasks: tasks where client_id == client.id or created_by_user_id == client.id
+        total_tasks = await db.tasks.count_documents({
+            "$or": [
+                {"client_id": client_id},
+                {"created_by_user_id": client_id}
+            ]
+        })
+
+        # Count pending_deliveries: orders where requester_id == client.id and status == "Pending"
+        pending_deliveries = await db.orders.count_documents({
+            "requester_id": client_id,
+            "status": "Pending"
+        })
+
+        # Count sla_breached: orders where requester_id == client.id, status not in ["Delivered","Closed"], and is_sla_breached == True
+        sla_breached = await db.orders.count_documents({
+            "requester_id": client_id,
+            "status": {"$nin": ["Delivered", "Closed"]},
+            "is_sla_breached": True
+        })
+
+        # Get last_activity_at: most recent updated_at from their orders, or their created_at if no orders
+        last_orders = await db.orders.find(
+            {"requester_id": client_id},
+            {"_id": 0, "updated_at": 1}
+        ).sort("updated_at", -1).limit(1).to_list(1)
+        last_activity_at = last_orders[0].get("updated_at") if last_orders else client.get("created_at", now.isoformat())
+
+        # Determine health: critical > at_risk > new > healthy
+        if sla_breached > 0:
+            health = "critical"
+        elif open_requests > 5 or pending_deliveries > 3:
+            health = "at_risk"
+        elif (now - datetime.fromisoformat(client.get("created_at", now.isoformat()).replace('Z', '+00:00'))).days <= 30 and open_requests == 0:
+            health = "new"
+        else:
+            health = "healthy"
+
+        client_stats.append({
+            "id": client_id,
+            "name": client_name,
+            "email": client.get("email"),
+            "avatar_url": client.get("avatar"),
+            "account_type": client.get("account_type"),
+            "created_at": client.get("created_at"),
+            "last_activity_at": last_activity_at,
+            "health": health,
+            "stats": {
+                "open_requests": open_requests,
+                "active_projects": active_projects,
+                "completed_projects": completed_projects,
+                "total_tasks": total_tasks,
+                "pending_deliveries": pending_deliveries,
+                "sla_breached": sla_breached
+            }
+        })
+
+        # Accumulate aggregate metrics
+        total_open_requests += open_requests
+        total_active_projects += active_projects
+        total_completed_projects += completed_projects
+        total_pending_deliveries += pending_deliveries
+        total_sla_breached += sla_breached
+
+    # ============ CALCULATE AGGREGATE METRICS ============
+
+    # deliveries_mtd: count of delivered orders in current month
+    total_deliveries_mtd = await db.orders.count_documents({
+        "status": {"$in": ["Delivered", "Closed"]},
+        "delivered_at": {"$gte": now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()}
+    })
+
+    # avg_response_hours: avg time between order created_at and picked_at for orders picked in last 30 days
+    recent_picked_orders = await db.orders.find(
+        {
+            "picked_at": {"$gte": thirty_days_ago.isoformat()},
+            "created_at": {"$exists": True}
+        },
+        {"_id": 0, "created_at": 1, "picked_at": 1}
+    ).to_list(1000)
+
+    if recent_picked_orders:
+        response_times = []
+        for order in recent_picked_orders:
+            try:
+                created = datetime.fromisoformat(order["created_at"].replace('Z', '+00:00'))
+                picked = datetime.fromisoformat(order["picked_at"].replace('Z', '+00:00'))
+                hours = (picked - created).total_seconds() / 3600
+                response_times.append(hours)
+            except (ValueError, KeyError):
+                continue
+        avg_response_hours = round(sum(response_times) / len(response_times), 1) if response_times else 0
+    else:
+        avg_response_hours = 0
+
+    # team_utilization_pct: count users with role != "Media Client" that have at least one In Progress order, divided by total internal users, × 100
+    internal_users_with_in_progress = await db.users.find(
+        {
+            "account_type": {"$ne": "Media Client"},
+            "active": True
+        },
+        {"_id": 0, "id": 1}
+    ).to_list(1000)
+
+    internal_user_ids = [u["id"] for u in internal_users_with_in_progress]
+
+    if internal_user_ids:
+        in_progress_editors = await db.orders.find(
+            {
+                "editor_id": {"$in": internal_user_ids},
+                "status": "In Progress"
+            },
+            {"_id": 0, "editor_id": 1}
+        ).to_list(1000)
+
+        busy_editor_ids = set(o.get("editor_id") for o in in_progress_editors if o.get("editor_id"))
+        team_utilization_pct = round((len(busy_editor_ids) / len(internal_user_ids)) * 100, 1) if internal_user_ids else 0
+    else:
+        team_utilization_pct = 0
+
+    # ============ FETCH RECENT EVENTS ============
+    # Try notifications collection first
+    events = []
+    notifications = await db.notifications.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+
+    if notifications:
+        for notif in notifications:
+            events.append({
+                "type": notif.get("type", "notification"),
+                "client_name": notif.get("client_name", ""),
+                "client_id": notif.get("user_id", ""),
+                "message": notif.get("message", notif.get("title", "")),
+                "timestamp": notif.get("created_at", "")
+            })
+    else:
+        # Fallback: build events from recent orders
+        recent_orders = await db.orders.find(
+            {},
+            {"_id": 0, "requester_id": 1, "requester_name": 1, "title": 1, "status": 1, "created_at": 1, "updated_at": 1}
+        ).sort("updated_at", -1).limit(5).to_list(5)
+
+        for order in recent_orders:
+            events.append({
+                "type": "order_status_change",
+                "client_name": order.get("requester_name", ""),
+                "client_id": order.get("requester_id", ""),
+                "message": f"Order '{order.get('title', '')}' status changed to {order.get('status', '')}",
+                "timestamp": order.get("updated_at", "")
+            })
+
+    return {
+        "aggregate": {
+            "total_clients": len(clients),
+            "active_clients": len([c for c in client_stats if c["health"] != "new"]),
+            "total_open_requests": total_open_requests,
+            "total_active_projects": total_active_projects,
+            "deliveries_mtd": total_deliveries_mtd,
+            "avg_response_hours": avg_response_hours,
+            "sla_breached": total_sla_breached,
+            "team_utilization_pct": team_utilization_pct
+        },
+        "clients": client_stats,
+        "recent_events": events
+    }
 
 
 # ============== FINANCIAL STATS ==============
