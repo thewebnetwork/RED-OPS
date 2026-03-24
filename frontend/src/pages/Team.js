@@ -809,9 +809,30 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
         <Field label="Team">
           <select style={inp} value={form.team_id} onChange={e => set('team_id', e.target.value)}>
             <option value="">No Team</option>
-            {teams.filter(t => t.active).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            {teams.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </Field>
+        {specialties.length > 0 && (
+          <Field label="Specialties">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {specialties.map(s => {
+                const id = s.id || s._id;
+                const selected = form.specialty_ids.includes(id);
+                return (
+                  <button key={id} type="button" onClick={() => {
+                    set('specialty_ids', selected ? form.specialty_ids.filter(x => x !== id) : [...form.specialty_ids, id]);
+                  }} style={{
+                    padding: '4px 10px', borderRadius: 6, fontSize: 12, border: '1px solid var(--border)',
+                    background: selected ? 'var(--accent)' : 'var(--bg)', color: selected ? '#fff' : 'var(--tx-2)',
+                    cursor: 'pointer', transition: 'all .15s',
+                  }}>
+                    {s.name}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+        )}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
           <button type="button" onClick={onClose} style={btnSec}>Cancel</button>
           <button type="submit" style={btnPri} disabled={saving}>{saving ? 'Adding…' : 'Add Member'}</button>
@@ -831,6 +852,7 @@ function EditMemberModal({ member, teams, specialties, onClose, onUpdated }) {
     role: member.role,
     account_type: member.account_type || 'Internal Staff',
     team_id: member.team_id || '',
+    specialty_ids: member.specialty_ids || [],
     active: member.active !== false,
   });
   const [saving, setSaving] = useState(false);
@@ -874,9 +896,30 @@ function EditMemberModal({ member, teams, specialties, onClose, onUpdated }) {
         <Field label="Team">
           <select style={inp} value={form.team_id} onChange={e => set('team_id', e.target.value)}>
             <option value="">No Team</option>
-            {teams.filter(t => t.active).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            {teams.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </Field>
+        {specialties.length > 0 && (
+          <Field label="Specialties">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {specialties.map(s => {
+                const id = s.id || s._id;
+                const selected = form.specialty_ids.includes(id);
+                return (
+                  <button key={id} type="button" onClick={() => {
+                    set('specialty_ids', selected ? form.specialty_ids.filter(x => x !== id) : [...form.specialty_ids, id]);
+                  }} style={{
+                    padding: '4px 10px', borderRadius: 6, fontSize: 12, border: '1px solid var(--border)',
+                    background: selected ? 'var(--accent)' : 'var(--bg)', color: selected ? '#fff' : 'var(--tx-2)',
+                    cursor: 'pointer', transition: 'all .15s',
+                  }}>
+                    {s.name}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
           <input type="checkbox" id="edit-active" checked={form.active} onChange={e => set('active', e.target.checked)}
             style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
@@ -1155,6 +1198,7 @@ function AdminTeamHub() {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1168,10 +1212,11 @@ function AdminTeamHub() {
     setLoading(true);
     setError(null);
     try {
-      const [usersRes, teamsRes, ordersRes] = await Promise.allSettled([
+      const [usersRes, teamsRes, ordersRes, specsRes] = await Promise.allSettled([
         ax().get(`${API}/users`),
         ax().get(`${API}/teams`),
         ax().get(`${API}/orders`),
+        ax().get(`${API}/specialties`),
       ]);
 
       let users = [];
@@ -1192,9 +1237,16 @@ function AdminTeamHub() {
         if (!Array.isArray(orderList)) orderList = [];
       }
 
+      let specList = [];
+      if (specsRes.status === 'fulfilled') {
+        specList = specsRes.value.data?.data || specsRes.value.data || [];
+        if (!Array.isArray(specList)) specList = [];
+      }
+
       setMembers(users);
       setTeams(teamList);
       setOrders(orderList);
+      setSpecialties(specList);
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
       setError(err.message);
@@ -1467,9 +1519,9 @@ function AdminTeamHub() {
       </div>
 
       {/* Modals */}
-      {showAddModal && <AddMemberModal teams={teams} specialties={[]} onClose={() => setShowAddModal(false)} onCreated={fetchAll} />}
-      {showTeamModal && <ManageTeamsModal teams={teams} onClose={() => setShowTeamModal(false)} onUpdated={fetchAll} />}
-      {editMember && <EditMemberModal member={editMember} teams={teams} specialties={[]} onClose={() => setEditMember(null)} onUpdated={fetchAll} />}
+      {showAddModal && <AddMemberModal teams={teams} specialties={specialties} onClose={() => setShowAddModal(false)} onCreated={fetchAll} />}
+      {showTeamModal && <ManageTeamsModal teams={teams} members={members} onClose={() => setShowTeamModal(false)} onUpdated={fetchAll} />}
+      {editMember && <EditMemberModal member={editMember} teams={teams} specialties={specialties} onClose={() => setEditMember(null)} onUpdated={fetchAll} />}
     </div>
   );
 }

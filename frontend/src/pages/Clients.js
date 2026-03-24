@@ -729,6 +729,18 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
               <label style={labelStyle}>Internal Notes</label>
               <textarea className="input-field" rows={3} value={editForm.notes} onChange={e => setEditForm(p=>({...p,notes:e.target.value}))} />
             </div>
+            <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, marginTop:4 }}>
+              <button onClick={async () => {
+                if (!window.confirm(`Delete client "${client.name}"? This cannot be undone.`)) return;
+                try {
+                  await ax().delete(`${API}/users/${client._id}`);
+                  toast.success(`Client "${client.name}" deleted`);
+                  onClose();
+                } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete client'); }
+              }} style={{ width:'100%', padding:'8px 0', borderRadius:7, border:'1px solid var(--red)', background:'transparent', color:'var(--red)', fontSize:12, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                <Trash2 size={13} /> Delete Client
+              </button>
+            </div>
           </div>
         )}
 

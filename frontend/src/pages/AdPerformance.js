@@ -570,6 +570,35 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
   const [csvImporting, setCsvImporting] = useState(false);
   const [csvResults, setCsvResults] = useState(null);
 
+  // Parse a CSV line handling quoted fields with commas inside
+  const parseCsvLine = (line) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; }
+        else if (ch === '"') { inQuotes = false; }
+        else { current += ch; }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === ',') { result.push(current.trim()); current = ''; }
+        else { current += ch; }
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const cleanNumber = (val) => {
+    if (!val || val === '') return 0;
+    // Strip currency symbols, commas, spaces
+    const cleaned = String(val).replace(/[$€£¥,\s]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
   const handleCsvImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -579,9 +608,9 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     if (lines.length < 2) { toast.error('CSV must have a header row and at least one data row'); return; }
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+    const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9_]/g, '_'));
     const rows = lines.slice(1).map(line => {
-      const vals = line.split(',').map(v => v.trim());
+      const vals = parseCsvLine(line);
       const obj = {};
       headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
       return obj;
@@ -589,20 +618,22 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
 
     setCsvImporting(true);
     let success = 0, failed = 0;
-    for (const row of rows) {
-      // Match client by name
-      const clientName = row.client || row.client_name || row.client_id || '';
-      const client = clients.find(c => c.name?.toLowerCase() === clientName.toLowerCase() || c.id === clientName);
-      if (!client) { failed++; continue; }
+    const failedRows = [];
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      // Match client by name (case-insensitive, trimmed)
+      const clientName = (row.client || row.client_name || row.client_id || '').trim();
+      const client = clients.find(c => c.name?.toLowerCase().trim() === clientName.toLowerCase() || c.id === clientName);
+      if (!client) { failed++; failedRows.push(`Row ${idx + 2}: client "${clientName}" not found`); continue; }
 
       const platform = row.platform || 'Meta';
       const period = row.period || row.month || new Date().toISOString().slice(0, 7);
-      const spend = parseFloat(row.ad_spend || row.spend || 0);
-      const leads = parseFloat(row.leads || 0);
-      const clicks = parseFloat(row.clicks || 0);
-      const impressions = parseFloat(row.impressions || 0);
-      const conversions = parseFloat(row.conversions || 0);
-      const roas = parseFloat(row.roas || 0);
+      const spend = cleanNumber(row.ad_spend || row.spend);
+      const leads = cleanNumber(row.leads);
+      const clicks = cleanNumber(row.clicks);
+      const impressions = cleanNumber(row.impressions);
+      const conversions = cleanNumber(row.conversions);
+      const roas = cleanNumber(row.roas);
 
       try {
         await ax().post(`${API}/ad-performance/snapshots`, {
@@ -620,12 +651,18 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
           notes: row.notes || '',
         });
         success++;
-      } catch { failed++; }
+      } catch (err) {
+        failed++;
+        failedRows.push(`Row ${idx + 2}: ${err.response?.data?.detail || 'API error'}`);
+      }
     }
     setCsvImporting(false);
     setCsvResults({ success, failed, total: rows.length });
     if (success > 0) { toast.success(`Imported ${success} of ${rows.length} snapshots`); onSave(); }
-    if (failed > 0 && success === 0) toast.error(`All ${failed} rows failed — check client names match exactly`);
+    if (failed > 0) {
+      const msg = failedRows.length <= 3 ? failedRows.join('; ') : `${failedRows.slice(0, 3).join('; ')} (+${failedRows.length - 3} more)`;
+      toast.error(success === 0 ? `All ${failed} rows failed: ${msg}` : `${failed} rows failed: ${msg}`);
+    }
   };
 
   const handleFieldChange = (field, value) => {

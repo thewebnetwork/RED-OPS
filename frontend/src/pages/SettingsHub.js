@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useOrg } from '@/contexts/OrgContext';
 import {
-  Settings, Users, Shield, Building2, FolderTree, GitBranch, Palette, Mail, Plug,
+  Settings, Users, Shield, Building2, FolderTree, GitBranch, Mail, Plug,
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
   X, Loader2, Clock, Package, Layers, Zap, EyeOff, Video, Camera, FileText, BarChart2,
   Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid,
@@ -22,7 +22,6 @@ const SECTIONS = [
   { id: 'services', label: 'Services', icon: ShoppingBag, inline: true },
   { id: 'categories', label: 'Categories', icon: FolderTree, inline: false, path: '/categories' },
   { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
-  { id: 'ui', label: 'UI & Branding', icon: Palette, inline: false, path: '/settings/ui' },
   { id: 'email', label: 'Email', icon: Mail, inline: false, path: '/email-settings' },
   { id: 'integrations', label: 'Integrations', icon: Plug, inline: false, path: '/integrations' },
 ];
@@ -132,6 +131,9 @@ function ClientAccountsSection() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     fetchClients();
@@ -163,6 +165,36 @@ function ClientAccountsSection() {
     }
   };
 
+  const startEdit = (client) => {
+    setEditing(client.id);
+    setEditForm({ name: client.name || '', email: client.email || '', company: client.company || '', plan: client.plan || 'Standard' });
+  };
+
+  const cancelEdit = () => { setEditing(null); setEditForm({}); };
+
+  const saveEdit = async (clientId) => {
+    setEditSaving(true);
+    try {
+      await ax().patch(`${API}/users/${clientId}`, editForm);
+      setClients(clients.map((c) => c.id === clientId ? { ...c, ...editForm } : c));
+      toast.success('Client updated');
+      setEditing(null);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update client');
+    } finally { setEditSaving(false); }
+  };
+
+  const deleteClient = async (clientId, name) => {
+    if (!window.confirm(`Delete client "${name}"? This cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/users/${clientId}`);
+      setClients(clients.filter((c) => c.id !== clientId));
+      toast.success(`Client "${name}" deleted`);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete client');
+    }
+  };
+
   const filteredClients = clients.filter((c) =>
     c.name?.toLowerCase().includes(search.toLowerCase()) ||
     c.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,8 +205,10 @@ function ClientAccountsSection() {
     total: clients.length,
     activePortals: clients.filter((c) => c.portal_status === 'active').length,
     invited: clients.filter((c) => c.portal_status === 'invited').length,
-    noPortal: clients.filter((c) => c.portal_status === 'none').length,
+    noPortal: clients.filter((c) => !c.portal_status || c.portal_status === 'none').length,
   };
+
+  const inpStyle = { width: '100%', padding: '6px 10px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg)', color: 'var(--tx-1)', boxSizing: 'border-box' };
 
   return (
     <div>
@@ -208,7 +242,6 @@ function ClientAccountsSection() {
           onChange={(e) => setSearch(e.target.value)}
           style={{
             width: '100%',
-            paddingLeft: '36px',
             padding: '10px 12px 10px 36px',
             fontSize: '13px',
             border: '1px solid var(--border)',
@@ -241,40 +274,42 @@ function ClientAccountsSection() {
             </thead>
             <tbody>
               {filteredClients.map((client) => (
-                <tr key={client.id} style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.background = 'var(--card)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                  <td style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '6px',
-                      background: 'var(--accent)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: '#fff',
-                    }}>
-                      {client.name?.[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: '500', color: 'var(--tx-1)' }}>{client.name}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--tx-3)' }}>{client.email}</div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '12px', color: 'var(--tx-2)' }}>{client.company || '—'}</td>
+                <tr key={client.id} style={{ borderBottom: '1px solid var(--border)' }} onMouseEnter={(e) => e.currentTarget.style.background = 'var(--card)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <td style={{ padding: '12px' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      fontWeight: '500',
-                      background: 'var(--accent)',
-                      color: '#fff',
-                      borderRadius: '4px',
-                    }}>
-                      {client.plan || 'Standard'}
-                    </span>
+                    {editing === client.id ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <input style={inpStyle} value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} placeholder="Name" />
+                        <input style={{ ...inpStyle, fontSize: 11 }} value={editForm.email} onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))} placeholder="Email" />
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 6, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#fff', flexShrink: 0 }}>
+                          {client.name?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: '500', color: 'var(--tx-1)' }}>{client.name}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--tx-3)' }}>{client.email}</div>
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '12px', color: 'var(--tx-2)' }}>
+                    {editing === client.id ? (
+                      <input style={inpStyle} value={editForm.company} onChange={e => setEditForm(f => ({ ...f, company: e.target.value }))} placeholder="Company" />
+                    ) : (client.company || '—')}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    {editing === client.id ? (
+                      <select style={inpStyle} value={editForm.plan} onChange={e => setEditForm(f => ({ ...f, plan: e.target.value }))}>
+                        <option value="Standard">Standard</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Enterprise">Enterprise</option>
+                      </select>
+                    ) : (
+                      <span style={{ display: 'inline-block', padding: '4px 8px', fontSize: '11px', fontWeight: '500', background: 'var(--accent)', color: '#fff', borderRadius: '4px' }}>
+                        {client.plan || 'Standard'}
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: '12px' }}>
                     {client.portal_status === 'active' && (
@@ -287,47 +322,45 @@ function ClientAccountsSection() {
                         <Circle size={14} /> Invited
                       </span>
                     )}
-                    {!client.portal_status || client.portal_status === 'none' && (
+                    {(!client.portal_status || client.portal_status === 'none') && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--tx-3)' }}>
                         <Circle size={14} /> None
                       </span>
                     )}
                   </td>
                   <td style={{ padding: '12px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => navigate(`/clients/${client.id}`)}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          background: 'transparent',
-                          border: '1px solid var(--border)',
-                          borderRadius: '6px',
-                          color: 'var(--tx-1)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <Eye size={12} /> View
-                      </button>
-                      <button
-                        onClick={() => togglePortal(client.id, client.portal_status)}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          background: client.portal_status === 'active' ? 'var(--red)' : 'var(--green)',
-                          border: 'none',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {client.portal_status === 'active' ? 'Disable' : 'Enable'} Portal
-                      </button>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {editing === client.id ? (
+                        <>
+                          <button onClick={() => saveEdit(client.id)} disabled={editSaving}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '600', background: 'var(--green)', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer', opacity: editSaving ? 0.6 : 1 }}>
+                            {editSaving ? 'Saving…' : 'Save'}
+                          </button>
+                          <button onClick={cancelEdit}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '500', background: 'transparent', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--tx-2)', cursor: 'pointer' }}>
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => startEdit(client)}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '500', background: 'transparent', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--tx-1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Pencil size={11} /> Edit
+                          </button>
+                          <button onClick={() => navigate(`/clients/${client.id}`)}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '500', background: 'transparent', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--tx-1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Eye size={11} /> View
+                          </button>
+                          <button onClick={() => togglePortal(client.id, client.portal_status)}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '500', background: client.portal_status === 'active' ? 'var(--red)' : 'var(--green)', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer' }}>
+                            {client.portal_status === 'active' ? 'Disable' : 'Enable'} Portal
+                          </button>
+                          <button onClick={() => deleteClient(client.id, client.name)}
+                            style={{ padding: '5px 10px', fontSize: '12px', fontWeight: '500', background: 'transparent', border: '1px solid var(--red)', borderRadius: '6px', color: 'var(--red)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Trash2 size={11} /> Delete
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

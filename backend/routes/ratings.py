@@ -43,6 +43,38 @@ class ResolverStatsResponse(BaseModel):
 
 # ============== ROUTES ==============
 
+@router.get("/verify-token")
+async def verify_rating_token(token: str):
+    """Verify a rating token and return order info (public endpoint)"""
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+
+    token_record = await db.rating_tokens.find_one(
+        {"token": token, "used": False},
+        {"_id": 0}
+    )
+
+    if not token_record:
+        return {"valid": False}
+
+    order = await db.orders.find_one(
+        {"id": token_record["order_id"]},
+        {"_id": 0, "id": 1, "order_code": 1, "title": 1, "requester_name": 1, "editor_name": 1}
+    )
+
+    if not order:
+        return {"valid": False}
+
+    return {
+        "valid": True,
+        "order_id": order["id"],
+        "order_code": order.get("order_code", ""),
+        "title": order.get("title", ""),
+        "requester_name": order.get("requester_name", ""),
+        "resolver_name": order.get("editor_name", ""),
+    }
+
+
 @router.post("")
 async def submit_rating(rating_data: RatingCreate):
     """Submit a satisfaction rating (public endpoint with token)"""

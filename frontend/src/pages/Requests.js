@@ -8,7 +8,7 @@ import {
   Plus, Search, X, AlertCircle, ArrowUp, Minus, ArrowDown,
   MessageSquare, Loader2, Clock, Shield, User, Users, ChevronDown,
   ExternalLink, Filter, LayoutGrid, List, RefreshCw, UserPlus,
-  CheckCircle2, Truck, AlertTriangle, Eye, MoreHorizontal,
+  CheckCircle2, Truck, AlertTriangle, Eye, MoreHorizontal, Trash2,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -809,6 +809,24 @@ export default function Requests() {
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   }}>
                     <X size={13} /> Cancel Request
+                  </button>
+                  <button onClick={async () => {
+                    if (!window.confirm('Permanently delete this request? This cannot be undone.')) return;
+                    try {
+                      await fetch(`${API}/orders/${selected.id}`, {
+                        method: 'DELETE', headers: jhdrs(),
+                      });
+                      toast.success('Request deleted');
+                      setOrders(prev => prev.filter(o => o.id !== selected.id));
+                      setSelected(null);
+                      fetchData();
+                    } catch { toast.error('Failed to delete request'); }
+                  }} style={{
+                    width: '100%', padding: '8px 0', borderRadius: 7, border: '1px solid #ef4444',
+                    background: '#ef4444', color: '#fff', fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}>
+                    <Trash2 size={13} /> Delete Request
                   </button>
                 </div>
               )}

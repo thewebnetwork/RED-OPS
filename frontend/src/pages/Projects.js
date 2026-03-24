@@ -346,7 +346,7 @@ function GroupHeader({ label, count, color, collapsed, onToggle }) {
   );
 }
 
-function ProjectModal({ project, onClose, onSave, loading, clients = [] }) {
+function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [] }) {
   const [form, setForm] = useState(project || {});
 
   const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
@@ -428,7 +428,13 @@ function ProjectModal({ project, onClose, onSave, loading, clients = [] }) {
           </div>
         </div>
 
-        <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+        <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+          {project && onDelete && (
+            <button onClick={() => onDelete(project.id)} style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, background: 'transparent', color: 'var(--red)', border: '1px solid var(--red)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Trash2 size={13} /> Delete
+            </button>
+          )}
+          <div style={{ flex: 1 }} />
           <button onClick={onClose} className="btn-ghost">Cancel</button>
           <button onClick={handleSave} disabled={loading} className="btn-primary">
             {loading ? <Loader2 size={14} className="spin" style={{ marginRight: 6 }} /> : <Plus size={14} style={{ marginRight: 6 }} />}
@@ -744,7 +750,7 @@ function Projects() {
         setSaving(true);
         try {
           if (proj.id) {
-            await ax().put(`${API}/projects/${proj.id}`, proj);
+            await ax().patch(`${API}/projects/${proj.id}`, proj);
             toast.success('Project updated');
           } else {
             await ax().post(`${API}/projects`, proj);
@@ -756,6 +762,14 @@ function Projects() {
         } finally {
           setSaving(false);
         }
+      }} onDelete={async (id) => {
+        if (!window.confirm('Delete this project? This cannot be undone.')) return;
+        try {
+          await ax().delete(`${API}/projects/${id}`);
+          toast.success('Project deleted');
+          setModal(null);
+          await fetchProjects();
+        } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete project'); }
       }} loading={saving} />}
     </div>
   );
@@ -1041,7 +1055,7 @@ function AdminProjectsHub() {
         setSaving(true);
         try {
           if (proj.id) {
-            await ax().put(`${API}/projects/${proj.id}`, proj);
+            await ax().patch(`${API}/projects/${proj.id}`, proj);
             toast.success('Project updated');
           } else {
             await ax().post(`${API}/projects`, proj);
@@ -1053,6 +1067,14 @@ function AdminProjectsHub() {
         } finally {
           setSaving(false);
         }
+      }} onDelete={async (id) => {
+        if (!window.confirm('Delete this project? This cannot be undone.')) return;
+        try {
+          await ax().delete(`${API}/projects/${id}`);
+          toast.success('Project deleted');
+          setModal(null);
+          await fetchData();
+        } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete project'); }
       }} loading={saving} />}
     </div>
   );

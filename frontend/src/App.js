@@ -37,7 +37,6 @@ import Roles from "./pages/Roles";
 import Teams from "./pages/Teams";
 import Workflows from "./pages/Workflows";
 import WorkflowEditor from "./pages/WorkflowEditor";
-import UISettings from "./pages/UISettings";
 import Announcements from "./pages/Announcements";
 import Logs from "./pages/Logs";
 import Integrations from "./pages/Integrations";
@@ -159,10 +158,15 @@ function PrivateRoute({ children, roles }) {
   }
 
   // Check if user needs onboarding (after password + OTP are done)
+  const isSetupOrVerifyPage = ['/setup-otp', '/verify-otp', '/force-password-change'].includes(location.pathname);
+  const isStaff = user?.role === 'Administrator' || user?.role === 'Operator';
+
   if (!user?.onboarding_completed &&
+      !isStaff &&
       !user?.force_password_change &&
       !(user?.force_otp_setup && !user?.otp_verified) &&
-      location.pathname !== '/onboarding') {
+      location.pathname !== '/onboarding' &&
+      !isSetupOrVerifyPage) {
     return <Navigate to="/onboarding" replace />;
   }
 
@@ -501,14 +505,6 @@ function AppRoutes() {
             <Settings />
           </PrivateRoute>
         }
-      />
-      <Route 
-        path="/settings/ui" 
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <UISettings />
-          </PrivateRoute>
-        } 
       />
       <Route 
         path="/email-settings" 

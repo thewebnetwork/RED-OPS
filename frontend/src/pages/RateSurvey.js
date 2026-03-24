@@ -49,7 +49,7 @@ export default function RateSurvey() {
 
     setSubmitting(true);
     try {
-      await axios.post(`${API}/ratings/submit`, {
+      await axios.post(`${API}/ratings`, {
         token,
         rating,
         comment: comment.trim() || null

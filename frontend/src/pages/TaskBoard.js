@@ -166,7 +166,7 @@ function AssigneePicker({ users, value, onChange }) {
   );
 }
 
-function QuickTaskDialog({ task, users, columns, onSave, onClose, saving }) {
+function QuickTaskDialog({ task, users, columns, onSave, onClose, onDelete, saving }) {
   const isEdit = !!task?.id;
   const [form, setForm] = useState({
     title: task?.title || '', description: task?.description || '',
@@ -229,8 +229,14 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, saving }) {
         </form>
         {/* Footer */}
         <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-          <button type="button" onClick={onClose} style={{ flex: 1, padding: '9px 0', fontSize: 13, fontWeight: 600, borderRadius: 10, background: 'var(--bg-elevated)', color: 'var(--tx-2)', border: '1px solid var(--border)', cursor: 'pointer' }}>Cancel</button>
-          <button type="button" onClick={submit} disabled={saving} style={{ flex: 1, padding: '9px 0', fontSize: 13, fontWeight: 700, borderRadius: 10, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer', opacity: saving ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          {isEdit && onDelete && (
+            <button type="button" onClick={() => onDelete(task.id)} style={{ padding: '9px 14px', fontSize: 13, fontWeight: 600, borderRadius: 10, background: 'transparent', color: 'var(--red)', border: '1px solid var(--red)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Trash2 size={13} /> Delete
+            </button>
+          )}
+          <div style={{ flex: 1 }} />
+          <button type="button" onClick={onClose} style={{ padding: '9px 16px', fontSize: 13, fontWeight: 600, borderRadius: 10, background: 'var(--bg-elevated)', color: 'var(--tx-2)', border: '1px solid var(--border)', cursor: 'pointer' }}>Cancel</button>
+          <button type="button" onClick={submit} disabled={saving} style={{ padding: '9px 16px', fontSize: 13, fontWeight: 700, borderRadius: 10, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer', opacity: saving ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             {saving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
             {isEdit ? 'Save Changes' : 'Create Task'}
           </button>
@@ -409,18 +415,43 @@ export default function TaskBoard() {
   async function handleSave(formData) {
     setSaving(true);
     try {
-      if (formData.id) {
-        const { data } = await axios.patch(`${API}/tasks/${formData.id}`, formData, { headers: headers() });
+      // Clean empty strings for Pydantic validation
+      const payload = { ...formData };
+      if (payload.due_at === '') payload.due_at = null;
+      if (payload.assignee_user_id === '' || payload.assignee_user_id === undefined) payload.assignee_user_id = null;
+      if (payload.description === '') payload.description = null;
+      // Remove read-only fields that backend doesn't accept on create
+      const taskId = payload.id;
+      delete payload.id;
+      delete payload.created_at;
+      delete payload.updated_at;
+      delete payload.created_by_user_id;
+      delete payload.created_source;
+      delete payload.subtask_count;
+      delete payload.completed_subtask_count;
+      delete payload.comment_count;
+      delete payload.assigned_user;
+      delete payload.assignee_name;
+      delete payload.created_by_name;
+      delete payload.request_title;
+      delete payload.project_name;
+
+      if (taskId) {
+        const { data } = await axios.patch(`${API}/tasks/${taskId}`, payload, { headers: headers() });
         setTasks(prev => prev.map(t => t.id === data.id ? data : t));
         toast.success('Task updated');
       } else {
-        const { data } = await axios.post(`${API}/tasks`, formData, { headers: headers() });
+        const { data } = await axios.post(`${API}/tasks`, payload, { headers: headers() });
         setTasks(prev => [...prev, data]);
         toast.success('Task created');
       }
       setDialogOpen(false);
       setEditingTask(null);
-    } catch { toast.error('Failed to save task'); } finally { setSaving(false); }
+    } catch (err) {
+      const detail = err.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(d => d.msg || d).join(', ') : 'Failed to save task');
+      toast.error(msg);
+    } finally { setSaving(false); }
   }
 
   async function handleInlineSave(colId, title) {
@@ -430,6 +461,19 @@ export default function TaskBoard() {
       setTasks(prev => [...prev, data]);
       toast.success('Task added');
     } catch { toast.error('Failed to create task'); }
+  }
+
+  async function handleDelete(taskId) {
+    if (!window.confirm('Delete this task? This cannot be undone.')) return;
+    try {
+      await axios.delete(`${API}/tasks/${taskId}`, { headers: headers() });
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+      setDialogOpen(false);
+      setEditingTask(null);
+      toast.success('Task deleted');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete task');
+    }
   }
 
   function openEdit(task) { setEditingTask(task); setDialogOpen(true); }
@@ -592,7 +636,7 @@ export default function TaskBoard() {
       {dialogOpen && (
         <QuickTaskDialog
           task={editingTask} users={assignableUsers} columns={COLUMNS}
-          onSave={handleSave} onClose={() => { setDialogOpen(false); setEditingTask(null); }}
+          onSave={handleSave} onDelete={handleDelete} onClose={() => { setDialogOpen(false); setEditingTask(null); }}
           saving={saving}
         />
       )}
