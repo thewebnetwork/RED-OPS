@@ -28,10 +28,11 @@ from .projects import router as projects_router
 from .knowledge_base import router as knowledge_base_router
 from .crm import router as crm_router
 from .ambassador import router as ambassador_router
+from .ad_performance import router as ad_performance_router
 
 __all__ = [
     "auth_router",
-    "users_router", 
+    "users_router",
     "roles_router",
     "teams_router",
     "categories_router",
@@ -57,4 +58,5 @@ __all__ = [
     "knowledge_base_router",
     "crm_router",
     "ambassador_router",
+    "ad_performance_router",
 ]

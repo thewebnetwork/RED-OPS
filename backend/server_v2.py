@@ -44,6 +44,7 @@ from routes import (
     knowledge_base_router,
     crm_router,
     ambassador_router,
+    ad_performance_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -263,6 +264,7 @@ app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base / SOP
 app.include_router(crm_router, prefix="/api")  # CRM / Pipeline (Phase 3)
 app.include_router(ambassador_router, prefix="/api")  # Ambassador + Marketplace (Phase 4)
 app.include_router(files_router, prefix="/api")  # Universal File Management
+app.include_router(ad_performance_router, prefix="/api")  # Ad Performance Tracking (Hyros Lite)
 
 
 @app.get("/")

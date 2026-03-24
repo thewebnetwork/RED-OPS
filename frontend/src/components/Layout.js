@@ -51,6 +51,7 @@ const NAV_BUSINESS = [
   // { path: '/crm',      icon: Contact,    label: 'Pipeline',  roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
   { path: '/reports',  icon: BarChart2,  label: 'Reports',  roles: ['Administrator','Operator'] },
+  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
 ];
 const NAV_SERVICES = [];
 const NAV_SYSTEM = [
@@ -66,6 +67,7 @@ const NAV_CLIENT = [
   { path: '/projects',     icon: FolderKanban,    label: 'My Projects',    roles: ['Media Client'] },
   { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
   { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
+  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Media Client'] },
   { path: '/files?context=knowledge_base', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
   { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
 ];
