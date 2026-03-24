@@ -30,6 +30,8 @@ from .crm import router as crm_router
 from .ambassador import router as ambassador_router
 from .ad_performance import router as ad_performance_router
 from .search import router as search_router
+from .integrations import router as integrations_router
+from .ai import router as ai_router
 
 __all__ = [
     "auth_router",
@@ -61,4 +63,6 @@ __all__ = [
     "ambassador_router",
     "ad_performance_router",
     "search_router",
+    "integrations_router",
+    "ai_router",
 ]

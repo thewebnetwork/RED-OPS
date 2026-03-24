@@ -1,10 +1,15 @@
 """Notification services"""
 import uuid
+import asyncio
+import logging
 from datetime import datetime, timezone
 from .sse import publish
+from .slack_service import send_slack_notification
+
+logger = logging.getLogger(__name__)
 
 async def create_notification(db, user_id: str, type: str, title: str, message: str, related_order_id: str = None):
-    """Create a notification for a user and push via SSE."""
+    """Create a notification for a user, push via SSE, and optionally send to Slack."""
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": user_id,
@@ -18,6 +23,22 @@ async def create_notification(db, user_id: str, type: str, title: str, message: 
     await db.notifications.insert_one(notification)
     # Push to SSE subscribers for real-time delivery
     await publish(user_id, {"_id": 0, **{k: v for k, v in notification.items() if k != "_id"}})
+
+    # Send to Slack if configured (non-blocking)
+    try:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "org_id": 1, "team_id": 1, "id": 1})
+        if user:
+            org_id = user.get("org_id") or user.get("team_id") or user.get("id")
+            slack = await db.integrations.find_one(
+                {"org_id": org_id, "provider": "slack_webhook", "status": "connected"}
+            )
+            if slack and slack.get("config", {}).get("webhook_url"):
+                asyncio.create_task(
+                    send_slack_notification(slack["config"]["webhook_url"], message, title)
+                )
+    except Exception as e:
+        logger.debug(f"Slack hook skipped: {e}")
+
     return notification
 
 

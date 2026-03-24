@@ -422,6 +422,28 @@ async def list_all_users(current_user: dict = Depends(require_roles(["Administra
     return [await build_user_response(u) for u in users]
 
 
+# ============== USER PREFERENCES ==============
+
+@router.get("/me/preferences")
+async def get_my_preferences(current_user: dict = Depends(get_current_user)):
+    """Get current user's preferences."""
+    return {"preferences": current_user.get("preferences", {"notifications": {}, "appearance": {}, "locale": {}})}
+
+
+@router.patch("/me/preferences")
+async def update_my_preferences(
+    prefs: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Update current user's preferences (deep-merge)."""
+    current = current_user.get("preferences", {})
+    for section in ("notifications", "appearance", "locale"):
+        if section in prefs:
+            current[section] = {**current.get(section, {}), **prefs[section]}
+    await db.users.update_one({"id": current_user["id"]}, {"$set": {"preferences": current}})
+    return {"message": "Preferences updated", "preferences": current}
+
+
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(user_id: str, current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
     """Get a specific user by ID"""

@@ -1,75 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { X, CheckCircle, Key, ExternalLink, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Key, ExternalLink, Loader2, Trash2, RefreshCw } from 'lucide-react';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const tok = () => localStorage.getItem('token');
+const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
 const allIntegrations = [
   {
-    id: 1, name: 'GoHighLevel', category: 'CRM',
+    id: 'ghl', name: 'GoHighLevel', category: 'CRM',
     description: 'Your primary acquisition & nurture CRM. Syncs contact status and pipeline stages.',
     icon: 'G', color: '#3b82f6', authType: 'api_key', keyLabel: 'GHL API Key',
     docsUrl: 'https://highlevel.stoplight.io/docs/integrations/0443d7d1a4bd0-overview',
-    lastSync: '5 mins ago', connected: true,
   },
   {
-    id: 2, name: 'Google Drive', category: 'Storage',
+    id: 'google_drive', name: 'Google Drive', category: 'Storage',
     description: 'Access and deliver files directly from Drive within requests and projects.',
     icon: 'D', color: '#4285f4', authType: 'oauth', oauthLabel: 'Sign in with Google',
-    lastSync: '12 mins ago', connected: true,
   },
   {
-    id: 3, name: 'Slack', category: 'Communication',
+    id: 'slack_webhook', name: 'Slack', category: 'Communication',
     description: 'Get notified in Slack when requests are submitted, assigned, or completed.',
-    icon: 'S', color: '#36c5f0', authType: 'oauth', oauthLabel: 'Add to Slack',
+    icon: 'S', color: '#36c5f0', authType: 'webhook', keyLabel: 'Slack Incoming Webhook URL',
+    docsUrl: 'https://api.slack.com/messaging/webhooks',
   },
   {
-    id: 4, name: 'Gmail / Google Workspace', category: 'Communication',
+    id: 'gmail', name: 'Gmail / Google Workspace', category: 'Communication',
     description: 'Send automated client emails and monthly reports directly from Red Ops.',
     icon: 'G', color: '#ea4335', authType: 'oauth', oauthLabel: 'Sign in with Google',
   },
   {
-    id: 5, name: 'Stripe', category: 'Payments',
+    id: 'stripe', name: 'Stripe', category: 'Payments',
     description: 'Sync client MRR, track renewals, and flag missed payments automatically.',
     icon: 'S', color: '#625bdb', authType: 'api_key', keyLabel: 'Stripe Secret Key',
     docsUrl: 'https://stripe.com/docs/keys',
   },
   {
-    id: 6, name: 'Calendly', category: 'Scheduling',
+    id: 'calendly', name: 'Calendly', category: 'Scheduling',
     description: 'Auto-create tasks when strategy calls are booked.',
     icon: 'C', color: '#006fee', authType: 'api_key', keyLabel: 'Calendly Personal Access Token',
     docsUrl: 'https://developer.calendly.com/api-docs',
   },
   {
-    id: 7, name: 'Zapier', category: 'Automation',
+    id: 'zapier', name: 'Zapier', category: 'Automation',
     description: 'Trigger Red Ops actions from 5,000+ apps via webhooks.',
-    icon: 'Z', color: '#ff4f00', authType: 'api_key', keyLabel: 'Webhook URL',
+    icon: 'Z', color: '#ff4f00', authType: 'webhook', keyLabel: 'Webhook URL',
   },
   {
-    id: 8, name: 'Notion', category: 'Knowledge',
+    id: 'notion', name: 'Notion', category: 'Knowledge',
     description: 'Migrate Notion docs to Red Ops SOPs with one click.',
     icon: 'N', color: '#888', authType: 'oauth', oauthLabel: 'Connect Notion',
   },
   {
-    id: 9, name: 'Meta Ads', category: 'Marketing',
+    id: 'meta_ads', name: 'Meta Ads', category: 'Marketing',
     description: 'Pull live ad performance into client dashboards.',
     icon: 'M', color: '#1877f2', authType: 'oauth', oauthLabel: 'Connect Meta Business',
   },
   {
-    id: 10, name: 'Google Ads', category: 'Marketing',
+    id: 'google_ads', name: 'Google Ads', category: 'Marketing',
     description: 'Monitor campaign performance alongside client health scores.',
     icon: 'A', color: '#4285f4', authType: 'oauth', oauthLabel: 'Sign in with Google',
   },
   {
-    id: 11, name: 'Nextcloud', category: 'Storage',
+    id: 'nextcloud', name: 'Nextcloud', category: 'Storage',
     description: 'Primary file storage for all deliverables and client assets.',
     icon: 'N', color: '#0082c9', authType: 'api_key', keyLabel: 'Nextcloud App Password',
-    lastSync: '8 mins ago', connected: true,
   },
   {
-    id: 12, name: 'OpenAI', category: 'AI',
-    description: 'Powers the AI Brief Generator, Status Summary, and internal search.',
+    id: 'openai', name: 'OpenAI', category: 'AI',
+    description: 'Powers the AI Brief Generator, Chat Assistant, and Status Summary.',
     icon: 'O', color: '#10a37f', authType: 'api_key', keyLabel: 'OpenAI API Key',
     docsUrl: 'https://platform.openai.com/api-keys',
-    lastSync: '2 mins ago', connected: true,
   },
 ];
 
@@ -83,19 +85,32 @@ const comingSoon = [
 export default function Integrations() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [connections, setConnections] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('redops_integrations') || '[]'); } catch { return []; }
-  });
+  const [connectedMap, setConnectedMap] = useState({});  // provider → integration doc
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [connecting, setConnecting] = useState(false);
+  const [testing, setTesting] = useState(null);
 
-  const isConnected = name => connections.includes(name);
+  const fetchIntegrations = useCallback(async () => {
+    try {
+      const res = await ax().get(`${API}/integrations`);
+      const map = {};
+      (res.data || []).forEach(i => { map[i.provider] = i; });
+      setConnectedMap(map);
+    } catch { /* silently fail */ }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchIntegrations(); }, [fetchIntegrations]);
+
+  const isConnected = id => !!connectedMap[id];
+  const connectedCount = Object.keys(connectedMap).length;
 
   const filtered = allIntegrations.filter(i => {
     const q = search.toLowerCase();
     const matchSearch = !q || i.name.toLowerCase().includes(q) || i.category.toLowerCase().includes(q) || i.description.toLowerCase().includes(q);
-    const matchFilter = statusFilter === 'All' || (statusFilter === 'Connected' ? isConnected(i.name) : !isConnected(i.name));
+    const matchFilter = statusFilter === 'All' || (statusFilter === 'Connected' ? isConnected(i.id) : !isConnected(i.id));
     return matchSearch && matchFilter;
   });
 
@@ -108,28 +123,74 @@ export default function Integrations() {
     if (!modal) return;
     const { integration } = modal;
 
-    if (integration.authType === 'api_key' && !apiKey.trim()) {
-      toast.error('Please enter your API key to connect.');
+    if ((integration.authType === 'api_key' || integration.authType === 'webhook') && !apiKey.trim()) {
+      toast.error(`Please enter your ${integration.keyLabel || 'key'} to connect.`);
+      return;
+    }
+
+    if (integration.authType === 'oauth') {
+      toast.info(`${integration.name} OAuth coming soon. Use API key if available.`);
       return;
     }
 
     setConnecting(true);
     try {
-      // Store connection in localStorage until backend integration API is built
-      const stored = JSON.parse(localStorage.getItem('redops_integrations') || '[]');
-      if (!stored.includes(integration.name)) {
-        stored.push(integration.name);
-        localStorage.setItem('redops_integrations', JSON.stringify(stored));
+      const config = integration.authType === 'webhook' ? { webhook_url: apiKey } : { api_key: apiKey };
+      const res = await ax().post(`${API}/integrations/${integration.id}/connect`, {
+        provider: integration.id,
+        auth_type: integration.authType,
+        config,
+      });
+      if (res.data.status === 'connected') {
+        toast.success(`${integration.name} connected successfully`);
+      } else {
+        toast.warning(`${integration.name} saved but credentials may be invalid`);
       }
-      setConnections(stored);
-      toast.success(`${integration.name} connected successfully`);
+      fetchIntegrations();
       setModal(null);
+      setApiKey('');
     } catch (err) {
-      toast.error('Failed to connect integration');
+      toast.error(err.response?.data?.detail || 'Failed to connect');
     } finally {
       setConnecting(false);
     }
   };
+
+  const handleDisconnect = async (integration) => {
+    if (!window.confirm(`Disconnect ${integration.name}?`)) return;
+    try {
+      await ax().delete(`${API}/integrations/${integration.id}`);
+      toast.success(`${integration.name} disconnected`);
+      fetchIntegrations();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to disconnect');
+    }
+  };
+
+  const handleTest = async (integration) => {
+    setTesting(integration.id);
+    try {
+      const res = await ax().post(`${API}/integrations/${integration.id}/test`);
+      if (res.data.status === 'connected') {
+        toast.success(`${integration.name} is working`);
+      } else {
+        toast.error(`${integration.name} test failed — check credentials`);
+      }
+      fetchIntegrations();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Test failed');
+    } finally {
+      setTesting(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <Loader2 size={24} className="spin" style={{ color: 'var(--tx-3)' }} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', padding: '32px 28px' }}>
@@ -138,7 +199,7 @@ export default function Integrations() {
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Integrations</h1>
         <p style={{ marginTop: 4, fontSize: 13, color: 'var(--tx-3)' }}>
-          Connect Red Ops to your existing stack. {connections.length} connected.
+          Connect Red Ops to your existing stack. {connectedCount} connected.
         </p>
       </div>
 
@@ -146,7 +207,7 @@ export default function Integrations() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, alignItems: 'center' }}>
         <input className="input-field" placeholder="Search integrations..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, maxWidth: 320, height: 34, fontSize: 13 }} />
         <div style={{ display: 'flex', gap: 6 }}>
-          {['All', 'Available'].map(f => (
+          {['All', 'Connected', 'Available'].map(f => (
             <button key={f} onClick={() => setStatusFilter(f)}
               style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid', borderColor: statusFilter === f ? 'var(--red)' : 'var(--border)', background: statusFilter === f ? 'var(--red)' : 'transparent', color: statusFilter === f ? '#fff' : 'var(--tx-2)', transition: 'all .12s' }}>
               {f}
@@ -158,28 +219,55 @@ export default function Integrations() {
       {/* Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 40 }}>
         {filtered.map(integration => {
-          const connected = isConnected(integration.name);
+          const connected = isConnected(integration.id);
+          const info = connectedMap[integration.id];
           return (
-            <div key={integration.id} className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div key={integration.id} className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 0, borderLeft: connected ? `3px solid ${integration.color}` : undefined }}>
               {/* Top row */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, background: integration.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
                   {integration.icon}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>{integration.name}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>{integration.name}</span>
+                    {connected && <CheckCircle size={14} color="#22c55e" />}
+                  </div>
                   <span style={{ fontSize: 11, color: 'var(--tx-3)', background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 3 }}>{integration.category}</span>
                 </div>
               </div>
 
-              <p style={{ fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.55, flex: 1, margin: '0 0 14px' }}>{integration.description}</p>
+              <p style={{ fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.55, flex: 1, margin: '0 0 10px' }}>{integration.description}</p>
 
+              {connected && info && (
+                <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 10 }}>
+                  Status: <span style={{ color: info.status === 'connected' ? '#22c55e' : '#ef4444', fontWeight: 600 }}>{info.status}</span>
+                  {info.connected_at && <> · Connected {new Date(info.connected_at).toLocaleDateString()}</>}
+                </div>
+              )}
 
-              <button
-                onClick={() => openConnect(integration)}
-                style={{ padding: '8px 0', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1px solid', width: '100%', borderColor: integration.color, background: integration.color + '18', color: integration.color, transition: 'all .12s' }}>
-                Connect
-              </button>
+              {connected ? (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => handleTest(integration)}
+                    style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                    {testing === integration.id ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />} Test
+                  </button>
+                  <button onClick={() => openConnect(integration)}
+                    style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)' }}>
+                    Reconfigure
+                  </button>
+                  <button onClick={() => handleDisconnect(integration)}
+                    style={{ padding: '7px 10px', borderRadius: 7, fontSize: 12, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => openConnect(integration)}
+                  style={{ padding: '8px 0', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1px solid', width: '100%', borderColor: integration.color, background: integration.color + '18', color: integration.color, transition: 'all .12s' }}>
+                  Connect
+                </button>
+              )}
             </div>
           );
         })}
@@ -215,7 +303,7 @@ export default function Integrations() {
 
             <p style={{ fontSize: 13, color: 'var(--tx-2)', marginBottom: 20, lineHeight: 1.55 }}>{modal.integration.description}</p>
 
-            {modal.integration.authType === 'api_key' ? (
+            {(modal.integration.authType === 'api_key' || modal.integration.authType === 'webhook') ? (
               <div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                   <Key size={12} /> {modal.integration.keyLabel}
@@ -239,7 +327,7 @@ export default function Integrations() {
               </div>
             ) : (
               <div style={{ marginBottom: 20, padding: '14px 16px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.5 }}>
-                Clicking <strong style={{ color: 'var(--tx-1)' }}>{modal.integration.oauthLabel}</strong> will open a secure authorisation window. No passwords are stored — we only request the minimum permissions needed.
+                OAuth integration for <strong style={{ color: 'var(--tx-1)' }}>{modal.integration.name}</strong> is coming soon. If this service supports API keys, you can use that method instead.
               </div>
             )}
 
@@ -247,8 +335,10 @@ export default function Integrations() {
               <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setModal(null)}>Cancel</button>
               <button
                 onClick={handleConnect}
-                style={{ flex: 2, padding: '10px 0', borderRadius: 7, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', background: modal.integration.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all .12s' }}>
-                {modal.integration.authType === 'oauth' ? modal.integration.oauthLabel : 'Save & Connect'}
+                disabled={connecting}
+                style={{ flex: 2, padding: '10px 0', borderRadius: 7, fontSize: 13, fontWeight: 700, cursor: connecting ? 'wait' : 'pointer', border: 'none', background: modal.integration.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all .12s', opacity: connecting ? 0.7 : 1 }}>
+                {connecting ? <Loader2 size={14} className="spin" /> : null}
+                {connecting ? 'Connecting...' : 'Save & Connect'}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import axios from 'axios';
 import {
   User,
   Settings as SettingsIcon,
@@ -124,12 +125,37 @@ export default function Settings() {
     { id: 2, browser: 'Safari', platform: 'iOS', location: 'Toronto, CA', lastActive: '2 hours ago', current: false },
   ];
 
+  // Fetch & save preferences to backend
+  const tok = () => localStorage.getItem('token');
+  const axh = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axh().get(`${API}/users/me/preferences`);
+        const p = res.data?.preferences || {};
+        if (p.notifications) setNotifications(prev => ({ ...prev, ...p.notifications }));
+        if (p.appearance) setAppearance(prev => ({ ...prev, ...p.appearance }));
+      } catch { /* first load, no prefs yet */ }
+    })();
+  }, []); // eslint-disable-line
+
+  const savePrefs = async (section, data) => {
+    try {
+      await axh().patch(`${API}/users/me/preferences`, { [section]: data });
+    } catch { /* silently fail */ }
+  };
+
   const handleToggleNotification = (key) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+    const updated = { ...notifications, [key]: !notifications[key] };
+    setNotifications(updated);
+    savePrefs('notifications', updated);
   };
 
   const handleAccentColorChange = (color) => {
-    setAppearance(prev => ({ ...prev, accentColor: color }));
+    const updated = { ...appearance, accentColor: color };
+    setAppearance(updated);
+    savePrefs('appearance', updated);
   };
 
   const getInitials = (name) => {
@@ -290,8 +316,8 @@ export default function Settings() {
     toast.info('Payment management coming soon');
   };
 
-  const handleConfigureIntegration = (integrationName) => {
-    toast.info(`${integrationName} configuration coming soon`);
+  const handleConfigureIntegration = () => {
+    navigate('/integrations');
   };
 
   const handleConnectIntegration = (integrationName) => {
