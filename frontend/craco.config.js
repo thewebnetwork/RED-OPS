@@ -1,14 +1,6 @@
 // craco.config.js
 const path = require('path');
 
-module.exports = {
-  webpack: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-    },
-  },
-};
-
 // Check if we're in development/preview mode (not production build)
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
 const isDevServer = process.env.NODE_ENV !== "production";
