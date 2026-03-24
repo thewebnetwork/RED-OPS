@@ -11,6 +11,11 @@
  *   • Sort options
  *   • New/Edit project modal
  *   • Clean empty states
+ *
+ * Admin Feature:
+ *   • AdminProjectsHub for admins: client-grouped project view with KPIs
+ *   • Auto-created project indicators (service_request source)
+ *   • Client linking and health metrics
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -23,7 +28,7 @@ import {
   MoreHorizontal, AlertCircle, Target, BarChart3,
   Layers, FileText, Activity, Loader2, CreditCard,
   Search, Grid3X3, List, ChevronDown, ArrowUpDown,
-  TrendingUp, Pause, Archive, Filter, Hash,
+  TrendingUp, Pause, Archive, Filter, Hash, Zap, ChevronUp,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -40,6 +45,14 @@ const formatDateLong = d => d ? new Date(d).toLocaleDateString('en-CA', { month:
 const daysUntil = d => {
   if (!d) return 999;
   return Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24));
+};
+
+const isOverdue = (due) => due && new Date(due) < new Date() ? true : false;
+const isThisMonth = (d) => {
+  if (!d) return false;
+  const now = new Date();
+  const date = new Date(d);
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
 };
 
 /* ── Config ── */
@@ -111,60 +124,67 @@ function TypePill({ type }) {
 }
 
 function StatusBadge({ status }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.active;
-  const Icon = cfg.icon;
+  const cfg = STATUS_CONFIG[status];
+  const Icon = cfg?.icon || Circle;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: cfg.color, padding: '2px 8px', borderRadius: 4, background: cfg.bg }}>
-      <Icon size={10} /> {cfg.label}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 4, background: cfg?.bg || 'var(--bg-elevated)', color: cfg?.color || 'var(--tx-2)', whiteSpace: 'nowrap' }}>
+      <Icon size={10} /> {cfg?.label || status}
     </span>
   );
 }
 
 function PriorityDot({ priority }) {
-  const cfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.medium;
+  const cfg = PRIORITY_CONFIG[priority];
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, color: cfg.color }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
-      {cfg.label}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, color: cfg?.color || 'var(--tx-2)' }}>
+      <Circle size={8} fill={cfg?.color || 'currentColor'} color={cfg?.color || 'currentColor'} /> {cfg?.label}
     </span>
   );
 }
 
 function PaymentPill({ status }) {
-  const colors = { paid: '#22c55e', partial: '#f59e0b', unpaid: '#ef4444', not_applicable: 'var(--tx-3)' };
-  const labels = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid', not_applicable: '—' };
-  if (status === 'not_applicable' || !status) return null;
-  const c = colors[status] || 'var(--tx-3)';
-  return <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: `${c}22`, color: c }}>{labels[status]}</span>;
+  const opt = PAYMENT_OPTIONS.find(o => o.value === status);
+  const colors = { paid: '#22c55e', partial: '#f59e0b', unpaid: '#ef4444', not_applicable: '#606060' };
+  const color = colors[status] || '#606060';
+  return (
+    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: color + '18', color: color, whiteSpace: 'nowrap' }}>
+      {opt?.label || status}
+    </span>
+  );
 }
 
 function ProgressBar({ progress, size = 'md' }) {
-  const h = size === 'sm' ? 4 : 6;
-  const done = progress === 100;
+  const percent = progress || 0;
+  const height = size === 'lg' ? 6 : size === 'sm' ? 2 : 4;
+  const color = percent < 33 ? '#ef4444' : percent < 66 ? '#f59e0b' : '#22c55e';
   return (
-    <div style={{ height: h, background: 'var(--bg-elevated)', borderRadius: h, overflow: 'hidden', flex: 1 }}>
-      <div style={{ height: '100%', width: `${progress || 0}%`, background: done ? '#22c55e' : 'var(--accent)', borderRadius: h, transition: 'width .4s ease' }} />
+    <div style={{ width: '100%', height, background: 'var(--bg-elevated)', borderRadius: 99, overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: percent + '%', background: color, transition: 'width 0.3s ease' }} />
     </div>
   );
 }
 
 function AvatarStack({ members = [], max = 4 }) {
-  const show = members.slice(0, max);
-  const extra = members.length - max;
+  const shown = members.slice(0, max);
+  const hidden = Math.max(0, members.length - max);
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      {show.map((m, i) => (
-        <div key={m.id || i} title={m.name} style={{
-          width: 26, height: 26, borderRadius: '50%', background: avatarBg(m.id || m.name || ''),
-          border: '2px solid var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 9, fontWeight: 700, color: '#fff', marginLeft: i > 0 ? -8 : 0,
-          zIndex: max - i, position: 'relative',
-        }}>
-          {initials(m.name)}
+    <div style={{ display: 'flex', gap: -6, alignItems: 'center' }}>
+      {shown.map((m, i) => (
+        <div key={i} style={{
+          width: 24, height: 24, borderRadius: '50%', background: avatarBg(m.id || m),
+          color: 'white', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '2px solid var(--bg)', marginLeft: i > 0 ? -8 : 0,
+        }} title={m.name || m}>
+          {initials(m.name || m)}
         </div>
       ))}
-      {extra > 0 && (
-        <span style={{ fontSize: 10, color: 'var(--tx-3)', marginLeft: 4, fontWeight: 600 }}>+{extra}</span>
+      {hidden > 0 && (
+        <div style={{
+          width: 24, height: 24, borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+          fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: -6,
+        }} title={`+${hidden} more`}>
+          +{hidden}
+        </div>
       )}
     </div>
   );
@@ -172,325 +192,252 @@ function AvatarStack({ members = [], max = 4 }) {
 
 function DeadlineTag({ dueDate }) {
   if (!dueDate) return <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>No deadline</span>;
-  const dl = daysUntil(dueDate);
-  const overdue = dl <= 0;
-  const urgent = dl > 0 && dl <= 7;
-  const soon = dl > 7 && dl <= 14;
-  const color = overdue ? '#ef4444' : urgent ? '#ef4444' : soon ? '#f59e0b' : 'var(--tx-3)';
-  const weight = overdue || urgent || soon ? 600 : 400;
-
+  const days = daysUntil(dueDate);
+  const overdue = days < 0;
+  const urgent = days <= 3 && days >= 0;
+  const color = overdue ? '#ef4444' : urgent ? '#f59e0b' : '#3b82f6';
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color, fontWeight: weight }}>
-      <Calendar size={10} />
-      {formatDate(dueDate)}
-      {overdue && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: '#ef444420', color: '#ef4444', fontWeight: 700 }}>OVERDUE</span>}
-      {urgent && !overdue && <span style={{ fontSize: 9, opacity: 0.8 }}>({dl}d left)</span>}
-      {soon && <span style={{ fontSize: 9, opacity: 0.8 }}>({dl}d)</span>}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color }}>
+      <Calendar size={11} />
+      {overdue ? `${Math.abs(days)}d overdue` : urgent ? `${days}d left` : `${days}d away`}
     </span>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   KPI SUMMARY BAR
-   ═══════════════════════════════════════════════════════════ */
 function KpiBar({ projects }) {
   const active = projects.filter(p => p.status === 'active').length;
   const planning = projects.filter(p => p.status === 'planning').length;
   const completed = projects.filter(p => p.status === 'completed').length;
   const onHold = projects.filter(p => p.status === 'on_hold').length;
-  const totalTasks = projects.reduce((s, p) => s + (p.task_count || 0), 0);
-  const doneTasks = projects.reduce((s, p) => s + (p.completed_task_count || 0), 0);
-  const taskPct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
-
-  const kpis = [
-    { label: 'Active', value: active, color: '#22c55e' },
-    { label: 'Planning', value: planning, color: '#f59e0b' },
-    { label: 'Completed', value: completed, color: '#3b82f6' },
-    { label: 'On Hold', value: onHold, color: '#ef4444' },
-    { label: 'Tasks Done', value: `${doneTasks}/${totalTasks}`, sub: `${taskPct}%`, color: 'var(--accent)' },
-  ];
+  const avgProgress = projects.length > 0 ? Math.round(projects.reduce((a, p) => a + (p.progress || 0), 0) / projects.length) : 0;
+  const totalTasks = projects.reduce((a, p) => a + (p.task_count || 0), 0);
+  const completedTasks = projects.reduce((a, p) => a + (p.completed_task_count || 0), 0);
 
   return (
-    <div style={{ display: 'flex', gap: 0, padding: '12px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0, overflowX: 'auto' }}>
-      {kpis.map((k, i) => (
-        <div key={k.label} style={{
-          paddingRight: i < kpis.length - 1 ? 24 : 0,
-          marginRight: i < kpis.length - 1 ? 24 : 0,
-          borderRight: i < kpis.length - 1 ? '1px solid var(--border)' : 'none',
-          minWidth: 'fit-content',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-            <span style={{ fontSize: 18, fontWeight: 800, color: k.color, letterSpacing: '-0.02em' }}>{k.value}</span>
-            {k.sub && <span style={{ fontSize: 11, fontWeight: 600, color: k.color, opacity: 0.7 }}>{k.sub}</span>}
-          </div>
-          <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 1, fontWeight: 500 }}>{k.label}</div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
+      {[
+        { label: 'Active', value: active, color: '#22c55e' },
+        { label: 'Planning', value: planning, color: '#f59e0b' },
+        { label: 'Completed', value: completed, color: '#3b82f6' },
+        { label: 'On Hold', value: onHold, color: '#ef4444' },
+        { label: 'Avg Progress', value: avgProgress + '%', color: '#8b5cf6' },
+        { label: 'Task Completion', value: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) + '%' : '0%', color: '#06b6d4' },
+      ].map((kpi, i) => (
+        <div key={i} style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>{kpi.label}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
         </div>
       ))}
     </div>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   PROJECT CARD
-   ═══════════════════════════════════════════════════════════ */
 function ProjectCard({ project, onEdit, onClick }) {
-  const p = project;
-  const dl = daysUntil(p.due_date);
-  const tasksDone = p.completed_task_count || 0;
-  const tasksTotal = p.task_count || 0;
-  const TypeIcon = (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).icon;
+  const typeConfig = TYPE_CONFIG[project.project_type] || TYPE_CONFIG.custom;
+  const TypeIcon = typeConfig.icon;
+  const statusCfg = STATUS_CONFIG[project.status];
+  const overdue = isOverdue(project.due_date) && project.status !== 'completed';
 
   return (
-    <div onClick={onClick} className="card" style={{
-      padding: 0, cursor: 'pointer', transition: 'all .15s ease',
-      border: '1px solid var(--border)', overflow: 'hidden',
-    }}
-    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+    <div
+      onClick={onClick}
+      style={{
+        padding: 14, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)',
+        cursor: 'pointer', transition: 'all 0.2s', position: 'relative',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
     >
-      {/* Top accent stripe */}
-      <div style={{ height: 3, background: (STATUS_CONFIG[p.status] || STATUS_CONFIG.active).color }} />
-
-      <div style={{ padding: '14px 16px' }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-          <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
-            <StatusBadge status={p.status} />
-            <PaymentPill status={p.payment_status} />
-          </div>
-          <button onClick={e => { e.stopPropagation(); onEdit(p); }}
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 5, cursor: 'pointer', color: 'var(--tx-3)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, transition: 'all .12s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--tx-1)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
-          >
-            <Edit3 size={10} /> Edit
-          </button>
-        </div>
-
-        {/* Title & client */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <TypeIcon size={14} color={(TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).color} style={{ flexShrink: 0 }} />
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', margin: 0, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {p.name}
-            </h3>
-          </div>
-          {p.client_name && (
-            <div style={{ fontSize: 11.5, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4, marginLeft: 20 }}>
-              <Folder size={10} /> {p.client_name}
-            </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+        <div style={{ flex: 1 }}>
+          <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', marginBottom: 4 }}>{project.name}</h4>
+          {project.client_name && (
+            <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: 0, marginBottom: 6 }}>{project.client_name}</p>
           )}
-        </div>
-
-        {/* Progress section */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-            <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>
-              <CheckSquare size={10} style={{ marginRight: 3, verticalAlign: -1 }} />
-              {tasksDone}/{tasksTotal} tasks
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: (p.progress || 0) === 100 ? '#22c55e' : 'var(--tx-1)' }}>
-              {p.progress || 0}%
-            </span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+            <TypePill type={project.project_type} />
+            <StatusBadge status={project.status} />
+            {project.source === 'service_request' && (
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#f59e0b18', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}>
+                <Zap size={9} /> Auto
+              </span>
+            )}
           </div>
-          <ProgressBar progress={p.progress || 0} />
         </div>
+        <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', padding: 0, fontSize: 16 }}>
+          <MoreHorizontal size={14} />
+        </button>
+      </div>
 
-        {/* Type pill + Priority */}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12 }}>
-          <TypePill type={p.project_type} />
-          <PriorityDot priority={p.priority} />
-        </div>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 4, fontWeight: 600 }}>Progress</div>
+        <ProgressBar progress={project.progress} size="md" />
+        <span style={{ fontSize: 9, color: 'var(--tx-3)', marginTop: 3, display: 'block' }}>{project.progress || 0}%</span>
+      </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-          <AvatarStack members={p.team_members || []} max={4} />
-          <DeadlineTag dueDate={p.due_date} />
+      {project.team_members && project.team_members.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 6, fontWeight: 600 }}>Team</div>
+          <AvatarStack members={project.team_members} max={4} />
         </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+        <DeadlineTag dueDate={project.due_date} />
+        <PriorityDot priority={project.priority} />
       </div>
     </div>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   PROJECT TABLE ROW
-   ═══════════════════════════════════════════════════════════ */
 function ProjectTableRow({ project, onEdit, onClick }) {
-  const p = project;
+  const progress = project.progress || 0;
+  const overdue = isOverdue(project.due_date) && project.status !== 'completed';
+  const color = overdue ? '#ef4444' : progress < 33 ? '#ef4444' : progress < 66 ? '#f59e0b' : '#22c55e';
+
   return (
-    <tr onClick={onClick} style={{ cursor: 'pointer', transition: 'background .1s' }}
+    <div
+      onClick={onClick}
+      style={{
+        display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 100px 100px 100px',
+        gap: 10, padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer',
+        alignItems: 'center', transition: 'background 0.2s',
+      }}
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
-      <td style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 7, background: (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {React.createElement((TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).icon, { size: 14, color: (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).color })}
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-            {p.client_name && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>{p.client_name}</div>}
-          </div>
-        </div>
-      </td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}><StatusBadge status={p.status} /></td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}><PriorityDot priority={p.priority} /></td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 120 }}>
-          <ProgressBar progress={p.progress || 0} size="sm" />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-1)', whiteSpace: 'nowrap' }}>{p.progress || 0}%</span>
-        </div>
-      </td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--tx-2)' }}>
-        {p.completed_task_count || 0}/{p.task_count || 0}
-      </td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
-        <AvatarStack members={p.team_members || []} max={3} />
-      </td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
-        <DeadlineTag dueDate={p.due_date} />
-      </td>
-      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
-        <button onClick={e => { e.stopPropagation(); onEdit(p); }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4, borderRadius: 4 }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--tx-1)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--tx-3)'}
-        >
-          <Edit3 size={13} />
-        </button>
-      </td>
-    </tr>
+      <div>
+        <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--tx-1)' }}>{project.name}</div>
+        {project.client_name && <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>{project.client_name}</div>}
+      </div>
+      <div><TypePill type={project.project_type} /></div>
+      <div><StatusBadge status={project.status} /></div>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color }}>{progress}%</div>
+        <ProgressBar progress={progress} size="sm" />
+      </div>
+      <DeadlineTag dueDate={project.due_date} />
+      <PriorityDot priority={project.priority} />
+      <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', padding: 0 }}>
+        <MoreHorizontal size={14} />
+      </button>
+    </div>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   GROUP HEADER
-   ═══════════════════════════════════════════════════════════ */
 function GroupHeader({ label, count, color, collapsed, onToggle }) {
   return (
-    <button onClick={onToggle} style={{
-      display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-      padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer',
-      borderBottom: '1px solid var(--border)', marginBottom: 12, marginTop: 8,
-    }}>
-      <ChevronDown size={14} color="var(--tx-3)" style={{ transition: 'transform .15s', transform: collapsed ? 'rotate(-90deg)' : 'none' }} />
-      {color && <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />}
-      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>{label}</span>
-      <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>({count})</span>
-    </button>
+    <div
+      onClick={onToggle}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'var(--bg-elevated)',
+        border: '1px solid var(--border)', borderLeft: `4px solid ${color || 'var(--border)'}`, borderRadius: 6,
+        cursor: 'pointer', marginBottom: 10, userSelect: 'none',
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--card)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+    >
+      {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)', flex: 1 }}>{label}</span>
+      <span style={{ fontSize: 11, fontWeight: 600, background: color + '20', color, padding: '2px 8px', borderRadius: 4 }}>
+        {count}
+      </span>
+    </div>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   PROJECT MODAL (New / Edit)
-   ═══════════════════════════════════════════════════════════ */
 function ProjectModal({ project, onClose, onSave, loading }) {
-  const isEdit = !!project;
-  const [form, setForm] = useState({
-    name:           project?.name || '',
-    project_type:   project?.project_type || 'custom',
-    client_name:    project?.client_name || '',
-    due_date:       project?.due_date ? project.due_date.substring(0, 10) : '',
-    status:         project?.status || 'planning',
-    priority:       project?.priority || 'medium',
-    description:    project?.description || '',
-    payment_status: project?.payment_status || 'not_applicable',
-  });
-  const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const [form, setForm] = useState(project || {});
 
-  const handleSubmit = () => {
-    if (!form.name.trim()) { toast.error('Project name is required.'); return; }
-    const payload = {
-      ...form,
-      due_date: form.due_date ? new Date(form.due_date + 'T00:00:00Z').toISOString() : null,
-    };
-    onSave(payload);
+  const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
+  const handleSave = async () => {
+    if (!form.name?.trim()) return toast.error('Project name required');
+    await onSave(form);
+    onClose();
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex',
-      alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)',
-    }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{
-        width: 520, maxHeight: '85vh', overflow: 'auto',
-        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
-        padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>{isEdit ? 'Edit Project' : 'New Project'}</h2>
-          <button onClick={onClose} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--tx-3)', padding: '4px 6px', display: 'flex' }}>
-            <X size={14} />
-          </button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+      <div style={{ background: 'var(--bg)', borderRadius: 12, maxWidth: 500, width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
+        <div style={{ padding: 20, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{project ? 'Edit Project' : 'New Project'}</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', fontSize: 20 }}><X /></button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={labelStyle}>Project Name *</label>
-            <input className="input-field" autoFocus placeholder="e.g. Thompson RE — April Campaign" value={form.name} onChange={e => f('name', e.target.value)} />
+            <label style={labelStyle}>Project Name</label>
+            <input type="text" value={form.name || ''} onChange={e => handleChange('name', e.target.value)} placeholder="Project name" className="input-field" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div>
-              <label style={labelStyle}>Type</label>
-              <select className="input-field" value={form.project_type} onChange={e => f('project_type', e.target.value)}>
-                {TYPE_OPTIONS.map(t => <option key={t} value={t}>{TYPE_CONFIG[t].label}</option>)}
-              </select>
-            </div>
+
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea value={form.description || ''} onChange={e => handleChange('description', e.target.value)} placeholder="Project description" className="input-field" style={{ minHeight: 80, resize: 'vertical' }} />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>Status</label>
-              <select className="input-field" value={form.status} onChange={e => f('status', e.target.value)}>
+              <select value={form.status || 'planning'} onChange={e => handleChange('status', e.target.value)} className="input-field">
                 {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
               </select>
             </div>
+            <div>
+              <label style={labelStyle}>Type</label>
+              <select value={form.project_type || 'custom'} onChange={e => handleChange('project_type', e.target.value)} className="input-field">
+                {TYPE_OPTIONS.map(t => <option key={t} value={t}>{TYPE_CONFIG[t].label}</option>)}
+              </select>
+            </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>Priority</label>
-              <select className="input-field" value={form.priority} onChange={e => f('priority', e.target.value)}>
+              <select value={form.priority || 'medium'} onChange={e => handleChange('priority', e.target.value)} className="input-field">
                 {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
             <div>
               <label style={labelStyle}>Payment Status</label>
-              <select className="input-field" value={form.payment_status} onChange={e => f('payment_status', e.target.value)}>
+              <select value={form.payment_status || 'not_applicable'} onChange={e => handleChange('payment_status', e.target.value)} className="input-field">
                 {PAYMENT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
           </div>
-          <div>
-            <label style={labelStyle}>Client</label>
-            <input className="input-field" placeholder="Client name (optional)" value={form.client_name} onChange={e => f('client_name', e.target.value)} />
-          </div>
+
           <div>
             <label style={labelStyle}>Due Date</label>
-            <input type="date" className="input-field" value={form.due_date} onChange={e => f('due_date', e.target.value)} />
+            <input type="date" value={form.due_date ? form.due_date.split('T')[0] : ''} onChange={e => handleChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} className="input-field" />
           </div>
+
           <div>
-            <label style={labelStyle}>Description</label>
-            <textarea className="input-field" rows={3} placeholder="What this project delivers..." value={form.description} onChange={e => f('description', e.target.value)} />
+            <label style={labelStyle}>Client Name</label>
+            <input type="text" value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" className="input-field" />
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button className="btn-ghost" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
-            <button className="btn-primary" style={{ flex: 2 }} onClick={handleSubmit} disabled={loading}>
-              {loading ? <Loader2 size={14} className="spin" /> : isEdit ? 'Save Changes' : 'Create Project'}
-            </button>
+
+          <div>
+            <label style={labelStyle}>Progress (%)</label>
+            <input type="number" min="0" max="100" value={form.progress || 0} onChange={e => handleChange('progress', parseInt(e.target.value))} className="input-field" />
           </div>
+        </div>
+
+        <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button onClick={onClose} className="btn-ghost">Cancel</button>
+          <button onClick={handleSave} disabled={loading} className="btn-primary">
+            {loading ? <Loader2 size={14} className="spin" style={{ marginRight: 6 }} /> : <Plus size={14} style={{ marginRight: 6 }} />}
+            {project ? 'Update' : 'Create'}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-
 /* ═══════════════════════════════════════════════════════════
-   MAIN PAGE
+   MAIN PROJECTS COMPONENT
    ═══════════════════════════════════════════════════════════ */
-export default function Projects() {
+
+function Projects() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -548,233 +495,128 @@ export default function Projects() {
       });
 
     // Sort
-    switch (sortBy) {
-      case 'oldest': list.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0)); break;
-      case 'name': list.sort((a, b) => (a.name || '').localeCompare(b.name || '')); break;
-      case 'due_soon': list.sort((a, b) => (daysUntil(a.due_date)) - (daysUntil(b.due_date))); break;
-      case 'progress': list.sort((a, b) => (a.progress || 0) - (b.progress || 0)); break;
-      case 'progress_desc': list.sort((a, b) => (b.progress || 0) - (a.progress || 0)); break;
-      default: list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)); break;
-    }
+    const sorters = {
+      newest: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+      oldest: (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      name: (a, b) => a.name.localeCompare(b.name),
+      due_soon: (a, b) => (a.due_date || '9999') < (b.due_date || '9999') ? -1 : 1,
+      progress: (a, b) => (a.progress || 0) - (b.progress || 0),
+      progress_desc: (a, b) => (b.progress || 0) - (a.progress || 0),
+    };
+    if (sorters[sortBy]) list.sort(sorters[sortBy]);
 
     return list;
   }, [projects, filterStatus, filterType, filterPriority, filterPayment, search, sortBy]);
 
-  // Grouping logic
+  // Group
   const grouped = useMemo(() => {
     if (groupBy === 'none') return null;
-
     const groups = {};
+    const groupColors = {};
+    const colorMap = {
+      status: (status) => STATUS_CONFIG[status]?.color || '#606060',
+      type: (type) => TYPE_CONFIG[type]?.color || '#8b5cf6',
+      priority: (pri) => PRIORITY_CONFIG[pri]?.color || '#606060',
+    };
+
     filtered.forEach(p => {
-      let key, label, color;
-      switch (groupBy) {
-        case 'status':
-          key = p.status || 'active';
-          label = (STATUS_CONFIG[key] || {}).label || key;
-          color = (STATUS_CONFIG[key] || {}).color;
-          break;
-        case 'type':
-          key = p.project_type || 'custom';
-          label = (TYPE_CONFIG[key] || {}).label || key;
-          color = (TYPE_CONFIG[key] || {}).color;
-          break;
-        case 'client':
-          key = p.client_name || '_none';
-          label = p.client_name || 'No Client';
-          color = key === '_none' ? 'var(--tx-3)' : 'var(--accent)';
-          break;
-        case 'priority':
-          key = p.priority || 'medium';
-          label = (PRIORITY_CONFIG[key] || {}).label || key;
-          color = (PRIORITY_CONFIG[key] || {}).color;
-          break;
-        default:
-          key = 'all'; label = 'All'; color = null;
-      }
-      if (!groups[key]) groups[key] = { label, color, items: [] };
-      groups[key].items.push(p);
+      const key = groupBy === 'status' ? p.status : groupBy === 'type' ? p.project_type : p.priority;
+      const label = groupBy === 'status' ? STATUS_CONFIG[key]?.label : groupBy === 'type' ? TYPE_CONFIG[key]?.label : PRIORITY_CONFIG[key]?.label;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(p);
+      groupColors[key] = colorMap[groupBy](key);
     });
 
-    // Order groups logically
-    const order = groupBy === 'status' ? STATUS_OPTIONS :
-                  groupBy === 'type' ? TYPE_OPTIONS :
-                  groupBy === 'priority' ? ['urgent','high','medium','low'] :
-                  Object.keys(groups).sort();
-
-    return order.filter(k => groups[k]).map(k => ({ key: k, ...groups[k] }));
+    return Object.entries(groups).map(([k, items]) => ({
+      key: k,
+      label: groupBy === 'status' ? STATUS_CONFIG[k]?.label : groupBy === 'type' ? TYPE_CONFIG[k]?.label : PRIORITY_CONFIG[k]?.label,
+      color: groupColors[k],
+      items,
+    }));
   }, [filtered, groupBy]);
 
-  const toggleGroup = (key) => setCollapsedGroups(prev => ({ ...prev, [key]: !prev[key] }));
-
-  // CRUD
-  const handleSave = async (form) => {
-    setSaving(true);
-    try {
-      if (modal && typeof modal === 'object' && modal.id) {
-        await ax().patch(`${API}/projects/${modal.id}`, form);
-        toast.success('Project updated');
-      } else {
-        const r = await ax().post(`${API}/projects`, form);
-        toast.success(`${form.name} created`);
-        navigate(`/projects/${r.data.id}`);
-      }
-      setModal(null);
-      fetchProjects();
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to save project');
-    } finally {
-      setSaving(false);
-    }
+  const toggleGroup = (key) => {
+    setCollapsedGroups(c => ({ ...c, [key]: !c[key] }));
   };
 
   const clearFilters = () => {
+    setSearch('');
     setFilterStatus('all');
     setFilterType('all');
     setFilterPriority('all');
     setFilterPayment('all');
-    setSearch('');
   };
 
-  // Render helpers
-  const renderCards = (items) => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
-      {items.map(p => (
-        <ProjectCard key={p.id} project={p} onEdit={setModal} onClick={() => navigate(`/projects/${p.id}`)} />
-      ))}
-    </div>
-  );
-
-  const renderTable = (items) => (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid var(--border)' }}>
-            {['Project', 'Status', 'Priority', 'Progress', 'Tasks', 'Team', 'Due Date', ''].map(h => (
-              <th key={h} style={{ padding: '8px 8px 10px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(p => (
-            <ProjectTableRow key={p.id} project={p} onEdit={setModal} onClick={() => navigate(`/projects/${p.id}`)} />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderContent = (items) => view === 'cards' ? renderCards(items) : renderTable(items);
-
-
-  /* ── Loading state ── */
-  if (loading) {
-    return (
-      <div className="page-fill" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 size={24} className="spin" color="var(--tx-3)" />
+  const renderContent = (items) => {
+    return view === 'table' ? (
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 100px 100px 100px', gap: 10, padding: '0 14px 10px', borderBottom: '2px solid var(--border)', marginBottom: 0 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Name</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Type</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Status</div>
+          <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Progress</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Deadline</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Priority</div>
+          <div />
+        </div>
+        {items.map(p => (
+          <ProjectTableRow key={p.id} project={p} onEdit={() => setModal(p)} onClick={() => navigate(`/projects/${p.id}`)} />
+        ))}
+      </div>
+    ) : (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 20 }}>
+        {items.map(p => (
+          <ProjectCard key={p.id} project={p} onEdit={() => setModal(p)} onClick={() => navigate(`/projects/${p.id}`)} />
+        ))}
       </div>
     );
-  }
+  };
+
+  if (loading) return <div className="page-fill" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 size={32} className="spin" color="var(--accent)" /></div>;
 
   return (
-    <div className="page-fill" style={{ flexDirection: 'column' }}>
-      {modal && (
-        <ProjectModal
-          project={typeof modal === 'object' ? modal : null}
-          onClose={() => setModal(null)}
-          onSave={handleSave}
-          loading={saving}
-        />
-      )}
-
-      {/* ── Page Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <FolderKanban size={18} color="var(--accent)" />
-        <h1 style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.03em', margin: 0 }}>Projects</h1>
-        <span style={{ fontSize: 11, color: 'var(--tx-3)', padding: '2px 8px', background: 'var(--bg-elevated)', borderRadius: 10, fontWeight: 600 }}>
-          {filtered.length}{filtered.length !== projects.length ? ` / ${projects.length}` : ''}
-        </span>
-        <div style={{ flex: 1 }} />
-        <button onClick={() => setModal('new')} className="btn-primary btn-sm" style={{ gap: 5 }}>
-          <Plus size={13} /> New Project
+    <div className="page-fill" style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <FolderKanban size={20} color="var(--accent)" />
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Projects</h1>
+          <span style={{ fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 4 }}>
+            {projects.length}
+          </span>
+        </div>
+        <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
+          <Plus size={14} /> New
         </button>
       </div>
 
-      {/* ── KPI Bar ── */}
-      <KpiBar projects={projects} />
+      {/* KPI Bar */}
+      <div style={{ padding: '16px 20px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+        <KpiBar projects={projects} />
+      </div>
 
-      {/* ── Toolbar: Search, Filters, Sort, View, Group ── */}
-      <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        {/* Top row */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Search */}
-          <div style={{ position: 'relative', flex: '1 1 200px', maxWidth: 280 }}>
-            <Search size={13} color="var(--tx-3)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects..."
-              style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, padding: '7px 10px 7px 30px', fontSize: 12.5, color: 'var(--tx-1)', outline: 'none' }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => e.target.style.borderColor = 'var(--border)'}
-            />
+      {/* Toolbar */}
+      <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: showFilters ? 12 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, background: 'var(--bg-elevated)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)' }}>
+            <Search size={14} color="var(--tx-3)" />
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects..." style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 12, color: 'var(--tx-1)' }} />
           </div>
-
-          {/* Filter toggle */}
-          <button onClick={() => setShowFilters(!showFilters)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
-              background: showFilters || activeFilterCount > 0 ? 'var(--accent)' : 'var(--bg-elevated)',
-              color: showFilters || activeFilterCount > 0 ? '#fff' : 'var(--tx-2)',
-              border: '1px solid', borderColor: showFilters || activeFilterCount > 0 ? 'var(--accent)' : 'var(--border)',
-              borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .12s',
-            }}>
-            <Filter size={12} />
-            Filters
-            {activeFilterCount > 0 && (
-              <span style={{ background: '#fff', color: 'var(--accent)', fontSize: 10, fontWeight: 800, padding: '0 5px', borderRadius: 8, lineHeight: '16px' }}>
-                {activeFilterCount}
-              </span>
-            )}
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <select value={groupBy} onChange={e => setGroupBy(e.target.value)} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+            {GROUP_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <div style={{ display: 'flex', gap: 6, border: '1px solid var(--border)', borderRadius: 6, padding: 2 }}>
+            <button onClick={() => setView('cards')} className={view === 'cards' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '4px 8px' }}><Grid3X3 size={14} /></button>
+            <button onClick={() => setView('table')} className={view === 'table' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '4px 8px' }}><List size={14} /></button>
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', background: activeFilterCount > 0 ? 'var(--accent)' : 'var(--bg-elevated)', color: activeFilterCount > 0 ? 'white' : 'var(--tx-2)', border: activeFilterCount > 0 ? 'none' : '1px solid var(--border)', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>
+            <Filter size={12} /> {activeFilterCount > 0 && activeFilterCount}
           </button>
-
-          <div style={{ flex: 1 }} />
-
-          {/* Sort */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <ArrowUpDown size={11} color="var(--tx-3)" />
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-
-          {/* Group by */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Layers size={11} color="var(--tx-3)" />
-            <select value={groupBy} onChange={e => setGroupBy(e.target.value)}
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
-              {GROUP_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-
-          {/* View toggle */}
-          <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden' }}>
-            {[
-              { id: 'cards', icon: Grid3X3 },
-              { id: 'table', icon: List },
-            ].map(v => (
-              <button key={v.id} onClick={() => setView(v.id)}
-                style={{
-                  padding: '5px 10px', background: view === v.id ? 'var(--accent)' : 'var(--bg-elevated)',
-                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
-                  color: view === v.id ? '#fff' : 'var(--tx-3)', transition: 'all .1s',
-                }}>
-                <v.icon size={13} />
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Filter row (collapsible) */}
         {showFilters && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -823,7 +665,7 @@ export default function Projects() {
         )}
       </div>
 
-      {/* ── Content Area ── */}
+      {/* Content Area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
         {filtered.length === 0 ? (
           /* Empty state */
@@ -873,6 +715,338 @@ export default function Projects() {
           renderContent(filtered)
         )}
       </div>
+
+      {/* Modal */}
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} onClose={() => setModal(null)} onSave={async (proj) => {
+        setSaving(true);
+        try {
+          if (proj.id) {
+            await ax().put(`${API}/projects/${proj.id}`, proj);
+            toast.success('Project updated');
+          } else {
+            await ax().post(`${API}/projects`, proj);
+            toast.success('Project created');
+          }
+          await fetchProjects();
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Failed to save project');
+        } finally {
+          setSaving(false);
+        }
+      }} loading={saving} />}
     </div>
   );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN PROJECTS HUB COMPONENT
+   ═══════════════════════════════════════════════════════════ */
+
+function AdminProjectsHub() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [modal, setModal] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterClient, setFilterClient] = useState('all');
+  const [view, setView] = useState(() => localStorage.getItem('admin_projects_view') || 'cards');
+  const [collapsedClients, setCollapsedClients] = useState({});
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => { localStorage.setItem('admin_projects_view', view); }, [view]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [projRes, clientRes] = await Promise.all([
+        ax().get(`${API}/projects`),
+        ax().get(`${API}/dashboard/agency`).catch(() => ({ data: { clients: [] } })),
+      ]);
+      setProjects(projRes.data);
+      setClients(clientRes.data.clients || []);
+    } catch (err) {
+      if (err.response?.status !== 401) toast.error('Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Calculate KPIs
+  const kpis = useMemo(() => {
+    const activeProjs = projects.filter(p => p.status === 'active').length;
+    const autoCreated = projects.filter(p => p.source === 'service_request').length;
+    const overdueProjs = projects.filter(p => isOverdue(p.due_date) && p.status !== 'completed').length;
+    const avgProgress = projects.length > 0 ? Math.round(projects.reduce((a, p) => a + (p.progress || 0), 0) / projects.length) : 0;
+    const completedMtd = projects.filter(p => p.status === 'completed' && isThisMonth(p.created_at)).length;
+    return { total: projects.length, activeProjs, autoCreated, overdueProjs, avgProgress, completedMtd };
+  }, [projects]);
+
+  // Filter projects
+  const filtered = useMemo(() => {
+    return projects
+      .filter(p => filterStatus === 'all' || p.status === filterStatus)
+      .filter(p => filterClient === 'all' || p.client_name === filterClient)
+      .filter(p => {
+        if (!search) return true;
+        const q = search.toLowerCase();
+        return p.name.toLowerCase().includes(q) || (p.client_name || '').toLowerCase().includes(q);
+      });
+  }, [projects, filterStatus, filterClient, search]);
+
+  // Group by client
+  const clientGroups = useMemo(() => {
+    const groups = {};
+    filtered.forEach(p => {
+      const clientName = p.client_name || 'Unassigned';
+      if (!groups[clientName]) groups[clientName] = [];
+      groups[clientName].push(p);
+    });
+
+    return Object.entries(groups).map(([name, items]) => {
+      const client = clients.find(c => c.name === name);
+      const activeCount = items.filter(p => p.status === 'active').length;
+      const completedCount = items.filter(p => p.status === 'completed').length;
+      const overdueCount = items.filter(p => isOverdue(p.due_date) && p.status !== 'completed').length;
+      return { name, items, client, activeCount, completedCount, overdueCount };
+    }).sort((a, b) => b.items.length - a.items.length);
+  }, [filtered, clients]);
+
+  const clearFilters = () => { setSearch(''); setFilterStatus('all'); setFilterClient('all'); };
+  const activeFilterCount = [filterStatus, filterClient].filter(f => f !== 'all').length + (search ? 1 : 0);
+
+  const renderClientGroup = (group) => {
+    const collapsed = collapsedClients[group.name];
+    const clientColor = group.client ? '#3b82f6' : '#606060';
+    return (
+      <div key={group.name} style={{ marginBottom: 16 }}>
+        {/* Client Group Header */}
+        <div
+          onClick={() => setCollapsedClients(c => ({ ...c, [group.name]: !collapsed }))}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+            background: 'var(--card)', border: '1px solid var(--border)', borderLeft: `4px solid ${clientColor}`,
+            borderRadius: 8, cursor: 'pointer', marginBottom: 10,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'var(--card)'}
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+          <div style={{ flex: 1 }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>
+              {group.name}
+            </h3>
+            <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--tx-3)' }}>
+              <span>{group.activeCount} active</span>
+              <span>{group.completedCount} completed</span>
+              {group.overdueCount > 0 && <span style={{ color: '#ef4444' }}>{group.overdueCount} overdue</span>}
+            </div>
+          </div>
+          {group.client && (
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate(`/clients/${group.client.id}`); }}
+              style={{ padding: '4px 8px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 11, color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}
+            >
+              View Client
+            </button>
+          )}
+        </div>
+
+        {/* Projects in group */}
+        {!collapsed && (
+          <div>
+            {group.items.length === 0 ? (
+              <p style={{ fontSize: 12, color: 'var(--tx-3)', padding: '10px 14px' }}>No projects</p>
+            ) : view === 'table' ? (
+              <div style={{ marginBottom: 10 }}>
+                {group.items.map(p => (
+                  <ProjectTableRow key={p.id} project={p} onEdit={() => setModal(p)} onClick={() => navigate(`/projects/${p.id}`)} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 10 }}>
+                {group.items.map(p => (
+                  <ProjectCard key={p.id} project={p} onEdit={() => setModal(p)} onClick={() => navigate(`/projects/${p.id}`)} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (loading) return <div className="page-fill" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 size={32} className="spin" color="var(--accent)" /></div>;
+
+  return (
+    <div className="page-fill" style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <FolderKanban size={20} color="var(--accent)" />
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Projects</h1>
+          <span style={{ fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 4 }}>
+            {projects.length}
+          </span>
+        </div>
+        <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
+          <Plus size={14} /> New Project
+        </button>
+      </div>
+
+      {/* KPI Strip */}
+      <div style={{ padding: '16px 20px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Total Projects</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>{kpis.total}</div>
+          </div>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Active</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#22c55e' }}>{kpis.activeProjs}</div>
+          </div>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={10} /> Auto-Created
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#f59e0b' }}>{kpis.autoCreated}</div>
+          </div>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Overdue</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444' }}>{kpis.overdueProjs}</div>
+          </div>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Avg Progress</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#8b5cf6' }}>{kpis.avgProgress}%</div>
+          </div>
+          <div style={{ padding: 12, borderRadius: 8, background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Completed MTD</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#3b82f6' }}>{kpis.completedMtd}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: showFilters ? 12 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, background: 'var(--bg-elevated)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)' }}>
+            <Search size={14} color="var(--tx-3)" />
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects..." style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 12, color: 'var(--tx-1)' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 6, border: '1px solid var(--border)', borderRadius: 6, padding: 2 }}>
+            <button onClick={() => setView('cards')} className={view === 'cards' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '4px 8px' }}><Grid3X3 size={14} /></button>
+            <button onClick={() => setView('table')} className={view === 'table' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '4px 8px' }}><List size={14} /></button>
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', background: activeFilterCount > 0 ? 'var(--accent)' : 'var(--bg-elevated)', color: activeFilterCount > 0 ? 'white' : 'var(--tx-2)', border: activeFilterCount > 0 ? 'none' : '1px solid var(--border)', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>
+            <Filter size={12} /> {activeFilterCount > 0 && activeFilterCount}
+          </button>
+        </div>
+
+        {showFilters && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Status</span>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All</option>
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Client</span>
+              <select value={filterClient} onChange={e => setFilterClient(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All Clients</option>
+                {Array.from(new Set(projects.map(p => p.client_name).filter(Boolean))).sort().map(cn => (
+                  <option key={cn} value={cn}>{cn}</option>
+                ))}
+              </select>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'none', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11, color: 'var(--tx-3)', cursor: 'pointer' }}>
+                <X size={10} /> Clear all
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Content Area - Client Groups */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+        {filtered.length === 0 ? (
+          <div style={{ padding: '80px 20px', textAlign: 'center', maxWidth: 400, margin: '0 auto' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 16, background: 'var(--bg-elevated)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+            }}>
+              <FolderKanban size={28} color="var(--tx-3)" />
+            </div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 8px' }}>
+              {projects.length === 0 ? 'No projects yet' : 'No projects match your filters'}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '0 0 20px', lineHeight: 1.6 }}>
+              {projects.length === 0
+                ? 'Create your first project to get started.'
+                : 'Try adjusting your search or filters.'}
+            </p>
+            {projects.length === 0 ? (
+              <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
+                <Plus size={14} /> Create First Project
+              </button>
+            ) : (
+              <button onClick={clearFilters} className="btn-ghost" style={{ gap: 6 }}>
+                <X size={12} /> Clear Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div>
+            {clientGroups.map(group => renderClientGroup(group))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} onClose={() => setModal(null)} onSave={async (proj) => {
+        setSaving(true);
+        try {
+          if (proj.id) {
+            await ax().put(`${API}/projects/${proj.id}`, proj);
+            toast.success('Project updated');
+          } else {
+            await ax().post(`${API}/projects`, proj);
+            toast.success('Project created');
+          }
+          await fetchData();
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Failed to save project');
+        } finally {
+          setSaving(false);
+        }
+      }} loading={saving} />}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROUTER COMPONENT (Default Export)
+   ═══════════════════════════════════════════════════════════ */
+
+export default function ProjectsPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+
+  if (isAdmin && !isPreview) {
+    return <AdminProjectsHub />;
+  }
+
+  return <Projects />;
 }
