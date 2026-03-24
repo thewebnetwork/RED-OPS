@@ -191,7 +191,7 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
         priority: PRIORITY_MAP[form.priority] || 'medium',
         due_at: form.due_date ? new Date(form.due_date + 'T00:00:00Z').toISOString() : null,
         project_id: form.project_id || null,
-        assignee_id: form.assignee_id || null,
+        assignee_user_id: form.assignee_id || null,
         visibility: 'both',
       });
       toast.success('Task created');

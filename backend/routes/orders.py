@@ -1633,6 +1633,17 @@ async def close_order(
             f"Order {order['order_code']} '{order['title']}' was closed. Reason: {close_data.reason}",
             order['id']
         )
+        
+    # Notify requester if closed by Admin
+    if order.get("requester_id") and not is_owner:
+        await create_notification(
+            db,
+            order["requester_id"],
+            "status_change",
+            "Order Closed",
+            f"Your ticket {order['order_code']} was closed by an admin. Reason: {close_data.reason}",
+            order['id']
+        )
     
     # Send close email to requester (if not the one closing)
     if order.get("requester_email") and not is_owner:

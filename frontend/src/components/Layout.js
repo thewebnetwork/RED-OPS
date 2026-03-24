@@ -37,24 +37,19 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // ─────────────────────────────────────────────
 // Navigation config
-// ─────────────────────────────────────────────
 const NAV_MAIN = [
   { path: '/',         icon: LayoutDashboard, label: 'Home',     roles: ['Administrator','Operator','Standard User'] },
   { path: '/task-board', icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
   { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
-  { path: '/services', icon: ShoppingBag,     label: 'Services', roles: ['Administrator','Operator','Standard User'] },
-];
-const NAV_BUSINESS = [
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
-  { path: '/reports',  icon: BarChart2,  label: 'Reports',  roles: ['Administrator','Operator'] },
-  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
+  { path: '/files?context=knowledge_base', icon: BookOpen, label: 'SOPs', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
 ];
+const NAV_BUSINESS = [];
 const NAV_SERVICES = [];
 const NAV_SYSTEM = [
-  { path: '/ai',       icon: Sparkles,  label: 'AI Assistant', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/files', icon: Cloud, label: 'Files & Docs', roles: ['Administrator','Operator','Standard User'] },
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
 
