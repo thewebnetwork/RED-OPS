@@ -139,7 +139,7 @@ const { login } = useAuth();
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       const msg = err.response?.data?.detail || 'Invalid email or password';
       setError(msg);

@@ -1042,7 +1042,7 @@ export default function OrderDetail() {
                   </div>
                   
                   {/* Message Composer */}
-                  {(order.editor_id === user?.id || order.requester_id === user?.id || user?.role === 'Admin') && (
+                  {(order.editor_id === user?.id || order.requester_id === user?.id || user?.role === 'Administrator' || user?.role === 'Admin') && (
                     <form onSubmit={handleSendMessage} className="border-t border-slate-100 p-4">
                       <div className="flex gap-3">
                         <Textarea

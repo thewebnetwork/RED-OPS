@@ -386,7 +386,7 @@ export default function Requests() {
     try {
       await fetch(`${API}/orders/${orderId}/reassign`, {
         method: 'POST', headers: jhdrs(),
-        body: JSON.stringify({ reassign_type: 'user', target_id: userId, notes: 'Assigned from operations board' }),
+        body: JSON.stringify({ reassign_type: 'user', target_id: userId, reason: 'Assigned from operations board' }),
       });
       toast.success(`Assigned to ${userName}`);
     } catch { toast.error('Failed to assign'); fetchData(); }

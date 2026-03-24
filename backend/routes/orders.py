@@ -620,7 +620,7 @@ async def create_order(
                     "progress": 0,
                     "task_count": 0,
                     "completed_task_count": 0,
-                    "created_by_user_id": "system",
+                    "created_by_user_id": current_user["id"],
                     "linked_order_id": order["id"],
                     "source": "service_request",
                     "created_at": created_at,
@@ -858,8 +858,16 @@ async def list_orders(
             query["status"] = {"$ne": "Draft"}
     
     if status:
-        if role == "Operator" and status != "Open":
-            query = {"editor_id": current_user["id"], "status": status}
+        if role == "Operator":
+            if status == "Open":
+                # Show only the open pool (unassigned)
+                query = {"status": "Open", "editor_id": {"$in": [None, ""]}}
+            else:
+                # Show operator's own orders with this status, plus open pool
+                query = {"$or": [
+                    {"editor_id": current_user["id"], "status": status},
+                    {"status": "Open"}
+                ]}
         elif role != "Operator":
             query["status"] = status
     

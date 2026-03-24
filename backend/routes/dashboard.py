@@ -341,7 +341,7 @@ async def get_agency_dashboard(current_user: dict = Depends(require_roles(["Admi
             health = "critical"
         elif open_requests > 5 or pending_deliveries > 3:
             health = "at_risk"
-        elif (now - datetime.fromisoformat(client.get("created_at", now.isoformat()).replace('Z', '+00:00'))).days <= 30 and open_requests == 0:
+        elif client.get("created_at") and (now - datetime.fromisoformat(str(client["created_at"]).replace('Z', '+00:00'))).days <= 30 and open_requests == 0:
             health = "new"
         else:
             health = "healthy"

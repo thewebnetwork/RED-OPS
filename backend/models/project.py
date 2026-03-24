@@ -92,6 +92,10 @@ class ProjectResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # Auto-creation fields (set when project is auto-created from a service request)
+    source: Optional[str] = None  # "service_request" for auto-created projects
+    linked_order_id: Optional[str] = None  # Order ID that triggered auto-creation
+
     # Enriched fields
     team_members: Optional[List[dict]] = None
     created_by_name: Optional[str] = None

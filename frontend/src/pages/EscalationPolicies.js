@@ -17,7 +17,7 @@ import { Switch } from '../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ACTION_TYPES = [
   { value: 'notify_user', label: 'Notify User', icon: Bell, description: 'Send in-app notification to a specific user' },
@@ -73,13 +73,13 @@ export default function EscalationPolicies() {
       const headers = { Authorization: `Bearer ${token}` };
       
       const [policiesRes, ordersRes, statsRes, catsRes, rolesRes, teamsRes, usersRes] = await Promise.all([
-        fetch(`${API}/api/escalation/policies`, { headers }),
-        fetch(`${API}/api/escalation/orders`, { headers }),
-        fetch(`${API}/api/escalation/stats`, { headers }),
-        fetch(`${API}/api/categories/l1`, { headers }),
-        fetch(`${API}/api/roles`, { headers }),
-        fetch(`${API}/api/teams`, { headers }),
-        fetch(`${API}/api/users`, { headers }),
+        fetch(`${API}/escalation/policies`, { headers }),
+        fetch(`${API}/escalation/orders`, { headers }),
+        fetch(`${API}/escalation/stats`, { headers }),
+        fetch(`${API}/categories/l1`, { headers }),
+        fetch(`${API}/roles`, { headers }),
+        fetch(`${API}/teams`, { headers }),
+        fetch(`${API}/users`, { headers }),
       ]);
 
       if (policiesRes.ok) setPolicies(await policiesRes.json());
@@ -155,8 +155,8 @@ export default function EscalationPolicies() {
       };
 
       const url = editingPolicy
-        ? `${API}/api/escalation/policies/${editingPolicy.id}`
-        : `${API}/api/escalation/policies`;
+        ? `${API}/escalation/policies/${editingPolicy.id}`
+        : `${API}/escalation/policies`;
       
       const method = editingPolicy ? 'PUT' : 'POST';
 
@@ -183,7 +183,7 @@ export default function EscalationPolicies() {
     if (!confirm('Are you sure you want to delete this policy?')) return;
 
     try {
-      const response = await fetch(`${API}/api/escalation/policies/${policyId}`, {
+      const response = await fetch(`${API}/escalation/policies/${policyId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -199,7 +199,7 @@ export default function EscalationPolicies() {
 
   const handleTriggerCheck = async () => {
     try {
-      const response = await fetch(`${API}/api/escalation/check`, {
+      const response = await fetch(`${API}/escalation/check`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
