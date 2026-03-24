@@ -40,7 +40,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 // ─────────────────────────────────────────────
 const NAV_MAIN = [
   { path: '/',         icon: LayoutDashboard, label: 'Home',     roles: ['Administrator','Operator','Standard User'] },
-  { path: '/tasks',    icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/task-board', icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
   { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/services', icon: ShoppingBag,     label: 'Services', roles: ['Administrator','Operator','Standard User'] },
@@ -530,7 +530,7 @@ export default function Layout({ children }) {
         {/* User */}
         <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
           <div className="sidebar-user-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
-            onClick={() => navigate(isClient ? '/my-account' : '/profile')}>
+            onClick={() => navigate(isClient ? '/my-account' : '/settings')}>
             <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>

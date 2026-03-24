@@ -607,15 +607,17 @@ export default function Settings() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '4px' }}>Two-Factor Authentication</h3>
-                  <p style={{ fontSize: '12px', color: 'var(--tx-3)' }}>Currently {security.twoFactorEnabled ? 'enabled' : 'disabled'}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--tx-3)' }}>
+                    {security.twoFactorEnabled
+                      ? 'TOTP authenticator is enabled on your account.'
+                      : '2FA is not yet configured. TOTP setup will be available in a future update.'}
+                  </p>
                 </div>
-                <div
-                  onClick={() => setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled })}
-                  style={{ position: 'relative', width: '36px', height: '20px', flexShrink: 0, cursor: 'pointer' }}
-                >
-                  <div style={{ position: 'absolute', inset: 0, borderRadius: '10px', backgroundColor: security.twoFactorEnabled ? 'var(--accent)' : 'var(--bg-overlay)', transition: 'background 0.2s' }} />
-                  <div style={{ position: 'absolute', top: '2px', left: security.twoFactorEnabled ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'var(--tx-1)', transition: 'left 0.2s' }} />
-                </div>
+                <span style={{ fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 5,
+                  background: security.twoFactorEnabled ? '#22c55e18' : 'var(--bg-overlay)',
+                  color: security.twoFactorEnabled ? '#22c55e' : 'var(--tx-3)' }}>
+                  {security.twoFactorEnabled ? 'Active' : 'Not Set Up'}
+                </span>
               </div>
             </div>
 
@@ -680,7 +682,7 @@ export default function Settings() {
               <div style={{ display: 'flex', gap: '12px' }}>
                 {['dark', 'light'].map(theme => (
                   <label key={theme} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                    <input type="radio" name="theme" value={theme} checked={appearance.theme === theme} onChange={e => setAppearance({ ...appearance, theme: e.target.value })} style={{ cursor: 'pointer' }} />
+                    <input type="radio" name="theme" value={theme} checked={appearance.theme === theme} onChange={e => { const u = { ...appearance, theme: e.target.value }; setAppearance(u); savePrefs('appearance', u); }} style={{ cursor: 'pointer' }} />
                     <span style={{ fontSize: '13px', color: 'var(--tx-1)', textTransform: 'capitalize' }}>{theme}</span>
                   </label>
                 ))}

@@ -316,7 +316,7 @@ function AppRoutes() {
       <Route path="/tickets/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       {/* ========== CORE APP ROUTES ========== */}
-      <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
+      <Route path="/tasks" element={<Navigate to="/task-board" replace />} />
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
@@ -486,13 +486,21 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      <Route 
-        path="/settings" 
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <SettingsHub />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings/profile"
         element={
           <PrivateRoute roles={["Administrator"]}>
             <Settings />
           </PrivateRoute>
-        } 
+        }
       />
       <Route 
         path="/settings/ui" 

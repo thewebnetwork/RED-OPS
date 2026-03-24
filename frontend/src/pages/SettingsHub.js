@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useOrg } from '@/contexts/OrgContext';
 import {
   Settings, Users, Shield, Building2, FolderTree, GitBranch, Palette, Mail, Plug,
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
@@ -29,9 +30,43 @@ const SECTIONS = [
 // ── General Section ────────────────────────────────────────────────────────────
 
 function GeneralSection() {
+  const { currentOrg, refreshOrgs } = useOrg();
   const [orgName, setOrgName] = useState('');
   const [timezone, setTimezone] = useState('UTC');
   const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  // Load current org settings
+  useEffect(() => {
+    if (currentOrg && !loaded) {
+      setOrgName(currentOrg.name || '');
+      setTimezone(currentOrg.settings?.timezone || 'UTC');
+      setDateFormat(currentOrg.settings?.date_format || 'MM/DD/YYYY');
+      setLoaded(true);
+    }
+  }, [currentOrg, loaded]);
+
+  const handleSave = async () => {
+    if (!currentOrg) { toast.error('No organization found'); return; }
+    setSaving(true);
+    try {
+      await ax().patch(`${API}/organizations/${currentOrg.id || currentOrg._id}`, {
+        name: orgName,
+        settings: { timezone, date_format: dateFormat },
+      });
+      toast.success('Organization settings saved');
+      refreshOrgs();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save settings');
+    } finally { setSaving(false); }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '10px 12px', fontSize: '13px',
+    border: '1px solid var(--border)', borderRadius: '8px',
+    background: 'var(--bg)', color: 'var(--tx-1)', boxSizing: 'border-box',
+  };
 
   return (
     <div>
@@ -44,74 +79,41 @@ function GeneralSection() {
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
               Organization Name
             </label>
-            <input
-              type="text"
-              value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              placeholder="Your organization name"
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: '13px',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
-                background: 'var(--bg)',
-                color: 'var(--tx-1)',
-                boxSizing: 'border-box',
-              }}
-            />
+            <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)}
+              placeholder="Your organization name" style={inputStyle} />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
               Timezone
             </label>
-            <select
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: '13px',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
-                background: 'var(--bg)',
-                color: 'var(--tx-1)',
-                boxSizing: 'border-box',
-              }}
-            >
-              <option>UTC</option>
-              <option>EST</option>
-              <option>CST</option>
-              <option>MST</option>
-              <option>PST</option>
+            <select value={timezone} onChange={(e) => setTimezone(e.target.value)} style={inputStyle}>
+              <option value="UTC">UTC</option>
+              <option value="America/Toronto">Eastern (Toronto)</option>
+              <option value="America/Edmonton">Mountain (Edmonton)</option>
+              <option value="America/Vancouver">Pacific (Vancouver)</option>
+              <option value="America/New_York">Eastern (New York)</option>
+              <option value="America/Chicago">Central (Chicago)</option>
+              <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
+              <option value="Europe/London">London (GMT)</option>
             </select>
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
               Date Format
             </label>
-            <select
-              value={dateFormat}
-              onChange={(e) => setDateFormat(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: '13px',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
-                background: 'var(--bg)',
-                color: 'var(--tx-1)',
-                boxSizing: 'border-box',
-              }}
-            >
+            <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} style={inputStyle}>
               <option>MM/DD/YYYY</option>
               <option>DD/MM/YYYY</option>
               <option>YYYY-MM-DD</option>
             </select>
           </div>
         </div>
+        <button onClick={handleSave} disabled={saving}
+          style={{ marginTop: '20px', padding: '10px 24px', background: 'var(--accent)', color: '#fff',
+            border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+            opacity: saving ? 0.6 : 1 }}>
+          {saving ? 'Saving...' : 'Save Settings'}
+        </button>
       </div>
     </div>
   );

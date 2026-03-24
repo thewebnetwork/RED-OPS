@@ -196,7 +196,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
         <p style={{ color:'var(--tx-2)', fontSize:14, marginBottom:4 }}><strong style={{ color:'var(--tx-1)' }}>{form.name}</strong> has been added to Red Ops.</p>
         {form.send_invite && (
           <p style={{ color:'var(--tx-3)', fontSize:13, marginBottom:24 }}>
-            An invite was sent to <strong style={{ color:'var(--tx-2)' }}>{form.contact_email}</strong> with their portal login credentials.
+            Portal credentials created for <strong style={{ color:'var(--tx-2)' }}>{form.contact_email}</strong>. Email delivery requires SMTP to be configured in settings.
           </p>
         )}
         <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
@@ -420,11 +420,15 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
   const [newNote, setNewNote] = useState('');
   const [notes, setNotes] = useState([]);
 
-  // Reset tab & notes when client changes
+  // Reset tab & load saved notes when client changes
   useEffect(() => {
     setTab('overview');
     setEditing(false);
-    setNotes([]);
+    // Load persisted notes from localStorage
+    try {
+      const saved = localStorage.getItem(`client_notes_${client._id}`);
+      setNotes(saved ? JSON.parse(saved) : []);
+    } catch { setNotes([]); }
   }, [client._id]);
 
   const startEdit = () => {
@@ -439,21 +443,33 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
     setEditing(true);
   };
 
-  const saveEdit = () => {
-    onUpdate({
-      ...client,
-      ...editForm,
-      mrr: PLAN_CONFIG[editForm.plan]?.price || client.mrr,
-    });
-    setEditing(false);
-    toast.success('Client updated');
+  const saveEdit = async () => {
+    try {
+      // Persist to backend — update the user record
+      await ax().patch(`${API}/users/${client._id}`, {
+        name: editForm.name,
+        subscription_plan_name: editForm.plan,
+      });
+      onUpdate({
+        ...client,
+        ...editForm,
+        mrr: PLAN_CONFIG[editForm.plan]?.price || client.mrr,
+      });
+      setEditing(false);
+      toast.success('Client updated');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update client');
+    }
   };
 
   const addNote = () => {
     if (!newNote.trim()) return;
     const note = { id: `n${Date.now()}`, text: newNote, author: 'You', ts: new Date().toLocaleString() };
-    setNotes(prev => [note, ...prev]);
+    const updated = [note, ...notes];
+    setNotes(updated);
     setNewNote('');
+    // Persist to localStorage until a dedicated notes API is built
+    try { localStorage.setItem(`client_notes_${client._id}`, JSON.stringify(updated)); } catch {}
     toast.success('Note added');
   };
 
@@ -567,12 +583,24 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
                 <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
                   {(!client.portal || client.portal === 'none') && (
                     <button className="btn-primary btn-sm" style={{ gap:4 }}
-                      onClick={() => { onUpdate({ ...client, portal:'invited' }); toast.success(`Invite sent to ${client.contact?.email}`); }}>
+                      onClick={async () => {
+                        try {
+                          await ax().patch(`${API}/users/${client._id}`, { portal_status: 'invited' });
+                          onUpdate({ ...client, portal:'invited' });
+                          toast.success(`Portal enabled for ${client.contact?.email || 'client'}`);
+                        } catch (err) { toast.error(err.response?.data?.detail || 'Failed to send invite'); }
+                      }}>
                       <Send size={11}/> Send Invite
                     </button>
                   )}
                   {client.portal === 'invited' && (
-                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => { onUpdate({ ...client, portal:'invited' }); toast.success(`Invite resent to ${client.contact?.email || 'client'}`); }}>
+                    <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={async () => {
+                      try {
+                        await ax().patch(`${API}/users/${client._id}`, { portal_status: 'invited' });
+                        onUpdate({ ...client, portal:'invited' });
+                        toast.success(`Invite resent to ${client.contact?.email || 'client'}`);
+                      } catch (err) { toast.error(err.response?.data?.detail || 'Failed to resend invite'); }
+                    }}>
                       <RefreshCw size={11}/> Resend Invite
                     </button>
                   )}

@@ -827,6 +827,7 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
 function EditMemberModal({ member, teams, specialties, onClose, onUpdated }) {
   const [form, setForm] = useState({
     name: member.name,
+    email: member.email || '',
     role: member.role,
     account_type: member.account_type || 'Internal Staff',
     team_id: member.team_id || '',
@@ -854,6 +855,9 @@ function EditMemberModal({ member, teams, specialties, onClose, onUpdated }) {
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Field label="Name">
           <input style={inp} value={form.name} onChange={e => set('name', e.target.value)} />
+        </Field>
+        <Field label="Email">
+          <input style={inp} type="email" value={form.email} onChange={e => set('email', e.target.value)} />
         </Field>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <Field label="Role">
