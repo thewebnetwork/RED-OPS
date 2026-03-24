@@ -1272,3 +1272,32 @@ kbd {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
+
+/* ── 43. RESPONSIVE UTILITIES ────────────────────────────────── */
+.responsive-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.responsive-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.responsive-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+.quick-actions-grid { display: flex; gap: 8px; }
+
+.hide-mobile  { display: initial; }
+.hide-desktop { display: none; }
+
+.mobile-scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 900px) {
+  .responsive-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .responsive-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .two-col { flex-direction: column; }
+  .two-col .col-side { width: 100%; }
+}
+
+@media (max-width: 600px) {
+  .responsive-grid-4 { grid-template-columns: 1fr; }
+  .responsive-grid-3 { grid-template-columns: 1fr; }
+  .responsive-grid-2 { grid-template-columns: 1fr; }
+  .metrics-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .quick-actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .hide-mobile  { display: none !important; }
+  .hide-desktop { display: initial !important; }
+}

@@ -171,7 +171,7 @@ export default function CommandCenter() {
       </div>
 
       {/* Pulse */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
+      <div className="metrics-grid-4" style={{ marginBottom:20 }}>
         <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='#3b82f6' trend={pulse.requests_trend} />
         <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? '#ef4444' : '#22c55e'} />
         <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='#22c55e' />
@@ -179,7 +179,7 @@ export default function CommandCenter() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display:'flex', gap:8, marginBottom:20 }}>
+      <div className="quick-actions-grid" style={{ marginBottom:20 }}>
         <QuickAction icon={FileText}     label="New Request"  to="/requests?new=1" color='#3b82f6' />
         <QuickAction icon={CheckSquare}  label="New Task"     to="/tasks?new=1"    color='#22c55e' />
         <QuickAction icon={FolderKanban} label="New Project"  to="/projects?new=1" color='#a855f7' />
@@ -189,7 +189,7 @@ export default function CommandCenter() {
       </div>
 
       {/* 3-col */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+      <div className="responsive-grid-3">
 
         {/* Tasks */}
         <div className="card" style={{ padding:16 }}>

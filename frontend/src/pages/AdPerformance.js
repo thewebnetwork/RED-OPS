@@ -462,14 +462,7 @@ function ClientAdDashboard() {
 
           {/* Platform Breakdown */}
           {platforms.length > 1 && (
-            <div
-              style={{
-                marginTop: '20px',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '12px',
-              }}
-            >
+            <div className="responsive-grid-3" style={{ marginTop: '20px' }}>
               {platforms.map((plat, idx) => (
                 <div key={idx} className="card" style={{ padding: '16px' }}>
                   <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px', color: 'var(--tx-1)' }}>
@@ -511,7 +504,7 @@ function ClientAdDashboard() {
               >
                 <h2 style={{ fontSize: '14px', fontWeight: 600 }}>Recent Campaign Results</h2>
               </div>
-              <div style={{ overflowX: 'auto' }}>
+              <div className="mobile-scroll-x">
                 <table className="data-table" style={{ fontSize: '12px' }}>
                   <thead>
                     <tr>
@@ -1160,7 +1153,7 @@ function AdminAdDashboard() {
             No client data available yet
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="mobile-scroll-x">
             <table className="data-table" style={{ fontSize: '12px', minWidth: '800px' }}>
               <thead>
                 <tr>
@@ -1241,13 +1234,7 @@ function AdminAdDashboard() {
                           {client.clientSnapshot.length === 0 ? (
                             <div style={{ fontSize: '12px', color: 'var(--tx-3)' }}>No snapshots yet</div>
                           ) : (
-                            <div
-                              style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                gap: '8px',
-                              }}
-                            >
+                            <div className="responsive-grid-3" style={{ gap: '8px' }}>
                               {client.clientSnapshot.map((snap) => (
                                 <div
                                   key={snap.id}

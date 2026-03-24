@@ -234,11 +234,11 @@ Pages already updated for preview mode: HomeRoute (App.js), Layout.js, ClientHom
 ## Pending Work
 
 ### Mobile Responsive (In Progress)
-CSS foundation is done (breakpoints for sidebar, grids, modals, tables, page padding). Still need:
-- [ ] Layout.js top bar — hide search kbd shortcut on mobile, compact "New Request" button
-- [ ] CommandCenter.js — replace inline grid styles with responsive CSS classes
-- [ ] ClientHome.js — replace inline grid styles with responsive CSS classes
-- [ ] AdPerformance.js — replace inline grid styles with responsive CSS classes
+CSS foundation is done (breakpoints for sidebar, grids, modals, tables, page padding).
+- [x] Layout.js top bar — hide search kbd shortcut on mobile, compact "New Request" button
+- [x] CommandCenter.js — replace inline grid styles with responsive CSS classes
+- [x] ClientHome.js — replace inline grid styles with responsive CSS classes
+- [x] AdPerformance.js — replace inline grid styles with responsive CSS classes
 - [ ] Test across all key pages at 375px width
 
 ### Future Features (Not Started)

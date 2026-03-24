@@ -569,8 +569,8 @@ export default function Layout({ children }) {
             <button onClick={openCmd}
               style={{ display:'flex', alignItems:'center', gap:6, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 11px', cursor:'pointer', color:'var(--tx-3)', fontSize:12 }}>
               <Search size={12} />
-              <span>Search</span>
-              <kbd>⌘K</kbd>
+              <span className="hide-mobile">Search</span>
+              <kbd className="hide-mobile">⌘K</kbd>
             </button>
 
             <div style={{ position:'relative' }}>
@@ -583,7 +583,7 @@ export default function Layout({ children }) {
 
             <button onClick={() => navigate(isClient ? '/services' : '/requests?new=1')} className="btn-primary btn-sm" style={{ gap:5 }}>
               <Plus size={13} />
-              New Request
+              <span className="hide-mobile">New Request</span>
             </button>
           </div>
         </div>

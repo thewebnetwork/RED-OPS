@@ -129,7 +129,7 @@ export default function ClientHome() {
       </div>
 
       {/* Metrics */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:24 }}>
+      <div className="metrics-grid-4">
         <MetricCard icon={Clock}        label="Active Requests"     value={loading ? '—' : metrics.active}    color='#3b82f6' />
         <MetricCard icon={AlertCircle}  label="In Review"           value={loading ? '—' : metrics.review}    color='#f59e0b' />
         <MetricCard icon={CheckCircle2} label="Delivered This Month" value={loading ? '—' : metrics.delivered} color='#22c55e' />
@@ -137,7 +137,7 @@ export default function ClientHome() {
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display:'flex', gap:8, marginBottom:24 }}>
+      <div className="quick-actions-grid" style={{ marginBottom:24 }}>
         <QuickAction icon={Plus}       label="New Request"     onClick={() => navigate('/services')}    color='#3b82f6' />
         <QuickAction icon={FileText}   label="My Requests"     onClick={() => navigate('/my-requests')} color='var(--red)' />
         <QuickAction icon={BookOpen}   label="Resources"       onClick={() => navigate('/files?context=knowledge_base')} color='#a855f7' />
@@ -145,10 +145,10 @@ export default function ClientHome() {
       </div>
 
       {/* Two column layout */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:16 }}>
+      <div className="two-col">
 
         {/* Recent Requests */}
-        <div className="card" style={{ padding:0, overflow:'hidden' }}>
+        <div className="card col-main" style={{ padding:0, overflow:'hidden' }}>
           <div style={{ padding:'14px 18px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <span style={{ fontSize:14, fontWeight:700, color:'var(--tx-1)' }}>Recent Requests</span>
             <button onClick={() => navigate('/my-requests')} style={{ display:'flex', alignItems:'center', gap:4, fontSize:12, color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer' }}>
@@ -203,7 +203,7 @@ export default function ClientHome() {
         </div>
 
         {/* Right sidebar */}
-        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div className="col-side" style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
           {/* Account Info Card */}
           <div className="card" style={{ padding:'16px 18px' }}>
