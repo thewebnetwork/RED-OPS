@@ -1,7 +1,8 @@
-"""Email services with real SMTP"""
+"""Email services with Resend HTTP API + SMTP fallback"""
 import logging
 import os
 import smtplib
+import httpx
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -37,55 +38,71 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
         print("="*50 + "\n")
         return True
     
+    # Build HTML content
+    if html_body:
+        html_content = html_body
+    else:
+        html_content = body.replace('\n', '<br>').replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
+        html_content = f"<html><body>{html_content}</body></html>"
+
+    from_addr = config['from_addr'] or config['user']
+
+    # Use Resend HTTP API when host is smtp.resend.com (bypasses port blocking)
+    if 'resend' in config['host']:
+        return await _send_via_resend(config['password'], from_addr, to_email, subject, body, html_content)
+
+    # Fallback: SMTP for other providers
+    return _send_via_smtp(config, from_addr, to_email, subject, body, html_content)
+
+
+async def _send_via_resend(api_key: str, from_addr: str, to_email: str, subject: str, body: str, html_body: str) -> bool:
+    """Send email via Resend HTTP API — no SMTP ports needed"""
     try:
-        # Create message
+        logging.info(f"Sending email via Resend API from {from_addr} to {to_email}")
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://api.resend.com/emails",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"from": from_addr, "to": [to_email], "subject": subject, "html": html_body, "text": body},
+                timeout=15,
+            )
+        if resp.status_code in (200, 201):
+            logging.info(f"✅ Email sent via Resend to {to_email}: {subject}")
+            return True
+        else:
+            logging.error(f"Resend API error {resp.status_code}: {resp.text}")
+            return False
+    except Exception as e:
+        logging.error(f"Failed to send email via Resend to {to_email}: {e}")
+        return False
+
+
+def _send_via_smtp(config: dict, from_addr: str, to_email: str, subject: str, body: str, html_body: str) -> bool:
+    """Send email via traditional SMTP"""
+    try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
-        msg['From'] = config['from_addr'] or config['user']
+        msg['From'] = from_addr
         msg['To'] = to_email
-        
-        # Attach plain text body
-        text_part = MIMEText(body, 'plain')
-        msg.attach(text_part)
-        
-        # Also create HTML version
-        if html_body:
-            html_part = MIMEText(html_body, 'html')
-        else:
-            html_content = body.replace('\n', '<br>').replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
-            html_part = MIMEText(f"<html><body>{html_content}</body></html>", 'html')
-        msg.attach(html_part)
-        
-        # Send via SMTP
-        logging.info(f"Sending email via {config['host']}:{config['port']} from {config['from_addr']} to {to_email}")
+        msg.attach(MIMEText(body, 'plain'))
+        msg.attach(MIMEText(html_body, 'html'))
+
+        logging.info(f"Sending email via SMTP {config['host']}:{config['port']} from {from_addr} to {to_email}")
         port = config['port']
         if port in (465, 2465):
-            # SSL connection for port 465/2465
             with smtplib.SMTP_SSL(config['host'], port) as server:
                 server.login(config['user'], config['password'])
                 server.send_message(msg)
         else:
-            # STARTTLS for port 587/2587/25
             with smtplib.SMTP(config['host'], port, timeout=15) as server:
                 server.starttls()
                 server.login(config['user'], config['password'])
                 server.send_message(msg)
-        
-        logging.info(f"✅ Email sent successfully to {to_email}: {subject}")
-        print("\n" + "="*50)
-        print("✅ EMAIL SENT SUCCESSFULLY")
-        print(f"To: {to_email}")
-        print(f"Subject: {subject}")
-        print("="*50 + "\n")
+
+        logging.info(f"✅ Email sent via SMTP to {to_email}: {subject}")
         return True
-        
     except Exception as e:
-        logging.error(f"Failed to send email to {to_email}: {e}")
-        print(f"\n{'='*50}")
-        print(f"❌ EMAIL FAILED: {e}")
-        print(f"To: {to_email}")
-        print(f"Subject: {subject}")
-        print(f"{'='*50}\n")
+        logging.error(f"Failed to send email via SMTP to {to_email}: {e}")
         return False
 
 
