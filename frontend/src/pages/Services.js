@@ -2,13 +2,14 @@
  * Services — Premium Service Catalog & Order Portal
  *
  * Features:
- *   • Category-based navigation with icon tabs
- *   • KPI bar (total services, categories, active templates)
- *   • Premium service cards with icons, turnaround badges, CTA flow types
- *   • Grid/list view toggle
- *   • Search + category filter
+ *   • Premium hero section with integrated search
+ *   • Category navigation cards with service counts
+ *   • Large, high-quality service cards with accent bars
+ *   • Grid/list view with premium styling
+ *   • Admin: prominent mode toggle, KPI dashboard, inline actions
  *   • Request modal with dynamic form schema
- *   • Admin: inline create/edit service templates
+ *   • Service editor with 2-column layout
+ *   • Search + category filter with persistent view preference
  *   • Seed catalog for first-time setup
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -20,7 +21,7 @@ import {
   Upload, FileText, CheckCircle2, ArrowRight, Settings, Grid3X3,
   List, Package, Layers, Zap, Star, Eye, EyeOff, Pencil, Trash2,
   Tag, LayoutGrid, BookOpen, Video, Camera, Palette, BarChart2,
-  Megaphone, Globe, Mail, Mic, Phone, ExternalLink, Copy,
+  Megaphone, Globe, Mail, Mic, Phone, ExternalLink, Copy, ChevronLeft,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -143,24 +144,24 @@ function RequestModal({ service, onClose }) {
 
   return (
     <div style={overlayStyle} onClick={onClose}>
-      <div style={{ ...modalStyle, width: 560 }} onClick={e => e.stopPropagation()}>
+      <div style={{ ...modalStyle, width: 600 }} onClick={e => e.stopPropagation()}>
         {/* Header with accent */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 10, background: `${catColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {service.icon ? <span style={{ fontSize: 22 }}>{service.icon}</span> : <CatIcon size={22} style={{ color: catColor }} />}
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          <div style={{ width: 52, height: 52, borderRadius: 12, background: `${catColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}30` }}>
+            {service.icon ? <span style={{ fontSize: 26 }}>{service.icon}</span> : <CatIcon size={26} style={{ color: catColor }} />}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>{service.name}</h2>
-            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '4px 0 0', lineHeight: 1.5 }}>{service.description}</p>
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>{service.name}</h2>
+            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '6px 0 0', lineHeight: 1.5 }}>{service.description}</p>
           </div>
-          <button onClick={onClose} style={closeBtn}><X size={18} /></button>
+          <button onClick={onClose} style={closeBtn}><X size={20} /></button>
         </div>
 
         {/* Meta badges */}
-        <div style={{ padding: '12px 24px', display: 'flex', gap: 8, flexWrap: 'wrap', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
-          <span style={metaBadge}><Clock size={11} /> {service.turnaround_text || 'TBD'}</span>
+        <div style={{ padding: '14px 28px', display: 'flex', gap: 10, flexWrap: 'wrap', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+          <span style={metaBadge}><Clock size={12} /> {service.turnaround_text || 'TBD'}</span>
           <span style={{ ...metaBadge, background: `${catColor}18`, color: catColor, borderColor: `${catColor}30` }}>
-            <CatIcon size={11} /> {service.category}
+            <CatIcon size={12} /> {service.category}
           </span>
           {service.offer_track && FLOW_LABELS[service.offer_track] && (
             <span style={{ ...metaBadge, background: FLOW_LABELS[service.offer_track].bg, color: FLOW_LABELS[service.offer_track].color }}>
@@ -169,16 +170,16 @@ function RequestModal({ service, onClose }) {
           )}
           {service.deliverable_type && (
             <span style={metaBadge}>
-              {React.createElement(DELIVERABLE_ICONS[service.deliverable_type] || DELIVERABLE_ICONS.default, { size: 11 })} {service.deliverable_type}
+              {React.createElement(DELIVERABLE_ICONS[service.deliverable_type] || DELIVERABLE_ICONS.default, { size: 12 })} {service.deliverable_type}
             </span>
           )}
         </div>
 
         {/* Form body */}
-        <div style={{ padding: '20px 24px', maxHeight: '50vh', overflowY: 'auto' }}>
+        <div style={{ padding: '24px 28px', maxHeight: '50vh', overflowY: 'auto' }}>
           {/* Dynamic form fields */}
           {schema.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 24 }}>
               {schema.map(field => {
                 if (field.type === 'file') return null;
                 return (
@@ -192,13 +193,13 @@ function RequestModal({ service, onClose }) {
                         {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
                       </select>
                     ) : field.type === 'textarea' ? (
-                      <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} placeholder={field.placeholder || ''} value={formData[field.field] || ''} onChange={e => handleFieldChange(field.field, e.target.value)} />
+                      <textarea style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }} placeholder={field.placeholder || ''} value={formData[field.field] || ''} onChange={e => handleFieldChange(field.field, e.target.value)} />
                     ) : field.type === 'toggle' ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <button
                           onClick={() => handleFieldChange(field.field, !formData[field.field])}
-                          style={{ width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', background: formData[field.field] ? '#22c55e' : 'var(--bg)', position: 'relative', transition: 'background .15s' }}>
-                          <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 2, left: formData[field.field] ? 20 : 2, transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
+                          style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', background: formData[field.field] ? '#22c55e' : 'var(--bg)', position: 'relative', transition: 'background .15s' }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', position: 'absolute', top: 2, left: formData[field.field] ? 22 : 2, transition: 'left .15s', boxShadow: '0 2px 4px rgba(0,0,0,.2)' }} />
                         </button>
                         <span style={{ fontSize: 13, color: 'var(--tx-2)' }}>{formData[field.field] ? 'Yes' : 'No'}</span>
                       </div>
@@ -212,26 +213,26 @@ function RequestModal({ service, onClose }) {
           )}
 
           {/* Description */}
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>
               {schema.length > 0 ? 'Additional Notes' : 'Brief Description *'}
             </label>
-            <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} placeholder={schema.length > 0 ? 'Anything else we should know?' : 'Tell us what you need for this service...'} value={description} onChange={e => setDescription(e.target.value)} />
+            <textarea style={{ ...inputStyle, minHeight: 100, resize: 'vertical' }} placeholder={schema.length > 0 ? 'Anything else we should know?' : 'Tell us what you need for this service...'} value={description} onChange={e => setDescription(e.target.value)} />
           </div>
 
           {/* File upload */}
           <div>
             <label style={labelStyle}>Attachments</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <input type="file" id="svc-file-input" multiple style={{ display: 'none' }} onChange={handleFileChange} />
               <button onClick={() => document.getElementById('svc-file-input').click()} style={btnGhost}>
-                <Upload size={13} /> Choose Files
+                <Upload size={14} /> Choose Files
               </button>
               {files.map((f, i) => (
-                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '4px 10px', background: 'var(--bg)', borderRadius: 6, color: 'var(--tx-2)', border: '1px solid var(--border)' }}>
-                  <FileText size={10} /> {f.name}
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, padding: '6px 12px', background: 'var(--bg)', borderRadius: 7, color: 'var(--tx-2)', border: '1px solid var(--border)' }}>
+                  <FileText size={11} /> {f.name}
                   <button onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 0, display: 'flex' }}>
-                    <X size={10} />
+                    <X size={12} />
                   </button>
                 </span>
               ))}
@@ -240,10 +241,10 @@ function RequestModal({ service, onClose }) {
         </div>
 
         {/* Actions */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+        <div style={{ padding: '18px 28px', borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
           <button style={{ ...btnGhost, flex: 1 }} onClick={onClose}>Cancel</button>
           <button style={{ ...btnPrimary, flex: 2 }} onClick={handleSubmit} disabled={submitting}>
-            {submitting ? <Loader2 size={14} className="spin" /> : <><ArrowRight size={14} /> Submit Request</>}
+            {submitting ? <Loader2 size={15} className="spin" /> : <><ArrowRight size={15} /> Submit Request</>}
           </button>
         </div>
       </div>
@@ -294,46 +295,49 @@ function ServiceEditorModal({ service, onClose, onSave }) {
 
   return (
     <div style={overlayStyle} onClick={onClose}>
-      <div style={{ ...modalStyle, width: 600 }} onClick={e => e.stopPropagation()}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>
-            {service?.id ? 'Edit Service' : 'New Service'}
+      <div style={{ ...modalStyle, width: 700 }} onClick={e => e.stopPropagation()}>
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>
+            {service?.id ? 'Edit Service' : 'Create New Service'}
           </h2>
-          <button onClick={onClose} style={closeBtn}><X size={18} /></button>
+          <button onClick={onClose} style={closeBtn}><X size={20} /></button>
         </div>
 
-        <div style={{ padding: '20px 24px', maxHeight: '60vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Name + Category */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+        <div style={{ padding: '24px 28px', maxHeight: '65vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Name + Icon */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14 }}>
             <div>
-              <label style={labelStyle}>Name *</label>
-              <input style={inputStyle} placeholder="Service name..." value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} autoFocus />
+              <label style={labelStyle}>Service Name *</label>
+              <input style={inputStyle} placeholder="e.g. Product Photography" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} autoFocus />
             </div>
             <div>
               <label style={labelStyle}>Icon (emoji)</label>
-              <input style={inputStyle} placeholder="🎬" value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} />
+              <input style={inputStyle} placeholder="📸" value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} maxLength="2" />
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label style={labelStyle}>Description</label>
-            <textarea style={{ ...inputStyle, minHeight: 60, resize: 'vertical' }} placeholder="What does this service include?" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+            <textarea style={{ ...inputStyle, minHeight: 70, resize: 'vertical' }} placeholder="What does this service include?" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {/* Category + Turnaround */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <div>
               <label style={labelStyle}>Category *</label>
-              <input style={inputStyle} placeholder="e.g. Video Production" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+              <input style={inputStyle} placeholder="e.g. Photography" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
             </div>
             <div>
-              <label style={labelStyle}>Turnaround</label>
+              <label style={labelStyle}>Turnaround Time</label>
               <input style={inputStyle} placeholder="e.g. 2-3 days" value={form.turnaround_text} onChange={e => setForm(p => ({ ...p, turnaround_text: e.target.value }))} />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+          {/* Type + Offer + Sort */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
             <div>
-              <label style={labelStyle}>Deliverable Type</label>
+              <label style={labelStyle}>Deliverable</label>
               <select style={inputStyle} value={form.deliverable_type} onChange={e => setForm(p => ({ ...p, deliverable_type: e.target.value }))}>
                 <option value="">None</option>
                 <option value="video">Video</option>
@@ -358,7 +362,8 @@ function ServiceEditorModal({ service, onClose, onSave }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {/* CTA */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <div>
               <label style={labelStyle}>CTA Label</label>
               <input style={inputStyle} placeholder="e.g. Book Now" value={form.cta_label} onChange={e => setForm(p => ({ ...p, cta_label: e.target.value }))} />
@@ -369,19 +374,20 @@ function ServiceEditorModal({ service, onClose, onSave }) {
             </div>
           </div>
 
+          {/* Default Title */}
           <div>
             <label style={labelStyle}>Default Request Title</label>
-            <input style={inputStyle} placeholder="Auto-fill for request title" value={form.default_title} onChange={e => setForm(p => ({ ...p, default_title: e.target.value }))} />
+            <input style={inputStyle} placeholder="Auto-populated in request forms" value={form.default_title} onChange={e => setForm(p => ({ ...p, default_title: e.target.value }))} />
           </div>
 
           {/* Toggles */}
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ display: 'flex', gap: 32, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
             <ToggleField label="Active" value={form.active} onChange={v => setForm(p => ({ ...p, active: v }))} />
             <ToggleField label="Visible to Clients" value={form.client_visible} onChange={v => setForm(p => ({ ...p, client_visible: v }))} />
           </div>
         </div>
 
-        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+        <div style={{ padding: '18px 28px', borderTop: '1px solid var(--border)', display: 'flex', gap: 12 }}>
           <button style={{ ...btnGhost, flex: 1 }} onClick={onClose}>Cancel</button>
           <button style={{ ...btnPrimary, flex: 2 }} onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : service?.id ? 'Save Changes' : 'Create Service'}
@@ -394,12 +400,12 @@ function ServiceEditorModal({ service, onClose, onSave }) {
 
 function ToggleField({ label, value, onChange }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <button
         onClick={() => onChange(!value)}
-        style={{ width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', background: value ? '#22c55e' : 'var(--bg)', position: 'relative', transition: 'background .15s' }}
+        style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', background: value ? '#22c55e' : 'var(--bg)', position: 'relative', transition: 'background .15s' }}
       >
-        <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 2, left: value ? 20 : 2, transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
+        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', position: 'absolute', top: 2, left: value ? 22 : 2, transition: 'left .15s', boxShadow: '0 2px 4px rgba(0,0,0,.2)' }} />
       </button>
       <span style={{ fontSize: 13, fontWeight: 500, color: value ? 'var(--tx-1)' : 'var(--tx-3)' }}>{label}</span>
     </div>
@@ -422,16 +428,16 @@ function SeedBanner({ onSeed }) {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-      <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-        <ShoppingBag size={28} style={{ color: 'var(--tx-3)' }} />
+    <div style={{ textAlign: 'center', padding: '100px 20px', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 80, height: 80, borderRadius: 18, background: 'var(--card)', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+        <ShoppingBag size={40} style={{ color: 'var(--accent)' }} />
       </div>
-      <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px', color: 'var(--tx-1)' }}>Service Catalog Empty</h2>
-      <p style={{ fontSize: 14, color: 'var(--tx-3)', margin: '0 0 24px', lineHeight: 1.6, maxWidth: 400, marginInline: 'auto' }}>
-        Seed the default RRG service catalog to get started. You can customize everything after.
+      <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px', color: 'var(--tx-1)' }}>Your Catalog Is Empty</h2>
+      <p style={{ fontSize: 14, color: 'var(--tx-3)', margin: '0 0 32px', lineHeight: 1.7, maxWidth: 420, marginInline: 'auto' }}>
+        Seed the default RRG service catalog to get started. You can customize each service and add your own services anytime.
       </p>
       <button onClick={handleSeed} style={btnPrimary} disabled={seeding}>
-        {seeding ? <Loader2 size={14} className="spin" /> : <><Zap size={14} /> Seed Service Catalog</>}
+        {seeding ? <Loader2 size={15} className="spin" /> : <><Zap size={15} /> Seed Service Catalog</>}
       </button>
     </div>
   );
@@ -512,22 +518,22 @@ export default function Services() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 60 }}>
-        <Loader2 size={28} className="spin" style={{ color: 'var(--tx-3)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 80 }}>
+        <Loader2 size={32} className="spin" style={{ color: 'var(--accent)' }} />
       </div>
     );
   }
 
   if (isAdmin && usedFallback && services.length === 0) {
     return (
-      <div style={{ padding: '24px 32px', maxWidth: 1400, margin: '0 auto' }}>
+      <div style={{ padding: '24px 32px' }}>
         <SeedBanner onSeed={fetchServices} />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {selectedService && <RequestModal service={selectedService} onClose={() => setSelectedService(null)} />}
       {editingService !== null && (
         <ServiceEditorModal
@@ -537,159 +543,200 @@ export default function Services() {
         />
       )}
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>
-            {isClient ? 'Order Services' : 'Services'}
-          </h1>
-          <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '4px 0 0' }}>
-            {isClient ? 'Browse and request professional services' : 'Manage your service catalog and templates'}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {isAdmin && (
-            <>
-              <button style={btnSecondary} onClick={() => setShowAdmin(!showAdmin)}>
-                <Settings size={14} /> {showAdmin ? 'Client View' : 'Admin'}
-              </button>
-              <button style={btnPrimary} onClick={() => setEditingService({})}>
-                <Plus size={14} /> New Service
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* KPI Bar (admin only) */}
-      {isAdmin && showAdmin && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
-          {[
-            { label: 'Total Services', value: kpis.total, icon: Package, color: 'var(--accent)' },
-            { label: 'Active', value: kpis.active, icon: Zap, color: 'var(--green)' },
-            { label: 'Categories', value: kpis.categories, icon: Layers, color: 'var(--purple)' },
-            { label: 'Client Visible', value: kpis.visible, icon: Eye, color: 'var(--blue)' },
-          ].map(k => (
-            <div key={k.label} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 8, background: `${k.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <k.icon size={18} style={{ color: k.color }} />
-              </div>
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)' }}>{k.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>{k.label}</div>
-              </div>
+      {/* Hero Section (Client View) */}
+      {!showAdmin && (
+        <div style={{ background: 'linear-gradient(135deg, var(--card) 0%, var(--bg) 100%)', borderBottom: '1px solid var(--border)', paddingBottom: 0 }}>
+          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '48px 32px 0' }}>
+            <div style={{ marginBottom: 32 }}>
+              <h1 style={{ fontSize: 32, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 8px' }}>
+                Services Marketplace
+              </h1>
+              <p style={{ fontSize: 15, color: 'var(--tx-3)', margin: 0, lineHeight: 1.6 }}>
+                Browse and request professional services from vetted RRG partners
+              </p>
             </div>
-          ))}
+
+            {/* Search Bar */}
+            <div style={{ marginBottom: 32, position: 'relative', maxWidth: 500 }}>
+              <Search size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--accent)' }} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search services by name or description..."
+                style={{ ...inputStyle, paddingLeft: 42, paddingRight: 40, fontSize: 14, height: 44, borderRadius: 10, background: 'var(--bg)' }}
+              />
+              {search && (
+                <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}>
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Service Stats */}
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13, color: 'var(--tx-3)', fontWeight: 500 }}>
+                {filtered.length} Service{filtered.length !== 1 ? 's' : ''}
+              </span>
+              <span style={{ width: 1, height: 16, background: 'var(--border)' }} />
+              <span style={{ fontSize: 13, color: 'var(--tx-3)', fontWeight: 500 }}>
+                {categories.length - 1} Categor{categories.length - 1 !== 1 ? 'ies' : 'y'}
+              </span>
+              <span style={{ width: 1, height: 16, background: 'var(--border)' }} />
+              <span style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>Quality guaranteed</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        {/* Category tabs */}
-        <div style={{ display: 'flex', gap: 4, flex: 1, flexWrap: 'wrap' }}>
-          {categories.map(cat => {
-            const CIcon = getCatIcon(cat === 'All' ? 'default' : cat);
-            const isActive = activeCategory === cat;
-            const color = cat === 'All' ? 'var(--accent)' : getCatColor(cat);
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
-                  borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                  border: `1px solid ${isActive ? color : 'var(--border)'}`,
-                  background: isActive ? `${color}18` : 'var(--card)',
-                  color: isActive ? color : 'var(--tx-3)',
-                  transition: 'all .12s', whiteSpace: 'nowrap',
-                }}
-              >
-                {cat !== 'All' && <CIcon size={13} />}
-                {cat}
-                {cat !== 'All' && (
-                  <span style={{ fontSize: 10, opacity: 0.7 }}>
-                    ({services.filter(s => s.category === cat).length})
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* Admin Header + KPI */}
+      {showAdmin && (
+        <div style={{ borderBottom: '1px solid var(--border)', padding: '24px 32px' }}>
+          <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Services Catalog</h1>
+              <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '4px 0 0' }}>Manage your service templates and catalog</p>
+            </div>
+            <button style={btnPrimary} onClick={() => setEditingService({})}>
+              <Plus size={15} /> New Service
+            </button>
+          </div>
 
-        {/* Search */}
-        <div style={{ position: 'relative' }}>
-          <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)' }} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search services…"
-            style={{ ...inputStyle, paddingLeft: 32, width: 200 }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}>
-              <X size={14} />
+          {/* KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+            {[
+              { label: 'Total Services', value: kpis.total, icon: Package, color: 'var(--accent)' },
+              { label: 'Active', value: kpis.active, icon: Zap, color: 'var(--green)' },
+              { label: 'Categories', value: kpis.categories, icon: Layers, color: 'var(--purple)' },
+              { label: 'Client Visible', value: kpis.visible, icon: Eye, color: 'var(--blue)' },
+            ].map(k => (
+              <div key={k.label} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: `${k.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${k.color}30` }}>
+                  <k.icon size={20} style={{ color: k.color }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', lineHeight: 1 }}>{k.value}</div>
+                  <div style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500, marginTop: 4 }}>{k.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px' }}>
+        {/* Top Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, gap: 16, flexWrap: 'wrap' }}>
+          {/* Admin Toggle */}
+          {isAdmin && (
+            <button
+              onClick={() => setShowAdmin(!showAdmin)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px',
+                background: showAdmin ? 'var(--accent)' : 'var(--card)',
+                color: showAdmin ? '#fff' : 'var(--tx-1)',
+                border: `1px solid ${showAdmin ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
+              }}>
+              <Settings size={13} /> {showAdmin ? 'Admin View' : 'Client View'}
             </button>
           )}
+
+          {/* View Toggle */}
+          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+            <button onClick={() => setView('grid')} style={{ ...viewBtn, background: view === 'grid' ? 'var(--accent)' : 'transparent', color: view === 'grid' ? '#fff' : 'var(--tx-3)' }}>
+              <Grid3X3 size={16} />
+            </button>
+            <button onClick={() => setView('list')} style={{ ...viewBtn, background: view === 'list' ? 'var(--accent)' : 'transparent', color: view === 'list' ? '#fff' : 'var(--tx-3)', borderLeft: '1px solid var(--border)' }}>
+              <List size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* View toggle */}
-        <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          <button onClick={() => setView('grid')} style={{ ...viewBtn, background: view === 'grid' ? 'var(--accent)' : 'var(--card)', color: view === 'grid' ? '#fff' : 'var(--tx-3)' }}>
-            <Grid3X3 size={16} />
-          </button>
-          <button onClick={() => setView('list')} style={{ ...viewBtn, background: view === 'list' ? 'var(--accent)' : 'var(--card)', color: view === 'list' ? '#fff' : 'var(--tx-3)' }}>
-            <List size={16} />
-          </button>
-        </div>
+        {/* Category Navigation */}
+        {categories.length > 1 && (
+          <div style={{ marginBottom: 32, overflowX: 'auto', paddingBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 10, minWidth: 'min-content' }}>
+              {categories.map(cat => {
+                const CIcon = getCatIcon(cat === 'All' ? 'default' : cat);
+                const isActive = activeCategory === cat;
+                const color = cat === 'All' ? 'var(--accent)' : getCatColor(cat);
+                const catCount = services.filter(s => s.category === cat).length;
+
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
+                      borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                      border: `1px solid ${isActive ? color : 'var(--border)'}`,
+                      background: isActive ? `${color}12` : 'transparent',
+                      color: isActive ? color : 'var(--tx-2)',
+                      transition: 'all .12s',
+                    }}
+                  >
+                    {cat !== 'All' && <CIcon size={14} />}
+                    {cat}
+                    {cat !== 'All' && (
+                      <span style={{ fontSize: 11, opacity: 0.7, fontWeight: 500 }}>
+                        {catCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Quality Banner (Client View) */}
+        {!showAdmin && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 28 }}>
+            <CheckCircle2 size={16} style={{ color: 'var(--green)', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.5 }}>Fulfilled by vetted RRG partners. Quality guaranteed. Billed through your account.</span>
+          </div>
+        )}
+
+        {/* Service Grid/List */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <ShoppingBag size={48} style={{ color: 'var(--tx-3)', opacity: 0.3, marginBottom: 16 }} />
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--tx-1)', margin: '0 0 8px' }}>
+              {services.length === 0 ? 'No services yet' : 'No results'}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: 0, lineHeight: 1.6 }}>
+              {services.length === 0 ? 'Services will appear here once configured.' : 'Try a different search or category.'}
+            </p>
+          </div>
+        ) : view === 'grid' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+            {filtered.map(service => (
+              <ServiceCard
+                key={service.id || service.name}
+                service={service}
+                isAdmin={isAdmin && showAdmin}
+                onSelect={() => setSelectedService(service)}
+                onEdit={(e) => { e.stopPropagation(); setEditingService(service); }}
+                onDelete={(e) => handleDelete(service, e)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+            {filtered.map((service, i) => (
+              <ServiceRow
+                key={service.id || service.name}
+                service={service}
+                isAdmin={isAdmin && showAdmin}
+                isLast={i === filtered.length - 1}
+                onSelect={() => setSelectedService(service)}
+                onEdit={(e) => { e.stopPropagation(); setEditingService(service); }}
+                onDelete={(e) => handleDelete(service, e)}
+              />
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Quality banner */}
-      {!showAdmin && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, marginBottom: 16, fontSize: 12, color: 'var(--tx-2)' }}>
-          <CheckCircle2 size={14} style={{ color: 'var(--green)', flexShrink: 0 }} />
-          Fulfilled by vetted RRG partners. Quality guaranteed. Billed through your account.
-        </div>
-      )}
-
-      {/* Service Grid/List */}
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <ShoppingBag size={40} style={{ color: 'var(--tx-3)', opacity: 0.4, marginBottom: 12 }} />
-          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>
-            {services.length === 0 ? 'No services available' : 'No services match your search'}
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: 0 }}>
-            {services.length === 0 ? 'Services will appear here once configured.' : 'Try a different search term or category.'}
-          </p>
-        </div>
-      ) : view === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-          {filtered.map(service => (
-            <ServiceCard
-              key={service.id || service.name}
-              service={service}
-              isAdmin={isAdmin && showAdmin}
-              onSelect={() => setSelectedService(service)}
-              onEdit={(e) => { e.stopPropagation(); setEditingService(service); }}
-              onDelete={(e) => handleDelete(service, e)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-          {filtered.map((service, i) => (
-            <ServiceRow
-              key={service.id || service.name}
-              service={service}
-              isAdmin={isAdmin && showAdmin}
-              isLast={i === filtered.length - 1}
-              onSelect={() => setSelectedService(service)}
-              onEdit={(e) => { e.stopPropagation(); setEditingService(service); }}
-              onDelete={(e) => handleDelete(service, e)}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -706,66 +753,90 @@ function ServiceCard({ service, isAdmin, onSelect, onEdit, onDelete }) {
     <div
       onClick={onSelect}
       style={{
-        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-        padding: 0, cursor: 'pointer', transition: 'all 0.15s', position: 'relative',
-        overflow: 'hidden', opacity: inactive ? 0.5 : 1,
+        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+        padding: 0, cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative',
+        overflow: 'hidden', opacity: inactive ? 0.6 : 1,
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = catColor; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${catColor}15`; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.borderColor = catColor;
+        e.currentTarget.style.boxShadow = `0 12px 28px ${catColor}22`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'none';
+        e.currentTarget.style.borderColor = 'var(--border)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
       {/* Top accent bar */}
-      <div style={{ height: 3, background: catColor }} />
+      <div style={{ height: 4, background: catColor }} />
 
-      <div style={{ padding: '18px 20px' }}>
+      <div style={{ padding: '20px 22px' }}>
         {/* Admin badges */}
         {isAdmin && (inactive || hidden) && (
-          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-            {inactive && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'var(--red)', color: '#fff' }}>Inactive</span>}
-            {hidden && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: 'var(--bg)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}><EyeOff size={9} style={{ marginRight: 3, display: 'inline' }} />Hidden</span>}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            {inactive && <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 5, background: 'var(--red)', color: '#fff' }}>INACTIVE</span>}
+            {hidden && <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 5, background: 'var(--bg)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}><EyeOff size={10} style={{ marginRight: 4, display: 'inline' }} />HIDDEN</span>}
           </div>
         )}
 
         {/* Icon + Title */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 10, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {service.icon ? <span style={{ fontSize: 22 }}>{service.icon}</span> : <CatIcon size={22} style={{ color: catColor }} />}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}25` }}>
+            {service.icon ? <span style={{ fontSize: 24 }}>{service.icon}</span> : <CatIcon size={24} style={{ color: catColor }} />}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 2px', lineHeight: 1.3 }}>{service.name}</h3>
-            <span style={{ fontSize: 11, color: catColor, fontWeight: 600 }}>{service.category}</span>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 4px', lineHeight: 1.3 }}>{service.name}</h3>
+            <span style={{ fontSize: 12, color: catColor, fontWeight: 600, backgroundColor: `${catColor}12`, padding: '2px 8px', borderRadius: 5, display: 'inline-block' }}>{service.category}</span>
           </div>
         </div>
 
         {/* Description */}
-        <p style={{ fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.55, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <p style={{ fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.6, margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {service.description}
         </p>
 
-        {/* Badges row */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-          <span style={metaBadge}><Clock size={10} /> {service.turnaround_text || 'TBD'}</span>
-          {flow && <span style={{ ...metaBadge, background: flow.bg, color: flow.color, borderColor: `${flow.color}30` }}>{flow.label}</span>}
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '0 0 14px' }} />
+
+        {/* Meta badges row */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          <span style={metaBadge}><Clock size={11} /> {service.turnaround_text || 'TBD'}</span>
           {service.deliverable_type && (
             <span style={metaBadge}>
-              {React.createElement(DELIVERABLE_ICONS[service.deliverable_type] || DELIVERABLE_ICONS.default, { size: 10 })}
+              {React.createElement(DELIVERABLE_ICONS[service.deliverable_type] || DELIVERABLE_ICONS.default, { size: 11 })}
               {' '}{service.deliverable_type}
             </span>
           )}
+          {flow && <span style={{ ...metaBadge, background: flow.bg, color: flow.color, borderColor: `${flow.color}30` }}>{flow.label}</span>}
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 14, borderTop: '1px solid var(--border)' }}>
           {isAdmin ? (
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={onEdit} style={iconBtn} title="Edit"><Pencil size={13} /></button>
-              <button onClick={onDelete} style={{ ...iconBtn, color: 'var(--red)' }} title="Delete"><Trash2 size={13} /></button>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={onEdit} style={{ ...iconBtn, color: 'var(--accent)' }} title="Edit"><Pencil size={14} /></button>
+              <button onClick={onDelete} style={{ ...iconBtn, color: 'var(--red)' }} title="Delete"><Trash2 size={14} /></button>
             </div>
           ) : (
             <span />
           )}
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: catColor }}>
-            {service.cta_label || 'Request'} <ArrowRight size={12} />
-          </span>
+          <button
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+              background: `${catColor}15`, color: catColor, border: 'none', borderRadius: 8,
+              fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
+            }}
+            onClick={isAdmin ? undefined : () => {}}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = `${catColor}25`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = `${catColor}15`;
+            }}
+          >
+            {service.cta_label || 'Request Service'} <ArrowRight size={12} />
+          </button>
         </div>
       </div>
     </div>
@@ -783,38 +854,38 @@ function ServiceRow({ service, isAdmin, isLast, onSelect, onEdit, onDelete }) {
     <div
       onClick={onSelect}
       style={{
-        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px',
+        display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
         borderBottom: isLast ? 'none' : '1px solid var(--border)',
-        cursor: 'pointer', transition: 'background .12s', opacity: inactive ? 0.5 : 1,
+        cursor: 'pointer', transition: 'background .12s', opacity: inactive ? 0.6 : 1,
       }}
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
-      <div style={{ width: 40, height: 40, borderRadius: 8, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        {service.icon ? <span style={{ fontSize: 20 }}>{service.icon}</span> : <CatIcon size={20} style={{ color: catColor }} />}
+      <div style={{ width: 44, height: 44, borderRadius: 10, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}25` }}>
+        {service.icon ? <span style={{ fontSize: 22 }}>{service.icon}</span> : <CatIcon size={22} style={{ color: catColor }} />}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{service.name}</span>
-          {inactive && isAdmin && <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 3, background: 'var(--red)', color: '#fff' }}>Inactive</span>}
+          {inactive && isAdmin && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--red)', color: '#fff' }}>INACTIVE</span>}
         </div>
         <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>{service.description?.substring(0, 80)}{service.description?.length > 80 ? '…' : ''}</span>
       </div>
 
-      <span style={{ ...metaBadge, flexShrink: 0 }}><Clock size={10} /> {service.turnaround_text || 'TBD'}</span>
-      <span style={{ fontSize: 11, fontWeight: 600, color: catColor, flexShrink: 0, minWidth: 90, textAlign: 'right' }}>{service.category}</span>
+      <span style={{ ...metaBadge, flexShrink: 0 }}><Clock size={11} /> {service.turnaround_text || 'TBD'}</span>
+      <span style={{ fontSize: 12, fontWeight: 600, color: catColor, flexShrink: 0, minWidth: 100, textAlign: 'right', padding: '2px 8px', backgroundColor: `${catColor}12`, borderRadius: 5 }}>{service.category}</span>
 
       {flow && <span style={{ ...metaBadge, flexShrink: 0, background: flow.bg, color: flow.color }}>{flow.label}</span>}
 
       {isAdmin && (
-        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-          <button onClick={onEdit} style={iconBtn} title="Edit"><Pencil size={13} /></button>
-          <button onClick={onDelete} style={{ ...iconBtn, color: 'var(--red)' }} title="Delete"><Trash2 size={13} /></button>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          <button onClick={onEdit} style={{ ...iconBtn, color: 'var(--accent)' }} title="Edit"><Pencil size={14} /></button>
+          <button onClick={onDelete} style={{ ...iconBtn, color: 'var(--red)' }} title="Delete"><Trash2 size={14} /></button>
         </div>
       )}
 
-      <ArrowRight size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+      <ArrowRight size={15} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
     </div>
   );
 }
@@ -823,52 +894,53 @@ function ServiceRow({ service, isAdmin, isLast, onSelect, onEdit, onDelete }) {
 // STYLES
 // ═══════════════════════════════════════
 const btnPrimary = {
-  display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px',
-  background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8,
+  display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
+  background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 10,
   fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.15s',
   justifyContent: 'center',
 };
 const btnSecondary = {
   display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px',
-  background: 'var(--card)', color: 'var(--tx-1)', border: '1px solid var(--border)', borderRadius: 8,
+  background: 'var(--card)', color: 'var(--tx-1)', border: '1px solid var(--border)', borderRadius: 10,
   fontSize: 13, fontWeight: 500, cursor: 'pointer',
 };
 const btnGhost = {
-  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px',
-  background: 'none', border: '1px solid var(--border)', borderRadius: 7,
-  fontSize: 12, fontWeight: 500, color: 'var(--tx-2)', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+  background: 'none', border: '1px solid var(--border)', borderRadius: 8,
+  fontSize: 13, fontWeight: 500, color: 'var(--tx-2)', cursor: 'pointer', transition: 'all .15s',
 };
 const inputStyle = {
-  width: '100%', padding: '9px 12px', background: 'var(--bg)', border: '1px solid var(--border)',
-  borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none',
+  width: '100%', padding: '10px 14px', background: 'var(--bg)', border: '1px solid var(--border)',
+  borderRadius: 10, color: 'var(--tx-1)', fontSize: 13, outline: 'none', fontFamily: 'inherit',
 };
 const labelStyle = {
-  fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', display: 'block', marginBottom: 6,
+  fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', display: 'block', marginBottom: 8,
   textTransform: 'uppercase', letterSpacing: '0.05em',
 };
 const metaBadge = {
-  display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
-  padding: '3px 9px', borderRadius: 20, background: 'var(--bg)', color: 'var(--tx-2)',
+  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600,
+  padding: '4px 10px', borderRadius: 6, background: 'var(--bg)', color: 'var(--tx-2)',
   border: '1px solid var(--border)',
 };
 const viewBtn = {
-  padding: '6px 10px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+  padding: '8px 12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'transparent', transition: 'all .15s',
 };
 const iconBtn = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6,
-  background: 'none', border: 'none', cursor: 'pointer', borderRadius: 6,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 7,
+  background: 'none', border: 'none', cursor: 'pointer', borderRadius: 7,
   color: 'var(--tx-3)', transition: 'all 0.15s',
 };
 const overlayStyle = {
   position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+  background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(5px)',
 };
 const modalStyle = {
-  background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+  background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16,
   maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+  boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
 };
 const closeBtn = {
   background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)',
-  padding: 4, flexShrink: 0, display: 'flex',
+  padding: 6, flexShrink: 0, display: 'flex', borderRadius: 7, transition: 'all .15s',
 };
