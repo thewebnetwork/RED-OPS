@@ -124,20 +124,19 @@ async def sla_monitor_loop():
 
 async def ensure_admin_account():
     """Ensure the platform admin account exists on startup."""
-    from passlib.context import CryptContext
+    from utils.helpers import hash_password
     import uuid
     from datetime import datetime, timezone
 
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
+    admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "Fmtvvl171**")
+
+    hashed = hash_password(admin_password)
 
     existing = await db.users.find_one({"email": admin_email})
 
     if existing:
-        # Ensure password is current and account is admin
-        hashed = pwd_context.hash(admin_password)
+        # Always reset password + ensure admin role on every startup
         await db.users.update_one(
             {"email": admin_email},
             {"$set": {
@@ -150,9 +149,8 @@ async def ensure_admin_account():
                 "otp_secret": None,
             }}
         )
-        logger.info(f"Admin account verified: {admin_email}")
+        logger.info(f"Admin account verified & password reset: {admin_email}")
     else:
-        hashed = pwd_context.hash(admin_password)
         user = {
             "id": str(uuid.uuid4()),
             "name": "Red Ops Admin",
