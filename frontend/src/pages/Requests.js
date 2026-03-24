@@ -1,496 +1,610 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  useDraggable,
-  useDroppable,
+  DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDraggable, useDroppable,
 } from '@dnd-kit/core';
 import {
-  Plus,
-  Search,
-  X,
-  AlertCircle,
-  ArrowUp,
-  Minus,
-  ArrowDown,
-  MessageSquare,
-  Loader2,
+  Plus, Search, X, AlertCircle, ArrowUp, Minus, ArrowDown,
+  MessageSquare, Loader2, Clock, Shield, User, Users, ChevronDown,
+  ExternalLink, Filter, LayoutGrid, List, RefreshCw, UserPlus,
+  CheckCircle2, Truck, AlertTriangle, Eye, MoreHorizontal,
 } from 'lucide-react';
 
-// ── API Configuration ────────────────────────────────────────────────────────────
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const getToken = () => localStorage.getItem('token');
-const getHeaders = () => ({ Authorization: `Bearer ${getToken()}` });
+const tok = () => localStorage.getItem('token');
+const hdrs = () => ({ Authorization: `Bearer ${tok()}` });
+const jhdrs = () => ({ ...hdrs(), 'Content-Type': 'application/json' });
 
-const STAGES = ['Submitted','Assigned','In Progress','Pending Review','Revision','Delivered','Closed'];
-
+const STAGES = ['Open', 'In Progress', 'Pending', 'Delivered', 'Closed'];
 const STAGE_COLORS = {
-  'Submitted':     '#3b82f6',
-  'Assigned':      '#a855f7',
-  'In Progress':   '#f59e0b',
-  'Pending Review':'#06b6d4',
-  'Revision':      '#ef4444',
-  'Delivered':     '#22c55e',
-  'Closed':        '#606060',
+  Open: '#3b82f6', 'In Progress': '#f59e0b', Pending: '#a855f7',
+  Delivered: '#22c55e', Closed: '#606060', Canceled: '#ef4444', Draft: '#64748b',
 };
 
-// ── Static Config ────────────────────────────────────────────────────────────
-// SERVICES: Dropdown options list (static config, not mock data)
-const SERVICES = ['Video Editing','Graphic Design','Copywriting','Social Media Pack','Meta Ads Setup','Email Sequence','Blog Post','Landing Page','Branding Package'];
+const PRI = { urgent: '#c92a3e', high: '#f97316', medium: '#3b82f6', low: '#606060' };
+const PRI_ICON = { urgent: AlertCircle, high: ArrowUp, medium: Minus, low: ArrowDown };
+const PRI_LABELS = ['urgent', 'high', 'medium', 'low'];
 
-const PRIORITY_COLOR = { Urgent:'#c92a3e', High:'#f59e0b', Normal:'#3b82f6', Low:'#606060' };
-const PRIORITY_ICON  = { Urgent: AlertCircle, High: ArrowUp, Normal: Minus, Low: ArrowDown };
+const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+const timeAgo = (d) => {
+  if (!d) return '';
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+};
 
-const fmt = d => d ? new Date(d).toLocaleDateString('en-US',{ month:'short', day:'numeric' }) : '—';
-const isOverdue = d => d && new Date(d) < new Date() && new Date(d).toDateString() !== new Date().toDateString();
-
-// ── Sub-components ───────────────────────────────────────────────────────────
-function PriorityIcon({ priority, size = 12 }) {
-  const Icon = PRIORITY_ICON[priority] || Minus;
-  return <Icon size={size} color={PRIORITY_COLOR[priority] || 'var(--tx-3)'} />;
+function slaCountdown(deadline) {
+  if (!deadline) return null;
+  const diff = new Date(deadline) - Date.now();
+  if (diff < 0) return { label: 'OVERDUE', color: '#ef4444', urgent: true };
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 4) return { label: `${hrs}h left`, color: '#ef4444', urgent: true };
+  if (hrs < 24) return { label: `${hrs}h left`, color: '#f59e0b', urgent: false };
+  const days = Math.floor(hrs / 24);
+  return { label: `${days}d left`, color: '#22c55e', urgent: false };
 }
 
-function Assignee({ assignee, size = 22 }) {
-  return (
-    <div title={assignee.name} style={{ width:size, height:size, borderRadius:'50%', background:assignee.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize: size > 26 ? 11 : 9, fontWeight:700, color:'#fff', flexShrink:0 }}>
-      {assignee.avatar}
-    </div>
-  );
+// ── Sub-components ──────────────────────────────────────────
+
+function PriorityDot({ priority, size = 7 }) {
+  return <span style={{ width: size, height: size, borderRadius: '50%', background: PRI[priority] || '#606060', display: 'inline-block', flexShrink: 0 }} />;
 }
 
 function StagePill({ stage }) {
-  const color = STAGE_COLORS[stage] || 'var(--tx-3)';
+  const color = STAGE_COLORS[stage] || '#606060';
   return (
-    <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'2px 8px', borderRadius:4, fontSize:11, fontWeight:600, background:`${color}22`, color }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 5, fontSize: 10.5, fontWeight: 600, background: `${color}18`, color }}>
       {stage}
     </span>
   );
 }
 
-// Comments component — fetches and posts real comments
-function RequestComments({ requestId, comment, setComment }) {
+function Avatar({ name, size = 22, color }) {
+  const initials = (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = (name || '').charCodeAt(i) + ((hash << 5) - hash);
+  const colors = ['#c92a3e', '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ec4899'];
+  const bg = color || colors[Math.abs(hash) % colors.length];
+  return (
+    <div title={name} style={{ width: size, height: size, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.4, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+      {initials}
+    </div>
+  );
+}
+
+function SlaTag({ deadline }) {
+  const sla = slaCountdown(deadline);
+  if (!sla) return null;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 3,
+      fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
+      background: sla.color + '18', color: sla.color,
+      animation: sla.urgent ? 'pulse 2s infinite' : 'none',
+    }}>
+      <Clock size={9} /> {sla.label}
+    </span>
+  );
+}
+
+// Kanban card for orders
+function OrderCard({ order, onClick, ghost = false }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+        padding: '10px 12px', cursor: ghost ? 'grabbing' : 'pointer',
+        boxShadow: ghost ? '0 8px 24px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.08)',
+        opacity: ghost ? 0.95 : 1, transition: 'box-shadow .15s, transform .15s',
+        borderLeft: `3px solid ${PRI[order.priority] || '#606060'}`,
+      }}
+      onMouseEnter={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+      onMouseLeave={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'none'; }}}
+    >
+      {/* Top: code + SLA */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent)', letterSpacing: '.02em' }}>{order.order_code}</span>
+        <SlaTag deadline={order.sla_deadline} />
+      </div>
+      {/* Title */}
+      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--tx-1)', lineHeight: 1.35, marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+        {order.title}
+      </div>
+      {/* Service + Client */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        {order.service_name && (
+          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'var(--bg)', color: 'var(--tx-3)', fontWeight: 500, border: '1px solid var(--border)' }}>
+            {order.service_name}
+          </span>
+        )}
+      </div>
+      {/* Bottom: client + assignee */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <Avatar name={order.requester_name} size={18} />
+          <span style={{ fontSize: 11, color: 'var(--tx-2)', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {order.requester_name}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          {order.editor_name ? (
+            <>
+              <Avatar name={order.editor_name} size={18} color="#22c55e" />
+              <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{order.editor_name?.split(' ')[0]}</span>
+            </>
+          ) : (
+            <span style={{ fontSize: 10, color: '#f59e0b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <UserPlus size={10} /> Unassigned
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DraggableOrder({ order, onOpen }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: order.id });
+  return (
+    <div ref={setNodeRef} {...attributes} {...listeners} style={{ opacity: isDragging ? 0 : 1, touchAction: 'none', marginBottom: 8 }}>
+      <OrderCard order={order} onClick={onOpen} />
+    </div>
+  );
+}
+
+function DroppableColumn({ stage, children, isEmpty }) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage });
+  const color = STAGE_COLORS[stage];
+  return (
+    <div ref={setNodeRef} style={{
+      flex: 1, minHeight: 80, padding: 4, borderRadius: 6, transition: 'background .15s',
+      background: isOver ? `${color}0d` : undefined, outline: isOver ? `1px dashed ${color}60` : '1px dashed transparent',
+    }}>
+      {children}
+      {isEmpty && !isOver && <div style={{ textAlign: 'center', padding: '20px 8px', color: 'var(--tx-3)', fontSize: 11.5 }}>No orders</div>}
+      {isEmpty && isOver && <div style={{ textAlign: 'center', padding: '20px 8px', color, fontSize: 11.5, fontWeight: 500 }}>Drop here</div>}
+    </div>
+  );
+}
+
+// Assignment dropdown
+function AssignDropdown({ orderId, currentEditorId, teamMembers, onAssign }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const filtered = teamMembers.filter(m =>
+    !search || m.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(!open)} className="btn-ghost btn-sm" style={{ fontSize: 11, gap: 4, padding: '5px 8px' }}>
+        <UserPlus size={12} /> Assign <ChevronDown size={10} />
+      </button>
+      {open && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 299 }} onClick={() => setOpen(false)} />
+          <div style={{
+            position: 'absolute', top: '100%', right: 0, marginTop: 4, width: 240,
+            background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: 300, overflow: 'hidden',
+          }}>
+            <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
+              <input
+                value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search team..."
+                autoFocus
+                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', color: 'var(--tx-1)', fontSize: 12, padding: '4px 0' }}
+              />
+            </div>
+            <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+              {filtered.map(m => (
+                <div
+                  key={m.id}
+                  onClick={() => { onAssign(orderId, m.id, m.name); setOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', cursor: 'pointer',
+                    background: m.id === currentEditorId ? 'var(--accent)12' : 'transparent',
+                    transition: 'background .1s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
+                  onMouseLeave={e => e.currentTarget.style.background = m.id === currentEditorId ? 'var(--accent)12' : 'transparent'}
+                >
+                  <Avatar name={m.name} size={22} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--tx-1)' }}>{m.name}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--tx-3)' }}>{m.role} · {m.active_orders || 0} active</div>
+                  </div>
+                  {m.id === currentEditorId && <CheckCircle2 size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
+                </div>
+              ))}
+              {filtered.length === 0 && <div style={{ padding: 16, textAlign: 'center', color: 'var(--tx-3)', fontSize: 12 }}>No team members found</div>}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// Comments (reuse existing pattern)
+function OrderComments({ orderId }) {
   const [comments, setComments] = useState([]);
-  const [loadingComments, setLoadingComments] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (!requestId) return;
-    setLoadingComments(true);
-    fetch(`${API}/tasks/${requestId}/comments`, { headers: getHeaders() })
+    if (!orderId) return;
+    setLoading(true);
+    fetch(`${API}/orders/${orderId}/messages`, { headers: hdrs() })
       .then(r => r.ok ? r.json() : [])
-      .then(data => setComments(Array.isArray(data) ? data : []))
+      .then(d => setComments(Array.isArray(d) ? d : []))
       .catch(() => setComments([]))
-      .finally(() => setLoadingComments(false));
-  }, [requestId]);
+      .finally(() => setLoading(false));
+  }, [orderId]);
 
-  const addComment = async () => {
-    if (!comment.trim() || sending) return;
+  const send = async () => {
+    if (!text.trim() || sending) return;
     setSending(true);
     try {
-      const res = await fetch(`${API}/tasks/${requestId}/comments`, {
-        method: 'POST',
-        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: comment.trim() }),
-      });
+      const res = await fetch(`${API}/orders/${orderId}/messages`, { method: 'POST', headers: jhdrs(), body: JSON.stringify({ message_body: text.trim() }) });
       if (!res.ok) throw new Error();
-      const newComment = await res.json();
-      setComments(prev => [...prev, newComment]);
-      setComment('');
-    } catch {
-      toast.error('Failed to add comment');
-    } finally {
-      setSending(false);
-    }
+      const msg = await res.json();
+      setComments(prev => [...prev, msg]);
+      setText('');
+    } catch { toast.error('Failed to send'); }
+    finally { setSending(false); }
   };
 
   return (
-    <div style={{ borderTop:'1px solid var(--border)', paddingTop:16 }}>
-      <h4 style={{ margin:'0 0 12px', fontSize:12, fontWeight:600, color:'var(--tx-1)', display:'flex', alignItems:'center', gap:6 }}>
-        <MessageSquare size={13} /> Comments ({comments.length})
+    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+      <h4 style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, color: 'var(--tx-1)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <MessageSquare size={13} /> Messages ({comments.length})
       </h4>
-      {loadingComments && (
-        <div style={{ textAlign:'center', padding:12, color:'var(--tx-3)' }}>
-          <Loader2 size={14} style={{ animation:'spin 1s linear infinite' }} />
-        </div>
-      )}
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {loading && <div style={{ textAlign: 'center', padding: 12, color: 'var(--tx-3)' }}><Loader2 size={14} className="spin" /></div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {comments.map((c, i) => (
-          <div key={c.id || i} style={{ padding:'8px 10px', background:'var(--bg-elevated)', borderRadius:7, borderLeft:'2px solid var(--border-hi)' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
-              <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{c.user_name || 'Unknown'}</span>
-              <span style={{ fontSize:11, color:'var(--tx-3)' }}>{c.created_at ? new Date(c.created_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : ''}</span>
+          <div key={c.id || i} style={{ padding: '8px 10px', background: 'var(--bg)', borderRadius: 7, borderLeft: `2px solid ${c.author_role === 'Administrator' ? 'var(--accent)' : '#3b82f6'}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--tx-1)' }}>{c.author_name}</span>
+              <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{timeAgo(c.created_at)}</span>
             </div>
-            <p style={{ margin:0, fontSize:12, color:'var(--tx-2)' }}>{c.content}</p>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--tx-2)', lineHeight: 1.5 }}>{c.message_body}</p>
           </div>
         ))}
-        {!loadingComments && comments.length === 0 && (
-          <div style={{ textAlign:'center', padding:'12px 0', color:'var(--tx-3)', fontSize:12 }}>No comments yet</div>
-        )}
+        {!loading && comments.length === 0 && <div style={{ textAlign: 'center', padding: '10px 0', color: 'var(--tx-3)', fontSize: 11.5 }}>No messages yet</div>}
       </div>
-      <div style={{ marginTop:12, display:'flex', gap:8 }}>
-        <input
-          className="input-field"
-          placeholder="Add a comment..."
-          value={comment}
-          onChange={e => setComment(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) addComment(); }}
-          style={{ flex:1, fontSize:12 }}
-        />
-        <button className="btn-ghost btn-sm" onClick={addComment} disabled={!comment.trim() || sending}>
-          {sending ? <Loader2 size={13} style={{ animation:'spin 1s linear infinite' }} /> : <MessageSquare size={13} />}
+      <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+        <input className="input-field" placeholder="Type a message..." value={text} onChange={e => setText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') send(); }} style={{ flex: 1, fontSize: 12 }} />
+        <button className="btn-ghost btn-sm" onClick={send} disabled={!text.trim() || sending}>
+          {sending ? <Loader2 size={13} className="spin" /> : <MessageSquare size={13} />}
         </button>
       </div>
     </div>
   );
 }
 
-// Pure display card — used both inline and inside DragOverlay
-function RequestCard({ req, onClick, ghost = false }) {
-  const overdue = isOverdue(req.due_date);
-  return (
-    <div
-      className="kanban-card"
-      onClick={onClick}
-      style={{
-        cursor: ghost ? 'grabbing' : 'pointer',
-        boxShadow: ghost ? '0 8px 24px rgba(0,0,0,0.5)' : undefined,
-        opacity: ghost ? 0.95 : 1,
-      }}
-    >
-      <div style={{ display:'flex', gap:6, marginBottom:6 }}>
-        <PriorityIcon priority={req.priority} size={11} />
-        <span style={{ fontSize:12, fontWeight:500, color:'var(--tx-1)', lineHeight:1.35, flex:1 }}>{req.title}</span>
-      </div>
-      <span className="pill pill-gray" style={{ fontSize:10 }}>{req.service}</span>
-      <p style={{ margin:'5px 0 0', fontSize:11, color:'var(--tx-2)' }}>{req.client}</p>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:8, paddingTop:8, borderTop:'1px solid var(--border)' }}>
-        <Assignee assignee={req.assignee} size={20} />
-        <span style={{ fontSize:10, color: overdue ? '#ef4444' : 'var(--tx-3)', fontWeight: overdue ? 600 : 400 }}>
-          {overdue ? '⚠ ' : ''}{fmt(req.due_date)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// Draggable wrapper — hides original while dragging (DragOverlay shows the ghost)
-function DraggableCard({ req, onOpen }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: req.id });
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{ opacity: isDragging ? 0 : 1, touchAction: 'none' }}
-    >
-      <RequestCard req={req} onClick={onOpen} />
-    </div>
-  );
-}
-
-// Droppable column body — highlights on hover
-function DroppableColumn({ stage, children, isEmpty }) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage });
-  const color = STAGE_COLORS[stage];
-  return (
-    <div
-      ref={setNodeRef}
-      className="kanban-col-body"
-      style={{
-        minHeight: 80,
-        transition: 'background 0.15s, border-color 0.15s',
-        background: isOver ? `${color}14` : undefined,
-        borderRadius: 6,
-        outline: isOver ? `1px dashed ${color}60` : '1px dashed transparent',
-      }}
-    >
-      {children}
-      {isEmpty && !isOver && (
-        <div style={{ textAlign:'center', padding:'20px 8px', color:'var(--tx-3)', fontSize:12 }}>No requests</div>
-      )}
-      {isEmpty && isOver && (
-        <div style={{ textAlign:'center', padding:'20px 8px', color: color, fontSize:12, fontWeight:500 }}>Drop here</div>
-      )}
-    </div>
-  );
-}
-
-// ── Main component ───────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────
 export default function Requests() {
-  const [requests,    setRequests]    = useState([]);
-  const [clients,     setClients]     = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [view,        setView]        = useState('kanban');
-  const [search,      setSearch]      = useState('');
-  const [priFilter,   setPriFilter]   = useState('');
-  const [showModal,   setShowModal]   = useState(false);
-  const [selectedReq, setSelectedReq] = useState(null);
-  const [activeId,    setActiveId]    = useState(null);
-  const [comment,     setComment]     = useState('');
-  const [form, setForm] = useState({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('kanban');
+  const [search, setSearch] = useState('');
+  const [priFilter, setPriFilter] = useState('');
+  const [stageFilter, setStageFilter] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({ title: '', service: '', priority: 'medium', description: '' });
+  const [services, setServices] = useState([]);
 
-  useEffect(() => {
-    fetchData();
-    if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [ordersRes, usersRes, servicesRes] = await Promise.all([
+        fetch(`${API}/orders`, { headers: hdrs() }).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/users`, { headers: hdrs() }).then(r => r.ok ? r.json() : []),
+        fetch(`${API}/service-templates?active_only=true`, { headers: hdrs() }).then(r => r.ok ? r.json() : []).catch(() => []),
+      ]);
+
+      const orderList = Array.isArray(ordersRes) ? ordersRes : ordersRes?.orders || [];
+      setOrders(orderList);
+
+      const userList = Array.isArray(usersRes) ? usersRes : usersRes?.items || [];
+      // Team = non-media-client active users
+      const team = userList.filter(u => u.account_type !== 'Media Client' && u.active !== false);
+      // Count active orders per team member
+      const editorCounts = {};
+      orderList.forEach(o => { if (o.editor_id && !['Delivered', 'Closed', 'Canceled'].includes(o.status)) editorCounts[o.editor_id] = (editorCounts[o.editor_id] || 0) + 1; });
+      setTeamMembers(team.map(u => ({ ...u, active_orders: editorCounts[u.id] || 0 })));
+
+      const svcList = Array.isArray(servicesRes) ? servicesRes : servicesRes?.services || [];
+      setServices(svcList);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => { fetchData(); if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true); }, [fetchData]);
 
-      // Fetch clients (Media Client users)
-      const usersRes = await fetch(`${API}/users`, {
-        headers: getHeaders(),
-      });
-      if (usersRes.ok) {
-        const usersData = await usersRes.json();
-        const arr = Array.isArray(usersData) ? usersData : usersData?.items || [];
-        const clientNames = arr
-          .filter(u => u.account_type === 'Media Client')
-          .map(u => u.name || u.email);
-        setClients(clientNames);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Filter
+  const filtered = useMemo(() => {
+    let list = orders.filter(o => o.status !== 'Draft' && o.status !== 'Canceled');
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(o => (o.title || '').toLowerCase().includes(q) || (o.order_code || '').toLowerCase().includes(q) || (o.requester_name || '').toLowerCase().includes(q) || (o.service_name || '').toLowerCase().includes(q));
+    }
+    if (priFilter) list = list.filter(o => o.priority === priFilter);
+    if (stageFilter) list = list.filter(o => o.status === stageFilter);
+    return list;
+  }, [orders, search, priFilter, stageFilter]);
+
+  const byStage = useMemo(() => STAGES.reduce((a, s) => { a[s] = filtered.filter(o => o.status === s); return a; }, {}), [filtered]);
+  const unassigned = orders.filter(o => o.status === 'Open' && !o.editor_id).length;
+  const openCount = orders.filter(o => !['Delivered', 'Closed', 'Canceled', 'Draft'].includes(o.status)).length;
+  const breachedCount = orders.filter(o => o.is_sla_breached && !['Delivered', 'Closed', 'Canceled'].includes(o.status)).length;
+  const activeDrag = orders.find(o => o.id === activeId) || null;
+
+  // Actions
+  const updateStatus = async (id, newStatus) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+    if (selected?.id === id) setSelected(prev => ({ ...prev, status: newStatus }));
+
+    // Map to backend endpoints
+    const statusEndpoints = {
+      'In Progress': null, // handled by pick
+      'Pending': 'submit-for-review',
+      'Delivered': 'deliver',
+      'Closed': 'close',
+    };
+
+    try {
+      if (newStatus === 'In Progress' && orders.find(o => o.id === id)?.status === 'Open') {
+        // Pick the order
+        await fetch(`${API}/orders/${id}/pick`, { method: 'POST', headers: jhdrs() });
+      } else if (statusEndpoints[newStatus]) {
+        const body = newStatus === 'Delivered' ? { resolution_notes: 'Delivered via kanban' } : newStatus === 'Closed' ? { reason: 'Completed' } : {};
+        await fetch(`${API}/orders/${id}/${statusEndpoints[newStatus]}`, { method: 'POST', headers: jhdrs(), body: JSON.stringify(body) });
       }
-
-      // Fetch requests/tasks
-      const res = await fetch(`${API}/tasks`, {
-        headers: getHeaders(),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      // Transform tasks to requests format
-      const transformed = data.map(task => ({
-        id: task.id,
-        title: task.title,
-        client: task.project_name || 'Unassigned Project',
-        service: task.task_type || 'Task',
-        priority: (['Urgent', 'High', 'Normal', 'Low'].includes(task.priority) ? task.priority : 'Normal'),
-        assignee: task.assignee_name ?
-          { name: task.assignee_name, avatar: task.assignee_name.split(' ').map(w => w[0]).join(''), color: '#3b82f6' } :
-          { name: 'Unassigned', avatar: '?', color: '#606060' },
-        created_at: task.created_at ? new Date(task.created_at).toISOString().split('T')[0] : '',
-        due_date: task.due_at ? new Date(task.due_at).toISOString().split('T')[0] : '',
-        stage: task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : 'Submitted',
-        description: task.description || '',
-      }));
-
-      setRequests(transformed);
-    } catch (err) {
-      console.error('Failed to fetch data:', err);
-      setRequests([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to update status'); fetchData(); }
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
-  );
-
-  const filtered = requests.filter(r => {
-    const q = search.toLowerCase();
-    return (!q || r.title.toLowerCase().includes(q) || r.client.toLowerCase().includes(q) || r.id.toLowerCase().includes(q))
-        && (!priFilter || r.priority === priFilter);
-  });
-
-  const byStage   = STAGES.reduce((a, s) => { a[s] = filtered.filter(r => r.stage === s); return a; }, {});
-  const open      = filtered.filter(r => !['Delivered','Closed'].includes(r.stage)).length;
-  const overdue   = filtered.filter(r => isOverdue(r.due_date) && !['Delivered','Closed'].includes(r.stage)).length;
-  const activeDrag = requests.find(r => r.id === activeId) || null;
-
-  const updateStage = async (id, stage) => {
-    // Optimistic update
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, stage } : r));
-    if (selectedReq?.id === id) setSelectedReq(prev => ({ ...prev, stage }));
-    // Persist to API — map stage name to task status
-    const statusMap = { 'Submitted':'open', 'Assigned':'assigned', 'In Progress':'doing', 'Pending Review':'review', 'Revision':'revision', 'Delivered':'delivered', 'Closed':'done' };
+  const assignOrder = async (orderId, userId, userName) => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, editor_id: userId, editor_name: userName, status: o.status === 'Open' ? 'In Progress' : o.status } : o));
     try {
-      await fetch(`${API}/tasks/${id}`, {
-        method: 'PATCH',
-        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: statusMap[stage] || 'open' }),
+      await fetch(`${API}/orders/${orderId}/reassign`, {
+        method: 'POST', headers: jhdrs(),
+        body: JSON.stringify({ reassign_type: 'user', target_id: userId, notes: 'Assigned from operations board' }),
       });
-    } catch {
-      toast.error('Failed to update stage');
-    }
+      toast.success(`Assigned to ${userName}`);
+    } catch { toast.error('Failed to assign'); fetchData(); }
   };
-
-  const handleDragStart = ({ active }) => setActiveId(active.id);
 
   const handleDragEnd = ({ active, over }) => {
     setActiveId(null);
-    if (!over) return;
-    const req = requests.find(r => r.id === active.id);
-    if (!req || req.stage === over.id) return;
-    updateStage(active.id, over.id);
+    if (!over || !active) return;
+    const order = orders.find(o => o.id === active.id);
+    if (!order || order.status === over.id) return;
+    updateStatus(active.id, over.id);
   };
 
-  const handleDragCancel = () => setActiveId(null);
-
-  const [creating, setCreating] = useState(false);
-
   const createRequest = async () => {
-    if (!form.title || !form.client || !form.service) {
-      toast.error('Please fill in title, client, and service.');
-      return;
-    }
+    if (!form.title) { toast.error('Title is required'); return; }
     setCreating(true);
     try {
-      const priorityMap = { Urgent:'urgent', High:'high', Normal:'medium', Low:'low' };
-      const res = await fetch(`${API}/tasks`, {
-        method: 'POST',
-        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+      const res = await fetch(`${API}/orders`, {
+        method: 'POST', headers: jhdrs(),
         body: JSON.stringify({
           title: form.title,
-          description: form.description || null,
-          status: 'open',
-          priority: priorityMap[form.priority] || 'medium',
-          task_type: form.service,
-          due_at: form.due_date ? new Date(form.due_date + 'T00:00:00Z').toISOString() : null,
-          visibility: 'both',
+          request_type: 'service_request',
+          description: form.description || '',
+          priority: form.priority,
+          service_name: form.service || null,
+          status: 'Open',
         }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error();
       toast.success('Request created');
       setShowModal(false);
-      setForm({ title:'', client:'', service:'', priority:'Normal', due_date:'', description:'' });
-      fetchData(); // Refresh from API
-    } catch (err) {
-      toast.error('Failed to create request');
-    } finally {
-      setCreating(false);
-    }
+      setForm({ title: '', service: '', priority: 'medium', description: '' });
+      fetchData();
+    } catch { toast.error('Failed to create'); }
+    finally { setCreating(false); }
   };
 
   if (loading) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', flex:1, overflow:'hidden', background:'var(--bg)', alignItems:'center', justifyContent:'center' }}>
-        <div style={{ fontSize:14, color:'var(--tx-3)' }}>Loading requests...</div>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <RefreshCw size={18} className="spin" style={{ color: 'var(--tx-3)' }} />
       </div>
     );
   }
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', flex:1, overflow:'hidden', background:'var(--bg)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', background: 'var(--bg)' }}>
 
       {/* ── Toolbar ── */}
-      <div style={{ padding:'10px 24px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:12, flexShrink:0, background:'var(--bg)' }}>
-        <div>
-          <span style={{ fontSize:18, fontWeight:700, color:'var(--tx-1)' }}>Requests</span>
-          <span style={{ marginLeft:10, fontSize:12, color:'var(--tx-3)' }}>
-            {requests.length === 0 ? 'No requests yet' : `${filtered.length} total · ${open} open${overdue > 0 ? ' · ' : ''}${overdue > 0 ? <span style={{ color:'#ef4444' }}>{overdue} overdue</span> : ''}`}
-          </span>
+      <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+        <div style={{ marginRight: 8 }}>
+          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--tx-1)' }}>Operations Board</span>
+          <div style={{ display: 'flex', gap: 12, marginTop: 2 }}>
+            <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{filtered.length} total</span>
+            <span style={{ fontSize: 11, color: '#3b82f6' }}>{openCount} active</span>
+            {unassigned > 0 && <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>{unassigned} unassigned</span>}
+            {breachedCount > 0 && <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>{breachedCount} SLA breached</span>}
+          </div>
         </div>
-
-        <div style={{ flex:1 }} />
+        <div style={{ flex: 1 }} />
 
         {/* Search */}
-        <div style={{ position:'relative' }}>
-          <Search size={13} style={{ position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', color:'var(--tx-3)', pointerEvents:'none' }} />
-          <input className="input-field" placeholder="Search requests..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft:28, width:240, height:32, fontSize:12 }} />
+        <div style={{ position: 'relative' }}>
+          <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)' }} />
+          <input className="input-field" placeholder="Search orders..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{ paddingLeft: 28, width: 220, height: 32, fontSize: 12 }} />
         </div>
 
         {/* Priority filter */}
-        {['Urgent','High','Normal','Low'].map(p => (
-          <button key={p} onClick={() => setPriFilter(priFilter === p ? '' : p)}
-            style={{ padding:'3px 8px', borderRadius:5, fontSize:11, fontWeight:600, cursor:'pointer', border:'1px solid', borderColor: priFilter === p ? PRIORITY_COLOR[p] : 'var(--border)', background: priFilter === p ? `${PRIORITY_COLOR[p]}22` : 'transparent', color: priFilter === p ? PRIORITY_COLOR[p] : 'var(--tx-3)', transition:'all .12s' }}>
-            {p}
-          </button>
-        ))}
-
-        {/* View toggle */}
-        <div style={{ display:'flex', background:'var(--bg-elevated)', borderRadius:6, padding:2, gap:2 }}>
-          {['kanban','table'].map(v => (
-            <button key={v} onClick={() => setView(v)}
-              style={{ padding:'4px 10px', borderRadius:4, fontSize:12, fontWeight:500, cursor:'pointer', border:'none', background: view === v ? 'var(--red)' : 'transparent', color: view === v ? '#fff' : 'var(--tx-2)', transition:'all .12s', textTransform:'capitalize' }}>
-              {v}
+        <div style={{ display: 'flex', gap: 3 }}>
+          {PRI_LABELS.map(p => (
+            <button key={p} onClick={() => setPriFilter(priFilter === p ? '' : p)}
+              style={{
+                padding: '3px 8px', borderRadius: 5, fontSize: 10.5, fontWeight: 600, cursor: 'pointer',
+                border: '1px solid', textTransform: 'capitalize',
+                borderColor: priFilter === p ? PRI[p] : 'var(--border)',
+                background: priFilter === p ? `${PRI[p]}18` : 'transparent',
+                color: priFilter === p ? PRI[p] : 'var(--tx-3)',
+              }}>
+              {p}
             </button>
           ))}
         </div>
 
-        <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}><Plus size={14} /> New Request</button>
+        {/* View toggle */}
+        <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 6, padding: 2, gap: 2, border: '1px solid var(--border)' }}>
+          {[{ v: 'kanban', icon: LayoutGrid }, { v: 'table', icon: List }].map(({ v, icon: Icon }) => (
+            <button key={v} onClick={() => setView(v)}
+              style={{
+                padding: '4px 10px', borderRadius: 4, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                border: 'none', display: 'flex', alignItems: 'center', gap: 4,
+                background: view === v ? 'var(--accent)' : 'transparent',
+                color: view === v ? '#fff' : 'var(--tx-2)',
+              }}>
+              <Icon size={12} /> {v === 'kanban' ? 'Board' : 'Table'}
+            </button>
+          ))}
+        </div>
+
+        <button onClick={() => fetchData()} className="btn-ghost btn-sm" style={{ gap: 4 }}>
+          <RefreshCw size={12} /> Refresh
+        </button>
+        <button className="btn-primary btn-sm" onClick={() => setShowModal(true)} style={{ gap: 4 }}>
+          <Plus size={13} /> New
+        </button>
       </div>
 
-      {/* ── Board / Table ── */}
-      <div style={{ flex:1, overflow: view === 'kanban' ? 'hidden' : 'auto', display:'flex', flexDirection:'column' }}>
+      {/* ── Incoming Unassigned Banner ── */}
+      {unassigned > 0 && (
+        <div style={{
+          padding: '10px 24px', background: '#f59e0b0d', borderBottom: '1px solid #f59e0b30',
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <AlertTriangle size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
+          <span style={{ fontSize: 12.5, color: '#f59e0b', fontWeight: 600, flex: 1 }}>
+            {unassigned} incoming request{unassigned > 1 ? 's' : ''} need{unassigned === 1 ? 's' : ''} assignment
+          </span>
+          <button onClick={() => { setPriFilter(''); setStageFilter('Open'); setView('table'); }} className="btn-ghost btn-sm" style={{ fontSize: 11, color: '#f59e0b', borderColor: '#f59e0b40' }}>
+            View unassigned
+          </button>
+        </div>
+      )}
 
-        {requests.length === 0 ? (
-          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:12 }}>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontSize:32, marginBottom:12, opacity:0.5 }}>📋</div>
-              <div style={{ fontSize:16, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No requests yet</div>
-              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16, maxWidth:380 }}>Requests are how work gets done — clients submit them, your team delivers. Create your first one or invite a client to submit theirs.</div>
-              <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}><Plus size={14} /> New Request</button>
+      {/* ── Board / Table ── */}
+      <div style={{ flex: 1, overflow: view === 'kanban' ? 'hidden' : 'auto', display: 'flex', flexDirection: 'column' }}>
+        {orders.length === 0 ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+            <div style={{ fontSize: 32, opacity: 0.4 }}>📋</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-1)' }}>No requests yet</div>
+            <div style={{ fontSize: 13, color: 'var(--tx-3)', maxWidth: 380, textAlign: 'center' }}>
+              Client service requests and internal orders will appear here. Create one manually or wait for clients to submit theirs.
             </div>
+            <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}><Plus size={14} /> New Request</button>
           </div>
         ) : view === 'kanban' ? (
-          <DndContext
-            sensors={sensors}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragCancel={handleDragCancel}
-          >
-            <div style={{ flex:1, overflowX:'auto', overflowY:'hidden', padding:'14px 20px', display:'flex', gap:10 }}>
-              {STAGES.map(stage => (
-                <div key={stage} className="kanban-col" style={{ flex:'0 0 248px' }}>
-                  <div className="kanban-col-header" style={{ gap:8 }}>
-                    <span style={{ width:8, height:8, borderRadius:'50%', background:STAGE_COLORS[stage], flexShrink:0, display:'inline-block' }} />
-                    <span style={{ fontSize:12, fontWeight:600, color:'var(--tx-1)' }}>{stage}</span>
-                    <span style={{ marginLeft:'auto', fontSize:11, color:'var(--tx-3)', background:'var(--bg-overlay)', padding:'1px 6px', borderRadius:4 }}>{byStage[stage].length}</span>
+          <DndContext sensors={sensors} onDragStart={({ active }) => setActiveId(active.id)} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
+            <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '14px 20px', display: 'flex', gap: 10 }}>
+              {STAGES.map(stage => {
+                const stageOrders = byStage[stage] || [];
+                return (
+                  <div key={stage} style={{ flex: '0 0 260px', display: 'flex', flexDirection: 'column', maxHeight: '100%' }}>
+                    {/* Column header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', marginBottom: 6 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: STAGE_COLORS[stage], flexShrink: 0 }} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{stage}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--tx-3)', background: 'var(--card)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
+                        {stageOrders.length}
+                      </span>
+                    </div>
+                    {/* Column body */}
+                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
+                      <DroppableColumn stage={stage} isEmpty={stageOrders.length === 0}>
+                        {stageOrders.map(o => (
+                          <DraggableOrder key={o.id} order={o} onOpen={() => setSelected(o)} />
+                        ))}
+                      </DroppableColumn>
+                    </div>
                   </div>
-                  <DroppableColumn stage={stage} isEmpty={byStage[stage].length === 0}>
-                    {byStage[stage].map(req => (
-                      <DraggableCard key={req.id} req={req} onOpen={() => setSelectedReq(req)} />
-                    ))}
-                  </DroppableColumn>
-                </div>
-              ))}
+                );
+              })}
             </div>
-
-            {/* Ghost card that follows the cursor */}
             <DragOverlay dropAnimation={null}>
-              {activeDrag && <RequestCard req={activeDrag} onClick={() => {}} ghost />}
+              {activeDrag && <OrderCard order={activeDrag} ghost />}
             </DragOverlay>
           </DndContext>
         ) : (
-          <div style={{ margin:16 }}>
-            <div className="card">
-              <table className="data-table">
+          /* Table view */
+          <div style={{ padding: 16, overflow: 'auto' }}>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr>
-                    <th>ID</th><th>Title</th><th>Client</th><th>Service</th>
-                    <th>Stage</th><th>Priority</th><th>Assignee</th><th>Due</th>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    {['Code', 'Title', 'Client', 'Service', 'Status', 'Priority', 'Assignee', 'SLA', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '10px 12px', fontSize: 10.5, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.04em', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign:'center', padding:'40px', color:'var(--tx-3)' }}>No requests match your filters</td>
-                    </tr>
-                  ) : filtered.map(req => (
-                    <tr key={req.id} onClick={() => setSelectedReq(req)} style={{ cursor:'pointer' }}>
-                      <td style={{ color:'var(--red)', fontWeight:600, fontSize:12 }}>{req.id}</td>
-                      <td style={{ fontWeight:500, maxWidth:220 }}>{req.title}</td>
-                      <td style={{ color:'var(--tx-2)' }}>{req.client}</td>
-                      <td><span className="pill pill-gray" style={{ fontSize:10 }}>{req.service}</span></td>
-                      <td><StagePill stage={req.stage} /></td>
-                      <td>
-                        <span style={{ display:'flex', alignItems:'center', gap:5, fontSize:12 }}>
-                          <PriorityIcon priority={req.priority} />
-                          {req.priority}
-                        </span>
+                    <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--tx-3)' }}>No orders match your filters</td></tr>
+                  ) : filtered.map(o => (
+                    <tr key={o.id} onClick={() => setSelected(o)} style={{ cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: 'background .1s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '10px 12px', fontSize: 12, fontWeight: 600, color: 'var(--accent)', whiteSpace: 'nowrap' }}>{o.order_code}</td>
+                      <td style={{ padding: '10px 12px', fontSize: 12.5, fontWeight: 500, color: 'var(--tx-1)', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.title}</td>
+                      <td style={{ padding: '10px 12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Avatar name={o.requester_name} size={20} />
+                          <span style={{ fontSize: 12, color: 'var(--tx-2)' }}>{o.requester_name}</span>
+                        </div>
                       </td>
-                      <td>
-                        <span style={{ display:'flex', alignItems:'center', gap:6 }}>
-                          <Assignee assignee={req.assignee} size={20} />
-                          <span style={{ fontSize:12, color:'var(--tx-2)' }}>{req.assignee.name}</span>
-                        </span>
+                      <td style={{ padding: '10px 12px' }}>
+                        {o.service_name && <span style={{ fontSize: 10.5, padding: '2px 6px', borderRadius: 4, background: 'var(--bg)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}>{o.service_name}</span>}
                       </td>
-                      <td style={{ color: isOverdue(req.due_date) ? '#ef4444' : 'var(--tx-1)', fontSize:12 }}>{fmt(req.due_date)}</td>
+                      <td style={{ padding: '10px 12px' }}><StagePill stage={o.status} /></td>
+                      <td style={{ padding: '10px 12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <PriorityDot priority={o.priority} />
+                          <span style={{ fontSize: 11.5, color: 'var(--tx-2)', textTransform: 'capitalize' }}>{o.priority}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '10px 12px' }}>
+                        {o.editor_name ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Avatar name={o.editor_name} size={20} />
+                            <span style={{ fontSize: 12, color: 'var(--tx-2)' }}>{o.editor_name}</span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>Unassigned</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '10px 12px' }}><SlaTag deadline={o.sla_deadline} /></td>
+                      <td style={{ padding: '10px 12px' }} onClick={e => e.stopPropagation()}>
+                        <AssignDropdown orderId={o.id} currentEditorId={o.editor_id} teamMembers={teamMembers} onAssign={assignOrder} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -502,48 +616,47 @@ export default function Requests() {
 
       {/* ── New Request Modal ── */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()} style={{ width:480 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-              <h3 style={{ margin:0, fontSize:16, fontWeight:700 }}>New Request</h3>
-              <button onClick={() => setShowModal(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)' }}><X size={18} /></button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setShowModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ width: 460, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>New Request</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)' }}><X size={18} /></button>
             </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Title</label>
-                <input type="text" className="input-field" placeholder="Request title..." value={form.title} onChange={e => setForm(p => ({ ...p, title:e.target.value }))} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Title *</label>
+                <input className="input-field" placeholder="Request title..." value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
               </div>
               <div>
-                <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Client</label>
-                <select className="input-field" value={form.client} onChange={e => setForm(p => ({ ...p, client:e.target.value }))}>
-                  <option value="">Select client...</option>
-                  {clients.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Service</label>
-                <select className="input-field" value={form.service} onChange={e => setForm(p => ({ ...p, service:e.target.value }))}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Service</label>
+                <select className="input-field" value={form.service} onChange={e => setForm(p => ({ ...p, service: e.target.value }))}>
                   <option value="">Select service...</option>
-                  {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
+                  {services.map(s => <option key={s.id || s.name} value={s.name}>{s.name}</option>)}
                 </select>
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                <div>
-                  <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Priority</label>
-                  <select className="input-field" value={form.priority} onChange={e => setForm(p => ({ ...p, priority:e.target.value }))}>
-                    {['Urgent','High','Normal','Low'].map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Due Date</label>
-                  <input type="date" className="input-field" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date:e.target.value }))} />
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Priority</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {PRI_LABELS.map(p => (
+                    <button key={p} onClick={() => setForm(f => ({ ...f, priority: p }))}
+                      style={{
+                        flex: 1, padding: '6px', borderRadius: 6, fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
+                        border: '1px solid', textTransform: 'capitalize',
+                        borderColor: form.priority === p ? PRI[p] : 'var(--border)',
+                        background: form.priority === p ? `${PRI[p]}18` : 'transparent',
+                        color: form.priority === p ? PRI[p] : 'var(--tx-3)',
+                      }}>
+                      {p}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div>
-                <label style={{ display:'block', fontSize:11, fontWeight:600, color:'var(--tx-3)', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.05em' }}>Description</label>
-                <textarea className="input-field" rows={3} placeholder="Describe the request..." value={form.description} onChange={e => setForm(p => ({ ...p, description:e.target.value }))} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Description</label>
+                <textarea className="input-field" rows={3} placeholder="Describe the request..." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
               </div>
-              <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:4 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
                 <button className="btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
                 <button className="btn-primary" onClick={createRequest} disabled={creating}>
                   {creating ? 'Creating...' : 'Create Request'}
@@ -555,81 +668,128 @@ export default function Requests() {
       )}
 
       {/* ── Detail Panel ── */}
-      {selectedReq && (
-        <div style={{ position:'fixed', top:0, right:0, width:360, height:'100vh', background:'var(--bg-card)', borderLeft:'1px solid var(--border)', overflowY:'auto', zIndex:200, animation:'slideRight 0.2s ease both' }}>
-          {/* Header */}
-          <div style={{ padding:'16px 18px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'flex-start', gap:10 }}>
-            <div style={{ flex:1 }}>
-              <span style={{ fontSize:11, color:'var(--red)', fontWeight:600 }}>{selectedReq.id}</span>
-              <h3 style={{ margin:'4px 0 0', fontSize:14, fontWeight:700, lineHeight:1.4 }}>{selectedReq.title}</h3>
-            </div>
-            <button onClick={() => setSelectedReq(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)', padding:4 }}><X size={16} /></button>
-          </div>
-          {/* Body */}
-          <div style={{ padding:18, display:'flex', flexDirection:'column', gap:16 }}>
-            {/* Stage selector */}
-            <div>
-              <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Stage</label>
-              <select className="input-field" value={selectedReq.stage} onChange={e => updateStage(selectedReq.id, e.target.value)}>
-                {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            {/* Info grid */}
-            {[
-              ['Client',   selectedReq.client],
-              ['Service',  selectedReq.service],
-            ].map(([lbl, val]) => (
-              <div key={lbl}>
-                <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:3 }}>{lbl}</label>
-                <span style={{ fontSize:13, color:'var(--tx-1)' }}>{val}</span>
+      {selected && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 199 }} onClick={() => setSelected(null)} />
+          <div style={{
+            position: 'fixed', top: 0, right: 0, width: 400, height: '100vh',
+            background: 'var(--card)', borderLeft: '1px solid var(--border)',
+            overflowY: 'auto', zIndex: 200, animation: 'slideRight 0.2s ease both',
+          }}>
+            {/* Header */}
+            <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)' }}>{selected.order_code}</span>
+                  <StagePill stage={selected.status} />
+                  <SlaTag deadline={selected.sla_deadline} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, lineHeight: 1.4, color: 'var(--tx-1)' }}>{selected.title}</h3>
               </div>
-            ))}
-            {/* Priority */}
-            <div>
-              <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Priority</label>
-              <div style={{ display:'flex', gap:5 }}>
-                {['Urgent','High','Normal','Low'].map(p => (
-                  <button key={p} onClick={async () => {
-                    const u = { ...selectedReq, priority:p }; setSelectedReq(u); setRequests(prev => prev.map(r => r.id === u.id ? u : r));
-                    const priMap = { Urgent:'urgent', High:'high', Normal:'medium', Low:'low' };
-                    try { await fetch(`${API}/tasks/${selectedReq.id}`, { method:'PATCH', headers:{ ...getHeaders(), 'Content-Type':'application/json' }, body:JSON.stringify({ priority: priMap[p] || 'medium' }) }); } catch { toast.error('Failed to update priority'); }
-                  }}
-                    style={{ padding:'3px 9px', borderRadius:5, fontSize:11, fontWeight:600, cursor:'pointer', border:'1px solid', borderColor: selectedReq.priority === p ? PRIORITY_COLOR[p] : 'var(--border)', background: selectedReq.priority === p ? `${PRIORITY_COLOR[p]}22` : 'transparent', color: selectedReq.priority === p ? PRIORITY_COLOR[p] : 'var(--tx-3)' }}>
-                    {p}
-                  </button>
+              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', padding: 4 }}><X size={16} /></button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Status selector */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Status</label>
+                <select className="input-field" value={selected.status} onChange={e => updateStatus(selected.id, e.target.value)}>
+                  {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              {/* Client + Service */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 4 }}>Client</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Avatar name={selected.requester_name} size={22} />
+                    <span style={{ fontSize: 12.5, color: 'var(--tx-1)' }}>{selected.requester_name}</span>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 4 }}>Service</label>
+                  <span style={{ fontSize: 12.5, color: 'var(--tx-1)' }}>{selected.service_name || '—'}</span>
+                </div>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Priority</label>
+                <div style={{ display: 'flex', gap: 5 }}>
+                  {PRI_LABELS.map(p => (
+                    <button key={p} style={{
+                      padding: '3px 9px', borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                      border: '1px solid', textTransform: 'capitalize',
+                      borderColor: selected.priority === p ? PRI[p] : 'var(--border)',
+                      background: selected.priority === p ? `${PRI[p]}18` : 'transparent',
+                      color: selected.priority === p ? PRI[p] : 'var(--tx-3)',
+                    }}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Assignee */}
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Assignee</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {selected.editor_name ? (
+                    <>
+                      <Avatar name={selected.editor_name} size={28} />
+                      <span style={{ fontSize: 13, color: 'var(--tx-1)', flex: 1 }}>{selected.editor_name}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600, flex: 1 }}>Unassigned</span>
+                  )}
+                  <AssignDropdown orderId={selected.id} currentEditorId={selected.editor_id} teamMembers={teamMembers} onAssign={(id, uid, name) => {
+                    assignOrder(id, uid, name);
+                    setSelected(prev => ({ ...prev, editor_id: uid, editor_name: name }));
+                  }} />
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                {[
+                  ['Created', selected.created_at],
+                  ['Picked', selected.picked_at],
+                  ['Delivered', selected.delivered_at],
+                ].map(([lbl, val]) => (
+                  <div key={lbl}>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>{lbl}</label>
+                    <span style={{ fontSize: 12, color: 'var(--tx-1)' }}>{fmt(val)}</span>
+                  </div>
                 ))}
               </div>
+
+              {/* Linked project */}
+              {selected.project_id && (
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 4 }}>Linked Project</label>
+                  <button onClick={() => navigate(`/projects/${selected.project_id}`)} className="btn-ghost btn-sm" style={{ fontSize: 11, gap: 4 }}>
+                    <ExternalLink size={11} /> View Project
+                  </button>
+                </div>
+              )}
+
+              {/* Description */}
+              {selected.description && (
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Description</label>
+                  <p style={{ margin: 0, fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.6, background: 'var(--bg)', padding: '10px 12px', borderRadius: 7 }}>
+                    {selected.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Messages */}
+              <OrderComments orderId={selected.id} />
             </div>
-            {/* Assignee */}
-            <div>
-              <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Assignee</label>
-              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <Assignee assignee={selectedReq.assignee} size={30} />
-                <span style={{ fontSize:13, color:'var(--tx-1)' }}>{selectedReq.assignee.name}</span>
-              </div>
-            </div>
-            {/* Dates */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              <div>
-                <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:3 }}>Created</label>
-                <span style={{ fontSize:13, color:'var(--tx-1)' }}>{fmt(selectedReq.created_at)}</span>
-              </div>
-              <div>
-                <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:3 }}>Due</label>
-                <span style={{ fontSize:13, color: isOverdue(selectedReq.due_date) ? '#ef4444' : 'var(--tx-1)', fontWeight: isOverdue(selectedReq.due_date) ? 600 : 400 }}>{fmt(selectedReq.due_date)}</span>
-              </div>
-            </div>
-            {/* Description */}
-            {selectedReq.description && (
-              <div>
-                <label style={{ fontSize:11, fontWeight:600, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.06em', display:'block', marginBottom:6 }}>Description</label>
-                <p style={{ margin:0, fontSize:12.5, color:'var(--tx-2)', lineHeight:1.6, background:'var(--bg-elevated)', padding:'10px 12px', borderRadius:7 }}>{selectedReq.description}</p>
-              </div>
-            )}
-            {/* Comments */}
-            <RequestComments requestId={selectedReq.id} comment={comment} setComment={setComment} />
           </div>
-        </div>
+        </>
       )}
     </div>
   );
