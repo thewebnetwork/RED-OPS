@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,6 +9,8 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const eventSourceRef = useRef(null);
+  const sseActiveRef = useRef(false);
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -27,16 +29,68 @@ export function useNotifications() {
     if (!isAuthenticated) return;
     try {
       const res = await axios.get(`${API}/notifications/unread-count`);
-      setUnreadCount(res.data.count);
+      setUnreadCount(res.data.unread_count);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
   }, [isAuthenticated]);
 
+  // SSE connection with polling fallback
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    // Try SSE connection
+    let es;
+    try {
+      es = new EventSource(`${API}/notifications/stream?token=${encodeURIComponent(token)}`);
+      eventSourceRef.current = es;
+
+      es.addEventListener('notification', (e) => {
+        try {
+          const notification = JSON.parse(e.data);
+          setNotifications(prev => [notification, ...prev].slice(0, 50));
+          setUnreadCount(prev => prev + 1);
+        } catch { /* ignore parse errors */ }
+      });
+
+      es.addEventListener('connected', () => {
+        sseActiveRef.current = true;
+      });
+
+      es.onerror = () => {
+        sseActiveRef.current = false;
+        es.close();
+        eventSourceRef.current = null;
+      };
+    } catch {
+      sseActiveRef.current = false;
+    }
+
+    // Fetch initial count
+    fetchUnreadCount();
+
+    // Polling fallback — slower interval if SSE active
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+    }, sseActiveRef.current ? 120000 : 30000);
+
+    return () => {
+      clearInterval(interval);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      sseActiveRef.current = false;
+    };
+  }, [isAuthenticated, fetchUnreadCount]);
+
   const markAsRead = async (notificationId) => {
     try {
       await axios.patch(`${API}/notifications/${notificationId}/read`);
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
@@ -54,12 +108,6 @@ export function useNotifications() {
       console.error('Error marking all notifications as read:', error);
     }
   };
-
-  useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000); // Poll every 30 seconds
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
 
   return {
     notifications,

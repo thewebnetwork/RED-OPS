@@ -6,7 +6,7 @@ import {
 import {
   TrendingUp, Clock, CheckCircle2, AlertCircle, Layers, Download,
   RefreshCw, Loader2, FileText, ChevronRight, ArrowLeft, Table2,
-  BarChart3, PieChart as PieIcon, Shield, Users, Tag, Zap,
+  BarChart3, PieChart as PieIcon, Shield, Users, Tag, Zap, Filter, X,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -80,6 +80,11 @@ export default function Reports() {
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
 
+  // Filters
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState({});
+  const [refData, setRefData] = useState({ categories: [], teams: [], assignees: [] });
+
   // View mode: 'overview' or 'report'
   const [view, setView] = useState('overview');
 
@@ -113,8 +118,39 @@ export default function Reports() {
     } catch { /* silently fall back to no reports */ }
   }, []);
 
+  /* ── Fetch reference data for filters ────────────────────────────────── */
+  const fetchRefData = useCallback(async () => {
+    try {
+      const [catRes, teamRes, userRes] = await Promise.allSettled([
+        ax().get(`${API}/categories`),
+        ax().get(`${API}/teams`),
+        ax().get(`${API}/users`, { params: { limit: 200 } }),
+      ]);
+      setRefData({
+        categories: catRes.status === 'fulfilled' ? (catRes.value.data || []) : [],
+        teams: teamRes.status === 'fulfilled' ? (teamRes.value.data || []) : [],
+        assignees: userRes.status === 'fulfilled' ? (Array.isArray(userRes.value.data) ? userRes.value.data : userRes.value.data?.users || []) : [],
+      });
+    } catch { /* silently ignore */ }
+  }, []);
+
   useEffect(() => { fetchOverview(); }, [fetchOverview]);
   useEffect(() => { fetchReports(); }, [fetchReports]);
+  useEffect(() => { fetchRefData(); }, [fetchRefData]);
+
+  /* ── Build filter payload ─────────────────────────────────────────────── */
+  const buildPayload = () => {
+    const dates = getRangeDates(range);
+    const payload = { ...dates };
+    if (filters.category_l2_id) payload.category_l2_id = filters.category_l2_id;
+    if (filters.team_id) payload.team_id = filters.team_id;
+    if (filters.assignee_id) payload.assignee_id = filters.assignee_id;
+    if (filters.sla_state) payload.sla_state = filters.sla_state;
+    if (filters.status?.length) payload.status = filters.status;
+    return payload;
+  };
+
+  const activeFilterCount = Object.values(filters).filter(v => v && (!Array.isArray(v) || v.length > 0)).length;
 
   /* ── Run a canned report ──────────────────────────────────────────────── */
   const runReport = async (report) => {
@@ -123,8 +159,7 @@ export default function Reports() {
     setReportLoading(true);
     setReportData(null);
     try {
-      const dates = getRangeDates(range);
-      const r = await ax().post(`${API}/reports/${report.id}/generate`, dates);
+      const r = await ax().post(`${API}/reports/${report.id}/generate`, buildPayload());
       setReportData(r.data);
     } catch (err) {
       toast.error('Failed to generate report');
@@ -136,8 +171,7 @@ export default function Reports() {
   const exportCSV = async () => {
     if (!activeReport) return;
     try {
-      const dates = getRangeDates(range);
-      const r = await ax().post(`${API}/reports/${activeReport.id}/export/csv`, dates, { responseType: 'blob' });
+      const r = await ax().post(`${API}/reports/${activeReport.id}/export/csv`, buildPayload(), { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([r.data]));
       const a = document.createElement('a');
       a.href = url;
@@ -204,15 +238,90 @@ export default function Reports() {
           )}
         </div>
 
-        {/* Date range pills */}
-        <div style={{ display:'flex',gap:2,background:'var(--bg-elevated)',borderRadius:7,padding:3,marginBottom:20,width:'fit-content' }}>
-          {RANGES.map(r => (
-            <button key={r} onClick={()=>{ setRange(r); if(activeReport) runReport(activeReport); }}
-              style={{ padding:'4px 10px',borderRadius:5,fontSize:11,fontWeight:600,cursor:'pointer',border:'none',background:range===r?'var(--red)':'transparent',color:range===r?'#fff':'var(--tx-2)',transition:'all .12s',whiteSpace:'nowrap' }}>
-              {r}
-            </button>
-          ))}
+        {/* Date range pills + filter toggle */}
+        <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:filtersOpen?10:20,flexWrap:'wrap' }}>
+          <div style={{ display:'flex',gap:2,background:'var(--bg-elevated)',borderRadius:7,padding:3,width:'fit-content' }}>
+            {RANGES.map(r => (
+              <button key={r} onClick={()=>{ setRange(r); if(activeReport) runReport(activeReport); }}
+                style={{ padding:'4px 10px',borderRadius:5,fontSize:11,fontWeight:600,cursor:'pointer',border:'none',background:range===r?'var(--red)':'transparent',color:range===r?'#fff':'var(--tx-2)',transition:'all .12s',whiteSpace:'nowrap' }}>
+                {r}
+              </button>
+            ))}
+          </div>
+          <button onClick={()=>setFiltersOpen(p=>!p)} className="btn-ghost btn-sm" style={{ display:'flex',alignItems:'center',gap:5,position:'relative' }}>
+            <Filter size={13} /> Filters
+            {activeFilterCount > 0 && <span style={{ position:'absolute',top:-4,right:-4,width:16,height:16,borderRadius:8,background:'var(--red)',color:'#fff',fontSize:9,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center' }}>{activeFilterCount}</span>}
+          </button>
+          {/* Active filter pills */}
+          {activeFilterCount > 0 && (
+            <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>
+              {filters.team_id && <span style={{ fontSize:10,padding:'2px 8px',borderRadius:4,background:'var(--bg-elevated)',color:'var(--tx-2)',display:'flex',alignItems:'center',gap:4 }}>
+                Team: {refData.teams.find(t=>t.id===filters.team_id)?.name||'—'}
+                <X size={10} style={{ cursor:'pointer' }} onClick={()=>setFilters(f=>({...f,team_id:undefined}))} />
+              </span>}
+              {filters.assignee_id && <span style={{ fontSize:10,padding:'2px 8px',borderRadius:4,background:'var(--bg-elevated)',color:'var(--tx-2)',display:'flex',alignItems:'center',gap:4 }}>
+                Assignee: {refData.assignees.find(u=>u.id===filters.assignee_id)?.name||'—'}
+                <X size={10} style={{ cursor:'pointer' }} onClick={()=>setFilters(f=>({...f,assignee_id:undefined}))} />
+              </span>}
+              {filters.category_l2_id && <span style={{ fontSize:10,padding:'2px 8px',borderRadius:4,background:'var(--bg-elevated)',color:'var(--tx-2)',display:'flex',alignItems:'center',gap:4 }}>
+                Category
+                <X size={10} style={{ cursor:'pointer' }} onClick={()=>setFilters(f=>({...f,category_l2_id:undefined}))} />
+              </span>}
+              {filters.sla_state && <span style={{ fontSize:10,padding:'2px 8px',borderRadius:4,background:'var(--bg-elevated)',color:'var(--tx-2)',display:'flex',alignItems:'center',gap:4 }}>
+                SLA: {filters.sla_state}
+                <X size={10} style={{ cursor:'pointer' }} onClick={()=>setFilters(f=>({...f,sla_state:undefined}))} />
+              </span>}
+              <button onClick={()=>setFilters({})} style={{ fontSize:10,color:'var(--red)',background:'none',border:'none',cursor:'pointer',padding:'2px 4px' }}>Clear all</button>
+            </div>
+          )}
         </div>
+
+        {/* Collapsible filter panel */}
+        {filtersOpen && (
+          <div className="card" style={{ padding:16,marginBottom:20,display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:12 }}>
+            <div>
+              <label style={{ fontSize:10,fontWeight:600,color:'var(--tx-3)',textTransform:'uppercase',display:'block',marginBottom:4 }}>Team</label>
+              <select value={filters.team_id||''} onChange={e=>setFilters(f=>({...f,team_id:e.target.value||undefined}))}
+                style={{ width:'100%',padding:'6px 8px',borderRadius:6,border:'1px solid var(--border)',background:'var(--card)',color:'var(--tx-1)',fontSize:12 }}>
+                <option value="">All teams</option>
+                {refData.teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize:10,fontWeight:600,color:'var(--tx-3)',textTransform:'uppercase',display:'block',marginBottom:4 }}>Assignee</label>
+              <select value={filters.assignee_id||''} onChange={e=>setFilters(f=>({...f,assignee_id:e.target.value||undefined}))}
+                style={{ width:'100%',padding:'6px 8px',borderRadius:6,border:'1px solid var(--border)',background:'var(--card)',color:'var(--tx-1)',fontSize:12 }}>
+                <option value="">All assignees</option>
+                {refData.assignees.filter(u=>u.role!=='Media Client').map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize:10,fontWeight:600,color:'var(--tx-3)',textTransform:'uppercase',display:'block',marginBottom:4 }}>Category</label>
+              <select value={filters.category_l2_id||''} onChange={e=>setFilters(f=>({...f,category_l2_id:e.target.value||undefined}))}
+                style={{ width:'100%',padding:'6px 8px',borderRadius:6,border:'1px solid var(--border)',background:'var(--card)',color:'var(--tx-1)',fontSize:12 }}>
+                <option value="">All categories</option>
+                {refData.categories.flatMap(c=>(c.subcategories||[]).map(s=>({...s,parent:c.name}))).map(s=>
+                  <option key={s.id} value={s.id}>{s.parent} → {s.name}</option>
+                )}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize:10,fontWeight:600,color:'var(--tx-3)',textTransform:'uppercase',display:'block',marginBottom:4 }}>SLA State</label>
+              <select value={filters.sla_state||''} onChange={e=>setFilters(f=>({...f,sla_state:e.target.value||undefined}))}
+                style={{ width:'100%',padding:'6px 8px',borderRadius:6,border:'1px solid var(--border)',background:'var(--card)',color:'var(--tx-1)',fontSize:12 }}>
+                <option value="">Any</option>
+                <option value="on_track">On Track</option>
+                <option value="at_risk">At Risk</option>
+                <option value="breached">Breached</option>
+              </select>
+            </div>
+            <div style={{ display:'flex',alignItems:'flex-end' }}>
+              <button onClick={()=>{ if(activeReport) runReport(activeReport); }} className="btn-ghost btn-sm" style={{ fontSize:11,fontWeight:600 }}>
+                Apply & Refresh
+              </button>
+            </div>
+          </div>
+        )}
 
         {reportLoading ? (
           <div style={{ display:'flex',alignItems:'center',justifyContent:'center',padding:60 }}>

@@ -57,7 +57,7 @@ export default function NotificationDropdown() {
         axios.get(`${API}/notifications/unread-count`)
       ]);
       setNotifications(notifRes.data.slice(0, 10));
-      setUnreadCount(countRes.data.count);
+      setUnreadCount(countRes.data.unread_count);
     } catch (error) {
       console.error('Failed to fetch notifications');
     }

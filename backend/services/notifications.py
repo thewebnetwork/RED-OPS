@@ -1,9 +1,10 @@
 """Notification services"""
 import uuid
 from datetime import datetime, timezone
+from .sse import publish
 
 async def create_notification(db, user_id: str, type: str, title: str, message: str, related_order_id: str = None):
-    """Create a notification for a user"""
+    """Create a notification for a user and push via SSE."""
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": user_id,
@@ -11,10 +12,12 @@ async def create_notification(db, user_id: str, type: str, title: str, message: 
         "title": title,
         "message": message,
         "related_order_id": related_order_id,
-        "read": False,
+        "is_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.notifications.insert_one(notification)
+    # Push to SSE subscribers for real-time delivery
+    await publish(user_id, {"_id": 0, **{k: v for k, v in notification.items() if k != "_id"}})
     return notification
 
 

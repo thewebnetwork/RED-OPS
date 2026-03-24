@@ -1,12 +1,17 @@
 """Notification routes"""
 import uuid
-from fastapi import APIRouter, HTTPException, Depends
+import json
+import asyncio
+from datetime import datetime, timezone
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 
 from database import db
-from utils.auth import get_current_user
+from utils.auth import get_current_user, get_user_from_token
 from utils.helpers import get_utc_now
+from services.sse import subscribe, unsubscribe
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
@@ -24,6 +29,42 @@ class NotificationResponse(BaseModel):
     created_at: str
 
 
+# ============== SSE STREAM ==============
+
+@router.get("/stream")
+async def notification_stream(token: str = Query(...)):
+    """SSE endpoint for real-time notifications. Auth via query param (EventSource doesn't support headers)."""
+    user = await get_user_from_token(token)
+    user_id = user["id"]
+
+    async def event_generator():
+        queue = await subscribe(user_id)
+        try:
+            yield f"event: connected\ndata: {json.dumps({'user_id': user_id})}\n\n"
+            while True:
+                try:
+                    event = await asyncio.wait_for(queue.get(), timeout=30.0)
+                    # Strip MongoDB _id if present
+                    event.pop("_id", None)
+                    yield f"event: notification\ndata: {json.dumps(event, default=str)}\n\n"
+                except asyncio.TimeoutError:
+                    yield f"event: heartbeat\ndata: {json.dumps({'ts': datetime.now(timezone.utc).isoformat()})}\n\n"
+        except asyncio.CancelledError:
+            pass
+        finally:
+            unsubscribe(user_id, queue)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
+
 # ============== ROUTES ==============
 
 @router.get("", response_model=List[NotificationResponse])
@@ -36,12 +77,12 @@ async def get_notifications(
     query = {"user_id": current_user["id"]}
     if unread_only:
         query["is_read"] = False
-    
+
     notifications = await db.notifications.find(
         query,
         {"_id": 0}
     ).sort("created_at", -1).limit(limit).to_list(limit)
-    
+
     return [NotificationResponse(**n) for n in notifications]
 
 
@@ -72,10 +113,10 @@ async def mark_notification_read(notification_id: str, current_user: dict = Depe
         {"id": notification_id, "user_id": current_user["id"]},
         {"$set": {"is_read": True}}
     )
-    
+
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Notification not found")
-    
+
     return {"message": "Notification marked as read"}
 
 
@@ -86,7 +127,7 @@ async def mark_all_notifications_read(current_user: dict = Depends(get_current_u
         {"user_id": current_user["id"], "is_read": False},
         {"$set": {"is_read": True}}
     )
-    
+
     return {"message": f"Marked {result.modified_count} notifications as read"}
 
 
@@ -97,10 +138,10 @@ async def delete_notification(notification_id: str, current_user: dict = Depends
         "id": notification_id,
         "user_id": current_user["id"]
     })
-    
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Notification not found")
-    
+
     return {"message": "Notification deleted"}
 
 
@@ -109,27 +150,3 @@ async def delete_all_notifications(current_user: dict = Depends(get_current_user
     """Delete all notifications for current user"""
     result = await db.notifications.delete_many({"user_id": current_user["id"]})
     return {"message": f"Deleted {result.deleted_count} notifications"}
-
-
-# ============== HELPER FUNCTION ==============
-
-async def create_notification(
-    user_id: str,
-    type: str,
-    title: str,
-    message: str,
-    related_order_id: str = None
-):
-    """Create a notification for a user"""
-    notification = {
-        "id": str(uuid.uuid4()),
-        "user_id": user_id,
-        "type": type,
-        "title": title,
-        "message": message,
-        "related_order_id": related_order_id,
-        "is_read": False,
-        "created_at": get_utc_now()
-    }
-    await db.notifications.insert_one(notification)
-    return notification

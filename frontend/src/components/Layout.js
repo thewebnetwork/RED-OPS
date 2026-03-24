@@ -358,7 +358,10 @@ export default function Layout({ children }) {
   const [cmdIdx,      setCmdIdx]      = useState(0);
   const [unread,      setUnread]      = useState(0);
   const [badges,      setBadges]      = useState({ tasks: 0, requests: 0 });
-  const cmdInputRef = useRef(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching]        = useState(false);
+  const cmdInputRef  = useRef(null);
+  const searchTimer  = useRef(null);
 
   // Filter items by role — preview-as-client mode forces client nav
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
@@ -388,20 +391,43 @@ export default function Layout({ children }) {
     ? cmdBase.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
     : cmdBase;
 
+  // Merge nav items + search results into a single navigable list
+  const searchMapped = searchResults.map(r => ({
+    label: r.title, icon: r.type === 'order' ? '📋' : r.type === 'task' ? '✅' : r.type === 'project' ? '📁' : r.type === 'user' ? '👤' : '📎',
+    to: r.url, group: 'Search', subtitle: r.subtitle, searchType: r.type,
+  }));
+  const allCmdItems = [...filtered, ...searchMapped];
+
   useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); cmdOpen ? closeCmd() : openCmd(); return; }
       if (e.key === 'Escape') { closeCmd(); setSidebarOpen(false); return; }
       if (!cmdOpen) return;
-      if (e.key === 'ArrowDown') { e.preventDefault(); setCmdIdx(i => Math.min(i+1, filtered.length-1)); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); setCmdIdx(i => Math.min(i+1, allCmdItems.length-1)); }
       if (e.key === 'ArrowUp')   { e.preventDefault(); setCmdIdx(i => Math.max(i-1, 0)); }
-      if (e.key === 'Enter' && filtered[cmdIdx]) { e.preventDefault(); execCmd(filtered[cmdIdx]); }
+      if (e.key === 'Enter' && allCmdItems[cmdIdx]) { e.preventDefault(); execCmd(allCmdItems[cmdIdx]); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [cmdOpen, cmdIdx, filtered, openCmd, closeCmd]); // eslint-disable-line
+  }, [cmdOpen, cmdIdx, allCmdItems, openCmd, closeCmd]); // eslint-disable-line
 
   const execCmd = (item) => { closeCmd(); navigate(item.to); };
+
+  // ── Debounced global search ──
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    const q = cmdQuery.trim();
+    if (q.length < 2) { setSearchResults([]); setSearching(false); return; }
+    setSearching(true);
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const res = await axios.get(`${API}/search`, { params: { q } });
+        setSearchResults(res.data.results || []);
+      } catch { setSearchResults([]); }
+      setSearching(false);
+    }, 300);
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [cmdQuery]);
 
   // ── Fetch unread notifications ──
   useEffect(() => {
@@ -410,12 +436,12 @@ export default function Layout({ children }) {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const r = await fetch(`${API}/notifications?unread_only=true&limit=1`, {
+        const r = await fetch(`${API}/notifications/unread-count`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!r.ok || dead) return;
         const d = await r.json();
-        setUnread(d.total_unread ?? 0);
+        setUnread(d.unread_count ?? 0);
       } catch {}
     };
     fetch_();
@@ -606,21 +632,49 @@ export default function Layout({ children }) {
               <kbd onClick={closeCmd} style={{ cursor:'pointer' }}>Esc</kbd>
             </div>
             <div className="cmd-results">
-              {filtered.length === 0 ? (
+              {allCmdItems.length === 0 && !searching ? (
                 <div style={{ padding:'20px', textAlign:'center', color:'var(--tx-3)', fontSize:13 }}>No results for "{cmdQuery}"</div>
               ) : (
                 <>
-                  <div className="cmd-group">Navigate & Create</div>
-                  {filtered.map((item, i) => (
-                    <div key={item.label}
-                      className={`cmd-item${i === cmdIdx ? ' highlighted' : ''}`}
-                      onClick={() => execCmd(item)}
-                      onMouseEnter={() => setCmdIdx(i)}>
-                      <div className="cmd-icon">{item.icon}</div>
-                      <span>{item.label}</span>
-                      {item.shortcut && <span className="cmd-shortcut">{item.shortcut}</span>}
-                    </div>
-                  ))}
+                  {filtered.length > 0 && (
+                    <>
+                      <div className="cmd-group">Navigate & Create</div>
+                      {filtered.map((item, i) => (
+                        <div key={item.label}
+                          className={`cmd-item${i === cmdIdx ? ' highlighted' : ''}`}
+                          onClick={() => execCmd(item)}
+                          onMouseEnter={() => setCmdIdx(i)}>
+                          <div className="cmd-icon">{item.icon}</div>
+                          <span>{item.label}</span>
+                          {item.shortcut && <span className="cmd-shortcut">{item.shortcut}</span>}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {searching && (
+                    <div style={{ padding:'12px 16px', color:'var(--tx-3)', fontSize:12 }}>Searching...</div>
+                  )}
+                  {searchMapped.length > 0 && (
+                    <>
+                      <div className="cmd-group">Search Results</div>
+                      {searchMapped.map((item, si) => {
+                        const idx = filtered.length + si;
+                        return (
+                          <div key={`search-${si}`}
+                            className={`cmd-item${idx === cmdIdx ? ' highlighted' : ''}`}
+                            onClick={() => execCmd(item)}
+                            onMouseEnter={() => setCmdIdx(idx)}>
+                            <div className="cmd-icon">{item.icon}</div>
+                            <div style={{ flex:1, minWidth:0 }}>
+                              <div style={{ whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{item.label}</div>
+                              {item.subtitle && <div style={{ fontSize:11, color:'var(--tx-3)', marginTop:1 }}>{item.subtitle}</div>}
+                            </div>
+                            <span style={{ fontSize:10, color:'var(--tx-3)', textTransform:'capitalize', flexShrink:0 }}>{item.searchType}</span>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
                 </>
               )}
             </div>

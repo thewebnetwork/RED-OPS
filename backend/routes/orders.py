@@ -58,6 +58,17 @@ UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+# ============== WORKFLOW TRIGGER HELPER ==============
+
+async def trigger_order_workflows(event: str, order: dict, user: dict, background_tasks: BackgroundTasks):
+    """Fire all matching workflows for a given trigger event in the background."""
+    async def _run():
+        wfs = await get_workflows_for_trigger(db, event, order.get("category_l2_id"))
+        for wf in wfs:
+            await execute_workflow(db, wf["id"], event, {"order": order, "user": user})
+    background_tasks.add_task(_run)
+
+
 # ============== MODELS ==============
 
 class OrderCreate(BaseModel):
@@ -641,6 +652,13 @@ async def create_order(
 
     # Only notify/trigger workflows for non-draft orders
     if not is_draft:
+        # In-app notification to requester confirming order creation
+        await create_notification(
+            db, current_user["id"], "order_created", "Request submitted",
+            f"Your request {order_code} '{order_data.title}' has been created successfully.",
+            order["id"]
+        )
+
         # Send email notification to requester
         background_tasks.add_task(
             send_ticket_created_email,
@@ -733,6 +751,13 @@ async def submit_draft(
     if routing_info.get("skipped_pool_1"):
         logging.info(f"Order {order['order_code']} (submitted draft) skipped Pool 1: {routing_info.get('skip_reason')}")
     
+    # In-app notification to requester confirming draft submission
+    await create_notification(
+        db, current_user["id"], "order_created", "Request submitted",
+        f"Your draft {order['order_code']} has been submitted and is now open.",
+        order["id"]
+    )
+
     # Trigger webhooks for order.submitted (and order.created for backwards compat)
     background_tasks.add_task(trigger_webhooks, "order.created", {
         "order_id": order["id"],
@@ -1343,12 +1368,16 @@ async def pick_order(
         "picked_by_account_type": account_type
     })
     
+    # Trigger workflows for assigned + status_changed
+    await trigger_order_workflows("order.assigned", updated_order, current_user, background_tasks)
+    await trigger_order_workflows("order.status_changed", updated_order, current_user, background_tasks)
+
     # Auto-generate tasks for status_changed_to_doing
     await generate_tasks_for_event("status_changed_to_doing", updated_order, current_user)
-    
+
     # Sync progress task status
     await sync_progress_task_status(updated_order)
-    
+
     return {"message": "Order picked successfully", "order_code": order["order_code"]}
 
 
@@ -1393,7 +1422,8 @@ async def submit_for_review(
                 "user": current_user
             })
     background_tasks.add_task(run_pending_workflows)
-    
+    await trigger_order_workflows("order.status_changed", updated_order, current_user, background_tasks)
+
     # Auto-generate tasks for status_changed_to_review
     await generate_tasks_for_event("status_changed_to_review", updated_order, current_user)
     
@@ -1436,7 +1466,8 @@ async def respond_to_order(
     
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "In Progress", current_user)
-    
+    await trigger_order_workflows("order.status_changed", updated_order, current_user, background_tasks)
+
     # Auto-generate tasks for revision_requested
     await generate_tasks_for_event("revision_requested", updated_order, current_user)
     
@@ -1540,13 +1571,17 @@ async def deliver_order(
             survey_link
         )
     
+    # Trigger workflows for delivered + status_changed
+    await trigger_order_workflows("order.delivered", updated_order, current_user, background_tasks)
+    await trigger_order_workflows("order.status_changed", updated_order, current_user, background_tasks)
+
     # Auto-complete open tasks + generate tasks for delivered
     await complete_open_tasks_for_request(order_id)
     await generate_tasks_for_event("delivered", updated_order, current_user)
-    
+
     # Sync progress task status
     await sync_progress_task_status(updated_order)
-    
+
     return {"message": "Order delivered successfully"}
 
 
@@ -1619,14 +1654,18 @@ async def close_order(
         "closed_by": current_user["name"]
     })
     
+    # Trigger workflows for status_changed
+    closed_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if closed_order:
+        await trigger_order_workflows("order.status_changed", closed_order, current_user, background_tasks)
+
     # Auto-complete open tasks linked to this request
     await complete_open_tasks_for_request(order_id)
-    
+
     # Sync progress task status
-    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
-    if updated_order:
-        await sync_progress_task_status(updated_order)
-    
+    if closed_order:
+        await sync_progress_task_status(closed_order)
+
     return {"message": "Order closed successfully"}
 
 
@@ -2002,12 +2041,16 @@ async def cancel_order(
         "canceled_by": current_user["name"]
     })
     
-    # Sync progress task status + complete open tasks
-    await complete_open_tasks_for_request(order_id)
+    # Trigger workflows for status_changed
     canceled_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if canceled_order:
+        await trigger_order_workflows("order.status_changed", canceled_order, current_user, background_tasks)
+
+    # Sync progress task status + complete open tasks
+    await complete_open_tasks_for_request(order_id)
+    if canceled_order:
         await sync_progress_task_status(canceled_order)
-    
+
     return {"message": "Ticket canceled successfully"}
 
 
@@ -2403,6 +2446,21 @@ async def upload_file(
         "created_at": get_utc_now()
     }
     await db.order_files.insert_one(file_doc)
+
+    # Notify the other party about the file upload
+    is_requester = order.get("requester_id") == current_user["id"]
+    if is_requester and order.get("editor_id"):
+        await create_notification(
+            db, order["editor_id"], "file_uploaded", "New file uploaded",
+            f"{current_user['name']} uploaded '{file.filename}' to order {order.get('order_code', '')}",
+            order_id
+        )
+    elif not is_requester and order.get("requester_id"):
+        await create_notification(
+            db, order["requester_id"], "file_uploaded", "New file on your request",
+            f"A file '{file.filename}' was uploaded to your request {order.get('order_code', '')}",
+            order_id
+        )
 
     return {
         "id": file_id,
