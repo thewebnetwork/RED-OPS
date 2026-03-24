@@ -9,6 +9,7 @@ import {
   Zap, Star, TrendingUp, Clock, DollarSign,
   Edit3, Save, MessageSquare, ArrowUpRight, Calendar,
   Layers, Trash2, PenLine, Hash, ExternalLink, LayoutGrid, List,
+  BarChart3, Upload,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -410,6 +411,7 @@ const TABS = [
   { id:'activity',  label:'Activity',  icon: Activity },
   { id:'notes',     label:'Notes',     icon: MessageSquare },
   { id:'billing',   label:'Billing',   icon: DollarSign },
+  { id:'ads',       label:'Ad Tracking', icon: BarChart3 },
 ];
 
 function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
@@ -419,6 +421,8 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
   const [editForm, setEditForm] = useState({});
   const [newNote, setNewNote] = useState('');
   const [notes, setNotes] = useState([]);
+  const [adEntries, setAdEntries] = useState([]);
+  const [adForm, setAdForm] = useState({ platform:'', campaign:'', spend:'', impressions:'', clicks:'', conversions:'', date:'' });
 
   // Reset tab & load saved notes when client changes
   useEffect(() => {
@@ -429,6 +433,11 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
       const saved = localStorage.getItem(`client_notes_${client._id}`);
       setNotes(saved ? JSON.parse(saved) : []);
     } catch { setNotes([]); }
+    // Load ad tracking entries
+    try {
+      const savedAds = localStorage.getItem(`client_ads_${client._id}`);
+      setAdEntries(savedAds ? JSON.parse(savedAds) : []);
+    } catch { setAdEntries([]); }
   }, [client._id]);
 
   const startEdit = () => {
@@ -445,10 +454,13 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
 
   const saveEdit = async () => {
     try {
-      // Persist to backend — update the user record
       await ax().patch(`${API}/users/${client._id}`, {
-        name: editForm.name,
+        company_name: editForm.name,
+        industry: editForm.industry || null,
+        website: editForm.website || null,
         subscription_plan_name: editForm.plan,
+        account_manager: editForm.am || null,
+        notes: editForm.notes || null,
       });
       onUpdate({
         ...client,
@@ -926,6 +938,149 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
             )}
           </div>
         )}
+
+        {/* ── Ad Tracking Tab ── */}
+        {tab === 'ads' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            {/* CSV Upload */}
+            <div style={{ background:'var(--bg-elevated)', borderRadius:10, padding:16 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
+                <Upload size={13} /> Import CSV
+              </div>
+              <label style={{
+                display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'14px 0',
+                border:'2px dashed var(--border)', borderRadius:8, cursor:'pointer', fontSize:12, color:'var(--tx-3)',
+                transition:'all .15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.color = 'var(--red)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+              >
+                <Upload size={14} /> Drop CSV or click to upload
+                <input type="file" accept=".csv" style={{ display:'none' }} onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    try {
+                      const text = ev.target.result;
+                      const lines = text.split('\n').filter(l => l.trim());
+                      if (lines.length < 2) { toast.error('CSV must have a header + data rows'); return; }
+                      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                      const rows = lines.slice(1).map((line, idx) => {
+                        const cols = line.split(',').map(c => c.trim());
+                        const row = {};
+                        headers.forEach((h, i) => { row[h] = cols[i] || ''; });
+                        return {
+                          id: `ad${Date.now()}_${idx}`,
+                          platform: row.platform || row.source || '—',
+                          campaign: row.campaign || row.campaign_name || '—',
+                          spend: parseFloat((row.spend || row.cost || '0').replace(/[$,]/g,'')) || 0,
+                          impressions: parseInt((row.impressions || '0').replace(/,/g,'')) || 0,
+                          clicks: parseInt((row.clicks || '0').replace(/,/g,'')) || 0,
+                          conversions: parseInt((row.conversions || row.conv || '0').replace(/,/g,'')) || 0,
+                          date: row.date || new Date().toISOString().split('T')[0],
+                        };
+                      });
+                      const updated = [...rows, ...adEntries];
+                      setAdEntries(updated);
+                      try { localStorage.setItem(`client_ads_${client._id}`, JSON.stringify(updated)); } catch {}
+                      toast.success(`Imported ${rows.length} rows`);
+                    } catch { toast.error('Failed to parse CSV'); }
+                  };
+                  reader.readAsText(file);
+                  e.target.value = '';
+                }} />
+              </label>
+              <p style={{ fontSize:10, color:'var(--tx-3)', marginTop:6 }}>
+                Expected columns: platform, campaign, spend, impressions, clicks, conversions, date
+              </p>
+            </div>
+
+            {/* Manual Entry */}
+            <div style={{ background:'var(--bg-elevated)', borderRadius:10, padding:16 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--tx-1)', marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
+                <PenLine size={13} /> Manual Entry
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                <input className="input-field" placeholder="Platform" value={adForm.platform} onChange={e => setAdForm(p=>({...p,platform:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" placeholder="Campaign" value={adForm.campaign} onChange={e => setAdForm(p=>({...p,campaign:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" placeholder="Spend ($)" type="number" value={adForm.spend} onChange={e => setAdForm(p=>({...p,spend:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" placeholder="Impressions" type="number" value={adForm.impressions} onChange={e => setAdForm(p=>({...p,impressions:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" placeholder="Clicks" type="number" value={adForm.clicks} onChange={e => setAdForm(p=>({...p,clicks:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" placeholder="Conversions" type="number" value={adForm.conversions} onChange={e => setAdForm(p=>({...p,conversions:e.target.value}))} style={{ fontSize:12 }} />
+                <input className="input-field" type="date" value={adForm.date} onChange={e => setAdForm(p=>({...p,date:e.target.value}))} style={{ fontSize:12 }} />
+                <button className="btn-primary btn-sm" onClick={() => {
+                  if (!adForm.platform) { toast.error('Platform required'); return; }
+                  const entry = {
+                    id: `ad${Date.now()}`,
+                    platform: adForm.platform,
+                    campaign: adForm.campaign || '—',
+                    spend: parseFloat(adForm.spend) || 0,
+                    impressions: parseInt(adForm.impressions) || 0,
+                    clicks: parseInt(adForm.clicks) || 0,
+                    conversions: parseInt(adForm.conversions) || 0,
+                    date: adForm.date || new Date().toISOString().split('T')[0],
+                  };
+                  const updated = [entry, ...adEntries];
+                  setAdEntries(updated);
+                  try { localStorage.setItem(`client_ads_${client._id}`, JSON.stringify(updated)); } catch {}
+                  setAdForm({ platform:'', campaign:'', spend:'', impressions:'', clicks:'', conversions:'', date:'' });
+                  toast.success('Entry added');
+                }} style={{ fontSize:12, display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
+                  <Plus size={12} /> Add
+                </button>
+              </div>
+            </div>
+
+            {/* Summary Stats */}
+            {adEntries.length > 0 && (
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+                {[
+                  { label:'Total Spend', value:`$${adEntries.reduce((s,a)=>s+a.spend,0).toLocaleString(undefined,{maximumFractionDigits:2})}`, color:'#ef4444' },
+                  { label:'Total Clicks', value:adEntries.reduce((s,a)=>s+a.clicks,0).toLocaleString(), color:'#3b82f6' },
+                  { label:'Total Conv.', value:adEntries.reduce((s,a)=>s+a.conversions,0).toLocaleString(), color:'#22c55e' },
+                ].map(s => (
+                  <div key={s.label} style={{ background:'var(--bg-elevated)', borderRadius:8, padding:'10px 12px', textAlign:'center' }}>
+                    <div style={{ fontSize:10, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.05em', fontWeight:600, marginBottom:3 }}>{s.label}</div>
+                    <div style={{ fontSize:16, fontWeight:800, color:s.color }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Ad Entries Table */}
+            {adEntries.length > 0 ? (
+              <div style={{ borderRadius:10, border:'1px solid var(--border)', overflow:'hidden' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'80px 1fr 80px 70px 60px 50px 32px', padding:'8px 12px', fontSize:10, fontWeight:700, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'.05em', background:'var(--bg-elevated)', borderBottom:'1px solid var(--border)' }}>
+                  <span>Platform</span><span>Campaign</span><span>Spend</span><span>Impr.</span><span>Clicks</span><span>Conv.</span><span />
+                </div>
+                {adEntries.slice(0, 50).map(a => (
+                  <div key={a.id} style={{ display:'grid', gridTemplateColumns:'80px 1fr 80px 70px 60px 50px 32px', padding:'8px 12px', fontSize:12, color:'var(--tx-1)', borderBottom:'1px solid var(--border)', alignItems:'center' }}>
+                    <span style={{ fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{a.platform}</span>
+                    <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--tx-2)' }}>{a.campaign}</span>
+                    <span style={{ color:'#ef4444', fontWeight:600 }}>${a.spend.toLocaleString(undefined,{maximumFractionDigits:2})}</span>
+                    <span>{a.impressions.toLocaleString()}</span>
+                    <span>{a.clicks.toLocaleString()}</span>
+                    <span style={{ color:'#22c55e', fontWeight:600 }}>{a.conversions}</span>
+                    <button onClick={() => {
+                      const updated = adEntries.filter(x => x.id !== a.id);
+                      setAdEntries(updated);
+                      try { localStorage.setItem(`client_ads_${client._id}`, JSON.stringify(updated)); } catch {}
+                    }} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:2, display:'flex' }}>
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding:'32px 16px', textAlign:'center', background:'var(--bg-elevated)', borderRadius:10 }}>
+                <BarChart3 size={28} color="var(--tx-3)" style={{ marginBottom:8 }} />
+                <p style={{ fontSize:13, color:'var(--tx-3)', margin:0 }}>No ad tracking data yet.</p>
+                <p style={{ fontSize:11, color:'var(--tx-3)', margin:'4px 0 0' }}>Upload a CSV or add entries manually above.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -966,21 +1121,21 @@ export default function Clients() {
           .filter(u => u.account_type === 'Media Client')
           .map(u => ({
             _id: u.id || u._id,
-            name: u.name || u.email,
+            name: u.company_name || u.name || u.email,
             plan: u.subscription_plan_name || 'Starter',
-            mrr: 0,
+            mrr: PLAN_CONFIG[u.subscription_plan_name]?.price || 0,
             score: 70,
             renewal: '',
             requests_open: 0,
             deliveries: 0,
             last_delivery: '—',
-            am: '—',
-            tags: [],
-            notes: '',
+            am: u.account_manager || '—',
+            tags: u.tags || [],
+            notes: u.notes || '',
             portal: u.active ? 'active' : 'none',
-            contact: { name: u.name, email: u.email, phone: '' },
-            industry: '',
-            website: '',
+            contact: { name: u.name, email: u.email, phone: u.phone || '' },
+            industry: u.industry || '',
+            website: u.website || '',
             last_login: '—',
             login_count: 0,
           }));

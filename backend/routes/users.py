@@ -45,6 +45,7 @@ class UserCreate(BaseModel):
     specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None  # Required if account_type = Partner
+    subscription_plan_name: Optional[str] = None  # Resolve by name if ID not given
     dashboard_type_id: Optional[str] = None  # Assigned dashboard template
     permission_overrides: Optional[Dict[str, Dict[str, bool]]] = None
     force_password_change: bool = True
@@ -52,6 +53,14 @@ class UserCreate(BaseModel):
     send_welcome_email: bool = True  # Send welcome email with temp password
     can_pick: bool = True  # Whether user can pick from pools (user-level override)
     pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
+    # Client-specific fields
+    company_name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    account_manager: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
     
     @field_validator('specialty_ids', mode='before')
     @classmethod
@@ -76,6 +85,7 @@ class UserUpdate(BaseModel):
     specialty_id: Optional[str] = None  # Still accepted for backwards compatibility
     team_id: Optional[str] = None
     subscription_plan_id: Optional[str] = None
+    subscription_plan_name: Optional[str] = None  # Resolve by name if ID not given
     dashboard_type_id: Optional[str] = None  # Assigned dashboard template
     can_pick: Optional[bool] = None  # Whether user can pick from pools
     pool_access: Optional[str] = None  # none, pool1, pool2, both - which pools user can access
@@ -83,6 +93,14 @@ class UserUpdate(BaseModel):
     active: Optional[bool] = None
     force_password_change: Optional[bool] = None
     force_otp_setup: Optional[bool] = None
+    # Client-specific fields
+    company_name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    account_manager: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
     
     @field_validator('specialty_ids', mode='before')
     @classmethod
@@ -133,6 +151,14 @@ class UserResponse(BaseModel):
     can_pick: bool = True  # Whether user can pick from pools
     pool_access: str = "both"  # none, pool1, pool2, both - which pools user can access
     created_at: str
+    # Client-specific fields
+    company_name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    account_manager: Optional[str] = None
+    notes: Optional[str] = None
+    tags: List[str] = []
 
 
 # ============== HELPERS ==============
@@ -255,7 +281,15 @@ async def build_user_response(user: dict) -> UserResponse:
         otp_verified=user.get("otp_verified", False),
         can_pick=user.get("can_pick", True),  # Default to True for existing users
         pool_access=user.get("pool_access", "both"),  # Default to both for existing users
-        created_at=user["created_at"]
+        created_at=user["created_at"],
+        # Client-specific fields
+        company_name=user.get("company_name"),
+        industry=user.get("industry"),
+        website=user.get("website"),
+        phone=user.get("phone"),
+        account_manager=user.get("account_manager"),
+        notes=user.get("notes"),
+        tags=user.get("tags", []),
     )
 
 
@@ -345,15 +379,22 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
             raise HTTPException(status_code=400, detail="Invalid team")
         team_name = team["name"]
     
-    # Verify subscription plan if account type is Partner
+    # Resolve subscription plan (by ID or by name)
+    subscription_plan_id = user_data.subscription_plan_id
     subscription_plan_name = None
-    if user_data.account_type == "Partner":
-        if not user_data.subscription_plan_id:
-            raise HTTPException(status_code=400, detail="Subscription plan is required for Partners")
-        plan = await db.subscription_plans.find_one({"id": user_data.subscription_plan_id, "active": True})
-        if not plan:
-            raise HTTPException(status_code=400, detail="Invalid subscription plan")
-        subscription_plan_name = plan["name"]
+    if not subscription_plan_id and user_data.subscription_plan_name:
+        plan = await db.subscription_plans.find_one({"name": user_data.subscription_plan_name, "active": True})
+        if plan:
+            subscription_plan_id = plan["id"]
+            subscription_plan_name = plan["name"]
+        else:
+            subscription_plan_name = user_data.subscription_plan_name
+    elif subscription_plan_id:
+        plan = await db.subscription_plans.find_one({"id": subscription_plan_id, "active": True})
+        if plan:
+            subscription_plan_name = plan["name"]
+    if user_data.account_type == "Partner" and not subscription_plan_id:
+        raise HTTPException(status_code=400, detail="Subscription plan is required for Partners")
     
     # Store the plain password for email before hashing
     plain_password = user_data.password
@@ -373,20 +414,28 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
         "specialty_name": primary_specialty_name,
         "team_id": user_data.team_id,
         "team_name": team_name,
-        "subscription_plan_id": user_data.subscription_plan_id,
+        "subscription_plan_id": subscription_plan_id,
         "subscription_plan_name": subscription_plan_name,
         "dashboard_type_id": user_data.dashboard_type_id,  # Dashboard assignment
         # Legacy field for backwards compatibility
-        "access_tier_id": user_data.subscription_plan_id,
+        "access_tier_id": subscription_plan_id,
         "access_tier_name": subscription_plan_name,
         "permission_overrides": user_data.permission_overrides,
         "active": True,
-        "can_pick": user_data.can_pick,  # User-level pool picking permission
-        "pool_access": user_data.pool_access if user_data.can_pick else "none",  # Pool access level
+        "can_pick": user_data.can_pick,
+        "pool_access": user_data.pool_access if user_data.can_pick else "none",
         "force_password_change": user_data.force_password_change,
         "force_otp_setup": user_data.force_otp_setup,
         "otp_verified": False,
-        "created_at": get_utc_now()
+        "created_at": get_utc_now(),
+        # Client-specific fields
+        "company_name": user_data.company_name,
+        "industry": user_data.industry,
+        "website": user_data.website,
+        "phone": user_data.phone,
+        "account_manager": user_data.account_manager,
+        "notes": user_data.notes,
+        "tags": user_data.tags or [],
     }
     
     await db.users.insert_one(user)
@@ -548,6 +597,20 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
         else:
             update_dict["team_name"] = None
     
+    # Resolve subscription_plan_name to subscription_plan_id if name given without ID
+    if "subscription_plan_name" in update_dict and "subscription_plan_id" not in update_dict:
+        plan_name = update_dict.pop("subscription_plan_name")
+        if plan_name:
+            plan = await db.subscription_plans.find_one({"name": plan_name, "active": True})
+            if plan:
+                update_dict["subscription_plan_id"] = plan["id"]
+                update_dict["subscription_plan_name"] = plan["name"]
+                update_dict["access_tier_id"] = plan["id"]
+                update_dict["access_tier_name"] = plan["name"]
+            else:
+                # Store the name even without a matching plan record
+                update_dict["subscription_plan_name"] = plan_name
+
     # Handle subscription plan update
     new_account_type = update_dict.get("account_type", user.get("account_type"))
     if "subscription_plan_id" in update_dict or new_account_type == "Partner":

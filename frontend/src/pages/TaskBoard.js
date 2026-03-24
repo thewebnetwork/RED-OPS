@@ -8,16 +8,10 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  pointerWithin,
+  useDraggable,
+  useDroppable,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import {
   Plus,
   Calendar,
@@ -38,6 +32,9 @@ import {
   MoreHorizontal,
   Trash2,
   Users,
+  LayoutGrid,
+  List as ListIcon,
+  ArrowUpDown,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -246,10 +243,15 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, onDelete, savi
   );
 }
 
-function SortableTaskCard(props) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.task.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
-  return (<div ref={setNodeRef} style={style}><TaskCard {...props} dragHandleProps={{ ...attributes, ...listeners }} /></div>);
+function DraggableTaskCard(props) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: props.task.id });
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    opacity: isDragging ? 0.4 : 1,
+    position: 'relative',
+    zIndex: isDragging ? 100 : 'auto',
+  };
+  return (<div ref={setNodeRef} style={style}><TaskCard {...props} dragHandleProps={{ ...attributes, ...listeners }} isDragging={isDragging} /></div>);
 }
 
 function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
@@ -310,7 +312,6 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
 }
 
 function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCreate }) {
-  const taskIds = tasks.map(t => t.id);
   const { setNodeRef, isOver } = useDroppable({ id: col.id });
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 272, maxWidth: 272 }}>
@@ -342,9 +343,7 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
         padding: 8, minHeight: 120, display: 'flex', flexDirection: 'column', gap: 6,
         transition: 'background 0.15s',
       }}>
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {tasks.map(task => (<SortableTaskCard key={task.id} task={task} onEdit={onEdit} />))}
-        </SortableContext>
+        {tasks.map(task => (<DraggableTaskCard key={task.id} task={task} onEdit={onEdit} />))}
         {inlineCreate === col.id && (<InlineCreate colId={col.id} onSave={onAddTask} onCancel={() => setInlineCreate(null)} />)}
         {tasks.length === 0 && inlineCreate !== col.id && (
           isOver ? (
@@ -369,6 +368,21 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
   );
 }
 
+function SortHeader({ label, sortKey, listSort, setListSort }) {
+  const active = listSort.key === sortKey;
+  return (
+    <button
+      onClick={() => setListSort(s => ({ key: sortKey, dir: s.key === sortKey && s.dir === 'asc' ? 'desc' : 'asc' }))}
+      style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: active ? 'var(--red)' : 'inherit', fontSize: 'inherit', fontWeight: 'inherit', textTransform: 'inherit', letterSpacing: 'inherit', padding: 0 }}
+    >
+      {label} <ArrowUpDown size={10} style={{ opacity: active ? 1 : 0.3 }} />
+    </button>
+  );
+}
+
+const PRIORITY_ORDER = { urgent: 0, high: 1, medium: 2, low: 3 };
+const STATUS_ORDER = { backlog: 0, todo: 1, doing: 2, waiting_on_client: 3, review: 4, done: 5 };
+
 export default function TaskBoard() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -383,6 +397,8 @@ export default function TaskBoard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [inlineCreateCol, setInlineCreateCol] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('board'); // 'board' | 'list'
+  const [listSort, setListSort] = useState({ key: 'status', dir: 'asc' });
   const tk = useCallback(() => localStorage.getItem('token'), []);
   const headers = useCallback(() => ({ Authorization: `Bearer ${tk()}` }), [tk]);
 
@@ -479,20 +495,21 @@ export default function TaskBoard() {
   function openEdit(task) { setEditingTask(task); setDialogOpen(true); }
   function openNew(colId) { setEditingTask({ status: colId || 'todo' }); setDialogOpen(true); }
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   function handleDragStart({ active }) { setActiveTask(tasks.find(t => t.id === active.id) || null); }
   async function handleDragEnd({ active, over }) {
     setActiveTask(null);
-    if (!over || active.id === over.id) return;
+    if (!over) return;
     const activeT = tasks.find(t => t.id === active.id);
-    const overT = tasks.find(t => t.id === over.id);
     if (!activeT) return;
-    const targetColId = COLUMNS.find(c => c.id === over.id)?.id || overT?.status;
-    if (!targetColId) return;
-    const newStatus = targetColId;
-    setTasks(tasks.map(t => t.id === activeT.id ? { ...t, status: newStatus } : t));
+    // Resolve target column: over.id is always a column id (columns are the only droppables)
+    const targetCol = COLUMNS.find(c => c.id === over.id);
+    if (!targetCol || activeT.status === targetCol.id) return;
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === activeT.id ? { ...t, status: targetCol.id } : t));
     try {
-      await axios.patch(`${API}/tasks/${activeT.id}`, { status: newStatus }, { headers: headers() });
+      await axios.patch(`${API}/tasks/${activeT.id}`, { status: targetCol.id }, { headers: headers() });
+      toast.success(`Moved to ${targetCol.label}`);
     } catch { toast.error('Failed to move task'); loadTasks(); }
   }
 
@@ -509,6 +526,25 @@ export default function TaskBoard() {
   const doneTasks = tasks.filter(t => t.status === 'done').length;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
   const hasFilters = filterAssignee || filterStatus || searchQuery;
+
+  // Filtered + sorted tasks for list view
+  const filteredTasks = tasks.filter(t => {
+    if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
+    if (filterStatus && t.status !== filterStatus) return false;
+    return true;
+  });
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const dir = listSort.dir === 'asc' ? 1 : -1;
+    switch (listSort.key) {
+      case 'title': return dir * (a.title || '').localeCompare(b.title || '');
+      case 'status': return dir * ((STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99));
+      case 'priority': return dir * ((PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99));
+      case 'assignee': return dir * ((a.assignee_name || a.assigned_user?.name || 'zzz').localeCompare(b.assignee_name || b.assigned_user?.name || 'zzz'));
+      case 'due_at': return dir * ((a.due_at || '9999').localeCompare(b.due_at || '9999'));
+      default: return 0;
+    }
+  });
 
   const selectStyle = {
     padding: '6px 10px', background: 'var(--bg-elevated)', border: '1px solid var(--border)',
@@ -546,6 +582,31 @@ export default function TaskBoard() {
                   background: 'var(--bg-elevated)', color: 'var(--tx-1)', outline: 'none', width: 180,
                 }}
               />
+            </div>
+            {/* View toggle */}
+            <div style={{ display: 'flex', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <button
+                onClick={() => setViewMode('board')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
+                  background: viewMode === 'board' ? 'var(--red)' : 'var(--bg-elevated)',
+                  color: viewMode === 'board' ? '#fff' : 'var(--tx-3)',
+                  border: 'none', cursor: 'pointer', borderRight: '1px solid var(--border)',
+                }}
+              >
+                <LayoutGrid size={13} /> Board
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
+                  background: viewMode === 'list' ? 'var(--red)' : 'var(--bg-elevated)',
+                  color: viewMode === 'list' ? '#fff' : 'var(--tx-3)',
+                  border: 'none', cursor: 'pointer',
+                }}
+              >
+                <ListIcon size={13} /> List
+              </button>
             </div>
             <button
               onClick={() => setShowFilters(f => !f)}
@@ -590,7 +651,7 @@ export default function TaskBoard() {
         )}
       </div>
 
-      {/* Board */}
+      {/* Content */}
       {loading ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--tx-3)' }}>
@@ -598,26 +659,9 @@ export default function TaskBoard() {
             <p style={{ fontSize: 13 }}>Loading tasks…</p>
           </div>
         </div>
-      ) : (
-        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div style={{ display: 'flex', gap: 14, padding: 20, height: '100%', minWidth: 'max-content' }}>
-              {COLUMNS.map(col => (
-                <KanbanColumn key={col.id} col={col} tasks={tasksForCol(col.id)}
-                  onAddTask={handleInlineSave} onEdit={openEdit}
-                  inlineCreate={inlineCreateCol} setInlineCreate={setInlineCreateCol}
-                />
-              ))}
-            </div>
-            <DragOverlay>{activeTask && (<TaskCard task={activeTask} onEdit={() => {}} isDragging />)}</DragOverlay>
-          </DndContext>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && tasks.length === 0 && (
-        <div style={{ position: 'absolute', inset: 0, top: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <div style={{ textAlign: 'center', pointerEvents: 'auto' }}>
+      ) : tasks.length === 0 ? (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
             <div style={{ width: 60, height: 60, borderRadius: 16, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Inbox size={26} style={{ color: 'var(--tx-3)' }} />
             </div>
@@ -629,6 +673,132 @@ export default function TaskBoard() {
             >
               <Plus size={13} /> Create Task
             </button>
+          </div>
+        </div>
+      ) : viewMode === 'board' ? (
+        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
+          <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div style={{ display: 'flex', gap: 14, padding: 20, height: '100%', minWidth: 'max-content' }}>
+              {COLUMNS.map(col => (
+                <KanbanColumn key={col.id} col={col} tasks={tasksForCol(col.id)}
+                  onAddTask={handleInlineSave} onEdit={openEdit}
+                  inlineCreate={inlineCreateCol} setInlineCreate={setInlineCreateCol}
+                />
+              ))}
+            </div>
+            <DragOverlay dropAnimation={null}>{activeTask && (<TaskCard task={activeTask} onEdit={() => {}} isDragging />)}</DragOverlay>
+          </DndContext>
+        </div>
+      ) : (
+        /* List View */
+        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            {/* List header */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: '3fr 120px 100px 140px 120px 60px',
+              padding: '10px 16px', fontSize: 11, fontWeight: 700, color: 'var(--tx-3)',
+              textTransform: 'uppercase', letterSpacing: '.06em', borderBottom: '1px solid var(--border)',
+              background: 'var(--bg-elevated)',
+            }}>
+              <SortHeader label="Title" sortKey="title" listSort={listSort} setListSort={setListSort} />
+              <SortHeader label="Status" sortKey="status" listSort={listSort} setListSort={setListSort} />
+              <SortHeader label="Priority" sortKey="priority" listSort={listSort} setListSort={setListSort} />
+              <SortHeader label="Assignee" sortKey="assignee" listSort={listSort} setListSort={setListSort} />
+              <SortHeader label="Due Date" sortKey="due_at" listSort={listSort} setListSort={setListSort} />
+              <span />
+            </div>
+            {/* List rows */}
+            {sortedTasks.map(task => {
+              const pri = PRIORITY[task.priority] || PRIORITY.medium;
+              const date = fmtDate(task.due_at);
+              const col = COLUMNS.find(c => c.id === task.status);
+              const assigneeName = task.assigned_user?.name || task.assignee_name || null;
+              return (
+                <div
+                  key={task.id}
+                  onClick={() => openEdit(task)}
+                  style={{
+                    display: 'grid', gridTemplateColumns: '3fr 120px 100px 140px 120px 60px',
+                    padding: '10px 16px', borderBottom: '1px solid var(--border)',
+                    cursor: 'pointer', transition: 'background 0.1s', alignItems: 'center',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  {/* Title */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                    <div style={{ width: 3, height: 20, borderRadius: 2, background: pri.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
+                  </div>
+                  {/* Status */}
+                  <div>
+                    <select
+                      value={task.status}
+                      onClick={e => e.stopPropagation()}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
+                        try { await axios.patch(`${API}/tasks/${task.id}`, { status: newStatus }, { headers: headers() }); }
+                        catch { toast.error('Failed to update'); loadTasks(); }
+                      }}
+                      style={{
+                        fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6,
+                        background: (col?.color || '#94a3b8') + '22', color: col?.color || '#94a3b8',
+                        border: 'none', cursor: 'pointer', outline: 'none',
+                      }}
+                    >
+                      {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                  </div>
+                  {/* Priority */}
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, background: pri.bg, color: pri.color, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: pri.color }} />
+                      {pri.label}
+                    </span>
+                  </div>
+                  {/* Assignee */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {assigneeName ? (
+                      <>
+                        <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(assigneeName)}</span>
+                        <span style={{ fontSize: 12, color: 'var(--tx-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{assigneeName}</span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>—</span>
+                    )}
+                  </div>
+                  {/* Due Date */}
+                  <div>
+                    {date ? (
+                      <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6, background: date.bg, color: date.color, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Calendar size={9} />{date.text}
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>—</span>
+                    )}
+                  </div>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                    <button
+                      onClick={e => { e.stopPropagation(); openEdit(task); }}
+                      style={{ padding: 4, borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', display: 'flex' }}
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); handleDelete(task.id); }}
+                      style={{ padding: 4, borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', display: 'flex' }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {sortedTasks.length === 0 && (
+              <div style={{ padding: 32, textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>No tasks match your filters</div>
+            )}
           </div>
         </div>
       )}
