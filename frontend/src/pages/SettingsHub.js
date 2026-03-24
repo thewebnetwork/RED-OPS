@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useOrg } from '@/contexts/OrgContext';
 import {
-  Settings, Users, Shield, Building2, FolderTree, GitBranch, Mail, Plug,
+  Settings, Users, Shield, Building2, FolderTree, GitBranch, Palette, Mail, Plug,
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
   X, Loader2, Clock, Package, Layers, Zap, EyeOff, Video, Camera, FileText, BarChart2,
   Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid,
