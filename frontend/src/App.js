@@ -69,6 +69,7 @@ import CRM from "./pages/CRM";
 import Ambassador from "./pages/Ambassador";
 import AIAssistant from "./pages/AIAssistant";
 import Files from "./pages/Files";
+import ClientPage from "./pages/ClientPage";
 import Team from "./pages/Team";
 import TeamMemberPage from "./pages/TeamMemberPage";
 import NotFound from "./pages/NotFound";
@@ -326,6 +327,7 @@ function AppRoutes() {
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/team/:id" element={<PrivateRoute roles={['Administrator','Operator']}><TeamMemberPage /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
+      <Route path="/clients/:id" element={<PrivateRoute roles={['Administrator','Operator']}><ClientPage /></PrivateRoute>} />
       <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Requests /></PrivateRoute>} />
 
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}

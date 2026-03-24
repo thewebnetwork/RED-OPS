@@ -1050,7 +1050,7 @@ export default function Clients() {
               {display.map(c => {
                 const isSelected = selected === c._id;
                 return (
-                  <tr key={c._id} onClick={() => setSelected(isSelected ? null : c._id)}
+                  <tr key={c._id} onClick={() => navigate(`/clients/${c._id}`)}
                     style={{ background: isSelected ? 'var(--bg-elevated)' : 'transparent', cursor:'pointer' }}>
                     <td>
                       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
