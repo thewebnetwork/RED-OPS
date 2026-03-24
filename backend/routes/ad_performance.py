@@ -345,7 +345,18 @@ async def get_client_summary(
     snapshots = await db.ad_snapshots.find({"client_id": client_id}).to_list(None)
 
     if not snapshots:
-        raise HTTPException(status_code=404, detail="No data found for this client")
+        # Return empty summary instead of 404 — frontend shows empty state
+        client_name = await get_client_name(client_id)
+        return ClientSummary(
+            client_id=client_id,
+            client_name=client_name,
+            current_month=None,
+            previous_month=None,
+            all_time_totals={"total_spend": 0, "total_leads": 0, "total_conversions": 0, "avg_cpl": 0, "avg_roas": 0},
+            monthly_trends=[],
+            active_platforms=[],
+            platforms=[]
+        )
 
     # Get client name
     client_name = snapshots[0].get("client_name") or await get_client_name(client_id)

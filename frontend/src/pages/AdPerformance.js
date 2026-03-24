@@ -257,35 +257,45 @@ function ClientAdDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // In preview-as-client mode, use the preview client's ID
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const clientId = isPreview ? localStorage.getItem('preview_client_id') : user?.id;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        if (!user?.id) {
+        if (!clientId) {
           setError('User not authenticated');
           return;
         }
 
         // Fetch summary
-        const summRes = await ax().get(`${API}/ad-performance/summary/${user.id}`);
+        const summRes = await ax().get(`${API}/ad-performance/summary/${clientId}`);
         setSummary(summRes.data);
 
         // Fetch snapshots
-        const snapsRes = await ax().get(`${API}/ad-performance/snapshots?client_id=${user.id}`);
+        const snapsRes = await ax().get(`${API}/ad-performance/snapshots?client_id=${clientId}`);
         setSnapshots(snapsRes.data || []);
       } catch (err) {
         console.error('Error fetching ad performance data:', err);
-        setError(err.response?.data?.message || 'Failed to load data');
-        toast.error('Failed to load ad performance data');
+        // Don't show error toast for empty data (404)
+        if (err.response?.status === 404) {
+          setSummary(null);
+          setSnapshots([]);
+        } else {
+          setError(err.response?.data?.message || 'Failed to load data');
+          toast.error('Failed to load ad performance data');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [user?.id]);
+  }, [clientId]);
 
   if (loading) {
     return (
@@ -961,13 +971,24 @@ function AdminAdDashboard() {
         setError(null);
 
         // Fetch agency overview
-        const ovRes = await ax().get(`${API}/ad-performance/agency-overview`);
-        setOverview(ovRes.data);
-        setMonthlyTrend(ovRes.data?.monthly_totals || []);
+        try {
+          const ovRes = await ax().get(`${API}/ad-performance/agency-overview`);
+          setOverview(ovRes.data);
+          setMonthlyTrend(ovRes.data?.monthly_totals || []);
+        } catch (ovErr) {
+          // Empty state is fine — no snapshots yet
+          console.log('No agency overview data yet');
+          setOverview(null);
+          setMonthlyTrend([]);
+        }
 
         // Fetch all snapshots (admin can see all)
-        const snapsRes = await ax().get(`${API}/ad-performance/snapshots`);
-        setSnapshots(snapsRes.data || []);
+        try {
+          const snapsRes = await ax().get(`${API}/ad-performance/snapshots`);
+          setSnapshots(snapsRes.data || []);
+        } catch (snapsErr) {
+          setSnapshots([]);
+        }
 
         // Fetch clients
         const clientRes = await ax().get(`${API}/users?account_type=Media+Client`);
