@@ -22,6 +22,7 @@ import {
   List, Package, Layers, Zap, Star, Eye, EyeOff, Pencil, Trash2,
   Tag, LayoutGrid, BookOpen, Video, Camera, Palette, BarChart2,
   Megaphone, Globe, Mail, Mic, Phone, ExternalLink, Copy, ChevronLeft,
+  Share2, Layout, Monitor, Image, PenTool, Briefcase, Target,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -70,6 +71,17 @@ const DELIVERABLE_ICONS = {
   default: Package,
 };
 
+// Map icon string names to Lucide components (handles DB icon values that are text, not emoji)
+const ICON_NAME_MAP = {
+  video: Video, camera: Camera, palette: Palette, megaphone: Megaphone,
+  share2: Share2, layout: Layout, layoutgrid: LayoutGrid, filetext: FileText,
+  barchart2: BarChart2, globe: Globe, mail: Mail, mic: Mic, phone: Phone,
+  zap: Zap, star: Star, package: Package, bookopen: BookOpen, monitor: Monitor,
+  image: Image, pentool: PenTool, briefcase: Briefcase, target: Target,
+  upload: Upload, search: Search, settings: Settings, eye: Eye, tag: Tag,
+  layers: Layers, externallink: ExternalLink, shoppingbag: ShoppingBag,
+};
+
 function getCatIcon(cat) {
   const Icon = CATEGORY_ICONS[cat] || CATEGORY_ICONS.default;
   return Icon;
@@ -77,6 +89,38 @@ function getCatIcon(cat) {
 
 function getCatColor(cat) {
   return CATEGORY_COLORS[cat] || CATEGORY_COLORS.default;
+}
+
+// Resolve service category with fallback
+function getServiceCategory(service) {
+  return service.category || service.hidden_category_l1 || '';
+}
+
+// Resolve icon: returns { type: 'component', Component } or { type: 'emoji', emoji }
+function resolveServiceIcon(service) {
+  const icon = service.icon;
+  if (!icon) return { type: 'component', Component: getCatIcon(getServiceCategory(service)) };
+
+  // Check if it maps to a known Lucide icon name
+  const key = icon.toLowerCase().replace(/[-_\s]/g, '');
+  const mapped = ICON_NAME_MAP[key];
+  if (mapped) return { type: 'component', Component: mapped };
+
+  // If it contains non-ASCII chars, it's an emoji
+  if (/[^\x00-\x7F]/.test(icon)) return { type: 'emoji', emoji: icon };
+
+  // Unknown string — fall back to category icon
+  return { type: 'component', Component: getCatIcon(getServiceCategory(service)) };
+}
+
+// Render icon helper
+function ServiceIcon({ service, size = 24, color }) {
+  const resolved = resolveServiceIcon(service);
+  if (resolved.type === 'emoji') {
+    return <span style={{ fontSize: size }}>{resolved.emoji}</span>;
+  }
+  const Icon = resolved.Component;
+  return <Icon size={size} style={{ color }} />;
 }
 
 // ── Request Modal ──
@@ -89,8 +133,9 @@ function RequestModal({ service, onClose }) {
   if (!service) return null;
 
   const schema = service.form_schema || [];
-  const CatIcon = getCatIcon(service.category);
-  const catColor = getCatColor(service.category);
+  const cat = getServiceCategory(service);
+  const CatIcon = getCatIcon(cat);
+  const catColor = getCatColor(cat);
 
   const handleFieldChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -148,7 +193,7 @@ function RequestModal({ service, onClose }) {
         {/* Header with accent */}
         <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <div style={{ width: 52, height: 52, borderRadius: 12, background: `${catColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}30` }}>
-            {service.icon ? <span style={{ fontSize: 26 }}>{service.icon}</span> : <CatIcon size={26} style={{ color: catColor }} />}
+            <ServiceIcon service={service} size={26} color={catColor} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>{service.name}</h2>
@@ -161,7 +206,7 @@ function RequestModal({ service, onClose }) {
         <div style={{ padding: '14px 28px', display: 'flex', gap: 10, flexWrap: 'wrap', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
           <span style={metaBadge}><Clock size={12} /> {service.turnaround_text || 'TBD'}</span>
           <span style={{ ...metaBadge, background: `${catColor}18`, color: catColor, borderColor: `${catColor}30` }}>
-            <CatIcon size={12} /> {service.category}
+            <CatIcon size={12} /> {cat}
           </span>
           {service.offer_track && FLOW_LABELS[service.offer_track] && (
             <span style={{ ...metaBadge, background: FLOW_LABELS[service.offer_track].bg, color: FLOW_LABELS[service.offer_track].color }}>
@@ -482,23 +527,23 @@ export default function Services() {
   useEffect(() => { fetchServices(); }, [fetchServices]);
   useEffect(() => { localStorage.setItem('services_view', view); }, [view]);
 
-  // Categories
+  // Categories (with hidden_category_l1 fallback)
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(services.map(s => s.category).filter(Boolean)));
+    const cats = Array.from(new Set(services.map(s => getServiceCategory(s)).filter(Boolean)));
     return ['All', ...cats.sort()];
   }, [services]);
 
   // Filtered
   const filtered = useMemo(() => {
     return services
-      .filter(s => activeCategory === 'All' || s.category === activeCategory)
+      .filter(s => activeCategory === 'All' || getServiceCategory(s) === activeCategory)
       .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.description || '').toLowerCase().includes(search.toLowerCase()));
   }, [services, activeCategory, search]);
 
   // KPIs
   const kpis = useMemo(() => {
     const active = services.filter(s => s.active !== false);
-    const cats = new Set(services.map(s => s.category).filter(Boolean));
+    const cats = new Set(services.map(s => getServiceCategory(s)).filter(Boolean));
     const visible = services.filter(s => s.client_visible !== false);
     return { total: services.length, active: active.length, categories: cats.size, visible: visible.length };
   }, [services]);
@@ -660,7 +705,7 @@ export default function Services() {
                 const CIcon = getCatIcon(cat === 'All' ? 'default' : cat);
                 const isActive = activeCategory === cat;
                 const color = cat === 'All' ? 'var(--accent)' : getCatColor(cat);
-                const catCount = services.filter(s => s.category === cat).length;
+                const catCount = services.filter(s => getServiceCategory(s) === cat).length;
 
                 return (
                   <button
@@ -743,8 +788,9 @@ export default function Services() {
 
 // ── Service Card (grid) ──
 function ServiceCard({ service, isAdmin, onSelect, onEdit, onDelete }) {
-  const CatIcon = getCatIcon(service.category);
-  const catColor = getCatColor(service.category);
+  const cat = getServiceCategory(service);
+  const CatIcon = getCatIcon(cat);
+  const catColor = getCatColor(cat);
   const flow = service.offer_track ? FLOW_LABELS[service.offer_track] : null;
   const inactive = service.active === false;
   const hidden = service.client_visible === false;
@@ -783,11 +829,11 @@ function ServiceCard({ service, isAdmin, onSelect, onEdit, onDelete }) {
         {/* Icon + Title */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
           <div style={{ width: 48, height: 48, borderRadius: 12, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}25` }}>
-            {service.icon ? <span style={{ fontSize: 24 }}>{service.icon}</span> : <CatIcon size={24} style={{ color: catColor }} />}
+            <ServiceIcon service={service} size={24} color={catColor} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 4px', lineHeight: 1.3 }}>{service.name}</h3>
-            <span style={{ fontSize: 12, color: catColor, fontWeight: 600, backgroundColor: `${catColor}12`, padding: '2px 8px', borderRadius: 5, display: 'inline-block' }}>{service.category}</span>
+            <span style={{ fontSize: 12, color: catColor, fontWeight: 600, backgroundColor: `${catColor}12`, padding: '2px 8px', borderRadius: 5, display: 'inline-block' }}>{cat}</span>
           </div>
         </div>
 
@@ -845,8 +891,8 @@ function ServiceCard({ service, isAdmin, onSelect, onEdit, onDelete }) {
 
 // ── Service Row (list) ──
 function ServiceRow({ service, isAdmin, isLast, onSelect, onEdit, onDelete }) {
-  const CatIcon = getCatIcon(service.category);
-  const catColor = getCatColor(service.category);
+  const cat = getServiceCategory(service);
+  const catColor = getCatColor(cat);
   const flow = service.offer_track ? FLOW_LABELS[service.offer_track] : null;
   const inactive = service.active === false;
 
@@ -862,7 +908,7 @@ function ServiceRow({ service, isAdmin, isLast, onSelect, onEdit, onDelete }) {
       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
       <div style={{ width: 44, height: 44, borderRadius: 10, background: `${catColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${catColor}25` }}>
-        {service.icon ? <span style={{ fontSize: 22 }}>{service.icon}</span> : <CatIcon size={22} style={{ color: catColor }} />}
+        <ServiceIcon service={service} size={22} color={catColor} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -874,7 +920,7 @@ function ServiceRow({ service, isAdmin, isLast, onSelect, onEdit, onDelete }) {
       </div>
 
       <span style={{ ...metaBadge, flexShrink: 0 }}><Clock size={11} /> {service.turnaround_text || 'TBD'}</span>
-      <span style={{ fontSize: 12, fontWeight: 600, color: catColor, flexShrink: 0, minWidth: 100, textAlign: 'right', padding: '2px 8px', backgroundColor: `${catColor}12`, borderRadius: 5 }}>{service.category}</span>
+      <span style={{ fontSize: 12, fontWeight: 600, color: catColor, flexShrink: 0, minWidth: 100, textAlign: 'right', padding: '2px 8px', backgroundColor: `${catColor}12`, borderRadius: 5 }}>{cat}</span>
 
       {flow && <span style={{ ...metaBadge, flexShrink: 0, background: flow.bg, color: flow.color }}>{flow.label}</span>}
 
