@@ -4,7 +4,7 @@ Red Ribbon Ops Portal API - V2 (Modular)
 This is the refactored version using modular routes.
 All routes have been extracted from the monolithic server.py.
 """
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 import os
@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 
 # Import database
 from database import db
+from utils.auth import require_admin
 
 # Import modular routes
 from routes import (
@@ -127,7 +128,10 @@ async def ensure_admin_account():
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "Fmtvvl171**")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+    if not admin_password:
+        logger.warning("ADMIN_PASSWORD not set — skipping admin account seed")
+        return
 
     existing = await db.users.find_one({"email": admin_email})
 
@@ -217,7 +221,8 @@ app = FastAPI(
 )
 
 # CORS middleware
-origins = os.environ.get("CORS_ORIGINS", "").split(",") + ["*"]
+_raw_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
+origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -273,13 +278,14 @@ async def root():
 
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "healthy", "version": "2.0.0"}
 
 
 @app.post("/api/setup/seed-admin")
-async def seed_admin_endpoint():
-    """Manually trigger admin account creation. Safe to call multiple times."""
+async def seed_admin_endpoint(current_user: dict = Depends(require_admin)):
+    """Manually trigger admin account creation. Requires admin auth."""
     try:
         await ensure_admin_account()
         admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
@@ -297,7 +303,7 @@ async def seed_admin_endpoint():
 
 
 @app.post("/api/setup/seed-services")
-async def seed_service_templates(overwrite: bool = False):
+async def seed_service_templates(overwrite: bool = False, current_user: dict = Depends(require_admin)):
     """Seed default Red Ribbon service templates. Safe to call multiple times."""
     import uuid
     if overwrite:

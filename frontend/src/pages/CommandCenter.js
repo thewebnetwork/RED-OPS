@@ -73,7 +73,7 @@ export default function CommandCenter() {
         const instance = ax();
         const [tRes, cRes, aRes, dRes] = await Promise.allSettled([
           instance.get(`${API}/tasks?limit=6`),
-          instance.get(`${API}/organizations/me/current/members`),
+          instance.get(`${API}/users`),
           instance.get(`${API}/dashboard/activity?limit=10`),
           instance.get(`${API}/dashboard/financial-stats`),
         ]);

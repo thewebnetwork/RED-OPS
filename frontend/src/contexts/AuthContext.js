@@ -12,6 +12,11 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
+    localStorage.removeItem('preview_as_client');
+    localStorage.removeItem('preview_client_id');
+    localStorage.removeItem('preview_client_name');
+    localStorage.removeItem('requires_password_change');
+    localStorage.removeItem('requires_otp_setup');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];

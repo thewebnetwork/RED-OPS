@@ -834,14 +834,20 @@ async def list_orders(
     status: Optional[str] = None,
     assigned_queue_key: Optional[str] = None,
     q: Optional[str] = None,
+    requester_id: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """List orders based on user role. Drafts only visible to their owner."""
     query = {}
     role = current_user.get("role", "")
-    
-    # Standard User = restricted to own data only
-    if role == "Standard User":
+
+    # Preview-as-client: admins can filter by requester_id
+    if requester_id:
+        if role not in ["Administrator", "Admin"]:
+            raise HTTPException(status_code=403, detail="Only admins can view other users' orders")
+        query["requester_id"] = requester_id
+        # Skip role-based scoping below since we're filtering explicitly
+    elif role == "Standard User":
         query["requester_id"] = current_user["id"]
         # Standard Users can see their own drafts
     # Operator = can see assigned orders + open pool
