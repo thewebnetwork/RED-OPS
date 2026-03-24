@@ -461,17 +461,24 @@ function Projects() {
   // Persist view
   useEffect(() => { localStorage.setItem('projects_view', view); }, [view]);
 
+  // Preview-as-client support
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
+
   // Fetch projects
   const fetchProjects = useCallback(async () => {
     try {
-      const r = await ax().get(`${API}/projects`);
+      const url = isPreview && previewClientId
+        ? `${API}/projects?client_id=${previewClientId}`
+        : `${API}/projects`;
+      const r = await ax().get(url);
       setProjects(r.data);
     } catch (err) {
       if (err.response?.status !== 401) toast.error('Failed to load projects');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPreview, previewClientId]);
 
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
   useEffect(() => { if (searchParams.get('new') === '1') setModal('new'); }, [searchParams]);

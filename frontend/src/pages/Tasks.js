@@ -754,16 +754,23 @@ export default function Tasks() {
   // Persist view
   useEffect(() => { localStorage.setItem('tasks_view', view); }, [view]);
 
+  // Preview-as-client support
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
+
   // Fetch data
   const fetchTasks = useCallback(async () => {
     try {
-      const r = await ax().get(`${API}/tasks`);
+      const url = isPreview && previewClientId
+        ? `${API}/tasks?assignee_user_id=${previewClientId}`
+        : `${API}/tasks`;
+      const r = await ax().get(url);
       const d = r.data;
       const arr = Array.isArray(d) ? d : d?.items || [];
       setTasks(arr.map(mapTaskFromApi));
     } catch (err) { if (err.response?.status !== 401) console.error('Failed to load tasks'); }
     setLoading(false);
-  }, []);
+  }, [isPreview, previewClientId]);
 
   const fetchProjects = useCallback(async () => {
     try { const r = await ax().get(`${API}/projects`); setProjects(r.data); } catch {}

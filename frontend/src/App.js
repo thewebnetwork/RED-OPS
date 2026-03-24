@@ -78,7 +78,8 @@ import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 // Home route — Command Center for internal roles, ClientHome for clients
 function HomeRoute() {
   const { user } = useAuth();
-  const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const isClient = isPreview || user?.account_type === 'Media Client' || user?.role === 'Media Client';
   if (isClient) return <ClientHome />;
   return <CommandCenter />;
 }

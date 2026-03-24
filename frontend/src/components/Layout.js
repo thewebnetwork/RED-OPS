@@ -360,10 +360,11 @@ export default function Layout({ children }) {
   const [badges,      setBadges]      = useState({ tasks: 0, requests: 0 });
   const cmdInputRef = useRef(null);
 
-  // Filter items by role
+  // Filter items by role — preview-as-client mode forces client nav
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
-  const isClient    = user?.role === 'Media Client' || user?.account_type === 'Media Client';
-  const mainItems     = isClient ? filter(NAV_CLIENT) : filter(NAV_MAIN);
+  const isPreviewClient = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const isClient    = isPreviewClient || user?.role === 'Media Client' || user?.account_type === 'Media Client';
+  const mainItems     = isClient ? NAV_CLIENT : filter(NAV_MAIN);
   const businessItems = isClient ? [] : filter(NAV_BUSINESS);
   const servicesItems = isClient ? [] : filter(NAV_SERVICES);
   const systemItems   = isClient ? [] : filter(NAV_SYSTEM);

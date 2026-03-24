@@ -58,14 +58,25 @@ export default function ClientHome() {
   const [loading, setLoading]   = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const firstName = user?.name?.split(' ')[0] || 'there';
+  // Preview-as-client support: use preview client's name and fetch their data
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
+  const previewClientName = isPreview ? localStorage.getItem('preview_client_name') : null;
+
+  const firstName = isPreview
+    ? (previewClientName?.split(' ')[0] || 'Client')
+    : (user?.name?.split(' ')[0] || 'there');
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
-      const r = await ax().get(`${API}/orders/my-requests`);
+      // In preview mode, fetch the client's orders by requester_id; otherwise use my-requests
+      const url = isPreview && previewClientId
+        ? `${API}/orders?requester_id=${previewClientId}`
+        : `${API}/orders/my-requests`;
+      const r = await ax().get(url);
       const data = r.data;
       const orders = Array.isArray(data) ? data : data?.items || data?.orders || [];
 

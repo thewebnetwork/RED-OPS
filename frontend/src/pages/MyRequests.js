@@ -289,10 +289,17 @@ export default function MyRequests() {
 
   useEffect(() => { fetchMyRequests(); fetchCancelReasons(); }, []); // eslint-disable-line
 
+  // Preview-as-client support
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
+
   const fetchMyRequests = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
-      const res = await ax().get(`${API}/orders/my-requests`);
+      const url = isPreview && previewClientId
+        ? `${API}/orders?requester_id=${previewClientId}`
+        : `${API}/orders/my-requests`;
+      const res = await ax().get(url);
       const data = res.data;
       setOrders(Array.isArray(data) ? data : data?.items || data?.orders || []);
     } catch {
