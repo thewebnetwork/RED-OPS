@@ -1,43 +1,71 @@
+/**
+ * Projects Hub — Full project management listing
+ *
+ * Features:
+ *   • Summary KPI bar (active, planning, completed, on hold, task progress)
+ *   • Search + multi-filters (status, type, priority, payment)
+ *   • View toggle: cards / table (persisted)
+ *   • Group by: none / status / type / client
+ *   • Polished project cards with progress, team, deadlines
+ *   • Table view with inline stats
+ *   • Sort options
+ *   • New/Edit project modal
+ *   • Clean empty states
+ */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
   FolderKanban, Plus, Calendar, Users, CheckSquare, ChevronRight,
-  Circle, Clock, Folder, X, Edit3, Save, Trash2, CheckCircle2,
-  ArrowRight, MoreHorizontal, AlertCircle, Target, BarChart3,
+  Circle, Clock, Folder, X, Edit3, Trash2, CheckCircle2,
+  MoreHorizontal, AlertCircle, Target, BarChart3,
   Layers, FileText, Activity, Loader2, CreditCard,
+  Search, Grid3X3, List, ChevronDown, ArrowUpDown,
+  TrendingUp, Pause, Archive, Filter, Hash,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
 const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
-// ── Config ───────────────────────────────────────────────────────────────────
+/* ── Helpers ── */
+const initials = (n) => (n || '?').split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
+const AVATAR_COLORS = ['#c92a3e','#7c3aed','#2563eb','#059669','#d97706','#0891b2','#db2777','#65a30d'];
+const avatarBg = (id) => AVATAR_COLORS[(typeof id === 'string' ? id.charCodeAt(0) + (id.charCodeAt(1) || 0) : id) % AVATAR_COLORS.length];
+
+const formatDate = d => d ? new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '—';
+const formatDateLong = d => d ? new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+const daysUntil = d => {
+  if (!d) return 999;
+  return Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24));
+};
+
+/* ── Config ── */
 const TYPE_CONFIG = {
-  campaign_build:     { label: 'Campaign Build',     color: '#a855f7', bg: '#a855f718' },
-  client_onboarding:  { label: 'Client Onboarding',  color: '#3b82f6', bg: '#3b82f618' },
-  creative_sprint:    { label: 'Creative Sprint',    color: '#22c55e', bg: '#22c55e18' },
-  internal:           { label: 'Internal',           color: '#606060', bg: '#60606018' },
-  retainer:           { label: 'Retainer',           color: '#f59e0b', bg: '#f59e0b18' },
-  one_off:            { label: 'One-Off',            color: '#06b6d4', bg: '#06b6d418' },
-  custom:             { label: 'Custom',             color: '#8b5cf6', bg: '#8b5cf618' },
+  campaign_build:    { label: 'Campaign Build',    color: '#a855f7', bg: '#a855f718', icon: Target },
+  client_onboarding: { label: 'Client Onboarding', color: '#3b82f6', bg: '#3b82f618', icon: Users },
+  creative_sprint:   { label: 'Creative Sprint',   color: '#22c55e', bg: '#22c55e18', icon: Activity },
+  internal:          { label: 'Internal',           color: '#606060', bg: '#60606018', icon: Layers },
+  retainer:          { label: 'Retainer',           color: '#f59e0b', bg: '#f59e0b18', icon: Clock },
+  one_off:           { label: 'One-Off',            color: '#06b6d4', bg: '#06b6d418', icon: FileText },
+  custom:            { label: 'Custom',             color: '#8b5cf6', bg: '#8b5cf618', icon: FolderKanban },
 };
 
 const STATUS_CONFIG = {
-  active:    { label: 'Active',    color: '#22c55e', icon: Circle },
-  planning:  { label: 'Planning',  color: '#f59e0b', icon: Clock },
-  completed: { label: 'Completed', color: '#3b82f6', icon: CheckSquare },
-  on_hold:   { label: 'On Hold',   color: '#c92a3e', icon: AlertCircle },
-  archived:  { label: 'Archived',  color: '#606060', icon: FileText },
+  active:    { label: 'Active',    color: '#22c55e', icon: Circle,      bg: '#22c55e15' },
+  planning:  { label: 'Planning',  color: '#f59e0b', icon: Clock,       bg: '#f59e0b15' },
+  completed: { label: 'Completed', color: '#3b82f6', icon: CheckSquare, bg: '#3b82f615' },
+  on_hold:   { label: 'On Hold',   color: '#ef4444', icon: Pause,       bg: '#ef444415' },
+  archived:  { label: 'Archived',  color: '#606060', icon: Archive,     bg: '#60606015' },
 };
 
 const PRIORITY_CONFIG = {
-  urgent: { label: 'Urgent', color: '#ef4444' },
-  high:   { label: 'High',   color: '#f59e0b' },
-  medium: { label: 'Medium', color: '#3b82f6' },
-  low:    { label: 'Low',    color: '#606060' },
+  urgent: { label: 'Urgent', color: '#ef4444', bg: '#ef444418' },
+  high:   { label: 'High',   color: '#f59e0b', bg: '#f59e0b18' },
+  medium: { label: 'Medium', color: '#3b82f6', bg: '#3b82f618' },
+  low:    { label: 'Low',    color: '#606060', bg: '#60606018' },
 };
 
 const PAYMENT_OPTIONS = [
@@ -47,22 +75,57 @@ const PAYMENT_OPTIONS = [
   { value: 'paid', label: 'Paid' },
 ];
 
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'name', label: 'Name A→Z' },
+  { value: 'due_soon', label: 'Due Soonest' },
+  { value: 'progress', label: 'Progress ↑' },
+  { value: 'progress_desc', label: 'Progress ↓' },
+];
+
+const GROUP_OPTIONS = [
+  { value: 'none', label: 'No Grouping' },
+  { value: 'status', label: 'By Status' },
+  { value: 'type', label: 'By Type' },
+  { value: 'client', label: 'By Client' },
+  { value: 'priority', label: 'By Priority' },
+];
+
 const TYPE_OPTIONS = Object.keys(TYPE_CONFIG);
 const STATUS_OPTIONS = Object.keys(STATUS_CONFIG);
 
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.05em' };
 
-// ── UI Components ────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   UI COMPONENTS
+   ═══════════════════════════════════════════════════════════ */
+
 function TypePill({ type }) {
   const cfg = TYPE_CONFIG[type] || TYPE_CONFIG.custom;
-  return <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: cfg.bg, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{cfg.label}</span>;
+  return (
+    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: cfg.bg, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>
+      {cfg.label}
+    </span>
+  );
 }
 
-function StatusDot({ status }) {
+function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+  const Icon = cfg.icon;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: cfg.color }}>
-      <cfg.icon size={11} /> {cfg.label}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: cfg.color, padding: '2px 8px', borderRadius: 4, background: cfg.bg }}>
+      <Icon size={10} /> {cfg.label}
+    </span>
+  );
+}
+
+function PriorityDot({ priority }) {
+  const cfg = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.medium;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, color: cfg.color }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+      {cfg.label}
     </span>
   );
 }
@@ -70,12 +133,262 @@ function StatusDot({ status }) {
 function PaymentPill({ status }) {
   const colors = { paid: '#22c55e', partial: '#f59e0b', unpaid: '#ef4444', not_applicable: 'var(--tx-3)' };
   const labels = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid', not_applicable: '—' };
-  if (status === 'not_applicable') return null;
+  if (status === 'not_applicable' || !status) return null;
   const c = colors[status] || 'var(--tx-3)';
   return <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: `${c}22`, color: c }}>{labels[status]}</span>;
 }
 
-// ── New / Edit Modal ─────────────────────────────────────────────────────────
+function ProgressBar({ progress, size = 'md' }) {
+  const h = size === 'sm' ? 4 : 6;
+  const done = progress === 100;
+  return (
+    <div style={{ height: h, background: 'var(--bg-elevated)', borderRadius: h, overflow: 'hidden', flex: 1 }}>
+      <div style={{ height: '100%', width: `${progress || 0}%`, background: done ? '#22c55e' : 'var(--accent)', borderRadius: h, transition: 'width .4s ease' }} />
+    </div>
+  );
+}
+
+function AvatarStack({ members = [], max = 4 }) {
+  const show = members.slice(0, max);
+  const extra = members.length - max;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {show.map((m, i) => (
+        <div key={m.id || i} title={m.name} style={{
+          width: 26, height: 26, borderRadius: '50%', background: avatarBg(m.id || m.name || ''),
+          border: '2px solid var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 9, fontWeight: 700, color: '#fff', marginLeft: i > 0 ? -8 : 0,
+          zIndex: max - i, position: 'relative',
+        }}>
+          {initials(m.name)}
+        </div>
+      ))}
+      {extra > 0 && (
+        <span style={{ fontSize: 10, color: 'var(--tx-3)', marginLeft: 4, fontWeight: 600 }}>+{extra}</span>
+      )}
+    </div>
+  );
+}
+
+function DeadlineTag({ dueDate }) {
+  if (!dueDate) return <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>No deadline</span>;
+  const dl = daysUntil(dueDate);
+  const overdue = dl <= 0;
+  const urgent = dl > 0 && dl <= 7;
+  const soon = dl > 7 && dl <= 14;
+  const color = overdue ? '#ef4444' : urgent ? '#ef4444' : soon ? '#f59e0b' : 'var(--tx-3)';
+  const weight = overdue || urgent || soon ? 600 : 400;
+
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color, fontWeight: weight }}>
+      <Calendar size={10} />
+      {formatDate(dueDate)}
+      {overdue && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: '#ef444420', color: '#ef4444', fontWeight: 700 }}>OVERDUE</span>}
+      {urgent && !overdue && <span style={{ fontSize: 9, opacity: 0.8 }}>({dl}d left)</span>}
+      {soon && <span style={{ fontSize: 9, opacity: 0.8 }}>({dl}d)</span>}
+    </span>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   KPI SUMMARY BAR
+   ═══════════════════════════════════════════════════════════ */
+function KpiBar({ projects }) {
+  const active = projects.filter(p => p.status === 'active').length;
+  const planning = projects.filter(p => p.status === 'planning').length;
+  const completed = projects.filter(p => p.status === 'completed').length;
+  const onHold = projects.filter(p => p.status === 'on_hold').length;
+  const totalTasks = projects.reduce((s, p) => s + (p.task_count || 0), 0);
+  const doneTasks = projects.reduce((s, p) => s + (p.completed_task_count || 0), 0);
+  const taskPct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  const kpis = [
+    { label: 'Active', value: active, color: '#22c55e' },
+    { label: 'Planning', value: planning, color: '#f59e0b' },
+    { label: 'Completed', value: completed, color: '#3b82f6' },
+    { label: 'On Hold', value: onHold, color: '#ef4444' },
+    { label: 'Tasks Done', value: `${doneTasks}/${totalTasks}`, sub: `${taskPct}%`, color: 'var(--accent)' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: 0, padding: '12px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0, overflowX: 'auto' }}>
+      {kpis.map((k, i) => (
+        <div key={k.label} style={{
+          paddingRight: i < kpis.length - 1 ? 24 : 0,
+          marginRight: i < kpis.length - 1 ? 24 : 0,
+          borderRight: i < kpis.length - 1 ? '1px solid var(--border)' : 'none',
+          minWidth: 'fit-content',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ fontSize: 18, fontWeight: 800, color: k.color, letterSpacing: '-0.02em' }}>{k.value}</span>
+            {k.sub && <span style={{ fontSize: 11, fontWeight: 600, color: k.color, opacity: 0.7 }}>{k.sub}</span>}
+          </div>
+          <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 1, fontWeight: 500 }}>{k.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECT CARD
+   ═══════════════════════════════════════════════════════════ */
+function ProjectCard({ project, onEdit, onClick }) {
+  const p = project;
+  const dl = daysUntil(p.due_date);
+  const tasksDone = p.completed_task_count || 0;
+  const tasksTotal = p.task_count || 0;
+  const TypeIcon = (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).icon;
+
+  return (
+    <div onClick={onClick} className="card" style={{
+      padding: 0, cursor: 'pointer', transition: 'all .15s ease',
+      border: '1px solid var(--border)', overflow: 'hidden',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+    >
+      {/* Top accent stripe */}
+      <div style={{ height: 3, background: (STATUS_CONFIG[p.status] || STATUS_CONFIG.active).color }} />
+
+      <div style={{ padding: '14px 16px' }}>
+        {/* Header row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
+            <StatusBadge status={p.status} />
+            <PaymentPill status={p.payment_status} />
+          </div>
+          <button onClick={e => { e.stopPropagation(); onEdit(p); }}
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 5, cursor: 'pointer', color: 'var(--tx-3)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, transition: 'all .12s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--tx-1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+          >
+            <Edit3 size={10} /> Edit
+          </button>
+        </div>
+
+        {/* Title & client */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <TypeIcon size={14} color={(TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).color} style={{ flexShrink: 0 }} />
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', margin: 0, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {p.name}
+            </h3>
+          </div>
+          {p.client_name && (
+            <div style={{ fontSize: 11.5, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4, marginLeft: 20 }}>
+              <Folder size={10} /> {p.client_name}
+            </div>
+          )}
+        </div>
+
+        {/* Progress section */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+            <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>
+              <CheckSquare size={10} style={{ marginRight: 3, verticalAlign: -1 }} />
+              {tasksDone}/{tasksTotal} tasks
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: (p.progress || 0) === 100 ? '#22c55e' : 'var(--tx-1)' }}>
+              {p.progress || 0}%
+            </span>
+          </div>
+          <ProgressBar progress={p.progress || 0} />
+        </div>
+
+        {/* Type pill + Priority */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12 }}>
+          <TypePill type={p.project_type} />
+          <PriorityDot priority={p.priority} />
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+          <AvatarStack members={p.team_members || []} max={4} />
+          <DeadlineTag dueDate={p.due_date} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECT TABLE ROW
+   ═══════════════════════════════════════════════════════════ */
+function ProjectTableRow({ project, onEdit, onClick }) {
+  const p = project;
+  return (
+    <tr onClick={onClick} style={{ cursor: 'pointer', transition: 'background .1s' }}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      <td style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 7, background: (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {React.createElement((TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).icon, { size: 14, color: (TYPE_CONFIG[p.project_type] || TYPE_CONFIG.custom).color })}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+            {p.client_name && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>{p.client_name}</div>}
+          </div>
+        </div>
+      </td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}><StatusBadge status={p.status} /></td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}><PriorityDot priority={p.priority} /></td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 120 }}>
+          <ProgressBar progress={p.progress || 0} size="sm" />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-1)', whiteSpace: 'nowrap' }}>{p.progress || 0}%</span>
+        </div>
+      </td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--tx-2)' }}>
+        {p.completed_task_count || 0}/{p.task_count || 0}
+      </td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
+        <AvatarStack members={p.team_members || []} max={3} />
+      </td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
+        <DeadlineTag dueDate={p.due_date} />
+      </td>
+      <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
+        <button onClick={e => { e.stopPropagation(); onEdit(p); }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4, borderRadius: 4 }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--tx-1)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--tx-3)'}
+        >
+          <Edit3 size={13} />
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   GROUP HEADER
+   ═══════════════════════════════════════════════════════════ */
+function GroupHeader({ label, count, color, collapsed, onToggle }) {
+  return (
+    <button onClick={onToggle} style={{
+      display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+      padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer',
+      borderBottom: '1px solid var(--border)', marginBottom: 12, marginTop: 8,
+    }}>
+      <ChevronDown size={14} color="var(--tx-3)" style={{ transition: 'transform .15s', transform: collapsed ? 'rotate(-90deg)' : 'none' }} />
+      {color && <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />}
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>{label}</span>
+      <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>({count})</span>
+    </button>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   PROJECT MODAL (New / Edit)
+   ═══════════════════════════════════════════════════════════ */
 function ProjectModal({ project, onClose, onSave, loading }) {
   const isEdit = !!project;
   const [form, setForm] = useState({
@@ -100,12 +413,22 @@ function ProjectModal({ project, onClose, onSave, loading }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={e => e.stopPropagation()} style={{ width: 520, maxHeight: '85vh', overflow: 'auto' }}>
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)',
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width: 520, maxHeight: '85vh', overflow: 'auto',
+        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+        padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>{isEdit ? 'Edit Project' : 'New Project'}</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)' }}><X size={16} /></button>
+          <button onClick={onClose} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--tx-3)', padding: '4px 6px', display: 'flex' }}>
+            <X size={14} />
+          </button>
         </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={labelStyle}>Project Name *</label>
@@ -163,268 +486,10 @@ function ProjectModal({ project, onClose, onSave, loading }) {
   );
 }
 
-// ── (Legacy) Milestone Manager — moved to ProjectPage.js ─────────────────────
-// eslint-disable-next-line no-unused-vars
-function LegacyMilestoneSection({ project, onToggle, onAdd, onDelete }) {
-  const [newLabel, setNewLabel] = useState('');
-  const completedMilestones = (project.milestones || []).filter(m => m.done).length;
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Milestones ({completedMilestones}/{(project.milestones || []).length})
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        <input className="input-field" placeholder="Add milestone..." value={newLabel}
-          onChange={e => setNewLabel(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && newLabel.trim()) { onAdd(newLabel.trim()); setNewLabel(''); } }}
-          style={{ flex: 1, fontSize: 12, padding: '6px 10px' }} />
-        <button className="btn-primary btn-sm" onClick={() => { if (newLabel.trim()) { onAdd(newLabel.trim()); setNewLabel(''); } }}
-          style={{ padding: '6px 12px' }}><Plus size={12} /></button>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {(project.milestones || []).map((m, i) => (
-          <div key={m.id} style={{ display: 'flex', gap: 10, paddingBottom: 12, position: 'relative' }}>
-            {i < (project.milestones || []).length - 1 && (
-              <div style={{ position: 'absolute', left: 11, top: 24, bottom: 0, width: 2, background: m.done ? '#22c55e30' : 'var(--border)' }} />
-            )}
-            <button onClick={() => onToggle(m.id)}
-              style={{ width: 24, height: 24, borderRadius: '50%', border: m.done ? 'none' : '2px solid var(--border)', background: m.done ? '#22c55e' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, position: 'relative', zIndex: 1, transition: 'all .15s' }}>
-              {m.done && <CheckCircle2 size={14} color="#fff" />}
-            </button>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: m.done ? 'var(--tx-3)' : 'var(--tx-1)', textDecoration: m.done ? 'line-through' : 'none' }}>
-                {m.label}
-              </div>
-            </div>
-            <button onClick={() => onDelete(m.id)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2, opacity: 0.5 }}>
-              <Trash2 size={11} />
-            </button>
-          </div>
-        ))}
-        {(project.milestones || []).length === 0 && (
-          <div style={{ padding: '20px 16px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: 10, fontSize: 12, color: 'var(--tx-3)' }}>
-            No milestones yet
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Detail Panel ─────────────────────────────────────────────────────────────
-function ProjectDetail({ project, onClose, onDelete, onRefresh }) {
-  const [tab, setTab] = useState('overview');
-  const [tasks, setTasks] = useState([]);
-  const [loadingTasks, setLoadingTasks] = useState(false);
-
-  const completedMilestones = (project.milestones || []).filter(m => m.done).length;
-
-  // Load project tasks
-  useEffect(() => {
-    if (tab === 'tasks') {
-      setLoadingTasks(true);
-      ax().get(`${API}/projects/${project.id}/tasks`)
-        .then(r => setTasks(r.data))
-        .catch(() => toast.error('Failed to load tasks'))
-        .finally(() => setLoadingTasks(false));
-    }
-  }, [tab, project.id]);
-
-  const handleToggleMilestone = async (mId) => {
-    try {
-      await ax().patch(`${API}/projects/${project.id}/milestones/${mId}`);
-      onRefresh();
-    } catch { toast.error('Failed to toggle milestone'); }
-  };
-
-  const handleAddMilestone = async (label) => {
-    try {
-      await ax().post(`${API}/projects/${project.id}/milestones`, { label });
-      onRefresh();
-    } catch { toast.error('Failed to add milestone'); }
-  };
-
-  const handleDeleteMilestone = async (mId) => {
-    try {
-      await ax().delete(`${API}/projects/${project.id}/milestones/${mId}`);
-      onRefresh();
-    } catch { toast.error('Failed to delete milestone'); }
-  };
-
-  const toggleTaskDone = async (taskId, currentStatus) => {
-    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
-    try {
-      await ax().patch(`${API}/tasks/${taskId}`, { status: newStatus });
-      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-      onRefresh();
-    } catch { toast.error('Failed to update task'); }
-  };
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'tasks', label: `Tasks (${project.task_count || 0})`, icon: CheckSquare },
-    { id: 'milestones', label: `Milestones (${(project.milestones || []).length})`, icon: Target },
-  ];
-
-  return (
-    <div style={{ width: 480, borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', background: 'var(--bg-card)', animation: 'slideRight 0.18s ease both' }}>
-      {/* Header */}
-      <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-              <TypePill type={project.project_type} />
-              <StatusDot status={project.status} />
-              <PaymentPill status={project.payment_status} />
-            </div>
-            <h2 style={{ fontSize: 15, fontWeight: 800, margin: '0 0 4px', lineHeight: 1.3 }}>{project.name}</h2>
-            {project.client_name && (
-              <div style={{ fontSize: 12, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Folder size={11} /> {project.client_name}
-              </div>
-            )}
-          </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}>
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{project.completed_task_count || 0}/{project.task_count || 0} tasks</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-1)' }}>{project.progress || 0}%</span>
-          </div>
-          <div style={{ height: 6, background: 'var(--bg-elevated)', borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${project.progress || 0}%`, background: project.progress === 100 ? '#22c55e' : 'var(--red)', borderRadius: 3, transition: 'width .3s' }} />
-          </div>
-        </div>
-
-        {/* Quick stats */}
-        <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--tx-3)' }}>
-          <span><Calendar size={10} style={{ marginRight: 3 }} /> Due {project.due_date ? new Date(project.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '—'}</span>
-          <span><Users size={10} style={{ marginRight: 3 }} /> {(project.team_members || []).length} members</span>
-          <span><Target size={10} style={{ marginRight: 3 }} /> {completedMilestones}/{(project.milestones || []).length} milestones</span>
-        </div>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 0, marginTop: 12, marginBottom: -1 }}>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              style={{ flex: 1, padding: '6px 4px 8px', background: 'transparent', border: 'none', borderBottom: tab === t.id ? '2px solid var(--red)' : '2px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .12s' }}>
-              <t.icon size={11} color={tab === t.id ? 'var(--red)' : 'var(--tx-3)'} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: tab === t.id ? 'var(--tx-1)' : 'var(--tx-3)' }}>{t.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
-        {tab === 'overview' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {project.description && (
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Description</div>
-                <div style={{ fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.6, background: 'var(--bg-elevated)', padding: '10px 12px', borderRadius: 8 }}>
-                  {project.description}
-                </div>
-              </div>
-            )}
-
-            {/* Team */}
-            {(project.team_members || []).length > 0 && (
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Team</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {(project.team_members || []).map(m => (
-                    <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--bg-elevated)', borderRadius: 7 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--red-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'var(--red)', flexShrink: 0 }}>
-                        {(m.name || '?').split(' ').map(n => n[0]).join('').substring(0, 2)}
-                      </div>
-                      <span style={{ fontSize: 12, color: 'var(--tx-1)', fontWeight: 500 }}>{m.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Stats grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {[
-                { label: 'Progress', value: `${project.progress || 0}%`, color: project.progress === 100 ? '#22c55e' : 'var(--red)' },
-                { label: 'Tasks Done', value: `${project.completed_task_count || 0}/${project.task_count || 0}`, color: '#22c55e' },
-                { label: 'Milestones', value: `${completedMilestones}/${(project.milestones || []).length}`, color: '#a855f7' },
-                { label: 'Due Date', value: project.due_date ? new Date(project.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—', color: '#06b6d4' },
-              ].map(s => (
-                <div key={s.label} style={{ background: 'var(--bg-elevated)', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 3 }}>{s.label}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.value}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Delete */}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn-ghost btn-sm" style={{ flex: 1, justifyContent: 'center', gap: 4, color: '#ef4444', borderColor: '#ef444430' }}
-                onClick={() => { if (window.confirm('Delete this project and all its tasks?')) onDelete(project.id); }}>
-                <Trash2 size={11} /> Delete Project
-              </button>
-            </div>
-          </div>
-        )}
-
-        {tab === 'tasks' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {loadingTasks && (
-              <div style={{ padding: 32, textAlign: 'center' }}><Loader2 size={20} className="spin" color="var(--tx-3)" /></div>
-            )}
-            {!loadingTasks && tasks.length === 0 && (
-              <div style={{ padding: '32px 16px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: 10 }}>
-                <CheckSquare size={24} color="var(--tx-3)" style={{ marginBottom: 8 }} />
-                <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: 0 }}>No tasks yet. Create tasks from the Tasks page and link them to this project.</p>
-              </div>
-            )}
-            {tasks.map(t => (
-              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)' }}>
-                <button onClick={() => toggleTaskDone(t.id, t.status)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.status === 'done' ? '#22c55e' : 'var(--tx-3)', padding: 0, flexShrink: 0, display: 'flex' }}>
-                  {t.status === 'done' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
-                </button>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 500, color: t.status === 'done' ? 'var(--tx-3)' : 'var(--tx-1)', textDecoration: t.status === 'done' ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {t.title}
-                  </div>
-                  <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 2, display: 'flex', gap: 8 }}>
-                    {t.assignee_name && <span>{t.assignee_name}</span>}
-                    {t.due_at && <span>Due: {new Date(t.due_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>}
-                  </div>
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: t.status === 'done' ? '#22c55e22' : '#3b82f622', color: t.status === 'done' ? '#22c55e' : '#3b82f6' }}>{t.status}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {tab === 'milestones' && (
-          <MilestoneSection
-            project={project}
-            onToggle={handleToggleMilestone}
-            onAdd={handleAddMilestone}
-            onDelete={handleDeleteMilestone}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Main Page ────────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   MAIN PAGE
+   ═══════════════════════════════════════════════════════════ */
 export default function Projects() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -432,9 +497,22 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [filter, setFilter] = useState('All');
-  const [search, setSearch] = useState('');
   const [modal, setModal] = useState(null);
+
+  // View + Filter state (persisted where useful)
+  const [view, setView] = useState(() => localStorage.getItem('projects_view') || 'cards');
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [filterPayment, setFilterPayment] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [groupBy, setGroupBy] = useState('none');
+  const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Persist view
+  useEffect(() => { localStorage.setItem('projects_view', view); }, [view]);
 
   // Fetch projects
   const fetchProjects = useCallback(async () => {
@@ -449,16 +527,86 @@ export default function Projects() {
   }, []);
 
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
-
-  // Open new modal if ?new=1
   useEffect(() => { if (searchParams.get('new') === '1') setModal('new'); }, [searchParams]);
 
-  const filtered = useMemo(() => {
-    return projects
-      .filter(p => filter === 'All' || p.project_type === filter)
-      .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.client_name || '').toLowerCase().includes(search.toLowerCase()));
-  }, [filter, search, projects]);
+  // Count active filters
+  const activeFilterCount = [filterStatus, filterType, filterPriority, filterPayment].filter(f => f !== 'all').length;
 
+  // Filter + Sort + Group
+  const filtered = useMemo(() => {
+    let list = projects
+      .filter(p => filterStatus === 'all' || p.status === filterStatus)
+      .filter(p => filterType === 'all' || p.project_type === filterType)
+      .filter(p => filterPriority === 'all' || p.priority === filterPriority)
+      .filter(p => filterPayment === 'all' || p.payment_status === filterPayment)
+      .filter(p => {
+        if (!search) return true;
+        const q = search.toLowerCase();
+        return p.name.toLowerCase().includes(q) ||
+          (p.client_name || '').toLowerCase().includes(q) ||
+          (p.description || '').toLowerCase().includes(q);
+      });
+
+    // Sort
+    switch (sortBy) {
+      case 'oldest': list.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0)); break;
+      case 'name': list.sort((a, b) => (a.name || '').localeCompare(b.name || '')); break;
+      case 'due_soon': list.sort((a, b) => (daysUntil(a.due_date)) - (daysUntil(b.due_date))); break;
+      case 'progress': list.sort((a, b) => (a.progress || 0) - (b.progress || 0)); break;
+      case 'progress_desc': list.sort((a, b) => (b.progress || 0) - (a.progress || 0)); break;
+      default: list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)); break;
+    }
+
+    return list;
+  }, [projects, filterStatus, filterType, filterPriority, filterPayment, search, sortBy]);
+
+  // Grouping logic
+  const grouped = useMemo(() => {
+    if (groupBy === 'none') return null;
+
+    const groups = {};
+    filtered.forEach(p => {
+      let key, label, color;
+      switch (groupBy) {
+        case 'status':
+          key = p.status || 'active';
+          label = (STATUS_CONFIG[key] || {}).label || key;
+          color = (STATUS_CONFIG[key] || {}).color;
+          break;
+        case 'type':
+          key = p.project_type || 'custom';
+          label = (TYPE_CONFIG[key] || {}).label || key;
+          color = (TYPE_CONFIG[key] || {}).color;
+          break;
+        case 'client':
+          key = p.client_name || '_none';
+          label = p.client_name || 'No Client';
+          color = key === '_none' ? 'var(--tx-3)' : 'var(--accent)';
+          break;
+        case 'priority':
+          key = p.priority || 'medium';
+          label = (PRIORITY_CONFIG[key] || {}).label || key;
+          color = (PRIORITY_CONFIG[key] || {}).color;
+          break;
+        default:
+          key = 'all'; label = 'All'; color = null;
+      }
+      if (!groups[key]) groups[key] = { label, color, items: [] };
+      groups[key].items.push(p);
+    });
+
+    // Order groups logically
+    const order = groupBy === 'status' ? STATUS_OPTIONS :
+                  groupBy === 'type' ? TYPE_OPTIONS :
+                  groupBy === 'priority' ? ['urgent','high','medium','low'] :
+                  Object.keys(groups).sort();
+
+    return order.filter(k => groups[k]).map(k => ({ key: k, ...groups[k] }));
+  }, [filtered, groupBy]);
+
+  const toggleGroup = (key) => setCollapsedGroups(prev => ({ ...prev, [key]: !prev[key] }));
+
+  // CRUD
   const handleSave = async (form) => {
     setSaving(true);
     try {
@@ -479,29 +627,48 @@ export default function Projects() {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await ax().delete(`${API}/projects/${id}`);
-      toast.success('Project deleted');
-      fetchProjects();
-    } catch {
-      toast.error('Failed to delete project');
-    }
+  const clearFilters = () => {
+    setFilterStatus('all');
+    setFilterType('all');
+    setFilterPriority('all');
+    setFilterPayment('all');
+    setSearch('');
   };
 
-  const formatDate = d => d ? new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) : '—';
-  const daysLeft = d => {
-    if (!d) return 999;
-    return Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24));
-  };
+  // Render helpers
+  const renderCards = (items) => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+      {items.map(p => (
+        <ProjectCard key={p.id} project={p} onEdit={setModal} onClick={() => navigate(`/projects/${p.id}`)} />
+      ))}
+    </div>
+  );
 
-  // Stats
-  const activeCount = projects.filter(p => p.status === 'active').length;
-  const planningCount = projects.filter(p => p.status === 'planning').length;
-  const completedCount = projects.filter(p => p.status === 'completed').length;
-  const totalTasks = projects.reduce((s, p) => s + (p.task_count || 0), 0);
-  const doneTasks = projects.reduce((s, p) => s + (p.completed_task_count || 0), 0);
+  const renderTable = (items) => (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr style={{ borderBottom: '2px solid var(--border)' }}>
+            {['Project', 'Status', 'Priority', 'Progress', 'Tasks', 'Team', 'Due Date', ''].map(h => (
+              <th key={h} style={{ padding: '8px 8px 10px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {items.map(p => (
+            <ProjectTableRow key={p.id} project={p} onEdit={setModal} onClick={() => navigate(`/projects/${p.id}`)} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
+  const renderContent = (items) => view === 'cards' ? renderCards(items) : renderTable(items);
+
+
+  /* ── Loading state ── */
   if (loading) {
     return (
       <div className="page-fill" style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -511,7 +678,7 @@ export default function Projects() {
   }
 
   return (
-    <div className="page-fill" style={{ flexDirection: 'row' }}>
+    <div className="page-fill" style={{ flexDirection: 'column' }}>
       {modal && (
         <ProjectModal
           project={typeof modal === 'object' ? modal : null}
@@ -521,118 +688,191 @@ export default function Projects() {
         />
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <h1 style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.03em', margin: 0 }}>Projects</h1>
-          <span style={{ fontSize: 12, color: 'var(--tx-3)', padding: '2px 8px', background: 'var(--bg-elevated)', borderRadius: 10 }}>{filtered.length}</span>
-          <div style={{ flex: 1 }} />
-          <div style={{ position: 'relative' }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects..."
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, padding: '6px 10px', fontSize: 12.5, color: 'var(--tx-1)', outline: 'none', width: 180 }} />
-          </div>
-          <button onClick={() => setModal('new')} className="btn-primary btn-sm" style={{ gap: 5 }}>
-            <Plus size={13} /> New Project
-          </button>
-        </div>
-
-        {/* Stats strip */}
-        <div style={{ display: 'flex', gap: 0, padding: '8px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          {[
-            { label: 'Active', value: activeCount, color: '#22c55e' },
-            { label: 'Planning', value: planningCount, color: '#f59e0b' },
-            { label: 'Completed', value: completedCount, color: '#3b82f6' },
-            { label: 'Tasks Done', value: `${doneTasks}/${totalTasks}`, color: 'var(--tx-1)' },
-          ].map((m, i) => (
-            <div key={i} style={{ paddingRight: 20, marginRight: 20, borderRight: i < 3 ? '1px solid var(--border)' : 'none' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 1 }}>{m.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 4, padding: '8px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          {['All', ...TYPE_OPTIONS].map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ padding: '4px 10px', borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: '1px solid', borderColor: filter === f ? 'var(--red)' : 'var(--border)', background: filter === f ? 'var(--red-bg)' : 'transparent', color: filter === f ? 'var(--red)' : 'var(--tx-3)', transition: 'all .1s' }}>
-              {f === 'All' ? 'All' : (TYPE_CONFIG[f] || {}).label || f}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14, alignContent: 'start' }}>
-          {filtered.map(p => {
-            const dl = daysLeft(p.due_date);
-
-            return (
-              <div key={p.id} onClick={() => navigate(`/projects/${p.id}`)}
-                className="card" style={{ padding: '16px 18px', cursor: 'pointer', transition: 'all .12s' }}>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <TypePill type={p.project_type} />
-                    <StatusDot status={p.status} />
-                    <PaymentPill status={p.payment_status} />
-                  </div>
-                  <button onClick={e => { e.stopPropagation(); setModal(p); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2 }}>
-                    <Edit3 size={12} />
-                  </button>
-                </div>
-
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 4px', lineHeight: 1.3 }}>{p.name}</h3>
-                {p.client_name && (
-                  <div style={{ fontSize: 11.5, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10 }}>
-                    <Folder size={10} /> {p.client_name}
-                  </div>
-                )}
-
-                {/* Progress */}
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{p.completed_task_count || 0}/{p.task_count || 0} tasks</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-1)' }}>{p.progress || 0}%</span>
-                  </div>
-                  <div style={{ height: 5, background: 'var(--bg-elevated)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${p.progress || 0}%`, background: p.progress === 100 ? '#22c55e' : 'var(--red)', borderRadius: 3, transition: 'width .3s' }} />
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', gap: -4 }}>
-                    {(p.team_members || []).slice(0, 3).map((m, i) => (
-                      <div key={m.id} style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--bg-elevated)', border: '2px solid var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'var(--tx-1)', marginLeft: i > 0 ? -6 : 0, zIndex: 3 - i, position: 'relative' }} title={m.name}>
-                        {(m.name || '?').split(' ').map(n => n[0]).join('').substring(0, 2)}
-                      </div>
-                    ))}
-                    {(p.team_members || []).length > 3 && <span style={{ fontSize: 10, color: 'var(--tx-3)', marginLeft: 4 }}>+{(p.team_members || []).length - 3}</span>}
-                  </div>
-                  <span style={{ fontSize: 11, color: dl <= 7 ? '#ef4444' : dl <= 14 ? '#f59e0b' : 'var(--tx-3)', fontWeight: dl <= 14 ? 600 : 400, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Calendar size={10} /> {formatDate(p.due_date)}
-                    {dl <= 14 && dl > 0 && <span>({dl}d)</span>}
-                    {dl <= 0 && p.due_date && <span style={{ color: '#ef4444' }}>Overdue</span>}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div style={{ gridColumn: '1/-1', padding: '60px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize:32, marginBottom:12, opacity:0.5 }}>📋</div>
-              <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>
-                {projects.length === 0 ? 'No projects yet' : 'No projects match your filters'}
-              </div>
-              <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '0 auto', maxWidth: 360 }}>
-                {projects.length === 0 ? 'Projects organize tasks, deadlines, and deliverables for each client engagement.' : 'Try adjusting your search or filters.'}
-              </p>
-            </div>
-          )}
-        </div>
+      {/* ── Page Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <FolderKanban size={18} color="var(--accent)" />
+        <h1 style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-.03em', margin: 0 }}>Projects</h1>
+        <span style={{ fontSize: 11, color: 'var(--tx-3)', padding: '2px 8px', background: 'var(--bg-elevated)', borderRadius: 10, fontWeight: 600 }}>
+          {filtered.length}{filtered.length !== projects.length ? ` / ${projects.length}` : ''}
+        </span>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => setModal('new')} className="btn-primary btn-sm" style={{ gap: 5 }}>
+          <Plus size={13} /> New Project
+        </button>
       </div>
 
+      {/* ── KPI Bar ── */}
+      <KpiBar projects={projects} />
+
+      {/* ── Toolbar: Search, Filters, Sort, View, Group ── */}
+      <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        {/* Top row */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: '1 1 200px', maxWidth: 280 }}>
+            <Search size={13} color="var(--tx-3)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects..."
+              style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 7, padding: '7px 10px 7px 30px', fontSize: 12.5, color: 'var(--tx-1)', outline: 'none' }}
+              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
+
+          {/* Filter toggle */}
+          <button onClick={() => setShowFilters(!showFilters)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
+              background: showFilters || activeFilterCount > 0 ? 'var(--accent)' : 'var(--bg-elevated)',
+              color: showFilters || activeFilterCount > 0 ? '#fff' : 'var(--tx-2)',
+              border: '1px solid', borderColor: showFilters || activeFilterCount > 0 ? 'var(--accent)' : 'var(--border)',
+              borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .12s',
+            }}>
+            <Filter size={12} />
+            Filters
+            {activeFilterCount > 0 && (
+              <span style={{ background: '#fff', color: 'var(--accent)', fontSize: 10, fontWeight: 800, padding: '0 5px', borderRadius: 8, lineHeight: '16px' }}>
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          <div style={{ flex: 1 }} />
+
+          {/* Sort */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <ArrowUpDown size={11} color="var(--tx-3)" />
+            <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+
+          {/* Group by */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Layers size={11} color="var(--tx-3)" />
+            <select value={groupBy} onChange={e => setGroupBy(e.target.value)}
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+              {GROUP_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+
+          {/* View toggle */}
+          <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            {[
+              { id: 'cards', icon: Grid3X3 },
+              { id: 'table', icon: List },
+            ].map(v => (
+              <button key={v.id} onClick={() => setView(v.id)}
+                style={{
+                  padding: '5px 10px', background: view === v.id ? 'var(--accent)' : 'var(--bg-elevated)',
+                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  color: view === v.id ? '#fff' : 'var(--tx-3)', transition: 'all .1s',
+                }}>
+                <v.icon size={13} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Filter row (collapsible) */}
+        {showFilters && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Status</span>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All</option>
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Type</span>
+              <select value={filterType} onChange={e => setFilterType(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All</option>
+                {TYPE_OPTIONS.map(t => <option key={t} value={t}>{TYPE_CONFIG[t].label}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Priority</span>
+              <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All</option>
+                {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Payment</span>
+              <select value={filterPayment} onChange={e => setFilterPayment(e.target.value)}
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
+                <option value="all">All</option>
+                {PAYMENT_OPTIONS.filter(o => o.value !== 'not_applicable').map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'none', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11, color: 'var(--tx-3)', cursor: 'pointer' }}>
+                <X size={10} /> Clear all
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Content Area ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+        {filtered.length === 0 ? (
+          /* Empty state */
+          <div style={{ padding: '80px 20px', textAlign: 'center', maxWidth: 400, margin: '0 auto' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 16, background: 'var(--bg-elevated)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+            }}>
+              <FolderKanban size={28} color="var(--tx-3)" />
+            </div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 8px' }}>
+              {projects.length === 0 ? 'No projects yet' : 'No projects match your filters'}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '0 0 20px', lineHeight: 1.6 }}>
+              {projects.length === 0
+                ? 'Projects organize tasks, deadlines, and deliverables for each client engagement. Create your first one to get started.'
+                : 'Try adjusting your search or filters to find what you\'re looking for.'}
+            </p>
+            {projects.length === 0 ? (
+              <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
+                <Plus size={14} /> Create First Project
+              </button>
+            ) : (
+              <button onClick={clearFilters} className="btn-ghost" style={{ gap: 6 }}>
+                <X size={12} /> Clear Filters
+              </button>
+            )}
+          </div>
+        ) : grouped ? (
+          /* Grouped view */
+          <div>
+            {grouped.map(g => (
+              <div key={g.key} style={{ marginBottom: 8 }}>
+                <GroupHeader
+                  label={g.label}
+                  count={g.items.length}
+                  color={g.color}
+                  collapsed={!!collapsedGroups[g.key]}
+                  onToggle={() => toggleGroup(g.key)}
+                />
+                {!collapsedGroups[g.key] && renderContent(g.items)}
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Flat view */
+          renderContent(filtered)
+        )}
+      </div>
     </div>
   );
 }
