@@ -960,7 +960,7 @@ export default function ProjectPage() {
             )}
 
             {/* Stats grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24 }}>
+            <div className="metrics-grid-4">
               {[
                 { label: 'Progress', value: `${project.progress || 0}%`, color: project.progress === 100 ? '#22c55e' : 'var(--red)', icon: BarChart3 },
                 { label: 'Tasks', value: `${project.completed_task_count || 0}/${project.task_count || 0}`, color: '#22c55e', icon: CheckSquare },

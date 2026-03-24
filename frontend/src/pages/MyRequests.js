@@ -393,7 +393,7 @@ export default function MyRequests() {
       </div>
 
       {/* KPI Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+      <div className="metrics-grid-4">
         {[
           { label: 'Total Requests', value: counts.total, color: 'var(--tx-1)', icon: FileText },
           { label: 'Open', value: counts.open, color: '#3b82f6', icon: Circle },

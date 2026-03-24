@@ -472,7 +472,7 @@ export default function Reports() {
 
       {/* SLA Status */}
       {slaCards.length > 0 && (
-        <div style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24 }}>
+        <div className="metrics-grid-3">
           {slaCards.map(({ label,value,color }) => (
             <div key={label} className="card" style={{ padding:'16px 18px',borderLeft:`3px solid ${color}` }}>
               <span style={{ fontSize:11,color:'var(--tx-3)',fontWeight:600,textTransform:'uppercase' }}>{label}</span>

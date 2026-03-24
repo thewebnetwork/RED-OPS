@@ -276,7 +276,7 @@ function OverviewTab({ member, team, tasks, files, tasksThisWeek, completedMonth
   return (
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px' }}>
       {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24 }}>
+      <div className="metrics-grid-4">
         {[
           { label: 'Capacity', value: `${utilization}%`, color: capColor(utilization), icon: Activity },
           { label: 'Done/mo', value: completedMonth, color: '#22c55e', icon: CheckSquare },

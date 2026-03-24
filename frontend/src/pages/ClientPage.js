@@ -383,7 +383,7 @@ export default function ClientPage() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div className="metrics-grid-5">
         {[
           { label: 'Total Tasks', value: taskStats.total, icon: CheckSquare, color: 'var(--accent)' },
           { label: 'In Progress', value: taskStats.inProgress, icon: Zap, color: 'var(--yellow)' },

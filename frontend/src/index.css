@@ -830,14 +830,32 @@ kbd {
   margin-bottom: 24px;
 }
 
+.metrics-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.metrics-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
 @media (max-width: 900px) {
   .metrics-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .metrics-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .metrics-grid-5 { grid-template-columns: repeat(3, 1fr); }
+  .metrics-grid-6 { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 500px) {
   .metrics-grid-4 { grid-template-columns: 1fr; }
   .metrics-grid-3 { grid-template-columns: 1fr; }
+  .metrics-grid-5 { grid-template-columns: repeat(2, 1fr); }
+  .metrics-grid-6 { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── 22. TWO-COL LAYOUT ────────────────────────────────────── */

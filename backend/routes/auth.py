@@ -3,7 +3,7 @@ import uuid
 import pyotp
 import secrets
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, Request
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict
 
@@ -211,15 +211,55 @@ async def send_password_reset_email(to_email: str, user_name: str, reset_link: s
 # ============== ROUTES ==============
 
 @router.post("/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
+async def login(request: LoginRequest, req: Request):
     """Authenticate user and return JWT token"""
     user = await db.users.find_one({"email": request.email.lower()}, {"_id": 0})
     if not user or not verify_password(request.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not user.get("active", True):
         raise HTTPException(status_code=401, detail="Account is deactivated")
-    
+
     token = create_access_token({"sub": user["id"], "role": user["role"]})
+
+    # Record session
+    ua = req.headers.get("user-agent", "")
+    browser = "Unknown"
+    platform = "Unknown"
+    if "Chrome" in ua and "Edg" not in ua:
+        browser = "Chrome"
+    elif "Safari" in ua and "Chrome" not in ua:
+        browser = "Safari"
+    elif "Firefox" in ua:
+        browser = "Firefox"
+    elif "Edg" in ua:
+        browser = "Edge"
+    if "Windows" in ua:
+        platform = "Windows"
+    elif "Macintosh" in ua or "Mac OS" in ua:
+        platform = "macOS"
+    elif "iPhone" in ua or "iPad" in ua:
+        platform = "iOS"
+    elif "Android" in ua:
+        platform = "Android"
+    elif "Linux" in ua:
+        platform = "Linux"
+
+    client_ip = req.headers.get("x-forwarded-for", req.client.host if req.client else "unknown")
+    if "," in client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+
+    await db.sessions.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "token_prefix": token[:16],
+        "browser": browser,
+        "platform": platform,
+        "ip": client_ip,
+        "user_agent": ua[:256],
+        "last_active": get_utc_now(),
+        "created_at": get_utc_now(),
+    })
+
     user_response = await build_user_response(user)
     return LoginResponse(token=token, user=user_response)
 
@@ -520,3 +560,46 @@ async def disable_otp(
     )
     
     return {"message": "Two-factor authentication disabled"}
+
+
+# ============== SESSION MANAGEMENT ==============
+
+@router.get("/sessions")
+async def list_sessions(req: Request, current_user: dict = Depends(get_current_user)):
+    """List active sessions for the current user."""
+    sessions = await db.sessions.find(
+        {"user_id": current_user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(20)
+
+    # Mark current session
+    auth_header = req.headers.get("authorization", "")
+    current_token_prefix = auth_header.replace("Bearer ", "")[:16] if auth_header.startswith("Bearer ") else ""
+
+    result = []
+    for s in sessions:
+        result.append({
+            "id": s["id"],
+            "browser": s.get("browser", "Unknown"),
+            "platform": s.get("platform", "Unknown"),
+            "ip": s.get("ip", ""),
+            "last_active": s.get("last_active", s.get("created_at", "")),
+            "current": s.get("token_prefix", "") == current_token_prefix,
+        })
+    return result
+
+
+@router.delete("/sessions/{session_id}")
+async def revoke_session(session_id: str, current_user: dict = Depends(get_current_user)):
+    """Revoke a specific session."""
+    result = await db.sessions.delete_one({"id": session_id, "user_id": current_user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"message": "Session revoked"}
+
+
+@router.delete("/sessions")
+async def revoke_all_sessions(current_user: dict = Depends(get_current_user)):
+    """Revoke all sessions for the current user."""
+    await db.sessions.delete_many({"user_id": current_user["id"]})
+    return {"message": "All sessions revoked"}

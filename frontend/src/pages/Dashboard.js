@@ -290,7 +290,7 @@ function OperatorDashboard() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+        <div className="metrics-grid-4">
           <AggregatePill icon={Inbox} label="Open Requests" color="#3b82f6" value={loading ? null : (metrics?.kpi?.open || 0) + (metrics?.kpi?.in_progress || 0)} loading={loading} />
           <AggregatePill icon={CheckCircle2} label="Deliveries MTD" color="#22c55e" value={loading ? null : metrics?.kpi?.delivered || 0} loading={loading} />
           <AggregatePill icon={Target} label="Open Tasks" color="#f59e0b" value={loading ? null : tasks.filter(t => t.status !== 'done').length} loading={loading} />
@@ -464,7 +464,7 @@ function AgencyDashboard() {
         </div>
 
         {/* Aggregate KPI Strip */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10, marginBottom: 24 }}>
+        <div className="metrics-grid-6">
           <AggregatePill icon={Users} label="Clients" color="#8b5cf6" value={agg.total_clients} loading={loading} />
           <AggregatePill icon={Inbox} label="Open Requests" color="#3b82f6" value={agg.total_open_requests} loading={loading} />
           <AggregatePill icon={FolderOpen} label="Active Projects" color="#f59e0b" value={agg.total_active_projects} loading={loading} />
