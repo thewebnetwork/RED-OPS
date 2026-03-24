@@ -134,6 +134,8 @@ class OrderResponse(BaseModel):
     service_fields: Optional[dict] = None
     # Queue routing
     assigned_queue_key: Optional[str] = None
+    # Linked project (auto-created for client service requests)
+    project_id: Optional[str] = None
 
 
 class CloseOrderRequest(BaseModel):
@@ -585,7 +587,58 @@ async def create_order(
         pass
     
     await db.orders.insert_one(order)
-    
+
+    # ── Auto-create admin project for Media Client service requests ──────────
+    if not is_draft and current_user.get("account_type") == "Media Client":
+        try:
+            # Find the platform org for admin-side project
+            platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
+            admin_org_id = platform_org["id"] if platform_org else None
+
+            if not admin_org_id:
+                # Fallback: find any admin user's org_id
+                admin_user = await db.users.find_one({"role": "Administrator"}, {"_id": 0, "org_id": 1, "id": 1})
+                admin_org_id = admin_user.get("org_id") if admin_user else None
+
+            if admin_org_id:
+                project_id = str(uuid.uuid4())
+                project_name = f"{service_name or order_data.title} — {current_user['name']}"
+                project_doc = {
+                    "id": project_id,
+                    "org_id": admin_org_id,
+                    "name": project_name,
+                    "description": f"Auto-created from service request {order['order_code']}.\n\n{order_data.description[:500] if order_data.description else ''}",
+                    "project_type": "one_off",
+                    "status": "planning",
+                    "priority": "medium",
+                    "client_name": current_user["name"],
+                    "due_date": None,
+                    "team_member_ids": [],
+                    "milestones": [],
+                    "payment_status": "not_applicable",
+                    "tags": [service_name or "Service Request", order["order_code"]],
+                    "progress": 0,
+                    "task_count": 0,
+                    "completed_task_count": 0,
+                    "created_by_user_id": "system",
+                    "linked_order_id": order["id"],
+                    "source": "service_request",
+                    "created_at": created_at,
+                    "updated_at": created_at,
+                }
+                await db.projects.insert_one(project_doc)
+
+                # Link project back to the order
+                await db.orders.update_one(
+                    {"id": order["id"]},
+                    {"$set": {"project_id": project_id}}
+                )
+                order["project_id"] = project_id
+
+                logging.info(f"Auto-created project {project_id} for order {order['order_code']} (client: {current_user['name']})")
+        except Exception as e:
+            logging.error(f"Failed to auto-create project for order {order['order_code']}: {e}")
+
     # Only notify/trigger workflows for non-draft orders
     if not is_draft:
         # Send email notification to requester

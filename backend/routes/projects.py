@@ -68,8 +68,15 @@ def _get_org_role(user: dict) -> str:
     return "member"
 
 
-def _can_manage_project(org_role: str) -> bool:
-    """Check if role can create/edit/delete projects."""
+def _is_media_client(user: dict) -> bool:
+    """Check if user is a Media Client."""
+    return user.get("account_type") == "Media Client" or user.get("role") == "Media Client"
+
+
+def _can_manage_project(org_role: str, user: dict = None) -> bool:
+    """Check if role can create/edit/delete projects. Media Clients can manage their own."""
+    if user and _is_media_client(user):
+        return True  # Clients can manage their own projects
     return org_role in ("owner", "admin", "manager")
 
 
@@ -133,7 +140,7 @@ async def create_project(
     org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
-    if not _can_manage_project(org_role):
+    if not _can_manage_project(org_role, current_user):
         raise HTTPException(status_code=403, detail="You don't have permission to create projects")
 
     # Validate team members exist and belong to org
@@ -192,21 +199,30 @@ async def list_projects(
     search: Optional[str] = Query(None),
     current_user: dict = Depends(get_current_user),
 ):
-    """List projects in the user's org."""
-    org_id = await _get_org_id(current_user)
+    """List projects in the user's org. Media Clients only see their own projects."""
+    is_client = _is_media_client(current_user)
 
-    query = {"org_id": org_id}
+    if is_client:
+        # Clients see only projects they created (their personal workspace)
+        query = {"created_by_user_id": current_user["id"]}
+    else:
+        org_id = await _get_org_id(current_user)
+        query = {"org_id": org_id}
 
     if status:
         query["status"] = status
     if project_type:
         query["project_type"] = project_type
     if search:
-        query["$or"] = [
+        search_filter = [
             {"name": {"$regex": search, "$options": "i"}},
             {"client_name": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}},
         ]
+        if "$or" in query:
+            query["$and"] = [{"$or": query.pop("$or")}, {"$or": search_filter}]
+        else:
+            query["$or"] = search_filter
 
     projects = await db.projects.find(query, {"_id": 0}).sort("updated_at", -1).to_list(500)
 
@@ -224,12 +240,20 @@ async def get_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a single project by ID."""
-    org_id = await _get_org_id(current_user)
+    is_client = _is_media_client(current_user)
 
-    project = await db.projects.find_one(
-        {"id": project_id, "org_id": org_id},
-        {"_id": 0}
-    )
+    if is_client:
+        # Clients can only see projects they created
+        project = await db.projects.find_one(
+            {"id": project_id, "created_by_user_id": current_user["id"]},
+            {"_id": 0}
+        )
+    else:
+        org_id = await _get_org_id(current_user)
+        project = await db.projects.find_one(
+            {"id": project_id, "org_id": org_id},
+            {"_id": 0}
+        )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -244,16 +268,23 @@ async def update_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Update a project."""
+    is_client = _is_media_client(current_user)
     org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
-    if not _can_manage_project(org_role):
+    if not _can_manage_project(org_role, current_user):
         raise HTTPException(status_code=403, detail="You don't have permission to edit projects")
 
-    project = await db.projects.find_one(
-        {"id": project_id, "org_id": org_id},
-        {"_id": 0}
-    )
+    if is_client:
+        project = await db.projects.find_one(
+            {"id": project_id, "created_by_user_id": current_user["id"]},
+            {"_id": 0}
+        )
+    else:
+        project = await db.projects.find_one(
+            {"id": project_id, "org_id": org_id},
+            {"_id": 0}
+        )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -278,21 +309,28 @@ async def delete_project(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete a project and optionally its tasks."""
+    is_client = _is_media_client(current_user)
     org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
-    if org_role not in ("owner", "admin"):
-        raise HTTPException(status_code=403, detail="Only owners and admins can delete projects")
-
-    project = await db.projects.find_one(
-        {"id": project_id, "org_id": org_id},
-        {"_id": 0, "id": 1}
-    )
+    if is_client:
+        # Clients can delete their own projects
+        project = await db.projects.find_one(
+            {"id": project_id, "created_by_user_id": current_user["id"]},
+            {"_id": 0, "id": 1}
+        )
+    else:
+        if org_role not in ("owner", "admin"):
+            raise HTTPException(status_code=403, detail="Only owners and admins can delete projects")
+        project = await db.projects.find_one(
+            {"id": project_id, "org_id": org_id},
+            {"_id": 0, "id": 1}
+        )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
     # Delete associated tasks
-    await db.tasks.delete_many({"project_id": project_id, "org_id": org_id})
+    await db.tasks.delete_many({"project_id": project_id})
 
     # Delete project
     await db.projects.delete_one({"id": project_id})

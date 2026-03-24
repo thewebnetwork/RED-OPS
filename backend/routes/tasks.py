@@ -313,14 +313,22 @@ async def list_tasks(
     - Operator: Tasks in their org based on visibility
     """
     query = {}
-    
+
     # Enforce org filtering
     user_org_id = get_user_org_id(current_user)
     is_admin = current_user.get("role") == "Administrator"
     is_internal = current_user.get("account_type") == "Internal Staff"
-    
-    # Admin/Internal querying by request_id can see tasks across orgs (linked tasks view)
-    if request_id and (is_admin or is_internal):
+    is_client = current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client"
+
+    if is_client:
+        # Media Clients see only tasks they created or are assigned to (their own workspace)
+        query["$or"] = [
+            {"created_by_user_id": current_user["id"]},
+            {"assignee_user_id": current_user["id"]},
+            {"client_id": current_user["id"]},
+        ]
+    elif request_id and (is_admin or is_internal):
+        # Admin/Internal querying by request_id can see tasks across orgs (linked tasks view)
         pass  # No org filter — they see all linked tasks for the request
     elif org_id and org_id != user_org_id:
         if not is_admin:
@@ -335,11 +343,10 @@ async def list_tasks(
             ]
         else:
             query["org_id"] = user_org_id
-    
-    # Apply visibility filter based on user type
-    if current_user.get("account_type") == "Media Client":
-        # Client can only see client or both
-        query["visibility"] = {"$in": ["client", "both"]}
+
+    # Apply visibility filter based on user type (skip for clients — already scoped above)
+    if is_client:
+        pass  # Client scoping already handled above
     elif visibility:
         query["visibility"] = visibility
     
@@ -435,17 +442,9 @@ async def create_task(
 
     # Client-specific restrictions
     if is_client:
-        # Clients can only create client-visible tasks
-        if task_data.visibility not in ("client", "both"):
-            raise HTTPException(status_code=403, detail="Clients can only create client-visible tasks")
-        # Clients can only assign to self or their account manager
-        if task_data.assignee_user_id:
-            am_id = current_user.get("account_manager_id")
-            allowed_assignees = {current_user["id"]}
-            if am_id:
-                allowed_assignees.add(am_id)
-            if task_data.assignee_user_id not in allowed_assignees:
-                raise HTTPException(status_code=403, detail="You can only assign tasks to yourself or your account manager")
+        # Default visibility to 'client' for client-created tasks
+        if not task_data.visibility or task_data.visibility == "internal":
+            task_data.visibility = "client"
 
     # Verify assignee exists (if provided)
     if task_data.assignee_user_id:
@@ -484,12 +483,18 @@ async def create_task(
 
     # Validate project_id if provided
     if task_data.project_id:
-        project = await db.projects.find_one(
-            {"id": task_data.project_id, "org_id": effective_org_id},
-            {"_id": 0, "id": 1}
-        )
+        if is_client:
+            project = await db.projects.find_one(
+                {"id": task_data.project_id, "created_by_user_id": current_user["id"]},
+                {"_id": 0, "id": 1}
+            )
+        else:
+            project = await db.projects.find_one(
+                {"id": task_data.project_id, "org_id": effective_org_id},
+                {"_id": 0, "id": 1}
+            )
         if not project:
-            raise HTTPException(status_code=404, detail="Project not found in this organization")
+            raise HTTPException(status_code=404, detail="Project not found")
 
     # Validate parent_task_id if provided (subtask)
     if task_data.parent_task_id:
