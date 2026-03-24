@@ -511,6 +511,8 @@ async def create_task(
         "status": task_data.status,
         "priority": task_data.priority if hasattr(task_data, 'priority') else "medium",
         "assignee_user_id": task_data.assignee_user_id,
+        "client_id": task_data.client_id,
+        "client_name": task_data.client_name,
         "created_by_user_id": current_user["id"],
         "visibility": task_data.visibility,
         "task_type": task_data.task_type,
@@ -631,6 +633,10 @@ async def update_task(
         update_data["position"] = task_update.position
     if task_update.completed_at is not None:
         update_data["completed_at"] = task_update.completed_at
+    if task_update.client_id is not None:
+        update_data["client_id"] = task_update.client_id
+    if task_update.client_name is not None:
+        update_data["client_name"] = task_update.client_name
 
     update_data["updated_at"] = datetime.now(timezone.utc)
     await db.tasks.update_one({"id": task_id}, {"$set": update_data})

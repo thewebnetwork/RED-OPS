@@ -1,14 +1,14 @@
 /**
- * ClientPage — Full Client Profile (like ProjectPage)
+ * ClientPage — Full Client Profile with Task Management
  *
  * /clients/:id
  *
- * Tabs:
- *   • Overview — client info, health score, plan, contact, portal status
- *   • Tasks — all tasks tagged/assigned to this client
- *   • Projects — all projects with this client_name
- *   • Requests — orders/requests from this client
- *   • Activity & Notes — internal notes + activity log
+ * Features:
+ *   • Quick actions bar: Add Task, Create Project, View Requests
+ *   • KPI cards: Total Tasks, In Progress, Completed, Projects, Requests
+ *   • Tabs: Overview, Tasks, Projects, Requests, Notes
+ *   • Add Task Modal with full form
+ *   • Inline status toggle on task rows
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ import {
   Circle, Send, Clock, Star, Activity, FileText, FolderKanban,
   CheckSquare, MessageSquare, Plus, Search, X, Edit2, ChevronRight,
   Eye, DollarSign, Calendar, Zap, ExternalLink, Tag, Loader2,
-  AlertCircle, TrendingUp, ShoppingBag, Layers,
+  AlertCircle, TrendingUp, ShoppingBag, Layers, Briefcase,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -96,9 +96,23 @@ export default function ClientPage() {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [ordersLoading, setOrdersLoading] = useState(false);
+
+  // Add Task Modal
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [addTaskLoading, setAddTaskLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    status: 'todo',
+    assignee_user_id: '',
+    project_id: '',
+    due_at: '',
+  });
 
   // Notes (local for now — no backend endpoint)
   const [notes, setNotes] = useState(() => {
@@ -172,14 +186,26 @@ export default function ClientPage() {
     finally { setOrdersLoading(false); }
   }, [id]);
 
+  // ── Fetch all users for assignee dropdown ──
+  const fetchUsers = useCallback(async () => {
+    try {
+      const { data } = await ax().get(`${API}/users`);
+      const arr = Array.isArray(data) ? data : data?.items || [];
+      // Filter to internal staff only (not clients)
+      const staff = arr.filter(u => u.role !== 'client' && u.role !== 'user');
+      setUsers(staff);
+    } catch { setUsers([]); }
+  }, []);
+
   useEffect(() => { fetchClient(); }, [fetchClient]);
   useEffect(() => {
     if (client) {
       fetchTasks();
       fetchProjects();
       fetchOrders();
+      fetchUsers();
     }
-  }, [client, fetchTasks, fetchProjects, fetchOrders]);
+  }, [client, fetchTasks, fetchProjects, fetchOrders, fetchUsers]);
 
   // Save notes to localStorage
   useEffect(() => {
@@ -195,6 +221,64 @@ export default function ClientPage() {
 
   const deleteNote = (noteId) => {
     setNotes(prev => prev.filter(n => n.id !== noteId));
+  };
+
+  // ── Add Task ──
+  const handleAddTask = async () => {
+    if (!formData.title.trim()) {
+      toast.error('Task title is required');
+      return;
+    }
+
+    setAddTaskLoading(true);
+    try {
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        status: formData.status,
+        priority: formData.priority,
+        assignee_user_id: formData.assignee_user_id || null,
+        client_id: id,
+        client_name: clientName,
+        project_id: formData.project_id || null,
+        visibility: 'internal',
+        due_at: formData.due_at || null,
+      };
+      await ax().post(`${API}/tasks`, payload);
+      toast.success('Task created');
+      setShowAddTaskModal(false);
+      setFormData({
+        title: '',
+        description: '',
+        priority: 'medium',
+        status: 'todo',
+        assignee_user_id: '',
+        project_id: '',
+        due_at: '',
+      });
+      fetchTasks();
+    } catch (err) {
+      toast.error('Failed to create task');
+      console.error(err);
+    } finally {
+      setAddTaskLoading(false);
+    }
+  };
+
+  // ── Toggle Task Status ──
+  const handleStatusToggle = async (taskId, currentStatus) => {
+    const statuses = ['backlog', 'todo', 'doing', 'waiting_on_client', 'review', 'done'];
+    const idx = statuses.indexOf(currentStatus);
+    const nextStatus = statuses[(idx + 1) % statuses.length];
+
+    try {
+      await ax().patch(`${API}/tasks/${taskId}`, { status: nextStatus });
+      toast.success(`Task moved to ${TASK_STATUS_CONFIG[nextStatus].label}`);
+      fetchTasks();
+    } catch (err) {
+      toast.error('Failed to update task');
+      console.error(err);
+    }
   };
 
   // ── Derived ──
@@ -262,6 +346,28 @@ export default function ClientPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* ── Quick Actions Bar ── */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+        <button
+          onClick={() => setShowAddTaskModal(true)}
+          style={{ ...btnPrimary, background: 'var(--accent)' }}
+        >
+          <Plus size={14} /> Add Task
+        </button>
+        <button
+          onClick={() => navigate(`/projects?client=${encodeURIComponent(clientName)}`)}
+          style={{ ...btnSecondary }}
+        >
+          <Briefcase size={14} /> Create Project
+        </button>
+        <button
+          onClick={() => setTab('requests')}
+          style={{ ...btnSecondary }}
+        >
+          <ShoppingBag size={14} /> View Requests
+        </button>
       </div>
 
       {/* ── KPI Cards ── */}
@@ -402,37 +508,57 @@ export default function ClientPage() {
           {tasksLoading ? (
             <div style={{ textAlign: 'center', padding: 40 }}><Loader2 size={24} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
           ) : tasks.length === 0 ? (
-            <EmptyState icon={CheckSquare} title="No tasks yet" subtitle="Tasks assigned to this client will appear here" />
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+                <button onClick={() => setShowAddTaskModal(true)} style={btnPrimary}>
+                  <Plus size={14} /> Add Task
+                </button>
+              </div>
+              <EmptyState icon={CheckSquare} title="No tasks yet" subtitle="Tasks assigned to this client will appear here" />
+            </div>
           ) : (
-            <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-              {tasks.map((task, i) => {
-                const st = TASK_STATUS_CONFIG[task.status] || { label: task.status, color: 'var(--tx-3)' };
-                const pri = PRIORITY_CONFIG[task.priority] || { label: task.priority, color: 'var(--tx-3)' };
-                return (
-                  <div key={task.id || task._id}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderBottom: i < tasks.length - 1 ? '1px solid var(--border)' : 'none', cursor: 'pointer', transition: 'background .12s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    onClick={() => navigate('/tasks')}
-                  >
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: st.color, flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
-                      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                        {task.project_name && <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{task.project_name}</span>}
-                        {task.assignee_name && <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>→ {task.assignee_name}</span>}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+                <button onClick={() => setShowAddTaskModal(true)} style={btnPrimary}>
+                  <Plus size={14} /> Add Task
+                </button>
+              </div>
+              <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+                {tasks.map((task, i) => {
+                  const st = TASK_STATUS_CONFIG[task.status] || { label: task.status, color: 'var(--tx-3)' };
+                  const pri = PRIORITY_CONFIG[task.priority] || { label: task.priority, color: 'var(--tx-3)' };
+                  return (
+                    <div key={task.id || task._id}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderBottom: i < tasks.length - 1 ? '1px solid var(--border)' : 'none', transition: 'background .12s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      {/* Clickable status toggle */}
+                      <button
+                        onClick={() => handleStatusToggle(task.id || task._id, task.status)}
+                        style={{ width: 12, height: 12, borderRadius: '50%', background: st.color, border: 'none', cursor: 'pointer', flexShrink: 0, transition: 'transform .12s' }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        title={`Click to change status (currently ${st.label})`}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                          {task.project_name && <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{task.project_name}</span>}
+                          {task.assignee_name && <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>→ {task.assignee_name}</span>}
+                        </div>
                       </div>
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: `${pri.color}18`, color: pri.color, flexShrink: 0 }}>{pri.label}</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: `${st.color}18`, color: st.color, flexShrink: 0 }}>{st.label}</span>
+                      {task.due_date && (
+                        <span style={{ fontSize: 11, color: new Date(task.due_date) < new Date() && task.status !== 'done' ? 'var(--red)' : 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                          <Clock size={11} /> {timeAgo(task.due_date)}
+                        </span>
+                      )}
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: `${pri.color}18`, color: pri.color, flexShrink: 0 }}>{pri.label}</span>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 4, background: `${st.color}18`, color: st.color, flexShrink: 0 }}>{st.label}</span>
-                    {task.due_date && (
-                      <span style={{ fontSize: 11, color: new Date(task.due_date) < new Date() && task.status !== 'done' ? 'var(--red)' : 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                        <Clock size={11} /> {timeAgo(task.due_date)}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -562,6 +688,159 @@ export default function ClientPage() {
           )}
         </div>
       )}
+
+      {/* ═══════════════════════════════════ */}
+      {/* ADD TASK MODAL */}
+      {/* ═══════════════════════════════════ */}
+      {showAddTaskModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 28, maxWidth: 500, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Add Task</h2>
+              <button
+                onClick={() => setShowAddTaskModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Title */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Task title"
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Task description"
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Priority
+                </label>
+                <select
+                  value={formData.priority}
+                  onChange={e => setFormData({ ...formData, priority: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}
+                >
+                  <option value="urgent">Urgent</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={e => setFormData({ ...formData, status: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}
+                >
+                  <option value="backlog">Backlog</option>
+                  <option value="todo">To Do</option>
+                  <option value="doing">In Progress</option>
+                  <option value="waiting_on_client">Waiting on Client</option>
+                  <option value="review">Review</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+
+              {/* Assignee */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Assignee
+                </label>
+                <select
+                  value={formData.assignee_user_id}
+                  onChange={e => setFormData({ ...formData, assignee_user_id: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}
+                >
+                  <option value="">Select assignee...</option>
+                  {users.map(u => (
+                    <option key={u.id || u._id} value={u.id || u._id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Project */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Project
+                </label>
+                <select
+                  value={formData.project_id}
+                  onChange={e => setFormData({ ...formData, project_id: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}
+                >
+                  <option value="">Select project...</option>
+                  {projects.map(p => (
+                    <option key={p.id || p._id} value={p.id || p._id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Due Date */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 6 }}>
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.due_at}
+                  onChange={e => setFormData({ ...formData, due_at: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', fontSize: 13, outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                <button
+                  onClick={() => setShowAddTaskModal(false)}
+                  style={{ ...btnSecondary, flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddTask}
+                  disabled={addTaskLoading}
+                  style={{ ...btnPrimary, flex: 1, opacity: addTaskLoading ? 0.6 : 1, cursor: addTaskLoading ? 'not-allowed' : 'pointer' }}
+                >
+                  {addTaskLoading ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
+                  {addTaskLoading ? 'Creating...' : 'Create Task'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -587,7 +866,12 @@ const backBtn = {
   transition: 'all .12s',
 };
 const btnPrimary = {
-  display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 18px',
   background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8,
-  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+  fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all .12s',
+};
+const btnSecondary = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 18px',
+  background: 'var(--card)', color: 'var(--tx-2)', border: '1px solid var(--border)', borderRadius: 8,
+  fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all .12s',
 };

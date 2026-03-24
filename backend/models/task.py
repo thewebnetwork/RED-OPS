@@ -35,6 +35,8 @@ class TaskCreate(BaseModel):
     status: TaskStatus = "todo"
     priority: TaskPriority = "medium"
     assignee_user_id: Optional[str] = None
+    client_id: Optional[str] = None  # Link to client user
+    client_name: Optional[str] = None  # Denormalized client name
     visibility: TaskVisibility = "internal"
     task_type: TaskType = "manual"
     due_at: Optional[datetime] = None
@@ -48,6 +50,8 @@ class TaskUpdate(BaseModel):
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     assignee_user_id: Optional[str] = None
+    client_id: Optional[str] = None
+    client_name: Optional[str] = None
     visibility: Optional[TaskVisibility] = None
     task_type: Optional[TaskType] = None
     due_at: Optional[datetime] = None
@@ -108,6 +112,10 @@ class TaskResponse(BaseModel):
 
     # Comment count
     comment_count: int = 0
+
+    # Client association
+    client_id: Optional[str] = None
+    client_name: Optional[str] = None
 
     # Optional enriched fields (populated from joins)
     assignee_name: Optional[str] = None
