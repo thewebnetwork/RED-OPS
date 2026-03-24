@@ -41,6 +41,39 @@ function ParticleNetwork({ canvasRef }) {
       opacity: Math.random() * 0.5 + 0.3,
     }));
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const drawStatic = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(220, 38, 38, ${p.opacity})`;
+        ctx.fill();
+      });
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECT_DIST) {
+            const alpha = (1 - dist / CONNECT_DIST) * 0.35;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(220, 38, 38, ${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+    };
+
+    if (prefersReducedMotion) {
+      drawStatic();
+      return () => { window.removeEventListener('resize', resize); };
+    }
+
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 

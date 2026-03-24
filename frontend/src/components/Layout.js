@@ -162,13 +162,13 @@ function AccountSwitcher({ user }) {
     <div ref={dropRef} style={{ padding: '4px 10px 0', position: 'relative' }}>
       <button onClick={() => setOpen(!open)} style={{
         width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-        padding: '7px 9px', background: isPreview ? 'rgba(168,85,247,.12)' : 'var(--bg-elevated)',
-        border: `1px solid ${isPreview ? 'rgba(168,85,247,.3)' : 'var(--border)'}`,
+        padding: '7px 9px', background: isPreview ? 'var(--purple-bg-hi)' : 'var(--bg-elevated)',
+        border: `1px solid ${isPreview ? 'var(--purple-border)' : 'var(--border)'}`,
         borderRadius: 8, cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, transition: 'all .1s',
       }}>
         <div style={{
           width: 22, height: 22, borderRadius: 5,
-          background: isPreview ? '#a855f7' : 'var(--red)',
+          background: isPreview ? 'var(--purple)' : 'var(--red)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
         }}>
@@ -177,7 +177,7 @@ function AccountSwitcher({ user }) {
         <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
           <div style={{
             fontSize: 11.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            color: isPreview ? '#a855f7' : 'var(--tx-1)',
+            color: isPreview ? 'var(--purple)' : 'var(--tx-1)',
           }}>
             {isPreview ? (previewName || 'Client View') : 'Agency View'}
           </div>
@@ -190,7 +190,7 @@ function AccountSwitcher({ user }) {
 
       {/* Dropdown */}
       {open && (
-        <div style={{
+        <div className="dropdown-enter" style={{
           position: 'absolute', top: '100%', left: 10, right: 10, marginTop: 4,
           background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 8px 30px rgba(0,0,0,.35)', zIndex: 999, overflow: 'hidden',
@@ -245,7 +245,12 @@ function AccountSwitcher({ user }) {
           {/* Client accounts */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
             {loading ? (
-              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12, color: 'var(--tx-3)' }}>Loading accounts...</div>
+              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12, color: 'var(--tx-3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <div className="spinner-ring" style={{ width: 14, height: 14 }} />
+                  Loading accounts...
+                </div>
+              </div>
             ) : filtered.length === 0 ? (
               <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12, color: 'var(--tx-3)' }}>
                 {accounts.length === 0 ? 'No client accounts yet' : 'No clients match your search'}
@@ -259,16 +264,16 @@ function AccountSwitcher({ user }) {
                     onClick={() => handleSwitchToClient(client)}
                     style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '7px 12px', background: isViewing ? 'rgba(168,85,247,.08)' : 'transparent',
+                      padding: '7px 12px', background: isViewing ? 'var(--purple-bg)' : 'transparent',
                       border: 'none', cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, textAlign: 'left',
                       transition: 'background .08s',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = isViewing ? 'rgba(168,85,247,.12)' : 'var(--bg-elevated)'}
-                    onMouseLeave={e => e.currentTarget.style.background = isViewing ? 'rgba(168,85,247,.08)' : 'transparent'}>
+                    onMouseEnter={e => e.currentTarget.style.background = isViewing ? 'var(--purple-bg-hi)' : 'var(--bg-elevated)'}
+                    onMouseLeave={e => e.currentTarget.style.background = isViewing ? 'var(--purple-bg)' : 'transparent'}>
                     <div style={{
                       width: 28, height: 28, borderRadius: 6,
-                      background: isViewing ? '#a855f7' : 'var(--bg-elevated)',
-                      border: `1px solid ${isViewing ? '#a855f7' : 'var(--border)'}`,
+                      background: isViewing ? 'var(--purple)' : 'var(--bg-elevated)',
+                      border: `1px solid ${isViewing ? 'var(--purple)' : 'var(--border)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontWeight: 700, fontSize: 10, color: isViewing ? '#fff' : 'var(--tx-2)', flexShrink: 0,
                     }}>
@@ -277,7 +282,7 @@ function AccountSwitcher({ user }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        color: isViewing ? '#a855f7' : 'var(--tx-1)',
+                        color: isViewing ? 'var(--purple)' : 'var(--tx-1)',
                       }}>
                         {client.company_name || client.name || client.email}
                       </div>
@@ -286,7 +291,7 @@ function AccountSwitcher({ user }) {
                       </div>
                     </div>
                     {isViewing && (
-                      <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#a855f722', color: '#a855f7' }}>VIEWING</span>
+                      <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'var(--purple-bg-hi)', color: 'var(--purple)' }}>VIEWING</span>
                     )}
                   </button>
                 );
@@ -333,7 +338,7 @@ function NavItem({ item, location, onClick, badgeCount }) {
       <item.icon size={15} />
       <span style={{ flex: 1 }}>{item.label}</span>
       {item.isNew && (
-        <span style={{ fontSize:9, fontWeight:700, background:'#a855f718', color:'#a855f7', padding:'1px 5px', borderRadius:4, letterSpacing:'.05em' }}>
+        <span style={{ fontSize:9, fontWeight:700, background:'var(--purple-bg-hi)', color:'var(--purple)', padding:'1px 5px', borderRadius:4, letterSpacing:'.05em' }}>
           NEW
         </span>
       )}
@@ -524,10 +529,8 @@ export default function Layout({ children }) {
 
         {/* User */}
         <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
-            onClick={() => navigate(isClient ? '/my-account' : '/profile')}
-            onMouseEnter={e => e.currentTarget.style.background='var(--bg-elevated)'}
-            onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+          <div className="sidebar-user-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
+            onClick={() => navigate(isClient ? '/my-account' : '/profile')}>
             <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
@@ -552,8 +555,8 @@ export default function Layout({ children }) {
         {typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true' && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '5px 16px', background: 'rgba(168,85,247,.12)', borderBottom: '1px solid rgba(168,85,247,.2)',
-            fontSize: 11, fontWeight: 600, color: '#a855f7', flexShrink: 0,
+            padding: '5px 16px', background: 'var(--purple-bg-hi)', borderBottom: '1px solid var(--purple-border)',
+            fontSize: 11, fontWeight: 600, color: 'var(--purple)', flexShrink: 0,
           }}>
             <Eye size={12} />
             <span>Viewing as {localStorage.getItem('preview_client_name') || 'client'}</span>
@@ -564,9 +567,9 @@ export default function Layout({ children }) {
               navigate('/');
               window.location.reload();
             }} style={{
-              background: 'rgba(168,85,247,.18)', border: '1px solid rgba(168,85,247,.3)',
+              background: 'var(--purple-bg-hi)', border: '1px solid var(--purple-border)',
               borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
-              fontSize: 10, fontWeight: 600, color: '#a855f7', marginLeft: 4,
+              fontSize: 10, fontWeight: 600, color: 'var(--purple)', marginLeft: 4,
             }}>
               Exit Preview
             </button>

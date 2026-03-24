@@ -61,6 +61,16 @@
     --ring:               348 72% 47%;
     --radius:             0.5rem;
 
+    /* Transition speeds */
+    --speed-fast:   0.1s;
+    --speed-normal: 0.15s;
+    --speed-slow:   0.25s;
+
+    /* Preview/purple theming */
+    --purple-bg:     rgba(168, 85, 247, 0.08);
+    --purple-bg-hi:  rgba(168, 85, 247, 0.12);
+    --purple-border: rgba(168, 85, 247, 0.3);
+
     /* Extended for components */
     --surface-2: 0 0% 12%;
     --surface-3: 0 0% 15%;
@@ -105,8 +115,8 @@
 /* ── 3. SCROLLBAR ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
 
 /* ── 4. ANIMATIONS ────────────────────────────────────────── */
 @keyframes fadeIn    { from { opacity: 0 } to { opacity: 1 } }
@@ -115,6 +125,18 @@
 @keyframes slideLeft { from { opacity: 0; transform: translateX(-16px) } to { opacity: 1; transform: translateX(0) } }
 @keyframes pulse-soft{ 0%, 100% { opacity: 1 } 50% { opacity: 0.5 } }
 @keyframes spin      { to { transform: rotate(360deg) } }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.6 } 50% { opacity: 0.3 } }
+@keyframes dropdownEnter { from { opacity: 0; transform: translateY(-4px) scale(0.98) } to { opacity: 1; transform: translateY(0) scale(1) } }
+
+.skeleton-pulse {
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+.dropdown-enter {
+  animation: dropdownEnter var(--speed-slow) ease both;
+}
 
 /* ── 5. LAYOUT ────────────────────────────────────────────── */
 .app-shell {
@@ -409,7 +431,7 @@
   font-family: inherit;
 }
 
-.input-field:focus { border-color: var(--red); }
+.input-field:focus { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-bg); }
 .input-field::placeholder { color: var(--tx-3); }
 textarea.input-field { resize: vertical; min-height: 80px; line-height: 1.6; }
 select.input-field { appearance: none; cursor: pointer; }
@@ -427,13 +449,14 @@ select.input-field { appearance: none; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: opacity 0.15s;
+  transition: background var(--speed-normal), transform var(--speed-fast), box-shadow var(--speed-normal);
   font-family: inherit;
   white-space: nowrap;
 }
 
-.btn-primary:hover { opacity: 0.88; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary:hover { background: #d4324a; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(201, 42, 62, 0.3); }
+.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* Legacy compat */
 .btn-primary-dark { @apply btn-primary; }
@@ -468,7 +491,8 @@ select.input-field { appearance: none; cursor: pointer; }
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -642,8 +666,35 @@ kbd {
   align-items: center;
   justify-content: center;
   padding: 56px 24px;
+  min-height: 240px;
   color: var(--tx-3);
   text-align: center;
+}
+
+.empty-state-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.empty-state h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tx-1);
+  margin: 0 0 4px;
+}
+
+.empty-state p {
+  font-size: 13px;
+  color: var(--tx-3);
+  margin: 0;
+  max-width: 320px;
 }
 
 /* animate utils */
@@ -1395,4 +1446,91 @@ kbd {
   .cmd-overlay { padding-top: 20px; }
   .cmd-box { max-width: 95vw; }
   .two-column-section { grid-template-columns: 1fr; }
+}
+
+/* ── 44. FOCUS RING ──────────────────────────────────────── */
+:focus-visible { outline: none; }
+button:focus-visible, a:focus-visible, select:focus-visible,
+[role="button"]:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+.input-field:focus-visible { outline: none; }
+
+/* ── 45. HOVER UTILITIES ─────────────────────────────────── */
+.hover-lift {
+  transition: transform var(--speed-normal) ease, box-shadow var(--speed-normal) ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hover-glow {
+  transition: border-color var(--speed-normal) ease, box-shadow var(--speed-normal) ease;
+}
+.hover-glow:hover {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 1px var(--border-hi);
+}
+
+/* ── 46. COMPONENT CLASSES ───────────────────────────────── */
+.client-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--speed-normal) ease, box-shadow var(--speed-normal) ease, border-color var(--speed-normal) ease;
+}
+.client-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hi);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.request-card {
+  --card-accent: var(--border-hi);
+  transition: border-color var(--speed-normal), box-shadow var(--speed-normal), transform var(--speed-normal);
+}
+.request-card:hover {
+  border-color: var(--card-accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.list-row-hover {
+  transition: background var(--speed-fast);
+}
+.list-row-hover:hover {
+  background: var(--bg-elevated);
+}
+
+.sidebar-user-btn {
+  transition: background var(--speed-fast);
+}
+.sidebar-user-btn:hover {
+  background: var(--bg-elevated);
+}
+
+.icon-btn-danger {
+  color: var(--tx-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--speed-fast), background var(--speed-fast);
+}
+.icon-btn-danger:hover {
+  color: var(--red-status);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── 47. REDUCED MOTION ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

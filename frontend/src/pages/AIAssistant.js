@@ -40,7 +40,7 @@ export default function AIAssistant() {
   const handleChat = async () => {
     if (!chatInput.trim() || streaming) return;
 
-    const userMsg = { role: 'user', content: chatInput };
+    const userMsg = { role: 'user', content: chatInput, timestamp: new Date().toISOString() };
     const updatedMessages = [...chatMessages, userMsg];
     setChatMessages(updatedMessages);
     setChatInput('');
@@ -75,9 +75,9 @@ export default function AIAssistant() {
               setChatMessages(prev => {
                 const msgs = [...prev];
                 if (msgs[msgs.length - 1]?.role === 'assistant') {
-                  msgs[msgs.length - 1] = { role: 'assistant', content };
+                  msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], content };
                 } else {
-                  msgs.push({ role: 'assistant', content });
+                  msgs.push({ role: 'assistant', content, timestamp: new Date().toISOString() });
                 }
                 return msgs;
               });
@@ -226,20 +226,49 @@ export default function AIAssistant() {
           {/* Messages */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12, minHeight: 250 }}>
             {chatMessages.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--tx-3)' }}>
-                <MessageSquare size={28} style={{ opacity: 0.3, marginBottom: 8 }} />
-                <p style={{ margin: 0, fontSize: 13 }}>Start a conversation...</p>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--tx-3)' }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: 'linear-gradient(135deg, rgba(201,42,62,0.12), rgba(168,85,247,0.12))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                  <Sparkles size={24} style={{ color: 'var(--purple)' }} />
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', margin: '0 0 4px' }}>Ask me anything</p>
+                <p style={{ fontSize: 12, margin: '0 0 16px' }}>I can help with tasks, projects, and data insights.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 280, margin: '0 auto' }}>
+                  {['What tasks are overdue?', "Summarize this week's activity", 'Who has the most open requests?'].map(prompt => (
+                    <button key={prompt} onClick={() => setChatInput(prompt)}
+                      style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--tx-2)', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.1s' }}>
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {chatMessages.map((msg, i) => (
-              <div key={i} style={{
-                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '80%', padding: '10px 14px', borderRadius: 12,
-                background: msg.role === 'user' ? 'var(--red)' : 'var(--bg-elevated)',
-                color: msg.role === 'user' ? '#fff' : 'var(--tx-1)',
-                fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-              }}>
-                {msg.content}
+              <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    background: msg.role === 'user' ? 'var(--red)' : 'linear-gradient(135deg, var(--red), var(--purple))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                  }}>
+                    {msg.role === 'user' ? 'U' : 'AI'}
+                  </div>
+                  <div>
+                    <div style={{
+                      padding: '10px 14px', borderRadius: 12,
+                      background: msg.role === 'user' ? 'var(--red)' : 'var(--bg-elevated)',
+                      color: msg.role === 'user' ? '#fff' : 'var(--tx-1)',
+                      fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
+                    }}>
+                      {msg.content}
+                    </div>
+                    {msg.timestamp && (
+                      <div style={{ fontSize: 10, color: 'var(--tx-3)', marginTop: 3, textAlign: msg.role === 'user' ? 'right' : 'left' }}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
             {streaming && chatMessages[chatMessages.length - 1]?.role !== 'assistant' && (
@@ -349,7 +378,6 @@ export default function AIAssistant() {
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

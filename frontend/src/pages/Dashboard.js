@@ -113,19 +113,11 @@ function StatChip({ label, value, color = 'var(--tx-3)' }) {
 
 function ClientCard({ client, onViewProfile, onViewAsClient, onOpenRequests }) {
   const s = client.stats || {};
-  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: 'var(--card)', border: '1px solid var(--border)',
-        borderRadius: 12, padding: 0, overflow: 'hidden',
-        transition: 'all .15s ease', cursor: 'pointer',
-        transform: hovered ? 'translateY(-2px)' : 'none',
-        boxShadow: hovered ? '0 8px 24px rgba(0,0,0,0.25)' : '0 1px 3px rgba(0,0,0,0.1)',
-      }}
+      className="client-card"
+      style={{ padding: 0 }}
     >
       {/* Top accent bar */}
       <div style={{ height: 3, background: (HEALTH_CONFIG[client.health] || HEALTH_CONFIG.healthy).color }} />
@@ -324,14 +316,12 @@ function OperatorDashboard() {
               <Link to="/requests" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}>View all <ChevronRight size={11} /></Link>
             </div>
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {loading ? [0,1,2].map(i => <div key={i} style={{ height: 50, margin: 8, background: 'var(--bg)', borderRadius: 7, opacity: .4 }} />)
+              {loading ? [0,1,2].map(i => <div key={i} className="skeleton-pulse" style={{ height: 50, margin: 8, borderRadius: 7 }} />)
                 : requests.length === 0
                   ? <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>No open requests</div>
                   : <div style={{ padding: 6 }}>{requests.slice(0,6).map(r => (
                     <Link key={r.id} to={`/requests/${r.id}`} style={{ textDecoration: 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, transition: 'background .1s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <div className="list-row-hover" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8 }}>
                         <span style={{ width: 7, height: 7, borderRadius: '50%', background: PRI_COLOR[r.priority] || '#606060', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title || r.request_type || 'Request'}</div>
@@ -350,14 +340,12 @@ function OperatorDashboard() {
               <Link to="/tasks" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}>View all <ChevronRight size={11} /></Link>
             </div>
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {loading ? [0,1,2].map(i => <div key={i} style={{ height: 50, margin: 8, background: 'var(--bg)', borderRadius: 7, opacity: .4 }} />)
+              {loading ? [0,1,2].map(i => <div key={i} className="skeleton-pulse" style={{ height: 50, margin: 8, borderRadius: 7 }} />)
                 : tasks.length === 0
                   ? <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx-3)', fontSize: 13 }}>No tasks right now</div>
                   : <div style={{ padding: 6 }}>{tasks.slice(0,6).map(t => (
                     <Link key={t.id} to="/tasks" style={{ textDecoration: 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, transition: 'background .1s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <div className="list-row-hover" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8 }}>
                         <Circle size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
@@ -556,7 +544,7 @@ function AgencyDashboard() {
             {loading ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
                 {[0,1,2,3,4,5].map(i => (
-                  <div key={i} style={{ height: 200, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, opacity: 0.5 }} />
+                  <div key={i} className="skeleton-pulse" style={{ height: 200, borderRadius: 12 }} />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
@@ -596,7 +584,7 @@ function AgencyDashboard() {
             </div>
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
               {loading ? (
-                [0,1,2,3].map(i => <div key={i} style={{ height: 50, margin: 8, background: 'var(--bg)', borderRadius: 7, opacity: 0.4 }} />)
+                [0,1,2,3].map(i => <div key={i} className="skeleton-pulse" style={{ height: 50, margin: 8, borderRadius: 7 }} />)
               ) : events.length === 0 ? (
                 <div style={{ padding: 28, textAlign: 'center', color: 'var(--tx-3)', fontSize: 12.5 }}>
                   No recent activity

@@ -180,13 +180,13 @@ function RequestCard({ order, onCancel }) {
 
   return (
     <div
+      className="request-card"
       onClick={() => navigate(`/requests/${oid}`)}
       style={{
+        '--card-accent': cfg.color,
         background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-        overflow: 'hidden', cursor: 'pointer', transition: 'all .15s',
+        overflow: 'hidden', cursor: 'pointer',
       }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = cfg.color; e.currentTarget.style.boxShadow = `0 4px 16px ${cfg.color}15`; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
     >
       {/* Top accent bar */}
       <div style={{ height: 3, background: cfg.color }} />
@@ -219,14 +219,13 @@ function RequestCard({ order, onCancel }) {
           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
             {canCancel && (
               <button
+                className="icon-btn-danger"
                 onClick={() => onCancel(order)}
                 title="Cancel request"
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
                   color: 'var(--tx-3)', padding: 6, borderRadius: 6, display: 'flex',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#ef444418'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--tx-3)'; e.currentTarget.style.background = 'none'; }}
               >
                 <X size={14} />
               </button>
@@ -483,14 +482,8 @@ export default function MyRequests() {
 
       {/* Cancel Modal */}
       {cancelOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)',
-        }} onClick={() => setCancelOpen(false)}>
-          <div style={{
-            background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
-            padding: '28px', width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,.5)',
-          }} onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => setCancelOpen(false)}>
+          <div className="modal-box" style={{ maxWidth: 460, padding: 28 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
               <XCircle size={18} style={{ color: '#ef4444' }} />
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Cancel Request</h2>

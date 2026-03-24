@@ -82,6 +82,18 @@ const comingSoon = [
   { name: 'QuickBooks', category: 'Accounting' },
 ];
 
+function timeAgo(date) {
+  if (!date) return '';
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return 'just now';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 export default function Integrations() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -91,6 +103,7 @@ export default function Integrations() {
   const [apiKey, setApiKey] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(null);
+  const [confirmDisconnect, setConfirmDisconnect] = useState(null);
 
   const fetchIntegrations = useCallback(async () => {
     try {
@@ -157,10 +170,10 @@ export default function Integrations() {
   };
 
   const handleDisconnect = async (integration) => {
-    if (!window.confirm(`Disconnect ${integration.name}?`)) return;
     try {
       await ax().delete(`${API}/integrations/${integration.id}`);
       toast.success(`${integration.name} disconnected`);
+      setConfirmDisconnect(null);
       fetchIntegrations();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to disconnect');
@@ -240,27 +253,43 @@ export default function Integrations() {
               <p style={{ fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.55, flex: 1, margin: '0 0 10px' }}>{integration.description}</p>
 
               {connected && info && (
-                <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 10 }}>
-                  Status: <span style={{ color: info.status === 'connected' ? '#22c55e' : '#ef4444', fontWeight: 600 }}>{info.status}</span>
-                  {info.connected_at && <> · Connected {new Date(info.connected_at).toLocaleDateString()}</>}
+                <div style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                    background: info.status === 'connected' ? '#22c55e' : '#ef4444',
+                    boxShadow: info.status === 'connected' ? '0 0 6px rgba(34,197,94,0.3)' : '0 0 6px rgba(239,68,68,0.3)',
+                  }} />
+                  <span style={{ fontWeight: 500, color: info.status === 'connected' ? '#22c55e' : '#ef4444', textTransform: 'capitalize' }}>
+                    {info.status}
+                  </span>
+                  {info.connected_at && <span> · {timeAgo(info.connected_at)}</span>}
                 </div>
               )}
 
               {connected ? (
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button onClick={() => handleTest(integration)}
-                    style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                    {testing === integration.id ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />} Test
-                  </button>
-                  <button onClick={() => openConnect(integration)}
-                    style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)' }}>
-                    Reconfigure
-                  </button>
-                  <button onClick={() => handleDisconnect(integration)}
-                    style={{ padding: '7px 10px', borderRadius: 7, fontSize: 12, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                    <Trash2 size={12} />
-                  </button>
-                </div>
+                <>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={() => handleTest(integration)}
+                      style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                      {testing === integration.id ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />} Test
+                    </button>
+                    <button onClick={() => openConnect(integration)}
+                      style={{ flex: 1, padding: '7px 0', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--tx-2)' }}>
+                      Reconfigure
+                    </button>
+                    <button onClick={() => setConfirmDisconnect(integration)}
+                      style={{ padding: '7px 10px', borderRadius: 7, fontSize: 12, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                  {confirmDisconnect?.id === integration.id && (
+                    <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ flex: 1, fontSize: 12, color: '#ef4444' }}>Disconnect {integration.name}?</span>
+                      <button onClick={() => setConfirmDisconnect(null)} className="btn-ghost btn-xs">Cancel</button>
+                      <button onClick={() => handleDisconnect(integration)} style={{ padding: '4px 10px', borderRadius: 5, fontSize: 11, fontWeight: 600, background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer' }}>Disconnect</button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <button
                   onClick={() => openConnect(integration)}
@@ -345,7 +374,6 @@ export default function Integrations() {
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
