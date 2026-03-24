@@ -16,6 +16,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Users, Plus, MoreHorizontal, Mail, X, Edit2, Trash2,
   Star, Clock, CheckSquare, BarChart2, UserPlus, Eye,
@@ -49,7 +50,7 @@ const ROLE_ICONS = {
 /* ═══════════════════════════════════════════════════════════
    MAIN TEAM PAGE
    ═══════════════════════════════════════════════════════════ */
-export default function Team() {
+function Team() {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -1144,6 +1145,346 @@ function ManageTeamsModal({ teams, members, onClose, onUpdated }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   ADMIN TEAM HUB — AGENCY CAPACITY CONSOLE
+   ═══════════════════════════════════════════════════════════ */
+function AdminTeamHub() {
+  const navigate = useNavigate();
+  const [members, setMembers] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('workload'); // 'workload', 'name'
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [editMember, setEditMember] = useState(null);
+
+  /* ── Data loading ── */
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [usersRes, teamsRes, ordersRes] = await Promise.allSettled([
+        ax().get(`${API}/users`),
+        ax().get(`${API}/teams`),
+        ax().get(`${API}/orders`),
+      ]);
+
+      let users = [];
+      if (usersRes.status === 'fulfilled') {
+        users = usersRes.value.data?.data || usersRes.value.data || [];
+        if (!Array.isArray(users)) users = [];
+      }
+
+      let teamList = [];
+      if (teamsRes.status === 'fulfilled') {
+        teamList = teamsRes.value.data || [];
+        if (!Array.isArray(teamList)) teamList = [];
+      }
+
+      let orderList = [];
+      if (ordersRes.status === 'fulfilled') {
+        orderList = ordersRes.value.data?.data || ordersRes.value.data || [];
+        if (!Array.isArray(orderList)) orderList = [];
+      }
+
+      setMembers(users);
+      setTeams(teamList);
+      setOrders(orderList);
+    } catch (err) {
+      console.error('Failed to fetch admin data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  /* ── Compute stats ── */
+  const memberStats = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 86400000);
+
+    const stats = {};
+    members.forEach(m => {
+      if (m.account_type === 'Media Client') return; // Exclude Media Client
+
+      const memberOrders = orders.filter(o => o.editor_id === m.id);
+      const openOrders = memberOrders.filter(o => !['Closed', 'Canceled', 'Delivered'].includes(o.status));
+      const completedWeek = memberOrders.filter(o => {
+        const closed = new Date(o.picked_at || o.created_at || 0);
+        return ['Closed', 'Delivered'].includes(o.status) && closed >= weekAgo;
+      });
+      const slaIssues = memberOrders.filter(o => o.is_sla_breached).length;
+
+      const clients = [...new Set(openOrders.map(o => o.requester_name).filter(Boolean))];
+      const maxTasks = m.maxTasks || m.max_tasks || 10;
+      const workloadPct = pct(openOrders.length, maxTasks);
+
+      stats[m.id] = {
+        openOrders: openOrders.length,
+        completedWeek: completedWeek.length,
+        slaIssues,
+        clients: clients.slice(0, 3),
+        workloadPct,
+        maxTasks,
+      };
+    });
+    return stats;
+  }, [members, orders]);
+
+  /* ── KPI metrics ── */
+  const kpis = useMemo(() => {
+    const activeMembers = members.filter(m => m.active && m.account_type !== 'Media Client').length;
+    const unassignedOrders = orders.filter(o => !o.editor_id && o.status === 'Open').length;
+    const totalOpen = orders.filter(o => !['Closed', 'Canceled', 'Delivered'].includes(o.status)).length;
+    const avgWorkload = activeMembers > 0 ? Math.round(totalOpen / activeMembers) : 0;
+    const atCapacity = Object.values(memberStats).filter(s => s.workloadPct >= 80).length;
+    const slaBreached = orders.filter(o => o.is_sla_breached).length;
+
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 86400000);
+    const completedWeek = orders.filter(o => {
+      const closed = new Date(o.picked_at || o.created_at || 0);
+      return ['Closed', 'Delivered'].includes(o.status) && closed >= weekAgo;
+    }).length;
+
+    return { activeMembers, unassignedOrders, totalOpen, avgWorkload, atCapacity, slaBreached, completedWeek };
+  }, [members, orders, memberStats]);
+
+  /* ── Sorted members ── */
+  const sortedMembers = useMemo(() => {
+    const filtered = members.filter(m => m.active && m.account_type !== 'Media Client');
+    return filtered.sort((a, b) => {
+      if (sortBy === 'workload') {
+        return (memberStats[b.id]?.workloadPct || 0) - (memberStats[a.id]?.workloadPct || 0);
+      }
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }, [members, sortBy, memberStats]);
+
+  /* ── Team breakdown ── */
+  const teamBreakdown = useMemo(() => {
+    return teams.filter(t => t.active).map(t => {
+      const teamMembers = members.filter(m => m.team_id === t.id && m.active);
+      const teamOrders = orders.filter(o => teamMembers.some(m => m.id === o.editor_id));
+      const openOrders = teamOrders.filter(o => !['Closed', 'Canceled', 'Delivered'].includes(o.status));
+
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 86400000);
+      const completed = teamOrders.filter(o => {
+        const closed = new Date(o.picked_at || o.created_at || 0);
+        return ['Closed', 'Delivered'].includes(o.status) && closed >= weekAgo;
+      }).length;
+
+      const avgWorkloadPct = teamMembers.length > 0
+        ? Math.round(teamMembers.reduce((sum, m) => sum + (memberStats[m.id]?.workloadPct || 0), 0) / teamMembers.length)
+        : 0;
+
+      return {
+        id: t.id,
+        name: t.name,
+        memberCount: teamMembers.length,
+        openOrders: openOrders.length,
+        completedWeek: completed,
+        avgWorkloadPct,
+      };
+    });
+  }, [teams, members, orders, memberStats]);
+
+  if (loading) {
+    return <div style={{ padding: 40, textAlign: 'center', color: 'var(--tx-2)' }}>Loading capacity data...</div>;
+  }
+
+  return (
+    <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <Users size={28} style={{ color: 'var(--accent)' }} />
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Team Capacity</h1>
+        </div>
+        <p style={{ fontSize: 14, color: 'var(--tx-2)', margin: '0 0 16px 0' }}>Agency workload overview & assignment intelligence</p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => setShowAddModal(true)} style={btnPri}><UserPlus size={16} />Add Member</button>
+          <button onClick={() => setShowTeamModal(true)} style={btnSec}><FolderKanban size={16} />Manage Teams</button>
+        </div>
+      </div>
+
+      {/* KPI Strip */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 28,
+      }}>
+        <KpiCard label="Team Members" value={kpis.activeMembers} icon={<Users size={16} />} />
+        <KpiCard label="Open Orders" value={kpis.totalOpen} icon={<CheckSquare size={16} />} />
+        <KpiCard label="Avg Workload" value={kpis.avgWorkload} unit="orders/person" icon={<BarChart2 size={16} />} />
+        <KpiCard label="At Capacity" value={kpis.atCapacity} color={kpis.atCapacity > 0 ? 'var(--red)' : 'var(--green)'} icon={<AlertCircle size={16} />} />
+        <KpiCard label="SLA Breached" value={kpis.slaBreached} color={kpis.slaBreached > 0 ? 'var(--red)' : 'var(--green)'} icon={<Clock size={16} />} />
+        <KpiCard label="Completed (7d)" value={kpis.completedWeek} icon={<CheckSquare size={16} />} />
+      </div>
+
+      {/* Unassigned Orders Banner */}
+      {kpis.unassignedOrders > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: 'rgba(217, 119, 6, .1)',
+          border: '1px solid var(--yellow)', borderRadius: 10, marginBottom: 24,
+        }}>
+          <AlertCircle size={20} style={{ color: 'var(--yellow)' }} />
+          <span style={{ fontSize: 14, color: 'var(--yellow)', flex: 1 }}>{kpis.unassignedOrders} orders are unassigned</span>
+          <button onClick={() => navigate('/requests')} style={{ ...btnSec, fontSize: 12 }}>View in Requests</button>
+        </div>
+      )}
+
+      {/* Workload Cards */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>Team Workload</h2>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={sel}>
+            <option value="workload">Busiest First</option>
+            <option value="name">Alphabetical</option>
+          </select>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+          {sortedMembers.map(m => {
+            const stats = memberStats[m.id] || {};
+            return (
+              <div key={m.id} style={{
+                background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 16,
+              }}>
+                {/* Member header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%', background: avatarBg(m.id),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 13, fontWeight: 600, color: '#fff',
+                  }}>
+                    {initials(m.name)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{m.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                      {ROLE_ICONS[m.role]} {m.role}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Workload bar */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--tx-2)', marginBottom: 6 }}>
+                    <span>Workload</span>
+                    <span>{stats.openOrders}/{stats.maxTasks}</span>
+                  </div>
+                  <div style={{
+                    width: '100%', height: 8, background: 'var(--bg)', borderRadius: 4, overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      width: `${Math.min(stats.workloadPct, 100)}%`, height: '100%',
+                      background: capColor(stats.workloadPct), transition: 'width .2s',
+                    }} />
+                  </div>
+                </div>
+
+                {/* Stats row */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, fontSize: 12, marginBottom: 12,
+                  paddingBottom: 12, borderBottom: '1px solid var(--border)',
+                }}>
+                  <div>
+                    <div style={{ color: 'var(--tx-3)', fontSize: 10 }}>Open</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{stats.openOrders}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--tx-3)', fontSize: 10 }}>Completed (7d)</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{stats.completedWeek}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--tx-3)', fontSize: 10 }}>SLA Issues</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: stats.slaIssues > 0 ? 'var(--red)' : 'var(--tx-1)' }}>{stats.slaIssues}</div>
+                  </div>
+                </div>
+
+                {/* Client chips */}
+                {stats.clients && stats.clients.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                    {stats.clients.map(c => (
+                      <span key={c} style={{
+                        fontSize: 11, padding: '4px 8px', background: 'var(--bg)', color: 'var(--tx-2)',
+                        borderRadius: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {c}
+                      </span>
+                    ))}
+                    {(memberStats[m.id]?.clients?.length || 0) > 3 && (
+                      <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>+{(memberStats[m.id]?.clients?.length || 0) - 3}</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Action button */}
+                <button onClick={() => navigate(`/team/${m.id}`)} style={{ ...btnSec, width: '100%', justifyContent: 'center' }}>
+                  <Eye size={14} />View Profile
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Team Breakdown */}
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-1)', margin: '0 0 14px 0' }}>Team Breakdown</h2>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+                <th style={th}>Team</th>
+                <th style={th}>Members</th>
+                <th style={th}>Open Orders</th>
+                <th style={th}>Completed (7d)</th>
+                <th style={th}>Avg Workload</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teamBreakdown.map(t => (
+                <tr key={t.id} style={{ borderBottom: '1px solid var(--border)', '&:last-child': { borderBottom: 'none' } }}>
+                  <td style={td}><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: avatarBg(t.id), marginRight: 8 }} />{t.name}</td>
+                  <td style={td}>{t.memberCount}</td>
+                  <td style={td}>{t.openOrders}</td>
+                  <td style={td}>{t.completedWeek}</td>
+                  <td style={td}>
+                    <span style={{ color: capColor(t.avgWorkloadPct) }}>{t.avgWorkloadPct}%</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {showAddModal && <AddMemberModal teams={teams} specialties={[]} onClose={() => setShowAddModal(false)} onCreated={fetchAll} />}
+      {showTeamModal && <ManageTeamsModal teams={teams} onClose={() => setShowTeamModal(false)} onUpdated={fetchAll} />}
+      {editMember && <EditMemberModal member={editMember} teams={teams} specialties={[]} onClose={() => setEditMember(null)} onUpdated={fetchAll} />}
+    </div>
+  );
+}
+
+/* ── KPI Card ── */
+function KpiCard({ label, value, unit, icon, color }) {
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: color || 'var(--accent)' }}>
+        {icon}
+      </div>
+      <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx-1)', marginBottom: 4 }}>{value}</div>
+      <div style={{ fontSize: 12, color: 'var(--tx-3)' }}>{label}</div>
+      {unit && <div style={{ fontSize: 10, color: 'var(--tx-3)', marginTop: 4 }}>{unit}</div>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
    SHARED UI COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 function Modal({ children, onClose, title, icon, wide }) {
@@ -1236,3 +1577,17 @@ const td = {
 const labelStyle = {
   display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4,
 };
+
+/* ═══════════════════════════════════════════════════════════
+   ROUTER WRAPPER — SELECT VIEW BASED ON ROLE
+   ═══════════════════════════════════════════════════════════ */
+export default function TeamPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
+  const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+
+  if (isAdmin && !isPreview) {
+    return <AdminTeamHub />;
+  }
+  return <Team />;
+}
