@@ -326,7 +326,7 @@ function ClientAdDashboard() {
   const hasData = snapshots && snapshots.length > 0;
   const currentMonth = summary?.current_month || {};
   const previousMonth = summary?.previous_month || {};
-  const monthlyTrend = summary?.monthly_trend || [];
+  const monthlyTrend = summary?.monthly_trends || [];
 
   // Calculate deltas
   const spendDelta =
@@ -349,7 +349,10 @@ function ClientAdDashboard() {
   // Prepare chart data
   const chartData = getLastNMonths(6).map((m) => {
     const trend = monthlyTrend?.find(
-      (t) => new Date(t.month).getMonth() === m.date.getMonth() && new Date(t.month).getFullYear() === m.date.getFullYear()
+      (t) => {
+        const d = new Date(t.period + '-01');
+        return d.getMonth() === m.date.getMonth() && d.getFullYear() === m.date.getFullYear();
+      }
     );
     return {
       label: m.label,
@@ -358,7 +361,7 @@ function ClientAdDashboard() {
     };
   });
 
-  // Prepare platforms
+  // Prepare platforms (rich objects with metrics from backend)
   const platforms = summary?.platforms || [];
 
   // Recent snapshots (last 12)
@@ -618,7 +621,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
       const payload = {
         client_id: formData.client_id,
         platform: formData.platform,
-        period: formData.period,
+        period: formData.period.slice(0, 7),  // YYYY-MM format for backend
         metrics: {
           ad_spend: parseFloat(formData.ad_spend),
           impressions: parseFloat(formData.impressions) || 0,
@@ -1036,7 +1039,10 @@ function AdminAdDashboard() {
   // Prepare chart data for agency
   const chartData = getLastNMonths(6).map((m) => {
     const trend = monthlyTrend?.find(
-      (t) => new Date(t.month).getMonth() === m.date.getMonth() && new Date(t.month).getFullYear() === m.date.getFullYear()
+      (t) => {
+        const d = new Date(t.period + '-01');
+        return d.getMonth() === m.date.getMonth() && d.getFullYear() === m.date.getFullYear();
+      }
     );
     return {
       label: m.label,

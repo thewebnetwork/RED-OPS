@@ -39,7 +39,7 @@ router = APIRouter(prefix="/crm", tags=["CRM"])
 
 async def _get_org_id(user: dict) -> str:
     """Extract org_id from authenticated user. Auto-provisions platform org for admins."""
-    org_id = user.get("org_id") or user.get("team_id")
+    org_id = user.get("org_id") or user.get("team_id") or user.get("id")
     if org_id:
         return org_id
     # Platform admins without org_id: find or create default platform org

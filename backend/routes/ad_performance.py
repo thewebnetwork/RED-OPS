@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 
 from database import db
-from utils.auth import get_current_user, require_roles
+from utils.auth import get_current_user
 
 router = APIRouter(prefix="/ad-performance", tags=["ad-performance"])
 
@@ -81,20 +81,31 @@ class AdSnapshot(BaseModel):
 class ClientSummaryPeriod(BaseModel):
     """Period data for monthly trend"""
     period: str
+    month: Optional[str] = None  # Alias for frontend compatibility
     total_spend: float
     total_leads: int
     total_cpl: float
+
+
+class PlatformSummary(BaseModel):
+    """Per-platform metrics breakdown"""
+    platform: str
+    ad_spend: float
+    leads: int
+    ctr: float
+    cpl: float
 
 
 class ClientSummary(BaseModel):
     """Aggregated summary for a single client"""
     client_id: str
     client_name: str
-    current_month: Optional[Dict[str, Any]] = None  # Latest snapshot per platform
+    current_month: Optional[Dict[str, Any]] = None
     previous_month: Optional[Dict[str, Any]] = None
     all_time_totals: Dict[str, Any]
     monthly_trends: List[ClientSummaryPeriod]
     active_platforms: List[str]
+    platforms: List[PlatformSummary] = []  # Detailed per-platform breakdown
 
 
 class PerClientAgencySummary(BaseModel):
@@ -171,7 +182,8 @@ async def create_snapshot(
     Auto-calculates derived metrics (CPL, CTR, CPC) if not provided.
     """
     # Only admins can create snapshots
-    require_roles(current_user, ["Administrator"])
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
 
     # Fetch client name for denormalization
     client_name = await get_client_name(body.client_id)
@@ -270,7 +282,8 @@ async def update_snapshot(
     current_user: dict = Depends(get_current_user)
 ):
     """Update a snapshot (Admin only)"""
-    require_roles(current_user, ["Administrator"])
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
 
     snapshot = await db.ad_snapshots.find_one({"id": snapshot_id})
     if not snapshot:
@@ -303,7 +316,8 @@ async def delete_snapshot(
     current_user: dict = Depends(get_current_user)
 ):
     """Delete a snapshot (Admin only)"""
-    require_roles(current_user, ["Administrator"])
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
 
     result = await db.ad_snapshots.delete_one({"id": snapshot_id})
 
@@ -372,6 +386,7 @@ async def get_client_summary(
 
         monthly_trends.append(ClientSummaryPeriod(
             period=period,
+            month=period,  # Alias for frontend compatibility
             total_spend=total_spend,
             total_leads=total_leads,
             total_cpl=total_cpl
@@ -380,6 +395,21 @@ async def get_client_summary(
     # Get active platforms
     active_platforms = sorted(set(s["platform"] for s in snapshots))
 
+    # Build per-platform breakdown with metrics (latest period)
+    platform_summaries = []
+    for plat in active_platforms:
+        plat_snapshots = [s for s in snapshots if s["platform"] == plat and s["period"] == current_period] if current_period else []
+        if plat_snapshots:
+            plat_spend = sum(s["metrics"].get("ad_spend", 0) for s in plat_snapshots)
+            plat_leads = sum(s["metrics"].get("leads", 0) for s in plat_snapshots)
+            plat_impressions = sum(s["metrics"].get("impressions", 0) for s in plat_snapshots)
+            plat_clicks = sum(s["metrics"].get("clicks", 0) for s in plat_snapshots)
+            plat_ctr = round((plat_clicks / plat_impressions) * 100, 2) if plat_impressions > 0 else 0
+            plat_cpl = round(plat_spend / plat_leads, 2) if plat_leads > 0 else 0
+            platform_summaries.append(PlatformSummary(
+                platform=plat, ad_spend=plat_spend, leads=plat_leads, ctr=plat_ctr, cpl=plat_cpl
+            ))
+
     return ClientSummary(
         client_id=client_id,
         client_name=client_name,
@@ -387,7 +417,8 @@ async def get_client_summary(
         previous_month=previous_month,
         all_time_totals=all_time_totals,
         monthly_trends=monthly_trends,
-        active_platforms=active_platforms
+        active_platforms=active_platforms,
+        platforms=platform_summaries
     )
 
 
@@ -399,7 +430,8 @@ async def get_agency_overview(
     Get agency-wide aggregate summary across ALL clients (Admin only).
     Includes per-client breakdown and health scoring.
     """
-    require_roles(current_user, ["Administrator"])
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
 
     # Fetch all snapshots
     all_snapshots = await db.ad_snapshots.find({}).to_list(None)
@@ -469,6 +501,7 @@ async def get_agency_overview(
         period_snapshots = [s for s in all_snapshots if s["period"] == period]
         monthly_totals.append({
             "period": period,
+            "month": period,  # Alias for frontend compatibility
             "total_spend": sum(s["metrics"].get("ad_spend", 0) for s in period_snapshots),
             "total_leads": sum(s["metrics"].get("leads", 0) for s in period_snapshots),
         })

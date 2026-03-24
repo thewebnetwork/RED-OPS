@@ -2,7 +2,7 @@ import string
 import random
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import JSONResponse
 from database import db
 from utils.auth import get_current_user
@@ -33,7 +33,7 @@ router = APIRouter(prefix="/ambassador", tags=["Ambassador & Marketplace"])
 
 async def _get_org_id(user: dict) -> str:
     """Extract org_id from user context. Auto-provisions platform org for admins."""
-    org_id = user.get("org_id") or user.get("team_id")
+    org_id = user.get("org_id") or user.get("team_id") or user.get("id")
     if org_id:
         return org_id
     if user.get("role") == "Administrator":
@@ -77,12 +77,12 @@ def _generate_referral_link(code: str) -> str:
     return f"https://redribbongroup.ca/ref/{code}"
 
 
-def _get_unique_referral_code() -> str:
+async def _get_unique_referral_code() -> str:
     """Generate a unique referral code, checking for collisions."""
     max_attempts = 10
     for _ in range(max_attempts):
         code = _generate_referral_code()
-        existing = db.referrals.find_one({"referral_code": code})
+        existing = await db.referrals.find_one({"referral_code": code})
         if not existing:
             return code
     raise HTTPException(status_code=500, detail="Failed to generate unique referral code.")
@@ -93,15 +93,12 @@ def _get_unique_referral_code() -> str:
 # =====================
 
 @router.post("/referrals")
-async def create_referral(payload: ReferralCreate, current_user: dict = None):
+async def create_referral(payload: ReferralCreate, current_user: dict = Depends(get_current_user)):
     """Create a new referral with unique code and link."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
-    referral_code = _get_unique_referral_code()
+    referral_code = await _get_unique_referral_code()
     referral_link = _generate_referral_link(referral_code)
 
     referral_doc = {
@@ -124,7 +121,7 @@ async def create_referral(payload: ReferralCreate, current_user: dict = None):
         "updated_at": datetime.utcnow(),
     }
 
-    result = db.referrals.insert_one(referral_doc)
+    result = await db.referrals.insert_one(referral_doc)
     referral_doc["_id"] = result.inserted_id
 
     return ReferralResponse(**referral_doc)
@@ -135,12 +132,9 @@ async def list_referrals(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     status: str = Query(None),
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """List referrals (filtered by org_id, filtered by status if provided)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
@@ -153,14 +147,9 @@ async def list_referrals(
     if status:
         query["status"] = status
 
-    referrals = list(
-        db.referrals.find(query, {"_id": 0})
-        .sort("created_at", -1)
-        .skip(skip)
-        .limit(limit)
-    )
+    referrals = await db.referrals.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
 
-    total = db.referrals.count_documents(query)
+    total = await db.referrals.count_documents(query)
 
     return {
         "data": [ReferralResponse(**ref) for ref in referrals],
@@ -171,16 +160,13 @@ async def list_referrals(
 
 
 @router.get("/referrals/{referral_id}")
-async def get_referral(referral_id: str, current_user: dict = None):
+async def get_referral(referral_id: str, current_user: dict = Depends(get_current_user)):
     """Get referral details by ID."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
-    referral = db.referrals.find_one(
+    referral = await db.referrals.find_one(
         {"id": referral_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -197,17 +183,14 @@ async def get_referral(referral_id: str, current_user: dict = None):
 async def update_referral(
     referral_id: str,
     payload: ReferralUpdate,
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Update referral status and details."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
-    referral = db.referrals.find_one(
+    referral = await db.referrals.find_one(
         {"id": referral_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -235,12 +218,12 @@ async def update_referral(
 
     update_data["updated_at"] = datetime.utcnow()
 
-    db.referrals.update_one(
+    await db.referrals.update_one(
         {"id": referral_id, "org_id": org_id},
         {"$set": update_data},
     )
 
-    updated = db.referrals.find_one(
+    updated = await db.referrals.find_one(
         {"id": referral_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -248,11 +231,8 @@ async def update_referral(
 
 
 @router.get("/referrals-stats")
-async def get_referral_stats(current_user: dict = None):
+async def get_referral_stats(current_user: dict = Depends(get_current_user)):
     """Get referral statistics for the current user or org (admin gets org-wide)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
@@ -261,7 +241,7 @@ async def get_referral_stats(current_user: dict = None):
     if org_role != "admin":
         query["referrer_user_id"] = user_id
 
-    all_referrals = list(db.referrals.find(query))
+    all_referrals = await db.referrals.find(query).to_list(None)
 
     total_referrals = len(all_referrals)
     converted_count = sum(1 for r in all_referrals if r["status"] == ReferralStatus.CONVERTED)
@@ -298,18 +278,15 @@ async def get_referral_stats(current_user: dict = None):
 
 
 @router.post("/referrals/{referral_id}/approve-commission")
-async def approve_commission(referral_id: str, current_user: dict = None):
+async def approve_commission(referral_id: str, current_user: dict = Depends(get_current_user)):
     """Approve pending commission (admin only)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     org_role = _get_org_role(current_user)
 
     if org_role != "admin":
         raise HTTPException(status_code=403, detail="Admin only.")
 
-    referral = db.referrals.find_one(
+    referral = await db.referrals.find_one(
         {"id": referral_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -322,7 +299,7 @@ async def approve_commission(referral_id: str, current_user: dict = None):
             detail="Commission must be in pending status to approve.",
         )
 
-    db.referrals.update_one(
+    await db.referrals.update_one(
         {"id": referral_id, "org_id": org_id},
         {
             "$set": {
@@ -332,7 +309,7 @@ async def approve_commission(referral_id: str, current_user: dict = None):
         },
     )
 
-    updated = db.referrals.find_one(
+    updated = await db.referrals.find_one(
         {"id": referral_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -346,12 +323,9 @@ async def approve_commission(referral_id: str, current_user: dict = None):
 @router.post("/marketplace/listings")
 async def create_marketplace_listing(
     payload: MarketplaceListingCreate,
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Create a new marketplace listing."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
@@ -375,7 +349,7 @@ async def create_marketplace_listing(
         "updated_at": datetime.utcnow(),
     }
 
-    result = db.marketplace_listings.insert_one(listing_doc)
+    result = await db.marketplace_listings.insert_one(listing_doc)
     listing_doc["_id"] = result.inserted_id
 
     return MarketplaceListingResponse(**listing_doc)
@@ -386,12 +360,9 @@ async def list_marketplace_listings(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     category: str = Query(None),
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """List all active marketplace listings (public within platform)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
 
     query = {
@@ -402,15 +373,9 @@ async def list_marketplace_listings(
     if category:
         query["category"] = category
 
-    listings = list(
-        db.marketplace_listings.find(query, {"_id": 0})
-        .sort("featured", -1)
-        .sort("created_at", -1)
-        .skip(skip)
-        .limit(limit)
-    )
+    listings = await db.marketplace_listings.find(query, {"_id": 0}).sort("featured", -1).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
 
-    total = db.marketplace_listings.count_documents(query)
+    total = await db.marketplace_listings.count_documents(query)
 
     return {
         "data": [MarketplaceListingResponse(**listing) for listing in listings],
@@ -421,14 +386,11 @@ async def list_marketplace_listings(
 
 
 @router.get("/marketplace/listings/{listing_id}")
-async def get_marketplace_listing(listing_id: str, current_user: dict = None):
+async def get_marketplace_listing(listing_id: str, current_user: dict = Depends(get_current_user)):
     """Get marketplace listing details by ID."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
 
-    listing = db.marketplace_listings.find_one(
+    listing = await db.marketplace_listings.find_one(
         {"id": listing_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -442,16 +404,13 @@ async def get_marketplace_listing(listing_id: str, current_user: dict = None):
 async def update_marketplace_listing(
     listing_id: str,
     payload: MarketplaceListingUpdate,
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Update marketplace listing (owner only)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
-    listing = db.marketplace_listings.find_one(
+    listing = await db.marketplace_listings.find_one(
         {"id": listing_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -485,12 +444,12 @@ async def update_marketplace_listing(
 
     update_data["updated_at"] = datetime.utcnow()
 
-    db.marketplace_listings.update_one(
+    await db.marketplace_listings.update_one(
         {"id": listing_id, "org_id": org_id},
         {"$set": update_data},
     )
 
-    updated = db.marketplace_listings.find_one(
+    updated = await db.marketplace_listings.find_one(
         {"id": listing_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -498,16 +457,13 @@ async def update_marketplace_listing(
 
 
 @router.delete("/marketplace/listings/{listing_id}")
-async def delete_marketplace_listing(listing_id: str, current_user: dict = None):
+async def delete_marketplace_listing(listing_id: str, current_user: dict = Depends(get_current_user)):
     """Delete marketplace listing (owner/admin only)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
 
-    listing = db.marketplace_listings.find_one(
+    listing = await db.marketplace_listings.find_one(
         {"id": listing_id, "org_id": org_id}, {"_id": 0}
     )
 
@@ -517,7 +473,7 @@ async def delete_marketplace_listing(listing_id: str, current_user: dict = None)
     if org_role != "admin" and listing["seller_user_id"] != user_id:
         raise HTTPException(status_code=403, detail="Unauthorized.")
 
-    db.marketplace_listings.delete_one({"id": listing_id, "org_id": org_id})
+    await db.marketplace_listings.delete_one({"id": listing_id, "org_id": org_id})
 
     return JSONResponse(
         status_code=200, content={"message": "Listing deleted successfully."}
@@ -528,12 +484,9 @@ async def delete_marketplace_listing(listing_id: str, current_user: dict = None)
 async def get_my_listings(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Get current user's marketplace listings."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
@@ -542,14 +495,9 @@ async def get_my_listings(
         "seller_user_id": user_id,
     }
 
-    listings = list(
-        db.marketplace_listings.find(query, {"_id": 0})
-        .sort("created_at", -1)
-        .skip(skip)
-        .limit(limit)
-    )
+    listings = await db.marketplace_listings.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
 
-    total = db.marketplace_listings.count_documents(query)
+    total = await db.marketplace_listings.count_documents(query)
 
     return {
         "data": [MarketplaceListingResponse(**listing) for listing in listings],
@@ -566,16 +514,13 @@ async def get_my_listings(
 @router.post("/marketplace/orders")
 async def create_marketplace_order(
     payload: MarketplaceOrderCreate,
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Create a marketplace order (buyer purchases listing)."""
-    if not current_user:
-        current_user = get_current_user()
-
     buyer_org_id = await _get_org_id(current_user)
     buyer_user_id = current_user["id"]
 
-    listing = db.marketplace_listings.find_one(
+    listing = await db.marketplace_listings.find_one(
         {"id": payload.listing_id}, {"_id": 0}
     )
 
@@ -605,7 +550,7 @@ async def create_marketplace_order(
         "updated_at": datetime.utcnow(),
     }
 
-    result = db.marketplace_orders.insert_one(order_doc)
+    result = await db.marketplace_orders.insert_one(order_doc)
     order_doc["_id"] = result.inserted_id
 
     return MarketplaceOrderResponse(**order_doc)
@@ -616,12 +561,9 @@ async def list_marketplace_orders(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     status: str = Query(None),
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """List marketplace orders (buyer or seller perspective)."""
-    if not current_user:
-        current_user = get_current_user()
-
     buyer_org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
@@ -635,14 +577,9 @@ async def list_marketplace_orders(
     if status:
         query["status"] = status
 
-    orders = list(
-        db.marketplace_orders.find(query, {"_id": 0})
-        .sort("created_at", -1)
-        .skip(skip)
-        .limit(limit)
-    )
+    orders = await db.marketplace_orders.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
 
-    total = db.marketplace_orders.count_documents(query)
+    total = await db.marketplace_orders.count_documents(query)
 
     return {
         "data": [MarketplaceOrderResponse(**order) for order in orders],
@@ -653,14 +590,11 @@ async def list_marketplace_orders(
 
 
 @router.get("/marketplace/orders/{order_id}")
-async def get_marketplace_order(order_id: str, current_user: dict = None):
+async def get_marketplace_order(order_id: str, current_user: dict = Depends(get_current_user)):
     """Get marketplace order details by ID."""
-    if not current_user:
-        current_user = get_current_user()
-
     buyer_org_id = await _get_org_id(current_user)
 
-    order = db.marketplace_orders.find_one(
+    order = await db.marketplace_orders.find_one(
         {
             "id": order_id,
             "$or": [
@@ -681,16 +615,13 @@ async def get_marketplace_order(order_id: str, current_user: dict = None):
 async def update_marketplace_order_status(
     order_id: str,
     payload: MarketplaceOrderUpdate,
-    current_user: dict = None,
+    current_user: dict = Depends(get_current_user),
 ):
     """Update marketplace order status (seller can mark as delivered/completed, buyer can dispute)."""
-    if not current_user:
-        current_user = get_current_user()
-
     buyer_org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
 
-    order = db.marketplace_orders.find_one(
+    order = await db.marketplace_orders.find_one(
         {
             "id": order_id,
             "$or": [
@@ -730,22 +661,19 @@ async def update_marketplace_order_status(
 
     update_data["updated_at"] = datetime.utcnow()
 
-    db.marketplace_orders.update_one(
+    await db.marketplace_orders.update_one(
         {"id": order_id},
         {"$set": update_data},
     )
 
-    updated = db.marketplace_orders.find_one({"id": order_id}, {"_id": 0})
+    updated = await db.marketplace_orders.find_one({"id": order_id}, {"_id": 0})
 
     return MarketplaceOrderResponse(**updated)
 
 
 @router.get("/marketplace-stats")
-async def get_marketplace_stats(current_user: dict = None):
+async def get_marketplace_stats(current_user: dict = Depends(get_current_user)):
     """Get marketplace statistics (seller perspective or org-wide for admin)."""
-    if not current_user:
-        current_user = get_current_user()
-
     org_id = await _get_org_id(current_user)
     user_id = current_user["id"]
     org_role = _get_org_role(current_user)
@@ -757,8 +685,8 @@ async def get_marketplace_stats(current_user: dict = None):
         listings_query = {"org_id": org_id, "seller_user_id": user_id}
         orders_query = {"seller_org_id": org_id, "seller_user_id": user_id}
 
-    all_listings = list(db.marketplace_listings.find(listings_query))
-    all_orders = list(db.marketplace_orders.find(orders_query))
+    all_listings = await db.marketplace_listings.find(listings_query).to_list(None)
+    all_orders = await db.marketplace_orders.find(orders_query).to_list(None)
 
     total_listings = len(all_listings)
     active_listings = sum(

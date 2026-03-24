@@ -45,7 +45,6 @@ import Services from "./pages/Services";
 import EmailSettings from "./pages/EmailSettings";
 import DraftEditor from "./pages/DraftEditor";
 import Reports from "./pages/Reports";
-import MyServices from "./pages/MyServices";
 import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
 import MyRequests from "./pages/MyRequests";
 import ReportIssue from "./pages/ReportIssue";
