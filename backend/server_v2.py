@@ -219,7 +219,7 @@ app = FastAPI(
 )
 
 # CORS middleware
-_raw_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
+_raw_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,https://redops.redribbongroup.ca,https://red-ops.vercel.app")
 origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
