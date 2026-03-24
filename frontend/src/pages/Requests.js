@@ -719,7 +719,10 @@ export default function Requests() {
                 <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Priority</label>
                 <div style={{ display: 'flex', gap: 5 }}>
                   {PRI_LABELS.map(p => (
-                    <button key={p} style={{
+                    <button key={p} onClick={() => {
+                      setSelected(prev => ({ ...prev, priority: p }));
+                      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, priority: p } : o));
+                    }} style={{
                       padding: '3px 9px', borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: 'pointer',
                       border: '1px solid', textTransform: 'capitalize',
                       borderColor: selected.priority === p ? PRI[p] : 'var(--border)',
@@ -782,6 +785,31 @@ export default function Requests() {
                   <p style={{ margin: 0, fontSize: 12.5, color: 'var(--tx-2)', lineHeight: 1.6, background: 'var(--bg)', padding: '10px 12px', borderRadius: 7 }}>
                     {selected.description}
                   </p>
+                </div>
+              )}
+
+              {/* Cancel button */}
+              {selected.status !== 'Canceled' && selected.status !== 'Closed' && selected.status !== 'Delivered' && (
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                  <button onClick={async () => {
+                    if (!window.confirm('Are you sure you want to cancel this request?')) return;
+                    try {
+                      await fetch(`${API}/orders/${selected.id}/cancel`, {
+                        method: 'POST', headers: jhdrs(),
+                        body: JSON.stringify({ reason: 'Canceled by admin' }),
+                      });
+                      toast.success('Request canceled');
+                      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, status: 'Canceled' } : o));
+                      setSelected(null);
+                      fetchData();
+                    } catch { toast.error('Failed to cancel request'); }
+                  }} style={{
+                    width: '100%', padding: '8px 0', borderRadius: 7, border: '1px solid #ef444440',
+                    background: '#ef444410', color: '#ef4444', fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}>
+                    <X size={13} /> Cancel Request
+                  </button>
                 </div>
               )}
 

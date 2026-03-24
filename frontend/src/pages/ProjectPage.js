@@ -8,6 +8,7 @@ import {
   Circle, Clock, Folder, X, Edit3, Save, Trash2, CheckCircle2, MoreHorizontal,
   Target, BarChart3, FileText, Loader2, CreditCard, AlertCircle, Hash,
   File, FilePlus, FolderOpen, Bold, Italic, List, Link2, Type, Grip,
+  LayoutGrid,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -581,6 +582,7 @@ function TasksTab({ projectId, taskCount, teamMembers }) {
   const [editTask, setEditTask] = useState(null);
   const [quickAdd, setQuickAdd] = useState('');
   const [adding, setAdding] = useState(false);
+  const [taskView, setTaskView] = useState('list');
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -648,9 +650,18 @@ function TasksTab({ projectId, taskCount, teamMembers }) {
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Tasks</h3>
           <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>{doneCount}/{tasks.length} completed</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
-          <Plus size={12} /> Add Task
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 6, padding: 2, gap: 2, border: '1px solid var(--border)' }}>
+            {[{ v: 'list', icon: List, label: 'List' }, { v: 'kanban', icon: LayoutGrid, label: 'Board' }].map(({ v, icon: Icon, label }) => (
+              <button key={v} onClick={() => setTaskView(v)} style={{ padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 600, cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: 4, background: taskView === v ? 'var(--accent)' : 'transparent', color: taskView === v ? '#fff' : 'var(--tx-3)' }}>
+                <Icon size={11} /> {label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setShowModal(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
+            <Plus size={12} /> Add Task
+          </button>
+        </div>
       </div>
 
       {/* Inline quick-add */}
@@ -685,17 +696,48 @@ function TasksTab({ projectId, taskCount, teamMembers }) {
 
       {loading ? (
         <div style={{ padding: 40, textAlign: 'center' }}><Loader2 size={20} className="spin" color="var(--tx-3)" /></div>
-      ) : filtered.length === 0 ? (
+      ) : tasks.length === 0 ? (
         <div style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: 12, border: '1px dashed var(--border)' }}>
           <CheckSquare size={32} color="var(--tx-3)" style={{ marginBottom: 12, opacity: 0.5 }} />
-          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-2)', margin: '0 0 4px' }}>
-            {tasks.length === 0 ? 'No tasks yet' : 'No tasks match this filter'}
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: '0 0 16px' }}>
-            {tasks.length === 0 ? 'Add your first task above or use the Add Task button.' : 'Try a different filter.'}
-          </p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-2)', margin: '0 0 4px' }}>No tasks yet</p>
+          <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: '0 0 16px' }}>Add your first task above or use the Add Task button.</p>
+        </div>
+      ) : taskView === 'kanban' ? (
+        /* Kanban board */
+        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 8 }}>
+          {Object.entries(TASK_STATUS_CONFIG).map(([statusKey, stCfg]) => {
+            const colTasks = tasks.filter(t => t.status === statusKey);
+            return (
+              <div key={statusKey} style={{ flex: '0 0 200px', display: 'flex', flexDirection: 'column', maxHeight: 500 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 4px', marginBottom: 6 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: stCfg.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-1)' }}>{stCfg.label}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--tx-3)', background: 'var(--card)', padding: '1px 5px', borderRadius: 4, border: '1px solid var(--border)' }}>{colTasks.length}</span>
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, padding: 4, background: `${stCfg.color}08`, borderRadius: 8 }}>
+                  {colTasks.map(t => {
+                    const prCfg = PRIORITY_CONFIG[t.priority] || PRIORITY_CONFIG.medium;
+                    return (
+                      <div key={t.id} onClick={() => setEditTask(t)}
+                        style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 10px', cursor: 'pointer', borderLeft: `3px solid ${prCfg.color}`, transition: 'box-shadow .12s' }}
+                        onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'}
+                        onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{t.title}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--tx-3)' }}>
+                          {t.assignee_name && <span>{t.assignee_name}</span>}
+                          {t.due_at && <span><Calendar size={8} style={{ marginRight: 1 }} />{new Date(t.due_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {colTasks.length === 0 && <div style={{ textAlign: 'center', padding: '12px 4px', fontSize: 11, color: 'var(--tx-3)' }}>No tasks</div>}
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
+        /* List view */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {filtered.map(t => {
             const isDone = t.status === 'done';
@@ -724,6 +766,7 @@ function TasksTab({ projectId, taskCount, teamMembers }) {
               </div>
             );
           })}
+          {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--tx-3)', fontSize: 12 }}>No tasks match this filter</div>}
         </div>
       )}
     </div>

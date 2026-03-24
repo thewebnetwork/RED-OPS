@@ -346,7 +346,7 @@ function GroupHeader({ label, count, color, collapsed, onToggle }) {
   );
 }
 
-function ProjectModal({ project, onClose, onSave, loading }) {
+function ProjectModal({ project, onClose, onSave, loading, clients = [] }) {
   const [form, setForm] = useState(project || {});
 
   const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
@@ -411,8 +411,15 @@ function ProjectModal({ project, onClose, onSave, loading }) {
           </div>
 
           <div>
-            <label style={labelStyle}>Client Name</label>
-            <input type="text" value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" className="input-field" />
+            <label style={labelStyle}>Client</label>
+            {clients.length > 0 ? (
+              <select value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} className="input-field">
+                <option value="">No client assigned</option>
+                {clients.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+              </select>
+            ) : (
+              <input type="text" value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" className="input-field" />
+            )}
           </div>
 
           <div>
@@ -457,6 +464,7 @@ function Projects() {
   const [groupBy, setGroupBy] = useState('none');
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFilters, setShowFilters] = useState(false);
+  const [clientsList, setClientsList] = useState([]);
 
   // Persist view
   useEffect(() => { localStorage.setItem('projects_view', view); }, [view]);
@@ -464,6 +472,14 @@ function Projects() {
   // Preview-as-client support
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
+
+  // Fetch clients for dropdown
+  useEffect(() => {
+    ax().get(`${API}/users`).then(r => {
+      const arr = Array.isArray(r.data) ? r.data : r.data?.items || [];
+      setClientsList(arr.filter(u => u.account_type === 'Media Client'));
+    }).catch(() => {});
+  }, []);
 
   // Fetch projects
   const fetchProjects = useCallback(async () => {
@@ -724,7 +740,7 @@ function Projects() {
       </div>
 
       {/* Modal */}
-      {modal && <ProjectModal project={modal === 'new' ? null : modal} onClose={() => setModal(null)} onSave={async (proj) => {
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clientsList} onClose={() => setModal(null)} onSave={async (proj) => {
         setSaving(true);
         try {
           if (proj.id) {
@@ -1021,7 +1037,7 @@ function AdminProjectsHub() {
       </div>
 
       {/* Modal */}
-      {modal && <ProjectModal project={modal === 'new' ? null : modal} onClose={() => setModal(null)} onSave={async (proj) => {
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clients} onClose={() => setModal(null)} onSave={async (proj) => {
         setSaving(true);
         try {
           if (proj.id) {

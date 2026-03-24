@@ -48,14 +48,20 @@ function GeneralSection() {
   }, [currentOrg, loaded]);
 
   const handleSave = async () => {
-    if (!currentOrg) { toast.error('No organization found'); return; }
+    if (!orgName.trim()) { toast.error('Organization name is required'); return; }
     setSaving(true);
     try {
-      await ax().patch(`${API}/organizations/${currentOrg.id || currentOrg._id}`, {
-        name: orgName,
-        settings: { timezone, date_format: dateFormat },
-      });
-      toast.success('Organization settings saved');
+      if (currentOrg) {
+        await ax().patch(`${API}/organizations/${currentOrg.id || currentOrg._id}`, {
+          name: orgName,
+          settings: { timezone, date_format: dateFormat },
+        });
+        toast.success('Organization settings saved');
+      } else {
+        // No org exists — create one
+        await ax().post(`${API}/organizations`, { name: orgName });
+        toast.success('Organization created');
+      }
       refreshOrgs();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to save settings');

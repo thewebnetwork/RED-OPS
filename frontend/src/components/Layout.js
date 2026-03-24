@@ -47,7 +47,6 @@ const NAV_MAIN = [
 ];
 const NAV_BUSINESS = [
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
-  { path: '/crm',      icon: Contact,    label: 'Pipeline',  roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
   { path: '/reports',  icon: BarChart2,  label: 'Reports',  roles: ['Administrator','Operator'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
@@ -79,7 +78,6 @@ const CMD_ITEMS = [
   { label:'Requests',        icon:'📋', to:'/requests',      group:'Navigate' },
   { label:'Services',        icon:'🛍', to:'/services',      group:'Navigate' },
   { label:'Clients',         icon:'👥', to:'/clients',       group:'Navigate' },
-  { label:'Pipeline',        icon:'📇', to:'/crm',           group:'Navigate' },
   { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
   { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
@@ -594,13 +592,6 @@ export default function Layout({ children }) {
           <div style={{ flex:1 }} />
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <button onClick={openCmd}
-              style={{ display:'flex', alignItems:'center', gap:6, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 11px', cursor:'pointer', color:'var(--tx-3)', fontSize:12 }}>
-              <Search size={12} />
-              <span className="hide-mobile">Search</span>
-              <kbd className="hide-mobile">⌘K</kbd>
-            </button>
-
             <div style={{ position:'relative' }}>
               <Link to="/notifications"
                 style={{ width:32, height:32, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-2)' }}>

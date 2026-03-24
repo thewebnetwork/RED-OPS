@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import {
   BarChart2, TrendingUp, TrendingDown, Plus, X, ChevronDown,
-  Loader2, AlertCircle, CheckCircle2, Activity
+  Loader2, AlertCircle, CheckCircle2, Activity, Upload, FileText
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -567,6 +567,66 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
   });
 
   const [saving, setSaving] = useState(false);
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvResults, setCsvResults] = useState(null);
+
+  const handleCsvImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    const text = await file.text();
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) { toast.error('CSV must have a header row and at least one data row'); return; }
+
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+    const rows = lines.slice(1).map(line => {
+      const vals = line.split(',').map(v => v.trim());
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
+      return obj;
+    });
+
+    setCsvImporting(true);
+    let success = 0, failed = 0;
+    for (const row of rows) {
+      // Match client by name
+      const clientName = row.client || row.client_name || row.client_id || '';
+      const client = clients.find(c => c.name?.toLowerCase() === clientName.toLowerCase() || c.id === clientName);
+      if (!client) { failed++; continue; }
+
+      const platform = row.platform || 'Meta';
+      const period = row.period || row.month || new Date().toISOString().slice(0, 7);
+      const spend = parseFloat(row.ad_spend || row.spend || 0);
+      const leads = parseFloat(row.leads || 0);
+      const clicks = parseFloat(row.clicks || 0);
+      const impressions = parseFloat(row.impressions || 0);
+      const conversions = parseFloat(row.conversions || 0);
+      const roas = parseFloat(row.roas || 0);
+
+      try {
+        await ax().post(`${API}/ad-performance/snapshots`, {
+          client_id: client.id,
+          platform,
+          period: period.slice(0, 7),
+          metrics: {
+            ad_spend: spend, impressions, clicks, leads, conversions,
+            roas: roas || (spend > 0 ? 1 : 0),
+            cpl: leads > 0 ? spend / leads : 0,
+            ctr: impressions > 0 ? clicks / impressions : 0,
+            cpc: clicks > 0 ? spend / clicks : 0,
+          },
+          campaigns: [],
+          notes: row.notes || '',
+        });
+        success++;
+      } catch { failed++; }
+    }
+    setCsvImporting(false);
+    setCsvResults({ success, failed, total: rows.length });
+    if (success > 0) { toast.success(`Imported ${success} of ${rows.length} snapshots`); onSave(); }
+    if (failed > 0 && success === 0) toast.error(`All ${failed} rows failed — check client names match exactly`);
+  };
 
   const handleFieldChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -686,6 +746,32 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
             <X size={18} />
           </button>
         </div>
+
+        {/* CSV Import Section */}
+        <div style={{ marginBottom: 16, padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px dashed var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Upload size={14} color="var(--accent)" />
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>Import from CSV</span>
+            </div>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 6, background: 'var(--accent)', color: '#fff', fontSize: 11, fontWeight: 600, cursor: csvImporting ? 'wait' : 'pointer', opacity: csvImporting ? 0.6 : 1 }}>
+              {csvImporting ? <Loader2 size={12} className="spin" /> : <FileText size={12} />}
+              {csvImporting ? 'Importing...' : 'Choose File'}
+              <input type="file" accept=".csv" onChange={handleCsvImport} hidden disabled={csvImporting} />
+            </label>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: 0, lineHeight: 1.5 }}>
+            CSV columns: <strong>client</strong>, platform, period (YYYY-MM), ad_spend, impressions, clicks, leads, conversions, roas, notes
+          </p>
+          {csvResults && (
+            <div style={{ marginTop: 8, fontSize: 11, display: 'flex', gap: 10 }}>
+              <span style={{ color: '#22c55e', fontWeight: 600 }}>{csvResults.success} imported</span>
+              {csvResults.failed > 0 && <span style={{ color: '#ef4444', fontWeight: 600 }}>{csvResults.failed} failed</span>}
+            </div>
+          )}
+        </div>
+
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textAlign: 'center', marginBottom: 12 }}>— or add manually —</div>
 
         {/* Client Select */}
         <div style={{ marginBottom: '16px' }}>

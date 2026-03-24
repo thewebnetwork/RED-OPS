@@ -8,7 +8,7 @@ import {
   Copy, RefreshCw, ShieldOff, Send, Eye, Lock,
   Zap, Star, TrendingUp, Clock, DollarSign,
   Edit3, Save, MessageSquare, ArrowUpRight, Calendar,
-  Layers, Trash2, PenLine, Hash, ExternalLink,
+  Layers, Trash2, PenLine, Hash, ExternalLink, LayoutGrid, List,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -933,6 +933,7 @@ export default function Clients() {
   const [showWizard, setShowWizard] = useState(searchParams.get('new') === '1');
   const [portalFilter, setPortalFilter] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
+  const [view, setView] = useState('table');
 
   useEffect(() => {
     const load = async () => {
@@ -1031,6 +1032,14 @@ export default function Clients() {
               </button>
             ))}
           </div>
+          <div style={{ display:'flex', background:'var(--card)', borderRadius:6, padding:2, gap:2, border:'1px solid var(--border)' }}>
+            {[{v:'grid',icon:LayoutGrid},{v:'table',icon:List}].map(({v,icon:Icon})=>(
+              <button key={v} onClick={()=>setView(v)}
+                style={{ padding:'4px 10px', borderRadius:4, fontSize:11, fontWeight:500, cursor:'pointer', border:'none', display:'flex', alignItems:'center', gap:4, background: view===v?'var(--accent)':'transparent', color: view===v?'#fff':'var(--tx-2)' }}>
+                <Icon size={12}/> {v==='grid'?'Cards':'Table'}
+              </button>
+            ))}
+          </div>
           <select value={sort} onChange={e=>setSort(e.target.value)}
             style={{ background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'6px 10px', fontSize:12, color:'var(--tx-2)', outline:'none', cursor:'pointer' }}>
             <option value="score">Health</option><option value="mrr">MRR</option><option value="name">Name</option>
@@ -1057,72 +1066,98 @@ export default function Clients() {
           ))}
         </div>
 
-        {/* Table */}
+        {/* Content: Grid or Table */}
         <div style={{ flex:1, overflowY:'auto' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Portal</th>
-                <th>Plan</th>
-                <th>MRR</th>
-                <th>Health</th>
-                <th>Open</th>
-                <th>Last Delivery</th>
-                <th>Renewal</th>
-                <th>AM</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
+          {display.length === 0 ? (
+            <div style={{ padding:'48px 0', textAlign:'center' }}>
+              <div style={{ fontSize:32, marginBottom:10, opacity:0.5 }}>👥</div>
+              <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No clients yet</div>
+              <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16 }}>Add your first client to start managing their work and tracking delivery.</div>
+            </div>
+          ) : view === 'grid' ? (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:14, padding:'16px 20px' }}>
               {display.map(c => {
-                const isSelected = selected === c._id;
+                const planCfg = PLAN_CONFIG[c.plan] || {};
                 return (
-                  <tr key={c._id} onClick={() => navigate(`/clients/${c._id}`)}
-                    style={{ background: isSelected ? 'var(--bg-elevated)' : 'transparent', cursor:'pointer' }}>
-                    <td>
-                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                        <div style={{ width:30, height:30, borderRadius:7, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, color:'var(--red)', flexShrink:0 }}>
-                          {c.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight:600, fontSize:13 }}>{c.name}</div>
-                          <div style={{ display:'flex', gap:3, flexWrap:'wrap', marginTop:1 }}>
-                            {c.tags?.map(t=><TagPill key={t} tag={t}/>)}
-                          </div>
-                        </div>
+                  <div key={c._id} onClick={() => navigate(`/clients/${c._id}`)}
+                    style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:'16px', cursor:'pointer', transition:'box-shadow .15s, transform .15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'; e.currentTarget.style.transform='translateY(-1px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none'; }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+                      <div style={{ width:38, height:38, borderRadius:9, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:800, color:'var(--red)', flexShrink:0 }}>
+                        {c.name.charAt(0)}
                       </div>
-                    </td>
-                    <td><PortalBadge status={c.portal || 'none'} /></td>
-                    <td>
-                      <span style={{ fontSize:11.5, padding:'2px 8px', background:`${PLAN_CONFIG[c.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[c.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>
-                        {c.plan}
-                      </span>
-                    </td>
-                    <td style={{ fontWeight:700, color:'var(--tx-1)' }}>${(c.mrr||0).toLocaleString()}</td>
-                    <td><ScoreBadge score={c.score||0}/></td>
-                    <td style={{ color:(c.requests_open||0)>2?'#f59e0b':'var(--tx-2)', fontWeight:(c.requests_open||0)>2?600:400 }}>{c.requests_open||0}</td>
-                    <td style={{ color:'var(--tx-2)', fontSize:12 }}>{c.last_delivery||'—'}</td>
-                    <td style={{ fontSize:12, color:'var(--tx-3)' }}>{c.renewal ? new Date(c.renewal).toLocaleDateString('en-CA',{month:'short',day:'numeric'}) : '—'}</td>
-                    <td style={{ fontSize:12, color:'var(--tx-2)' }}>{c.am||'—'}</td>
-                    <td>
-                      <button onClick={e=>{e.stopPropagation();setSelected(isSelected?null:c._id);}}
-                        style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}>
-                        <ChevronRight size={13} style={{ transform: isSelected ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
-                      </button>
-                    </td>
-                  </tr>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontWeight:700, fontSize:14, color:'var(--tx-1)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.name}</div>
+                        <div style={{ fontSize:11, color:'var(--tx-3)' }}>{c.contact?.email || ''}</div>
+                      </div>
+                      <PortalBadge status={c.portal || 'none'} />
+                    </div>
+                    <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+                      <span style={{ fontSize:11, padding:'2px 8px', borderRadius:4, background:`${planCfg.color || '#606060'}18`, color:planCfg.color || 'var(--tx-3)', fontWeight:600 }}>{c.plan}</span>
+                      <ScoreBadge score={c.score||0} />
+                      {c.tags?.map(t => <TagPill key={t} tag={t} />)}
+                    </div>
+                    <div style={{ display:'flex', justifyContent:'space-between', paddingTop:10, borderTop:'1px solid var(--border)' }}>
+                      <div><div style={{ fontSize:16, fontWeight:700, color:'var(--tx-1)' }}>${(c.mrr||0).toLocaleString()}</div><div style={{ fontSize:10, color:'var(--tx-3)' }}>MRR</div></div>
+                      <div style={{ textAlign:'center' }}><div style={{ fontSize:14, fontWeight:600, color: (c.requests_open||0)>2?'#f59e0b':'var(--tx-2)' }}>{c.requests_open||0}</div><div style={{ fontSize:10, color:'var(--tx-3)' }}>Open</div></div>
+                      <div style={{ textAlign:'right' }}><div style={{ fontSize:12, fontWeight:500, color:'var(--tx-2)' }}>{c.am||'—'}</div><div style={{ fontSize:10, color:'var(--tx-3)' }}>AM</div></div>
+                    </div>
+                  </div>
                 );
               })}
-              {display.length === 0 && (
-                <tr><td colSpan={10}><div className="empty-state" style={{ padding:'32px 0', textAlign:'center' }}>
-                  <div style={{ fontSize:32, marginBottom:10, opacity:0.5 }}>👥</div>
-                  <div style={{ fontSize:15, fontWeight:600, color:'var(--tx-1)', marginBottom:6 }}>No clients yet</div>
-                  <div style={{ fontSize:13, color:'var(--tx-3)', marginBottom:16 }}>Add your first client to start managing their work and tracking delivery.</div>
-                </div></td></tr>
-              )}
-            </tbody>
-          </table>
+            </div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Client</th><th>Portal</th><th>Plan</th><th>MRR</th><th>Health</th>
+                  <th>Open</th><th>Last Delivery</th><th>Renewal</th><th>AM</th><th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {display.map(c => {
+                  const isSelected = selected === c._id;
+                  return (
+                    <tr key={c._id} onClick={() => navigate(`/clients/${c._id}`)}
+                      style={{ background: isSelected ? 'var(--bg-elevated)' : 'transparent', cursor:'pointer' }}>
+                      <td>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <div style={{ width:30, height:30, borderRadius:7, background:'var(--red-bg)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, color:'var(--red)', flexShrink:0 }}>
+                            {c.name.charAt(0)}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight:600, fontSize:13 }}>{c.name}</div>
+                            <div style={{ display:'flex', gap:3, flexWrap:'wrap', marginTop:1 }}>
+                              {c.tags?.map(t=><TagPill key={t} tag={t}/>)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><PortalBadge status={c.portal || 'none'} /></td>
+                      <td>
+                        <span style={{ fontSize:11.5, padding:'2px 8px', background:`${PLAN_CONFIG[c.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[c.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>
+                          {c.plan}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight:700, color:'var(--tx-1)' }}>${(c.mrr||0).toLocaleString()}</td>
+                      <td><ScoreBadge score={c.score||0}/></td>
+                      <td style={{ color:(c.requests_open||0)>2?'#f59e0b':'var(--tx-2)', fontWeight:(c.requests_open||0)>2?600:400 }}>{c.requests_open||0}</td>
+                      <td style={{ color:'var(--tx-2)', fontSize:12 }}>{c.last_delivery||'—'}</td>
+                      <td style={{ fontSize:12, color:'var(--tx-3)' }}>{c.renewal ? new Date(c.renewal).toLocaleDateString('en-CA',{month:'short',day:'numeric'}) : '—'}</td>
+                      <td style={{ fontSize:12, color:'var(--tx-2)' }}>{c.am||'—'}</td>
+                      <td>
+                        <button onClick={e=>{e.stopPropagation();setSelected(isSelected?null:c._id);}}
+                          style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}>
+                          <ChevronRight size={13} style={{ transform: isSelected ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 

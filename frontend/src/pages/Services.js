@@ -686,6 +686,13 @@ export default function Services() {
             </button>
           )}
 
+          {/* Always-visible Add button for admin */}
+          {isAdmin && !showAdmin && (
+            <button style={btnPrimary} onClick={() => setEditingService({})}>
+              <Plus size={15} /> New Service
+            </button>
+          )}
+
           {/* View Toggle */}
           <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             <button onClick={() => setView('grid')} style={{ ...viewBtn, background: view === 'grid' ? 'var(--accent)' : 'transparent', color: view === 'grid' ? '#fff' : 'var(--tx-3)' }}>

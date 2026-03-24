@@ -16,6 +16,7 @@ import {
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
   Plus,
@@ -304,6 +305,7 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
 
 function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCreate }) {
   const taskIds = tasks.map(t => t.id);
+  const { setNodeRef, isOver } = useDroppable({ id: col.id });
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 272, maxWidth: 272 }}>
       {/* Header */}
@@ -325,30 +327,36 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
           <Plus size={13} />
         </button>
       </div>
-      {/* Body */}
-      <div style={{
+      {/* Body — registered as droppable target */}
+      <div ref={setNodeRef} style={{
         flex: 1, borderRadius: '0 0 10px 10px',
         border: '1px solid var(--border)', borderTop: 'none',
-        background: col.color + '08',
+        background: isOver ? `${col.color}15` : col.color + '08',
+        outline: isOver ? `1px dashed ${col.color}60` : 'none',
         padding: 8, minHeight: 120, display: 'flex', flexDirection: 'column', gap: 6,
+        transition: 'background 0.15s',
       }}>
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {tasks.map(task => (<SortableTaskCard key={task.id} task={task} onEdit={onEdit} />))}
         </SortableContext>
         {inlineCreate === col.id && (<InlineCreate colId={col.id} onSave={onAddTask} onCancel={() => setInlineCreate(null)} />)}
         {tasks.length === 0 && inlineCreate !== col.id && (
-          <button
-            onClick={() => setInlineCreate(col.id)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              padding: '14px 0', fontSize: 12, color: 'var(--tx-3)',
-              background: 'none', border: `2px dashed var(--border)`, borderRadius: 8, cursor: 'pointer',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = col.color; e.currentTarget.style.color = col.color; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
-          >
-            <Plus size={11} /> Add task
-          </button>
+          isOver ? (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: col.color, fontSize: 12, fontWeight: 500 }}>Drop here</div>
+          ) : (
+            <button
+              onClick={() => setInlineCreate(col.id)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: '14px 0', fontSize: 12, color: 'var(--tx-3)',
+                background: 'none', border: `2px dashed var(--border)`, borderRadius: 8, cursor: 'pointer',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = col.color; e.currentTarget.style.color = col.color; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+            >
+              <Plus size={11} /> Add task
+            </button>
+          )
         )}
       </div>
     </div>

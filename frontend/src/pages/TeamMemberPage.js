@@ -128,8 +128,8 @@ export default function TeamMemberPage() {
 
   const fetchSops = useCallback(async () => {
     try {
-      const r = await ax().get(`${API}/knowledge-base`);
-      setSops(r.data?.data || r.data || []);
+      const r = await ax().get(`${API}/knowledge-base/documents`);
+      setSops(r.data?.documents || r.data?.data || r.data || []);
     } catch { setSops([]); }
   }, []);
 
