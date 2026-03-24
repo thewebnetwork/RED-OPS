@@ -28,6 +28,11 @@ from models.task import (
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
+def get_user_org_id(user: dict) -> str | None:
+    """Get the effective org_id for a user, with fallback chain."""
+    return user.get("org_id") or user.get("team_id") or user.get("id")
+
+
 async def get_account_manager_id(user: dict) -> str | None:
     """Get the account_manager_id for a client user."""
     if user.get("account_type") != "Media Client":
@@ -54,7 +59,7 @@ def is_account_manager(user: dict) -> bool:
 
 def can_view_task(task: dict, user: dict, managed_client_ids: list = None) -> bool:
     """Check if user can view this task."""
-    user_org_id = user.get("org_id") or user.get("team_id")
+    user_org_id = get_user_org_id(user)
     task_org_id = task.get("org_id")
 
     if user_org_id != task_org_id:
@@ -74,7 +79,7 @@ def can_view_task(task: dict, user: dict, managed_client_ids: list = None) -> bo
 
 def can_edit_task(task: dict, user: dict, managed_client_ids: list = None) -> bool:
     """Check if user can edit this task."""
-    user_org_id = user.get("org_id") or user.get("team_id")
+    user_org_id = get_user_org_id(user)
 
     if user.get("role") == "Administrator" and user_org_id == task.get("org_id"):
         return True
@@ -103,7 +108,7 @@ async def list_client_assignments(
     """Admin only: List all clients with their account manager assignments."""
     if current_user.get("role") != "Administrator":
         raise HTTPException(status_code=403, detail="Admin only")
-    org_id = current_user.get("org_id") or current_user.get("team_id")
+    org_id = get_user_org_id(current_user)
     clients = await db.users.find(
         {"team_id": org_id, "account_type": "Media Client", "active": {"$ne": False}},
         {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_manager_id": 1}
@@ -207,7 +212,7 @@ async def list_assignable_users(
     - Account Manager: themselves + their managed clients
     - Client: themselves + their account manager (if set)
     """
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = get_user_org_id(current_user)
     result = []
 
     if current_user.get("role") == "Administrator":
@@ -310,7 +315,7 @@ async def list_tasks(
     query = {}
     
     # Enforce org filtering
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = get_user_org_id(current_user)
     is_admin = current_user.get("role") == "Administrator"
     is_internal = current_user.get("account_type") == "Internal Staff"
     
@@ -345,7 +350,10 @@ async def list_tasks(
         query["request_id"] = request_id
     if status:
         query["status"] = status
-    
+
+    # Exclude subtasks from main list (they show nested under parent)
+    query["parent_task_id"] = {"$in": [None, ""]}
+
     # Fetch tasks
     tasks = await db.tasks.find(query, {"_id": 0}).sort("position", 1).to_list(1000)
     
@@ -414,7 +422,7 @@ async def create_task(
     - Account Manager: can create tasks in their org
     - Client: can create tasks with visibility=client, assign to self or AM only
     """
-    user_org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    user_org_id = get_user_org_id(current_user) or current_user.get("id")
     is_client = current_user.get("account_type") == "Media Client"
 
     # Auto-fill org_id from user if not provided
@@ -649,7 +657,7 @@ async def delete_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = get_user_org_id(current_user)
     is_admin = current_user.get("role") == "Administrator"
     is_creator = task.get("created_by_user_id") == current_user["id"]
     same_org = task.get("org_id") == user_org_id
@@ -682,7 +690,7 @@ async def list_task_comments(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = get_user_org_id(current_user)
     if task.get("org_id") != user_org_id and current_user.get("role") != "Administrator":
         raise HTTPException(status_code=403, detail="Cannot access comments from other organizations")
 
@@ -713,7 +721,7 @@ async def add_task_comment(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    user_org_id = current_user.get("org_id") or current_user.get("team_id")
+    user_org_id = get_user_org_id(current_user)
     if task.get("org_id") != user_org_id and current_user.get("role") != "Administrator":
         raise HTTPException(status_code=403, detail="Cannot comment on tasks from other organizations")
 
