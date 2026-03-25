@@ -1477,10 +1477,15 @@ function AdminTeamHub() {
                   </div>
                 )}
 
-                {/* Action button */}
-                <button onClick={() => navigate(`/team/${m.id}`)} style={{ ...btnSec, width: '100%', justifyContent: 'center' }}>
-                  <Eye size={14} />View Profile
-                </button>
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setEditMember(m)} style={{ ...btnSec, flex: 1, justifyContent: 'center' }}>
+                    <Edit2 size={14} />Edit
+                  </button>
+                  <button onClick={() => navigate(`/team/${m.id}`)} style={{ ...btnSec, flex: 1, justifyContent: 'center' }}>
+                    <Eye size={14} />View
+                  </button>
+                </div>
               </div>
             );
           })}
