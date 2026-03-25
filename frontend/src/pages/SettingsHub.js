@@ -7,7 +7,7 @@ import {
   Settings, Users, Shield, Building2, FolderTree, GitBranch, Palette, Mail, Plug,
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
   X, Loader2, Clock, Package, Layers, Zap, EyeOff, Video, Camera, FileText, BarChart2,
-  Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid,
+  Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid, Tag, CreditCard, DollarSign, Star,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -20,6 +20,8 @@ const SECTIONS = [
   { id: 'roles', label: 'Roles & Permissions', icon: Shield, inline: false, path: '/roles' },
   { id: 'clients', label: 'Client Accounts', icon: Building2, inline: true },
   { id: 'services', label: 'Services', icon: ShoppingBag, inline: true },
+  { id: 'specialties', label: 'Specialties', icon: Tag, inline: true },
+  { id: 'plans', label: 'Subscription Plans', icon: CreditCard, inline: true },
   { id: 'categories', label: 'Categories', icon: FolderTree, inline: false, path: '/categories' },
   { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
   { id: 'email', label: 'Email', icon: Mail, inline: false, path: '/email-settings' },
@@ -726,6 +728,545 @@ function ServicesSection() {
   );
 }
 
+// ── Specialties Management Section ───────────────────────────────────────────
+
+function SpecialtiesSection() {
+  const [specialties, setSpecialties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', description: '', icon: '', color: '' });
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({ name: '', description: '', icon: '', color: '#3b82f6' });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { fetchSpecialties(); }, []);
+
+  const fetchSpecialties = async () => {
+    try {
+      setLoading(true);
+      const res = await ax().get(`${API}/specialties`);
+      setSpecialties(res.data || []);
+    } catch (err) {
+      toast.error('Failed to load specialties');
+    } finally { setLoading(false); }
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.name.trim()) { toast.error('Specialty name is required'); return; }
+    setSaving(true);
+    try {
+      await ax().post(`${API}/specialties`, createForm);
+      toast.success('Specialty created');
+      setCreating(false);
+      setCreateForm({ name: '', description: '', icon: '', color: '#3b82f6' });
+      fetchSpecialties();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to create specialty');
+    } finally { setSaving(false); }
+  };
+
+  const startEdit = (spec) => {
+    setEditing(spec.id);
+    setEditForm({ name: spec.name || '', description: spec.description || '', icon: spec.icon || '', color: spec.color || '#3b82f6' });
+  };
+
+  const handleUpdate = async (specId) => {
+    if (!editForm.name.trim()) { toast.error('Specialty name is required'); return; }
+    setSaving(true);
+    try {
+      await ax().patch(`${API}/specialties/${specId}`, editForm);
+      toast.success('Specialty updated');
+      setEditing(null);
+      fetchSpecialties();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update specialty');
+    } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (spec) => {
+    const msg = spec.user_count > 0
+      ? `Delete "${spec.name}"? ${spec.user_count} user(s) will be unassigned.`
+      : `Delete "${spec.name}"? This cannot be undone.`;
+    if (!window.confirm(msg)) return;
+    try {
+      await ax().delete(`${API}/specialties/${spec.id}`);
+      toast.success('Specialty deleted');
+      fetchSpecialties();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete specialty');
+    }
+  };
+
+  const inpStyle = {
+    width: '100%', padding: '8px 12px', fontSize: '13px',
+    border: '1px solid var(--border)', borderRadius: '8px',
+    background: 'var(--bg)', color: 'var(--tx-1)', boxSizing: 'border-box',
+  };
+
+  return (
+    <div>
+      {/* KPI Strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div style={{ padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Tag size={16} style={{ color: '#3b82f6' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', lineHeight: 1 }}>{specialties.length}</div>
+            <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>Total Specialties</div>
+          </div>
+        </div>
+        <div style={{ padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={16} style={{ color: '#22c55e' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', lineHeight: 1 }}>{specialties.reduce((sum, s) => sum + (s.user_count || 0), 0)}</div>
+            <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>Assigned Users</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>Manage Specialties</h3>
+        <button onClick={() => { setCreating(true); setEditing(null); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          <Plus size={14} /> Add Specialty
+        </button>
+      </div>
+
+      {/* Create Form */}
+      {creating && (
+        <div style={{ padding: 20, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>New Specialty</h4>
+            <button onClick={() => setCreating(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={16} /></button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name *</label>
+              <input style={inpStyle} placeholder="e.g. Photography" value={createForm.name} onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))} autoFocus />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Icon (emoji)</label>
+              <input style={inpStyle} placeholder="e.g. camera emoji" value={createForm.icon} onChange={e => setCreateForm(f => ({ ...f, icon: e.target.value }))} maxLength="2" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Color</label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="color" value={createForm.color} onChange={e => setCreateForm(f => ({ ...f, color: e.target.value }))}
+                  style={{ width: 36, height: 36, border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'var(--bg)', padding: 2 }} />
+                <input style={{ ...inpStyle, flex: 1 }} value={createForm.color} onChange={e => setCreateForm(f => ({ ...f, color: e.target.value }))} placeholder="#3b82f6" />
+              </div>
+            </div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</label>
+            <input style={inpStyle} placeholder="Optional description" value={createForm.description} onChange={e => setCreateForm(f => ({ ...f, description: e.target.value }))} />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={handleCreate} disabled={saving}
+              style={{ padding: '8px 20px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Creating...' : 'Create Specialty'}
+            </button>
+            <button onClick={() => setCreating(false)}
+              style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, fontWeight: 500, color: 'var(--tx-2)', cursor: 'pointer' }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Specialties List */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)' }}>
+          <Loader2 size={24} className="spin" style={{ color: 'var(--accent)' }} />
+        </div>
+      ) : specialties.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)' }}>
+          No specialties yet. Click "Add Specialty" to create one.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {specialties.map(spec => (
+            <div key={spec.id} style={{ padding: '14px 18px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 14, transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-hi, #3a3a3a)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+
+              {editing === spec.id ? (
+                /* Edit mode */
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 10 }}>
+                    <input style={inpStyle} placeholder="Name" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} autoFocus />
+                    <input style={inpStyle} placeholder="Icon emoji" value={editForm.icon} onChange={e => setEditForm(f => ({ ...f, icon: e.target.value }))} maxLength="2" />
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={editForm.color || '#3b82f6'} onChange={e => setEditForm(f => ({ ...f, color: e.target.value }))}
+                        style={{ width: 32, height: 32, border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'var(--bg)', padding: 2 }} />
+                      <input style={{ ...inpStyle, flex: 1 }} value={editForm.color} onChange={e => setEditForm(f => ({ ...f, color: e.target.value }))} placeholder="#3b82f6" />
+                    </div>
+                  </div>
+                  <input style={inpStyle} placeholder="Description" value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => handleUpdate(spec.id)} disabled={saving}
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, background: 'var(--green)', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button onClick={() => setEditing(null)}
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 500, background: 'none', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* View mode */
+                <>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `${spec.color || '#3b82f6'}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${spec.color || '#3b82f6'}30` }}>
+                    {spec.icon ? (
+                      <span style={{ fontSize: 18 }}>{spec.icon}</span>
+                    ) : (
+                      <Tag size={16} style={{ color: spec.color || '#3b82f6' }} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--tx-1)' }}>{spec.name}</div>
+                    {spec.description && <div style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 2 }}>{spec.description}</div>}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <span style={{ fontSize: 12, color: 'var(--tx-3)', marginRight: 8 }}>
+                      {spec.user_count || 0} user{(spec.user_count || 0) !== 1 ? 's' : ''}
+                    </span>
+                    <button onClick={() => startEdit(spec)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 7, background: 'none', border: 'none', cursor: 'pointer', borderRadius: 7, color: 'var(--accent)' }} title="Edit">
+                      <Pencil size={14} />
+                    </button>
+                    <button onClick={() => handleDelete(spec)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 7, background: 'none', border: 'none', cursor: 'pointer', borderRadius: 7, color: 'var(--red)' }} title="Delete">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Subscription Plans Management Section ────────────────────────────────────
+
+function SubscriptionPlansSection() {
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: 0 });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { fetchPlans(); }, []);
+
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const res = await ax().get(`${API}/subscription-plans`);
+      setPlans(res.data || []);
+    } catch (err) {
+      toast.error('Failed to load subscription plans');
+    } finally { setLoading(false); }
+  };
+
+  const parseFeatures = (featStr) => {
+    if (!featStr || !featStr.trim()) return [];
+    return featStr.split('\n').map(f => f.trim()).filter(Boolean);
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.name.trim()) { toast.error('Plan name is required'); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        name: createForm.name,
+        description: createForm.description || null,
+        price_monthly: createForm.price_monthly ? parseFloat(createForm.price_monthly) : null,
+        price_yearly: createForm.price_yearly ? parseFloat(createForm.price_yearly) : null,
+        features: parseFeatures(createForm.features),
+        sort_order: parseInt(createForm.sort_order) || 0,
+      };
+      await ax().post(`${API}/subscription-plans`, payload);
+      toast.success('Plan created');
+      setCreating(false);
+      setCreateForm({ name: '', description: '', price_monthly: '', price_yearly: '', features: '', sort_order: 0 });
+      fetchPlans();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to create plan');
+    } finally { setSaving(false); }
+  };
+
+  const startEdit = (plan) => {
+    setEditing(plan.id);
+    setEditForm({
+      name: plan.name || '',
+      description: plan.description || '',
+      price_monthly: plan.price_monthly != null ? String(plan.price_monthly) : '',
+      price_yearly: plan.price_yearly != null ? String(plan.price_yearly) : '',
+      features: (plan.features || []).join('\n'),
+      sort_order: plan.sort_order || 0,
+    });
+  };
+
+  const handleUpdate = async (planId) => {
+    if (!editForm.name.trim()) { toast.error('Plan name is required'); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        name: editForm.name,
+        description: editForm.description || null,
+        price_monthly: editForm.price_monthly ? parseFloat(editForm.price_monthly) : null,
+        price_yearly: editForm.price_yearly ? parseFloat(editForm.price_yearly) : null,
+        features: parseFeatures(editForm.features),
+        sort_order: parseInt(editForm.sort_order) || 0,
+      };
+      await ax().patch(`${API}/subscription-plans/${planId}`, payload);
+      toast.success('Plan updated');
+      setEditing(null);
+      fetchPlans();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update plan');
+    } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (plan) => {
+    if (plan.user_count > 0) {
+      toast.error(`Cannot delete "${plan.name}" — ${plan.user_count} active user(s) are on this plan`);
+      return;
+    }
+    if (!window.confirm(`Delete plan "${plan.name}"? This cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/subscription-plans/${plan.id}`);
+      toast.success('Plan deleted');
+      fetchPlans();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete plan');
+    }
+  };
+
+  const inpStyle = {
+    width: '100%', padding: '8px 12px', fontSize: '13px',
+    border: '1px solid var(--border)', borderRadius: '8px',
+    background: 'var(--bg)', color: 'var(--tx-1)', boxSizing: 'border-box',
+  };
+
+  const lblStyle = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' };
+
+  const formatPrice = (price) => {
+    if (price == null) return '—';
+    return `$${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
+
+  return (
+    <div>
+      {/* KPI Strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div style={{ padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(168,85,247,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <CreditCard size={16} style={{ color: '#a855f7' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', lineHeight: 1 }}>{plans.length}</div>
+            <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>Total Plans</div>
+          </div>
+        </div>
+        <div style={{ padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={16} style={{ color: '#22c55e' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', lineHeight: 1 }}>{plans.reduce((sum, p) => sum + (p.user_count || 0), 0)}</div>
+            <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>Subscribed Users</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>Manage Plans</h3>
+        <button onClick={() => { setCreating(true); setEditing(null); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          <Plus size={14} /> Add Plan
+        </button>
+      </div>
+
+      {/* Create Form */}
+      {creating && (
+        <div style={{ padding: 20, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', margin: 0 }}>New Subscription Plan</h4>
+            <button onClick={() => setCreating(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={16} /></button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={lblStyle}>Name *</label>
+              <input style={inpStyle} placeholder="e.g. Scale" value={createForm.name} onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))} autoFocus />
+            </div>
+            <div>
+              <label style={lblStyle}>Monthly Price</label>
+              <input style={inpStyle} type="number" step="0.01" placeholder="0.00" value={createForm.price_monthly} onChange={e => setCreateForm(f => ({ ...f, price_monthly: e.target.value }))} />
+            </div>
+            <div>
+              <label style={lblStyle}>Yearly Price</label>
+              <input style={inpStyle} type="number" step="0.01" placeholder="0.00" value={createForm.price_yearly} onChange={e => setCreateForm(f => ({ ...f, price_yearly: e.target.value }))} />
+            </div>
+            <div>
+              <label style={lblStyle}>Sort Order</label>
+              <input style={inpStyle} type="number" value={createForm.sort_order} onChange={e => setCreateForm(f => ({ ...f, sort_order: e.target.value }))} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={lblStyle}>Description</label>
+            <input style={inpStyle} placeholder="Brief description of this plan" value={createForm.description} onChange={e => setCreateForm(f => ({ ...f, description: e.target.value }))} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={lblStyle}>Features (one per line)</label>
+            <textarea style={{ ...inpStyle, minHeight: 80, resize: 'vertical', fontFamily: 'inherit' }} placeholder="Feature 1&#10;Feature 2&#10;Feature 3" value={createForm.features} onChange={e => setCreateForm(f => ({ ...f, features: e.target.value }))} />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={handleCreate} disabled={saving}
+              style={{ padding: '8px 20px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Creating...' : 'Create Plan'}
+            </button>
+            <button onClick={() => setCreating(false)}
+              style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, fontWeight: 500, color: 'var(--tx-2)', cursor: 'pointer' }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Plans Grid */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)' }}>
+          <Loader2 size={24} className="spin" style={{ color: 'var(--accent)' }} />
+        </div>
+      ) : plans.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)' }}>
+          No subscription plans yet. Click "Add Plan" to create one.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+          {plans.map(plan => (
+            <div key={plan.id} style={{ padding: 20, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-hi, #3a3a3a)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+
+              {editing === plan.id ? (
+                /* Edit mode */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div>
+                    <label style={lblStyle}>Name *</label>
+                    <input style={inpStyle} value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} autoFocus />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                    <div>
+                      <label style={lblStyle}>Monthly</label>
+                      <input style={inpStyle} type="number" step="0.01" placeholder="0.00" value={editForm.price_monthly} onChange={e => setEditForm(f => ({ ...f, price_monthly: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label style={lblStyle}>Yearly</label>
+                      <input style={inpStyle} type="number" step="0.01" placeholder="0.00" value={editForm.price_yearly} onChange={e => setEditForm(f => ({ ...f, price_yearly: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label style={lblStyle}>Order</label>
+                      <input style={inpStyle} type="number" value={editForm.sort_order} onChange={e => setEditForm(f => ({ ...f, sort_order: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lblStyle}>Description</label>
+                    <input style={inpStyle} value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" />
+                  </div>
+                  <div>
+                    <label style={lblStyle}>Features (one per line)</label>
+                    <textarea style={{ ...inpStyle, minHeight: 70, resize: 'vertical', fontFamily: 'inherit' }} value={editForm.features} onChange={e => setEditForm(f => ({ ...f, features: e.target.value }))} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                    <button onClick={() => handleUpdate(plan.id)} disabled={saving}
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, background: 'var(--green)', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button onClick={() => setEditing(null)}
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 500, background: 'none', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* View mode */
+                <>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div>
+                      <h4 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: 0, marginBottom: 4 }}>{plan.name}</h4>
+                      {plan.description && <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>{plan.description}</p>}
+                    </div>
+                    <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+                      <button onClick={() => startEdit(plan)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 7, background: 'none', border: 'none', cursor: 'pointer', borderRadius: 7, color: 'var(--accent)' }} title="Edit">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDelete(plan)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 7, background: 'none', border: 'none', cursor: 'pointer', borderRadius: 7, color: 'var(--red)' }} title="Delete">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div style={{ display: 'flex', gap: 16, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid var(--border)' }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 2 }}>Monthly</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--tx-1)' }}>{formatPrice(plan.price_monthly)}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--tx-3)', marginBottom: 2 }}>Yearly</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--tx-1)' }}>{formatPrice(plan.price_yearly)}</div>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  {plan.features && plan.features.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Features</div>
+                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {plan.features.map((feat, i) => (
+                          <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tx-2)' }}>
+                            <CheckCircle2 size={13} style={{ color: 'var(--green)', flexShrink: 0 }} />
+                            {feat}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div style={{ marginTop: 'auto', paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>
+                      {plan.user_count || 0} subscriber{(plan.user_count || 0) !== 1 ? 's' : ''}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>
+                      Order: {plan.sort_order}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Navigation Card ───────────────────────────────────────────────────────────
 
 function NavigationCard({ section }) {
@@ -865,6 +1406,8 @@ export default function SettingsHub() {
           {activeSection === 'general' && <GeneralSection />}
           {activeSection === 'clients' && <ClientAccountsSection />}
           {activeSection === 'services' && <ServicesSection />}
+          {activeSection === 'specialties' && <SpecialtiesSection />}
+          {activeSection === 'plans' && <SubscriptionPlansSection />}
           {SECTIONS.find((s) => s.id === activeSection && !s.inline) && (
             <NavigationCard section={SECTIONS.find((s) => s.id === activeSection)} />
           )}

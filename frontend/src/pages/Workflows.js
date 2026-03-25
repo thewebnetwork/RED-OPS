@@ -226,7 +226,7 @@ export default function Workflows() {
   const handleInstallTemplate = async (templateId) => {
     setInstallingTemplate(templateId);
     try {
-      const res = await axios.postemplateId;
+      const res = await axios.post(`${API}/workflow-templates/${templateId}/install`);
       toast.success(res.data.message || 'Workflow installed successfully!');
       fetchWorkflows();
       // Navigate to the new workflow

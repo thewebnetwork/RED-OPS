@@ -98,14 +98,15 @@ function OrderCard({ order, onClick, ghost = false }) {
     <div
       onClick={onClick}
       style={{
-        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
+        background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
         padding: '10px 12px', cursor: ghost ? 'grabbing' : 'pointer',
-        boxShadow: ghost ? '0 8px 24px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.08)',
-        opacity: ghost ? 0.95 : 1, transition: 'box-shadow .15s, transform .15s',
+        boxShadow: ghost ? '0 12px 40px rgba(0,0,0,0.5)' : '0 1px 4px rgba(0,0,0,0.12)',
+        opacity: ghost ? 0.5 : 1, transition: 'box-shadow .15s, transform .15s',
         borderLeft: `3px solid ${PRI[order.priority] || '#606060'}`,
+        transform: ghost ? 'rotate(1.5deg)' : 'none',
       }}
-      onMouseEnter={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
-      onMouseLeave={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'none'; }}}
+      onMouseEnter={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+      onMouseLeave={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.12)'; e.currentTarget.style.transform = 'none'; }}}
     >
       {/* Top: code + SLA */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -189,11 +190,11 @@ function AssignDropdown({ orderId, currentEditorId, teamMembers, onAssign }) {
       </button>
       {open && (
         <>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 299 }} onClick={() => setOpen(false)} />
+          <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={() => setOpen(false)} />
           <div style={{
             position: 'absolute', top: '100%', right: 0, marginTop: 4, width: 240,
-            background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: 300, overflow: 'hidden',
+            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 451, overflow: 'hidden',
           }}>
             <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
               <input
@@ -298,7 +299,7 @@ export default function Requests() {
   const [orders, setOrders] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('kanban');
+  const [view, setView] = useState(() => localStorage.getItem('requests_view') || 'kanban');
   const [search, setSearch] = useState('');
   const [priFilter, setPriFilter] = useState('');
   const [stageFilter, setStageFilter] = useState('');
@@ -472,16 +473,17 @@ export default function Requests() {
         </div>
 
         {/* View toggle */}
-        <div style={{ display: 'flex', background: 'var(--card)', borderRadius: 6, padding: 2, gap: 2, border: '1px solid var(--border)' }}>
-          {[{ v: 'kanban', icon: LayoutGrid }, { v: 'table', icon: List }].map(({ v, icon: Icon }) => (
-            <button key={v} onClick={() => setView(v)}
+        <div style={{ display: 'flex', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
+          {[{ v: 'kanban', icon: LayoutGrid, label: 'Board' }, { v: 'table', icon: List, label: 'Table' }].map(({ v, icon: Icon, label }, i) => (
+            <button key={v} onClick={() => { setView(v); localStorage.setItem('requests_view', v); }}
               style={{
-                padding: '4px 10px', borderRadius: 4, fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                border: 'none', display: 'flex', alignItems: 'center', gap: 4,
-                background: view === v ? 'var(--accent)' : 'transparent',
-                color: view === v ? '#fff' : 'var(--tx-2)',
+                display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
+                background: view === v ? 'var(--red)' : 'var(--bg-elevated)',
+                color: view === v ? '#fff' : 'var(--tx-3)',
+                border: 'none', cursor: 'pointer',
+                borderRight: i === 0 ? '1px solid var(--border)' : 'none',
               }}>
-              <Icon size={12} /> {v === 'kanban' ? 'Board' : 'Table'}
+              <Icon size={13} /> {label}
             </button>
           ))}
         </div>
@@ -504,7 +506,7 @@ export default function Requests() {
           <span style={{ fontSize: 12.5, color: '#f59e0b', fontWeight: 600, flex: 1 }}>
             {unassigned} incoming request{unassigned > 1 ? 's' : ''} need{unassigned === 1 ? 's' : ''} assignment
           </span>
-          <button onClick={() => { setPriFilter(''); setStageFilter('Open'); setView('table'); }} className="btn-ghost btn-sm" style={{ fontSize: 11, color: '#f59e0b', borderColor: '#f59e0b40' }}>
+          <button onClick={() => { setPriFilter(''); setStageFilter('Open'); setView('table'); localStorage.setItem('requests_view', 'table'); }} className="btn-ghost btn-sm" style={{ fontSize: 11, color: '#f59e0b', borderColor: '#f59e0b40' }}>
             View unassigned
           </button>
         </div>
@@ -532,7 +534,7 @@ export default function Requests() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 6px', marginBottom: 6 }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: STAGE_COLORS[stage], flexShrink: 0 }} />
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{stage}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--tx-3)', background: 'var(--card)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
+                      <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--tx-3)', background: 'var(--bg-card)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
                         {stageOrders.length}
                       </span>
                     </div>
@@ -555,7 +557,7 @@ export default function Requests() {
         ) : (
           /* Table view */
           <div style={{ padding: 16, overflow: 'auto' }}>
-            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
@@ -616,9 +618,9 @@ export default function Requests() {
 
       {/* ── New Request Modal ── */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ width: 460, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '24px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: 460, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>New Request</h3>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)' }}><X size={18} /></button>
@@ -670,11 +672,11 @@ export default function Requests() {
       {/* ── Detail Panel ── */}
       {selected && (
         <>
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 199 }} onClick={() => setSelected(null)} />
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 400 }} onClick={() => setSelected(null)} />
           <div style={{
             position: 'fixed', top: 0, right: 0, width: 400, height: '100vh',
-            background: 'var(--card)', borderLeft: '1px solid var(--border)',
-            overflowY: 'auto', zIndex: 200, animation: 'slideRight 0.2s ease both',
+            background: 'var(--bg-card)', borderLeft: '1px solid var(--border)',
+            overflowY: 'auto', zIndex: 401, animation: 'slideRight 0.2s ease both',
           }}>
             {/* Header */}
             <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: 10 }}>

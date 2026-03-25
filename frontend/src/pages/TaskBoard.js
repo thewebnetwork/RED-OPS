@@ -397,7 +397,7 @@ export default function TaskBoard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [inlineCreateCol, setInlineCreateCol] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('board'); // 'board' | 'list'
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('taskboard_view') || 'board');
   const [listSort, setListSort] = useState({ key: 'status', dir: 'asc' });
   const tk = useCallback(() => localStorage.getItem('token'), []);
   const headers = useCallback(() => ({ Authorization: `Bearer ${tk()}` }), [tk]);
@@ -586,7 +586,7 @@ export default function TaskBoard() {
             {/* View toggle */}
             <div style={{ display: 'flex', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
               <button
-                onClick={() => setViewMode('board')}
+                onClick={() => { setViewMode('board'); localStorage.setItem('taskboard_view', 'board'); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
                   background: viewMode === 'board' ? 'var(--red)' : 'var(--bg-elevated)',
@@ -597,7 +597,7 @@ export default function TaskBoard() {
                 <LayoutGrid size={13} /> Board
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => { setViewMode('list'); localStorage.setItem('taskboard_view', 'list'); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
                   background: viewMode === 'list' ? 'var(--red)' : 'var(--bg-elevated)',

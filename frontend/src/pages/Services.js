@@ -500,7 +500,7 @@ export default function Services() {
   const [selectedService, setSelectedService] = useState(null);
   const [usedFallback, setUsedFallback] = useState(false);
   const [view, setView] = useState(() => localStorage.getItem('services_view') || 'grid');
-  const [showAdmin, setShowAdmin] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(() => user?.role === 'Administrator');
   const [editingService, setEditingService] = useState(null);
 
   const isAdmin = user?.role === 'Administrator';
@@ -677,9 +677,9 @@ export default function Services() {
               onClick={() => setShowAdmin(!showAdmin)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px',
-                background: showAdmin ? 'var(--accent)' : 'var(--card)',
+                background: showAdmin ? 'var(--red)' : 'var(--bg-card)',
                 color: showAdmin ? '#fff' : 'var(--tx-1)',
-                border: `1px solid ${showAdmin ? 'var(--accent)' : 'var(--border)'}`,
+                border: `1px solid ${showAdmin ? 'var(--red)' : 'var(--border)'}`,
                 borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
               }}>
               <Settings size={13} /> {showAdmin ? 'Admin View' : 'Client View'}
@@ -694,11 +694,11 @@ export default function Services() {
           )}
 
           {/* View Toggle */}
-          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <button onClick={() => setView('grid')} style={{ ...viewBtn, background: view === 'grid' ? 'var(--accent)' : 'transparent', color: view === 'grid' ? '#fff' : 'var(--tx-3)' }}>
+          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            <button onClick={() => setView('grid')} style={{ ...viewBtn, background: view === 'grid' ? 'var(--red)' : 'var(--bg-elevated)', color: view === 'grid' ? '#fff' : 'var(--tx-3)' }}>
               <Grid3X3 size={16} />
             </button>
-            <button onClick={() => setView('list')} style={{ ...viewBtn, background: view === 'list' ? 'var(--accent)' : 'transparent', color: view === 'list' ? '#fff' : 'var(--tx-3)', borderLeft: '1px solid var(--border)' }}>
+            <button onClick={() => setView('list')} style={{ ...viewBtn, background: view === 'list' ? 'var(--red)' : 'var(--bg-elevated)', color: view === 'list' ? '#fff' : 'var(--tx-3)', borderLeft: '1px solid var(--border)' }}>
               <List size={16} />
             </button>
           </div>

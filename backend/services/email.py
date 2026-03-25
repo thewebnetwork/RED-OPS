@@ -19,7 +19,7 @@ def get_smtp_config():
         'user': os.environ.get('SMTP_USER', ''),
         'password': os.environ.get('SMTP_PASSWORD', ''),
         'from_addr': os.environ.get('SMTP_FROM', ''),
-        'frontend_url': os.environ.get('FRONTEND_URL', os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:3000'))
+        'frontend_url': os.environ.get('FRONTEND_URL', 'https://redops.redribbongroup.ca')
     }
 
 

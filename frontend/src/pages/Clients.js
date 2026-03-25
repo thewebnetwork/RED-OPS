@@ -529,6 +529,10 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
             </div>
           </div>
           <div style={{ display:'flex', gap:4 }}>
+            <button onClick={() => navigate(`/clients/${client._id}`)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}
+              title="Open full profile">
+              <ExternalLink size={14} />
+            </button>
             <button onClick={startEdit} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-3)', padding:4, borderRadius:5 }}
               title="Edit client">
               <Edit3 size={14} />
@@ -1150,7 +1154,7 @@ export default function Clients() {
   const [showWizard, setShowWizard] = useState(searchParams.get('new') === '1');
   const [portalFilter, setPortalFilter] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
-  const [view, setView] = useState('table');
+  const [view, setView] = useState(() => localStorage.getItem('clients_view') || 'grid');
 
   useEffect(() => {
     const load = async () => {
@@ -1249,11 +1253,11 @@ export default function Clients() {
               </button>
             ))}
           </div>
-          <div style={{ display:'flex', background:'var(--card)', borderRadius:6, padding:2, gap:2, border:'1px solid var(--border)' }}>
-            {[{v:'grid',icon:LayoutGrid},{v:'table',icon:List}].map(({v,icon:Icon})=>(
-              <button key={v} onClick={()=>setView(v)}
-                style={{ padding:'4px 10px', borderRadius:4, fontSize:11, fontWeight:500, cursor:'pointer', border:'none', display:'flex', alignItems:'center', gap:4, background: view===v?'var(--accent)':'transparent', color: view===v?'#fff':'var(--tx-2)' }}>
-                <Icon size={12}/> {v==='grid'?'Cards':'Table'}
+          <div style={{ display:'flex', borderRadius:8, border:'1px solid var(--border)', overflow:'hidden' }}>
+            {[{v:'grid',icon:LayoutGrid,label:'Cards'},{v:'table',icon:List,label:'Table'}].map(({v,icon:Icon,label},i)=>(
+              <button key={v} onClick={()=>{ setView(v); localStorage.setItem('clients_view', v); }}
+                style={{ display:'flex', alignItems:'center', gap:4, padding:'6px 10px', fontSize:12, fontWeight:600, background: view===v?'var(--red)':'var(--bg-elevated)', color: view===v?'#fff':'var(--tx-3)', border:'none', cursor:'pointer', borderRight: i===0?'1px solid var(--border)':'none' }}>
+                <Icon size={13}/> {label}
               </button>
             ))}
           </div>
