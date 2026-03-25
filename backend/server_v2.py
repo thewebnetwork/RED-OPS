@@ -49,6 +49,7 @@ from routes import (
     search_router,
     integrations_router,
     ai_router,
+    finance_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -272,6 +273,7 @@ app.include_router(ad_performance_router, prefix="/api")  # Ad Performance Track
 app.include_router(search_router, prefix="/api")  # Global Search
 app.include_router(integrations_router, prefix="/api")  # Integration Management
 app.include_router(ai_router, prefix="/api")  # AI Features
+app.include_router(finance_router, prefix="/api")  # Finance Dashboard
 
 
 @app.get("/")
