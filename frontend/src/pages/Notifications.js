@@ -33,7 +33,7 @@ function NotificationCard({ notification, onRead, onDismiss }) {
 
   return (
     <div 
-      className={`notif-card ${notification.is_read ? 'is-read' : 'is-unread'}`}
+      className={`notif-card ${notification.is_read ? 'read' : 'unread'}`}
       onClick={() => !notification.is_read && onRead(notification.id)}
     >
       <div className="notif-icon" style={{ background: `${meta.color}15` }}>

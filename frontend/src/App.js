@@ -69,6 +69,8 @@ import ClientPage from "./pages/ClientPage";
 import Team from "./pages/Team";
 import TeamMemberPage from "./pages/TeamMemberPage";
 import AdPerformance from "./pages/AdPerformance";
+import AdminShell from "./components/AdminShell";
+import ClientShell from "./components/ClientShell";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -179,7 +181,11 @@ function PrivateRoute({ children, roles }) {
     }
   }
 
-  return <Layout>{children}</Layout>;
+  // Choose Shell
+  const isClient = isPreview || user?.account_type === 'Media Client' || user?.role === 'Media Client';
+  const Shell = isClient ? ClientShell : AdminShell;
+
+  return <Shell>{children}</Shell>;
 }
 
 function PublicRoute({ children }) {

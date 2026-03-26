@@ -6,7 +6,7 @@ import {
   Clock, CheckCircle2, AlertCircle, Plus, ChevronRight,
   Phone, MessageSquare, BookOpen, Upload,
   Calendar, Layers, Activity, RefreshCw,
-  User, Mail, ArrowRight, Zap
+  User, Mail, ArrowRight, Zap, LifeBuoy
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -150,11 +150,11 @@ export default function ClientHome() {
       
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
-        <div className="portal-header">
-          <h1 className="portal-title">
+        <div className="portal-header" style={{ marginBottom: 0 }}>
+          <h1 className="portal-header-title">
             Welcome back, {firstName}
           </h1>
-          <p className="portal-subtitle">
+          <p className="portal-header-subtitle">
             Here is what’s happening with your projects today.
           </p>
         </div>
@@ -308,11 +308,7 @@ export default function ClientHome() {
       </div>
 
       {/* ── Bottom CTA ── */}
-      <div style={{ 
-        marginTop: 40, padding: '48px 24px', borderRadius: 16, 
-        background: 'linear-gradient(135deg, #c92a3e15 0%, transparent 100%)', 
-        border: '1px solid var(--border)', textAlign: 'center' 
-      }}>
+      <div className="bottom-cta-banner">
         <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--tx-1)', margin: '0 0 12px', letterSpacing: '-0.03em' }}>
           Accelerate your growth with more services
         </h2>

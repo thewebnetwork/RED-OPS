@@ -1542,6 +1542,32 @@ button:focus-visible, a:focus-visible, select:focus-visible,
   transform: translateY(-2px);
   border-color: var(--border-hi);
 }
+.metric-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.metric-content {
+  display: flex;
+  flex-direction: column;
+}
+.metric-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--tx-1);
+  letter-spacing: -0.02em;
+}
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
 
 /* Priority Helpers */
 .priority-high   { color: var(--red-status); background: rgba(239, 68, 68, 0.1); }
@@ -1609,6 +1635,12 @@ button:focus-visible, a:focus-visible, select:focus-visible,
   font-weight: 800;
   color: var(--tx-1);
   letter-spacing: -0.04em;
+  margin: 0;
+}
+.portal-header-subtitle {
+  font-size: 14px;
+  color: var(--tx-3);
+  margin: 4px 0 0;
 }
 
 /* Bottom CTA Layout */
