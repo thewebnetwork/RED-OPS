@@ -24,7 +24,6 @@ import ClientHome from "./pages/ClientHome";
 import Clients from "./pages/Clients";
 import ServiceCatalog from "./pages/ServiceCatalog";
 import MyAccount from "./pages/MyAccount";
-import Orders from "./pages/Orders";
 import Requests from "./pages/Requests";
 import Settings from "./pages/Settings";
 import OrderDetail from "./pages/OrderDetail";
@@ -48,7 +47,6 @@ import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
 import MyRequests from "./pages/MyRequests";
 import ReportIssue from "./pages/ReportIssue";
 import IAMPage from "./pages/IAMPage";
-import SettingsHub from "./pages/SettingsHub";
 import DeletedTickets from "./pages/DeletedTickets";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
@@ -352,7 +350,7 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
-              <Orders />
+            <Requests />
             </ModeRoute>
           </PrivateRoute>
         } 
@@ -374,7 +372,7 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
-              <Orders />
+              <Requests />
             </ModeRoute>
           </PrivateRoute>
         } 
@@ -494,7 +492,7 @@ function AppRoutes() {
         path="/settings"
         element={
           <PrivateRoute roles={["Administrator"]}>
-            <SettingsHub />
+            <Settings />
           </PrivateRoute>
         }
       />

@@ -1525,12 +1525,117 @@ button:focus-visible, a:focus-visible, select:focus-visible,
   background: rgba(239, 68, 68, 0.1);
 }
 
-/* ── 47. REDUCED MOTION ──────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* ── 48. ADDITIONAL SHARED UTILITIES (STAGE 6) ─────────────── */
+
+/* Refined Metrics Card */
+.metric-card-v2 {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform var(--speed-normal) ease, border-color var(--speed-normal) ease;
+}
+.metric-card-v2:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hi);
+}
+
+/* Priority Helpers */
+.priority-high   { color: var(--red-status); background: rgba(239, 68, 68, 0.1); }
+.priority-medium { color: var(--yellow);     background: rgba(245, 158, 11, 0.1); }
+.priority-low    { color: var(--blue);       background: rgba(59, 130, 246, 0.1); }
+
+/* Unified Notification Card */
+.notif-card {
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  gap: 16px;
+  transition: all var(--speed-normal) ease;
+  cursor: pointer;
+  position: relative;
+}
+.notif-card.unread {
+  background: var(--bg-elevated);
+}
+.notif-card-unread-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--red);
+}
+
+/* Stagger Entry Animation */
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-in {
+  animation: staggerIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+/* Sidebar Action Item */
+.action-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--tx-2);
+  transition: all var(--speed-fast);
+}
+.action-item-row:hover {
+  color: var(--tx-1);
+}
+
+/* Shared Header Utilities */
+.portal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.portal-header-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--tx-1);
+  letter-spacing: -0.04em;
+}
+
+/* Bottom CTA Layout */
+.bottom-cta-banner {
+  margin-top: 40px;
+  padding: 48px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--red-lo) 0%, transparent 100%);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+/* ── 49. REFINEMENTS & REPAIRS ─────────────────────────────── */
+
+/* Ensure Services container behaves in shell */
+.services-page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Table Row Hover Consistency */
+.table-row-hover {
+  transition: background var(--speed-fast);
+}
+.table-row-hover:hover {
+  background: var(--bg-elevated) !important;
 }

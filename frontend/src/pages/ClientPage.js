@@ -19,7 +19,7 @@ import {
   Circle, Send, Clock, Star, Activity, FileText, FolderKanban,
   CheckSquare, MessageSquare, Plus, Search, X, Edit2, ChevronRight,
   Eye, DollarSign, Calendar, Zap, ExternalLink, Tag, Loader2,
-  AlertCircle, TrendingUp, ShoppingBag, Layers, Briefcase,
+  AlertCircle, TrendingUp, ShoppingBag, Layers, Briefcase, Trash2,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -101,18 +101,12 @@ export default function ClientPage() {
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
-  // Add Task Modal
+  // Add/Edit Task Modal
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const [addTaskLoading, setAddTaskLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    status: 'todo',
-    assignee_user_id: '',
-    project_id: '',
-    due_at: '',
-  });
+  const emptyForm = { title: '', description: '', priority: 'medium', status: 'todo', assignee_user_id: '', project_id: '', due_at: '' };
+  const [formData, setFormData] = useState(emptyForm);
 
   // Notes (local for now — no backend endpoint)
   const [notes, setNotes] = useState(() => {
@@ -223,7 +217,22 @@ export default function ClientPage() {
     setNotes(prev => prev.filter(n => n.id !== noteId));
   };
 
-  // ── Add Task ──
+  // ── Open Edit Task ──
+  const openEditTask = (task) => {
+    setEditingTask(task);
+    setFormData({
+      title: task.title || '',
+      description: task.description || '',
+      priority: task.priority || 'medium',
+      status: task.status || 'todo',
+      assignee_user_id: task.assignee_user_id || task.assignee_id || '',
+      project_id: task.project_id || '',
+      due_at: task.due_at || task.due_date || '',
+    });
+    setShowAddTaskModal(true);
+  };
+
+  // ── Add / Update Task ──
   const handleAddTask = async () => {
     if (!formData.title.trim()) {
       toast.error('Task title is required');
@@ -239,29 +248,40 @@ export default function ClientPage() {
         priority: formData.priority,
         assignee_user_id: formData.assignee_user_id || null,
         client_id: id,
-        client_name: clientName,
+        client_name: client?.company_name || client?.name || 'Client',
         project_id: formData.project_id || null,
         visibility: 'internal',
         due_at: formData.due_at || null,
       };
-      await ax().post(`${API}/tasks`, payload);
-      toast.success('Task created');
+
+      if (editingTask) {
+        await ax().patch(`${API}/tasks/${editingTask.id || editingTask._id}`, payload);
+        toast.success('Task updated');
+      } else {
+        await ax().post(`${API}/tasks`, payload);
+        toast.success('Task created');
+      }
       setShowAddTaskModal(false);
-      setFormData({
-        title: '',
-        description: '',
-        priority: 'medium',
-        status: 'todo',
-        assignee_user_id: '',
-        project_id: '',
-        due_at: '',
-      });
+      setEditingTask(null);
+      setFormData(emptyForm);
       fetchTasks();
     } catch (err) {
-      toast.error('Failed to create task');
+      toast.error(editingTask ? 'Failed to update task' : 'Failed to create task');
       console.error(err);
     } finally {
       setAddTaskLoading(false);
+    }
+  };
+
+  // ── Delete Task ──
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Delete this task? This cannot be undone.')) return;
+    try {
+      await ax().delete(`${API}/tasks/${taskId}`);
+      toast.success('Task deleted');
+      fetchTasks();
+    } catch (err) {
+      toast.error('Failed to delete task');
     }
   };
 
@@ -351,7 +371,7 @@ export default function ClientPage() {
       {/* ── Quick Actions Bar ── */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
         <button
-          onClick={() => setShowAddTaskModal(true)}
+          onClick={() => { setEditingTask(null); setFormData(emptyForm); setShowAddTaskModal(true); }}
           style={{ ...btnPrimary, background: 'var(--accent)' }}
         >
           <Plus size={14} /> Add Task
@@ -522,7 +542,7 @@ export default function ClientPage() {
           ) : tasks.length === 0 ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-                <button onClick={() => setShowAddTaskModal(true)} style={btnPrimary}>
+                <button onClick={() => { setEditingTask(null); setFormData(emptyForm); setShowAddTaskModal(true); }} style={btnPrimary}>
                   <Plus size={14} /> Add Task
                 </button>
               </div>
@@ -531,7 +551,7 @@ export default function ClientPage() {
           ) : (
             <div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-                <button onClick={() => setShowAddTaskModal(true)} style={btnPrimary}>
+                <button onClick={() => { setEditingTask(null); setFormData(emptyForm); setShowAddTaskModal(true); }} style={btnPrimary}>
                   <Plus size={14} /> Add Task
                 </button>
               </div>
@@ -567,6 +587,16 @@ export default function ClientPage() {
                           <Clock size={11} /> {timeAgo(task.due_date)}
                         </span>
                       )}
+                      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                        <button onClick={(e) => { e.stopPropagation(); openEditTask(task); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, borderRadius: 6, color: 'var(--tx-3)', transition: 'all .12s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+                          title="Edit task"><Edit2 size={13} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id || task._id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, borderRadius: 6, color: 'var(--tx-3)', transition: 'all .12s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = '#ef444418'; e.currentTarget.style.color = '#ef4444'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--tx-3)'; }}
+                          title="Delete task"><Trash2 size={13} /></button>
+                      </div>
                     </div>
                   );
                 })}
@@ -708,9 +738,9 @@ export default function ClientPage() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 28, maxWidth: 500, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Add Task</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>{editingTask ? 'Edit Task' : 'Add Task'}</h2>
               <button
-                onClick={() => setShowAddTaskModal(false)}
+                onClick={() => { setShowAddTaskModal(false); setEditingTask(null); setFormData(emptyForm); }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}
               >
                 <X size={18} />
@@ -835,7 +865,7 @@ export default function ClientPage() {
               {/* Actions */}
               <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                 <button
-                  onClick={() => setShowAddTaskModal(false)}
+                  onClick={() => { setShowAddTaskModal(false); setEditingTask(null); setFormData(emptyForm); }}
                   style={{ ...btnSecondary, flex: 1 }}
                 >
                   Cancel
@@ -845,8 +875,8 @@ export default function ClientPage() {
                   disabled={addTaskLoading}
                   style={{ ...btnPrimary, flex: 1, opacity: addTaskLoading ? 0.6 : 1, cursor: addTaskLoading ? 'not-allowed' : 'pointer' }}
                 >
-                  {addTaskLoading ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
-                  {addTaskLoading ? 'Creating...' : 'Create Task'}
+                  {addTaskLoading ? <Loader2 size={14} className="spin" /> : editingTask ? <Edit2 size={14} /> : <Plus size={14} />}
+                  {addTaskLoading ? (editingTask ? 'Saving...' : 'Creating...') : (editingTask ? 'Save Changes' : 'Create Task')}
                 </button>
               </div>
             </div>

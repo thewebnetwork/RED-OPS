@@ -346,10 +346,20 @@ function GroupHeader({ label, count, color, collapsed, onToggle }) {
   );
 }
 
-function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [] }) {
-  const [form, setForm] = useState(project || {});
+function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [], teamMembers = [] }) {
+  const [form, setForm] = useState(() => {
+    const init = project || {};
+    return { ...init, team_member_ids: init.team_member_ids || (init.team_members || []).map(m => m.id) || [] };
+  });
 
   const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
+  const toggleTeamMember = (userId) => {
+    setForm(f => {
+      const ids = f.team_member_ids || [];
+      return { ...f, team_member_ids: ids.includes(userId) ? ids.filter(id => id !== userId) : [...ids, userId] };
+    });
+  };
+
   const handleSave = async () => {
     if (!form.name?.trim()) return toast.error('Project name required');
     await onSave(form);
@@ -358,7 +368,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: 'var(--bg)', borderRadius: 12, maxWidth: 500, width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
+      <div style={{ background: 'var(--bg)', borderRadius: 12, maxWidth: 520, width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
         <div style={{ padding: 20, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{project ? 'Edit Project' : 'New Project'}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', fontSize: 20 }}><X /></button>
@@ -422,6 +432,34 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
             )}
           </div>
 
+          {/* Team Members */}
+          {teamMembers.length > 0 && (
+            <div>
+              <label style={labelStyle}>Team Members</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: 10, background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)', maxHeight: 120, overflowY: 'auto' }}>
+                {teamMembers.map(m => {
+                  const selected = (form.team_member_ids || []).includes(m.id || m._id);
+                  return (
+                    <button key={m.id || m._id} type="button" onClick={() => toggleTeamMember(m.id || m._id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                        background: selected ? 'var(--accent)' : 'var(--bg)', color: selected ? '#fff' : 'var(--tx-2)',
+                        border: selected ? 'none' : '1px solid var(--border)', transition: 'all .12s',
+                      }}>
+                      <span style={{ width: 18, height: 18, borderRadius: '50%', background: selected ? 'rgba(255,255,255,0.25)' : avatarBg(m.id || m._id), color: selected ? '#fff' : '#fff', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {initials(m.name)}
+                      </span>
+                      {m.name}
+                    </button>
+                  );
+                })}
+              </div>
+              {(form.team_member_ids || []).length > 0 && (
+                <span style={{ fontSize: 10, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{(form.team_member_ids || []).length} selected</span>
+              )}
+            </div>
+          )}
+
           <div>
             <label style={labelStyle}>Progress (%)</label>
             <input type="number" min="0" max="100" value={form.progress || 0} onChange={e => handleChange('progress', parseInt(e.target.value))} className="input-field" />
@@ -471,6 +509,7 @@ function Projects() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFilters, setShowFilters] = useState(false);
   const [clientsList, setClientsList] = useState([]);
+  const [teamMembersList, setTeamMembersList] = useState([]);
 
   // Persist view
   useEffect(() => { localStorage.setItem('projects_view', view); }, [view]);
@@ -479,11 +518,12 @@ function Projects() {
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   const previewClientId = isPreview ? localStorage.getItem('preview_client_id') : null;
 
-  // Fetch clients for dropdown
+  // Fetch clients + team members for dropdowns
   useEffect(() => {
     ax().get(`${API}/users`).then(r => {
       const arr = Array.isArray(r.data) ? r.data : r.data?.items || [];
       setClientsList(arr.filter(u => u.account_type === 'Media Client'));
+      setTeamMembersList(arr.filter(u => u.account_type !== 'Media Client' && u.active !== false));
     }).catch(() => {});
   }, []);
 
@@ -746,7 +786,7 @@ function Projects() {
       </div>
 
       {/* Modal */}
-      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clientsList} onClose={() => setModal(null)} onSave={async (proj) => {
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clientsList} teamMembers={teamMembersList} onClose={() => setModal(null)} onSave={async (proj) => {
         setSaving(true);
         try {
           if (proj.id) {
@@ -793,17 +833,21 @@ function AdminProjectsHub() {
   const [view, setView] = useState(() => localStorage.getItem('admin_projects_view') || 'cards');
   const [collapsedClients, setCollapsedClients] = useState({});
   const [showFilters, setShowFilters] = useState(false);
+  const [teamMembersList, setTeamMembersList] = useState([]);
 
   useEffect(() => { localStorage.setItem('admin_projects_view', view); }, [view]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [projRes, clientRes] = await Promise.all([
+      const [projRes, clientRes, usersRes] = await Promise.all([
         ax().get(`${API}/projects`),
         ax().get(`${API}/dashboard/agency`).catch(() => ({ data: { clients: [] } })),
+        ax().get(`${API}/users`).catch(() => ({ data: [] })),
       ]);
       setProjects(projRes.data);
       setClients(clientRes.data.clients || []);
+      const allUsers = Array.isArray(usersRes.data) ? usersRes.data : usersRes.data?.items || [];
+      setTeamMembersList(allUsers.filter(u => u.account_type !== 'Media Client' && u.active !== false));
     } catch (err) {
       if (err.response?.status !== 401) toast.error('Failed to load data');
     } finally {
@@ -1051,7 +1095,7 @@ function AdminProjectsHub() {
       </div>
 
       {/* Modal */}
-      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clients} onClose={() => setModal(null)} onSave={async (proj) => {
+      {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clients} teamMembers={teamMembersList} onClose={() => setModal(null)} onSave={async (proj) => {
         setSaving(true);
         try {
           if (proj.id) {

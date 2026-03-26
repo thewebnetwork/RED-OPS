@@ -578,7 +578,7 @@ export default function Services() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    <div className="services-page-container">
       {selectedService && <RequestModal service={selectedService} onClose={() => setSelectedService(null)} />}
       {editingService !== null && (
         <ServiceEditorModal

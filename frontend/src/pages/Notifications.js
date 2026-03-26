@@ -1,384 +1,161 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Bell,
-  X,
-  FileText,
-  CheckSquare,
-  MessageSquare,
-  AlertCircle,
-  DollarSign,
-  CheckCircle2,
-  User,
-  Settings,
-  ChevronRight,
+  Bell, X, FileText, CheckSquare, MessageSquare, AlertCircle,
+  DollarSign, User,
+  Info, BellOff
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+const MOCK_NOTIFICATIONS = [
+  { id: '1', type: 'request', title: 'New Request Submitted', description: 'Your request "Q2 Brand Assets" has been successfully submitted.', timestamp: '2m ago', is_read: false },
+  { id: '2', type: 'message', title: 'Sarah Chen mentioned you', description: '"@Alex can you take a look at the revised logo options?"', timestamp: '15m ago', is_read: false },
+  { id: '3', type: 'update', title: 'Status Update: SEO Audit', description: 'Your "SEO Audit - Main Site" project is now in Pending Review.', timestamp: '1h ago', is_read: false },
+  { id: '4', type: 'alert', title: 'Security Alert', description: 'New login detected from Safari on macOS (San Francisco, CA).', timestamp: '3h ago', is_read: true },
+  { id: '5', type: 'invoice', title: 'Invoice Paid', description: 'Payment for invoice INV-2024-001 has been processed.', timestamp: 'Yesterday', is_read: true },
+  { id: '6', type: 'task', title: 'New Task Assigned', description: 'You have been assigned to "Review Facebook Ad Copy".', timestamp: 'Yesterday', is_read: true },
+  { id: '7', type: 'delivered', title: 'Delivery Ready', description: 'The final files for "Newsletter Layout" are ready for download.', timestamp: '2 days ago', is_read: true },
+];
+
 const iconMap = {
-  request: FileText,
-  task: CheckSquare,
-  comment: MessageSquare,
-  update: CheckCircle2,
-  invoice: DollarSign,
-  delivered: CheckCircle2,
-  alert: AlertCircle,
-  message: MessageSquare,
+  request: { icon: FileText, color: '#3b82f6' },
+  task: { icon: CheckSquare, color: '#a855f7' },
+  message: { icon: MessageSquare, color: '#22c55e' },
+  update: { icon: Info, color: '#3b82f6' },
+  invoice: { icon: DollarSign, color: '#f59e0b' },
+  delivered: { icon: CheckCircle2, color: '#22c55e' },
+  alert: { icon: AlertCircle, color: '#f43f5e' },
 };
 
-const colorMap = {
-  request: 'var(--blue)',
-  task: 'var(--purple)',
-  comment: 'var(--green)',
-  update: 'var(--green)',
-  invoice: 'var(--yellow)',
-  delivered: 'var(--green)',
-  alert: 'var(--red)',
-  message: 'var(--blue)',
-};
+// ── Components ──
+
+function NotificationCard({ notification, onRead, onDismiss }) {
+  const meta = iconMap[notification.type] || { icon: Bell, color: 'var(--tx-3)' };
+  const Icon = meta.icon;
+
+  return (
+    <div 
+      className={`notif-card ${notification.is_read ? 'is-read' : 'is-unread'}`}
+      onClick={() => !notification.is_read && onRead(notification.id)}
+    >
+      <div className="notif-icon" style={{ background: `${meta.color}15` }}>
+        <Icon size={18} style={{ color: meta.color }} />
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <h4 style={{ fontSize: 14, fontWeight: notification.is_read ? 600 : 700, color: 'var(--tx-1)', margin: 0 }}>{notification.title}</h4>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 500 }}>{notification.timestamp}</span>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--tx-2)', margin: 0, lineHeight: 1.5 }}>{notification.description}</p>
+      </div>
+
+      <button 
+        onClick={(e) => { e.stopPropagation(); onDismiss(notification.id); }}
+        style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
+
+// ── Main Page ──
 
 function Notifications() {
-  const [notifications, setNotifications] = useState([]);
+  const [notifs, setNotifs] = useState(MOCK_NOTIFICATIONS);
   const [activeTab, setActiveTab] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  const unreadCount = notifs.filter(n => !n.is_read).length;
 
-  const fetchNotifications = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API}/notifications`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setNotifications([]);
-        } else {
-          throw new Error('Failed to fetch notifications');
-        }
-      } else {
-        const data = await response.json();
-        const normalized = (Array.isArray(data) ? data : []).map((n) => ({
-          ...n,
-          icon: iconMap[n.type] || MessageSquare,
-          color: colorMap[n.type] || 'var(--blue)',
-        }));
-        setNotifications(normalized);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMarkAsRead = async (id) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`${API}/notifications/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_read: true }),
-      });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      );
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      );
-    }
-  };
-
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
-
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifs = notifs.filter(n => {
     if (activeTab === 'all') return true;
     if (activeTab === 'unread') return !n.is_read;
-    if (activeTab === 'mentions')
-      return ['comment', 'message'].includes(n.type);
-    if (activeTab === 'system')
-      return ['alert', 'invoice', 'update'].includes(n.type);
+    if (activeTab === 'mentions') return n.type === 'message';
+    if (activeTab === 'system') return ['alert', 'invoice', 'update'].includes(n.type);
     return true;
   });
 
-  const handleMarkAllRead = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const unreadIds = notifications
-        .filter((n) => !n.is_read)
-        .map((n) => n.id);
-
-      for (const id of unreadIds) {
-        await fetch(`${API}/notifications/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ is_read: true }),
-        });
-      }
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    }
+  const handleMarkAsRead = (id) => {
+    setNotifs(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
   };
 
-  const groupByDate = (notifs) => {
-    const today = notifs.filter((n) =>
-      n.timestamp.includes('mins ago') || n.timestamp.includes('hour')
-    );
-    const yesterday = notifs.filter((n) => n.timestamp.includes('Yesterday'));
-    const thisWeek = notifs.filter(
-      (n) =>
-        !n.timestamp.includes('mins ago') &&
-        !n.timestamp.includes('hour') &&
-        !n.timestamp.includes('Yesterday') &&
-        !n.timestamp.includes('days ago')
-    );
-    const older = notifs.filter((n) => n.timestamp.includes('days ago'));
-
-    return { today, yesterday, thisWeek, older };
+  const handleDismiss = (id) => {
+    setNotifs(prev => prev.filter(n => n.id !== id));
+    toast.success('Notification dismissed');
   };
 
-  if (loading) {
-    return (
-      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
-        <div className="spinner-ring" />
-      </div>
-    );
-  }
+  const handleMarkAllRead = () => {
+    setNotifs(prev => prev.map(n => ({ ...n, is_read: true })));
+    toast.success('All notifications marked as read');
+  };
 
   return (
-    <div className="page-content">
-      {/* Header */}
-      <div style={styles.header}>
+    <div className="page-content" style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto' }}>
+      
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
         <div>
-          <h1 style={styles.title}>Notifications</h1>
-          <p style={styles.subtitle}>
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--tx-1)', margin: '0 0 6px', letterSpacing: '-0.04em' }}>Notifications</h1>
+          <p style={{ fontSize: 14, color: 'var(--tx-3)', margin: 0 }}>
+            {unreadCount > 0 ? `You have ${unreadCount} unread update${unreadCount === 1 ? '' : 's'}.` : 'All caught up!'}
           </p>
         </div>
         {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAllRead}
-            className="btn btn-ghost btn-sm"
-            style={styles.markAllBtn}
-          >
-            Mark all read
+          <button onClick={handleMarkAllRead} className="btn-ghost" style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)' }}>
+            Mark all as read
           </button>
         )}
       </div>
 
-      {/* Filter Tabs */}
-      <div style={styles.tabsContainer}>
+      {/* ── Filters ── */}
+      <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
         {['all', 'unread', 'mentions', 'system'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              ...styles.tab,
-              ...(activeTab === tab ? styles.tabActive : styles.tabInactive),
+              padding: '12px 4px', fontSize: 14, fontWeight: 600, border: 'none', background: 'none', cursor: 'pointer',
+              color: activeTab === tab ? 'var(--tx-1)' : 'var(--tx-3)',
+              borderBottom: `2px solid ${activeTab === tab ? 'var(--accent)' : 'transparent'}`,
+              transition: 'all 0.2s', textTransform: 'capitalize'
             }}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab}
           </button>
         ))}
       </div>
 
-      {/* Notifications List */}
-      {filteredNotifications.length === 0 ? (
-        <div className="empty-state">
-          <Bell size={48} style={{ color: 'var(--tx-3)', marginBottom: '12px' }} />
-          <p style={{ color: 'var(--tx-2)', marginTop: '12px' }}>
-            {activeTab === 'all'
-              ? 'No notifications yet'
-              : `No ${activeTab} notifications`}
-          </p>
-        </div>
-      ) : (
-        <div style={styles.notificationsList}>
-          {filteredNotifications.map((notification) => {
-            const Icon = notification.icon;
-            return (
-              <div
-                key={notification.id}
-                style={{
-                  ...styles.notificationItem,
-                  ...(notification.is_read
-                    ? styles.notificationRead
-                    : styles.notificationUnread),
-                }}
-              >
-                <div style={styles.notificationContent}>
-                  <div style={styles.notificationDot}>
-                    <div
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: notification.color,
-                      }}
-                    />
-                  </div>
+      {/* ── List ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {filteredNotifs.length > 0 ? (
+          filteredNotifs.map(n => (
+            <NotificationCard 
+              key={n.id} 
+              notification={n} 
+              onRead={handleMarkAsRead} 
+              onDismiss={handleDismiss} 
+            />
+          ))
+        ) : (
+          <div style={{ padding: '64px 0', textAlign: 'center' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <BellOff size={24} style={{ color: 'var(--tx-3)' }} />
+            </div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', margin: '0 0 8px' }}>
+              {activeTab === 'all' ? 'No Notifications' : `No ${activeTab} notifications`}
+            </h3>
+            <p style={{ fontSize: 14, color: 'var(--tx-3)', maxWidth: 300, margin: '0 auto' }}>
+              When you receive updates about your requests or mentions, they will appear here.
+            </p>
+          </div>
+        )}
+      </div>
 
-                  <div style={styles.notificationText}>
-                    <div style={styles.notificationTitleRow}>
-                      <p
-                        style={{
-                          ...styles.notificationTitle,
-                          fontWeight: notification.is_read ? '500' : '600',
-                        }}
-                      >
-                        {notification.title}
-                      </p>
-                      {!notification.is_read && (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          style={styles.dismissBtn}
-                          title="Dismiss"
-                        >
-                          <X size={16} />
-                        </button>
-                      )}
-                    </div>
-                    <p style={styles.notificationDescription}>
-                      {notification.description}
-                    </p>
-                    <p style={styles.notificationTime}>{notification.timestamp}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
-
-const styles = {
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '32px',
-  },
-  title: {
-    fontSize: '22px',
-    fontWeight: '600',
-    color: 'var(--tx-1)',
-    margin: '0 0 8px 0',
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: 'var(--tx-2)',
-    margin: '0',
-  },
-  markAllBtn: {
-    fontSize: '12px',
-  },
-  tabsContainer: {
-    display: 'flex',
-    gap: '0',
-    borderBottom: '1px solid var(--border)',
-    marginBottom: '24px',
-  },
-  tab: {
-    padding: '12px 16px',
-    fontSize: '13px',
-    fontWeight: '500',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    borderBottom: '2px solid transparent',
-    transition: 'all 0.2s',
-    color: 'var(--tx-2)',
-  },
-  tabActive: {
-    color: 'var(--tx-1)',
-    borderBottomColor: 'var(--red)',
-  },
-  tabInactive: {
-    color: 'var(--tx-2)',
-  },
-  notificationsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  notificationItem: {
-    padding: '16px',
-    borderRadius: '8px',
-    border: '1px solid var(--border)',
-    transition: 'all 0.2s',
-  },
-  notificationRead: {
-    backgroundColor: 'var(--bg)',
-  },
-  notificationUnread: {
-    backgroundColor: 'var(--bg-elevated)',
-  },
-  notificationContent: {
-    display: 'flex',
-    gap: '12px',
-  },
-  notificationDot: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    paddingTop: '2px',
-    flexShrink: 0,
-  },
-  notificationText: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  notificationTitleRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '8px',
-  },
-  notificationTitle: {
-    fontSize: '14px',
-    color: 'var(--tx-1)',
-    margin: '0',
-  },
-  notificationDescription: {
-    fontSize: '13px',
-    color: 'var(--tx-2)',
-    margin: '0',
-  },
-  notificationTime: {
-    fontSize: '12px',
-    color: 'var(--tx-3)',
-    margin: '0',
-  },
-  dismissBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'var(--tx-3)',
-    cursor: 'pointer',
-    padding: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'color 0.2s',
-  },
-};
 
 export default Notifications;

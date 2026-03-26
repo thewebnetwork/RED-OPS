@@ -830,7 +830,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
         </div>
 
         {/* Platform + Period Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+        <div className="responsive-grid-2" style={{ marginBottom: '16px' }}>
           <div>
             <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '4px', display: 'block' }}>
               Platform
@@ -865,7 +865,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
           <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '8px', display: 'block' }}>
             Campaign Metrics
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+          <div className="responsive-grid-2" style={{ marginBottom: '12px' }}>
             <input
               type="number"
               className="input-field"
@@ -913,13 +913,11 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
 
           {/* Calculated Fields */}
           <div
+            className="responsive-grid-3"
             style={{
               padding: '12px',
               backgroundColor: 'var(--bg-elevated)',
               borderRadius: '6px',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: '8px',
               fontSize: '12px',
             }}
           >
@@ -952,14 +950,16 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
               Campaign Breakdown (Optional)
             </summary>
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 100px 80px 80px',
-                  gap: '8px',
-                  marginBottom: '12px',
-                }}
-              >
+              <div className="mobile-scroll-x">
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 100px 80px 80px',
+                    gap: '8px',
+                    marginBottom: '12px',
+                    minWidth: '400px',
+                  }}
+                >
                 <input
                   type="text"
                   className="input-field"
@@ -991,7 +991,8 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
                   onChange={(e) => setNewCampaign({ ...newCampaign, leads: e.target.value })}
                 />
               </div>
-              <button onClick={handleAddCampaign} className="btn-ghost btn-sm">
+            </div>
+            <button onClick={handleAddCampaign} className="btn-ghost btn-sm">
                 <Plus size={14} /> Add Campaign
               </button>
 
