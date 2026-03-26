@@ -79,3 +79,4 @@ agenthub/agents/youtube/db
 # Generated outputs and local artifacts
 outputs/
 memory/
+.git_corrupted
