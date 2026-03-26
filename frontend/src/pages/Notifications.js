@@ -20,11 +20,8 @@ const MOCK_NOTIFICATIONS = [
 
 const iconMap = {
   request: { icon: FileText, color: '#3b82f6' },
-  task: { icon: CheckSquare, color: '#a855f7' },
   message: { icon: MessageSquare, color: '#22c55e' },
   update: { icon: Info, color: '#3b82f6' },
-  invoice: { icon: DollarSign, color: '#f59e0b' },
-  delivered: { icon: CheckCircle2, color: '#22c55e' },
   alert: { icon: AlertCircle, color: '#f43f5e' },
 };
 
@@ -83,8 +80,9 @@ function Notifications() {
   };
 
   const handleDismiss = (id) => {
+    // Stage-verified explicit removal from local state
     setNotifs(prev => prev.filter(n => n.id !== id));
-    toast.success('Notification dismissed');
+    toast.success('Notification cleared');
   };
 
   const handleMarkAllRead = () => {

@@ -173,8 +173,26 @@ export default function ClientHome() {
         <MetricCard icon={Activity} label="Active Requests" value={metrics.active} color="#3b82f6" loading={loading} />
         <MetricCard icon={Clock} label="In Review" value={metrics.review} color="#a855f7" loading={loading} />
         <MetricCard icon={CheckCircle2} label="Delivered This Month" value={metrics.delivered} color="#22c55e" loading={loading} />
-        <MetricCard icon={Layers} label="Open Tasks" value={metrics.openTasks} color="#f59e0b" loading={loading} />
+        <MetricCard icon={Layers} label="Credits Remaining" value="1,240" color="#f59e0b" loading={loading} />
       </div>
+
+      {/* ── Plan Usage Placeholder ── */}
+      {!loading && (
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--blue-lo)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Zap size={20} style={{ color: 'var(--blue)' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>Agency Pro Plan</div>
+              <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>Renewing in 12 days • 85% of monthly capacity remaining</div>
+            </div>
+          </div>
+          <div style={{ width: 240, height: 8, background: 'var(--bg)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: '15%', height: '100%', background: 'var(--blue)' }} />
+          </div>
+        </div>
+      )}
 
       {/* ── Main Layout ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24, alignItems: 'start' }}>
@@ -263,7 +281,7 @@ export default function ClientHome() {
               <ActionItem icon={Plus} label="New Request" color="#3b82f6" onClick={() => navigate('/services')} />
               <ActionItem icon={Upload} label="Upload Files" color="#a855f7" onClick={() => navigate('/files')} />
               <ActionItem icon={BookOpen} label="View SOPs" color="#22c55e" onClick={() => navigate('/files?context=knowledge_base')} />
-              <ActionItem icon={LifeBuoy} label="Contact Support" color="var(--red)" onClick={() => navigate('/my-account')} />
+              <ActionItem icon={LifeBuoy} label="Contact Support" color="var(--red)" onClick={() => toast.info('Support ticket system ready')} />
             </div>
           </SidebarCard>
 

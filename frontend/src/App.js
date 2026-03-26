@@ -381,7 +381,6 @@ function AppRoutes() {
       {/* Legacy operator routes */}
       {/* MVP: Ribbon board disabled */}
       {/* <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} /> */}
-      <Route path="/orders" element={<Navigate to="/all-requests" replace />} />
       <Route path="/orders/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       <Route 
@@ -490,14 +489,6 @@ function AppRoutes() {
       />
       <Route
         path="/settings"
-        element={
-          <PrivateRoute roles={["Administrator"]}>
-            <Settings />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/settings/profile"
         element={
           <PrivateRoute roles={["Administrator"]}>
             <Settings />
