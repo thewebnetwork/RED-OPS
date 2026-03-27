@@ -24,6 +24,7 @@ import ClientHome from "./pages/ClientHome";
 import Clients from "./pages/Clients";
 import ServiceCatalog from "./pages/ServiceCatalog";
 import MyAccount from "./pages/MyAccount";
+import Orders from "./pages/Orders";
 import Requests from "./pages/Requests";
 import Settings from "./pages/Settings";
 import OrderDetail from "./pages/OrderDetail";
@@ -47,6 +48,7 @@ import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
 import MyRequests from "./pages/MyRequests";
 import ReportIssue from "./pages/ReportIssue";
 import IAMPage from "./pages/IAMPage";
+import SettingsHub from "./pages/SettingsHub";
 import DeletedTickets from "./pages/DeletedTickets";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
@@ -69,8 +71,6 @@ import ClientPage from "./pages/ClientPage";
 import Team from "./pages/Team";
 import TeamMemberPage from "./pages/TeamMemberPage";
 import AdPerformance from "./pages/AdPerformance";
-import AdminShell from "./components/AdminShell";
-import ClientShell from "./components/ClientShell";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -173,7 +173,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
@@ -181,11 +181,7 @@ function PrivateRoute({ children, roles }) {
     }
   }
 
-  // Choose Shell
-  const isClient = isPreview || user?.account_type === 'Media Client' || user?.role === 'Media Client';
-  const Shell = isClient ? ClientShell : AdminShell;
-
-  return <Shell>{children}</Shell>;
+  return <Layout>{children}</Layout>;
 }
 
 function PublicRoute({ children }) {
@@ -356,7 +352,7 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
-            <Requests />
+              <Orders />
             </ModeRoute>
           </PrivateRoute>
         } 
@@ -378,7 +374,7 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ModeRoute allowedModes={[APP_MODES.OPERATOR_CONSOLE, APP_MODES.ADMIN_STUDIO]}>
-              <Requests />
+              <Orders />
             </ModeRoute>
           </PrivateRoute>
         } 
@@ -387,6 +383,7 @@ function AppRoutes() {
       {/* Legacy operator routes */}
       {/* MVP: Ribbon board disabled */}
       {/* <Route path="/ribbon-board" element={<Navigate to="/pool" replace />} /> */}
+      <Route path="/orders" element={<Navigate to="/all-requests" replace />} />
       <Route path="/orders/:orderId" element={<RedirectWithParams to="/requests/:orderId" />} />
       
       <Route 
@@ -495,6 +492,14 @@ function AppRoutes() {
       />
       <Route
         path="/settings"
+        element={
+          <PrivateRoute roles={["Administrator"]}>
+            <SettingsHub />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings/profile"
         element={
           <PrivateRoute roles={["Administrator"]}>
             <Settings />

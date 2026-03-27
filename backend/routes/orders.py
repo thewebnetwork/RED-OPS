@@ -5,6 +5,8 @@ import os
 import base64
 import logging
 from datetime import datetime, timezone, timedelta
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
@@ -1147,8 +1149,8 @@ async def get_pool_tickets(
                                 {"id": order["id"]},
                                 {"$set": {"pool_stage": "POOL_2"}}
                             )
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.warning(f"Non-critical error: {e}")
             
             if order_pool_stage != pool_stage_value:
                 continue
@@ -1160,9 +1162,9 @@ async def get_pool_tickets(
                     pool_entered_dt = datetime.fromisoformat(pool_entered.replace('Z', '+00:00'))
                 else:
                     pool_entered_dt = pool_entered
-            except:
+            except (ValueError, TypeError):
                 pool_entered_dt = now
-            
+
             in_pool_1 = pool_entered_dt > twenty_four_hours_ago
             
             if pool_number == 1 and not in_pool_1:
@@ -1295,7 +1297,7 @@ async def pick_order(
         else:
             pool_entered_dt = pool_entered
         hours_in_pool = (now_dt - pool_entered_dt).total_seconds() / 3600
-    except:
+    except (ValueError, TypeError):
         hours_in_pool = 0
     
     # Determine which pool the ticket is in

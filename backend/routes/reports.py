@@ -7,6 +7,7 @@ Supports CSV and PDF exports with RBAC-aware data filtering.
 import uuid
 import csv
 import io
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Literal
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -16,6 +17,8 @@ from pydantic import BaseModel
 from database import db
 from utils.auth import get_current_user, require_roles
 from utils.helpers import get_utc_now
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
@@ -167,7 +170,7 @@ def parse_date(date_str: Optional[str]) -> Optional[datetime]:
         return None
     try:
         return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-    except:
+    except (ValueError, TypeError):
         return None
 
 
@@ -244,7 +247,7 @@ async def get_sla_state_for_order(order: dict) -> str:
     now = datetime.now(timezone.utc)
     try:
         deadline = datetime.fromisoformat(order["sla_deadline"].replace('Z', '+00:00'))
-    except:
+    except (ValueError, TypeError):
         return "unknown"
     
     if order["status"] in ["Closed", "Delivered"]:
@@ -256,8 +259,8 @@ async def get_sla_state_for_order(order: dict) -> str:
                     return "on_track"
                 else:
                     return "breached"
-            except:
-                pass
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Non-critical error parsing closed_at date: {e}")
         return "on_track"
     
     time_remaining = (deadline - now).total_seconds()
@@ -464,7 +467,7 @@ async def generate_aging_report(report_def: dict, filters: ReportFilter, now: st
                 "age_bucket": bucket,
                 "created_at": order.get("created_at")
             })
-        except:
+        except (ValueError, TypeError):
             continue
     
     summary_data = [{"bucket": k, "count": v} for k, v in buckets.items()]
@@ -499,7 +502,7 @@ async def generate_first_response_report(report_def: dict, filters: ReportFilter
                     "first_response_at": order.get("picked_at"),
                     "response_time_hours": round(response_time_hours, 2)
                 })
-            except:
+            except (ValueError, TypeError):
                 continue
     
     avg_response = sum(r["response_time_hours"] for r in response_times) / len(response_times) if response_times else 0
@@ -535,7 +538,7 @@ async def generate_resolution_time_report(report_def: dict, filters: ReportFilte
                     "closed_at": order.get("closed_at"),
                     "resolution_hours": round(resolution_hours, 2)
                 })
-            except:
+            except (ValueError, TypeError):
                 continue
     
     avg_resolution = sum(r["resolution_hours"] for r in resolution_times) / len(resolution_times) if resolution_times else 0
@@ -831,7 +834,7 @@ async def generate_stale_pending_review_report(report_def: dict, filters: Report
                 "requester_responded": requester_responded,
                 "workflow_status": status_label
             })
-        except:
+        except (ValueError, TypeError):
             continue
     
     # Sort by hours waiting (longest first)

@@ -345,7 +345,7 @@ function NavItem({ item, location, onClick, badgeCount }) {
 // ─────────────────────────────────────────────
 // Main Layout
 // ─────────────────────────────────────────────
-export default function Layout({ children, shellType }) {
+export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const location  = useLocation();
   const navigate  = useNavigate();
@@ -363,7 +363,7 @@ export default function Layout({ children, shellType }) {
   // Filter items by role — preview-as-client mode forces client nav
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
   const isPreviewClient = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
-  const isClient = shellType === 'client' || (shellType !== 'admin' && (isPreviewClient || user?.role === 'Media Client' || user?.account_type === 'Media Client'));
+  const isClient    = isPreviewClient || user?.role === 'Media Client' || user?.account_type === 'Media Client';
   const mainItems     = isClient ? NAV_CLIENT : filter(NAV_MAIN);
   const businessItems = isClient ? [] : filter(NAV_BUSINESS);
   const servicesItems = isClient ? [] : filter(NAV_SERVICES);

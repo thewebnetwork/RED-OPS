@@ -830,7 +830,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
         </div>
 
         {/* Platform + Period Row */}
-        <div className="responsive-grid-2" style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
           <div>
             <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '4px', display: 'block' }}>
               Platform
@@ -865,7 +865,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
           <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '8px', display: 'block' }}>
             Campaign Metrics
           </label>
-          <div className="responsive-grid-2" style={{ marginBottom: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
             <input
               type="number"
               className="input-field"
@@ -913,11 +913,13 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
 
           {/* Calculated Fields */}
           <div
-            className="responsive-grid-3"
             style={{
               padding: '12px',
               backgroundColor: 'var(--bg-elevated)',
               borderRadius: '6px',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: '8px',
               fontSize: '12px',
             }}
           >
@@ -950,16 +952,14 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
               Campaign Breakdown (Optional)
             </summary>
             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-              <div className="mobile-scroll-x">
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 100px 80px 80px',
-                    gap: '8px',
-                    marginBottom: '12px',
-                    minWidth: '400px',
-                  }}
-                >
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 100px 80px 80px',
+                  gap: '8px',
+                  marginBottom: '12px',
+                }}
+              >
                 <input
                   type="text"
                   className="input-field"
@@ -991,8 +991,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
                   onChange={(e) => setNewCampaign({ ...newCampaign, leads: e.target.value })}
                 />
               </div>
-            </div>
-            <button onClick={handleAddCampaign} className="btn-ghost btn-sm">
+              <button onClick={handleAddCampaign} className="btn-ghost btn-sm">
                 <Plus size={14} /> Add Campaign
               </button>
 
@@ -1068,6 +1067,197 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
+   IMPORT CSV MODAL — Meta Ads Manager CSV import
+   ──────────────────────────────────────────────────────────────────────────── */
+
+function ImportCSVModal({ open, onClose, onSuccess, clients }) {
+  const [file, setFile] = useState(null);
+  const [clientId, setClientId] = useState('');
+  const [period, setPeriod] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (f) setFile(f);
+  };
+
+  const handleImport = async () => {
+    if (!file) { toast.error('Please select a CSV file'); return; }
+    if (!clientId) { toast.error('Please select a client'); return; }
+    if (!period) { toast.error('Please select a period'); return; }
+
+    setImporting(true);
+    setResult(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('client_id', clientId);
+      fd.append('period', period);
+
+      const res = await ax().post(`${API}/ad-performance/import-csv`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setResult(res.data);
+      toast.success(`Imported ${res.data.campaigns_found} campaigns`);
+      onSuccess();
+    } catch (err) {
+      console.error('CSV import error:', err);
+      toast.error(err.response?.data?.detail || 'CSV import failed');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setFile(null);
+    setClientId('');
+    setResult(null);
+    onClose();
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-box" style={{ maxWidth: '500px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Import Meta Ads CSV</h2>
+          <button onClick={handleClose} className="btn-ghost btn-sm" style={{ border: 'none', padding: '4px' }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {result ? (
+          /* Success state */
+          <div>
+            <div style={{ padding: '20px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: '8px', marginBottom: '16px' }}>
+              <CheckCircle2 size={36} style={{ color: '#22c55e', marginBottom: '8px' }} />
+              <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px', color: 'var(--tx-1)' }}>Import Successful</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px', textAlign: 'left', maxWidth: '280px', margin: '0 auto' }}>
+                <div>
+                  <div style={{ color: 'var(--tx-3)', fontSize: '11px' }}>Campaigns</div>
+                  <div style={{ fontWeight: 600, color: 'var(--tx-1)' }}>{result.campaigns_found}</div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--tx-3)', fontSize: '11px' }}>Total Spend</div>
+                  <div style={{ fontWeight: 600, color: 'var(--tx-1)' }}>{formatCurrency(result.total_spend)}</div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--tx-3)', fontSize: '11px' }}>Total Leads</div>
+                  <div style={{ fontWeight: 600, color: 'var(--tx-1)' }}>{formatNumber(result.total_leads)}</div>
+                </div>
+              </div>
+            </div>
+            {result.warnings?.length > 0 && (
+              <div style={{ padding: '10px 12px', background: '#f59e0b12', border: '1px solid #f59e0b30', borderRadius: '6px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#f59e0b', marginBottom: '4px' }}>Warnings</div>
+                {result.warnings.map((w, i) => (
+                  <div key={i} style={{ fontSize: '11px', color: 'var(--tx-2)', lineHeight: 1.5 }}>{w}</div>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={handleClose} className="btn-primary">Done</button>
+            </div>
+          </div>
+        ) : (
+          /* Upload form */
+          <div>
+            {/* File upload */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '4px', display: 'block' }}>
+                CSV File
+              </label>
+              <div
+                style={{
+                  border: '2px dashed var(--border)',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  background: file ? 'var(--bg-elevated)' : 'transparent',
+                }}
+                onClick={() => document.getElementById('csv-import-input').click()}
+              >
+                {file ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <FileText size={18} style={{ color: 'var(--accent)' }} />
+                    <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--tx-1)' }}>{file.name}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                      className="btn-ghost btn-xs"
+                      style={{ border: 'none', padding: '2px', marginLeft: '4px' }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload size={24} style={{ color: 'var(--tx-3)', marginBottom: '6px' }} />
+                    <div style={{ fontSize: '13px', color: 'var(--tx-2)' }}>Click to select a .csv file</div>
+                    <div style={{ fontSize: '11px', color: 'var(--tx-3)', marginTop: '2px' }}>Exported from Meta Ads Manager</div>
+                  </>
+                )}
+                <input
+                  id="csv-import-input"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+
+            {/* Client select */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '4px', display: 'block' }}>
+                Client
+              </label>
+              <select
+                className="input-field"
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+              >
+                <option value="">Select a client...</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Period picker */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tx-2)', marginBottom: '4px', display: 'block' }}>
+                Period (Month)
+              </label>
+              <input
+                type="month"
+                className="input-field"
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+              />
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button onClick={handleClose} className="btn-ghost">Cancel</button>
+              <button onClick={handleImport} className="btn-primary" disabled={importing}>
+                {importing ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
+                {importing ? 'Importing...' : 'Import'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
    ADMIN DASHBOARD
    ──────────────────────────────────────────────────────────────────────────── */
 
@@ -1079,6 +1269,7 @@ function AdminAdDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [expandedClient, setExpandedClient] = useState(null);
 
   useEffect(() => {
@@ -1122,9 +1313,7 @@ function AdminAdDashboard() {
     fetchData();
   }, []);
 
-  const handleSnapshotAdded = async () => {
-    setShowAddModal(false);
-    // Refetch data
+  const refreshData = async () => {
     try {
       const ovRes = await ax().get(`${API}/ad-performance/agency-overview`);
       setOverview(ovRes.data);
@@ -1135,6 +1324,15 @@ function AdminAdDashboard() {
     } catch (err) {
       console.error('Error refreshing data:', err);
     }
+  };
+
+  const handleSnapshotAdded = async () => {
+    setShowAddModal(false);
+    await refreshData();
+  };
+
+  const handleImportSuccess = async () => {
+    await refreshData();
   };
 
   if (loading) {
@@ -1205,12 +1403,20 @@ function AdminAdDashboard() {
             <h1 style={{ fontSize: '22px', fontWeight: 700 }}>Ad Performance — Agency View</h1>
           </div>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-primary"
-        >
-          <Plus size={16} /> Add Snapshot
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="btn-ghost"
+          >
+            <Upload size={16} /> Import CSV
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-primary"
+          >
+            <Plus size={16} /> Add Snapshot
+          </button>
+        </div>
       </div>
 
       {/* Agency KPI Row */}
@@ -1396,6 +1602,14 @@ function AdminAdDashboard() {
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSave={handleSnapshotAdded}
+        clients={clients}
+      />
+
+      {/* Import CSV Modal */}
+      <ImportCSVModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={handleImportSuccess}
         clients={clients}
       />
     </div>

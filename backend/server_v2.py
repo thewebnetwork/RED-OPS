@@ -221,6 +221,14 @@ app = FastAPI(
 
 # CORS middleware
 _raw_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
+# Guard against accidentally JSON-encoded value
+if _raw_origins.strip().startswith("["):
+    import json, logging
+    try:
+        _raw_origins = ",".join(json.loads(_raw_origins))
+        logging.warning("CORS_ORIGINS was JSON-encoded. Parsed correctly. Use comma-separated format.")
+    except Exception:
+        pass
 _always_allowed = ["https://redops.redribbongroup.ca", "https://red-ops.vercel.app"]
 origins = list(set([o.strip() for o in _raw_origins.split(",") if o.strip()] + _always_allowed))
 app.add_middleware(

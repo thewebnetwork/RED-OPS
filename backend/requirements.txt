@@ -123,4 +123,3 @@ websockets==15.0.1
 yarl==1.22.0
 zipp==3.23.0
 pyotp==2.9.0
-supabase==2.28.0

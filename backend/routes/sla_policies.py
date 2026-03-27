@@ -1,4 +1,5 @@
 """Unified SLA & Escalation Policy routes"""
+import logging
 import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -7,6 +8,9 @@ from typing import Optional, List
 from database import db
 from utils.auth import get_current_user, require_roles
 from utils.helpers import get_utc_now
+
+logger = logging.getLogger(__name__)
+
 from models.sla_policy import (
     SLAPolicyCreate,
     SLAPolicyUpdate,
@@ -114,7 +118,7 @@ def calculate_time_remaining(deadline_str: str) -> tuple:
             return f"{hours}h {minutes}m", total_minutes
         else:
             return f"{minutes}m", total_minutes
-    except:
+    except (ValueError, TypeError):
         return None, None
 
 
@@ -133,7 +137,7 @@ def get_sla_status(deadline_str: str, at_risk_minutes: int = 240) -> str:
             return "at_risk"
         else:
             return "on_track"
-    except:
+    except (ValueError, TypeError):
         return "unknown"
 
 

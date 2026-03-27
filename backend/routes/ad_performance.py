@@ -7,14 +7,19 @@ Supports snapshot-based performance recording with aggregated summaries and agen
 Data Model: ad_snapshots collection
 Each snapshot is a point-in-time record of ad performance for one client per platform per period.
 """
+import csv
+import io
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from pydantic import BaseModel, Field
 
 from database import db
 from utils.auth import get_current_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ad-performance", tags=["ad-performance"])
 
@@ -76,6 +81,16 @@ class AdSnapshot(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CSVImportResult(BaseModel):
+    """Result of a Meta Ads CSV import"""
+    imported: bool
+    campaigns_found: int
+    total_spend: float
+    total_leads: int
+    snapshot_id: str
+    warnings: List[str] = []
 
 
 class ClientSummaryPeriod(BaseModel):
@@ -252,7 +267,8 @@ async def list_snapshots(
 
     # Fetch and sort
     cursor = db.ad_snapshots.find(query).sort([("period", -1), ("platform", 1)])
-    snapshots = await cursor.to_list(None)
+    # Cap at 2000 documents to prevent OOM on large datasets. Paginate if needed.
+    snapshots = await cursor.to_list(2000)
 
     return [AdSnapshot(**s) for s in snapshots]
 
@@ -327,6 +343,229 @@ async def delete_snapshot(
     return {"status": "deleted", "snapshot_id": snapshot_id}
 
 
+# ============== META ADS CSV IMPORT ==============
+
+# Column name mappings: Meta Ads Manager header → internal field
+_META_COLUMN_MAP = {
+    "amount spent (usd)": "ad_spend",
+    "amount spent": "ad_spend",
+    "impressions": "impressions",
+    "link clicks": "clicks",
+    "clicks (all)": "clicks",
+    "leads": "leads",
+    "results": "leads",
+    "lead gen form leads": "leads",
+    "ctr (link click-through rate)": "ctr",
+    "ctr (all)": "ctr",
+    "cost per result": "cpl",
+    "cost per lead": "cpl",
+    "campaign name": "campaign_name",
+}
+
+
+def _resolve_column(headers: List[str]) -> Dict[str, int]:
+    """Map internal field names to CSV column indices using Meta Ads header mappings."""
+    mapping: Dict[str, int] = {}
+    lower_headers = [h.strip().lower() for h in headers]
+    for idx, header in enumerate(lower_headers):
+        internal = _META_COLUMN_MAP.get(header)
+        if internal and internal not in mapping:
+            mapping[internal] = idx
+    return mapping
+
+
+def _safe_float(val: str) -> float:
+    """Parse a numeric string, stripping currency symbols and commas."""
+    if not val or not val.strip():
+        return 0.0
+    cleaned = val.strip().replace("$", "").replace(",", "").replace("%", "")
+    try:
+        return float(cleaned)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+@router.post("/import-csv", response_model=CSVImportResult)
+async def import_meta_csv(
+    file: UploadFile = File(...),
+    client_id: str = Form(...),
+    period: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Import a Meta Ads Manager CSV export.
+    Aggregates rows by campaign name into a single snapshot for the given client + period.
+    If a snapshot already exists for this client/period/Meta, it is updated (merged).
+    """
+    if current_user.get("role") not in ["Administrator", "Admin", "Operator"]:
+        raise HTTPException(status_code=403, detail="Admin or Operator access required")
+
+    # Validate period format
+    if not period or len(period) < 7:
+        raise HTTPException(status_code=400, detail="Period must be YYYY-MM format")
+    period = period.strip()[:7]
+
+    # Read and decode file
+    content = await file.read()
+    try:
+        text = content.decode("utf-8-sig")  # utf-8-sig handles BOM from Excel exports
+    except UnicodeDecodeError:
+        text = content.decode("latin-1")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    if len(rows) < 2:
+        raise HTTPException(status_code=400, detail="CSV must have a header row and at least one data row")
+
+    headers = rows[0]
+    col_map = _resolve_column(headers)
+    warnings: List[str] = []
+
+    # Validate required columns
+    if "ad_spend" not in col_map:
+        warnings.append("Missing 'Amount spent' column — spend will be 0 for all rows")
+    if "campaign_name" not in col_map:
+        warnings.append("Missing 'Campaign name' column — all rows grouped as 'Unknown Campaign'")
+
+    # Parse data rows and aggregate by campaign
+    campaigns: Dict[str, Dict[str, Any]] = {}
+    total_spend = 0.0
+    total_impressions = 0
+    total_clicks = 0
+    total_leads = 0
+    total_ctr_weighted = 0.0  # impressions-weighted CTR sum
+    skipped = 0
+
+    for row_idx, row in enumerate(rows[1:], start=2):
+        if not any(cell.strip() for cell in row):
+            skipped += 1
+            continue
+
+        try:
+            spend = _safe_float(row[col_map["ad_spend"]]) if "ad_spend" in col_map else 0.0
+            impressions = int(_safe_float(row[col_map["impressions"]])) if "impressions" in col_map else 0
+            clicks = int(_safe_float(row[col_map["clicks"]])) if "clicks" in col_map else 0
+            leads = int(_safe_float(row[col_map["leads"]])) if "leads" in col_map else 0
+            ctr_raw = _safe_float(row[col_map["ctr"]]) if "ctr" in col_map else 0.0
+            cpl_raw = _safe_float(row[col_map["cpl"]]) if "cpl" in col_map else 0.0
+            campaign = row[col_map["campaign_name"]].strip() if "campaign_name" in col_map else "Unknown Campaign"
+        except (IndexError, KeyError):
+            skipped += 1
+            warnings.append(f"Row {row_idx}: malformed — skipped")
+            continue
+
+        if not campaign:
+            campaign = "Unknown Campaign"
+
+        # Aggregate into campaign bucket
+        if campaign not in campaigns:
+            campaigns[campaign] = {"spend": 0.0, "impressions": 0, "clicks": 0, "leads": 0, "cpl_sum": 0.0, "cpl_count": 0}
+        c = campaigns[campaign]
+        c["spend"] += spend
+        c["impressions"] += impressions
+        c["clicks"] += clicks
+        c["leads"] += leads
+        if cpl_raw > 0:
+            c["cpl_sum"] += cpl_raw
+            c["cpl_count"] += 1
+
+        # Totals
+        total_spend += spend
+        total_impressions += impressions
+        total_clicks += clicks
+        total_leads += leads
+        # CTR from Meta is already a percentage; weight by impressions for averaging
+        if impressions > 0:
+            total_ctr_weighted += ctr_raw * impressions
+
+    if skipped > 0:
+        warnings.append(f"{skipped} empty/malformed rows skipped")
+
+    if not campaigns:
+        raise HTTPException(status_code=400, detail="No valid data rows found in CSV")
+
+    # Build campaign breakdowns
+    campaign_list = []
+    for name, data in campaigns.items():
+        cpl = round(data["spend"] / data["leads"], 2) if data["leads"] > 0 else (
+            round(data["cpl_sum"] / data["cpl_count"], 2) if data["cpl_count"] > 0 else 0.0
+        )
+        campaign_list.append({
+            "name": name,
+            "status": "active",
+            "spend": round(data["spend"], 2),
+            "leads": data["leads"],
+            "cpl": cpl,
+        })
+
+    # Build top-level metrics
+    overall_cpl = round(total_spend / total_leads, 2) if total_leads > 0 else 0.0
+    overall_ctr = round(total_ctr_weighted / total_impressions, 2) if total_impressions > 0 else 0.0
+    # Meta exports CTR as percentage (e.g. 1.5 = 1.5%). Store as decimal fraction.
+    overall_ctr_decimal = round(overall_ctr / 100, 4)
+    overall_cpc = round(total_spend / total_clicks, 2) if total_clicks > 0 else 0.0
+
+    metrics = {
+        "ad_spend": round(total_spend, 2),
+        "impressions": total_impressions,
+        "clicks": total_clicks,
+        "leads": total_leads,
+        "cpl": overall_cpl,
+        "ctr": overall_ctr_decimal,
+        "conversions": 0,
+        "roas": None,
+        "cpc": overall_cpc,
+    }
+
+    # Check for existing snapshot (same client + period + Meta)
+    client_name = await get_client_name(client_id)
+    now = datetime.now(timezone.utc).isoformat()
+
+    existing = await db.ad_snapshots.find_one({
+        "client_id": client_id,
+        "period": period,
+        "platform": "Meta",
+    })
+
+    if existing:
+        # Merge: replace metrics and campaigns with fresh CSV data
+        await db.ad_snapshots.update_one(
+            {"id": existing["id"]},
+            {"$set": {
+                "metrics": metrics,
+                "campaigns": campaign_list,
+                "notes": f"CSV import updated {now}",
+                "updated_at": now,
+            }}
+        )
+        snapshot_id = existing["id"]
+    else:
+        snapshot_id = str(uuid.uuid4())
+        snapshot = {
+            "id": snapshot_id,
+            "client_id": client_id,
+            "client_name": client_name,
+            "platform": "Meta",
+            "period": period,
+            "metrics": metrics,
+            "campaigns": campaign_list,
+            "notes": f"CSV import {now}",
+            "created_by": current_user.get("id"),
+            "created_at": now,
+            "updated_at": now,
+        }
+        await db.ad_snapshots.insert_one(snapshot)
+
+    return CSVImportResult(
+        imported=True,
+        campaigns_found=len(campaigns),
+        total_spend=round(total_spend, 2),
+        total_leads=total_leads,
+        snapshot_id=snapshot_id,
+        warnings=warnings,
+    )
+
+
 @router.get("/summary/{client_id}", response_model=ClientSummary)
 async def get_client_summary(
     client_id: str,
@@ -342,7 +581,8 @@ async def get_client_summary(
         raise HTTPException(status_code=403, detail="You can only view your own summary")
 
     # Fetch all snapshots for this client
-    snapshots = await db.ad_snapshots.find({"client_id": client_id}).to_list(None)
+    # Cap at 2000 documents to prevent OOM on large datasets. Paginate if needed.
+    snapshots = await db.ad_snapshots.find({"client_id": client_id}).to_list(2000)
 
     if not snapshots:
         # Return empty summary instead of 404 — frontend shows empty state
@@ -445,7 +685,8 @@ async def get_agency_overview(
         raise HTTPException(status_code=403, detail="Admin access required")
 
     # Fetch all snapshots
-    all_snapshots = await db.ad_snapshots.find({}).to_list(None)
+    # Cap at 2000 documents to prevent OOM on large datasets. Paginate if needed.
+    all_snapshots = await db.ad_snapshots.find({}).to_list(2000)
 
     if not all_snapshots:
         return AgencyOverview(

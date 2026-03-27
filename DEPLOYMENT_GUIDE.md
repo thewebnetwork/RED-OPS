@@ -4,22 +4,19 @@
 
 ### Prerequisites
 - GitHub account
-- Supabase account (database)
+- MongoDB Atlas account (database)
 - Railway account (backend) OR Render/Heroku
 - Vercel account (frontend)
 
 ---
 
-## Step 1: Set Up Supabase Database
+## Step 1: Set Up MongoDB Atlas
 
-1. Go to https://supabase.com/dashboard
-2. Click your project: `vgmeeihmtgrapvolmmg`
-3. Go to **SQL Editor** (left sidebar)
-4. Copy the entire content of `/app/supabase_schema.sql`
-5. Paste it into the SQL Editor
-6. Click **Run** (this creates all tables, indexes, and default admin user)
-
-✅ **Your database is now ready!**
+1. Go to https://cloud.mongodb.com
+2. Create a free cluster
+3. Create a database user and get your connection string (MONGO_URL)
+4. Set the environment variable DB_NAME to: `red_ribbon_ops`
+5. The app will auto-create collections on first use
 
 Admin credentials are set during initial seed — see Railway environment variables.
 
@@ -59,12 +56,12 @@ git push -u origin main
 
 3. Add environment variables in Railway dashboard:
    ```
-   SUPABASE_URL=https://vgmeeihmtgrapvolmmg.supabase.co
-   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   MONGO_URL=mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true&w=majority
+   DB_NAME=red_ribbon_ops
    JWT_SECRET=your-super-secret-jwt-key-change-this
    JWT_ALGORITHM=HS256
    ACCESS_TOKEN_EXPIRE_MINUTES=1440
-   CORS_ORIGINS=["https://your-app.vercel.app","http://localhost:3000"]
+   CORS_ORIGINS=https://your-app.vercel.app,http://localhost:3000  # Comma-separated, no brackets or quotes around the full value
    ```
 
 ### Option B: Using Railway Dashboard
@@ -106,7 +103,7 @@ After deployment, update your backend CORS_ORIGINS:
 
 In Railway dashboard, update environment variable:
 ```
-CORS_ORIGINS=["https://your-app.vercel.app"]
+CORS_ORIGINS=https://your-app.vercel.app  # Comma-separated, no brackets or quotes around the full value
 ```
 
 ---
@@ -123,7 +120,7 @@ Admin credentials are set during initial seed — see Railway environment variab
 ### Backend won't start
 - Check Railway logs: `railway logs`
 - Verify all environment variables are set
-- Ensure Supabase credentials are correct
+- Ensure MONGO_URL and DB_NAME are correct
 
 ### Frontend can't connect
 - Check browser console for CORS errors
@@ -131,9 +128,9 @@ Admin credentials are set during initial seed — see Railway environment variab
 - Ensure backend health check passes: `https://your-backend.railway.app/api/health`
 
 ### Database connection fails
-- Verify Supabase URL and keys
-- Check if SQL schema was run successfully
-- View Supabase logs in dashboard
+- Verify MONGO_URL connection string and credentials
+- Ensure your IP is whitelisted in MongoDB Atlas Network Access
+- Check MongoDB Atlas cluster status
 
 ---
 
@@ -141,7 +138,7 @@ Admin credentials are set during initial seed — see Railway environment variab
 
 1. **Set up custom domain** on Vercel
 2. **Configure SMTP** for email notifications
-3. **Set up Supabase Storage** for file uploads
+3. **Set up file storage** (S3/Nextcloud) for file uploads
 4. **Add more users** through the IAM page
 
 Need help? Check the logs and let me know what error you see!

@@ -1,4 +1,5 @@
 """Dashboard V2 - Role-based dashboard with metrics and analytics"""
+import logging
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -8,6 +9,8 @@ from collections import defaultdict
 from database import db
 from utils.auth import get_current_user
 from utils.helpers import normalize_order, is_sla_breached
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/dashboard/v2", tags=["Dashboard V2"])
 
@@ -247,9 +250,9 @@ async def get_sla_trends(base_query: dict, days: int) -> Dict[str, List[dict]]:
                         at_risk += 1
                     else:
                         on_track += 1
-                except:
+                except (ValueError, TypeError):
                     on_track += 1
-        
+
         on_track_data.append({"date": date.strftime("%Y-%m-%d"), "value": on_track})
         at_risk_data.append({"date": date.strftime("%Y-%m-%d"), "value": at_risk})
         breached_data.append({"date": date.strftime("%Y-%m-%d"), "value": breached})
@@ -335,7 +338,7 @@ async def get_dashboard_metrics(current_user: dict = Depends(get_current_user)):
                     sla.at_risk += 1
                 else:
                     sla.on_track += 1
-            except:
+            except (ValueError, TypeError):
                 sla.on_track += 1
     
     # ============== POOL METRICS ==============
@@ -406,8 +409,8 @@ async def get_dashboard_metrics(current_user: dict = Depends(get_current_user)):
                         entered = datetime.fromisoformat(p["pool1_entered_at"].replace("Z", "+00:00"))
                         picked = datetime.fromisoformat(p["picked_at"].replace("Z", "+00:00"))
                         total_hours += (picked - entered).total_seconds() / 3600
-                    except:
-                        pass
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Non-critical error parsing pool1 dates: {e}")
                 pool.avg_time_to_pick_pool1_hours = round(total_hours / len(pool1_picked), 1)
             
             # Pool 2 avg time
@@ -424,8 +427,8 @@ async def get_dashboard_metrics(current_user: dict = Depends(get_current_user)):
                         entered = datetime.fromisoformat(p["pool2_entered_at"].replace("Z", "+00:00"))
                         picked = datetime.fromisoformat(p["picked_at"].replace("Z", "+00:00"))
                         total_hours += (picked - entered).total_seconds() / 3600
-                    except:
-                        pass
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Non-critical error parsing pool2 dates: {e}")
                 pool.avg_time_to_pick_pool2_hours = round(total_hours / len(pool2_picked), 1)
             
             # Expired Pool 1 -> Pool 2

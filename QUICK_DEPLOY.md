@@ -43,7 +43,7 @@
    SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbWVlaWhtdGdyYXB2b2xtbWciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczOTc1MjE0MywiZXhwIjoyMDU1MzI4MTQzfQ.7Xpf5sGxYfKKPr1234EXAMPLE
    JWT_SECRET=change-this-to-a-random-string-234234sdfsd
    JWT_ALGORITHM=HS256
-   CORS_ORIGINS=["https://your-app.vercel.app","http://localhost:3000"]
+   CORS_ORIGINS=https://your-app.vercel.app,http://localhost:3000  # Comma-separated, no brackets or quotes around the full value
    ```
 6. Railway will auto-redeploy
 7. **Copy your Railway URL** (looks like: `https://redribbonops.up.railway.app`)
@@ -81,7 +81,7 @@ Go back to Railway:
 1. Click **Variables**
 2. Edit `CORS_ORIGINS`:
    ```
-   ["https://YOUR-VERCEL-URL.vercel.app"]
+   https://YOUR-VERCEL-URL.vercel.app  # Comma-separated, no brackets or quotes around the full value
    ```
 3. Save (auto-redeploys)
 
