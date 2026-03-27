@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDraggable, useDroppable,
 } from '@dnd-kit/core';
@@ -93,7 +94,15 @@ function SlaTag({ deadline }) {
 }
 
 // Kanban card for orders
-function OrderCard({ order, onClick, ghost = false }) {
+function OrderCard({ order, onClick, ghost = false, isAdmin = false, teamMembers = [], onAssign, onClose, onCancel }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const [showAssign, setShowAssign] = useState(false);
+  const [showCancelPrompt, setShowCancelPrompt] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [assignSearch, setAssignSearch] = useState('');
+
+  const canAct = isAdmin && !ghost && order.status !== 'Closed' && order.status !== 'Canceled';
+
   return (
     <div
       onClick={onClick}
@@ -104,15 +113,121 @@ function OrderCard({ order, onClick, ghost = false }) {
         opacity: ghost ? 0.5 : 1, transition: 'box-shadow .15s, transform .15s',
         borderLeft: `3px solid ${PRI[order.priority] || '#606060'}`,
         transform: ghost ? 'rotate(1.5deg)' : 'none',
+        position: 'relative',
       }}
       onMouseEnter={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
       onMouseLeave={e => { if (!ghost) { e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.12)'; e.currentTarget.style.transform = 'none'; }}}
     >
-      {/* Top: code + SLA */}
+      {/* Top: code + SLA + kebab */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent)', letterSpacing: '.02em' }}>{order.order_code}</span>
-        <SlaTag deadline={order.sla_deadline} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <SlaTag deadline={order.sla_deadline} />
+          {canAct && (
+            <button onClick={e => { e.stopPropagation(); setShowMenu(!showMenu); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 1, display: 'flex', borderRadius: 3 }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--tx-1)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--tx-3)'}>
+              <MoreHorizontal size={13} />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Kebab menu */}
+      {showMenu && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={e => { e.stopPropagation(); setShowMenu(false); }} />
+          <div style={{
+            position: 'absolute', right: 8, top: 28, zIndex: 451,
+            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+            boxShadow: '0 8px 24px rgba(0,0,0,.4)', minWidth: 140, padding: '4px 0',
+          }}>
+            <button onClick={e => { e.stopPropagation(); setShowMenu(false); onClick(); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, textAlign: 'left' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+              <Eye size={13} /> View
+            </button>
+            <button onClick={e => { e.stopPropagation(); setShowMenu(false); setShowAssign(true); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-1)', fontSize: 12, textAlign: 'left' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+              <UserPlus size={13} /> Assign
+            </button>
+            {order.status !== 'Delivered' && (
+              <button onClick={e => { e.stopPropagation(); setShowMenu(false); onClose(order.id); }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', color: '#22c55e', fontSize: 12, textAlign: 'left' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                <CheckCircle2 size={13} /> Close
+              </button>
+            )}
+            <button onClick={e => { e.stopPropagation(); setShowMenu(false); setShowCancelPrompt(true); }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 12, textAlign: 'left' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+              <X size={13} /> Cancel
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Inline assign dropdown */}
+      {showAssign && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={e => { e.stopPropagation(); setShowAssign(false); }} />
+          <div style={{
+            position: 'absolute', right: 8, top: 28, zIndex: 451, width: 220,
+            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+            boxShadow: '0 8px 24px rgba(0,0,0,.4)', overflow: 'hidden',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
+              <input value={assignSearch} onChange={e => setAssignSearch(e.target.value)} placeholder="Search team..."
+                autoFocus style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', color: 'var(--tx-1)', fontSize: 12, padding: '4px 0' }} />
+            </div>
+            <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+              {teamMembers.filter(m => !assignSearch || m.name.toLowerCase().includes(assignSearch.toLowerCase())).map(m => (
+                <div key={m.id} onClick={() => { onAssign(order.id, m.id, m.name); setShowAssign(false); setAssignSearch(''); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', cursor: 'pointer', fontSize: 12, color: 'var(--tx-1)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <Avatar name={m.name} size={20} />
+                  <span style={{ flex: 1 }}>{m.name}</span>
+                  {m.id === order.editor_id && <CheckCircle2 size={11} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Cancel reason prompt */}
+      {showCancelPrompt && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={e => { e.stopPropagation(); setShowCancelPrompt(false); setCancelReason(''); }} />
+          <div style={{
+            position: 'absolute', right: 8, top: 28, zIndex: 451, width: 240,
+            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+            boxShadow: '0 8px 24px rgba(0,0,0,.4)', padding: 12,
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)', marginBottom: 8 }}>Cancel reason</div>
+            <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} placeholder="Why is this being canceled?"
+              autoFocus rows={2} style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--tx-1)', fontSize: 12, padding: '6px 8px', resize: 'none', boxSizing: 'border-box' }} />
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 8 }}>
+              <button onClick={() => { setShowCancelPrompt(false); setCancelReason(''); }}
+                style={{ padding: '4px 10px', fontSize: 11, background: 'none', border: '1px solid var(--border)', borderRadius: 5, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                Back
+              </button>
+              <button onClick={() => { if (!cancelReason.trim()) { toast.error('Reason is required'); return; } onCancel(order.id, cancelReason.trim()); setShowCancelPrompt(false); setCancelReason(''); }}
+                style={{ padding: '4px 10px', fontSize: 11, background: '#ef4444', border: 'none', borderRadius: 5, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+                Cancel Request
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Title */}
       <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--tx-1)', lineHeight: 1.35, marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
         {order.title}
@@ -150,11 +265,11 @@ function OrderCard({ order, onClick, ghost = false }) {
   );
 }
 
-function DraggableOrder({ order, onOpen }) {
+function DraggableOrder({ order, onOpen, isAdmin, teamMembers, onAssign, onClose, onCancel }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: order.id });
   return (
     <div ref={setNodeRef} {...attributes} {...listeners} style={{ opacity: isDragging ? 0 : 1, touchAction: 'none', marginBottom: 8 }}>
-      <OrderCard order={order} onClick={onOpen} />
+      <OrderCard order={order} onClick={onOpen} isAdmin={isAdmin} teamMembers={teamMembers} onAssign={onAssign} onClose={onClose} onCancel={onCancel} />
     </div>
   );
 }
@@ -296,7 +411,9 @@ function OrderComments({ orderId }) {
 // ── Main ──────────────────────────────────────────────────────
 export default function Requests() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin' || user?.role === 'Operator';
   const [orders, setOrders] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -398,6 +515,22 @@ export default function Requests() {
       });
       toast.success(`Assigned to ${userName}`);
     } catch { toast.error('Failed to assign'); fetchData(); }
+  };
+
+  const closeOrder = async (id) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'Closed' } : o));
+    try {
+      await fetch(`${API}/orders/${id}/close`, { method: 'POST', headers: jhdrs(), body: JSON.stringify({ reason: 'Completed' }) });
+      toast.success('Request closed');
+    } catch { toast.error('Failed to close'); fetchData(); }
+  };
+
+  const cancelOrder = async (id, reason) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'Canceled' } : o));
+    try {
+      await fetch(`${API}/orders/${id}/cancel`, { method: 'POST', headers: jhdrs(), body: JSON.stringify({ reason }) });
+      toast.success('Request canceled');
+    } catch { toast.error('Failed to cancel'); fetchData(); }
   };
 
   const handleDragEnd = ({ active, over }) => {
@@ -552,7 +685,7 @@ export default function Requests() {
                     <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
                       <DroppableColumn stage={stage} isEmpty={stageOrders.length === 0}>
                         {stageOrders.map(o => (
-                          <DraggableOrder key={o.id} order={o} onOpen={() => navigate(`/requests/${o.id}`)} />
+                          <DraggableOrder key={o.id} order={o} onOpen={() => navigate(`/requests/${o.id}`)} isAdmin={isAdmin} teamMembers={teamMembers} onAssign={assignOrder} onClose={closeOrder} onCancel={cancelOrder} />
                         ))}
                       </DroppableColumn>
                     </div>
