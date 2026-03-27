@@ -918,7 +918,8 @@ async def list_orders(
         else:
             existing = {k: v for k, v in query.items()}
             query = {"$and": [existing, search_filter]}
-    
+
+    query["deleted"] = {"$ne": True}
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
     result = []
@@ -940,7 +941,7 @@ async def list_orders(
 @router.get("/pool", response_model=List[OrderResponse])
 async def get_order_pool(current_user: dict = Depends(require_roles(["Editor", "Admin"]))):
     """Get pool of open orders available for pickup (excludes drafts)"""
-    orders = await db.orders.find({"status": "Open"}, {"_id": 0}).sort("created_at", 1).to_list(1000)
+    orders = await db.orders.find({"status": "Open", "deleted": {"$ne": True}}, {"_id": 0}).sort("created_at", 1).to_list(1000)
     
     result = []
     for order in orders:
@@ -957,7 +958,7 @@ async def get_order_pool(current_user: dict = Depends(require_roles(["Editor", "
 async def get_my_requests(current_user: dict = Depends(get_current_user)):
     """Get all requests created by the current user"""
     orders = await db.orders.find(
-        {"requester_id": current_user["id"], "status": {"$ne": "Draft"}},
+        {"requester_id": current_user["id"], "status": {"$ne": "Draft"}, "deleted": {"$ne": True}},
         {"_id": 0}
     ).sort("created_at", -1).to_list(1000)
     
@@ -978,7 +979,7 @@ async def get_my_requests(current_user: dict = Depends(get_current_user)):
 async def get_my_assigned_tickets(current_user: dict = Depends(get_current_user)):
     """Get all tickets assigned to the current user (for resolvers)"""
     orders = await db.orders.find(
-        {"editor_id": current_user["id"], "status": {"$nin": ["Closed", "Canceled"]}},
+        {"editor_id": current_user["id"], "status": {"$nin": ["Closed", "Canceled"]}, "deleted": {"$ne": True}},
         {"_id": 0}
     ).sort("created_at", -1).to_list(1000)
     
