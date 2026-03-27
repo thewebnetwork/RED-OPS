@@ -21,9 +21,7 @@
 
 ✅ **Your database is now ready!**
 
-Admin login will be:
-- Email: `admin@redribbonops.com`
-- Password: `Admin123!`
+Admin credentials are set during initial seed — see Railway environment variables.
 
 ---
 
@@ -116,8 +114,7 @@ CORS_ORIGINS=["https://your-app.vercel.app"]
 ## 🎉 You're Live!
 
 Visit your Vercel URL and login with:
-- Email: `admin@redribbonops.com`
-- Password: `Admin123!`
+Admin credentials are set during initial seed — see Railway environment variables.
 
 ---
 

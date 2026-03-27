@@ -80,3 +80,7 @@ agenthub/agents/youtube/db
 outputs/
 memory/
 .git_corrupted
+
+# Uploads and agent config
+uploads/
+.gitconfig

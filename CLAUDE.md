@@ -12,7 +12,7 @@
 - **Build**: `npx craco build` (NOT react-scripts) — craco handles `@/` path aliasing
 - **Deploy**: `git push origin main` → Railway auto-deploys from GitHub
 - **Auth**: JWT tokens — `get_current_user` returns full user dict
-- **Admin creds (dev)**: `redops@redribbongroup.ca` / `Fmtvvl171**`
+- **Admin creds**: stored in Railway environment variables — do not hardcode here.
 
 ---
 
