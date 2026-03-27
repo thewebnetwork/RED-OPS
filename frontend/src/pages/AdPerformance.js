@@ -1405,6 +1405,20 @@ function AdminAdDashboard() {
     }
   };
 
+  const [generatingAll, setGeneratingAll] = useState(false);
+
+  const handleGenerateAllReports = async () => {
+    setGeneratingAll(true);
+    try {
+      const res = await ax().post(`${API}/ad-performance/reports/generate-all`, {});
+      toast.success(`Generated ${res.data.reports_generated} report(s)`);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to generate reports');
+    } finally {
+      setGeneratingAll(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1474,6 +1488,14 @@ function AdminAdDashboard() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={handleGenerateAllReports}
+            disabled={generatingAll}
+            className="btn-ghost"
+          >
+            {generatingAll ? <Loader2 size={14} className="spin" /> : <FileText size={14} />}
+            {generatingAll ? 'Generating...' : 'Generate All Reports'}
+          </button>
           <button
             onClick={() => setShowImportModal(true)}
             className="btn-ghost"

@@ -669,7 +669,7 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
 /* ═══════════════════════════════════════════════════════════
    LIST ROW
    ═══════════════════════════════════════════════════════════ */
-function TaskRow({ task, onToggle, onClick }) {
+function TaskRow({ task, onToggle, onClick, selected = false, onToggleSelect }) {
   const done = task.status === 'Done';
   const overdue = task.due_date && daysUntil(task.due_date) <= 0 && !done;
   const urgent = !done && task.due_date && daysUntil(task.due_date) > 0 && daysUntil(task.due_date) <= 3;
@@ -678,9 +678,16 @@ function TaskRow({ task, onToggle, onClick }) {
     <div onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
       borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'background .08s',
+      background: selected ? 'var(--accent-soft)' : 'transparent',
     }}
-    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+    onMouseEnter={e => { if (!selected) e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+    onMouseLeave={e => { if (!selected) e.currentTarget.style.background = 'transparent'; }}>
+      {/* Bulk select checkbox */}
+      {onToggleSelect && (
+        <input type="checkbox" checked={selected} onChange={e => { e.stopPropagation(); onToggleSelect(task._id || task.id); }}
+          onClick={e => e.stopPropagation()}
+          style={{ width: 14, height: 14, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }} />
+      )}
       {/* Toggle */}
       <button onClick={e => { e.stopPropagation(); onToggle(task._id); }}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: done ? '#22c55e' : 'var(--tx-3)', padding: 0, flexShrink: 0, display: 'flex', transition: 'color .1s' }}
@@ -1032,6 +1039,8 @@ export default function Tasks() {
   const [groupBy, setGroupBy] = useState('none');
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkAction, setBulkAction] = useState(false);
 
   // Persist view
   useEffect(() => { localStorage.setItem('tasks_view', view); }, [view]);
@@ -1188,6 +1197,31 @@ export default function Tasks() {
     } catch { toast.error('Failed to create task'); }
   };
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === filtered.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filtered.map(t => t._id || t.id)));
+  };
+
+  const executeBulkAction = async (action, value) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    try {
+      await ax().post(`${API}/tasks/batch-update`, { task_ids: ids, action, value });
+      toast.success(`${action === 'delete' ? 'Deleted' : 'Updated'} ${ids.length} task(s)`);
+      setSelectedIds(new Set());
+      setBulkAction(false);
+      fetchTasks();
+    } catch { toast.error('Bulk action failed'); }
+  };
+
   const clearFilters = () => {
     setFilterStatus('all');
     setFilterPriority('all');
@@ -1198,7 +1232,8 @@ export default function Tasks() {
 
   // Render list rows (with optional grouping)
   const renderList = (items) => items.map(t => (
-    <TaskRow key={t._id} task={t} onToggle={toggleDone} onClick={() => setSelectedTask(t)} />
+    <TaskRow key={t._id} task={t} onToggle={toggleDone} onClick={() => setSelectedTask(t)}
+      selected={selectedIds.has(t._id || t.id)} onToggleSelect={toggleSelect} />
   ));
 
 
@@ -1360,6 +1395,38 @@ export default function Tasks() {
           </div>
         )}
       </div>
+
+      {/* ── Bulk Action Bar ── */}
+      {selectedIds.size > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px',
+          background: 'var(--accent-soft)', borderBottom: '1px solid var(--accent)',
+          fontSize: 12, flexShrink: 0,
+        }}>
+          <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{selectedIds.size} selected</span>
+          <div style={{ flex: 1 }} />
+          <select onChange={e => { if (e.target.value) executeBulkAction('assign', e.target.value); e.target.value = ''; }}
+            style={{ fontSize: 11, padding: '3px 8px', borderRadius: 5, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--tx-1)', cursor: 'pointer' }}>
+            <option value="">Assign to...</option>
+            {(users || []).map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+          <select onChange={e => { if (e.target.value) executeBulkAction('move', e.target.value); e.target.value = ''; }}
+            style={{ fontSize: 11, padding: '3px 8px', borderRadius: 5, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--tx-1)', cursor: 'pointer' }}>
+            <option value="">Move to...</option>
+            {STATUSES.map(s => <option key={s} value={STATUS_MAP[s] || s}>{s}</option>)}
+          </select>
+          <button onClick={() => executeBulkAction('close')} className="btn-ghost btn-xs" style={{ color: '#22c55e', borderColor: '#22c55e40' }}>
+            <CheckCircle2 size={12} /> Close All
+          </button>
+          <button onClick={() => { if (window.confirm(`Delete ${selectedIds.size} task(s)? This cannot be undone.`)) executeBulkAction('delete'); }}
+            className="btn-ghost btn-xs" style={{ color: '#ef4444', borderColor: '#ef444440' }}>
+            <Trash2 size={12} /> Delete
+          </button>
+          <button onClick={() => setSelectedIds(new Set())} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2, display: 'flex' }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* ── Content Area ── */}
       {view === 'list' ? (

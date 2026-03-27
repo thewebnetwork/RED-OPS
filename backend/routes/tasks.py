@@ -581,6 +581,69 @@ async def reorder_tasks(
     return {"success": True, "task_id": reorder_data.task_id, "new_position": reorder_data.new_position}
 
 
+@router.post("/batch-update")
+async def batch_update_tasks(
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Batch update multiple tasks at once. Admin/Operator only.
+    Body: { task_ids: [...], action: "assign"|"close"|"delete"|"move", value: ... }
+    """
+    role = current_user.get("role", "")
+    if role not in ["Administrator", "Admin", "Operator"]:
+        raise HTTPException(status_code=403, detail="Admin or Operator access required")
+
+    task_ids = body.get("task_ids", [])
+    action = body.get("action")
+    value = body.get("value")
+
+    if not task_ids or not action:
+        raise HTTPException(status_code=400, detail="task_ids and action are required")
+
+    now = datetime.now(timezone.utc)
+    updated = 0
+
+    if action == "assign":
+        if not value:
+            raise HTTPException(status_code=400, detail="value (assignee_user_id) required for assign")
+        result = await db.tasks.update_many(
+            {"id": {"$in": task_ids}},
+            {"$set": {"assignee_user_id": value, "updated_at": now}}
+        )
+        updated = result.modified_count
+
+    elif action == "close":
+        result = await db.tasks.update_many(
+            {"id": {"$in": task_ids}},
+            {"$set": {"status": "done", "completed_at": now, "updated_at": now}}
+        )
+        updated = result.modified_count
+
+    elif action == "move":
+        if not value:
+            raise HTTPException(status_code=400, detail="value (status) required for move")
+        result = await db.tasks.update_many(
+            {"id": {"$in": task_ids}},
+            {"$set": {"status": value, "updated_at": now}}
+        )
+        updated = result.modified_count
+
+    elif action == "delete":
+        # Delete tasks and their subtasks/comments
+        for tid in task_ids:
+            await db.tasks.delete_many({"parent_task_id": tid})
+            await db.task_comments.delete_many({"task_id": tid})
+            await db.time_entries.delete_many({"task_id": tid})
+        result = await db.tasks.delete_many({"id": {"$in": task_ids}})
+        updated = result.deleted_count
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown action: {action}")
+
+    return {"success": True, "action": action, "updated": updated}
+
+
 @router.patch("/{task_id}", response_model=TaskResponse)
 async def update_task(
     task_id: str,
