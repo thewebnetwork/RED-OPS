@@ -1276,6 +1276,16 @@ export default function Clients() {
             style={{ background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, padding:'6px 10px', fontSize:12, color:'var(--tx-2)', outline:'none', cursor:'pointer' }}>
             <option value="score">Health</option><option value="mrr">MRR</option><option value="name">Name</option>
           </select>
+          <button onClick={async () => {
+            try {
+              const res = await ax().get(`${API}/exports/clients`, { responseType: 'blob' });
+              const url = window.URL.createObjectURL(new Blob([res.data]));
+              const a = document.createElement('a'); a.href = url; a.download = 'clients_export.csv';
+              document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+            } catch { toast.error('Export failed'); }
+          }} className="btn-ghost btn-sm" style={{ gap:4 }}>
+            <ExternalLink size={11}/> Export
+          </button>
           <button onClick={() => setShowWizard(true)} className="btn-primary btn-sm" style={{ gap:5 }}>
             <Plus size={13}/> Add Client
           </button>

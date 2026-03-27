@@ -115,12 +115,14 @@ class IframeEmbeddingMiddleware(BaseHTTPMiddleware):
 async def sla_monitor_loop():
     """Background task to periodically check SLA breaches, process policies, review reminders, and pool transitions"""
     from services.sla_monitor import check_pool_transitions
+    from services.recurring_tasks import check_and_create_recurring_tasks
     while True:
         try:
             await check_sla_breaches(db)
             await check_and_process_policies()
             await check_pending_reviews()  # Check for review reminders and auto-close
             await check_pool_transitions(db)  # Check for Pool 1 -> Pool 2 transitions
+            await check_and_create_recurring_tasks()  # Create scheduled recurring tasks
         except Exception as e:
             logger.error(f"SLA monitor error: {e}")
         await asyncio.sleep(300)  # Check every 5 minutes

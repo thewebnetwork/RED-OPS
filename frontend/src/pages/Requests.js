@@ -631,6 +631,17 @@ export default function Requests() {
           ))}
         </div>
 
+        <button onClick={async () => {
+          try {
+            const res = await fetch(`${API}/exports/orders`, { headers: hdrs() });
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'orders_export.csv';
+            document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+          } catch { toast.error('Export failed'); }
+        }} className="btn-ghost btn-sm" style={{ gap: 4 }}>
+          <ExternalLink size={12} /> Export
+        </button>
         <button onClick={() => fetchData()} className="btn-ghost btn-sm" style={{ gap: 4 }}>
           <RefreshCw size={12} /> Refresh
         </button>

@@ -1056,3 +1056,77 @@ async def delete_time_entry(
 
     await db.time_entries.delete_one({"id": entry_id})
     return {"success": True, "deleted_entry_id": entry_id}
+
+
+# ── Recurring Tasks ───────────────────────────────────────────────────────────
+
+@router.get("/recurring/rules")
+async def list_recurring_rules(
+    current_user: dict = Depends(get_current_user)
+):
+    """List all recurring task rules. Admin/Operator only."""
+    if current_user.get("role") not in ["Administrator", "Admin", "Operator"]:
+        raise HTTPException(status_code=403, detail="Admin or Operator access required")
+
+    rules = await db.recurring_task_rules.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return rules
+
+
+@router.post("/recurring/rules")
+async def create_recurring_rule_endpoint(
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a recurring task rule. Admin/Operator only."""
+    if current_user.get("role") not in ["Administrator", "Admin", "Operator"]:
+        raise HTTPException(status_code=403, detail="Admin or Operator access required")
+
+    title = body.get("title")
+    frequency = body.get("frequency")
+    if not title or frequency not in ["daily", "weekly", "monthly"]:
+        raise HTTPException(status_code=400, detail="title and frequency (daily/weekly/monthly) required")
+
+    from services.recurring_tasks import create_recurring_rule
+    org_id = get_user_org_id(current_user) or current_user.get("id")
+
+    rule = await create_recurring_rule(
+        title=title,
+        frequency=frequency,
+        org_id=org_id,
+        created_by=current_user["id"],
+        assignee_user_id=body.get("assignee_user_id"),
+        priority=body.get("priority", "medium"),
+        client_id=body.get("client_id"),
+        client_name=body.get("client_name"),
+        project_id=body.get("project_id"),
+        description=body.get("description"),
+    )
+    return rule
+
+
+@router.delete("/recurring/rules/{rule_id}")
+async def delete_recurring_rule(
+    rule_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a recurring task rule."""
+    if current_user.get("role") not in ["Administrator", "Admin", "Operator"]:
+        raise HTTPException(status_code=403, detail="Admin or Operator access required")
+
+    result = await db.recurring_task_rules.delete_one({"id": rule_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    return {"success": True, "deleted_rule_id": rule_id}
+
+
+@router.post("/recurring/run")
+async def trigger_recurring_check(
+    current_user: dict = Depends(get_current_user)
+):
+    """Manually trigger recurring task creation check. Admin only."""
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    from services.recurring_tasks import check_and_create_recurring_tasks
+    count = await check_and_create_recurring_tasks()
+    return {"success": True, "tasks_created": count}

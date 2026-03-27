@@ -1263,6 +1263,16 @@ export default function Tasks() {
           {filtered.length}{filtered.length !== tasks.length ? ` / ${tasks.length}` : ''}
         </span>
         <div style={{ flex: 1 }} />
+        <button onClick={async () => {
+          try {
+            const res = await ax().get(`${API}/exports/tasks`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement('a'); a.href = url; a.download = 'tasks_export.csv';
+            document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+          } catch { toast.error('Export failed'); }
+        }} className="btn-ghost btn-sm" style={{ gap: 4 }}>
+          <ArrowUpDown size={12} /> Export
+        </button>
         <button onClick={() => setShowNew(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
           <Plus size={13} /> New Task
         </button>
