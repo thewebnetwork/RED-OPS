@@ -5,6 +5,12 @@ import { useAuth } from './AuthContext';
 const OrgContext = createContext(null);
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const authAxios = () => {
+  const token = localStorage.getItem('token');
+  return axios.create({
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+};
 
 export function OrgProvider({ children }) {
   const { user, isAuthenticated, updateUser } = useAuth();
@@ -26,12 +32,12 @@ export function OrgProvider({ children }) {
     }
 
     try {
-      const res = await axios.get(`${API}/organizations`);
+      const res = await authAxios().get(`${API}/organizations`);
       setOrgs(res.data || []);
 
       // If user has a primary org, load it
       if (user?.primary_org_id) {
-        const orgRes = await axios.get(`${API}/organizations/${user.primary_org_id}`);
+        const orgRes = await authAxios().get(`${API}/organizations/${user.primary_org_id}`);
         const org = orgRes.data;
         setCurrentOrg(org);
         setMembership({
@@ -42,7 +48,7 @@ export function OrgProvider({ children }) {
       } else if (res.data?.length > 0) {
         // Default to first org if no primary set
         const first = res.data[0];
-        const orgRes = await axios.get(`${API}/organizations/${first.id}`);
+        const orgRes = await authAxios().get(`${API}/organizations/${first.id}`);
         const org = orgRes.data;
         setCurrentOrg(org);
         setMembership({
@@ -65,7 +71,7 @@ export function OrgProvider({ children }) {
   // Switch active organization
   const switchOrg = useCallback(async (orgId) => {
     try {
-      const res = await axios.post(`${API}/organizations/me/switch/${orgId}`);
+      const res = await authAxios().post(`${API}/organizations/me/switch/${orgId}`);
       const { org, membership: mem } = res.data;
       setCurrentOrg(org);
       setMembership({

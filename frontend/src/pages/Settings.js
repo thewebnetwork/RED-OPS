@@ -22,7 +22,7 @@ import {
   Loader2,
 } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}/api`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
 const axh = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import {
-  FileText, Clock, CheckCircle2, AlertCircle, Plus, ChevronRight,
+  FileText, Clock, CheckCircle2, Circle, AlertCircle, Plus, ChevronRight,
   Phone, MessageSquare, BookOpen, LifeBuoy, Upload, Star,
   ArrowUpRight, Calendar, Layers, Activity, TrendingUp, RefreshCw,
 } from 'lucide-react';
@@ -57,6 +57,7 @@ export default function ClientHome() {
   const [metrics, setMetrics]   = useState({ active:0, review:0, delivered:0, total:0 });
   const [loading, setLoading]   = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [onboarding, setOnboarding] = useState(null);
 
   // Preview-as-client support: use preview client's name and fetch their data
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
@@ -98,6 +99,12 @@ export default function ClientHome() {
     }
     setLoading(false);
     setRefreshing(false);
+
+    // Fetch onboarding checklist
+    const obClientId = isPreview && previewClientId ? previewClientId : user?.id;
+    if (obClientId) {
+      ax().get(`${API}/onboarding/${obClientId}`).then(r => setOnboarding(r.data)).catch(() => {});
+    }
   };
 
   useEffect(() => { fetchData(); }, []); // eslint-disable-line
@@ -127,6 +134,30 @@ export default function ClientHome() {
           </button>
         </div>
       </div>
+
+      {/* Onboarding Banner */}
+      {onboarding && onboarding.status !== 'completed' && (
+        <div style={{ padding:'16px 18px', background:'#3b82f60d', border:'1px solid #3b82f630', borderRadius:10, marginBottom:20 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <CheckCircle2 size={16} style={{ color:'#3b82f6' }} />
+              <span style={{ fontSize:13, fontWeight:600, color:'var(--tx-1)' }}>Onboarding in progress</span>
+            </div>
+            <span style={{ fontSize:11, fontWeight:600, color:'#3b82f6' }}>{onboarding.completed_steps}/{onboarding.total_steps}</span>
+          </div>
+          <div style={{ height:4, background:'var(--bg-elevated)', borderRadius:2, overflow:'hidden', marginBottom:10 }}>
+            <div style={{ height:'100%', width:`${onboarding.completion_pct||0}%`, background:'#3b82f6', borderRadius:2, transition:'width .3s' }} />
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+            {(onboarding.steps||[]).filter(s => !s.completed).slice(0,3).map(s => (
+              <div key={s.id} style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:'var(--tx-2)' }}>
+                <Circle size={10} style={{ color:'var(--tx-3)', flexShrink:0 }} />
+                {s.title}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Metrics */}
       <div className="metrics-grid-4">

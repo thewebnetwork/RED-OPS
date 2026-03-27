@@ -31,7 +31,7 @@ const SECTIONS = [
 // ── General Section ────────────────────────────────────────────────────────────
 
 function GeneralSection() {
-  const { currentOrg, refreshOrgs } = useOrg();
+  const { currentOrg, loading: orgLoading, refreshOrgs } = useOrg();
   const [orgName, setOrgName] = useState('');
   const [timezone, setTimezone] = useState('UTC');
   const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
@@ -41,19 +41,27 @@ function GeneralSection() {
   // Load current org settings
   useEffect(() => {
     if (currentOrg && !loaded) {
-      setOrgName(currentOrg.name || '');
-      setTimezone(currentOrg.settings?.timezone || 'UTC');
-      setDateFormat(currentOrg.settings?.date_format || 'MM/DD/YYYY');
+      setOrgName(currentOrg?.name || '');
+      setTimezone(currentOrg?.settings?.timezone || 'UTC');
+      setDateFormat(currentOrg?.settings?.date_format || 'MM/DD/YYYY');
       setLoaded(true);
     }
   }, [currentOrg, loaded]);
+
+  if (orgLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+        <Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} />
+      </div>
+    );
+  }
 
   const handleSave = async () => {
     if (!orgName.trim()) { toast.error('Organization name is required'); return; }
     setSaving(true);
     try {
       if (currentOrg) {
-        await ax().patch(`${API}/organizations/${currentOrg.id || currentOrg._id}`, {
+        await ax().patch(`${API}/organizations/${currentOrg?.id || currentOrg?._id}`, {
           name: orgName,
           settings: { timezone, date_format: dateFormat },
         });
@@ -145,7 +153,8 @@ function ClientAccountsSection() {
     try {
       setLoading(true);
       const res = await ax().get(`${API}/users`);
-      const mediaClients = res.data.filter((u) => u.account_type === 'Media Client');
+      const users = Array.isArray(res.data) ? res.data : (res.data?.users || []);
+      const mediaClients = users.filter((u) => u.account_type === 'Media Client');
       setClients(mediaClients);
     } catch (err) {
       toast.error('Failed to load clients');

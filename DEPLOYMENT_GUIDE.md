@@ -86,10 +86,12 @@ git push -u origin main
    - **Build Command:** `npm run build`
    - **Output Directory:** `build`
 
-4. Add environment variable:
+4. Add environment variables:
    ```
    REACT_APP_BACKEND_URL=https://your-app.up.railway.app
    ```
+   **Important:** This must be set in Vercel's project settings before deploying.
+   The frontend will not be able to reach the API without it.
 
 5. Click **Deploy**
 
@@ -131,6 +133,19 @@ Admin credentials are set during initial seed — see Railway environment variab
 - Verify MONGO_URL connection string and credentials
 - Ensure your IP is whitelisted in MongoDB Atlas Network Access
 - Check MongoDB Atlas cluster status
+
+---
+
+## Post-Deployment: Clear Seed Data
+
+After first deployment, if sample data is visible in the Request Pipeline,
+run:
+
+```bash
+MONGO_URL=your-connection-string DB_NAME=red_ribbon_ops python backend/scripts/clear_seed_data.py
+```
+
+This only deletes known seed/demo orders. It will not touch real client data.
 
 ---
 

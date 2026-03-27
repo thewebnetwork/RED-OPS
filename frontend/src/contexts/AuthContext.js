@@ -5,6 +5,10 @@ const AuthContext = createContext(null);
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_BACKEND_URL) {
+  console.warn('REACT_APP_BACKEND_URL is not set. API calls will fail. Add it to your .env file.');
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));

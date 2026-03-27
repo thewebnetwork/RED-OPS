@@ -637,8 +637,8 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
                   )}
                   {client.portal === 'active' && (
                     <button className="btn-ghost btn-sm" style={{ gap:4 }} onClick={() => {
-                      const domain = new URL(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000').hostname;
-                      const protocol = new URL(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000').protocol;
+                      const domain = new URL(process.env.REACT_APP_BACKEND_URL || window.location.origin).hostname;
+                      const protocol = new URL(process.env.REACT_APP_BACKEND_URL || window.location.origin).protocol;
                       const portalUrl = `${protocol}//${domain}/login`;
                       navigator.clipboard?.writeText(portalUrl);
                       toast.success('Portal link copied!');
@@ -1155,14 +1155,25 @@ export default function Clients() {
   const [portalFilter, setPortalFilter] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
   const [view, setView] = useState(() => localStorage.getItem('clients_view') || 'grid');
+  const [onboardingMap, setOnboardingMap] = useState({});
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Fetch all users
-        const r = await ax().get(`${API}/users`);
+        // Fetch all users and onboarding checklists in parallel
+        const [r, obRes] = await Promise.all([
+          ax().get(`${API}/users`),
+          ax().get(`${API}/onboarding`).catch(() => ({ data: [] })),
+        ]);
         const d = r.data;
         const arr = Array.isArray(d) ? d : d?.items || [];
+
+        // Build onboarding lookup by client_id
+        const obMap = {};
+        for (const cl of (obRes.data || [])) {
+          obMap[cl.client_id] = cl;
+        }
+        setOnboardingMap(obMap);
 
         // Extract team members (staff)
         const staff = arr
@@ -1300,7 +1311,7 @@ export default function Clients() {
               {display.map(c => {
                 const planCfg = PLAN_CONFIG[c.plan] || {};
                 return (
-                  <div key={c._id} onClick={() => setSelected(c._id)}
+                  <div key={c._id} onClick={() => navigate(`/clients/${c._id || c.id}`)}
                     style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:'16px', cursor:'pointer', transition:'box-shadow .15s, transform .15s' }}
                     onMouseEnter={e => { e.currentTarget.style.boxShadow='0 4px 16px rgba(0,0,0,0.2)'; e.currentTarget.style.transform='translateY(-1px)'; }}
                     onMouseLeave={e => { e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none'; }}>
@@ -1314,9 +1325,18 @@ export default function Clients() {
                       </div>
                       <PortalBadge status={c.portal || 'none'} />
                     </div>
-                    <div style={{ display:'flex', gap:8, marginBottom:10 }}>
+                    <div style={{ display:'flex', gap:8, marginBottom:10, flexWrap:'wrap' }}>
                       <span style={{ fontSize:11, padding:'2px 8px', borderRadius:4, background:`${planCfg.color || '#606060'}18`, color:planCfg.color || 'var(--tx-3)', fontWeight:600 }}>{c.plan}</span>
                       <ScoreBadge score={c.score||0} />
+                      {onboardingMap[c._id] && (() => {
+                        const ob = onboardingMap[c._id];
+                        const done = ob.status === 'completed';
+                        return (
+                          <span style={{ fontSize:11, padding:'2px 8px', borderRadius:4, background: done ? '#22c55e18' : '#f59e0b18', color: done ? '#22c55e' : '#f59e0b', fontWeight:600 }}>
+                            {done ? 'Onboarded' : `${ob.completed_steps}/${ob.total_steps}`}
+                          </span>
+                        );
+                      })()}
                       {c.tags?.map(t => <TagPill key={t} tag={t} />)}
                     </div>
                     <div style={{ display:'flex', justifyContent:'space-between', paddingTop:10, borderTop:'1px solid var(--border)' }}>
@@ -1340,7 +1360,7 @@ export default function Clients() {
                 {display.map(c => {
                   const isSelected = selected === c._id;
                   return (
-                    <tr key={c._id} onClick={() => setSelected(c._id)}
+                    <tr key={c._id} onClick={() => navigate(`/clients/${c._id || c.id}`)}
                       style={{ background: isSelected ? 'var(--bg-elevated)' : 'transparent', cursor:'pointer' }}>
                       <td>
                         <div style={{ display:'flex', alignItems:'center', gap:8 }}>

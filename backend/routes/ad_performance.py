@@ -14,10 +14,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from database import db
 from utils.auth import get_current_user
+from services.report_generator import generate_ad_performance_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -832,3 +834,77 @@ def calculate_avg_roas(metrics_list: List[dict]) -> float:
         return 0
 
     return round(sum(valid_roass) / len(valid_roass), 2)
+
+
+# ============== PDF REPORT ENDPOINT ==============
+
+@router.get("/report/{client_id}/{period}")
+async def download_ad_report(
+    client_id: str,
+    period: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Generate and download a branded PDF ad performance report.
+    Clients can only download their own reports.
+    """
+    # Access control: clients can only pull their own report
+    if is_media_client(current_user) and current_user.get("id") != client_id:
+        raise HTTPException(status_code=403, detail="You can only download your own report")
+
+    # Fetch all snapshots for this client + period
+    snapshots = await db.ad_snapshots.find({
+        "client_id": client_id,
+        "period": period,
+    }).to_list(100)
+
+    if not snapshots:
+        raise HTTPException(status_code=404, detail="No snapshot data found for this client/period")
+
+    # Aggregate current period data
+    snapshot_data = {
+        "metrics": aggregate_snapshots(snapshots) or {},
+        "campaigns": [],
+        "notes": None,
+    }
+    # Collect campaigns and notes from all snapshots in this period
+    for s in snapshots:
+        if s.get("campaigns"):
+            snapshot_data["campaigns"].extend(s["campaigns"])
+        if s.get("notes") and not snapshot_data["notes"]:
+            snapshot_data["notes"] = s["notes"]
+
+    # Fetch previous period for MoM comparison
+    previous_data = None
+    try:
+        dt = datetime.strptime(period, "%Y-%m")
+        if dt.month == 1:
+            prev_period = f"{dt.year - 1}-12"
+        else:
+            prev_period = f"{dt.year}-{dt.month - 1:02d}"
+        prev_snapshots = await db.ad_snapshots.find({
+            "client_id": client_id,
+            "period": prev_period,
+        }).to_list(100)
+        if prev_snapshots:
+            previous_data = {"metrics": aggregate_snapshots(prev_snapshots) or {}}
+    except (ValueError, TypeError):
+        pass
+
+    client_name = snapshots[0].get("client_name") or await get_client_name(client_id)
+
+    pdf_bytes = generate_ad_performance_pdf(
+        client_name=client_name,
+        period=period,
+        snapshot_data=snapshot_data,
+        previous_data=previous_data,
+    )
+
+    safe_name = client_name.replace(" ", "_").replace("/", "-")
+    filename = f"RRM_AdReport_{safe_name}_{period}.pdf"
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

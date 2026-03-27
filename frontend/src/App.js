@@ -71,6 +71,7 @@ import ClientPage from "./pages/ClientPage";
 import Team from "./pages/Team";
 import TeamMemberPage from "./pages/TeamMemberPage";
 import AdPerformance from "./pages/AdPerformance";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -326,6 +327,7 @@ function AppRoutes() {
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/sops" element={<Navigate to="/files?context=knowledge_base" replace />} />
       <Route path="/ad-performance" element={<PrivateRoute><AdPerformance /></PrivateRoute>} />
+      <Route path="/client-onboarding" element={<PrivateRoute roles={['Administrator','Operator']}><Onboarding /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />

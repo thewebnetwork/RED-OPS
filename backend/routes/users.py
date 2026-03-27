@@ -440,6 +440,19 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
     
     await db.users.insert_one(user)
     
+    # Auto-create onboarding checklist for new Media Client users
+    if user_data.account_type == "Media Client":
+        try:
+            from routes.onboarding import create_checklist_for_client
+            await create_checklist_for_client(
+                client_id=user["id"],
+                client_name=user_data.name,
+                created_by=current_user["id"],
+            )
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to auto-create onboarding checklist: {e}")
+
     # Send welcome email with credentials
     if user_data.send_welcome_email:
         try:

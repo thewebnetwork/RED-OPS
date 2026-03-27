@@ -275,13 +275,16 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
 /* ═══════════════════════════════════════════════════════════
    TASK DETAIL DRAWER
    ═══════════════════════════════════════════════════════════ */
-function TaskDetail({ task, onClose, onRefresh, onDelete, users }) {
+function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   const [subtasks, setSubtasks] = useState([]);
   const [newSubtask, setNewSubtask] = useState('');
   const [addingSubtask, setAddingSubtask] = useState(false);
+  const [blockedByTasks, setBlockedByTasks] = useState(task.blocked_by_tasks || []);
+  const [addingBlocker, setAddingBlocker] = useState(false);
+  const [blockerSearchId, setBlockerSearchId] = useState('');
 
   const [editTitle, setEditTitle] = useState(false);
   const [title, setTitle] = useState(task.title);
@@ -292,11 +295,12 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users }) {
     setLoadingComments(true);
     setTitle(task.title);
     setDesc(task.description || '');
+    setBlockedByTasks(task.blocked_by_tasks || []);
     Promise.all([
       ax().get(`${API}/tasks/${task.id}/comments`).then(r => setComments(r.data)).catch(() => {}),
       ax().get(`${API}/tasks/${task.id}/subtasks`).then(r => setSubtasks(r.data)).catch(() => {}),
     ]).finally(() => setLoadingComments(false));
-  }, [task.id]);
+  }, [task.id, task.blocked_by_tasks]);
 
   const addComment = async () => {
     if (!newComment.trim()) return;
@@ -314,7 +318,21 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users }) {
     } catch { toast.error('Failed to update'); }
   };
 
-  const handleStatusChange = (newStatus) => handleFieldUpdate('status', STATUS_MAP[newStatus] || newStatus);
+  const handleStatusChange = (newStatus) => {
+    const mappedStatus = STATUS_MAP[newStatus] || newStatus;
+    // Guard: prevent marking done if subtasks are incomplete
+    if (mappedStatus === 'done' && subtasks.length > 0 && doneCount < subtasks.length) {
+      toast.error(`Complete all subtasks first (${doneCount}/${subtasks.length} done)`);
+      return;
+    }
+    // Guard: prevent marking done if blocked by incomplete tasks
+    const activeBlockers = blockedByTasks.filter(b => b.status !== 'done');
+    if (mappedStatus === 'done' && activeBlockers.length > 0) {
+      toast.error(`Blocked by ${activeBlockers.length} incomplete task(s)`);
+      return;
+    }
+    handleFieldUpdate('status', mappedStatus);
+  };
   const handlePriorityChange = (newPri) => handleFieldUpdate('priority', PRIORITY_MAP[newPri] || newPri);
   const handleDueChange = (val) => handleFieldUpdate('due_at', val ? new Date(val + 'T00:00:00Z').toISOString() : null);
   const handleAssigneeChange = (val) => handleFieldUpdate('assignee_id', val || null);
@@ -352,6 +370,27 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users }) {
       await ax().delete(`${API}/tasks/${stId}`);
       setSubtasks(prev => prev.filter(s => s.id !== stId));
     } catch { toast.error('Failed to delete subtask'); }
+  };
+
+  const addBlocker = async () => {
+    if (!blockerSearchId) return;
+    setAddingBlocker(true);
+    try {
+      await ax().post(`${API}/tasks/${task.id}/block`, { blocked_by_id: blockerSearchId });
+      const blockerTask = allTasks?.find(t => t._id === blockerSearchId || t.id === blockerSearchId);
+      setBlockedByTasks(prev => [...prev, { id: blockerSearchId, title: blockerTask?.title || 'Task', status: blockerTask?.status || 'todo' }]);
+      setBlockerSearchId('');
+      onRefresh();
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to add blocker'); }
+    finally { setAddingBlocker(false); }
+  };
+
+  const removeBlocker = async (blockerId) => {
+    try {
+      await ax().delete(`${API}/tasks/${task.id}/block/${blockerId}`);
+      setBlockedByTasks(prev => prev.filter(b => b.id !== blockerId));
+      onRefresh();
+    } catch { toast.error('Failed to remove blocker'); }
   };
 
   const doneCount = subtasks.filter(s => s.status === 'done').length;
@@ -479,6 +518,52 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users }) {
           </div>
         </div>
 
+        {/* Blocked By */}
+        {(blockedByTasks.length > 0 || allTasks?.length > 0) && (
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <AlertCircle size={12} />
+              Blocked By ({blockedByTasks.length})
+            </div>
+            {blockedByTasks.map(b => {
+              const isDone = b.status === 'done';
+              return (
+                <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}
+                  onMouseEnter={e => { const d = e.currentTarget.querySelector('[data-rm]'); if (d) d.style.opacity = 1; }}
+                  onMouseLeave={e => { const d = e.currentTarget.querySelector('[data-rm]'); if (d) d.style.opacity = 0; }}>
+                  {isDone ? <CheckCircle2 size={13} style={{ color: '#22c55e', flexShrink: 0 }} /> : <Clock size={13} style={{ color: '#f59e0b', flexShrink: 0 }} />}
+                  <span style={{ fontSize: 12, color: isDone ? 'var(--tx-3)' : 'var(--tx-1)', textDecoration: isDone ? 'line-through' : 'none', flex: 1 }}>
+                    {b.title}
+                  </span>
+                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: isDone ? '#22c55e18' : '#f59e0b18', color: isDone ? '#22c55e' : '#f59e0b', fontWeight: 600 }}>
+                    {STATUS_RMAP[b.status] || b.status}
+                  </span>
+                  <button data-rm onClick={() => removeBlocker(b.id)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, opacity: 0, transition: 'opacity .1s', flexShrink: 0 }}>
+                    <X size={11} />
+                  </button>
+                </div>
+              );
+            })}
+            {/* Add blocker selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+              <select className="input-field" value={blockerSearchId} onChange={e => setBlockerSearchId(e.target.value)}
+                style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5 }}>
+                <option value="">Add blocking task...</option>
+                {(allTasks || [])
+                  .filter(t => (t._id || t.id) !== task.id && !blockedByTasks.some(b => b.id === (t._id || t.id)))
+                  .map(t => <option key={t._id || t.id} value={t._id || t.id}>{t.title}</option>)}
+              </select>
+              {blockerSearchId && (
+                <button onClick={addBlocker} disabled={addingBlocker}
+                  style={{ background: 'var(--accent)', border: 'none', borderRadius: 5, color: '#fff', cursor: 'pointer', padding: '4px 8px', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>
+                  {addingBlocker ? <Loader2 size={10} className="spin" /> : <Plus size={10} />}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Comments */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -562,6 +647,11 @@ function TaskRow({ task, onToggle, onClick }) {
           {task.comment_count > 0 && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <MessageSquare size={10} /> {task.comment_count}
+            </span>
+          )}
+          {(task.blocked_by_tasks || []).some(b => b.status !== 'done') && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#ef4444', fontWeight: 600 }}>
+              <AlertCircle size={10} /> Blocked
             </span>
           )}
         </div>
@@ -665,6 +755,11 @@ function KanbanCol({ status, tasks, onToggle, onCardClick, onQuickAdd }) {
                 {PRIORITY_ICON[task.priority]}
               </div>
               {task.project && <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 3 }}><FolderKanban size={10} /> {task.project}</div>}
+              {(task.blocked_by_tasks || []).some(b => b.status !== 'done') && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 4, background: '#ef444415', color: '#ef4444', fontSize: 9.5, fontWeight: 600, marginBottom: 6 }}>
+                  <AlertCircle size={10} /> Blocked
+                </div>
+              )}
               {task.subtask_count > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                   <div style={{ flex: 1, height: 3, background: 'var(--bg-elevated)', borderRadius: 2 }}>
@@ -880,6 +975,16 @@ export default function Tasks() {
     const task = tasks.find(t => t._id === id);
     if (!task) return;
     const newStatus = task.status === 'Done' ? 'todo' : 'done';
+    // Guard: incomplete subtasks
+    if (newStatus === 'done' && task.subtask_count > 0 && task.completed_subtask_count < task.subtask_count) {
+      toast.error(`Complete all subtasks first (${task.completed_subtask_count}/${task.subtask_count} done)`);
+      return;
+    }
+    // Guard: active blockers
+    if (newStatus === 'done' && (task.blocked_by_tasks || []).some(b => b.status !== 'done')) {
+      toast.error('This task is blocked by incomplete tasks');
+      return;
+    }
     try { await ax().patch(`${API}/tasks/${id}`, { status: newStatus }); fetchTasks(); }
     catch { toast.error('Failed to update task'); }
   };
@@ -925,7 +1030,7 @@ export default function Tasks() {
       {selectedTask && (
         <TaskDetail task={selectedTask} onClose={() => setSelectedTask(null)}
           onRefresh={() => { fetchTasks(); }}
-          onDelete={handleDelete} users={users} />
+          onDelete={handleDelete} users={users} allTasks={tasks} />
       )}
 
       {/* ── Page Header ── */}

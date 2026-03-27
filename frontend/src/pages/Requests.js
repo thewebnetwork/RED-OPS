@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDraggable, useDroppable,
 } from '@dnd-kit/core';
@@ -296,6 +296,7 @@ function OrderComments({ orderId }) {
 // ── Main ──────────────────────────────────────────────────────
 export default function Requests() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -307,8 +308,9 @@ export default function Requests() {
   const [selected, setSelected] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ title: '', service: '', priority: 'medium', description: '' });
+  const [form, setForm] = useState({ title: '', service_template_id: '', client_id: '', priority: 'medium', description: '' });
   const [services, setServices] = useState([]);
+  const [clients, setClients] = useState([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -330,13 +332,18 @@ export default function Requests() {
       orderList.forEach(o => { if (o.editor_id && !['Delivered', 'Closed', 'Canceled'].includes(o.status)) editorCounts[o.editor_id] = (editorCounts[o.editor_id] || 0) + 1; });
       setTeamMembers(team.map(u => ({ ...u, active_orders: editorCounts[u.id] || 0 })));
 
+      // Clients = Media Client users
+      const clientList = userList.filter(u => u.account_type === 'Media Client' && u.active !== false);
+      setClients(clientList);
+
       const svcList = Array.isArray(servicesRes) ? servicesRes : servicesRes?.services || [];
       setServices(svcList);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchData(); if (new URLSearchParams(window.location.search).get('new') === '1') setShowModal(true); }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { if (searchParams.get('new') === '1') setShowModal(true); }, [searchParams]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -405,6 +412,7 @@ export default function Requests() {
     if (!form.title) { toast.error('Title is required'); return; }
     setCreating(true);
     try {
+      const selectedService = services.find(s => s.id === form.service_template_id);
       const res = await fetch(`${API}/orders`, {
         method: 'POST', headers: jhdrs(),
         body: JSON.stringify({
@@ -412,14 +420,16 @@ export default function Requests() {
           request_type: 'service_request',
           description: form.description || '',
           priority: form.priority,
-          service_name: form.service || null,
+          service_template_id: form.service_template_id || null,
+          service_name: selectedService?.name || null,
+          client_id: form.client_id || null,
           status: 'Open',
         }),
       });
       if (!res.ok) throw new Error();
       toast.success('Request created');
       setShowModal(false);
-      setForm({ title: '', service: '', priority: 'medium', description: '' });
+      setForm({ title: '', service_template_id: '', client_id: '', priority: 'medium', description: '' });
       fetchData();
     } catch { toast.error('Failed to create'); }
     finally { setCreating(false); }
@@ -631,10 +641,17 @@ export default function Requests() {
                 <input className="input-field" placeholder="Request title..." value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
               </div>
               <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Client</label>
+                <select className="input-field" value={form.client_id} onChange={e => setForm(p => ({ ...p, client_id: e.target.value }))}>
+                  <option value="">Select client...</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.company_name || c.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.05em' }}>Service</label>
-                <select className="input-field" value={form.service} onChange={e => setForm(p => ({ ...p, service: e.target.value }))}>
+                <select className="input-field" value={form.service_template_id} onChange={e => setForm(p => ({ ...p, service_template_id: e.target.value }))}>
                   <option value="">Select service...</option>
-                  {services.map(s => <option key={s.id || s.name} value={s.name}>{s.name}</option>)}
+                  {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>

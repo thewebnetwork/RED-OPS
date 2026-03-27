@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import {
   BarChart2, TrendingUp, TrendingDown, Plus, X, ChevronDown,
-  Loader2, AlertCircle, CheckCircle2, Activity, Upload, FileText
+  Loader2, AlertCircle, CheckCircle2, Activity, Upload, FileText, Download
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -256,6 +256,7 @@ function ClientAdDashboard() {
   const [snapshots, setSnapshots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   // In preview-as-client mode, use the preview client's ID
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
@@ -377,6 +378,32 @@ function ClientAdDashboard() {
   // Recent snapshots (last 12)
   const recentSnapshots = snapshots.slice(0, 12);
 
+  // Current period for report download (latest snapshot period)
+  const latestPeriod = snapshots.length > 0 ? snapshots[0].period : null;
+
+  const handleDownloadReport = async () => {
+    if (!clientId || !latestPeriod) return;
+    setDownloadingReport(true);
+    try {
+      const res = await ax().get(`${API}/ad-performance/report/${clientId}/${latestPeriod}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.headers['content-disposition']?.split('filename=')[1]?.replace(/"/g, '') || `AdReport_${latestPeriod}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Report download error:', err);
+      toast.error(err.response?.data?.detail || 'Failed to download report');
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
   return (
     <div className="page-content">
       {/* Header */}
@@ -388,6 +415,17 @@ function ClientAdDashboard() {
           </div>
           <p style={{ fontSize: '13px', color: 'var(--tx-2)' }}>Track your advertising results</p>
         </div>
+        {hasData && latestPeriod && (
+          <button
+            className="btn-ghost"
+            onClick={handleDownloadReport}
+            disabled={downloadingReport}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            {downloadingReport ? <Loader2 size={14} className="spin" /> : <Download size={14} />}
+            {downloadingReport ? 'Generating...' : 'Download Report'}
+          </button>
+        )}
       </div>
 
       {!hasData ? (
@@ -1335,6 +1373,38 @@ function AdminAdDashboard() {
     await refreshData();
   };
 
+  const [downloadingReportFor, setDownloadingReportFor] = useState(null);
+
+  const handleDownloadClientReport = async (clientId, clientName) => {
+    // Find the latest period for this client from snapshots
+    const clientSnaps = snapshots.filter(s => s.client_id === clientId);
+    if (clientSnaps.length === 0) {
+      toast.error('No snapshot data for this client');
+      return;
+    }
+    const latestPeriod = clientSnaps.sort((a, b) => b.period.localeCompare(a.period))[0].period;
+
+    setDownloadingReportFor(clientId);
+    try {
+      const res = await ax().get(`${API}/ad-performance/report/${clientId}/${latestPeriod}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.headers['content-disposition']?.split('filename=')[1]?.replace(/"/g, '') || `AdReport_${clientName}_${latestPeriod}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Report download error:', err);
+      toast.error(err.response?.data?.detail || 'Failed to download report');
+    } finally {
+      setDownloadingReportFor(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1564,27 +1634,40 @@ function AdminAdDashboard() {
                           {client.clientSnapshot.length === 0 ? (
                             <div style={{ fontSize: '12px', color: 'var(--tx-3)' }}>No snapshots yet</div>
                           ) : (
-                            <div className="responsive-grid-3" style={{ gap: '8px' }}>
-                              {client.clientSnapshot.map((snap) => (
-                                <div
-                                  key={snap.id}
-                                  style={{
-                                    padding: '8px',
-                                    backgroundColor: 'var(--bg-card)',
-                                    borderRadius: '4px',
-                                    fontSize: '11px',
-                                  }}
-                                >
-                                  <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-                                    {snap.platform} • {getMonthName(snap.period)}
+                            <>
+                              <div className="responsive-grid-3" style={{ gap: '8px' }}>
+                                {client.clientSnapshot.map((snap) => (
+                                  <div
+                                    key={snap.id}
+                                    style={{
+                                      padding: '8px',
+                                      backgroundColor: 'var(--bg-card)',
+                                      borderRadius: '4px',
+                                      fontSize: '11px',
+                                    }}
+                                  >
+                                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+                                      {snap.platform} • {getMonthName(snap.period)}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tx-2)' }}>
+                                      <span>{formatCurrency(snap.metrics?.ad_spend)}</span>
+                                      <span>{formatNumber(snap.metrics?.leads)} leads</span>
+                                    </div>
                                   </div>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tx-2)' }}>
-                                    <span>{formatCurrency(snap.metrics?.ad_spend)}</span>
-                                    <span>{formatNumber(snap.metrics?.leads)} leads</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                                ))}
+                              </div>
+                              <button
+                                className="btn-ghost btn-sm"
+                                onClick={(e) => { e.stopPropagation(); handleDownloadClientReport(client.client_id, client.client_name); }}
+                                disabled={downloadingReportFor === client.client_id}
+                                style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' }}
+                              >
+                                {downloadingReportFor === client.client_id
+                                  ? <><Loader2 size={12} className="spin" /> Generating...</>
+                                  : <><Download size={12} /> Download Report</>
+                                }
+                              </button>
+                            </>
                           )}
                         </td>
                       </tr>

@@ -29,6 +29,7 @@ class TaskCreate(BaseModel):
     org_id: Optional[str] = None  # Auto-filled from user if not provided
     project_id: Optional[str] = None  # Link to project
     parent_task_id: Optional[str] = None  # Subtask support
+    blocked_by: Optional[List[str]] = []  # Task IDs that block this task
     request_id: Optional[str] = None
     title: str
     description: Optional[str] = None
@@ -109,6 +110,10 @@ class TaskResponse(BaseModel):
     # Subtask count
     subtask_count: int = 0
     completed_subtask_count: int = 0
+
+    # Dependencies
+    blocked_by: Optional[List[str]] = []
+    blocked_by_tasks: Optional[List[dict]] = []  # Enriched: [{ id, title, status }]
 
     # Comment count
     comment_count: int = 0

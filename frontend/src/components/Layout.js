@@ -31,6 +31,7 @@ import {
   Building2,
   ArrowLeftRight,
   Eye,
+  ClipboardCheck,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -43,9 +44,11 @@ const NAV_MAIN = [
   { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
   { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
+  { path: '/client-onboarding', icon: ClipboardCheck, label: 'Onboarding', roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
   { path: '/files?context=knowledge_base', icon: BookOpen, label: 'SOPs', roles: ['Administrator','Operator','Standard User'] },
   { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
+  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
 ];
 const NAV_BUSINESS = [];
 const NAV_SERVICES = [];

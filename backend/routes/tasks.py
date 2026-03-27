@@ -413,8 +413,19 @@ async def list_tasks(
         comment_count = await db.task_comments.count_documents({"task_id": task["id"]})
         task["comment_count"] = comment_count
 
+        # Enrich blocked_by with task details
+        blocked_ids = task.get("blocked_by") or []
+        if blocked_ids:
+            blockers = await db.tasks.find(
+                {"id": {"$in": blocked_ids}},
+                {"_id": 0, "id": 1, "title": 1, "status": 1}
+            ).to_list(50)
+            task["blocked_by_tasks"] = blockers
+        else:
+            task["blocked_by_tasks"] = []
+
         result.append(TaskResponse(**task))
-    
+
     return result
 
 
@@ -510,6 +521,7 @@ async def create_task(
         "org_id": effective_org_id,
         "project_id": task_data.project_id,
         "parent_task_id": task_data.parent_task_id,
+        "blocked_by": task_data.blocked_by or [],
         "request_id": task_data.request_id,
         "title": task_data.title,
         "description": task_data.description,
@@ -651,6 +663,17 @@ async def update_task(
     updated_task["subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id})
     updated_task["completed_subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id, "status": "done"})
     updated_task["comment_count"] = await db.task_comments.count_documents({"task_id": task_id})
+
+    # Enrich blocked_by
+    blocked_ids = updated_task.get("blocked_by") or []
+    if blocked_ids:
+        blockers = await db.tasks.find(
+            {"id": {"$in": blocked_ids}},
+            {"_id": 0, "id": 1, "title": 1, "status": 1}
+        ).to_list(50)
+        updated_task["blocked_by_tasks"] = blockers
+    else:
+        updated_task["blocked_by_tasks"] = []
 
     return TaskResponse(**updated_task)
 
@@ -808,3 +831,67 @@ async def list_subtasks(
                 st["assignee_name"] = assignee.get("full_name") or assignee.get("name")
 
     return subtasks
+
+
+# ── Task Dependencies (Blocked By) ───────────────────────────────────────────
+
+@router.post("/{task_id}/block")
+async def add_blocker(
+    task_id: str,
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add a blocking dependency to a task."""
+    blocked_by_id = body.get("blocked_by_id")
+    if not blocked_by_id:
+        raise HTTPException(status_code=400, detail="blocked_by_id is required")
+    if blocked_by_id == task_id:
+        raise HTTPException(status_code=400, detail="A task cannot block itself")
+
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1, "blocked_by": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    blocker = await db.tasks.find_one({"id": blocked_by_id}, {"_id": 0, "id": 1, "title": 1, "org_id": 1})
+    if not blocker:
+        raise HTTPException(status_code=404, detail="Blocking task not found")
+
+    if not can_edit_task(task, current_user):
+        raise HTTPException(status_code=403, detail="Not authorized to edit this task")
+
+    existing = task.get("blocked_by") or []
+    if blocked_by_id in existing:
+        return {"success": True, "message": "Already blocked by this task"}
+
+    await db.tasks.update_one(
+        {"id": task_id},
+        {
+            "$addToSet": {"blocked_by": blocked_by_id},
+            "$set": {"updated_at": datetime.now(timezone.utc)},
+        }
+    )
+    return {"success": True, "task_id": task_id, "blocked_by_id": blocked_by_id}
+
+
+@router.delete("/{task_id}/block/{blocked_by_id}")
+async def remove_blocker(
+    task_id: str,
+    blocked_by_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove a blocking dependency from a task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if not can_edit_task(task, current_user):
+        raise HTTPException(status_code=403, detail="Not authorized to edit this task")
+
+    await db.tasks.update_one(
+        {"id": task_id},
+        {
+            "$pull": {"blocked_by": blocked_by_id},
+            "$set": {"updated_at": datetime.now(timezone.utc)},
+        }
+    )
+    return {"success": True, "task_id": task_id, "removed_blocker": blocked_by_id}

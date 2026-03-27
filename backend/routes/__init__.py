@@ -33,6 +33,7 @@ from .search import router as search_router
 from .integrations import router as integrations_router
 from .ai import router as ai_router
 from .finance import router as finance_router
+from .onboarding import router as onboarding_router
 
 __all__ = [
     "auth_router",
@@ -67,4 +68,5 @@ __all__ = [
     "integrations_router",
     "ai_router",
     "finance_router",
+    "onboarding_router",
 ]
