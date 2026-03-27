@@ -13,6 +13,13 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			/* RED OPS design tokens */
+  			'rrg-accent': '#c92a3e',
+  			'rrg-surface': '#161920',
+  			'rrg-surface-2': '#1e2129',
+  			'rrg-surface-3': '#252830',
+  			'rrg-bg': '#0d0f14',
+  			/* shadcn compat */
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

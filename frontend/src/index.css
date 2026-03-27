@@ -12,25 +12,32 @@
 /* ── 1. CSS CUSTOM PROPERTIES ─────────────────────────────── */
 @layer base {
   :root {
-    /* Backgrounds — layered dark greys */
-    --bg:         #0d0d0d;   /* page background */
-    --bg-card:    #161616;   /* cards, sidebar */
-    --bg-elevated:#1e1e1e;   /* hover, inputs, dropdowns */
-    --bg-overlay: #252525;   /* deep elevated */
+    /* Backgrounds — layered dark surfaces */
+    --bg:         #0d0f14;   /* page background */
+    --bg-card:    #161920;   /* cards, sidebar — alias: --surface */
+    --bg-elevated:#1e2129;   /* hover, inputs — alias: --surface-2 */
+    --bg-overlay: #252830;   /* deep elevated — alias: --surface-3 */
+    --surface:    #161920;
+    --surface-2:  #1e2129;
+    --surface-3:  #252830;
 
     /* Borders */
-    --border:     #2a2a2a;   /* default border */
-    --border-hi:  #3a3a3a;   /* hover border */
+    --border:        rgba(255, 255, 255, 0.07);
+    --border-hi:     rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.12);
 
     /* Text */
-    --tx-1: #f0f0f0;  /* primary text */
-    --tx-2: #a0a0a0;  /* secondary text */
-    --tx-3: #606060;  /* muted/placeholder text */
+    --tx-1: #f1f3f5;  /* primary text */
+    --tx-2: #9ca3af;  /* secondary text */
+    --tx-3: #4b5563;  /* muted/placeholder text */
 
-    /* Brand */
-    --red:   #c92a3e;  /* RRG brand red — primary action */
-    --red-bg:#c92a3e1a;/* red with 10% opacity */
-    --red-lo:#c92a3e0d;/* red with 5% opacity */
+    /* Brand / Accent */
+    --red:   #c92a3e;  /* RRG brand red */
+    --accent: #c92a3e;
+    --accent-hover: #a8202f;
+    --accent-soft: rgba(201, 42, 62, 0.12);
+    --red-bg: rgba(201, 42, 62, 0.12);
+    --red-lo: rgba(201, 42, 62, 0.06);
 
     /* Status */
     --green:  #22c55e;
@@ -38,6 +45,25 @@
     --blue:   #3b82f6;
     --purple: #a855f7;
     --red-status: #ef4444;
+
+    /* Status soft backgrounds */
+    --color-green: #22c55e;
+    --color-green-soft: rgba(34, 197, 94, 0.12);
+    --color-yellow: #f59e0b;
+    --color-yellow-soft: rgba(245, 158, 11, 0.12);
+    --color-red: #ef4444;
+    --color-red-soft: rgba(239, 68, 68, 0.12);
+    --color-blue: #3b82f6;
+    --color-blue-soft: rgba(59, 130, 246, 0.12);
+    --color-purple: #a855f7;
+    --color-purple-soft: rgba(168, 85, 247, 0.12);
+
+    /* Layout */
+    --radius: 8px;
+    --radius-lg: 12px;
+    --radius-sm: 5px;
+    --sidebar-width: 220px;
+    --topbar-height: 52px;
 
     /* shadcn/ui compatibility */
     --background:         0 0% 5%;
@@ -148,11 +174,11 @@
 }
 
 .app-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
   flex-shrink: 0;
   height: 100vh;
-  background: var(--bg-card);
+  background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -181,15 +207,18 @@
 
 /* Top bar — sticky header inside app-main */
 .top-bar {
-  height: 44px;
-  min-height: 44px;
+  height: var(--topbar-height);
+  min-height: var(--topbar-height);
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 18px;
   gap: 10px;
-  background: var(--bg-card);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 @media (max-width: 1023px) {
@@ -237,9 +266,9 @@
 
 /* ── 6. SIDEBAR NAV ───────────────────────────────────────── */
 .nav-section-label {
-  padding: 0 8px;
-  margin: 16px 0 4px;
-  font-size: 10px;
+  padding: 14px 10px 4px;
+  margin: 0;
+  font-size: 10.5px;
   font-weight: 600;
   color: var(--tx-3);
   text-transform: uppercase;
@@ -249,28 +278,28 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: 9px;
+  padding: 7px 10px;
   margin: 1px 0;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--tx-2);
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .nav-item:hover {
-  background: var(--bg-elevated);
+  background: var(--surface-3);
   color: var(--tx-1);
 }
 
 .nav-item.active {
-  background: var(--red-bg);
-  color: #e8404e;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .nav-item svg {
@@ -295,20 +324,30 @@
 
 /* ── 7. CARDS & SURFACES ──────────────────────────────────── */
 .card {
-  background: var(--bg-card);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
-.metric-card {
-  background: var(--bg-card);
+.hover-card {
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
   transition: border-color 0.15s;
 }
 
-.metric-card:hover { border-color: var(--border-hi); }
+.hover-card:hover { border-color: var(--border-strong); }
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  transition: border-color 0.15s;
+}
+
+.metric-card:hover { border-color: var(--border-strong); }
 
 .metric-value {
   font-size: 28px;
@@ -341,27 +380,26 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 500;
   white-space: nowrap;
-  letter-spacing: 0.02em;
 }
 
-.pill-green  { background: #22c55e18; color: var(--green); }
-.pill-yellow { background: #f59e0b18; color: var(--yellow); }
-.pill-red    { background: #ef444418; color: var(--red-status); }
-.pill-blue   { background: #3b82f618; color: var(--blue); }
-.pill-purple { background: #a855f718; color: var(--purple); }
-.pill-gray   { background: var(--bg-elevated); color: var(--tx-2); }
-.pill-brand  { background: var(--red-bg); color: #e8404e; }
+.pill-green  { background: var(--color-green-soft);  color: var(--color-green);  border: 1px solid rgba(34,197,94,0.2); }
+.pill-yellow { background: var(--color-yellow-soft); color: var(--color-yellow); border: 1px solid rgba(245,158,11,0.2); }
+.pill-red    { background: var(--color-red-soft);    color: var(--color-red);    border: 1px solid rgba(239,68,68,0.2); }
+.pill-blue   { background: var(--color-blue-soft);   color: var(--color-blue);   border: 1px solid rgba(59,130,246,0.2); }
+.pill-purple { background: var(--color-purple-soft); color: var(--color-purple); border: 1px solid rgba(168,85,247,0.2); }
+.pill-gray   { background: var(--surface-2); color: var(--tx-2); border: 1px solid var(--border); }
+.pill-brand  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(201,42,62,0.2); }
 
 /* ── 10. KANBAN ───────────────────────────────────────────── */
 .kanban-col {
   flex: 0 0 240px;
-  background: var(--bg-card);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -386,17 +424,17 @@
 }
 
 .kanban-card {
-  background: var(--bg-elevated);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 10px 12px;
   cursor: grab;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   position: relative;
 }
 
 .kanban-card:hover {
-  border-color: var(--border-hi);
+  border-color: var(--border-strong);
   box-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 
@@ -420,41 +458,41 @@
 /* ── 12. FORM ELEMENTS ────────────────────────────────────── */
 .input-field {
   width: 100%;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 7px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--tx-1);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
-.input-field:focus { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-bg); }
+.input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .input-field::placeholder { color: var(--tx-3); }
 textarea.input-field { resize: vertical; min-height: 80px; line-height: 1.6; }
 select.input-field { appearance: none; cursor: pointer; }
 
 /* ── 13. BUTTONS ──────────────────────────────────────────── */
 .btn-primary {
-  background: var(--red);
+  background: var(--accent);
   color: #fff;
   border: none;
   padding: 7px 14px;
-  border-radius: 7px;
+  border-radius: var(--radius);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background var(--speed-normal), transform var(--speed-fast), box-shadow var(--speed-normal);
+  transition: background 0.15s;
   font-family: inherit;
   white-space: nowrap;
 }
 
-.btn-primary:hover { background: #d4324a; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(201, 42, 62, 0.3); }
+.btn-primary:hover { background: var(--accent-hover); }
 .btn-primary:active { transform: translateY(0); box-shadow: none; }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -464,21 +502,21 @@ select.input-field { appearance: none; cursor: pointer; }
 .btn-ghost {
   background: transparent;
   color: var(--tx-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   padding: 7px 14px;
-  border-radius: 7px;
+  border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.12s;
+  transition: background 0.15s, color 0.15s;
   font-family: inherit;
   white-space: nowrap;
 }
 
-.btn-ghost:hover { background: var(--bg-elevated); color: var(--tx-1); border-color: var(--border-hi); }
+.btn-ghost:hover { background: var(--surface-3); color: var(--tx-1); }
 
 /* Legacy compat */
 .btn-ghost-dark { @apply btn-ghost; }
@@ -490,7 +528,7 @@ select.input-field { appearance: none; cursor: pointer; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
@@ -502,14 +540,14 @@ select.input-field { appearance: none; cursor: pointer; }
 }
 
 .modal-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
   width: 520px;
   max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   animation: fadeUp 0.2s ease;
   padding: 22px;
 }
@@ -616,25 +654,26 @@ select.input-field { appearance: none; cursor: pointer; }
 /* ── 16. TABLE ────────────────────────────────────────────── */
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--tx-3);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  padding: 8px 14px;
+  letter-spacing: 0.05em;
+  padding: 8px 16px;
+  padding-bottom: 8px;
   text-align: left;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 .data-table td {
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-size: 13px;
   border-bottom: 1px solid var(--border);
   color: var(--tx-1);
 }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tbody tr { cursor: pointer; transition: background 0.08s; }
-.data-table tbody tr:hover td { background: var(--bg-elevated); }
+.data-table tbody tr:hover td { background: var(--surface-2); }
 
 /* ── 17. MISC UTILITIES ───────────────────────────────────── */
 kbd {
