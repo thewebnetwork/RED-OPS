@@ -552,7 +552,7 @@ export default function Requests() {
                     <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
                       <DroppableColumn stage={stage} isEmpty={stageOrders.length === 0}>
                         {stageOrders.map(o => (
-                          <DraggableOrder key={o.id} order={o} onOpen={() => setSelected(o)} />
+                          <DraggableOrder key={o.id} order={o} onOpen={() => navigate(`/requests/${o.id}`)} />
                         ))}
                       </DroppableColumn>
                     </div>
@@ -582,7 +582,7 @@ export default function Requests() {
                   {filtered.length === 0 ? (
                     <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--tx-3)' }}>No orders match your filters</td></tr>
                   ) : filtered.map(o => (
-                    <tr key={o.id} onClick={() => setSelected(o)} style={{ cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: 'background .1s' }}
+                    <tr key={o.id} onClick={() => navigate(`/requests/${o.id}`)} style={{ cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: 'background .1s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <td style={{ padding: '10px 12px', fontSize: 12, fontWeight: 600, color: 'var(--accent)', whiteSpace: 'nowrap' }}>{o.order_code}</td>
