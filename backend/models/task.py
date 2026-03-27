@@ -68,6 +68,25 @@ class TaskReorder(BaseModel):
     new_position: float
 
 
+class TimeEntryCreate(BaseModel):
+    """Log hours against a task"""
+    hours: float
+    description: Optional[str] = None
+    date: Optional[str] = None  # YYYY-MM-DD, defaults to today
+
+
+class TimeEntryResponse(BaseModel):
+    """Time entry response"""
+    id: str
+    task_id: str
+    user_id: str
+    user_name: Optional[str] = None
+    hours: float
+    description: Optional[str] = None
+    date: str
+    created_at: datetime
+
+
 class TaskCommentCreate(BaseModel):
     """Comment on a task"""
     content: str
@@ -114,6 +133,10 @@ class TaskResponse(BaseModel):
     # Dependencies
     blocked_by: Optional[List[str]] = []
     blocked_by_tasks: Optional[List[dict]] = []  # Enriched: [{ id, title, status }]
+
+    # Time tracking
+    total_hours: float = 0.0
+    time_entry_count: int = 0
 
     # Comment count
     comment_count: int = 0

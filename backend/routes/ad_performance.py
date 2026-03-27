@@ -908,3 +908,21 @@ async def download_ad_report(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.post("/reports/generate-all")
+async def generate_all_reports(
+    body: dict = {},
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Generate monthly ad performance reports for all clients with data.
+    Admin only. Optionally specify period (YYYY-MM), defaults to previous month.
+    """
+    if current_user.get("role") not in ["Administrator", "Admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    from services.scheduled_reports import run_monthly_reports
+    period = body.get("period")
+    result = await run_monthly_reports(period)
+    return result

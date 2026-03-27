@@ -23,6 +23,8 @@ from models.task import (
     CreatedSource,
     TaskCommentCreate,
     TaskCommentResponse,
+    TimeEntryCreate,
+    TimeEntryResponse,
 )
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -413,6 +415,15 @@ async def list_tasks(
         comment_count = await db.task_comments.count_documents({"task_id": task["id"]})
         task["comment_count"] = comment_count
 
+        # Time tracking totals
+        time_pipeline = [
+            {"$match": {"task_id": task["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$hours"}, "count": {"$sum": 1}}},
+        ]
+        time_agg = await db.time_entries.aggregate(time_pipeline).to_list(1)
+        task["total_hours"] = round(time_agg[0]["total"], 2) if time_agg else 0.0
+        task["time_entry_count"] = time_agg[0]["count"] if time_agg else 0
+
         # Enrich blocked_by with task details
         blocked_ids = task.get("blocked_by") or []
         if blocked_ids:
@@ -664,6 +675,14 @@ async def update_task(
     updated_task["completed_subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id, "status": "done"})
     updated_task["comment_count"] = await db.task_comments.count_documents({"task_id": task_id})
 
+    # Time tracking
+    time_agg = await db.time_entries.aggregate([
+        {"$match": {"task_id": task_id}},
+        {"$group": {"_id": None, "total": {"$sum": "$hours"}, "count": {"$sum": 1}}},
+    ]).to_list(1)
+    updated_task["total_hours"] = round(time_agg[0]["total"], 2) if time_agg else 0.0
+    updated_task["time_entry_count"] = time_agg[0]["count"] if time_agg else 0
+
     # Enrich blocked_by
     blocked_ids = updated_task.get("blocked_by") or []
     if blocked_ids:
@@ -895,3 +914,82 @@ async def remove_blocker(
         }
     )
     return {"success": True, "task_id": task_id, "removed_blocker": blocked_by_id}
+
+
+# ── Time Tracking ─────────────────────────────────────────────────────────────
+
+@router.get("/{task_id}/time-entries", response_model=List[TimeEntryResponse])
+async def list_time_entries(
+    task_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """List all time entries for a task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    entries = await db.time_entries.find(
+        {"task_id": task_id}, {"_id": 0}
+    ).sort("date", -1).to_list(200)
+
+    for e in entries:
+        user = await db.users.find_one({"id": e["user_id"]}, {"_id": 0, "full_name": 1, "name": 1})
+        if user:
+            e["user_name"] = user.get("full_name") or user.get("name")
+
+    return [TimeEntryResponse(**e) for e in entries]
+
+
+@router.post("/{task_id}/time-entries", response_model=TimeEntryResponse, status_code=201)
+async def add_time_entry(
+    task_id: str,
+    data: TimeEntryCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Log hours against a task."""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0, "org_id": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if data.hours <= 0:
+        raise HTTPException(status_code=400, detail="Hours must be greater than 0")
+
+    entry_date = data.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    entry = {
+        "id": str(uuid.uuid4()),
+        "task_id": task_id,
+        "user_id": current_user["id"],
+        "hours": round(data.hours, 2),
+        "description": data.description,
+        "date": entry_date,
+        "created_at": datetime.now(timezone.utc),
+    }
+
+    await db.time_entries.insert_one(entry)
+    await db.tasks.update_one({"id": task_id}, {"$set": {"updated_at": datetime.now(timezone.utc)}})
+
+    entry["user_name"] = current_user.get("full_name") or current_user.get("name") or current_user.get("email")
+    entry.pop("_id", None)
+    return TimeEntryResponse(**entry)
+
+
+@router.delete("/{task_id}/time-entries/{entry_id}")
+async def delete_time_entry(
+    task_id: str,
+    entry_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a time entry. Only the author or admin can delete."""
+    entry = await db.time_entries.find_one({"id": entry_id, "task_id": task_id}, {"_id": 0})
+    if not entry:
+        raise HTTPException(status_code=404, detail="Time entry not found")
+
+    is_admin = current_user.get("role") == "Administrator"
+    is_author = entry.get("user_id") == current_user["id"]
+
+    if not is_admin and not is_author:
+        raise HTTPException(status_code=403, detail="Only the author or admin can delete time entries")
+
+    await db.time_entries.delete_one({"id": entry_id})
+    return {"success": True, "deleted_entry_id": entry_id}

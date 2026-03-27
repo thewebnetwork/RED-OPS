@@ -285,6 +285,10 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
   const [blockedByTasks, setBlockedByTasks] = useState(task.blocked_by_tasks || []);
   const [addingBlocker, setAddingBlocker] = useState(false);
   const [blockerSearchId, setBlockerSearchId] = useState('');
+  const [timeEntries, setTimeEntries] = useState([]);
+  const [newHours, setNewHours] = useState('');
+  const [newTimeDesc, setNewTimeDesc] = useState('');
+  const [addingTime, setAddingTime] = useState(false);
 
   const [editTitle, setEditTitle] = useState(false);
   const [title, setTitle] = useState(task.title);
@@ -299,6 +303,7 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
     Promise.all([
       ax().get(`${API}/tasks/${task.id}/comments`).then(r => setComments(r.data)).catch(() => {}),
       ax().get(`${API}/tasks/${task.id}/subtasks`).then(r => setSubtasks(r.data)).catch(() => {}),
+      ax().get(`${API}/tasks/${task.id}/time-entries`).then(r => setTimeEntries(r.data)).catch(() => {}),
     ]).finally(() => setLoadingComments(false));
   }, [task.id, task.blocked_by_tasks]);
 
@@ -392,6 +397,30 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
       onRefresh();
     } catch { toast.error('Failed to remove blocker'); }
   };
+
+  const addTimeEntry = async () => {
+    const hrs = parseFloat(newHours);
+    if (!hrs || hrs <= 0) { toast.error('Enter valid hours'); return; }
+    setAddingTime(true);
+    try {
+      const r = await ax().post(`${API}/tasks/${task.id}/time-entries`, { hours: hrs, description: newTimeDesc || null });
+      setTimeEntries(prev => [r.data, ...prev]);
+      setNewHours('');
+      setNewTimeDesc('');
+      onRefresh();
+    } catch { toast.error('Failed to log time'); }
+    finally { setAddingTime(false); }
+  };
+
+  const deleteTimeEntry = async (entryId) => {
+    try {
+      await ax().delete(`${API}/tasks/${task.id}/time-entries/${entryId}`);
+      setTimeEntries(prev => prev.filter(e => e.id !== entryId));
+      onRefresh();
+    } catch { toast.error('Failed to delete time entry'); }
+  };
+
+  const totalHours = timeEntries.reduce((sum, e) => sum + (e.hours || 0), 0);
 
   const doneCount = subtasks.filter(s => s.status === 'done').length;
 
@@ -563,6 +592,43 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
             </div>
           </div>
         )}
+
+        {/* Time Tracking */}
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Clock size={12} />
+            Time Logged ({totalHours.toFixed(1)}h)
+          </div>
+          {timeEntries.map(e => (
+            <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', fontSize: 12 }}
+              onMouseEnter={ev => { const d = ev.currentTarget.querySelector('[data-tdel]'); if (d) d.style.opacity = 1; }}
+              onMouseLeave={ev => { const d = ev.currentTarget.querySelector('[data-tdel]'); if (d) d.style.opacity = 0; }}>
+              <span style={{ fontWeight: 600, color: 'var(--tx-1)', minWidth: 36 }}>{e.hours}h</span>
+              <span style={{ flex: 1, color: 'var(--tx-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {e.description || '—'}
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--tx-3)', flexShrink: 0 }}>{e.user_name?.split(' ')[0]} · {e.date}</span>
+              <button data-tdel onClick={() => deleteTimeEntry(e.id)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, opacity: 0, transition: 'opacity .1s', flexShrink: 0 }}>
+                <X size={11} />
+              </button>
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+            <input value={newHours} onChange={e => setNewHours(e.target.value)} placeholder="Hrs"
+              type="number" step="0.25" min="0"
+              style={{ width: 50, background: 'transparent', border: '1px solid var(--border)', borderRadius: 5, padding: '3px 6px', fontSize: 12, color: 'var(--tx-1)', outline: 'none', textAlign: 'center' }} />
+            <input value={newTimeDesc} onChange={e => setNewTimeDesc(e.target.value)} placeholder="What did you work on?"
+              onKeyDown={e => { if (e.key === 'Enter') addTimeEntry(); }}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 12, color: 'var(--tx-1)', padding: '3px 0' }} />
+            {newHours && (
+              <button onClick={addTimeEntry} disabled={addingTime}
+                style={{ background: 'var(--accent)', border: 'none', borderRadius: 5, color: '#fff', cursor: 'pointer', padding: '3px 8px', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>
+                {addingTime ? <Loader2 size={10} className="spin" /> : 'Log'}
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Comments */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
@@ -779,6 +845,7 @@ function KanbanCol({ status, tasks, onToggle, onCardClick, onQuickAdd }) {
                   </div>
                 )}
                 <span style={{ fontSize: 10, flex: 1, color: 'var(--tx-3)' }}>{task.assignee ? task.assignee.split(' ')[0] : ''}</span>
+                {task.total_hours > 0 && <span style={{ fontSize: 10, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 2 }}><Clock size={9} /> {task.total_hours}h</span>}
                 {task.comment_count > 0 && <span style={{ fontSize: 10, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 2 }}><MessageSquare size={9} /> {task.comment_count}</span>}
                 {task.due_date && (
                   <span style={{ fontSize: 10, color: overdue ? '#ef4444' : 'var(--tx-3)', fontWeight: overdue ? 600 : 400 }}>
@@ -795,6 +862,126 @@ function KanbanCol({ status, tasks, onToggle, onCardClick, onQuickAdd }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   CALENDAR VIEW
+   ═══════════════════════════════════════════════════════════ */
+function CalendarView({ tasks, onTaskClick }) {
+  const [monthOffset, setMonthOffset] = useState(0);
+
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const monthLabel = viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  // Build map: date string → tasks
+  const tasksByDate = {};
+  tasks.forEach(t => {
+    if (!t.due_date) return;
+    const d = t.due_date.slice(0, 10);
+    if (!tasksByDate[d]) tasksByDate[d] = [];
+    tasksByDate[d].push(t);
+  });
+
+  const cells = [];
+  // Empty cells for days before month starts
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+      {/* Month nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <button onClick={() => setMonthOffset(p => p - 1)} className="btn-ghost btn-sm">&larr;</button>
+        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{monthLabel}</span>
+        <button onClick={() => setMonthOffset(p => p + 1)} className="btn-ghost btn-sm">&rarr;</button>
+      </div>
+
+      {/* Day headers */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+        {DAYS.map(d => (
+          <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', padding: '6px 0', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+        {cells.map((day, idx) => {
+          if (day === null) return <div key={`e${idx}`} style={{ minHeight: 80, background: 'var(--surface)', borderRadius: 4 }} />;
+
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dayTasks = tasksByDate[dateStr] || [];
+          const isToday = dateStr === todayStr;
+
+          return (
+            <div key={dateStr} style={{
+              minHeight: 80, padding: '4px 6px', background: isToday ? 'var(--accent-soft)' : 'var(--surface)',
+              border: isToday ? '1px solid var(--accent)' : '1px solid var(--border)', borderRadius: 4,
+              display: 'flex', flexDirection: 'column', gap: 2,
+            }}>
+              <div style={{ fontSize: 11, fontWeight: isToday ? 700 : 500, color: isToday ? 'var(--accent)' : 'var(--tx-2)', marginBottom: 2 }}>
+                {day}
+              </div>
+              {dayTasks.slice(0, 3).map(t => {
+                const stColor = STATUS_COLORS[STATUS_RMAP[t.status] || t.status] || '#606060';
+                return (
+                  <div key={t._id || t.id} onClick={() => onTaskClick(t)}
+                    style={{
+                      fontSize: 10, padding: '2px 5px', borderRadius: 3, cursor: 'pointer',
+                      background: `${stColor}18`, color: stColor, fontWeight: 500,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}
+                    title={t.title}>
+                    {t.title}
+                  </div>
+                );
+              })}
+              {dayTasks.length > 3 && (
+                <div style={{ fontSize: 9, color: 'var(--tx-3)', fontWeight: 600 }}>+{dayTasks.length - 3} more</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Unscheduled tasks */}
+      {(() => {
+        const unscheduled = tasks.filter(t => !t.due_date);
+        if (unscheduled.length === 0) return null;
+        return (
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+              No Due Date ({unscheduled.length})
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {unscheduled.slice(0, 20).map(t => (
+                <div key={t._id || t.id} onClick={() => onTaskClick(t)}
+                  style={{
+                    fontSize: 11, padding: '4px 8px', borderRadius: 5, cursor: 'pointer',
+                    background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--tx-2)',
+                    maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                  {t.title}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1120,6 +1307,7 @@ export default function Tasks() {
             {[
               { id: 'list', icon: List },
               { id: 'board', icon: LayoutGrid },
+              { id: 'calendar', icon: Calendar },
             ].map(v => (
               <button key={v.id} onClick={() => setView(v.id)}
                 style={{
@@ -1223,6 +1411,9 @@ export default function Tasks() {
             renderList(filtered)
           )}
         </div>
+      ) : view === 'calendar' ? (
+        /* Calendar */
+        <CalendarView tasks={filtered} onTaskClick={setSelectedTask} />
       ) : (
         /* Kanban */
         <div style={{ flex: 1, display: 'flex', overflowX: 'auto', overflowY: 'hidden', gap: 12, padding: 12 }}>

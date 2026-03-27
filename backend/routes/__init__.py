@@ -34,6 +34,7 @@ from .integrations import router as integrations_router
 from .ai import router as ai_router
 from .finance import router as finance_router
 from .onboarding import router as onboarding_router
+from .exports import router as exports_router
 
 __all__ = [
     "auth_router",
@@ -69,4 +70,5 @@ __all__ = [
     "ai_router",
     "finance_router",
     "onboarding_router",
+    "exports_router",
 ]
