@@ -304,7 +304,7 @@ export default function Requests() {
   const [search, setSearch] = useState('');
   const [priFilter, setPriFilter] = useState('');
   const [stageFilter, setStageFilter] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(() => searchParams.get('new') === '1');
   const [selected, setSelected] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [creating, setCreating] = useState(false);
