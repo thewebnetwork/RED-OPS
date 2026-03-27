@@ -9,7 +9,7 @@
 
 **Goal**: Build Red Ops into a multi-tenant agency operations platform for RRG (Red Ribbon Group)
 **Deployed at**: `redops.redribbongroup.ca` via Railway (auto-deploys from `main`)
-**Admin creds**: `redops@redribbongroup.ca` / `Fmtvvl171**`
+**Admin creds**: see Railway environment variables.
 
 ---
 

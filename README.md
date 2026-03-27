@@ -25,7 +25,7 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete instructions.
 ## Tech Stack
 - **Frontend:** React + TailwindCSS + Shadcn/UI
 - **Backend:** FastAPI (Python)
-- **Database:** Supabase (PostgreSQL)
+- **Database:** MongoDB (Motor async driver)
 - **Hosting:** Vercel (Frontend) + Railway (Backend)
 
 ## Features
@@ -36,10 +36,6 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete instructions.
 - 🔄 Workflow automation
 - 💬 Request management with messaging
 - 📈 Analytics and reporting
-
-## Default Admin Login
-- Email: `admin@redribbonops.com`
-- Password: `Admin123!`
 
 ## License
 Proprietary - Red Ribbon Media
