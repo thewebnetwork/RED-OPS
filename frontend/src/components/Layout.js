@@ -20,7 +20,6 @@ import {
   Plus,
   Bell,
   BarChart2,
-  ChevronRight,
   ChevronDown,
   Cloud,
   ShoppingBag,
@@ -579,13 +578,7 @@ export default function Layout({ children }) {
             <Menu size={18} />
           </button>
 
-          <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:12.5 }}>
-            <span style={{ color:'var(--tx-3)' }}>Red Ops</span>
-            {pageTitle && <>
-              <ChevronRight size={11} style={{ color:'var(--tx-3)' }} />
-              <span style={{ color:'var(--tx-1)', fontWeight:600 }}>{pageTitle}</span>
-            </>}
-          </div>
+          <span style={{ color:'var(--tx-1)', fontWeight:600, fontSize:12.5 }}>{pageTitle}</span>
 
           <div style={{ flex:1 }} />
 
@@ -597,11 +590,6 @@ export default function Layout({ children }) {
               </Link>
               {unread > 0 && <div className="notif-dot" />}
             </div>
-
-            <button onClick={() => navigate(isClient ? '/services' : '/requests?new=1')} className="btn-primary btn-sm" style={{ gap:5 }}>
-              <Plus size={13} />
-              <span className="hide-mobile">New Request</span>
-            </button>
           </div>
         </div>
 
