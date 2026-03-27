@@ -138,6 +138,25 @@
   input, select, textarea { font-family: inherit; }
 }
 
+/* ── 2b. TIPTAP EDITOR ────────────────────────────────────── */
+.tiptap { outline: none; color: var(--tx-1); font-size: 15px; line-height: 1.75; }
+.tiptap h1 { font-size: 28px; font-weight: 700; margin: 24px 0 8px; }
+.tiptap h2 { font-size: 22px; font-weight: 600; margin: 20px 0 6px; }
+.tiptap h3 { font-size: 17px; font-weight: 600; margin: 16px 0 4px; }
+.tiptap p { margin: 0 0 8px; }
+.tiptap ul, .tiptap ol { padding-left: 24px; margin: 4px 0 12px; }
+.tiptap li { margin: 2px 0; }
+.tiptap code { background: var(--surface-3); padding: 2px 5px; border-radius: 4px; font-size: 13px; color: var(--accent); }
+.tiptap pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; }
+.tiptap pre code { background: none; padding: 0; color: var(--tx-1); font-size: 13px; }
+.tiptap blockquote { border-left: 3px solid var(--accent); padding-left: 16px; margin: 12px 0; color: var(--tx-2); font-style: italic; }
+.tiptap hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.tiptap ul[data-type="taskList"] { list-style: none; padding-left: 0; }
+.tiptap ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0; }
+.tiptap ul[data-type="taskList"] li label { margin-top: 3px; }
+.tiptap ul[data-type="taskList"] li[data-checked="true"] > div > p { text-decoration: line-through; color: var(--tx-3); }
+.tiptap p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--tx-3); pointer-events: none; height: 0; float: left; }
+
 /* ── 3. SCROLLBAR ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

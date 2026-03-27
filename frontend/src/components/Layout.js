@@ -45,6 +45,7 @@ const NAV_MAIN = [
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
   { path: '/client-onboarding', icon: ClipboardCheck, label: 'Onboarding', roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
+  { path: '/docs',   icon: BookOpen,  label: 'Docs',     roles: ['Administrator','Operator','Standard User'] },
   { path: '/files?context=knowledge_base', icon: BookOpen, label: 'SOPs', roles: ['Administrator','Operator','Standard User'] },
   { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
