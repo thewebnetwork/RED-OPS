@@ -1323,7 +1323,7 @@ function AdminAdDashboard() {
           setMonthlyTrend(ovRes.data?.monthly_totals || []);
         } catch (ovErr) {
           // Empty state is fine — no snapshots yet
-          console.log('No agency overview data yet');
+          // Empty state is expected when no snapshots exist
           setOverview(null);
           setMonthlyTrend([]);
         }

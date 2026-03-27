@@ -19,7 +19,7 @@ export default function AnnouncementTicker() {
         }
       } catch (error) {
         // If 401, user not logged in yet - try again later
-        console.log('Announcements fetch skipped - user may not be logged in');
+        // user may not be logged in yet — retry later
         if (isMounted) {
           setAnnouncements([]);
         }

@@ -21,9 +21,9 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-ADMIN_EMAIL = "redops@redribbongroup.ca"
-ADMIN_PASSWORD = "Fmtvvl171**"
-ADMIN_NAME = "Red Ops Admin"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+ADMIN_NAME = os.environ.get("ADMIN_NAME", "Red Ops Admin")
 
 
 async def seed():
@@ -33,6 +33,10 @@ async def seed():
     if not mongo_url or not db_name:
         print("ERROR: MONGO_URL and DB_NAME environment variables are required.")
         print("Set them in backend/.env or export them before running.")
+        sys.exit(1)
+
+    if not ADMIN_PASSWORD:
+        print("ERROR: ADMIN_PASSWORD environment variable is required.")
         sys.exit(1)
 
     client = AsyncIOMotorClient(mongo_url)

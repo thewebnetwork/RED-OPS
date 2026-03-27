@@ -131,7 +131,10 @@ async def ensure_admin_account():
     from datetime import datetime, timezone
 
     admin_email = os.environ.get("ADMIN_EMAIL", "redops@redribbongroup.ca").lower()
-    admin_password = os.environ.get("ADMIN_PASSWORD", "Fmtvvl171**")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+    if not admin_password:
+        logger.warning("ADMIN_PASSWORD env var not set — skipping admin account seed")
+        return
 
     hashed = hash_password(admin_password)
 
