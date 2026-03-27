@@ -108,6 +108,11 @@ export default function ClientPage() {
   const emptyForm = { title: '', description: '', priority: 'medium', status: 'todo', assignee_user_id: '', project_id: '', due_at: '' };
   const [formData, setFormData] = useState(emptyForm);
 
+  // Edit Client Modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
+
   // Notes (local for now — no backend endpoint)
   const [notes, setNotes] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`client_notes_${id}`) || '[]'); } catch { return []; }
@@ -127,6 +132,34 @@ export default function ClientPage() {
       setLoading(false);
     }
   }, [id, navigate]);
+
+  const openEditModal = () => {
+    if (!client) return;
+    setEditData({
+      name: client.name || '',
+      email: client.email || '',
+      phone: client.phone || '',
+      company_name: client.company_name || '',
+      industry: client.industry || '',
+      website: client.website || '',
+      active: client.active !== false,
+    });
+    setShowEditModal(true);
+  };
+
+  const saveEdit = async () => {
+    setEditSaving(true);
+    try {
+      await ax().patch(`${API}/users/${id}`, editData);
+      toast.success('Client updated');
+      setShowEditModal(false);
+      fetchClient();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update client');
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   // ── Fetch tasks for this client ──
   const fetchTasks = useCallback(async () => {
@@ -458,7 +491,12 @@ export default function ClientPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
           {/* Client Info */}
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 16px', color: 'var(--tx-1)' }}>Client Information</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Client Information</h3>
+              <button onClick={openEditModal} className="btn-ghost btn-sm" style={{ gap: 5, fontSize: 11 }}>
+                <Edit2 size={12} /> Edit Client
+              </button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
                 ['Name', client.name],
@@ -879,6 +917,52 @@ export default function ClientPage() {
                   {addTaskLoading ? (editingTask ? 'Saving...' : 'Creating...') : (editingTask ? 'Save Changes' : 'Create Task')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Client Modal ── */}
+      {showEditModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 28, maxWidth: 480, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Edit Client</h2>
+              <button onClick={() => setShowEditModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {[
+                { key: 'name', label: 'Contact Name', type: 'text' },
+                { key: 'company_name', label: 'Company Name', type: 'text' },
+                { key: 'email', label: 'Email', type: 'email' },
+                { key: 'phone', label: 'Phone', type: 'tel' },
+                { key: 'industry', label: 'Industry', type: 'text' },
+                { key: 'website', label: 'Website', type: 'url' },
+              ].map(f => (
+                <div key={f.key}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>{f.label}</label>
+                  <input className="input-field" type={f.type} value={editData[f.key] || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, [f.key]: e.target.value }))} />
+                </div>
+              ))}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Status</label>
+                <select className="input-field" value={editData.active ? 'active' : 'inactive'}
+                  onChange={e => setEditData(prev => ({ ...prev, active: e.target.value === 'active' }))}>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+              <button onClick={() => setShowEditModal(false)} className="btn-ghost">Cancel</button>
+              <button onClick={saveEdit} className="btn-primary" disabled={editSaving} style={{ gap: 5 }}>
+                {editSaving ? <Loader2 size={14} className="spin" /> : <CheckCircle2 size={14} />}
+                {editSaving ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         </div>
