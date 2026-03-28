@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import {
   BarChart2, TrendingUp, TrendingDown, Plus, X, ChevronDown,
-  Loader2, AlertCircle, CheckCircle2, Activity, Upload, FileText, Download
+  Loader2, AlertCircle, CheckCircle2, Activity, Upload, FileText, Download, Pencil, Trash2
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -1373,6 +1373,58 @@ function AdminAdDashboard() {
     await refreshData();
   };
 
+  // Edit/Delete snapshot state
+  const [editingSnap, setEditingSnap] = useState(null);
+  const [editSnapForm, setEditSnapForm] = useState({});
+  const [editSnapSaving, setEditSnapSaving] = useState(false);
+
+  const openEditSnap = (snap) => {
+    setEditSnapForm({
+      ad_spend: snap.metrics?.ad_spend || 0,
+      impressions: snap.metrics?.impressions || 0,
+      clicks: snap.metrics?.clicks || 0,
+      leads: snap.metrics?.leads || 0,
+      cpl: snap.metrics?.cpl || 0,
+      ctr: snap.metrics?.ctr || 0,
+      notes: snap.notes || '',
+    });
+    setEditingSnap(snap);
+  };
+
+  const saveEditSnap = async () => {
+    if (!editingSnap) return;
+    setEditSnapSaving(true);
+    try {
+      await ax().patch(`${API}/ad-performance/snapshots/${editingSnap.id}`, {
+        metrics: {
+          ad_spend: parseFloat(editSnapForm.ad_spend) || 0,
+          impressions: parseInt(editSnapForm.impressions) || 0,
+          clicks: parseInt(editSnapForm.clicks) || 0,
+          leads: parseInt(editSnapForm.leads) || 0,
+          cpl: parseFloat(editSnapForm.cpl) || 0,
+          ctr: parseFloat(editSnapForm.ctr) || 0,
+        },
+        notes: editSnapForm.notes || null,
+      });
+      toast.success('Snapshot updated');
+      setEditingSnap(null);
+      refreshData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update snapshot');
+    } finally { setEditSnapSaving(false); }
+  };
+
+  const deleteSnapshot = async (snap) => {
+    if (!window.confirm(`Delete snapshot for ${snap.client_name} — ${snap.period}? This cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/ad-performance/snapshots/${snap.id}`);
+      toast.success('Snapshot deleted');
+      refreshData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete snapshot');
+    }
+  };
+
   const [downloadingReportFor, setDownloadingReportFor] = useState(null);
 
   const handleDownloadClientReport = async (clientId, clientName) => {
@@ -1675,6 +1727,16 @@ function AdminAdDashboard() {
                                       <span>{formatCurrency(snap.metrics?.ad_spend)}</span>
                                       <span>{formatNumber(snap.metrics?.leads)} leads</span>
                                     </div>
+                                    <div style={{ display: 'flex', gap: 4, marginTop: 6, justifyContent: 'flex-end' }}>
+                                      <button onClick={(e) => { e.stopPropagation(); openEditSnap(snap); }}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: 2 }}>
+                                        <Pencil size={11} />
+                                      </button>
+                                      <button onClick={(e) => { e.stopPropagation(); deleteSnapshot(snap); }}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2 }}>
+                                        <Trash2 size={11} />
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -1701,6 +1763,49 @@ function AdminAdDashboard() {
           </div>
         )}
       </div>
+
+      {/* Edit Snapshot Modal */}
+      {editingSnap && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: 440 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Edit Snapshot</h2>
+              <button onClick={() => setEditingSnap(null)} className="btn-ghost btn-sm" style={{ border: 'none', padding: 4 }}><X size={18} /></button>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--tx-3)', marginBottom: 16, display: 'flex', gap: 8 }}>
+              <span className="pill pill-gray">{editingSnap.platform}</span>
+              <span className="pill pill-gray">{getMonthName(editingSnap.period)}</span>
+              <span style={{ color: 'var(--tx-2)' }}>{editingSnap.client_name}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              {[
+                { key: 'ad_spend', label: 'Ad Spend ($)', type: 'number', step: '0.01' },
+                { key: 'impressions', label: 'Impressions', type: 'number', step: '1' },
+                { key: 'clicks', label: 'Clicks', type: 'number', step: '1' },
+                { key: 'leads', label: 'Leads', type: 'number', step: '1' },
+                { key: 'cpl', label: 'CPL ($)', type: 'number', step: '0.01' },
+                { key: 'ctr', label: 'CTR (%)', type: 'number', step: '0.01' },
+              ].map(f => (
+                <div key={f.key}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>{f.label}</label>
+                  <input className="input-field" type={f.type} step={f.step}
+                    value={editSnapForm[f.key] ?? ''} onChange={e => setEditSnapForm(p => ({ ...p, [f.key]: e.target.value }))} />
+                </div>
+              ))}
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Notes</label>
+              <textarea className="input-field" rows={2} value={editSnapForm.notes || ''} onChange={e => setEditSnapForm(p => ({ ...p, notes: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setEditingSnap(null)} className="btn-ghost">Cancel</button>
+              <button onClick={saveEditSnap} className="btn-primary" disabled={editSnapSaving}>
+                {editSnapSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Snapshot Modal */}
       <AddSnapshotModal
