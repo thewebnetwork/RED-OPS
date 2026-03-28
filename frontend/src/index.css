@@ -13,13 +13,16 @@
 @layer base {
   :root {
     /* Backgrounds — layered dark surfaces */
-    --bg:         #0d0f14;   /* page background */
-    --bg-card:    #161920;   /* cards, sidebar — alias: --surface */
-    --bg-elevated:#1e2129;   /* hover, inputs — alias: --surface-2 */
-    --bg-overlay: #252830;   /* deep elevated — alias: --surface-3 */
+    --bg:         #0d0f14;
     --surface:    #161920;
     --surface-2:  #1e2129;
     --surface-3:  #252830;
+
+    /* Legacy aliases — old token names resolve to new design system */
+    --bg-card:    var(--surface);
+    --bg-elevated:var(--surface-2);
+    --bg-overlay: var(--surface-3);
+    --card:       var(--surface);
 
     /* Borders */
     --border:        rgba(255, 255, 255, 0.07);
@@ -32,19 +35,21 @@
     --tx-3: #4b5563;  /* muted/placeholder text */
 
     /* Brand / Accent */
-    --red:   #c92a3e;  /* RRG brand red */
     --accent: #c92a3e;
     --accent-hover: #a8202f;
     --accent-soft: rgba(201, 42, 62, 0.12);
-    --red-bg: rgba(201, 42, 62, 0.12);
+
+    /* Legacy brand aliases */
+    --red:    var(--accent);
+    --red-bg: var(--accent-soft);
     --red-lo: rgba(201, 42, 62, 0.06);
 
-    /* Status */
-    --green:  #22c55e;
-    --yellow: #f59e0b;
-    --blue:   #3b82f6;
-    --purple: #a855f7;
-    --red-status: #ef4444;
+    /* Status — legacy aliases point to semantic tokens */
+    --green:  var(--color-green);
+    --yellow: var(--color-yellow);
+    --blue:   var(--color-blue);
+    --purple: var(--color-purple);
+    --red-status: var(--color-red);
 
     /* Status soft backgrounds */
     --color-green: #22c55e;
