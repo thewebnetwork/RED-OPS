@@ -73,6 +73,7 @@ import TeamMemberPage from "./pages/TeamMemberPage";
 import AdPerformance from "./pages/AdPerformance";
 import Onboarding from "./pages/Onboarding";
 import Documents from "./pages/Documents";
+import KnowledgeBase from "./pages/KnowledgeBase";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -326,13 +327,14 @@ function AppRoutes() {
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
-      <Route path="/sops" element={<Navigate to="/files?context=knowledge_base" replace />} />
+      <Route path="/knowledge-base" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
+      <Route path="/sops" element={<Navigate to="/knowledge-base?tab=sops" replace />} />
       <Route path="/ad-performance" element={<PrivateRoute><AdPerformance /></PrivateRoute>} />
       <Route path="/client-onboarding" element={<PrivateRoute roles={['Administrator','Operator']}><Onboarding /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
-      <Route path="/docs" element={<PrivateRoute><Documents /></PrivateRoute>} />
+      <Route path="/docs" element={<Navigate to="/knowledge-base?tab=docs" replace />} />
       <Route path="/files" element={<PrivateRoute><Files /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/team/:id" element={<PrivateRoute roles={['Administrator','Operator']}><TeamMemberPage /></PrivateRoute>} />

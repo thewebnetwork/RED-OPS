@@ -45,8 +45,7 @@ const NAV_MAIN = [
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
   { path: '/client-onboarding', icon: ClipboardCheck, label: 'Onboarding', roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
-  { path: '/docs',   icon: BookOpen,  label: 'Docs',     roles: ['Administrator','Operator','Standard User'] },
-  { path: '/files?context=knowledge_base', icon: BookOpen, label: 'SOPs', roles: ['Administrator','Operator','Standard User'] },
+  { path: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base', roles: ['Administrator','Operator','Standard User'] },
   { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
 ];
@@ -64,7 +63,7 @@ const NAV_CLIENT = [
   { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
   { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Media Client'] },
-  { path: '/files?context=knowledge_base', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
+  { path: '/knowledge-base?tab=sops', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
   { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
 ];
 
@@ -79,7 +78,7 @@ const CMD_ITEMS = [
   { label:'Team',            icon:'👫', to:'/team',          group:'Navigate' },
   { label:'Reports',         icon:'📊', to:'/reports',       group:'Navigate' },
   { label:'AI Assistant',    icon:'✨', to:'/ai',            group:'Navigate' },
-  { label:'Knowledge Base',  icon:'📚', to:'/files?context=knowledge_base', group:'Navigate' },
+  { label:'Knowledge Base',  icon:'📚', to:'/knowledge-base', group:'Navigate' },
   { label:'Settings',        icon:'⚙️',  to:'/settings',      group:'Navigate' },
   { label:'New Task',        icon:'✏️',  to:'/tasks?new=1',      group:'Create', shortcut:'T' },
   { label:'New Request',     icon:'📝', to:'/requests?new=1',    group:'Create', shortcut:'R' },
@@ -385,7 +384,7 @@ export default function Layout({ children }) {
   const closeCmd = useCallback(() => setCmdOpen(false), []);
 
   // Client users only see client-relevant command palette items
-  const clientPaths = ['/', '/tasks', '/projects', '/services', '/my-requests', '/my-account', '/files', '/files?context=knowledge_base'];
+  const clientPaths = ['/', '/tasks', '/projects', '/services', '/my-requests', '/my-account', '/files', '/knowledge-base'];
   const cmdBase = isClient ? CMD_ITEMS.filter(i => clientPaths.includes(i.to) || i.to?.startsWith('/my-')) : CMD_ITEMS;
   const filtered = cmdQuery.trim()
     ? cmdBase.filter(i => i.label.toLowerCase().includes(cmdQuery.toLowerCase()))
