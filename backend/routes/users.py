@@ -839,6 +839,52 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_roles([
     return {"message": "User deactivated"}
 
 
+@router.delete("/{user_id}/hard-delete")
+async def hard_delete_user(user_id: str, current_user: dict = Depends(require_roles(["Administrator"]))):
+    """
+    Permanently remove a user and soft-delete their related records.
+    Admin only. Use for cleaning up test/seed users from production.
+    """
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user_id == current_user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+
+    now = datetime.now(timezone.utc).isoformat()
+    user_name = user.get("name", "Unknown")
+    user_email = user.get("email", "")
+
+    # Soft-delete related records
+    await db.orders.update_many(
+        {"$or": [{"requester_id": user_id}, {"editor_id": user_id}]},
+        {"$set": {"deleted": True, "deletion_reason": f"User hard-deleted: {user_name}", "updated_at": now}}
+    )
+    await db.tasks.update_many(
+        {"$or": [{"assignee_user_id": user_id}, {"created_by_user_id": user_id}, {"client_id": user_id}]},
+        {"$set": {"archived": True, "updated_at": now}}
+    )
+    await db.onboarding_checklists.update_many(
+        {"client_id": user_id},
+        {"$set": {"status": "archived", "updated_at": now}}
+    )
+    await db.ad_snapshots.update_many(
+        {"client_id": user_id},
+        {"$set": {"archived": True, "updated_at": now}}
+    )
+    await db.task_comments.delete_many({"user_id": user_id})
+    await db.time_entries.delete_many({"user_id": user_id})
+
+    # Hard-delete the user document
+    await db.users.delete_one({"id": user_id})
+
+    import logging
+    logging.info(f"Hard-deleted user {user_name} ({user_email}, {user_id}) by {current_user.get('name')}")
+
+    return {"deleted": True, "user_id": user_id, "name": user_name, "email": user_email}
+
+
 @router.post("/{user_id}/restore")
 async def restore_user(user_id: str, current_user: dict = Depends(require_roles(["Administrator"]))):
     """Restore a deactivated user (Admin only)"""
