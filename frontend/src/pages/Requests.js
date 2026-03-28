@@ -571,7 +571,9 @@ export default function Requests() {
   if (loading) {
     return (
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-        <RefreshCw size={18} className="spin" style={{ color: 'var(--tx-3)' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 260 }}>
+          {[1,2,3,4,5].map(i => <div key={i} className="skeleton-pulse" style={{ height: 60, borderRadius: 8 }} />)}
+        </div>
       </div>
     );
   }
