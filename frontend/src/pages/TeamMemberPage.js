@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowLeft, ChevronRight, Edit2, Mail, Shield, Activity, Circle,
   CheckSquare, FolderKanban, BarChart2, Calendar, Clock, Star,
@@ -75,12 +76,21 @@ function fileIcon(ct, size = 16) {
 /* ═══════════════════════════════════════════════════════════
    MAIN PAGE
    ═══════════════════════════════════════════════════════════ */
+const ROLES = ['Administrator', 'Operator', 'Standard User'];
+const ACCOUNT_TYPES = ['Internal Staff', 'Partner', 'Media Client', 'Vendor/Freelancer'];
+
 export default function TeamMemberPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
 
   // Stats
   const [tasks, setTasks] = useState([]);
@@ -135,6 +145,56 @@ export default function TeamMemberPage() {
 
   useEffect(() => { fetchMember(); }, [fetchMember]);
   useEffect(() => { fetchTasks(); fetchFiles(); fetchSops(); }, [fetchTasks, fetchFiles, fetchSops]);
+
+  // Fetch teams + specialties for edit modal
+  useEffect(() => {
+    ax().get(`${API}/teams`).then(r => setTeams(r.data || [])).catch(() => {});
+    ax().get(`${API}/specialties`).then(r => setSpecialties(r.data || [])).catch(() => {});
+  }, []);
+
+  const openEditModal = () => {
+    if (!member) return;
+    setEditForm({
+      name: member.name || '',
+      email: member.email || '',
+      role: member.role || 'Standard User',
+      account_type: member.account_type || 'Internal Staff',
+      team_id: member.team_id || '',
+      specialty_ids: member.specialty_ids || [],
+      active: member.active !== false,
+    });
+    setShowEditModal(true);
+  };
+
+  const saveEdit = async (e) => {
+    e.preventDefault();
+    setEditSaving(true);
+    try {
+      await ax().patch(`${API}/users/${id}`, { ...editForm, team_id: editForm.team_id || null });
+      toast.success(`${editForm.name} updated`);
+      setShowEditModal(false);
+      fetchMember();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update');
+    } finally { setEditSaving(false); }
+  };
+
+  const handleDeactivate = async () => {
+    if (!window.confirm(`Deactivate ${member.name}? They will lose portal access immediately.`)) return;
+    try {
+      await ax().patch(`${API}/users/${id}`, { active: false });
+      toast.success(`${member.name} deactivated`);
+      fetchMember();
+    } catch { toast.error('Failed to deactivate'); }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await ax().post(`${API}/users/${id}/restore`);
+      toast.success(`${member.name} restored`);
+      fetchMember();
+    } catch { toast.error('Failed to restore'); }
+  };
 
   // Linked SOPs stored as a simple array in localStorage per member
   useEffect(() => {
@@ -201,6 +261,20 @@ export default function TeamMemberPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: 'var(--tx-1)', letterSpacing: '-.03em' }}>{member.name}</h1>
               {member.active === false && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(201,42,62,.12)', color: 'var(--red)', fontWeight: 600 }}>Inactive</span>}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                <button onClick={openEditModal} className="btn-ghost btn-sm" style={{ gap: 5 }}>
+                  <Edit2 size={12} /> Edit Member
+                </button>
+                {member.active !== false && currentUser?.id !== member.id ? (
+                  <button onClick={handleDeactivate} className="btn-ghost btn-sm" style={{ gap: 5, color: '#ef4444', borderColor: '#ef444440' }}>
+                    <UserX size={12} /> Deactivate
+                  </button>
+                ) : member.active === false ? (
+                  <button onClick={handleRestore} className="btn-ghost btn-sm" style={{ gap: 5, color: '#22c55e', borderColor: '#22c55e40' }}>
+                    <UserCheck size={12} /> Restore
+                  </button>
+                ) : null}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--tx-2)' }}>
               {ROLE_ICONS[member.role]} {member.role}
@@ -647,6 +721,83 @@ function SOPsTab({ sops, linkedSops, onSave }) {
                 ))
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Member Modal ── */}
+      {showEditModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, maxWidth: 480, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Edit Member</h2>
+              <button onClick={() => setShowEditModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
+            </div>
+            <form onSubmit={saveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Full Name</label>
+                <input className="input-field" value={editForm.name || ''} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Email</label>
+                <input className="input-field" type="email" value={editForm.email || ''} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Role</label>
+                  <select className="input-field" value={editForm.role || ''} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}>
+                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Account Type</label>
+                  <select className="input-field" value={editForm.account_type || ''} onChange={e => setEditForm(p => ({ ...p, account_type: e.target.value }))}>
+                    {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Team</label>
+                <select className="input-field" value={editForm.team_id || ''} onChange={e => setEditForm(p => ({ ...p, team_id: e.target.value }))}>
+                  <option value="">No Team</option>
+                  {teams.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
+              {specialties.length > 0 && (
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Specialties</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {specialties.map(s => {
+                      const sid = s.id || s._id;
+                      const sel = (editForm.specialty_ids || []).includes(sid);
+                      return (
+                        <button key={sid} type="button" onClick={() => {
+                          setEditForm(p => ({
+                            ...p,
+                            specialty_ids: sel ? p.specialty_ids.filter(x => x !== sid) : [...(p.specialty_ids || []), sid],
+                          }));
+                        }} style={{
+                          padding: '4px 10px', borderRadius: 6, fontSize: 12, border: '1px solid var(--border)',
+                          background: sel ? 'var(--accent)' : 'var(--surface-2)', color: sel ? '#fff' : 'var(--tx-2)',
+                          cursor: 'pointer', transition: 'all .15s',
+                        }}>{s.name}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                <input type="checkbox" checked={editForm.active !== false} onChange={e => setEditForm(p => ({ ...p, active: e.target.checked }))}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
+                <label style={{ fontSize: 13, color: 'var(--tx-1)' }}>Active account</label>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn-ghost">Cancel</button>
+                <button type="submit" className="btn-primary" disabled={editSaving}>
+                  {editSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
