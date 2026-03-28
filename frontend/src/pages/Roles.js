@@ -390,7 +390,6 @@ export default function Roles() {
               background: 'var(--card)',
               border: '1px solid var(--border)',
               borderRadius: '12px',
-              overflow: 'hidden'
             }}>
               {/* Header */}
               <div style={{
