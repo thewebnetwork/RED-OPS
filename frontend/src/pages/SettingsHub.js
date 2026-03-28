@@ -1401,7 +1401,7 @@ export default function SettingsHub() {
         overflowY: 'auto',
         padding: '32px 40px',
       }}>
-        <div style={{ maxWidth: '1200px' }}>
+        <div>
           {/* Page Header */}
           <div style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--tx-1)', marginBottom: '8px' }}>

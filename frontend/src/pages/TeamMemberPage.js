@@ -348,7 +348,7 @@ export default function TeamMemberPage() {
    ═══════════════════════════════════════════════════════════ */
 function OverviewTab({ member, team, tasks, files, tasksThisWeek, completedMonth, openTasks, utilization, maxTasks, specialty }) {
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ padding: '0 20px' }}>
       {/* Stats grid */}
       <div className="metrics-grid-4">
         {[
@@ -452,7 +452,7 @@ function TasksTab({ tasks, onRefresh }) {
     : tasks.filter(t => ['done', 'completed', 'delivered'].includes(t.status));
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ padding: '0 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Assigned Tasks</h3>
@@ -562,7 +562,7 @@ function FilesTab({ memberId, files, onRefresh }) {
   };
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ padding: '0 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Files & Contracts</h3>
@@ -637,7 +637,7 @@ function SOPsTab({ sops, linkedSops, onSave }) {
   };
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 20px' }}>
+    <div style={{ padding: '0 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Linked SOPs</h3>
