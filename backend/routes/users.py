@@ -9,6 +9,7 @@ Identity Model:
 - Access Controls: Module-level permissions with overrides
 """
 import uuid
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
@@ -488,6 +489,115 @@ async def list_users(current_user: dict = Depends(require_roles(["Administrator"
     """List all active users"""
     users = await db.users.find({"active": True}, {"_id": 0, "password": 0}).to_list(1000)
     return [await build_user_response(u) for u in users]
+
+
+# ── Client Workspace (sub-user management) ───────────────────────────────────
+
+@router.get("/my-team")
+async def get_my_team(current_user: dict = Depends(get_current_user)):
+    """Get sub-users in the current Media Client's workspace."""
+    if current_user.get("account_type") != "Media Client" and current_user.get("role") != "Media Client":
+        raise HTTPException(status_code=403, detail="Only Media Client users can access their workspace team")
+
+    # Find users invited by this user or sharing the same client workspace
+    query = {
+        "$or": [
+            {"invited_by": current_user["id"]},
+            {"invited_by": {"$exists": True}, "team_id": current_user.get("team_id"), "team_id": {"$ne": None}},
+        ],
+        "id": {"$ne": current_user["id"]},  # Exclude self
+    }
+    users = await db.users.find(query, {"_id": 0, "password": 0}).to_list(100)
+
+    return [{
+        "id": u.get("id"),
+        "name": u.get("name", ""),
+        "email": u.get("email", ""),
+        "role": u.get("role", ""),
+        "active": u.get("active", True),
+        "created_at": str(u.get("created_at", ""))[:10] if u.get("created_at") else "",
+        "invited_by": u.get("invited_by"),
+    } for u in users]
+
+
+@router.post("/invite-sub-user")
+async def invite_sub_user(
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Media Client invites a sub-user to their workspace."""
+    if current_user.get("account_type") != "Media Client" and current_user.get("role") != "Media Client":
+        raise HTTPException(status_code=403, detail="Only Media Client users can invite sub-users")
+
+    name = body.get("name")
+    email = body.get("email", "").lower().strip()
+    if not name or not email:
+        raise HTTPException(status_code=400, detail="Name and email are required")
+
+    existing = await db.users.find_one({"email": email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    import uuid
+    from utils.helpers import hash_password
+    temp_password = f"Welcome{uuid.uuid4().hex[:6]}!"
+    now = datetime.now(timezone.utc).isoformat()
+
+    user = {
+        "id": str(uuid.uuid4()),
+        "name": name,
+        "email": email,
+        "password": hash_password(temp_password),
+        "role": "Media Client",
+        "account_type": "Media Client",
+        "team_id": current_user.get("team_id") or current_user.get("org_id"),
+        "invited_by": current_user["id"],
+        "active": True,
+        "force_password_change": True,
+        "created_at": now,
+        "specialty_ids": [],
+        "primary_specialty_id": None,
+        "specialty_id": None,
+        "permissions": {},
+        "can_pick": False,
+    }
+
+    await db.users.insert_one(user)
+
+    # Try to send welcome email
+    try:
+        from services.email import send_account_created_email
+        await send_account_created_email(
+            to_email=email,
+            user_name=name,
+            temp_password=temp_password,
+            role="Media Client"
+        )
+    except Exception as e:
+        import logging
+        logging.warning(f"Failed to send invite email: {e}")
+
+    return {"success": True, "id": user["id"], "name": name, "email": email}
+
+
+@router.delete("/{user_id}/revoke-access")
+async def revoke_sub_user_access(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Deactivate a sub-user. Only the inviting Media Client can do this."""
+    sub_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not sub_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if sub_user.get("invited_by") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only revoke access for users you invited")
+
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"active": False, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"success": True, "deactivated_user_id": user_id}
 
 
 @router.get("/all", response_model=List[UserResponse])

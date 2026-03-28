@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Shield, Key, Camera, Mail, Phone, FileText, Save, Loader2 } from 'lucide-react';
+import { User, Shield, Key, Camera, Mail, Phone, FileText, Save, Loader2, Users, Plus, X, CheckCircle2, UserX } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -69,10 +69,57 @@ export default function MyAccount() {
 
   if (!user) return null;
 
+  const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
+
+  // Workspace state (client sub-users)
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '' });
+  const [inviting, setInviting] = useState(false);
+
+  const fetchTeam = async () => {
+    setTeamLoading(true);
+    try {
+      const r = await axios.get(`${API}/users/my-team`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      setTeamMembers(r.data || []);
+    } catch { /* ignore for non-clients */ }
+    finally { setTeamLoading(false); }
+  };
+
+  useEffect(() => { if (isClient && tab === 'workspace') fetchTeam(); }, [tab]); // eslint-disable-line
+
+  const handleInvite = async (e) => {
+    e.preventDefault();
+    if (!inviteForm.name || !inviteForm.email) { toast.error('Name and email required'); return; }
+    setInviting(true);
+    try {
+      await axios.post(`${API}/users/invite-sub-user`, inviteForm, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      toast.success(`Invite sent to ${inviteForm.email}`);
+      setInviteForm({ name: '', email: '' });
+      setShowInvite(false);
+      fetchTeam();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to send invite');
+    } finally { setInviting(false); }
+  };
+
+  const handleRevoke = async (memberId, memberName) => {
+    if (!window.confirm(`Remove ${memberName} from your workspace? They will lose portal access.`)) return;
+    try {
+      await axios.delete(`${API}/users/${memberId}/revoke-access`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      toast.success(`${memberName} removed`);
+      fetchTeam();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to revoke access');
+    }
+  };
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Security', icon: Key },
     { id: 'account', label: 'Account', icon: Shield },
+    ...(isClient ? [{ id: 'workspace', label: 'Workspace', icon: Users }] : []),
   ];
 
   return (
@@ -206,6 +253,94 @@ export default function MyAccount() {
           <div style={{ marginTop: 20, padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: 8, fontSize: 11, color: 'var(--tx-3)' }}>
             Account ID: <span style={{ fontFamily: 'monospace' }}>{user.id}</span>
           </div>
+        </div>
+      )}
+
+      {/* ── Workspace Tab (Media Clients only) ── */}
+      {tab === 'workspace' && isClient && (
+        <div>
+          <div className="card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px', color: 'var(--tx-1)' }}>Team Members</h3>
+                <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>Manage who has access to your workspace</p>
+              </div>
+              <button onClick={() => setShowInvite(true)} className="btn-primary btn-sm" style={{ gap: 5 }}>
+                <Plus size={13} /> Invite Member
+              </button>
+            </div>
+
+            {teamLoading ? (
+              <div style={{ textAlign: 'center', padding: 32 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
+            ) : teamMembers.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                <Users size={28} style={{ color: 'var(--tx-3)', opacity: 0.4, marginBottom: 8 }} />
+                <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: 0 }}>No team members yet. Invite someone to collaborate.</p>
+              </div>
+            ) : (
+              <div style={{ overflow: 'hidden', borderRadius: 8, border: '1px solid var(--border)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <th style={{ padding: '8px 12px', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '.05em' }}>Name</th>
+                      <th style={{ padding: '8px 12px', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '.05em' }}>Email</th>
+                      <th style={{ padding: '8px 12px', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.05em' }}>Status</th>
+                      <th style={{ padding: '8px 12px', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textAlign: 'right', textTransform: 'uppercase', letterSpacing: '.05em' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teamMembers.map(m => (
+                      <tr key={m.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500, color: 'var(--tx-1)' }}>{m.name}</td>
+                        <td style={{ padding: '10px 12px', fontSize: 13, color: 'var(--tx-2)' }}>{m.email}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                          <span className={`pill ${m.active !== false ? 'pill-green' : 'pill-red'}`}>
+                            {m.active !== false ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                          {m.active !== false && (
+                            <button onClick={() => handleRevoke(m.id, m.name)} className="btn-ghost btn-xs" style={{ color: '#ef4444', borderColor: '#ef444440', gap: 4 }}>
+                              <UserX size={11} /> Revoke
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Invite Modal */}
+          {showInvite && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, width: 400, maxWidth: '90%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Invite Team Member</h3>
+                  <button onClick={() => setShowInvite(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
+                </div>
+                <form onSubmit={handleInvite} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Full Name</label>
+                    <input className="input-field" value={inviteForm.name} onChange={e => setInviteForm(p => ({ ...p, name: e.target.value }))} placeholder="Jane Smith" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Email Address</label>
+                    <input className="input-field" type="email" value={inviteForm.email} onChange={e => setInviteForm(p => ({ ...p, email: e.target.value }))} placeholder="jane@example.com" />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
+                    <button type="button" onClick={() => setShowInvite(false)} className="btn-ghost">Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={inviting} style={{ gap: 5 }}>
+                      {inviting ? <Loader2 size={14} className="spin" /> : <CheckCircle2 size={14} />}
+                      {inviting ? 'Sending...' : 'Send Invite'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
