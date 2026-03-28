@@ -24,11 +24,13 @@ const health = s => s >= 70
   ? { color:'#f59e0b', label:'Watch',   bg:'#f59e0b18' }
   : { color:'#ef4444', label:'At Risk', bg:'#ef444418' };
 
-const PLAN_CONFIG = {
-  Starter: { price:1200, color:'#3b82f6', desc:'Up to 15 requests/mo · 1 user' },
-  Growth:  { price:2500, color:'#a855f7', desc:'Up to 30 requests/mo · 3 users' },
-  Pro:     { price:3800, color:'#f59e0b', desc:'Unlimited requests · 5 users' },
+// Fallback plan config — overridden by API data when available
+const PLAN_CONFIG_FALLBACK = {
+  Starter: { price:0, color:'#3b82f6' },
+  Growth:  { price:0, color:'#a855f7' },
+  Pro:     { price:0, color:'#f59e0b' },
 };
+const PLAN_COLORS = ['#3b82f6','#a855f7','#f59e0b','#22c55e','#ec4899','#06b6d4'];
 
 const PORTAL_STATUS = {
   active:   { label:'Portal Active',  color:'#22c55e', bg:'#22c55e18', icon: CheckCircle2 },
@@ -159,7 +161,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
         _id: userId || `c${Date.now()}`,
         name: form.name,
         plan: form.plan,
-        mrr: PLAN_CONFIG[form.plan]?.price || 0,
+        mrr: planConfig[form.plan]?.price || 0,
         score: 75,
         renewal: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
         requests_open: 0,
@@ -293,7 +295,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
 
           {step === 3 && (
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              {Object.entries(PLAN_CONFIG).map(([name, cfg]) => (
+              {Object.entries(planConfig).map(([name, cfg]) => (
                 <div key={name} onClick={() => f('plan', name)}
                   style={{ padding:'14px 16px', borderRadius:10, border:`2px solid ${form.plan === name ? cfg.color : 'var(--border)'}`, background: form.plan === name ? `${cfg.color}0d` : 'var(--bg-elevated)', cursor:'pointer', display:'flex', alignItems:'center', gap:14, transition:'all .12s' }}>
                   <div style={{ width:36, height:36, borderRadius:9, background:`${cfg.color}22`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -357,7 +359,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
                   {[
                     ['Contact',   form.contact_name || '—'],
                     ['Email',     form.contact_email || '—'],
-                    ['Plan',      form.plan ? `${form.plan} · $${PLAN_CONFIG[form.plan]?.price?.toLocaleString()}/mo` : '—'],
+                    ['Plan',      form.plan ? `${form.plan} · $${planConfig[form.plan]?.price?.toLocaleString()}/mo` : '—'],
                     ['Manager',   form.am || 'Unassigned'],
                   ].map(([l,v]) => (
                     <div key={l}>
@@ -480,7 +482,7 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
       onUpdate({
         ...client,
         ...editForm,
-        mrr: PLAN_CONFIG[editForm.plan]?.price || client.mrr,
+        mrr: planConfig[editForm.plan]?.price || client.mrr,
       });
       setEditing(false);
       toast.success('Client updated');
@@ -522,7 +524,7 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
             <div>
               <div style={{ fontSize:15, fontWeight:800, marginBottom:2 }}>{client.name}</div>
               <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center' }}>
-                <span style={{ fontSize:11, padding:'1px 7px', background:`${PLAN_CONFIG[client.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[client.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>{client.plan}</span>
+                <span style={{ fontSize:11, padding:'1px 7px', background:`${planConfig[client.plan]?.color || '#606060'}18`, borderRadius:4, color:planConfig[client.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>{client.plan}</span>
                 <PortalBadge status={client.portal || 'none'} />
                 {client.tags?.map(t=><TagPill key={t} tag={t}/>)}
               </div>
@@ -745,7 +747,7 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
               <div>
                 <label style={labelStyle}>Plan</label>
                 <select className="input-field" value={editForm.plan} onChange={e => setEditForm(p=>({...p,plan:e.target.value}))}>
-                  {Object.keys(PLAN_CONFIG).map(p => <option key={p} value={p}>{p} — ${PLAN_CONFIG[p].price}/mo</option>)}
+                  {Object.keys(planConfig).map(p => <option key={p} value={p}>{p} — ${planConfig[p].price}/mo</option>)}
                 </select>
               </div>
               <div>
@@ -900,7 +902,7 @@ function ClientDetailPanel({ client, onClose, onUpdate, teamMembers = [] }) {
               </div>
               <div style={{ textAlign:'right' }}>
                 <div style={{ fontSize:10, color:'var(--tx-3)', textTransform:'uppercase', letterSpacing:'0.05em', fontWeight:600, marginBottom:4 }}>Plan</div>
-                <span style={{ fontSize:13, padding:'3px 10px', background:`${PLAN_CONFIG[client.plan]?.color || '#606060'}18`, borderRadius:5, color:PLAN_CONFIG[client.plan]?.color || 'var(--tx-3)', fontWeight:700 }}>{client.plan}</span>
+                <span style={{ fontSize:13, padding:'3px 10px', background:`${planConfig[client.plan]?.color || '#606060'}18`, borderRadius:5, color:planConfig[client.plan]?.color || 'var(--tx-3)', fontWeight:700 }}>{client.plan}</span>
               </div>
             </div>
 
@@ -1156,15 +1158,28 @@ export default function Clients() {
   const [teamMembers, setTeamMembers] = useState([]);
   const [view, setView] = useState(() => localStorage.getItem('clients_view') || 'grid');
   const [onboardingMap, setOnboardingMap] = useState({});
+  const [planConfig, setPlanConfig] = useState(PLAN_CONFIG_FALLBACK);
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Fetch all users and onboarding checklists in parallel
-        const [r, obRes] = await Promise.all([
+        // Fetch all users, onboarding checklists, and subscription plans in parallel
+        const [r, obRes, plansRes] = await Promise.all([
           ax().get(`${API}/users`),
           ax().get(`${API}/onboarding`).catch(() => ({ data: [] })),
+          ax().get(`${API}/subscription-plans`).catch(() => ({ data: [] })),
         ]);
+
+        // Build dynamic plan config from API
+        const apiPlans = plansRes.data || [];
+        if (apiPlans.length > 0) {
+          const pc = {};
+          apiPlans.forEach((p, i) => {
+            pc[p.name] = { price: p.price_monthly || 0, color: PLAN_COLORS[i % PLAN_COLORS.length], desc: p.description || '' };
+          });
+          setPlanConfig(pc);
+        }
+
         const d = r.data;
         const arr = Array.isArray(d) ? d : d?.items || [];
 
@@ -1188,7 +1203,7 @@ export default function Clients() {
             _id: u.id || u._id,
             name: u.company_name || u.name || u.email,
             plan: u.subscription_plan_name || 'Starter',
-            mrr: PLAN_CONFIG[u.subscription_plan_name]?.price || 0,
+            mrr: planConfig[u.subscription_plan_name]?.price || 0,
             score: 70,
             renewal: '',
             requests_open: 0,
@@ -1319,7 +1334,7 @@ export default function Clients() {
           ) : view === 'grid' ? (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:14, padding:'16px 20px' }}>
               {display.map(c => {
-                const planCfg = PLAN_CONFIG[c.plan] || {};
+                const planCfg = planConfig[c.plan] || {};
                 return (
                   <div key={c._id} onClick={() => navigate(`/clients/${c._id || c.id}`)}
                     style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:10, padding:'16px', cursor:'pointer', transition:'box-shadow .15s, transform .15s' }}
@@ -1387,7 +1402,7 @@ export default function Clients() {
                       </td>
                       <td><PortalBadge status={c.portal || 'none'} /></td>
                       <td>
-                        <span style={{ fontSize:11.5, padding:'2px 8px', background:`${PLAN_CONFIG[c.plan]?.color || '#606060'}18`, borderRadius:4, color:PLAN_CONFIG[c.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>
+                        <span style={{ fontSize:11.5, padding:'2px 8px', background:`${planConfig[c.plan]?.color || '#606060'}18`, borderRadius:4, color:planConfig[c.plan]?.color || 'var(--tx-3)', fontWeight:600 }}>
                           {c.plan}
                         </span>
                       </td>

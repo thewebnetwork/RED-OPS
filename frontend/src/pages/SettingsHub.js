@@ -143,10 +143,12 @@ function ClientAccountsSection() {
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [plans, setPlans] = useState([]);
   const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     fetchClients();
+    ax().get(`${API}/subscription-plans`).then(r => setPlans(r.data || [])).catch(() => {});
   }, []);
 
   const fetchClients = async () => {
@@ -312,9 +314,8 @@ function ClientAccountsSection() {
                   <td style={{ padding: '12px' }}>
                     {editing === client.id ? (
                       <select style={inpStyle} value={editForm.plan} onChange={e => setEditForm(f => ({ ...f, plan: e.target.value }))}>
-                        <option value="Standard">Standard</option>
-                        <option value="Premium">Premium</option>
-                        <option value="Enterprise">Enterprise</option>
+                        <option value="">Select plan...</option>
+                        {plans.map(p => <option key={p.id} value={p.name}>{p.name}{p.price_monthly ? ` — $${p.price_monthly}/mo` : ''}</option>)}
                       </select>
                     ) : (
                       <span style={{ display: 'inline-block', padding: '4px 8px', fontSize: '11px', fontWeight: '500', background: 'var(--accent)', color: '#fff', borderRadius: '4px' }}>
