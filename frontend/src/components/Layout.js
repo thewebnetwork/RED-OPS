@@ -31,6 +31,7 @@ import {
   ArrowLeftRight,
   Eye,
   ClipboardCheck,
+  MessageSquare,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -42,6 +43,7 @@ const NAV_MAIN = [
   { path: '/task-board', icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
   { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/conversations', icon: MessageSquare, label: 'Messages', roles: ['Administrator','Operator','Standard User','Media Client'] },
   { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
   { path: '/client-onboarding', icon: ClipboardCheck, label: 'Onboarding', roles: ['Administrator','Operator'] },
   { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
@@ -61,6 +63,7 @@ const NAV_CLIENT = [
   { path: '/tasks',        icon: CheckSquare,     label: 'My Tasks',       roles: ['Media Client'] },
   { path: '/projects',     icon: FolderKanban,    label: 'My Projects',    roles: ['Media Client'] },
   { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
+  { path: '/conversations', icon: MessageSquare, label: 'Messages', roles: ['Media Client'] },
   { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Media Client'] },
   { path: '/knowledge-base?tab=sops', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },

@@ -36,6 +36,7 @@ from .finance import router as finance_router
 from .onboarding import router as onboarding_router
 from .exports import router as exports_router
 from .documents import router as documents_router
+from .messages import router as messages_router
 
 __all__ = [
     "auth_router",
@@ -73,4 +74,5 @@ __all__ = [
     "onboarding_router",
     "exports_router",
     "documents_router",
+    "messages_router",
 ]

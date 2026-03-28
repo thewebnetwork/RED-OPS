@@ -53,6 +53,7 @@ from routes import (
     onboarding_router,
     exports_router,
     documents_router,
+    messages_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -293,6 +294,7 @@ app.include_router(finance_router, prefix="/api")  # Finance Dashboard
 app.include_router(onboarding_router, prefix="/api")  # Client Onboarding Checklists
 app.include_router(exports_router, prefix="/api")  # CSV Exports
 app.include_router(documents_router, prefix="/api")  # Document Editor
+app.include_router(messages_router, prefix="/api")  # In-Platform Messaging
 
 
 @app.get("/")

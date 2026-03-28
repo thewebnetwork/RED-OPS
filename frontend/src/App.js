@@ -74,6 +74,7 @@ import AdPerformance from "./pages/AdPerformance";
 import Onboarding from "./pages/Onboarding";
 import Documents from "./pages/Documents";
 import KnowledgeBase from "./pages/KnowledgeBase";
+import Conversations from "./pages/Conversations";
 import NotFound from "./pages/NotFound";
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -176,7 +177,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications', '/conversations'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
@@ -329,6 +330,7 @@ function AppRoutes() {
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/knowledge-base" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
       <Route path="/sops" element={<Navigate to="/knowledge-base?tab=sops" replace />} />
+      <Route path="/conversations" element={<PrivateRoute><Conversations /></PrivateRoute>} />
       <Route path="/ad-performance" element={<PrivateRoute><AdPerformance /></PrivateRoute>} />
       <Route path="/client-onboarding" element={<PrivateRoute roles={['Administrator','Operator']}><Onboarding /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
