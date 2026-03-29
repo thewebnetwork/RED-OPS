@@ -180,7 +180,7 @@ function ClientAccountsSection() {
 
   const startEdit = (client) => {
     setEditing(client.id);
-    setEditForm({ name: client.name || '', email: client.email || '', company: client.company || '', plan: client.plan || 'Standard' });
+    setEditForm({ name: client.name || '', email: client.email || '', company: client.company || '', subscription_plan_name: client.subscription_plan_name || '' });
   };
 
   const cancelEdit = () => { setEditing(null); setEditForm({}); };
@@ -313,13 +313,13 @@ function ClientAccountsSection() {
                   </td>
                   <td style={{ padding: '12px' }}>
                     {editing === client.id ? (
-                      <select style={inpStyle} value={editForm.plan} onChange={e => setEditForm(f => ({ ...f, plan: e.target.value }))}>
-                        <option value="">Select plan...</option>
+                      <select style={inpStyle} value={editForm.subscription_plan_name || ''} onChange={e => setEditForm(f => ({ ...f, subscription_plan_name: e.target.value }))}>
+                        <option value="">No plan</option>
                         {plans.map(p => <option key={p.id} value={p.name}>{p.name}{p.price_monthly ? ` — $${p.price_monthly}/mo` : ''}</option>)}
                       </select>
                     ) : (
-                      <span style={{ display: 'inline-block', padding: '4px 8px', fontSize: '11px', fontWeight: '500', background: 'var(--accent)', color: '#fff', borderRadius: '4px' }}>
-                        {client.plan || 'Standard'}
+                      <span style={{ display: 'inline-block', padding: '4px 8px', fontSize: '11px', fontWeight: '500', background: client.subscription_plan_name ? 'var(--accent)' : 'var(--surface-2)', color: client.subscription_plan_name ? '#fff' : 'var(--tx-3)', borderRadius: '4px' }}>
+                        {client.subscription_plan_name || '—'}
                       </span>
                     )}
                   </td>
