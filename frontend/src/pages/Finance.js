@@ -35,7 +35,7 @@ const monthLabel = (ym) => {
 
 // ── Transaction Form ────────────────────────────────────────────────────────
 
-const CATEGORIES = ['Ad Spend', 'Software', 'Salary', 'Freelancer', 'Tools', 'Revenue', 'Refund', 'Other'];
+// Categories fetched from DB — no hardcoded list
 
 function TransactionDialog({ tx, categories, clients, users, onSave, onClose, saving }) {
   const isEdit = !!tx?.id;
@@ -536,7 +536,7 @@ export default function Finance() {
       {/* Category + Assignee Filters */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {['All', ...CATEGORIES].map(cat => (
+          {['All', ...(categories?.items || []).map(c => c.name)].map(cat => (
             <button key={cat} onClick={() => setFilterCategory(cat)}
               style={{
                 padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, cursor: 'pointer',

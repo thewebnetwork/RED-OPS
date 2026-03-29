@@ -23,6 +23,7 @@ const SECTIONS = [
   { id: 'specialties', label: 'Specialties', icon: Tag, inline: true },
   { id: 'plans', label: 'Subscription Plans', icon: CreditCard, inline: true },
   { id: 'categories', label: 'Categories', icon: FolderTree, inline: false, path: '/categories' },
+  { id: 'finance-categories', label: 'Finance Categories', icon: DollarSign, inline: true },
   { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
   { id: 'email', label: 'Email', icon: Mail, inline: false, path: '/email-settings' },
   { id: 'integrations', label: 'Integrations', icon: Plug, inline: false, path: '/integrations' },
@@ -967,6 +968,126 @@ function SpecialtiesSection() {
 
 // ── Subscription Plans Management Section ────────────────────────────────────
 
+// ── Finance Categories Section ───────────────────────────────────────────────
+
+function FinanceCategoriesSection() {
+  const [cats, setCats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState('');
+  const [newType, setNewType] = useState('expense');
+  const [newColor, setNewColor] = useState('#6366f1');
+  const [editingCat, setEditingCat] = useState(null);
+
+  useEffect(() => { fetchCats(); }, []);
+
+  const fetchCats = async () => {
+    try {
+      setLoading(true);
+      const res = await ax().get(`${API}/finance/categories`);
+      setCats(res.data?.items || []);
+    } catch { toast.error('Failed to load categories'); }
+    finally { setLoading(false); }
+  };
+
+  const handleAdd = async () => {
+    if (!newName.trim()) return;
+    try {
+      await ax().post(`${API}/finance/categories`, { name: newName.trim(), type: newType, color: newColor });
+      setNewName('');
+      toast.success('Category added');
+      fetchCats();
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to add'); }
+  };
+
+  const handleSave = async (id) => {
+    try {
+      await ax().patch(`${API}/finance/categories/${id}`, { name: editingCat.name, type: editingCat.type, color: editingCat.color });
+      setEditingCat(null);
+      toast.success('Category updated');
+      fetchCats();
+    } catch { toast.error('Failed to update'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this category? Existing transactions keep their label.')) return;
+    try {
+      await ax().delete(`${API}/finance/categories/${id}`);
+      toast.success('Category deleted');
+      fetchCats();
+    } catch { toast.error('Failed to delete'); }
+  };
+
+  const inpStyle = {
+    padding: '8px 10px', fontSize: 13, borderRadius: 8,
+    border: '1px solid var(--border)', background: 'var(--surface-2)',
+    color: 'var(--tx-1)', outline: 'none', boxSizing: 'border-box',
+  };
+
+  return (
+    <div>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: 'var(--tx-1)' }}>Finance Categories</h3>
+      <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>Used in Finance to tag and filter transactions.</p>
+
+      {/* Add new */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, alignItems: 'center' }}>
+        <input style={{ ...inpStyle, flex: 1 }} value={newName} onChange={e => setNewName(e.target.value)}
+          placeholder="Category name" onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }} />
+        <select style={inpStyle} value={newType} onChange={e => setNewType(e.target.value)}>
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+          <option value="both">Both</option>
+        </select>
+        <input type="color" value={newColor} onChange={e => setNewColor(e.target.value)}
+          style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', padding: 2 }} />
+        <button onClick={handleAdd} className="btn-primary btn-sm" style={{ gap: 4 }}>
+          <Plus size={13} /> Add
+        </button>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
+      ) : cats.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)', fontSize: 13 }}>No categories yet. Add one above.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {cats.map(cat => (
+            <div key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+              {editingCat?.id === cat.id ? (
+                <>
+                  <input type="color" value={editingCat.color || '#6366f1'} onChange={e => setEditingCat(p => ({ ...p, color: e.target.value }))}
+                    style={{ width: 28, height: 28, borderRadius: 6, border: 'none', cursor: 'pointer', padding: 0 }} />
+                  <input style={{ ...inpStyle, flex: 1 }} value={editingCat.name} onChange={e => setEditingCat(p => ({ ...p, name: e.target.value }))} />
+                  <select style={{ ...inpStyle, width: 'auto' }} value={editingCat.type} onChange={e => setEditingCat(p => ({ ...p, type: e.target.value }))}>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                    <option value="both">Both</option>
+                  </select>
+                  <button onClick={() => handleSave(cat.id)} style={{ fontSize: 11, color: '#22c55e', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Save</button>
+                  <button onClick={() => setEditingCat(null)} style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color || '#6366f1', flexShrink: 0 }} />
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--tx-1)' }}>{cat.name}</span>
+                  <span style={{
+                    fontSize: 10, padding: '2px 6px', borderRadius: 10, fontWeight: 600,
+                    background: cat.type === 'income' ? '#22c55e18' : cat.type === 'expense' ? '#ef444418' : 'var(--surface-3)',
+                    color: cat.type === 'income' ? '#22c55e' : cat.type === 'expense' ? '#ef4444' : 'var(--tx-3)',
+                  }}>{cat.type}</span>
+                  <button onClick={() => setEditingCat({ ...cat })} style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer' }}>Edit</button>
+                  <button onClick={() => handleDelete(cat.id)} style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function SubscriptionPlansSection() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1418,6 +1539,7 @@ export default function SettingsHub() {
           {activeSection === 'services' && <ServicesSection />}
           {activeSection === 'specialties' && <SpecialtiesSection />}
           {activeSection === 'plans' && <SubscriptionPlansSection />}
+          {activeSection === 'finance-categories' && <FinanceCategoriesSection />}
           {SECTIONS.find((s) => s.id === activeSection && !s.inline) && (
             <NavigationCard section={SECTIONS.find((s) => s.id === activeSection)} />
           )}

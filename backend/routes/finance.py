@@ -207,19 +207,101 @@ async def get_financial_summary(
 
 # ── Categories Endpoint ──────────────────────────────────────────────────────
 
+DEFAULT_FINANCE_CATEGORIES = [
+    {"name": "Ad Spend", "type": "expense", "color": "#ef4444"},
+    {"name": "Software & Tools", "type": "expense", "color": "#f97316"},
+    {"name": "Salary", "type": "expense", "color": "#eab308"},
+    {"name": "Freelancer", "type": "expense", "color": "#a855f7"},
+    {"name": "Revenue", "type": "income", "color": "#22c55e"},
+    {"name": "Retainer", "type": "income", "color": "#10b981"},
+    {"name": "Refund", "type": "income", "color": "#06b6d4"},
+    {"name": "Other", "type": "both", "color": "#6b7280"},
+]
+
+
+class FinanceCategoryCreate(BaseModel):
+    name: str
+    type: str = "expense"  # income | expense | both
+    color: Optional[str] = "#6366f1"
+
+
+class FinanceCategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    color: Optional[str] = None
+
+
 @router.get("/categories")
 async def get_finance_categories(
-    current_user: dict = Depends(require_roles(["Administrator"]))
+    current_user: dict = Depends(get_current_user)
 ):
-    """Get distinct transaction categories used so far"""
-    income_cats = await db.finance_transactions.distinct("category", {"type": "income"})
-    expense_cats = await db.finance_transactions.distinct("category", {"type": "expense"})
+    """Get finance categories. Auto-seeds defaults if none exist."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    count = await db.finance_categories.count_documents({"org_id": org_id})
 
-    # Merge with defaults
-    default_income = ["Retainer", "Project Fee", "Consultation", "Ad Spend Markup", "Other Income"]
-    default_expense = ["Payroll", "Software", "Ads", "Office", "Contractors", "Marketing", "Other Expense"]
+    if count == 0:
+        docs = []
+        for d in DEFAULT_FINANCE_CATEGORIES:
+            docs.append({
+                "id": str(uuid.uuid4()),
+                "org_id": org_id,
+                "name": d["name"],
+                "type": d["type"],
+                "color": d["color"],
+            })
+        await db.finance_categories.insert_many(docs)
+
+    cats = await db.finance_categories.find({"org_id": org_id}, {"_id": 0}).sort("name", 1).to_list(100)
+
+    # Also return legacy format for backward compat with transaction modal
+    income = [c["name"] for c in cats if c["type"] in ["income", "both"]]
+    expense = [c["name"] for c in cats if c["type"] in ["expense", "both"]]
 
     return {
-        "income": sorted(set(default_income + income_cats)),
-        "expense": sorted(set(default_expense + expense_cats)),
+        "items": cats,
+        "income": sorted(income),
+        "expense": sorted(expense),
     }
+
+
+@router.post("/categories")
+async def create_finance_category(
+    data: FinanceCategoryCreate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Create a new finance category."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "org_id": org_id,
+        "name": data.name,
+        "type": data.type,
+        "color": data.color or "#6366f1",
+    }
+    await db.finance_categories.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.patch("/categories/{category_id}")
+async def update_finance_category(
+    category_id: str,
+    data: FinanceCategoryUpdate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update a finance category."""
+    update = {k: v for k, v in data.dict().items() if v is not None}
+    if not update:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.finance_categories.update_one({"id": category_id}, {"$set": update})
+    return {"success": True}
+
+
+@router.delete("/categories/{category_id}")
+async def delete_finance_category(
+    category_id: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Delete a finance category. Existing transactions keep their label."""
+    await db.finance_categories.delete_one({"id": category_id})
+    return {"success": True}
