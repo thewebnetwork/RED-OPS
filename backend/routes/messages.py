@@ -156,6 +156,79 @@ async def get_thread(
     return thread
 
 
+@router.patch("/threads/{thread_id}/members")
+async def update_thread_members(
+    thread_id: str,
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add or remove members from a thread."""
+    thread = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    if current_user["id"] not in thread.get("members", []):
+        raise HTTPException(status_code=403, detail="Not a member of this thread")
+
+    add_ids = body.get("add", [])
+    remove_ids = body.get("remove", [])
+
+    if add_ids:
+        await db.threads.update_one(
+            {"id": thread_id},
+            {"$addToSet": {"members": {"$each": add_ids}}}
+        )
+    if remove_ids:
+        await db.threads.update_one(
+            {"id": thread_id},
+            {"$pull": {"members": {"$in": remove_ids}}}
+        )
+
+    updated = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    return updated
+
+
+@router.patch("/threads/{thread_id}/messages/{message_id}")
+async def edit_message(
+    thread_id: str,
+    message_id: str,
+    body: MessageCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Edit a message. Only the sender can edit."""
+    msg = await db.messages.find_one({"id": message_id, "thread_id": thread_id}, {"_id": 0})
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if msg.get("sender_id") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only edit your own messages")
+
+    await db.messages.update_one(
+        {"id": message_id},
+        {"$set": {"body": body.body.strip(), "edited_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"success": True, "message_id": message_id}
+
+
+@router.delete("/threads/{thread_id}/messages/{message_id}")
+async def delete_message(
+    thread_id: str,
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a message. Only the sender or admin can delete."""
+    msg = await db.messages.find_one({"id": message_id, "thread_id": thread_id}, {"_id": 0})
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    is_sender = msg.get("sender_id") == current_user["id"]
+    is_admin = current_user.get("role") in ["Administrator", "Admin"]
+    if not is_sender and not is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this message")
+
+    await db.messages.delete_one({"id": message_id})
+    return {"success": True, "deleted_message_id": message_id}
+
+
 @router.get("/threads/by-reference/{reference_id}")
 async def get_thread_by_reference(
     reference_id: str,

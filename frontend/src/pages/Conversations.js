@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
   MessageSquare, Plus, X, Send, Hash, User, FileText,
-  Loader2, Circle, Search, ChevronDown,
+  Loader2, Pencil, Trash2, Users, Check,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -35,15 +35,23 @@ function timeAgo(dt) {
 function NewThreadModal({ type, onClose, onCreate, users }) {
   const [name, setName] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
+  const [selectedMembers, setSelectedMembers] = useState(new Set());
   const [search, setSearch] = useState('');
+
+  const toggleMember = (id) => {
+    setSelectedMembers(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const handleCreate = () => {
     if (type === 'channel') {
       if (!name.trim()) { toast.error('Channel name required'); return; }
-      onCreate({ type: 'channel', name: `#${name.trim().toLowerCase().replace(/\s+/g, '-')}`, members: [] });
+      onCreate({ type: 'channel', name: `#${name.trim().toLowerCase().replace(/\s+/g, '-')}`, members: Array.from(selectedMembers) });
     } else {
       if (!selectedUser) { toast.error('Select a user'); return; }
-      const u = users.find(u => u.id === selectedUser);
       onCreate({ type: 'dm', name: null, members: [selectedUser] });
     }
     onClose();
@@ -53,7 +61,7 @@ function NewThreadModal({ type, onClose, onCreate, users }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, width: 380, maxWidth: '90%' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, width: 400, maxWidth: '90%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>
             {type === 'channel' ? 'New Channel' : 'New Message'}
@@ -61,9 +69,32 @@ function NewThreadModal({ type, onClose, onCreate, users }) {
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
         </div>
         {type === 'channel' ? (
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Channel Name</label>
-            <input className="input-field" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. general" autoFocus />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Channel Name</label>
+              <input className="input-field" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. general" autoFocus />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Members ({selectedMembers.size})</label>
+              <input className="input-field" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users..." style={{ marginBottom: 6 }} />
+              <div style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 6 }}>
+                {filtered.map(u => {
+                  const sel = selectedMembers.has(u.id);
+                  return (
+                    <div key={u.id} onClick={() => toggleMember(u.id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', cursor: 'pointer', background: sel ? 'var(--accent-soft)' : 'transparent', fontSize: 13 }}
+                      onMouseEnter={e => { if (!sel) e.currentTarget.style.background = 'var(--surface-2)'; }}
+                      onMouseLeave={e => { if (!sel) e.currentTarget.style.background = sel ? 'var(--accent-soft)' : 'transparent'; }}>
+                      <input type="checkbox" checked={sel} readOnly style={{ accentColor: 'var(--accent)', cursor: 'pointer' }} />
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: avatarBg(u.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                        {initials(u.name)}
+                      </div>
+                      <span style={{ color: 'var(--tx-1)' }}>{u.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div>
@@ -104,6 +135,10 @@ export default function Conversations() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [showNewModal, setShowNewModal] = useState(null); // 'channel' | 'dm' | null
+  const [showMembers, setShowMembers] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [editingMsg, setEditingMsg] = useState(null);
+  const [editText, setEditText] = useState('');
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
   const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
@@ -161,6 +196,45 @@ export default function Conversations() {
       setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, last_message_preview: newMsg.slice(0, 80), last_message_at: new Date().toISOString() } : t));
     } catch { toast.error('Failed to send'); }
     finally { setSending(false); }
+  };
+
+  // Member management
+  const addMember = async (userId) => {
+    if (!activeThread) return;
+    try {
+      const res = await ax().patch(`${API}/messages/threads/${activeThread.id}/members`, { add: [userId] });
+      setActiveThread(res.data);
+      setMemberSearch('');
+      fetchThreads();
+    } catch { toast.error('Failed to add member'); }
+  };
+
+  const removeMember = async (userId) => {
+    if (!activeThread) return;
+    try {
+      const res = await ax().patch(`${API}/messages/threads/${activeThread.id}/members`, { remove: [userId] });
+      setActiveThread(res.data);
+      fetchThreads();
+    } catch { toast.error('Failed to remove member'); }
+  };
+
+  // Message edit/delete
+  const saveEditMsg = async () => {
+    if (!editingMsg || !editText.trim()) return;
+    try {
+      await ax().patch(`${API}/messages/threads/${activeThread.id}/messages/${editingMsg}`, { body: editText.trim() });
+      setMessages(prev => prev.map(m => m.id === editingMsg ? { ...m, body: editText.trim() } : m));
+      setEditingMsg(null);
+      setEditText('');
+    } catch { toast.error('Failed to edit message'); }
+  };
+
+  const deleteMsg = async (msgId) => {
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      await ax().delete(`${API}/messages/threads/${activeThread.id}/messages/${msgId}`);
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    } catch { toast.error('Failed to delete message'); }
   };
 
   const createThread = async (data) => {
@@ -270,10 +344,54 @@ export default function Conversations() {
         {activeThread ? (
           <>
             {/* Thread header */}
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative' }}>
               <ThreadIcon type={activeThread.type} />
               <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{getThreadDisplayName(activeThread)}</span>
-              <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{activeThread.members?.length || 0} members</span>
+              <button onClick={() => setShowMembers(!showMembers)}
+                style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Users size={12} /> {activeThread.members?.length || 0} members
+              </button>
+
+              {/* Members panel */}
+              {showMembers && (
+                <>
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={() => setShowMembers(false)} />
+                  <div style={{
+                    position: 'absolute', right: 20, top: '100%', marginTop: 4, width: 260, zIndex: 451,
+                    background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 10,
+                    boxShadow: '0 8px 24px rgba(0,0,0,.4)', overflow: 'hidden',
+                  }}>
+                    <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>Members</div>
+                    <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+                      {(activeThread.members || []).map(mid => {
+                        const mu = users.find(u => u.id === mid);
+                        return (
+                          <div key={mid} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', fontSize: 12 }}>
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', background: avatarBg(mid), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                              {initials(mu?.name || '?')}
+                            </div>
+                            <span style={{ flex: 1, color: 'var(--tx-1)' }}>{mu?.name || mid.slice(0, 8)}</span>
+                            {mid !== user?.id && activeThread.type === 'channel' && (
+                              <button onClick={() => removeMember(mid)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2 }}><X size={12} /></button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {activeThread.type === 'channel' && (
+                      <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)' }}>
+                        <select className="input-field" value="" onChange={e => { if (e.target.value) addMember(e.target.value); }}
+                          style={{ fontSize: 11, padding: '4px 8px' }}>
+                          <option value="">Add member...</option>
+                          {users.filter(u => !(activeThread.members || []).includes(u.id)).map(u => (
+                            <option key={u.id} value={u.id}>{u.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Messages */}
@@ -286,8 +404,11 @@ export default function Conversations() {
               {messages.map((msg, idx) => {
                 const isMine = msg.sender_id === user?.id;
                 const showAvatar = idx === 0 || messages[idx - 1]?.sender_id !== msg.sender_id;
+                const isEditing = editingMsg === msg.id;
                 return (
-                  <div key={msg.id} style={{ display: 'flex', gap: 10, padding: showAvatar ? '8px 0 2px' : '1px 0', alignItems: 'flex-start' }}>
+                  <div key={msg.id} style={{ display: 'flex', gap: 10, padding: showAvatar ? '8px 0 2px' : '1px 0', alignItems: 'flex-start', position: 'relative' }}
+                    onMouseEnter={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 1; }}
+                    onMouseLeave={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 0; }}>
                     {showAvatar ? (
                       <div style={{ width: 28, height: 28, borderRadius: '50%', background: avatarBg(msg.sender_id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0, marginTop: 2 }}>
                         {initials(msg.sender_name)}
@@ -300,8 +421,32 @@ export default function Conversations() {
                           <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{timeAgo(msg.created_at)}</span>
                         </div>
                       )}
-                      <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                      {isEditing ? (
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+                          <textarea value={editText} onChange={e => setEditText(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEditMsg(); } if (e.key === 'Escape') { setEditingMsg(null); } }}
+                            autoFocus rows={2}
+                            style={{ flex: 1, resize: 'none', background: 'var(--surface-2)', border: '1px solid var(--accent)', borderRadius: 6, padding: '6px 10px', fontSize: 13, color: 'var(--tx-1)', outline: 'none', fontFamily: 'inherit' }} />
+                          <button onClick={saveEditMsg} style={{ background: 'var(--accent)', border: 'none', borderRadius: 5, color: '#fff', cursor: 'pointer', padding: '5px 8px', display: 'flex' }}><Check size={14} /></button>
+                          <button onClick={() => setEditingMsg(null)} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 5, color: 'var(--tx-3)', cursor: 'pointer', padding: '5px 8px', display: 'flex' }}><X size={14} /></button>
+                        </div>
+                      ) : (
+                        <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                      )}
                     </div>
+                    {/* Hover action bar — only for own messages */}
+                    {isMine && !isEditing && (
+                      <div data-actions style={{ position: 'absolute', right: 0, top: showAvatar ? 6 : 0, display: 'flex', gap: 2, opacity: 0, transition: 'opacity .1s', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 5, padding: 2 }}>
+                        <button onClick={() => { setEditingMsg(msg.id); setEditText(msg.body); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 3, display: 'flex' }}>
+                          <Pencil size={12} />
+                        </button>
+                        <button onClick={() => deleteMsg(msg.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 3, display: 'flex' }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
