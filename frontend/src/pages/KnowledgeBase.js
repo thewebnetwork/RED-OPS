@@ -12,6 +12,17 @@ import Documents from './Documents';
 import Files from './Files';
 import { BookOpen, FileText } from 'lucide-react';
 
+/**
+ * Wrapper that renders Files with ?context=knowledge_base injected into the URL.
+ * Files.js reads context from useSearchParams, so we need it in the actual URL.
+ */
+function SOPsView() {
+  // Files component reads searchParams internally — we pass context via a key trick:
+  // Render Files and let it read 'context' from the real URL params.
+  // The parent KnowledgeBase sets tab=sops, so we append context as well.
+  return <Files defaultContext="knowledge_base" />;
+}
+
 const TABS = [
   { id: 'docs', label: 'Docs', icon: BookOpen },
   { id: 'sops', label: 'SOPs', icon: FileText },
@@ -50,7 +61,7 @@ export default function KnowledgeBase() {
       {/* Tab content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {tab === 'docs' && <Documents />}
-        {tab === 'sops' && <Files />}
+        {tab === 'sops' && <SOPsView />}
       </div>
     </div>
   );

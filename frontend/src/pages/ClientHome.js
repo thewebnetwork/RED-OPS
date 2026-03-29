@@ -243,7 +243,7 @@ export default function ClientHome() {
               {[
                 { label:'Account', value: user?.name || '—' },
                 { label:'Email',   value: user?.email || '—' },
-                { label:'Plan',    value: user?.subscription_plan_name || 'Standard' },
+                { label:'Plan',    value: user?.subscription_plan_name || '—' },
                 { label:'Role',    value: user?.account_type || user?.role || '—' },
               ].map(r => (
                 <div key={r.label} style={{ display:'flex', justifyContent:'space-between', fontSize:12 }}>

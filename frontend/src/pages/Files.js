@@ -85,7 +85,7 @@ const CONTEXT_TABS = [
   { key: 'knowledge_base', label: 'Knowledge Base', icon: BookOpen },
 ];
 
-export default function Files() {
+export default function Files({ defaultContext }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const userId = useMemo(() => getUserId(), []);
 
@@ -99,7 +99,7 @@ export default function Files() {
   // Navigation
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
-  const [contextFilter, setContextFilter] = useState(searchParams.get('context') || 'all');
+  const [contextFilter, setContextFilter] = useState(defaultContext || searchParams.get('context') || 'all');
 
   // Search
   const [search, setSearch] = useState('');

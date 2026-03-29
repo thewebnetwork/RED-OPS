@@ -177,7 +177,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications', '/conversations'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications', '/conversations', '/knowledge-base'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
