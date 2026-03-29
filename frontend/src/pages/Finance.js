@@ -209,6 +209,8 @@ export default function Finance() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
+  const [rangeMode, setRangeMode] = useState('month'); // 'month' | 'q1' | 'q2' | 'q3' | 'q4' | 'h1' | 'h2' | 'year'
+  const [rangeYear, setRangeYear] = useState(() => new Date().getFullYear());
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTx, setEditingTx] = useState(null);
@@ -217,12 +219,38 @@ export default function Finance() {
   const [filterType, setFilterType] = useState('');
   const [sort, setSort] = useState({ key: 'date', dir: 'desc' });
 
+  // Calculate date range based on mode
+  const getDateRange = useCallback(() => {
+    if (rangeMode === 'month') {
+      return { date_from: `${period}-01`, date_to: `${period}-31` };
+    }
+    const y = rangeYear;
+    const ranges = {
+      q1: { date_from: `${y}-01-01`, date_to: `${y}-03-31` },
+      q2: { date_from: `${y}-04-01`, date_to: `${y}-06-30` },
+      q3: { date_from: `${y}-07-01`, date_to: `${y}-09-30` },
+      q4: { date_from: `${y}-10-01`, date_to: `${y}-12-31` },
+      h1: { date_from: `${y}-01-01`, date_to: `${y}-06-30` },
+      h2: { date_from: `${y}-07-01`, date_to: `${y}-12-31` },
+      year: { date_from: `${y}-01-01`, date_to: `${y}-12-31` },
+    };
+    return ranges[rangeMode] || ranges.year;
+  }, [rangeMode, rangeYear, period]);
+
+  const getRangeLabel = () => {
+    if (rangeMode === 'month') return monthLabel(period);
+    const labels = { q1: 'Q1', q2: 'Q2', q3: 'Q3', q4: 'Q4', h1: 'H1', h2: 'H2', year: 'Full Year' };
+    return `${labels[rangeMode]} ${rangeYear}`;
+  };
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
+      const range = getDateRange();
+      const summaryPeriod = rangeMode === 'month' ? period : `${rangeYear}-01`;
       const [sumRes, txRes, catRes, usersRes] = await Promise.allSettled([
-        ax().get(`${API}/finance/summary`, { params: { period } }),
-        ax().get(`${API}/finance/transactions`, { params: { date_from: `${period}-01`, date_to: `${period}-31` } }),
+        ax().get(`${API}/finance/summary`, { params: { period: summaryPeriod } }),
+        ax().get(`${API}/finance/transactions`, { params: range }),
         ax().get(`${API}/finance/categories`),
         ax().get(`${API}/users`),
       ]);
@@ -238,7 +266,7 @@ export default function Finance() {
       }
     } catch { toast.error('Failed to load financial data'); }
     finally { setLoading(false); }
-  }, [period]);
+  }, [period, rangeMode, rangeYear, getDateRange]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -333,13 +361,44 @@ export default function Finance() {
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx-1)', margin: 0 }}>Finance Dashboard</h1>
           <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--tx-3)' }}>Track income, expenses, and profitability</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* Period Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 4px' }}>
-            <button onClick={() => shiftPeriod(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronLeft size={16} /></button>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)', minWidth: 90, textAlign: 'center' }}>{monthLabel(period)}</span>
-            <button onClick={() => shiftPeriod(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronRight size={16} /></button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Range Mode Selector */}
+          <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            {[
+              { id: 'month', label: 'Month' },
+              { id: 'q1', label: 'Q1' },
+              { id: 'q2', label: 'Q2' },
+              { id: 'q3', label: 'Q3' },
+              { id: 'q4', label: 'Q4' },
+              { id: 'h1', label: 'H1' },
+              { id: 'h2', label: 'H2' },
+              { id: 'year', label: 'Year' },
+            ].map(r => (
+              <button key={r.id} onClick={() => setRangeMode(r.id)}
+                style={{
+                  padding: '5px 9px', fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none',
+                  background: rangeMode === r.id ? 'var(--accent)' : 'var(--bg-elevated)',
+                  color: rangeMode === r.id ? '#fff' : 'var(--tx-3)', transition: 'all .1s',
+                }}>
+                {r.label}
+              </button>
+            ))}
           </div>
+
+          {/* Period Nav — month arrows or year selector */}
+          {rangeMode === 'month' ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 4px' }}>
+              <button onClick={() => shiftPeriod(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronLeft size={16} /></button>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)', minWidth: 90, textAlign: 'center' }}>{monthLabel(period)}</span>
+              <button onClick={() => shiftPeriod(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronRight size={16} /></button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: '2px 4px' }}>
+              <button onClick={() => setRangeYear(y => y - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronLeft size={16} /></button>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-1)', minWidth: 100, textAlign: 'center' }}>{getRangeLabel()}</span>
+              <button onClick={() => setRangeYear(y => y + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronRight size={16} /></button>
+            </div>
+          )}
           <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
             <Download size={13} /> Export
           </button>
@@ -358,7 +417,7 @@ export default function Finance() {
             <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>Income</span>
           </div>
           <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: '#22c55e', lineHeight: 1 }}>{fmt(income)}</p>
-          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{monthLabel(period)}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{getRangeLabel()}</span>
         </div>
 
         <div style={{ padding: '18px 20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
@@ -367,7 +426,7 @@ export default function Finance() {
             <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>Expenses</span>
           </div>
           <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: '#ef4444', lineHeight: 1 }}>{fmt(expenses)}</p>
-          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{monthLabel(period)}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{getRangeLabel()}</span>
         </div>
 
         <div style={{ padding: '18px 20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
@@ -376,7 +435,7 @@ export default function Finance() {
             <span style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>Net Profit</span>
           </div>
           <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: net >= 0 ? '#22c55e' : '#ef4444', lineHeight: 1 }}>{fmt(net)}</p>
-          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{monthLabel(period)}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4, display: 'block' }}>{getRangeLabel()}</span>
         </div>
 
         <div style={{ padding: '18px 20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
