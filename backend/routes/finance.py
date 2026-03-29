@@ -22,10 +22,12 @@ class TransactionCreate(BaseModel):
     date: str  # YYYY-MM-DD
     client_id: Optional[str] = None
     client_name: Optional[str] = None
+    team_member_id: Optional[str] = None
     reference: Optional[str] = None
     recurring: bool = False
     recurring_interval: Optional[str] = None  # monthly, quarterly, yearly
     notes: Optional[str] = None
+    source: Optional[str] = None  # "manual", "bank_import"
 
 class TransactionUpdate(BaseModel):
     type: Optional[str] = None
@@ -35,10 +37,12 @@ class TransactionUpdate(BaseModel):
     date: Optional[str] = None
     client_id: Optional[str] = None
     client_name: Optional[str] = None
+    team_member_id: Optional[str] = None
     reference: Optional[str] = None
     recurring: Optional[bool] = None
     recurring_interval: Optional[str] = None
     notes: Optional[str] = None
+    source: Optional[str] = None
 
 
 # ── CRUD Endpoints ───────────────────────────────────────────────────────────

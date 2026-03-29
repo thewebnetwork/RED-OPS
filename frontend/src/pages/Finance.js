@@ -35,8 +35,11 @@ const monthLabel = (ym) => {
 
 // ── Transaction Form ────────────────────────────────────────────────────────
 
-function TransactionDialog({ tx, categories, clients, onSave, onClose, saving }) {
+const CATEGORIES = ['Ad Spend', 'Software', 'Salary', 'Freelancer', 'Tools', 'Revenue', 'Refund', 'Other'];
+
+function TransactionDialog({ tx, categories, clients, users, onSave, onClose, saving }) {
   const isEdit = !!tx?.id;
+  const [assignType, setAssignType] = useState(tx?.team_member_id ? 'team_member' : 'client');
   const [form, setForm] = useState({
     type: tx?.type || 'income',
     category: tx?.category || '',
@@ -45,6 +48,7 @@ function TransactionDialog({ tx, categories, clients, onSave, onClose, saving })
     date: tx?.date || new Date().toISOString().slice(0, 10),
     client_id: tx?.client_id || '',
     client_name: tx?.client_name || '',
+    team_member_id: tx?.team_member_id || '',
     reference: tx?.reference || '',
     recurring: tx?.recurring || false,
     recurring_interval: tx?.recurring_interval || 'monthly',
@@ -53,11 +57,6 @@ function TransactionDialog({ tx, categories, clients, onSave, onClose, saving })
   const [customCat, setCustomCat] = useState('');
 
   const cats = form.type === 'income' ? (categories?.income || []) : (categories?.expense || []);
-
-  const handleClientSelect = (cid) => {
-    const c = clients.find(cl => (cl.id || cl._id) === cid);
-    setForm(f => ({ ...f, client_id: cid, client_name: c?.name || '' }));
-  };
 
   const handleSubmit = () => {
     const cat = form.category === '__custom__' ? customCat.trim() : form.category;
@@ -127,11 +126,26 @@ function TransactionDialog({ tx, categories, clients, onSave, onClose, saving })
             <input type="date" style={inpStyle} value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
           </div>
           <div>
-            <label style={lblStyle}>Client (optional)</label>
-            <select style={inpStyle} value={form.client_id} onChange={e => handleClientSelect(e.target.value)}>
-              <option value="">No client</option>
-              {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>)}
-            </select>
+            <label style={lblStyle}>Assign To</label>
+            <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden', marginBottom: 6 }}>
+              {['client', 'team_member'].map(t => (
+                <button key={t} type="button" onClick={() => setAssignType(t)}
+                  style={{ flex: 1, padding: '5px 0', fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer', background: assignType === t ? 'var(--accent)' : 'var(--bg-elevated)', color: assignType === t ? '#fff' : 'var(--tx-3)', textTransform: 'capitalize' }}>
+                  {t === 'team_member' ? 'Team Member' : 'Client'}
+                </button>
+              ))}
+            </div>
+            {assignType === 'client' ? (
+              <select style={inpStyle} value={form.client_id} onChange={e => setForm(f => ({ ...f, client_id: e.target.value, team_member_id: '' }))}>
+                <option value="">No client</option>
+                {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>)}
+              </select>
+            ) : (
+              <select style={inpStyle} value={form.team_member_id} onChange={e => setForm(f => ({ ...f, team_member_id: e.target.value, client_id: '' }))}>
+                <option value="">No team member</option>
+                {(users || []).map(u => <option key={u.id} value={u.id}>{u.name || u.full_name}</option>)}
+              </select>
+            )}
           </div>
         </div>
 
@@ -217,7 +231,12 @@ export default function Finance() {
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All');
+  const [filterAssignedTo, setFilterAssignedTo] = useState('all');
   const [sort, setSort] = useState({ key: 'date', dir: 'desc' });
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importRows, setImportRows] = useState([]);
+  const [importMapping, setImportMapping] = useState({ date: '', description: '', amount: '', type: '' });
 
   // Calculate date range based on mode
   const getDateRange = useCallback(() => {
@@ -317,6 +336,8 @@ export default function Finance() {
   const filtered = transactions
     .filter(t => {
       if (filterType && t.type !== filterType) return false;
+      if (filterCategory !== 'All' && t.category !== filterCategory) return false;
+      if (filterAssignedTo !== 'all' && t.team_member_id !== filterAssignedTo && t.client_id !== filterAssignedTo) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         return (t.description?.toLowerCase().includes(q) || t.category?.toLowerCase().includes(q) || t.client_name?.toLowerCase().includes(q) || t.reference?.toLowerCase().includes(q));
@@ -399,6 +420,9 @@ export default function Finance() {
               <button onClick={() => setRangeYear(y => y + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-3)', display: 'flex' }}><ChevronRight size={16} /></button>
             </div>
           )}
+          <button onClick={() => setShowImportModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
+            ↑ Import
+          </button>
           <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
             <Download size={13} /> Export
           </button>
@@ -509,6 +533,30 @@ export default function Finance() {
         </div>
       </div>
 
+      {/* Category + Assignee Filters */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {['All', ...CATEGORIES].map(cat => (
+            <button key={cat} onClick={() => setFilterCategory(cat)}
+              style={{
+                padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                border: '1px solid', transition: 'all .1s',
+                background: filterCategory === cat ? 'var(--accent)' : 'var(--surface)',
+                color: filterCategory === cat ? '#fff' : 'var(--tx-2)',
+                borderColor: filterCategory === cat ? 'var(--accent)' : 'var(--border)',
+              }}>
+              {cat}
+            </button>
+          ))}
+        </div>
+        <select value={filterAssignedTo} onChange={e => setFilterAssignedTo(e.target.value)}
+          style={{ padding: '4px 10px', borderRadius: 8, fontSize: 11, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--tx-1)', outline: 'none', cursor: 'pointer' }}>
+          <option value="all">All Members</option>
+          {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>🏢 {c.name}</option>)}
+          {(summary?.team_members || []).map(u => <option key={u.id} value={u.id}>👤 {u.name}</option>)}
+        </select>
+      </div>
+
       {/* Transactions Table */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         {/* Table Header */}
@@ -545,6 +593,7 @@ export default function Finance() {
           <SortHeader label="Date" sortKey="date" sort={sort} setSort={setSort} />
           <SortHeader label="Description" sortKey="description" sort={sort} setSort={setSort} />
           <SortHeader label="Category" sortKey="category" sort={sort} setSort={setSort} />
+          <SortHeader label="Assigned To" sortKey="client_name" sort={sort} setSort={setSort} />
           <SortHeader label="Type" sortKey="type" sort={sort} setSort={setSort} />
           <SortHeader label="Amount" sortKey="amount" sort={sort} setSort={setSort} />
           <span />
@@ -569,7 +618,7 @@ export default function Finance() {
             <div
               key={tx.id}
               style={{
-                display: 'grid', gridTemplateColumns: '100px 2fr 140px 120px 120px 80px',
+                display: 'grid', gridTemplateColumns: '100px 2fr 120px 140px 100px 110px 70px',
                 padding: '10px 16px', borderBottom: '1px solid var(--border)',
                 alignItems: 'center', transition: 'background 0.1s',
               }}
@@ -594,6 +643,18 @@ export default function Finance() {
               {/* Category */}
               <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, background: tx.type === 'income' ? '#22c55e18' : '#ef444418', color: tx.type === 'income' ? '#22c55e' : '#ef4444', display: 'inline-block', maxWidth: 'fit-content' }}>
                 {tx.category}
+              </span>
+
+              {/* Assigned To */}
+              <span style={{ fontSize: 11, color: 'var(--tx-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {tx.team_member_id
+                  ? `👤 ${clients.find(c => c.id === tx.team_member_id)?.name || 'Team'}`
+                  : tx.client_name || tx.client_id
+                  ? `🏢 ${tx.client_name || 'Client'}`
+                  : '—'}
+                {tx.source === 'bank_import' && (
+                  <span style={{ marginLeft: 4, padding: '1px 4px', fontSize: 9, borderRadius: 3, background: '#3b82f618', color: '#3b82f6', fontWeight: 600 }}>imported</span>
+                )}
               </span>
 
               {/* Type */}
@@ -650,10 +711,124 @@ export default function Finance() {
           tx={editingTx}
           categories={categories}
           clients={clients}
+          users={clients}
           onSave={handleSave}
           onClose={() => { setDialogOpen(false); setEditingTx(null); }}
           saving={saving}
         />
+      )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={() => { setShowImportModal(false); setImportRows([]); }} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+          <div style={{ position: 'relative', width: 640, maxHeight: '85vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>Import Transactions</h3>
+              <button onClick={() => { setShowImportModal(false); setImportRows([]); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
+            </div>
+
+            {importRows.length === 0 ? (
+              <div>
+                <p style={{ fontSize: 13, color: 'var(--tx-2)', marginBottom: 16 }}>
+                  Upload a CSV from your bank. Columns like Date, Description, Amount are auto-detected.
+                </p>
+                <label style={{ display: 'block', border: '2px dashed var(--border)', borderRadius: 12, padding: 40, textAlign: 'center', cursor: 'pointer' }}>
+                  <div style={{ fontSize: 28, marginBottom: 8 }}>📄</div>
+                  <div style={{ fontSize: 13, color: 'var(--tx-2)' }}>Click to upload CSV</div>
+                  <input type="file" accept=".csv" style={{ display: 'none' }} onChange={e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                      const lines = evt.target.result.trim().split('\n');
+                      if (lines.length < 2) return;
+                      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                      const rows = lines.slice(1).map(line => {
+                        const vals = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                        return headers.reduce((acc, h, i) => ({ ...acc, [h]: vals[i] || '' }), {});
+                      });
+                      setImportRows(rows);
+                      const lower = headers.map(h => h.toLowerCase());
+                      setImportMapping({
+                        date: headers[lower.findIndex(h => h.includes('date'))] || '',
+                        description: headers[lower.findIndex(h => h.includes('desc') || h.includes('payee') || h.includes('narr'))] || '',
+                        amount: headers[lower.findIndex(h => h.includes('amount') || h.includes('debit') || h.includes('credit'))] || '',
+                        type: headers[lower.findIndex(h => h.includes('type') || h.includes('dr') || h.includes('cr'))] || '',
+                      });
+                    };
+                    reader.readAsText(file);
+                  }} />
+                </label>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: 13, color: 'var(--tx-2)', marginBottom: 12 }}>{importRows.length} rows detected. Map columns:</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                  {['date', 'description', 'amount', 'type'].map(field => (
+                    <div key={field}>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'capitalize', display: 'block', marginBottom: 3 }}>{field}</label>
+                      <select className="input-field" value={importMapping[field]} onChange={e => setImportMapping(m => ({ ...m, [field]: e.target.value }))}
+                        style={{ fontSize: 12, padding: '5px 8px' }}>
+                        <option value="">— select —</option>
+                        {Object.keys(importRows[0] || {}).map(col => <option key={col} value={col}>{col}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 8, marginBottom: 16 }}>
+                  <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg-elevated)' }}>
+                        <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--tx-2)' }}>Date</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--tx-2)' }}>Description</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--tx-2)' }}>Amount</th>
+                        <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--tx-2)' }}>Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importRows.slice(0, 5).map((row, i) => (
+                        <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
+                          <td style={{ padding: '5px 10px', color: 'var(--tx-1)' }}>{row[importMapping.date] || '—'}</td>
+                          <td style={{ padding: '5px 10px', color: 'var(--tx-1)' }}>{row[importMapping.description] || '—'}</td>
+                          <td style={{ padding: '5px 10px', color: 'var(--tx-1)' }}>{row[importMapping.amount] || '—'}</td>
+                          <td style={{ padding: '5px 10px', color: 'var(--tx-1)' }}>{row[importMapping.type] || 'auto'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <button onClick={() => setImportRows([])} className="btn-ghost">← Back</button>
+                  <button onClick={async () => {
+                    let ok = 0;
+                    for (const row of importRows) {
+                      const rawAmt = parseFloat((row[importMapping.amount] || '0').replace(/[^0-9.-]/g, ''));
+                      const type = row[importMapping.type]
+                        ? (row[importMapping.type].toLowerCase().includes('credit') || rawAmt > 0 ? 'income' : 'expense')
+                        : (rawAmt >= 0 ? 'income' : 'expense');
+                      try {
+                        await ax().post(`${API}/finance/transactions`, {
+                          date: row[importMapping.date] || new Date().toISOString().slice(0, 10),
+                          description: row[importMapping.description] || 'Imported',
+                          amount: Math.abs(rawAmt) || 0.01,
+                          type, category: 'Other', source: 'bank_import',
+                        });
+                        ok++;
+                      } catch { /* skip failed */ }
+                    }
+                    toast.success(`Imported ${ok} of ${importRows.length} transactions`);
+                    setShowImportModal(false);
+                    setImportRows([]);
+                    fetchAll();
+                  }} className="btn-primary">
+                    Import {importRows.length} transactions
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
