@@ -218,6 +218,7 @@ export default function Finance() {
   const [totalTx, setTotalTx] = useState(0);
   const [categories, setCategories] = useState({ income: [], expense: [] });
   const [clients, setClients] = useState([]);
+  const [teamUsers, setTeamUsers] = useState([]);
 
   const [period, setPeriod] = useState(() => {
     const now = new Date();
@@ -282,6 +283,7 @@ export default function Finance() {
       if (usersRes.status === 'fulfilled') {
         const all = Array.isArray(usersRes.value.data) ? usersRes.value.data : usersRes.value.data?.items || [];
         setClients(all.filter(u => u.account_type === 'Media Client'));
+        setTeamUsers(all.filter(u => u.account_type !== 'Media Client' && u.active !== false));
       }
     } catch { toast.error('Failed to load financial data'); }
     finally { setLoading(false); }
@@ -553,7 +555,7 @@ export default function Finance() {
           style={{ padding: '4px 10px', borderRadius: 8, fontSize: 11, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--tx-1)', outline: 'none', cursor: 'pointer' }}>
           <option value="all">All Members</option>
           {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>🏢 {c.name}</option>)}
-          {(summary?.team_members || []).map(u => <option key={u.id} value={u.id}>👤 {u.name}</option>)}
+          {teamUsers.map(u => <option key={u.id} value={u.id}>👤 {u.name || u.full_name}</option>)}
         </select>
       </div>
 
@@ -711,7 +713,7 @@ export default function Finance() {
           tx={editingTx}
           categories={categories}
           clients={clients}
-          users={clients}
+          users={teamUsers}
           onSave={handleSave}
           onClose={() => { setDialogOpen(false); setEditingTx(null); }}
           saving={saving}
