@@ -70,6 +70,7 @@ class ProfileUpdate(BaseModel):
     avatar: Optional[str] = None
     bio: Optional[str] = None
     phone: Optional[str] = None
+    title: Optional[str] = None
 
 
 class PasswordChange(BaseModel):

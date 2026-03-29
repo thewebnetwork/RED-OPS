@@ -31,6 +31,88 @@ const SECTIONS = [
 
 // ── General Section ────────────────────────────────────────────────────────────
 
+// ── My Profile Section (shown at top of General) ─────────────────────────────
+
+function MyProfileSection() {
+  const [profile, setProfile] = useState({ name: '', phone: '', title: '', bio: '', avatar: '' });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loaded) return;
+    ax().get(`${API}/auth/me`).then(r => {
+      const u = r.data;
+      setProfile({ name: u.name || '', phone: u.phone || '', title: u.title || '', bio: u.bio || '', avatar: u.avatar || '' });
+      setLoaded(true);
+    }).catch(() => {});
+  }, [loaded]);
+
+  const handleSave = async () => {
+    if (!profile.name.trim()) { toast.error('Name is required'); return; }
+    setSaving(true);
+    try {
+      await ax().patch(`${API}/auth/profile`, profile);
+      toast.success('Profile updated');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to save'); }
+    finally { setSaving(false); }
+  };
+
+  const inpStyle = {
+    width: '100%', padding: '8px 12px', fontSize: 13,
+    border: '1px solid var(--border)', borderRadius: 8,
+    background: 'var(--surface-2)', color: 'var(--tx-1)', boxSizing: 'border-box', outline: 'none',
+  };
+
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: 'var(--tx-1)' }}>My Profile</h3>
+      <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>Your name and details shown across RED-OPS.</p>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, overflow: 'hidden', flexShrink: 0 }}>
+          {profile.avatar
+            ? <img src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : (profile.name?.charAt(0)?.toUpperCase() || '?')}
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{profile.name || 'No name set'}</div>
+          <div style={{ fontSize: 12, color: 'var(--tx-3)' }}>{profile.title || 'No title set'}</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+        <div>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Full Name</label>
+          <input style={inpStyle} value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} placeholder="Your name" />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Title / Role</label>
+          <input style={inpStyle} value={profile.title} onChange={e => setProfile(p => ({ ...p, title: e.target.value }))} placeholder="CEO, Red Ribbon Media" />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Phone</label>
+          <input style={inpStyle} value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="+1 (403) 555-0000" />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Avatar URL <span style={{ color: 'var(--tx-3)' }}>(optional)</span></label>
+          <input style={inpStyle} value={profile.avatar} onChange={e => setProfile(p => ({ ...p, avatar: e.target.value }))} placeholder="https://..." />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ gap: 5 }}>
+          {saving ? 'Saving...' : 'Save Profile'}
+        </button>
+        {saved && <span style={{ fontSize: 13, color: '#22c55e' }}>✓ Saved</span>}
+      </div>
+    </div>
+  );
+}
+
+
 function GeneralSection() {
   const { currentOrg, loading: orgLoading, refreshOrgs } = useOrg();
   const [orgName, setOrgName] = useState('');
@@ -86,6 +168,8 @@ function GeneralSection() {
 
   return (
     <div>
+      <MyProfileSection />
+
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: 'var(--tx-1)' }}>
           Organization Settings
