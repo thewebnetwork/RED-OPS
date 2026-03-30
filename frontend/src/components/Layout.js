@@ -32,6 +32,7 @@ import {
   Eye,
   ClipboardCheck,
   MessageSquare,
+  LifeBuoy,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -50,6 +51,7 @@ const NAV_MAIN = [
   { path: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base', roles: ['Administrator','Operator','Standard User'] },
   { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
+  { path: '/support', icon: LifeBuoy, label: 'Support', roles: ['Administrator','Operator'] },
 ];
 const NAV_BUSINESS = [];
 const NAV_SERVICES = [];
@@ -67,6 +69,7 @@ const NAV_CLIENT = [
   { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
   { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Media Client'] },
   { path: '/knowledge-base?tab=sops', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
+  { path: '/support',      icon: LifeBuoy,        label: 'Support',        roles: ['Media Client'] },
   { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
 ];
 

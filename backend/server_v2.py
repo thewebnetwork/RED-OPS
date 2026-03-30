@@ -54,6 +54,7 @@ from routes import (
     exports_router,
     documents_router,
     messages_router,
+    support_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -295,6 +296,7 @@ app.include_router(onboarding_router, prefix="/api")  # Client Onboarding Checkl
 app.include_router(exports_router, prefix="/api")  # CSV Exports
 app.include_router(documents_router, prefix="/api")  # Document Editor
 app.include_router(messages_router, prefix="/api")  # In-Platform Messaging
+app.include_router(support_router, prefix="/api")  # Support Tickets
 
 
 @app.get("/")
