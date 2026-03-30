@@ -283,13 +283,13 @@ function ClientAccountsSection() {
   };
 
   const deleteClient = async (clientId, name) => {
-    if (!window.confirm(`Delete client "${name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Deactivate client "${name}"? They will lose portal access.`)) return;
     try {
       await ax().delete(`${API}/users/${clientId}`);
-      setClients(clients.filter((c) => c.id !== clientId));
-      toast.success(`Client "${name}" deleted`);
+      toast.success(`Client "${name}" deactivated`);
+      fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to delete client');
+      toast.error(err.response?.data?.detail || 'Failed to deactivate client');
     }
   };
 
