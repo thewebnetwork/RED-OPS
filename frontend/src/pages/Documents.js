@@ -7,7 +7,7 @@
  *   • Create, edit, archive documents
  *   • Search across all pages
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -18,7 +18,7 @@ import TaskItem from '@tiptap/extension-task-item';
 import {
   FileText, Plus, Search, X, ChevronRight, ChevronDown,
   Loader2, Trash2, ArrowLeft, Bold, Italic, List, ListOrdered,
-  Heading1, Heading2, Code, CheckSquare, Minus,
+  Heading1, Heading2, Code, CheckSquare, Minus, Upload, Download, File, Image,
 } from 'lucide-react';
 import BulkActionBar from '../components/BulkActionBar';
 
@@ -115,6 +115,9 @@ export default function Documents() {
   const [search, setSearch] = useState('');
   const [selectedDocIds, setSelectedDocIds] = useState([]);
   const [editTitle, setEditTitle] = useState(false);
+  const [docFiles, setDocFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [title, setTitle] = useState('');
   const saveTimer = { current: null };
 
@@ -166,6 +169,7 @@ export default function Documents() {
       } else if (editor) {
         editor.commands.setContent('');
       }
+      fetchDocFiles(docId);
     } catch { toast.error('Failed to load document'); }
     finally { setDocLoading(false); }
   };
@@ -196,6 +200,43 @@ export default function Documents() {
       setSelectedDocIds([]);
       fetchDocs();
     } catch { toast.error('Failed to archive'); }
+  };
+
+  const fetchDocFiles = async (docId) => {
+    try {
+      const res = await ax().get(`${API}/files`, { params: { context_type: 'document', context_id: docId } });
+      setDocFiles(res.data || []);
+    } catch { setDocFiles([]); }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedId) return;
+    if (file.size > 25 * 1024 * 1024) { toast.error('File must be under 25MB'); return; }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('context_type', 'document');
+      fd.append('context_id', selectedId);
+      await ax().post(`${API}/files/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success(`Uploaded ${file.name}`);
+      fetchDocFiles(selectedId);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Upload failed');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const deleteDocFile = async (fileId) => {
+    if (!window.confirm('Delete this file?')) return;
+    try {
+      await ax().delete(`${API}/files/${fileId}`);
+      toast.success('File deleted');
+      fetchDocFiles(selectedId);
+    } catch { toast.error('Failed to delete'); }
   };
 
   const archiveDoc = async () => {
@@ -271,6 +312,11 @@ export default function Documents() {
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {saving && <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>Saving...</span>}
+                {uploading && <Loader2 size={13} className="spin" style={{ color: 'var(--tx-3)' }} />}
+                <button onClick={() => fileInputRef.current?.click()} className="btn-ghost btn-xs" style={{ gap: 4 }}>
+                  <Upload size={12} /> Upload
+                </button>
+                <input ref={fileInputRef} type="file" onChange={handleFileUpload} style={{ display: 'none' }} />
                 <button onClick={() => createDoc(selectedId)} className="btn-ghost btn-xs" style={{ gap: 4 }}>
                   <Plus size={12} /> Subpage
                 </button>
@@ -289,6 +335,38 @@ export default function Documents() {
                 <div style={{ textAlign: 'center', padding: 40 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
               ) : (
                 <EditorContent editor={editor} style={{ minHeight: 400 }} />
+              )}
+
+              {/* Attached Files */}
+              {docFiles.length > 0 && (
+                <div style={{ padding: '16px 0', borderTop: '1px solid var(--border)', marginTop: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <File size={12} /> Attachments ({docFiles.length})
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {docFiles.map(f => {
+                      const isImg = f.content_type?.startsWith('image/');
+                      return (
+                        <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface-2)' }}
+                          onMouseEnter={e => { const d = e.currentTarget.querySelector('[data-fdel]'); if (d) d.style.opacity = 1; }}
+                          onMouseLeave={e => { const d = e.currentTarget.querySelector('[data-fdel]'); if (d) d.style.opacity = 0; }}>
+                          {isImg ? <Image size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} /> : <File size={16} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />}
+                          <span style={{ flex: 1, fontSize: 13, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.original_filename || f.filename || 'File'}</span>
+                          <span style={{ fontSize: 10, color: 'var(--tx-3)', flexShrink: 0 }}>{f.size ? `${(f.size / 1024).toFixed(0)}KB` : ''}</span>
+                          {f.download_url && (
+                            <a href={f.download_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', display: 'flex', flexShrink: 0 }}>
+                              <Download size={14} />
+                            </a>
+                          )}
+                          <button data-fdel onClick={() => deleteDocFile(f.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, opacity: 0, transition: 'opacity .1s', flexShrink: 0 }}>
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           </>
