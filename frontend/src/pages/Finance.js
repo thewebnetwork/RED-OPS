@@ -9,6 +9,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
+import BulkActionBar from '../components/BulkActionBar';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -235,6 +236,7 @@ export default function Finance() {
   const [filterCategory, setFilterCategory] = useState('All');
   const [filterAssignedTo, setFilterAssignedTo] = useState('all');
   const [sort, setSort] = useState({ key: 'date', dir: 'desc' });
+  const [selectedTxIds, setSelectedTxIds] = useState([]);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importRows, setImportRows] = useState([]);
   const [importMapping, setImportMapping] = useState({ date: '', description: '', amount: '', type: '' });
@@ -316,6 +318,25 @@ export default function Finance() {
       toast.success('Deleted');
       fetchAll();
     } catch { toast.error('Failed to delete'); }
+  };
+
+  const bulkDeleteTx = async () => {
+    if (!window.confirm(`Delete ${selectedTxIds.length} transactions?`)) return;
+    try {
+      await Promise.all(selectedTxIds.map(id => ax().delete(`${API}/finance/transactions/${id}`)));
+      toast.success(`Deleted ${selectedTxIds.length} transactions`);
+      setSelectedTxIds([]);
+      fetchAll();
+    } catch { toast.error('Failed to delete'); }
+  };
+
+  const bulkUpdateTxCategory = async (category) => {
+    try {
+      await Promise.all(selectedTxIds.map(id => ax().patch(`${API}/finance/transactions/${id}`, { category })));
+      toast.success(`Updated ${selectedTxIds.length} transactions`);
+      setSelectedTxIds([]);
+      fetchAll();
+    } catch { toast.error('Failed to update'); }
   };
 
   const shiftPeriod = (dir) => {
@@ -592,6 +613,12 @@ export default function Finance() {
           textTransform: 'uppercase', letterSpacing: '.06em', borderBottom: '1px solid var(--border)',
           background: 'var(--bg-elevated)',
         }}>
+          <span>
+            <input type="checkbox"
+              checked={selectedTxIds.length === filtered.length && filtered.length > 0}
+              onChange={e => setSelectedTxIds(e.target.checked ? filtered.map(t => t.id) : [])}
+              style={{ accentColor: 'var(--accent)', cursor: 'pointer' }} />
+          </span>
           <SortHeader label="Date" sortKey="date" sort={sort} setSort={setSort} />
           <SortHeader label="Description" sortKey="description" sort={sort} setSort={setSort} />
           <SortHeader label="Category" sortKey="category" sort={sort} setSort={setSort} />
@@ -620,13 +647,21 @@ export default function Finance() {
             <div
               key={tx.id}
               style={{
-                display: 'grid', gridTemplateColumns: '100px 2fr 120px 140px 100px 110px 70px',
+                display: 'grid', gridTemplateColumns: '30px 90px 2fr 110px 130px 90px 100px 60px',
                 padding: '10px 16px', borderBottom: '1px solid var(--border)',
                 alignItems: 'center', transition: 'background 0.1s',
               }}
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
+              {/* Checkbox */}
+              <span>
+                <input type="checkbox" checked={selectedTxIds.includes(tx.id)}
+                  onChange={e => setSelectedTxIds(prev => e.target.checked ? [...prev, tx.id] : prev.filter(id => id !== tx.id))}
+                  onClick={e => e.stopPropagation()}
+                  style={{ accentColor: 'var(--accent)', cursor: 'pointer' }} />
+              </span>
+
               {/* Date */}
               <span style={{ fontSize: 12, color: 'var(--tx-2)' }}>{fmtDate(tx.date)}</span>
 
@@ -719,6 +754,16 @@ export default function Finance() {
           saving={saving}
         />
       )}
+
+      {/* Bulk Action Bar */}
+      <BulkActionBar
+        count={selectedTxIds.length}
+        onClear={() => setSelectedTxIds([])}
+        actions={[
+          { label: 'Set Category', onClick: () => { const c = window.prompt('Category:'); if (c) bulkUpdateTxCategory(c); } },
+          { label: 'Delete', danger: true, onClick: bulkDeleteTx },
+        ]}
+      />
 
       {/* Import CSV Modal */}
       {showImportModal && (

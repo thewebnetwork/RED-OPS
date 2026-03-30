@@ -20,6 +20,7 @@ import {
   Loader2, Trash2, ArrowLeft, Bold, Italic, List, ListOrdered,
   Heading1, Heading2, Code, CheckSquare, Minus,
 } from 'lucide-react';
+import BulkActionBar from '../components/BulkActionBar';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -55,7 +56,7 @@ function EditorToolbar({ editor }) {
 }
 
 /* ── Page Tree Item ── */
-function PageTreeItem({ doc, selected, onSelect, depth = 0 }) {
+function PageTreeItem({ doc, selected, onSelect, depth = 0, checkedIds, onToggleCheck }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const hasChildren = doc.child_count > 0;
@@ -87,11 +88,17 @@ function PageTreeItem({ doc, selected, onSelect, depth = 0 }) {
             {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
           </button>
         ) : <span style={{ width: 13 }} />}
+        {onToggleCheck && (
+          <input type="checkbox" checked={(checkedIds || []).includes(doc.id)}
+            onChange={e => { e.stopPropagation(); onToggleCheck(doc.id, e.target.checked); }}
+            onClick={e => e.stopPropagation()}
+            style={{ accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }} />
+        )}
         <span style={{ fontSize: 14 }}>{doc.icon || '📄'}</span>
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.title}</span>
       </div>
       {expanded && children.map(c => (
-        <PageTreeItem key={c.id} doc={c} selected={selected} onSelect={onSelect} depth={depth + 1} />
+        <PageTreeItem key={c.id} doc={c} selected={selected} onSelect={onSelect} depth={depth + 1} checkedIds={checkedIds} onToggleCheck={onToggleCheck} />
       ))}
     </>
   );
@@ -106,6 +113,7 @@ export default function Documents() {
   const [docLoading, setDocLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [selectedDocIds, setSelectedDocIds] = useState([]);
   const [editTitle, setEditTitle] = useState(false);
   const [title, setTitle] = useState('');
   const saveTimer = { current: null };
@@ -180,6 +188,16 @@ export default function Documents() {
     } catch { toast.error('Failed to update title'); }
   };
 
+  const bulkDeleteDocs = async () => {
+    if (!window.confirm(`Archive ${selectedDocIds.length} pages?`)) return;
+    try {
+      await Promise.all(selectedDocIds.map(id => ax().delete(`${API}/documents/${id}`)));
+      toast.success(`Archived ${selectedDocIds.length} pages`);
+      setSelectedDocIds([]);
+      fetchDocs();
+    } catch { toast.error('Failed to archive'); }
+  };
+
   const archiveDoc = async () => {
     if (!selectedId || !window.confirm('Archive this page? It can be restored later.')) return;
     try {
@@ -225,7 +243,8 @@ export default function Documents() {
               {search ? 'No pages match your search' : 'No pages yet. Create one!'}
             </div>
           ) : (
-            docs.map(d => <PageTreeItem key={d.id} doc={d} selected={selectedId} onSelect={loadDoc} />)
+            docs.map(d => <PageTreeItem key={d.id} doc={d} selected={selectedId} onSelect={loadDoc}
+              checkedIds={selectedDocIds} onToggleCheck={(id, checked) => setSelectedDocIds(prev => checked ? [...prev, id] : prev.filter(x => x !== id))} />)
           )}
         </div>
       </div>
@@ -287,6 +306,14 @@ export default function Documents() {
           </div>
         )}
       </div>
+
+      <BulkActionBar
+        count={selectedDocIds.length}
+        onClear={() => setSelectedDocIds([])}
+        actions={[
+          { label: 'Archive', danger: true, onClick: bulkDeleteDocs },
+        ]}
+      />
     </div>
   );
 }
