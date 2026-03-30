@@ -48,7 +48,9 @@ class ProjectCreate(BaseModel):
     project_type: ProjectType = "custom"
     status: ProjectStatus = "planning"
     priority: ProjectPriority = "medium"
+    client_id: Optional[str] = None
     client_name: Optional[str] = None
+    client_visible: bool = False
     due_date: Optional[datetime] = None
     team_member_ids: List[str] = []
     milestones: List[MilestoneCreate] = []
@@ -63,7 +65,9 @@ class ProjectUpdate(BaseModel):
     project_type: Optional[ProjectType] = None
     status: Optional[ProjectStatus] = None
     priority: Optional[ProjectPriority] = None
+    client_id: Optional[str] = None
     client_name: Optional[str] = None
+    client_visible: Optional[bool] = None
     due_date: Optional[datetime] = None
     team_member_ids: Optional[List[str]] = None
     payment_status: Optional[PaymentStatus] = None

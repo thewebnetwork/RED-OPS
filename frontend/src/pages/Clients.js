@@ -124,7 +124,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
   const canNext = () => {
     if (step === 1) return form.name.trim().length > 0;
     if (step === 2) return form.contact_name.trim() && form.contact_email.includes('@');
-    if (step === 3) return form.plan !== '';
+    if (step === 3) return true;  // Plan is optional — can skip
     return true;
   };
 

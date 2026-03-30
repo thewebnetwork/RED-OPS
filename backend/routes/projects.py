@@ -172,7 +172,9 @@ async def create_project(
         "project_type": data.project_type,
         "status": data.status,
         "priority": data.priority,
+        "client_id": data.client_id,
         "client_name": data.client_name,
+        "client_visible": data.client_visible,
         "due_date": data.due_date,
         "team_member_ids": data.team_member_ids,
         "milestones": milestones,
@@ -203,8 +205,11 @@ async def list_projects(
     is_client = _is_media_client(current_user)
 
     if is_client:
-        # Clients see only projects they created (their personal workspace)
-        query = {"created_by_user_id": current_user["id"]}
+        # Clients see projects they created OR projects shared with them
+        query = {"$or": [
+            {"created_by_user_id": current_user["id"]},
+            {"client_id": current_user["id"], "client_visible": True},
+        ]}
     else:
         org_id = await _get_org_id(current_user)
         query = {"org_id": org_id}
@@ -290,7 +295,7 @@ async def update_project(
 
     update_data = {}
     for field in ["name", "description", "project_type", "status", "priority",
-                   "client_name", "due_date", "team_member_ids", "payment_status", "tags"]:
+                   "client_id", "client_name", "client_visible", "due_date", "team_member_ids", "payment_status", "tags"]:
         value = getattr(data, field, None)
         if value is not None:
             update_data[field] = value

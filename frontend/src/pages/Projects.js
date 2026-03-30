@@ -422,15 +422,28 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
 
           <div>
             <label style={labelStyle}>Client</label>
-            {clients.length > 0 ? (
-              <select value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} className="input-field">
-                <option value="">No client assigned</option>
-                {clients.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
-              </select>
-            ) : (
-              <input type="text" value={form.client_name || ''} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" className="input-field" />
-            )}
+            <select value={form.client_id || ''} onChange={e => {
+              const sel = clients.find(c => (c.id || c._id) === e.target.value);
+              handleChange('client_id', e.target.value || null);
+              handleChange('client_name', sel?.name || sel?.company_name || '');
+            }} className="input-field">
+              <option value="">No client (internal project)</option>
+              {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.company_name || c.name}</option>)}
+            </select>
           </div>
+
+          {form.client_id && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)' }}>Client can view this project</div>
+                <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>Visible in their portal</div>
+              </div>
+              <button type="button" onClick={() => handleChange('client_visible', !form.client_visible)}
+                style={{ width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', padding: 2, background: form.client_visible ? 'var(--accent)' : 'var(--border)', transition: 'background .2s', display: 'flex', alignItems: 'center' }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'transform .2s', transform: form.client_visible ? 'translateX(18px)' : 'translateX(0)' }} />
+              </button>
+            </div>
+          )}
 
           {/* Team Members */}
           {teamMembers.length > 0 && (
