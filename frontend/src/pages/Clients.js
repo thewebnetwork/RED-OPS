@@ -110,7 +110,7 @@ const WIZARD_STEPS = [
   { id:5, label:'Launch',    icon: Zap,         title:'Review & Launch',     sub:'Create account & send invite' },
 ];
 
-function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
+function AddClientWizard({ onClose, onCreated, teamMembers = [], planConfig = {} }) {
   const [step, setStep] = useState(1);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -306,7 +306,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [] }) {
                     <div style={{ fontSize:12, color:'var(--tx-3)' }}>{cfg.desc}</div>
                   </div>
                   <div style={{ textAlign:'right' }}>
-                    <div style={{ fontSize:16, fontWeight:800, color:cfg.color }}>${cfg.price.toLocaleString()}</div>
+                    <div style={{ fontSize:16, fontWeight:800, color:cfg.color }}>${(cfg.price || 0).toLocaleString()}</div>
                     <div style={{ fontSize:10, color:'var(--tx-3)' }}>/month</div>
                   </div>
                   <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${form.plan === name ? cfg.color : 'var(--border)'}`, background: form.plan === name ? cfg.color : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -1256,7 +1256,7 @@ export default function Clients() {
 
   return (
     <div className="page-fill" style={{ flexDirection:'row' }}>
-      {showWizard && <AddClientWizard onClose={() => setShowWizard(false)} onCreated={handleCreated} teamMembers={teamMembers} />}
+      {showWizard && <AddClientWizard onClose={() => setShowWizard(false)} onCreated={handleCreated} teamMembers={teamMembers} planConfig={planConfig} />}
 
       {/* ── Main list ── */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0, overflow:'hidden' }}>
