@@ -405,21 +405,39 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
           {!project && templates.length > 0 && (
             <div style={{ padding: 14, borderRadius: 10, border: '1px solid var(--accent)', background: 'rgba(201,42,62,0.04)' }}>
               <label style={{ ...labelStyle, marginBottom: 8 }}>Start from a template</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {templates.map(t => (
-                  <button key={t.id} type="button" onClick={() => setSelectedTemplate(selectedTemplate?.id === t.id ? null : t)}
-                    style={{
-                      textAlign: 'left', padding: '10px 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
-                      borderColor: selectedTemplate?.id === t.id ? 'var(--accent)' : 'var(--border)',
-                      background: selectedTemplate?.id === t.id ? 'rgba(201,42,62,0.08)' : 'var(--surface-2)',
-                    }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{t.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>
-                      {t.tasks?.length || 0} tasks · {t.phases?.length || 0} phases
+              {[
+                { key: 'engagement', label: 'Client Engagements', icon: '🤝' },
+                { key: 'campaign', label: 'Campaigns', icon: '📣' },
+                { key: 'funnel', label: 'Funnels', icon: '🎬' },
+                { key: 'process', label: 'Processes', icon: '🔄' },
+                { key: 'internal', label: 'Internal Ops', icon: '⚙️' },
+              ].map(type => {
+                const group = templates.filter(t => (t.type || 'engagement') === type.key);
+                if (!group.length) return null;
+                return (
+                  <div key={type.key} style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>
+                      {type.icon} {type.label}
                     </div>
-                  </button>
-                ))}
-              </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {group.map(t => (
+                        <button key={t.id} type="button" onClick={() => setSelectedTemplate(selectedTemplate?.id === t.id ? null : t)}
+                          style={{
+                            textAlign: 'left', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
+                            borderColor: selectedTemplate?.id === t.id ? 'var(--accent)' : 'var(--border)',
+                            background: selectedTemplate?.id === t.id ? 'rgba(201,42,62,0.08)' : 'var(--surface-2)',
+                          }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{t.icon || '📋'} {t.name}</span>
+                            <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{t.tasks?.length || 0} tasks</span>
+                          </div>
+                          {t.description && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description}</div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
               {selectedTemplate && (
                 <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6, fontWeight: 500 }}>
                   ✓ Tasks will be created automatically from this template

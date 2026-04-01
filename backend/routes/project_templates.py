@@ -45,14 +45,13 @@ RRM_TEMPLATE_ID = "rrm-media-client-template-v1"
 
 
 async def seed_rrm_template():
-    """Seed the RRM Media Client template if it doesn't exist."""
-    existing = await db.project_templates.find_one({"id": RRM_TEMPLATE_ID})
-    if existing:
-        return
-
-    from scripts.seed_rrm_template import RRM_MEDIA_CLIENT_TEMPLATE
-    await db.project_templates.insert_one(RRM_MEDIA_CLIENT_TEMPLATE)
-    logger.info("Seeded RRM Media Client template")
+    """Seed all built-in templates if they don't exist."""
+    from scripts.seed_rrm_template import ALL_TEMPLATES
+    for tpl in ALL_TEMPLATES:
+        existing = await db.project_templates.find_one({"id": tpl["id"]})
+        if not existing:
+            await db.project_templates.insert_one({**tpl})
+            logger.info(f"Seeded template: {tpl['name']}")
 
 
 # ============== ENDPOINTS ==============
