@@ -9,7 +9,7 @@ Identity Model:
 - Access Controls: Module-level permissions with overrides
 """
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
@@ -911,6 +911,74 @@ async def restore_user(user_id: str, current_user: dict = Depends(require_roles(
     
     return {"message": "User restored"}
 
+
+@router.post("/{user_id}/send-reset-email")
+async def admin_send_reset_email(
+    user_id: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Admin triggers a password reset email for a user."""
+    from fastapi import BackgroundTasks
+    import os
+
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Generate reset token
+    reset_token = str(uuid.uuid4())
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
+
+    await db.password_resets.delete_many({"user_id": user_id})
+    await db.password_resets.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "token": reset_token,
+        "expires_at": expires_at,
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    frontend_url = os.environ.get("FRONTEND_URL", os.environ.get("CORS_ORIGINS", "http://localhost:3000").split(",")[0])
+    reset_link = f"{frontend_url}/reset-password?token={reset_token}"
+
+    try:
+        from routes.auth import send_password_reset_email
+        await send_password_reset_email(user["email"], user.get("name", "User"), reset_link)
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to send reset email: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+
+    return {"success": True, "message": f"Password reset email sent to {user['email']}"}
+
+
+@router.post("/{user_id}/set-password")
+async def admin_set_password(
+    user_id: str,
+    body: dict,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Admin directly sets a new password for a user."""
+    new_password = body.get("password")
+    if not new_password or len(new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    force_change = body.get("force_change", True)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "password": hash_password(new_password),
+            "force_password_change": force_change,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }}
+    )
+
+    return {"success": True, "message": f"Password set for {user.get('name', user_id)}", "force_change": force_change}
 
 
 # ============== MIGRATION ENDPOINT ==============

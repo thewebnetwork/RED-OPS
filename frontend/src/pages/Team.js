@@ -253,6 +253,38 @@ function Team() {
     } catch { toast.error('Failed to restore member'); }
   };
 
+  const handleResetPassword = async (member, mode) => {
+    if (mode === 'email') {
+      try {
+        await ax().post(`${API}/users/${member.id}/send-reset-email`);
+        toast.success(`Password reset email sent to ${member.email}`);
+      } catch (err) {
+        toast.error(err.response?.data?.detail || 'Failed to send reset email');
+      }
+    } else {
+      const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars):`);
+      if (!newPass) return;
+      if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return; }
+      try {
+        await ax().post(`${API}/users/${member.id}/set-password`, { password: newPass, force_change: true });
+        toast.success(`Password set for ${member.name} — they'll be prompted to change it on next login`);
+      } catch (err) {
+        toast.error(err.response?.data?.detail || 'Failed to set password');
+      }
+    }
+  };
+
+  const handleDeleteMember = async (member) => {
+    if (!window.confirm(`Permanently delete ${member.name}? This removes their account and cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/users/${member.id}/hard-delete`);
+      toast.success(`${member.name} permanently deleted`);
+      fetchAll();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete member');
+    }
+  };
+
   return (
     <div style={{ padding: '24px 32px', maxWidth: 'none' }}>
       {/* ── Header ── */}
@@ -409,6 +441,8 @@ function Team() {
                         onEdit={() => setEditMember(m)}
                         onRemove={() => handleRemove(m)}
                         onRestore={() => handleRestore(m)}
+                        onResetPassword={handleResetPassword}
+                        onDelete={handleDeleteMember}
                       />
                     ))}
                   </div>
@@ -420,6 +454,8 @@ function Team() {
                     onEdit={setEditMember}
                     onRemove={handleRemove}
                     onRestore={handleRestore}
+                    onResetPassword={handleResetPassword}
+                    onDelete={handleDeleteMember}
                   />
                 )
               )}
@@ -472,7 +508,7 @@ function Team() {
 /* ═══════════════════════════════════════════════════════════
    MEMBER CARD (grid view)
    ═══════════════════════════════════════════════════════════ */
-function MemberCard({ member, teams, onClick, onEdit, onRemove, onRestore }) {
+function MemberCard({ member, teams, onClick, onEdit, onRemove, onRestore, onResetPassword, onDelete }) {
   const m = member;
   const team = teams.find(t => t.id === m.team_id);
   const [showMenu, setShowMenu] = useState(false);
@@ -532,11 +568,14 @@ function MemberCard({ member, teams, onClick, onEdit, onRemove, onRestore }) {
               }}>
                 <DropItem icon={<Eye size={14} />} label="View Profile" onClick={() => { setShowMenu(false); onClick(); }} />
                 <DropItem icon={<Edit2 size={14} />} label="Edit" onClick={() => { setShowMenu(false); onEdit(); }} />
+                <DropItem icon={<Mail size={14} />} label="Send Reset Email" onClick={() => { setShowMenu(false); onResetPassword(m, 'email'); }} />
+                <DropItem icon={<Shield size={14} />} label="Set Password" onClick={() => { setShowMenu(false); onResetPassword(m, 'set'); }} />
                 {m.active ? (
                   <DropItem icon={<UserX size={14} />} label="Deactivate" danger onClick={() => { setShowMenu(false); onRemove(); }} />
                 ) : (
                   <DropItem icon={<UserCheck size={14} />} label="Restore" onClick={() => { setShowMenu(false); onRestore(); }} />
                 )}
+                <DropItem icon={<Trash2 size={14} />} label="Delete Permanently" danger onClick={() => { setShowMenu(false); onDelete(m); }} />
               </div>
             </>
           )}
@@ -597,7 +636,7 @@ function MemberCard({ member, teams, onClick, onEdit, onRemove, onRestore }) {
 /* ═══════════════════════════════════════════════════════════
    MEMBER TABLE (list view)
    ═══════════════════════════════════════════════════════════ */
-function MemberTable({ members, teams, onView, onEdit, onRemove, onRestore }) {
+function MemberTable({ members, teams, onView, onEdit, onRemove, onRestore, onResetPassword, onDelete }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
