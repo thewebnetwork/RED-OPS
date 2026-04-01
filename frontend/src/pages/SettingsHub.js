@@ -24,6 +24,7 @@ const SECTIONS = [
   { id: 'plans', label: 'Subscription Plans', icon: CreditCard, inline: true },
   { id: 'categories', label: 'Categories', icon: FolderTree, inline: false, path: '/categories' },
   { id: 'finance-categories', label: 'Finance Categories', icon: DollarSign, inline: true },
+  { id: 'project-templates', label: 'Project Templates', icon: Layers, inline: true },
   { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
   { id: 'email', label: 'Email', icon: Mail, inline: false, path: '/email-settings' },
   { id: 'integrations', label: 'Integrations', icon: Plug, inline: false, path: '/integrations' },
@@ -1054,6 +1055,63 @@ function SpecialtiesSection() {
 
 // ── Finance Categories Section ───────────────────────────────────────────────
 
+// ── Project Templates Section ────────────────────────────────────────────────
+
+function ProjectTemplatesSection() {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    ax().get(`${API}/project-templates`).then(r => setTemplates(r.data || [])).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this template?')) return;
+    try {
+      await ax().delete(`${API}/project-templates/${id}`);
+      toast.success('Template deleted');
+      setTemplates(prev => prev.filter(t => t.id !== id));
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to delete');
+    }
+  };
+
+  return (
+    <div>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: 'var(--tx-1)' }}>Project Templates</h3>
+      <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>Pre-built task flows applied when a client is added with a specific offer type.</p>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
+      ) : templates.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 32, color: 'var(--tx-3)', fontSize: 13 }}>No templates yet.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {templates.map(t => (
+            <div key={t.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{t.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>
+                  {t.tasks?.length || 0} tasks · {t.phases?.length || 0} phases · Offer: {t.offer_type}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {t.is_global && (
+                  <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600 }}>Built-in</span>
+                )}
+                {!t.is_global && (
+                  <button onClick={() => handleDelete(t.id)} style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function FinanceCategoriesSection() {
   const [cats, setCats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1624,6 +1682,7 @@ export default function SettingsHub() {
           {activeSection === 'specialties' && <SpecialtiesSection />}
           {activeSection === 'plans' && <SubscriptionPlansSection />}
           {activeSection === 'finance-categories' && <FinanceCategoriesSection />}
+          {activeSection === 'project-templates' && <ProjectTemplatesSection />}
           {SECTIONS.find((s) => s.id === activeSection && !s.inline) && (
             <NavigationCard section={SECTIONS.find((s) => s.id === activeSection)} />
           )}

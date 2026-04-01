@@ -115,7 +115,7 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [], planConfig = {}
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
-    name: '', industry: '', website: '', phone: '',
+    name: '', industry: '', website: '', phone: '', offer_type: '',
     contact_name: '', contact_email: '', contact_phone: '',
     plan: '', am: '', notes: '', send_invite: true, tags: [],
   });
@@ -177,6 +177,22 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [], planConfig = {}
         last_login: 'Never',
         login_count: 0,
       };
+
+      // Auto-apply project template if offer_type matches
+      if (form.offer_type === 'rrm_media_client' && userId) {
+        try {
+          const tplRes = await ax().get(`${API}/project-templates`);
+          const rrmTemplate = (tplRes.data || []).find(t => t.offer_type === 'rrm_media_client');
+          if (rrmTemplate) {
+            const applyRes = await ax().post(`${API}/project-templates/${rrmTemplate.id}/apply`, {
+              client_id: userId,
+              client_name: form.contact_name || form.name,
+              start_date: new Date().toISOString(),
+            });
+            toast.success(`Project created with ${applyRes.data?.tasks_created || 0} tasks across ${applyRes.data?.phases?.length || 0} phases`);
+          }
+        } catch { /* template apply is optional */ }
+      }
 
       setDone(true);
       if (onCreated) onCreated(newClient);
@@ -269,6 +285,15 @@ function AddClientWizard({ onClose, onCreated, teamMembers = [], planConfig = {}
               <div>
                 <label style={labelStyle}>Business Phone</label>
                 <input className="input-field" placeholder="403-555-0000" value={form.phone} onChange={e => f('phone', e.target.value)} />
+              </div>
+              <div>
+                <label style={labelStyle}>Offer / Service Type</label>
+                <select className="input-field" value={form.offer_type} onChange={e => f('offer_type', e.target.value)}>
+                  <option value="">Select offer type...</option>
+                  <option value="rrm_media_client">RRM Media Client</option>
+                  <option value="rrp_partner">RRP Partner</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
             </div>
           )}

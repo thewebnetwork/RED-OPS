@@ -351,6 +351,14 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
     const init = project || {};
     return { ...init, team_member_ids: init.team_member_ids || (init.team_members || []).map(m => m.id) || [] };
   });
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  useEffect(() => {
+    if (!project) {
+      ax().get(`${API}/project-templates`).then(r => setTemplates(r.data || [])).catch(() => {});
+    }
+  }, [project]);
 
   const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
   const toggleTeamMember = (userId) => {
@@ -361,7 +369,25 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
   };
 
   const handleSave = async () => {
-    if (!form.name?.trim()) return toast.error('Project name required');
+    if (!form.name?.trim() && !selectedTemplate) return toast.error('Project name required');
+
+    if (selectedTemplate) {
+      // Apply template instead of creating manually
+      try {
+        const res = await ax().post(`${API}/project-templates/${selectedTemplate.id}/apply`, {
+          client_id: form.client_id || null,
+          client_name: form.client_name || form.name || '',
+          start_date: new Date().toISOString(),
+        });
+        toast.success(`Created project with ${res.data.tasks_created} tasks`);
+        onSave(null); // trigger refresh without double-creating
+        onClose();
+      } catch (err) {
+        toast.error(err.response?.data?.detail || 'Failed to apply template');
+      }
+      return;
+    }
+
     await onSave(form);
     onClose();
   };
@@ -375,6 +401,33 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
         </div>
 
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Template selector (new projects only) */}
+          {!project && templates.length > 0 && (
+            <div style={{ padding: 14, borderRadius: 10, border: '1px solid var(--accent)', background: 'rgba(201,42,62,0.04)' }}>
+              <label style={{ ...labelStyle, marginBottom: 8 }}>Start from a template</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {templates.map(t => (
+                  <button key={t.id} type="button" onClick={() => setSelectedTemplate(selectedTemplate?.id === t.id ? null : t)}
+                    style={{
+                      textAlign: 'left', padding: '10px 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
+                      borderColor: selectedTemplate?.id === t.id ? 'var(--accent)' : 'var(--border)',
+                      background: selectedTemplate?.id === t.id ? 'rgba(201,42,62,0.08)' : 'var(--surface-2)',
+                    }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{t.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>
+                      {t.tasks?.length || 0} tasks · {t.phases?.length || 0} phases
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {selectedTemplate && (
+                <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6, fontWeight: 500 }}>
+                  ✓ Tasks will be created automatically from this template
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label style={labelStyle}>Project Name</label>
             <input type="text" value={form.name || ''} onChange={e => handleChange('name', e.target.value)} placeholder="Project name" className="input-field" />
