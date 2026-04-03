@@ -172,7 +172,7 @@ async def create_sla_alert(db, order: dict, alert_type: str, deadline: datetime)
     
     # Always notify admins for breaches
     if alert_type == "breach":
-        admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+        admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
         for admin in admins:
             await create_notification(
                 db,

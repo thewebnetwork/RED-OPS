@@ -145,7 +145,7 @@ async def create_feature_request(request_data: FeatureRequestCreate, current_use
     
     # Only notify admins for non-draft requests
     if not is_draft:
-        admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+        admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
         for admin in admins:
             await create_notification(
                 db,
@@ -223,7 +223,7 @@ async def submit_feature_request_draft(request_id: str, current_user: dict = Dep
     )
     
     # Now notify admins
-    admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+    admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
     for admin in admins:
         await create_notification(
             db,
@@ -437,7 +437,7 @@ async def submit_bug_report_draft(report_id: str, current_user: dict = Depends(g
     )
     
     # Now notify admins
-    admins = await db.users.find({"role": "Admin", "active": True}, {"_id": 0}).to_list(100)
+    admins = await db.users.find({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0}).to_list(100)
     for admin in admins:
         await create_notification(
             db,

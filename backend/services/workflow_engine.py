@@ -202,7 +202,7 @@ async def execute_action(db, action_type: str, node_data: dict, context: dict) -
         elif target == "resolver":
             target_user_id = order.get("editor_id")
         elif target == "admin":
-            admin = await db.users.find_one({"role": "Admin", "active": True}, {"_id": 0})
+            admin = await db.users.find_one({"role": {"$in": ["Administrator", "Admin"]}, "active": True}, {"_id": 0})
             target_user_id = admin["id"] if admin else None
         
         if target_user_id:
