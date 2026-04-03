@@ -197,15 +197,16 @@ export default function TeamMemberPage() {
   };
 
   const handleSetPassword = async () => {
-    const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars).\n\nThey will be forced to change it on first login.`);
+    const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars):`);
     if (!newPass) return;
     if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return; }
+    const forceChange = window.confirm('Force them to change this password on next login?\n\nClick OK = yes (they must change it)\nClick Cancel = no (they can use this password permanently)');
     try {
-      await ax().post(`${API}/users/${id}/set-password`, { password: newPass, force_change: true });
-      toast.success(`Password set for ${member.name}`);
+      await ax().post(`${API}/users/${id}/set-password`, { password: newPass, force_change: forceChange });
+      toast.success(`Password set for ${member.name}${forceChange ? ' (must change on login)' : ''}`);
       const loginUrl = window.location.origin + '/login';
       window.prompt(
-        `Share these login details:\n\nLogin: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}`,
+        `Share these login details with ${member.name}:`,
         `Login: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}`
       );
     } catch (err) { toast.error(err.response?.data?.detail || 'Failed to set password'); }

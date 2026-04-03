@@ -978,6 +978,13 @@ async def admin_set_password(
         }}
     )
 
+    # Also clear force_otp_setup to avoid double-blocking
+    if not force_change:
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"force_otp_setup": False, "otp_verified": False}}
+        )
+
     return {"success": True, "message": f"Password set for {user.get('name', user_id)}", "force_change": force_change}
 
 
