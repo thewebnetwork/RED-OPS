@@ -969,20 +969,20 @@ async def admin_set_password(
         raise HTTPException(status_code=404, detail="User not found")
 
     force_change = body.get("force_change", True)
+    update_fields = {
+        "password": hash_password(new_password),
+        "force_password_change": force_change,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    # Clear all login blockers when not forcing password change
+    if not force_change:
+        update_fields["force_otp_setup"] = False
+        update_fields["otp_verified"] = False
+        update_fields["otp_secret"] = None
+
     await db.users.update_one(
         {"id": user_id},
-        {"$set": {
-            "password": hash_password(new_password),
-            "force_password_change": force_change,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-        }}
-    )
-
-    # Also clear force_otp_setup to avoid double-blocking
-    if not force_change:
-        await db.users.update_one(
-            {"id": user_id},
-            {"$set": {"force_otp_setup": False, "otp_verified": False}}
+        {"$set": update_fields}
         )
 
     return {"success": True, "message": f"Password set for {user.get('name', user_id)}", "force_change": force_change}
