@@ -259,15 +259,27 @@ function Team() {
         await ax().post(`${API}/users/${member.id}/send-reset-email`);
         toast.success(`Password reset email sent to ${member.email}`);
       } catch (err) {
-        toast.error(err.response?.data?.detail || 'Failed to send reset email');
+        // Email likely failed because SMTP isn't configured — offer manual alternative
+        const detail = err.response?.data?.detail || '';
+        if (detail.includes('email') || detail.includes('SMTP') || err.response?.status === 500) {
+          toast.error('Email service not configured. Use "Set Password" instead to set their password manually.');
+        } else {
+          toast.error(detail || 'Failed to send reset email');
+        }
       }
     } else {
-      const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars):`);
+      const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars).\n\nThey will be forced to change it on first login.`);
       if (!newPass) return;
       if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return; }
       try {
         await ax().post(`${API}/users/${member.id}/set-password`, { password: newPass, force_change: true });
-        toast.success(`Password set for ${member.name} — they'll be prompted to change it on next login`);
+        // Show the credentials so admin can share manually
+        const loginUrl = window.location.origin + '/login';
+        toast.success(`Password set for ${member.name}`);
+        window.prompt(
+          `Share these login details with ${member.name}:\n\nLogin: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}\n\n(Copy this text)`,
+          `Login: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}`
+        );
       } catch (err) {
         toast.error(err.response?.data?.detail || 'Failed to set password');
       }
@@ -794,8 +806,10 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '', email: '', password: '', role: 'Operator',
     account_type: 'Internal Staff', team_id: '', specialty_ids: [],
+    send_email: true,
   });
   const [saving, setSaving] = useState(false);
+  const [created, setCreated] = useState(null); // { email, password, loginUrl }
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const submit = async (e) => {
@@ -809,16 +823,54 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
         team_id: form.team_id || undefined,
         force_password_change: true,
         force_otp_setup: false,
-        send_welcome_email: false,
+        send_welcome_email: form.send_email,
       };
       await ax().post(`${API}/users`, payload);
       toast.success(`${form.name} added`);
       onCreated();
-      onClose();
+      // Show credentials so admin can share manually
+      setCreated({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        loginUrl: window.location.origin + '/login',
+      });
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to add member');
     } finally { setSaving(false); }
   };
+
+  if (created) {
+    return (
+      <Modal onClose={onClose} title="Member Created" icon={<CheckSquare size={18} />}>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#22c55e18', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <CheckSquare size={24} style={{ color: '#22c55e' }} />
+          </div>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{created.name} has been added</h3>
+          <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: '4px 0 0' }}>Share these login details with them:</p>
+        </div>
+
+        <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.8, color: 'var(--tx-1)' }}>
+          <div><strong>Login:</strong> {created.loginUrl}</div>
+          <div><strong>Email:</strong> {created.email}</div>
+          <div><strong>Password:</strong> {created.password}</div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => {
+            navigator.clipboard?.writeText(`Login: ${created.loginUrl}\nEmail: ${created.email}\nPassword: ${created.password}`);
+            toast.success('Copied to clipboard');
+          }} style={{ ...btnSec, flex: 1, justifyContent: 'center' }}>
+            Copy Details
+          </button>
+          <button onClick={onClose} style={{ ...btnPri, flex: 1, justifyContent: 'center' }}>
+            Done
+          </button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal onClose={onClose} title="Add Team Member" icon={<UserPlus size={18} />}>
@@ -872,6 +924,11 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
             </div>
           </Field>
         )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+          <input type="checkbox" id="send-email" checked={form.send_email} onChange={e => set('send_email', e.target.checked)}
+            style={{ width: 15, height: 15, accentColor: 'var(--accent)' }} />
+          <label htmlFor="send-email" style={{ fontSize: 12, color: 'var(--tx-2)' }}>Send welcome email with login details</label>
+        </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
           <button type="button" onClick={onClose} style={btnSec}>Cancel</button>
           <button type="submit" style={btnPri} disabled={saving}>{saving ? 'Adding…' : 'Add Member'}</button>
