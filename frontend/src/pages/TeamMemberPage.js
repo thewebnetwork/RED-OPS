@@ -196,6 +196,39 @@ export default function TeamMemberPage() {
     } catch { toast.error('Failed to restore'); }
   };
 
+  const handleSetPassword = async () => {
+    const newPass = window.prompt(`Set new password for ${member.name} (min 8 chars).\n\nThey will be forced to change it on first login.`);
+    if (!newPass) return;
+    if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return; }
+    try {
+      await ax().post(`${API}/users/${id}/set-password`, { password: newPass, force_change: true });
+      toast.success(`Password set for ${member.name}`);
+      const loginUrl = window.location.origin + '/login';
+      window.prompt(
+        `Share these login details:\n\nLogin: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}`,
+        `Login: ${loginUrl}\nEmail: ${member.email}\nPassword: ${newPass}`
+      );
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to set password'); }
+  };
+
+  const handleSendResetEmail = async () => {
+    try {
+      await ax().post(`${API}/users/${id}/send-reset-email`);
+      toast.success(`Reset email sent to ${member.email}`);
+    } catch (err) {
+      toast.error('Email service not configured. Use "Set Password" instead.');
+    }
+  };
+
+  const handleDeletePermanently = async () => {
+    if (!window.confirm(`Permanently delete ${member.name}? This removes their account and cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/users/${id}/hard-delete`);
+      toast.success(`${member.name} permanently deleted`);
+      navigate('/team');
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete'); }
+  };
+
   // Linked SOPs stored as a simple array in localStorage per member
   useEffect(() => {
     try {
@@ -261,9 +294,15 @@ export default function TeamMemberPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: 'var(--tx-1)', letterSpacing: '-.03em' }}>{member.name}</h1>
               {member.active === false && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'rgba(201,42,62,.12)', color: 'var(--red)', fontWeight: 600 }}>Inactive</span>}
-              <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <button onClick={openEditModal} className="btn-ghost btn-sm" style={{ gap: 5 }}>
-                  <Edit2 size={12} /> Edit Member
+                  <Edit2 size={12} /> Edit
+                </button>
+                <button onClick={handleSetPassword} className="btn-ghost btn-sm" style={{ gap: 5 }}>
+                  <Shield size={12} /> Set Password
+                </button>
+                <button onClick={handleSendResetEmail} className="btn-ghost btn-sm" style={{ gap: 5 }}>
+                  <Mail size={12} /> Reset Email
                 </button>
                 {member.active !== false && currentUser?.id !== member.id ? (
                   <button onClick={handleDeactivate} className="btn-ghost btn-sm" style={{ gap: 5, color: '#ef4444', borderColor: '#ef444440' }}>
@@ -274,6 +313,9 @@ export default function TeamMemberPage() {
                     <UserCheck size={12} /> Restore
                   </button>
                 ) : null}
+                <button onClick={handleDeletePermanently} className="btn-ghost btn-sm" style={{ gap: 5, color: '#ef4444', borderColor: '#ef444440' }}>
+                  <Trash2 size={12} /> Delete
+                </button>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--tx-2)' }}>
