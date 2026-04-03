@@ -8,6 +8,7 @@
  *   • SOPs — linked knowledge base articles
  */
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -768,8 +769,8 @@ function SOPsTab({ sops, linkedSops, onSave }) {
         </div>
       )}
 
-      {/* ── Edit Member Modal ── */}
-      {showEditModal && (
+      {/* ── Edit Member Modal (portal to escape overflow:hidden) ── */}
+      {showEditModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, maxWidth: 480, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
@@ -842,7 +843,8 @@ function SOPsTab({ sops, linkedSops, onSave }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
