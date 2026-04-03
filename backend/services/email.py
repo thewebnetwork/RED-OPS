@@ -29,8 +29,8 @@ async def send_email_notification(to_email: str, subject: str, body: str, html_b
     
     # Check if SMTP is configured
     if not config['user'] or not config['password']:
-        logging.warning(f"[MOCKED EMAIL] SMTP not configured — To: {to_email}, Subject: {subject}")
-        return True
+        logging.warning(f"[EMAIL SKIPPED] SMTP not configured (SMTP_USER/SMTP_PASSWORD missing) — To: {to_email}, Subject: {subject}")
+        return False
     
     # Build HTML content
     if html_body:

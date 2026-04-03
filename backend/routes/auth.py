@@ -206,7 +206,8 @@ async def send_password_reset_email(to_email: str, user_name: str, reset_link: s
     </html>
     """
     
-    await send_email_notification(to_email, subject, body)
+    plain = f"Hi {user_name}, reset your password here: {reset_link}"
+    await send_email_notification(to_email, subject, plain, html_body=body)
 
 
 # ============== ROUTES ==============

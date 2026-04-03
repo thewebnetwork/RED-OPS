@@ -948,9 +948,9 @@ async def admin_send_reset_email(
     except Exception as e:
         import logging
         logging.error(f"Failed to send reset email: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Email failed: {str(e)}. Use 'Set Password' instead, or configure SMTP_USER + SMTP_PASSWORD in Railway.")
 
-    return {"success": True, "message": f"Password reset email sent to {user['email']}"}
+    return {"success": True, "message": f"Password reset email sent to {user['email']}", "reset_link": reset_link}
 
 
 @router.post("/{user_id}/set-password")
