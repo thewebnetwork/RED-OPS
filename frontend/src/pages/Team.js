@@ -503,6 +503,8 @@ function Team() {
           teams={teams}
           onClose={() => setViewMember(null)}
           onEdit={(m) => { setViewMember(null); setEditMember(m); }}
+          onResetPassword={handleResetPassword}
+          onDelete={(m) => { setViewMember(null); handleDeleteMember(m); }}
         />
       )}
       {showTeamModal && (
@@ -1033,7 +1035,7 @@ function EditMemberModal({ member, teams, specialties, onClose, onUpdated }) {
 /* ═══════════════════════════════════════════════════════════
    MEMBER DETAIL PANEL (slide-in)
    ═══════════════════════════════════════════════════════════ */
-function MemberDetailPanel({ member, teams, onClose, onEdit }) {
+function MemberDetailPanel({ member, teams, onClose, onEdit, onResetPassword, onDelete }) {
   const m = member;
   const team = teams.find(t => t.id === m.team_id);
 
@@ -1174,9 +1176,22 @@ function MemberDetailPanel({ member, teams, onClose, onEdit }) {
           )}
 
           {/* Actions */}
-          <button onClick={() => onEdit(m)} style={{ ...btnPri, width: '100%', justifyContent: 'center' }}>
-            <Edit2 size={14} /> Edit Member
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button onClick={() => onEdit(m)} style={{ ...btnPri, width: '100%', justifyContent: 'center' }}>
+              <Edit2 size={14} /> Edit Member
+            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => onResetPassword(m, 'set')} style={{ ...btnSec, flex: 1, justifyContent: 'center', fontSize: 12 }}>
+                <Shield size={12} /> Set Password
+              </button>
+              <button onClick={() => onResetPassword(m, 'email')} style={{ ...btnSec, flex: 1, justifyContent: 'center', fontSize: 12 }}>
+                <Mail size={12} /> Reset Email
+              </button>
+            </div>
+            <button onClick={() => onDelete(m)} style={{ ...btnSec, width: '100%', justifyContent: 'center', color: '#ef4444', borderColor: '#ef444440' }}>
+              <Trash2 size={13} /> Delete Permanently
+            </button>
+          </div>
         </div>
       </div>
     </div>
