@@ -31,7 +31,8 @@ class ThreadCreate(BaseModel):
 
 
 class MessageCreate(BaseModel):
-    body: str
+    body: str = ""
+    attachment_ids: List[str] = []
 
 
 # ============== HELPERS ==============
@@ -292,8 +293,10 @@ async def send_message(
     current_user: dict = Depends(get_current_user)
 ):
     """Send a message to a thread."""
-    if not body.body.strip():
-        raise HTTPException(status_code=400, detail="Message body cannot be empty")
+    body_text = (body.body or "").strip()
+    attachment_ids = body.attachment_ids or []
+    if not body_text and not attachment_ids:
+        raise HTTPException(status_code=400, detail="Message body or attachments required")
 
     thread = await db.threads.find_one({"id": thread_id}, {"_id": 0, "members": 1, "org_id": 1})
     if not thread:
@@ -301,6 +304,23 @@ async def send_message(
 
     if current_user["id"] not in thread.get("members", []):
         raise HTTPException(status_code=403, detail="Not a member of this thread")
+
+    # Resolve attachments into embedded metadata so clients can render
+    # without an extra lookup.
+    attachments = []
+    if attachment_ids:
+        async for f in db.files.find(
+            {"id": {"$in": attachment_ids}, "uploaded_by_user_id": current_user["id"]},
+            {"_id": 0, "id": 1, "original_filename": 1, "label": 1,
+             "content_type": 1, "file_size": 1},
+        ):
+            attachments.append({
+                "id": f["id"],
+                "filename": f.get("original_filename") or f.get("label") or "file",
+                "content_type": f.get("content_type"),
+                "file_size": f.get("file_size"),
+                "download_url": f"/api/files/{f['id']}/download",
+            })
 
     now = datetime.now(timezone.utc).isoformat()
     message = {
@@ -310,16 +330,16 @@ async def send_message(
         "thread_type": thread.get("type"),
         "sender_id": current_user["id"],
         "sender_name": current_user.get("name") or current_user.get("email"),
-        "body": body.body.strip(),
+        "body": body_text,
         "created_at": now,
         "read_by": [current_user["id"]],
-        "attachments": [],
+        "attachments": attachments,
     }
 
     await db.messages.insert_one(message)
 
     # Update thread's last message
-    preview = body.body.strip()[:80]
+    preview = body_text[:80] if body_text else f"📎 {len(attachments)} attachment{'s' if len(attachments) != 1 else ''}"
     await db.threads.update_one(
         {"id": thread_id},
         {"$set": {"last_message_at": now, "last_message_preview": preview}}

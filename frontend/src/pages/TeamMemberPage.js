@@ -380,9 +380,87 @@ export default function TeamMemberPage() {
           <FilesTab memberId={id} files={files} onRefresh={fetchFiles} />
         )}
         {tab === 'sops' && (
-          <SOPsTab sops={sops} linkedSops={linkedSops} onSave={saveSopLinks} />
+          <SOPsTab sops={sops} linkedSops={linkedSops} onSave={saveSopLinks} onRefreshSops={fetchSops} />
         )}
       </div>
+
+      {/* ── Edit Member Modal (portal to escape overflow:hidden) ── */}
+      {showEditModal && createPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, maxWidth: 480, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Edit Member</h2>
+              <button onClick={() => setShowEditModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
+            </div>
+            <form onSubmit={saveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Full Name</label>
+                <input className="input-field" value={editForm.name || ''} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Email</label>
+                <input className="input-field" type="email" value={editForm.email || ''} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Role</label>
+                  <select className="input-field" value={editForm.role || ''} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}>
+                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Account Type</label>
+                  <select className="input-field" value={editForm.account_type || ''} onChange={e => setEditForm(p => ({ ...p, account_type: e.target.value }))}>
+                    {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Team</label>
+                <select className="input-field" value={editForm.team_id || ''} onChange={e => setEditForm(p => ({ ...p, team_id: e.target.value }))}>
+                  <option value="">No Team</option>
+                  {teams.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
+              {specialties.length > 0 && (
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Specialties</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {specialties.map(s => {
+                      const sid = s.id || s._id;
+                      const sel = (editForm.specialty_ids || []).includes(sid);
+                      return (
+                        <button key={sid} type="button" onClick={() => {
+                          setEditForm(p => ({
+                            ...p,
+                            specialty_ids: sel ? p.specialty_ids.filter(x => x !== sid) : [...(p.specialty_ids || []), sid],
+                          }));
+                        }} style={{
+                          padding: '4px 10px', borderRadius: 6, fontSize: 12, border: '1px solid var(--border)',
+                          background: sel ? 'var(--accent)' : 'var(--surface-2)', color: sel ? '#fff' : 'var(--tx-2)',
+                          cursor: 'pointer', transition: 'all .15s',
+                        }}>{s.name}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                <input type="checkbox" checked={editForm.active !== false} onChange={e => setEditForm(p => ({ ...p, active: e.target.checked }))}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
+                <label style={{ fontSize: 13, color: 'var(--tx-1)' }}>Active account</label>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn-ghost">Cancel</button>
+                <button type="submit" className="btn-primary" disabled={editSaving}>
+                  {editSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
@@ -664,9 +742,10 @@ function FilesTab({ memberId, files, onRefresh }) {
 /* ═══════════════════════════════════════════════════════════
    SOPS TAB (link knowledge base articles)
    ═══════════════════════════════════════════════════════════ */
-function SOPsTab({ sops, linkedSops, onSave }) {
+function SOPsTab({ sops, linkedSops, onSave, onRefreshSops }) {
   const [showPicker, setShowPicker] = useState(false);
   const [search, setSearch] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const linked = sops.filter(s => linkedSops.includes(s.id || s._id));
   const available = sops.filter(s => !linkedSops.includes(s.id || s._id));
@@ -680,6 +759,50 @@ function SOPsTab({ sops, linkedSops, onSave }) {
     onSave(linkedSops.filter(id => id !== sopId));
   };
 
+  const readFileAsText = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+
+  const handleUpload = async (fileList) => {
+    if (!fileList?.length) return;
+    setUploading(true);
+    const TEXT_EXTS = ['.md', '.markdown', '.txt', '.html', '.htm', '.json', '.csv'];
+    const newLinks = [];
+    try {
+      for (const f of fileList) {
+        const ext = '.' + (f.name.split('.').pop() || '').toLowerCase();
+        if (!TEXT_EXTS.includes(ext)) {
+          toast.error(`${f.name}: only ${TEXT_EXTS.join(', ')} files are supported`);
+          continue;
+        }
+        const body = await readFileAsText(f);
+        const title = f.name.replace(/\.[^/.]+$/, '');
+        const res = await ax().post(`${API}/knowledge-base/documents`, {
+          title,
+          folder: 'sops',
+          access: 'team',
+          status: 'published',
+          body,
+          tags: [],
+        });
+        const newId = res.data?.id || res.data?._id;
+        if (newId) newLinks.push(newId);
+      }
+      if (newLinks.length) {
+        toast.success(`Uploaded ${newLinks.length} doc${newLinks.length > 1 ? 's' : ''} to knowledge base`);
+        onSave([...linkedSops, ...newLinks]);
+        onRefreshSops?.();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div style={{ padding: '0 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -687,13 +810,26 @@ function SOPsTab({ sops, linkedSops, onSave }) {
           <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px', color: 'var(--tx-1)' }}>Linked SOPs</h3>
           <p style={{ fontSize: 12, color: 'var(--tx-3)', margin: 0 }}>Knowledge base articles relevant to this team member's role</p>
         </div>
-        <button onClick={() => setShowPicker(true)} style={{
-          display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px',
-          background: 'var(--accent)', color: '#fff', borderRadius: 8, border: 'none',
-          fontSize: 12, fontWeight: 600, cursor: 'pointer',
-        }}>
-          <Link2 size={13} /> Link SOP
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px',
+            background: 'var(--bg-elevated)', color: 'var(--tx-1)', borderRadius: 8,
+            border: '1px solid var(--border)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Upload size={13} /> {uploading ? 'Uploading…' : 'Upload to KB'}
+            <input type="file" multiple accept=".md,.markdown,.txt,.html,.htm,.json,.csv"
+              style={{ display: 'none' }}
+              onChange={e => { handleUpload(Array.from(e.target.files)); e.target.value = ''; }}
+              disabled={uploading} />
+          </label>
+          <button onClick={() => setShowPicker(true)} style={{
+            display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px',
+            background: 'var(--accent)', color: '#fff', borderRadius: 8, border: 'none',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Link2 size={13} /> Link SOP
+          </button>
+        </div>
       </div>
 
       {linked.length === 0 ? (
@@ -767,84 +903,6 @@ function SOPsTab({ sops, linkedSops, onSave }) {
             </div>
           </div>
         </div>
-      )}
-
-      {/* ── Edit Member Modal (portal to escape overflow:hidden) ── */}
-      {showEditModal && createPortal(
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 12, padding: 24, maxWidth: 480, width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Edit Member</h2>
-              <button onClick={() => setShowEditModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
-            </div>
-            <form onSubmit={saveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Full Name</label>
-                <input className="input-field" value={editForm.name || ''} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Email</label>
-                <input className="input-field" type="email" value={editForm.email || ''} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Role</label>
-                  <select className="input-field" value={editForm.role || ''} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))}>
-                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Account Type</label>
-                  <select className="input-field" value={editForm.account_type || ''} onChange={e => setEditForm(p => ({ ...p, account_type: e.target.value }))}>
-                    {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Team</label>
-                <select className="input-field" value={editForm.team_id || ''} onChange={e => setEditForm(p => ({ ...p, team_id: e.target.value }))}>
-                  <option value="">No Team</option>
-                  {teams.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              </div>
-              {specialties.length > 0 && (
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Specialties</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {specialties.map(s => {
-                      const sid = s.id || s._id;
-                      const sel = (editForm.specialty_ids || []).includes(sid);
-                      return (
-                        <button key={sid} type="button" onClick={() => {
-                          setEditForm(p => ({
-                            ...p,
-                            specialty_ids: sel ? p.specialty_ids.filter(x => x !== sid) : [...(p.specialty_ids || []), sid],
-                          }));
-                        }} style={{
-                          padding: '4px 10px', borderRadius: 6, fontSize: 12, border: '1px solid var(--border)',
-                          background: sel ? 'var(--accent)' : 'var(--surface-2)', color: sel ? '#fff' : 'var(--tx-2)',
-                          cursor: 'pointer', transition: 'all .15s',
-                        }}>{s.name}</button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-                <input type="checkbox" checked={editForm.active !== false} onChange={e => setEditForm(p => ({ ...p, active: e.target.checked }))}
-                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
-                <label style={{ fontSize: 13, color: 'var(--tx-1)' }}>Active account</label>
-              </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
-                <button type="button" onClick={() => setShowEditModal(false)} className="btn-ghost">Cancel</button>
-                <button type="submit" className="btn-primary" disabled={editSaving}>
-                  {editSaving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
       )}
     </div>
   );

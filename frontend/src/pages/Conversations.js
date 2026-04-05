@@ -11,7 +11,7 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
   MessageSquare, Plus, X, Send, Hash, User, FileText,
-  Loader2, Pencil, Trash2, Users, Check,
+  Loader2, Pencil, Trash2, Users, Check, Paperclip, Download, Image as ImageIcon,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -139,6 +139,8 @@ export default function Conversations() {
   const [memberSearch, setMemberSearch] = useState('');
   const [editingMsg, setEditingMsg] = useState(null);
   const [editText, setEditText] = useState('');
+  const [pendingAttachments, setPendingAttachments] = useState([]); // [{id, filename, content_type, file_size}]
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
   const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
@@ -185,17 +187,55 @@ export default function Conversations() {
   }, [activeThread, loadMessages]);
 
   const sendMessage = async () => {
-    if (!newMsg.trim() || !activeThread) return;
+    if (!activeThread) return;
+    if (!newMsg.trim() && pendingAttachments.length === 0) return;
     setSending(true);
     try {
-      const res = await ax().post(`${API}/messages/threads/${activeThread.id}/messages`, { body: newMsg });
+      const res = await ax().post(`${API}/messages/threads/${activeThread.id}/messages`, {
+        body: newMsg,
+        attachment_ids: pendingAttachments.map(a => a.id),
+      });
       setMessages(prev => [...prev, res.data]);
+      const preview = newMsg.trim()
+        ? newMsg.slice(0, 80)
+        : `📎 ${pendingAttachments.length} attachment${pendingAttachments.length !== 1 ? 's' : ''}`;
       setNewMsg('');
+      setPendingAttachments([]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
       // Update thread preview
-      setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, last_message_preview: newMsg.slice(0, 80), last_message_at: new Date().toISOString() } : t));
+      setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, last_message_preview: preview, last_message_at: new Date().toISOString() } : t));
     } catch { toast.error('Failed to send'); }
     finally { setSending(false); }
+  };
+
+  const handleAttachFiles = async (fileList) => {
+    if (!fileList?.length || !activeThread) return;
+    setUploadingAttachment(true);
+    try {
+      const uploaded = [];
+      for (const f of fileList) {
+        const fd = new FormData();
+        fd.append('file', f);
+        fd.append('context_type', 'message');
+        fd.append('context_id', activeThread.id);
+        const res = await ax().post(`${API}/files/upload`, fd);
+        uploaded.push({
+          id: res.data.file_id || res.data.id,
+          filename: res.data.filename || res.data.original_filename || f.name,
+          content_type: res.data.content_type || f.type,
+          file_size: res.data.file_size || f.size,
+        });
+      }
+      setPendingAttachments(prev => [...prev, ...uploaded]);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Upload failed');
+    } finally {
+      setUploadingAttachment(false);
+    }
+  };
+
+  const removePendingAttachment = (id) => {
+    setPendingAttachments(prev => prev.filter(a => a.id !== id));
   };
 
   // Member management
@@ -431,7 +471,40 @@ export default function Conversations() {
                           <button onClick={() => setEditingMsg(null)} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 5, color: 'var(--tx-3)', cursor: 'pointer', padding: '5px 8px', display: 'flex' }}><X size={14} /></button>
                         </div>
                       ) : (
-                        <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                        <>
+                          {msg.body && (
+                            <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                          )}
+                          {(msg.attachments || []).length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: msg.body ? 6 : 0 }}>
+                              {msg.attachments.map(att => {
+                                const isImg = (att.content_type || '').startsWith('image/');
+                                const url = `${API}/files/${att.id}/download`;
+                                if (isImg) {
+                                  return (
+                                    <a key={att.id} href={url} target="_blank" rel="noreferrer"
+                                      style={{ display: 'inline-block', maxWidth: 320 }}>
+                                      <img src={url} alt={att.filename}
+                                        style={{ maxWidth: '100%', maxHeight: 240, borderRadius: 8, border: '1px solid var(--border)' }} />
+                                    </a>
+                                  );
+                                }
+                                return (
+                                  <a key={att.id} href={url} target="_blank" rel="noreferrer"
+                                    style={{
+                                      display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px',
+                                      background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8,
+                                      textDecoration: 'none', color: 'var(--tx-1)', maxWidth: 320,
+                                    }}>
+                                    <FileText size={16} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+                                    <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.filename}</span>
+                                    <Download size={13} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                     {/* Hover action bar — only for own messages */}
@@ -455,7 +528,47 @@ export default function Conversations() {
 
             {/* Input */}
             <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+              {/* Pending attachment chips */}
+              {(pendingAttachments.length > 0 || uploadingAttachment) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  {pendingAttachments.map(att => {
+                    const isImg = (att.content_type || '').startsWith('image/');
+                    return (
+                      <div key={att.id} style={{
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px 5px 10px',
+                        background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6,
+                        fontSize: 11.5, color: 'var(--tx-1)', maxWidth: 220,
+                      }}>
+                        {isImg ? <ImageIcon size={12} style={{ color: 'var(--tx-3)' }} /> : <FileText size={12} style={{ color: 'var(--tx-3)' }} />}
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.filename}</span>
+                        <button onClick={() => removePendingAttachment(att.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 2, display: 'flex' }}>
+                          <X size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {uploadingAttachment && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11.5, color: 'var(--tx-3)' }}>
+                      <Loader2 size={12} className="spin" /> Uploading…
+                    </div>
+                  )}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                <label title="Attach files" style={{
+                  width: 38, height: 38, borderRadius: 8, cursor: uploadingAttachment ? 'not-allowed' : 'pointer',
+                  background: 'var(--surface-2)', border: '1px solid var(--border-strong)',
+                  color: 'var(--tx-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  opacity: uploadingAttachment ? 0.6 : 1,
+                }}>
+                  <Paperclip size={16} />
+                  <input
+                    type="file" multiple style={{ display: 'none' }}
+                    disabled={uploadingAttachment}
+                    onChange={e => { handleAttachFiles(Array.from(e.target.files)); e.target.value = ''; }}
+                  />
+                </label>
                 <textarea
                   value={newMsg}
                   onChange={e => setNewMsg(e.target.value)}
@@ -468,11 +581,12 @@ export default function Conversations() {
                     fontFamily: 'inherit', minHeight: 40, maxHeight: 120,
                   }}
                 />
-                <button onClick={sendMessage} disabled={sending || !newMsg.trim()}
+                <button onClick={sendMessage} disabled={sending || (!newMsg.trim() && pendingAttachments.length === 0)}
                   style={{
                     width: 38, height: 38, borderRadius: 8, border: 'none', cursor: 'pointer',
-                    background: newMsg.trim() ? 'var(--accent)' : 'var(--surface-2)',
-                    color: newMsg.trim() ? '#fff' : 'var(--tx-3)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: (newMsg.trim() || pendingAttachments.length > 0) ? 'var(--accent)' : 'var(--surface-2)',
+                    color: (newMsg.trim() || pendingAttachments.length > 0) ? '#fff' : 'var(--tx-3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'background .15s', flexShrink: 0,
                   }}>
                   {sending ? <Loader2 size={16} className="spin" /> : <Send size={16} />}
