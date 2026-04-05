@@ -8,7 +8,7 @@ RBAC Rules:
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 
 from database import db
@@ -28,6 +28,50 @@ from models.task import (
 )
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
+
+
+async def _upsert_task_reminder(
+    task_id: str,
+    user_id: str,
+    due_at,
+    minutes_before: Optional[int],
+    channels: Optional[List[str]],
+):
+    """
+    Upsert a task_reminders row when a task has a due date, a lead time,
+    and at least one notification channel. If any of those are missing,
+    delete any existing row for the task.
+    """
+    if not due_at or not minutes_before or not channels:
+        await db.task_reminders.delete_many({"task_id": task_id})
+        return
+
+    # Normalize due_at to an aware UTC datetime
+    if isinstance(due_at, str):
+        try:
+            due_dt = datetime.fromisoformat(due_at.replace("Z", "+00:00"))
+        except ValueError:
+            return
+    else:
+        due_dt = due_at
+    if due_dt.tzinfo is None:
+        due_dt = due_dt.replace(tzinfo=timezone.utc)
+
+    reminder_at = due_dt - timedelta(minutes=int(minutes_before))
+
+    await db.task_reminders.update_one(
+        {"task_id": task_id},
+        {"$set": {
+            "task_id": task_id,
+            "user_id": user_id,
+            "due_at": due_dt.isoformat(),
+            "reminder_at": reminder_at.isoformat(),
+            "channels": list(channels),
+            "sent": False,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }},
+        upsert=True,
+    )
 
 
 def get_user_org_id(user: dict) -> str | None:
@@ -549,10 +593,22 @@ async def create_task(
         "created_source": created_source,
         "completed_at": None,
         "created_at": now,
-        "updated_at": now
+        "updated_at": now,
+        "reminder_minutes_before": task_data.reminder_minutes_before,
+        "reminder_channels": task_data.reminder_channels or [],
     }
 
     await db.tasks.insert_one(task)
+
+    # Upsert reminder row if requested
+    await _upsert_task_reminder(
+        task_id=task_id,
+        user_id=task_data.assignee_user_id or current_user["id"],
+        due_at=task_data.due_at,
+        minutes_before=task_data.reminder_minutes_before,
+        channels=task_data.reminder_channels or [],
+    )
+
     task_response = {k: v for k, v in task.items() if k != "_id"}
     return TaskResponse(**task_response)
 
@@ -728,10 +784,28 @@ async def update_task(
         update_data["client_id"] = task_update.client_id
     if task_update.client_name is not None:
         update_data["client_name"] = task_update.client_name
+    if task_update.reminder_minutes_before is not None:
+        update_data["reminder_minutes_before"] = task_update.reminder_minutes_before
+    if task_update.reminder_channels is not None:
+        update_data["reminder_channels"] = task_update.reminder_channels
 
     update_data["updated_at"] = datetime.now(timezone.utc)
     await db.tasks.update_one({"id": task_id}, {"$set": update_data})
     updated_task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+
+    # Refresh reminder if due_at / reminder fields were touched
+    if (
+        task_update.due_at is not None
+        or task_update.reminder_minutes_before is not None
+        or task_update.reminder_channels is not None
+    ):
+        await _upsert_task_reminder(
+            task_id=task_id,
+            user_id=updated_task.get("assignee_user_id") or updated_task.get("created_by_user_id") or current_user["id"],
+            due_at=updated_task.get("due_at"),
+            minutes_before=updated_task.get("reminder_minutes_before"),
+            channels=updated_task.get("reminder_channels") or [],
+        )
 
     # Enrich subtask and comment counts
     updated_task["subtask_count"] = await db.tasks.count_documents({"parent_task_id": task_id})

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -420,7 +421,7 @@ function ContactsTab({ token, onRefresh }) {
       </div>
 
       {/* Contact Details Panel */}
-      {showDetailsPanel && selectedContact && (
+      {showDetailsPanel && selectedContact && createPortal(
         <div style={{
           position: 'fixed',
           right: 0,
@@ -690,11 +691,12 @@ function ContactsTab({ token, onRefresh }) {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Overlay */}
-      {showDetailsPanel && (
+      {showDetailsPanel && createPortal(
         <div
           onClick={() => setShowDetailsPanel(false)}
           style={{
@@ -704,7 +706,8 @@ function ContactsTab({ token, onRefresh }) {
             zIndex: 99,
             pointerEvents: 'auto',
           }}
-        />
+        />,
+        document.body
       )}
     </div>
   );

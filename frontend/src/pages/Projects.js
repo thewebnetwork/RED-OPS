@@ -18,6 +18,7 @@
  *   • Client linking and health metrics
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -392,7 +393,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
     onClose();
   };
 
-  return (
+  return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div style={{ background: 'var(--bg)', borderRadius: 12, maxWidth: 520, width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
         <div style={{ padding: 20, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -564,7 +565,8 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

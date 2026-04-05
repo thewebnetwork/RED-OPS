@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -71,7 +72,7 @@ function TransactionDialog({ tx, categories, clients, users, onSave, onClose, sa
   const lblStyle = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.04em' };
   const inpStyle = { width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-1)', outline: 'none', boxSizing: 'border-box' };
 
-  return (
+  return createPortal(
     <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
       <div style={{ position: 'relative', width: 520, maxHeight: '85vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', padding: 24 }}>
@@ -192,7 +193,8 @@ function TransactionDialog({ tx, categories, clients, users, onSave, onClose, sa
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -766,7 +768,7 @@ export default function Finance() {
       />
 
       {/* Import CSV Modal */}
-      {showImportModal && (
+      {showImportModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={() => { setShowImportModal(false); setImportRows([]); }} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
           <div style={{ position: 'relative', width: 640, maxHeight: '85vh', overflowY: 'auto', background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', padding: 24 }}>
@@ -875,7 +877,8 @@ export default function Finance() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

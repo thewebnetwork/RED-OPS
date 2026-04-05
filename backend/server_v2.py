@@ -68,6 +68,7 @@ from routes.files import router as files_router
 from services.sla_monitor import check_sla_breaches
 from services.sla_policy_engine import check_and_process_policies
 from services.review_reminder import check_pending_reviews
+from services.reminder_worker import run_reminder_worker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -75,6 +76,7 @@ logger = logging.getLogger(__name__)
 
 # SLA monitor background task
 sla_monitor_task = None
+reminder_worker_task = None
 
 
 # ============== IFRAME EMBEDDING MIDDLEWARE ==============
@@ -194,7 +196,7 @@ async def ensure_admin_account():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler for startup and shutdown events"""
-    global sla_monitor_task
+    global sla_monitor_task, reminder_worker_task
 
     # Startup
     logger.info("Starting Red Ribbon Ops Portal API V2...")
@@ -210,13 +212,26 @@ async def lifespan(app: FastAPI):
     sla_monitor_task = asyncio.create_task(sla_monitor_loop())
     logger.info("SLA monitor started")
 
+    # Start task-reminder worker (polls task_reminders every 60s)
+    try:
+        reminder_worker_task = asyncio.create_task(run_reminder_worker(db))
+        logger.info("Reminder worker started")
+    except Exception as e:
+        logger.error(f"Failed to start reminder worker (non-fatal): {e}")
+
     yield
-    
+
     # Shutdown
     if sla_monitor_task:
         sla_monitor_task.cancel()
         try:
             await sla_monitor_task
+        except asyncio.CancelledError:
+            pass
+    if reminder_worker_task:
+        reminder_worker_task.cancel()
+        try:
+            await reminder_worker_task
         except asyncio.CancelledError:
             pass
     logger.info("Red Ribbon Ops Portal API V2 shutdown complete")

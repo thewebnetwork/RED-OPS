@@ -36,6 +36,10 @@ import {
   List as ListIcon,
   ArrowUpDown,
 } from 'lucide-react';
+import PillSelect, {
+  STATUS_OPTIONS_ID,
+  PRIORITY_OPTIONS_ID,
+} from '../components/PillSelect';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -202,15 +206,25 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, onDelete, savi
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>Status</label>
-              <select value={form.status} onChange={e => set('status', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                {columns.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
+              <div>
+                <PillSelect
+                  value={form.status}
+                  onChange={v => set('status', v)}
+                  options={STATUS_OPTIONS_ID}
+                  minWidth={160}
+                />
+              </div>
             </div>
             <div>
               <label style={labelStyle}>Priority</label>
-              <select value={form.priority} onChange={e => set('priority', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                {Object.entries(PRIORITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
+              <div>
+                <PillSelect
+                  value={form.priority}
+                  onChange={v => set('priority', v)}
+                  options={PRIORITY_OPTIONS_ID}
+                  minWidth={140}
+                />
+              </div>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -635,10 +649,13 @@ export default function TaskBoard() {
               <option value="">All Assignees</option>
               {assignableUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
-              <option value="">All Statuses</option>
-              {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-            </select>
+            <PillSelect
+              value={filterStatus || ''}
+              onChange={setFilterStatus}
+              options={[{ value: '', label: 'All Statuses', color: '#9ca3af' }, ...STATUS_OPTIONS_ID]}
+              size="sm"
+              minWidth={150}
+            />
             {hasFilters && (
               <button
                 onClick={() => { setFilterAssignee(''); setFilterStatus(''); setSearchQuery(''); }}
@@ -711,7 +728,6 @@ export default function TaskBoard() {
             {sortedTasks.map(task => {
               const pri = PRIORITY[task.priority] || PRIORITY.medium;
               const date = fmtDate(task.due_at);
-              const col = COLUMNS.find(c => c.id === task.status);
               const assigneeName = task.assigned_user?.name || task.assignee_name || null;
               return (
                 <div
@@ -731,24 +747,18 @@ export default function TaskBoard() {
                     <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</span>
                   </div>
                   {/* Status */}
-                  <div>
-                    <select
+                  <div onClick={e => e.stopPropagation()}>
+                    <PillSelect
                       value={task.status}
-                      onClick={e => e.stopPropagation()}
-                      onChange={async (e) => {
-                        const newStatus = e.target.value;
+                      onChange={async (newStatus) => {
                         setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
                         try { await axios.patch(`${API}/tasks/${task.id}`, { status: newStatus }, { headers: headers() }); }
                         catch { toast.error('Failed to update'); loadTasks(); }
                       }}
-                      style={{
-                        fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6,
-                        background: (col?.color || '#94a3b8') + '22', color: col?.color || '#94a3b8',
-                        border: 'none', cursor: 'pointer', outline: 'none',
-                      }}
-                    >
-                      {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                    </select>
+                      options={STATUS_OPTIONS_ID}
+                      size="sm"
+                      minWidth={130}
+                    />
                   </div>
                   {/* Priority */}
                   <div>

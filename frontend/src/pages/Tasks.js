@@ -26,6 +26,11 @@ import {
   ArrowUpDown, Layers, CheckSquare, Target, BarChart3,
   Hash, Grid3X3, Activity, TrendingUp,
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import PillSelect, {
+  STATUS_OPTIONS_LABEL,
+  PRIORITY_OPTIONS_LABEL,
+} from '../components/PillSelect';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -178,6 +183,9 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
     title: '', status: 'Todo', priority: 'Normal',
     assignee_id: '', due_date: '', project_id: '', description: '',
   });
+  const [reminderEmail, setReminderEmail] = useState(false);
+  const [reminderSms, setReminderSms] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(60);
   const [saving, setSaving] = useState(false);
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -185,14 +193,17 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
     if (!form.title.trim()) return;
     setSaving(true);
     try {
+      const channels = [reminderEmail && 'email', reminderSms && 'sms'].filter(Boolean);
       await ax().post(`${API}/tasks`, {
         title: form.title, description: form.description || null,
         status: STATUS_MAP[form.status] || 'todo',
         priority: PRIORITY_MAP[form.priority] || 'medium',
-        due_at: form.due_date ? new Date(form.due_date + 'T00:00:00Z').toISOString() : null,
+        due_at: form.due_date ? new Date(form.due_date).toISOString() : null,
         project_id: form.project_id || null,
         assignee_user_id: form.assignee_id || null,
         visibility: 'both',
+        reminder_minutes_before: channels.length ? reminderMinutes : null,
+        reminder_channels: channels,
       });
       toast.success('Task created');
       onSave(); onClose();
@@ -200,7 +211,7 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
     finally { setSaving(false); }
   };
 
-  return (
+  return createPortal(
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)',
@@ -228,21 +239,31 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label style={labelStyle}>Status</label>
-              <select className="input-field" value={form.status} onChange={e => f('status', e.target.value)}>
-                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div>
+                <PillSelect
+                  value={form.status}
+                  onChange={v => f('status', v)}
+                  options={STATUS_OPTIONS_LABEL}
+                  minWidth={160}
+                />
+              </div>
             </div>
             <div>
               <label style={labelStyle}>Priority</label>
-              <select className="input-field" value={form.priority} onChange={e => f('priority', e.target.value)}>
-                {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <div>
+                <PillSelect
+                  value={form.priority}
+                  onChange={v => f('priority', v)}
+                  options={PRIORITY_OPTIONS_LABEL}
+                  minWidth={140}
+                />
+              </div>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={labelStyle}>Due Date</label>
-              <input className="input-field" type="date" value={form.due_date} onChange={e => f('due_date', e.target.value)} />
+              <label style={labelStyle}>Due Date & Time</label>
+              <input className="input-field" type="datetime-local" value={form.due_date} onChange={e => f('due_date', e.target.value)} />
             </div>
             <div>
               <label style={labelStyle}>Assignee</label>
@@ -252,6 +273,35 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
               </select>
             </div>
           </div>
+          {form.due_date && (
+            <div style={{ marginTop: 4, padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 10, color: 'var(--tx-3)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em' }}>Reminders</div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={reminderEmail} onChange={e => setReminderEmail(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
+                  Email
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={reminderSms} onChange={e => setReminderSms(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
+                  SMS
+                </label>
+                {(reminderEmail || reminderSms) && (
+                  <select
+                    value={reminderMinutes}
+                    onChange={e => setReminderMinutes(Number(e.target.value))}
+                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)', padding: '4px 10px', fontSize: 12 }}
+                  >
+                    <option value={15}>15 min before</option>
+                    <option value={30}>30 min before</option>
+                    <option value={60}>1 hour before</option>
+                    <option value={120}>2 hours before</option>
+                    <option value={1440}>1 day before</option>
+                    <option value={2880}>2 days before</option>
+                  </select>
+                )}
+              </div>
+            </div>
+          )}
           <div>
             <label style={labelStyle}>Project</label>
             <select className="input-field" value={form.project_id} onChange={e => f('project_id', e.target.value)}>
@@ -267,7 +317,8 @@ function NewTaskModal({ onClose, onSave, projects, users }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -424,7 +475,7 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
 
   const doneCount = subtasks.filter(s => s.status === 'done').length;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 99 }} />
@@ -474,17 +525,21 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
         <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
             <label style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: 4 }}>Status</label>
-            <select className="input-field" value={task.status} onChange={e => handleStatusChange(e.target.value)}
-              style={{ fontSize: 12, padding: '5px 8px', borderRadius: 6, width: '100%' }}>
-              {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <PillSelect
+              value={task.status}
+              onChange={handleStatusChange}
+              options={STATUS_OPTIONS_LABEL}
+              minWidth={160}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: 4 }}>Priority</label>
-            <select className="input-field" value={task.priority} onChange={e => handlePriorityChange(e.target.value)}
-              style={{ fontSize: 12, padding: '5px 8px', borderRadius: 6, width: '100%' }}>
-              {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <PillSelect
+              value={task.priority}
+              onChange={handlePriorityChange}
+              options={PRIORITY_OPTIONS_LABEL}
+              minWidth={140}
+            />
           </div>
           <div>
             <label style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', display: 'block', marginBottom: 4 }}>Due Date</label>
@@ -661,7 +716,8 @@ function TaskDetail({ task, onClose, onRefresh, onDelete, users, allTasks }) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
@@ -1371,11 +1427,13 @@ export default function Tasks() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase' }}>Priority</span>
-              <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--tx-2)', cursor: 'pointer', outline: 'none' }}>
-                <option value="all">All</option>
-                {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <PillSelect
+                value={filterPriority}
+                onChange={setFilterPriority}
+                options={[{ value: 'all', label: 'All', color: '#9ca3af' }, ...PRIORITY_OPTIONS_LABEL]}
+                size="sm"
+                minWidth={110}
+              />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

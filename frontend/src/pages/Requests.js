@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -773,7 +774,7 @@ export default function Requests() {
       </div>
 
       {/* ── New Request Modal ── */}
-      {showModal && (
+      {showModal && createPortal(
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           onClick={() => setShowModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ width: 460, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '24px' }}>
@@ -829,11 +830,12 @@ export default function Requests() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Detail Panel ── */}
-      {selected && (
+      {selected && createPortal(
         <>
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 400 }} onClick={() => setSelected(null)} />
           <div style={{
@@ -1000,7 +1002,8 @@ export default function Requests() {
               <OrderComments orderId={selected.id} />
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

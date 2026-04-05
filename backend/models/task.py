@@ -42,6 +42,8 @@ class TaskCreate(BaseModel):
     task_type: TaskType = "manual"
     due_at: Optional[datetime] = None
     position: Optional[float] = None
+    reminder_minutes_before: Optional[int] = None
+    reminder_channels: Optional[List[str]] = []
 
 
 class TaskUpdate(BaseModel):
@@ -59,6 +61,8 @@ class TaskUpdate(BaseModel):
     position: Optional[float] = None
     completed_at: Optional[datetime] = None
     project_id: Optional[str] = None
+    reminder_minutes_before: Optional[int] = None
+    reminder_channels: Optional[List[str]] = None
 
 
 class TaskReorder(BaseModel):
