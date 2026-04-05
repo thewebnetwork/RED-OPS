@@ -190,11 +190,15 @@ export default function Conversations() {
     if (!activeThread) return;
     if (!newMsg.trim() && pendingAttachments.length === 0) return;
     setSending(true);
+    // Build payload. Only send attachment_ids when there are actually
+    // attachments — older backend builds reject unknown fields via
+    // Pydantic's `extra = 'forbid'` on some deployments.
+    const payload = { body: newMsg };
+    if (pendingAttachments.length > 0) {
+      payload.attachment_ids = pendingAttachments.map(a => a.id);
+    }
     try {
-      const res = await ax().post(`${API}/messages/threads/${activeThread.id}/messages`, {
-        body: newMsg,
-        attachment_ids: pendingAttachments.map(a => a.id),
-      });
+      const res = await ax().post(`${API}/messages/threads/${activeThread.id}/messages`, payload);
       setMessages(prev => [...prev, res.data]);
       const preview = newMsg.trim()
         ? newMsg.slice(0, 80)
@@ -204,8 +208,19 @@ export default function Conversations() {
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
       // Update thread preview
       setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, last_message_preview: preview, last_message_at: new Date().toISOString() } : t));
-    } catch { toast.error('Failed to send'); }
-    finally { setSending(false); }
+    } catch (err) {
+      // Surface the real failure instead of a generic toast.
+      // eslint-disable-next-line no-console
+      console.error('sendMessage failed', err.response?.status, err.response?.data, err);
+      const detail = err.response?.data?.detail;
+      toast.error(
+        typeof detail === 'string'
+          ? detail
+          : err.response?.status
+            ? `Failed to send (${err.response.status})`
+            : err.message || 'Failed to send'
+      );
+    } finally { setSending(false); }
   };
 
   const handleAttachFiles = async (fileList) => {
