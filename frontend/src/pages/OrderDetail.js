@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import MentionHashtagInput from '../components/MentionHashtagInput';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -103,6 +104,8 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [threadUsers, setThreadUsers] = useState([]);
+  const orderInputRef = useRef(null);
   const [addFileOpen, setAddFileOpen] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [closeReason, setCloseReason] = useState('');
@@ -144,7 +147,12 @@ export default function OrderDetail() {
   useEffect(() => {
     fetchOrderData();
     fetchCancellationReasons();
-  }, [orderId]);
+    // Fetch team members for @mention autocomplete
+    axios.get(`${API}/users`).then(r => {
+      const arr = Array.isArray(r.data) ? r.data : r.data?.users || [];
+      setThreadUsers(arr.filter(u => u.role !== 'Media Client').map(u => ({ id: u.id, name: u.name, role: u.role })));
+    }).catch(() => {});
+  }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     scrollToBottom();
@@ -198,21 +206,39 @@ export default function OrderDetail() {
   };
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!newMessage.trim()) return;
 
     setSendingMessage(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/messages`, {
-        message_body: newMessage.trim()
-      });
+      const mentionedIds = orderInputRef.current?.getMentionedUserIds() || [];
+      const metadata = orderInputRef.current?.getMetadata() || {};
+      const payload = { message_body: newMessage.trim() };
+      if (mentionedIds.length > 0) payload.mentions = mentionedIds;
+      if (metadata.urgent) payload.metadata = metadata;
+      await axios.post(`${API}/orders/${orderId}/messages`, payload);
       setNewMessage('');
+      orderInputRef.current?.resetState();
       const messagesRes = await axios.get(`${API}/orders/${orderId}/messages`);
       setMessages(messagesRes.data);
     } catch (error) {
       toast.error('Failed to send message');
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  const handleOrderCommandExecute = async (command, args) => {
+    if (command === 'createtask') {
+      const title = args || 'Task from order thread';
+      try {
+        await axios.post(`${API}/tasks`, { title, request_id: orderId });
+        toast.success(`Task created: "${title}"`);
+      } catch {
+        toast.error('Failed to create task');
+      }
+    } else if (command === 'status') {
+      toast.info(`Request status: ${order?.status || 'Unknown'}`);
     }
   };
 
@@ -1029,7 +1055,18 @@ export default function OrderDetail() {
                               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{msg.author_name}</span>
                               <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-elevated)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}>{msg.author_role}</span>
                             </div>
-                            <p style={{ fontSize: 13, color: 'var(--tx-2)', margin: 0, whiteSpace: 'pre-wrap' }}>{msg.message_body}</p>
+                            {msg.metadata?.urgent && (
+                              <span style={{ fontSize: 10, fontWeight: 700, color: '#ef4444', background: '#ef444415', padding: '1px 6px', borderRadius: 4, marginBottom: 3, display: 'inline-block' }}>
+                                {'\u26A1'} URGENT
+                              </span>
+                            )}
+                            <p style={{ fontSize: 13, color: 'var(--tx-2)', margin: 0, whiteSpace: 'pre-wrap' }}>
+                              {msg.message_body?.split(/(@\w[\w\s]*?)(?=\s|$|@|#)/g).map((part, pi) =>
+                                part.startsWith('@') ? (
+                                  <span key={pi} style={{ color: 'var(--accent, #c92a3e)', fontWeight: 600 }}>{part}</span>
+                                ) : part
+                              )}
+                            </p>
                             <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: '6px 0 0' }}>
                               {format(new Date(msg.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
@@ -1043,17 +1080,20 @@ export default function OrderDetail() {
                   
                   {/* Message Composer */}
                   {(order.editor_id === user?.id || order.requester_id === user?.id || user?.role === 'Administrator' || user?.role === 'Admin') && (
-                    <form onSubmit={handleSendMessage} className="border-t border-slate-100 p-4">
-                      <div className="flex gap-3">
-                        <Textarea
+                    <div className="border-t border-slate-100 p-4">
+                      <div className="flex gap-3" style={{ alignItems: 'flex-end' }}>
+                        <MentionHashtagInput
+                          ref={orderInputRef}
                           value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          placeholder="Type your message..."
-                          className="flex-1 min-h-[60px] resize-none"
-                          data-testid="message-input"
+                          onChange={setNewMessage}
+                          onSend={() => handleSendMessage()}
+                          users={threadUsers}
+                          threadType="request"
+                          onCommandExecute={handleOrderCommandExecute}
+                          placeholder="Type your message... Use @ to mention, # for commands"
                         />
-                        <Button 
-                          type="submit" 
+                        <Button
+                          onClick={() => handleSendMessage()}
                           className="bg-rose-600 hover:bg-rose-700"
                           disabled={sendingMessage || !newMessage.trim()}
                           data-testid="send-message-btn"
@@ -1061,7 +1101,7 @@ export default function OrderDetail() {
                           <Send size={18} />
                         </Button>
                       </div>
-                    </form>
+                    </div>
                   )}
                 </CardContent>
               </Card>

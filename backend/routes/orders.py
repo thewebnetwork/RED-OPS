@@ -166,6 +166,8 @@ class DeliverOrderRequest(BaseModel):
 
 class MessageCreate(BaseModel):
     message_body: str
+    mentions: Optional[List[str]] = []
+    metadata: Optional[dict] = {}
 
 
 class MessageResponse(BaseModel):
@@ -175,6 +177,8 @@ class MessageResponse(BaseModel):
     author_name: str
     author_role: str
     message_body: str
+    mentions: Optional[List[str]] = []
+    metadata: Optional[dict] = {}
     created_at: str
 
 
@@ -2355,10 +2359,27 @@ async def create_message(
         "author_name": current_user["name"],
         "author_role": current_user["role"],
         "message_body": message_data.message_body,
+        "mentions": message_data.mentions or [],
+        "metadata": message_data.metadata or {},
         "created_at": now
     }
     await db.order_messages.insert_one(message)
-    
+
+    # Notify mentioned users
+    for mentioned_user_id in (message_data.mentions or []):
+        if mentioned_user_id != current_user["id"]:
+            try:
+                await create_notification(
+                    db,
+                    user_id=mentioned_user_id,
+                    type="mention",
+                    title=f"{current_user['name']} mentioned you",
+                    message=message_data.message_body[:120],
+                    related_order_id=order_id,
+                )
+            except Exception:
+                pass
+
     # If requester sends a message while order is Pending, update last_requester_message_at
     # This is used by the review reminder workflow to check if requester has responded
     if is_requester and order["status"] == "Pending":

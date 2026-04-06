@@ -33,6 +33,8 @@ class ThreadCreate(BaseModel):
 class MessageCreate(BaseModel):
     body: str = ""
     attachment_ids: List[str] = []
+    mentions: Optional[List[str]] = []
+    metadata: Optional[dict] = {}
 
 
 # ============== HELPERS ==============
@@ -334,9 +336,26 @@ async def send_message(
         "created_at": now,
         "read_by": [current_user["id"]],
         "attachments": attachments,
+        "mentions": body.mentions or [],
+        "metadata": body.metadata or {},
     }
 
     await db.messages.insert_one(message)
+
+    # Notify mentioned users
+    for mentioned_user_id in (body.mentions or []):
+        if mentioned_user_id != current_user["id"]:
+            try:
+                from services.notifications import create_notification
+                await create_notification(
+                    db,
+                    user_id=mentioned_user_id,
+                    type="mention",
+                    title=f"{current_user.get('name')} mentioned you",
+                    message=body_text[:120],
+                )
+            except Exception:
+                pass  # non-fatal
 
     # Update thread's last message
     preview = body_text[:80] if body_text else f"📎 {len(attachments)} attachment{'s' if len(attachments) != 1 else ''}"

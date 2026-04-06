@@ -13,6 +13,7 @@ import {
   MessageSquare, Plus, X, Send, Hash, User, FileText,
   Loader2, Pencil, Trash2, Users, Check, Paperclip, Download, Image as ImageIcon,
 } from 'lucide-react';
+import MentionHashtagInput from '../components/MentionHashtagInput';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -124,6 +125,19 @@ function NewThreadModal({ type, onClose, onCreate, users }) {
   );
 }
 
+/* ── Render @mentions highlighted ── */
+function renderMsgBody(body) {
+  if (!body) return null;
+  const parts = body.split(/(@\w[\w\s]*?)(?=\s|$|@|#)/g);
+  return parts.map((part, i) =>
+    part.startsWith('@') ? (
+      <span key={i} style={{ color: 'var(--accent)', fontWeight: 600, background: 'var(--accent)12', borderRadius: 3, padding: '0 2px' }}>
+        {part}
+      </span>
+    ) : part
+  );
+}
+
 /* ── Main Page ── */
 export default function Conversations() {
   const { user } = useAuth();
@@ -139,8 +153,9 @@ export default function Conversations() {
   const [memberSearch, setMemberSearch] = useState('');
   const [editingMsg, setEditingMsg] = useState(null);
   const [editText, setEditText] = useState('');
-  const [pendingAttachments, setPendingAttachments] = useState([]); // [{id, filename, content_type, file_size}]
+  const [pendingAttachments, setPendingAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
   const isClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
@@ -190,13 +205,14 @@ export default function Conversations() {
     if (!activeThread) return;
     if (!newMsg.trim() && pendingAttachments.length === 0) return;
     setSending(true);
-    // Build payload. Only send attachment_ids when there are actually
-    // attachments — older backend builds reject unknown fields via
-    // Pydantic's `extra = 'forbid'` on some deployments.
+    const mentionedIds = inputRef.current?.getMentionedUserIds() || [];
+    const metadata = inputRef.current?.getMetadata() || {};
     const payload = { body: newMsg };
     if (pendingAttachments.length > 0) {
       payload.attachment_ids = pendingAttachments.map(a => a.id);
     }
+    if (mentionedIds.length > 0) payload.mentions = mentionedIds;
+    if (metadata.urgent) payload.metadata = metadata;
     try {
       const res = await ax().post(`${API}/messages/threads/${activeThread.id}/messages`, payload);
       setMessages(prev => [...prev, res.data]);
@@ -205,13 +221,11 @@ export default function Conversations() {
         : `📎 ${pendingAttachments.length} attachment${pendingAttachments.length !== 1 ? 's' : ''}`;
       setNewMsg('');
       setPendingAttachments([]);
+      inputRef.current?.resetState();
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-      // Update thread preview
       setThreads(prev => prev.map(t => t.id === activeThread.id ? { ...t, last_message_preview: preview, last_message_at: new Date().toISOString() } : t));
     } catch (err) {
-      // Surface the real failure instead of a generic toast.
-      // eslint-disable-next-line no-console
-      console.error('sendMessage failed', err.response?.status, err.response?.data, err);
+      console.error('sendMessage failed', err.response?.status, err.response?.data, err); // eslint-disable-line no-console
       const detail = err.response?.data?.detail;
       toast.error(
         typeof detail === 'string'
@@ -221,6 +235,27 @@ export default function Conversations() {
             : err.message || 'Failed to send'
       );
     } finally { setSending(false); }
+  };
+
+  const handleCommandExecute = async (command, args) => {
+    if (command === 'createtask') {
+      const title = args || 'Task from chat';
+      try {
+        await ax().post(`${API}/tasks`, {
+          title,
+          ...(activeThread?.type === 'request' && activeThread?.reference_id
+            ? { request_id: activeThread.reference_id }
+            : {}),
+        });
+        toast.success(`Task created: "${title}"`);
+      } catch {
+        toast.error('Failed to create task');
+      }
+    } else if (command === 'status') {
+      if (activeThread?.type === 'request') {
+        toast.info(`Request status: ${activeThread.status || 'Open'}`);
+      }
+    }
   };
 
   const handleAttachFiles = async (fileList) => {
@@ -487,8 +522,15 @@ export default function Conversations() {
                         </div>
                       ) : (
                         <>
+                          {msg.metadata?.urgent && (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: '#ef4444', background: '#ef444415', padding: '1px 6px', borderRadius: 4, marginBottom: 3, display: 'inline-block' }}>
+                              {'\u26A1'} URGENT
+                            </span>
+                          )}
                           {msg.body && (
-                            <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                            <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                              {renderMsgBody(msg.body)}
+                            </p>
                           )}
                           {(msg.attachments || []).length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: msg.body ? 6 : 0 }}>
@@ -584,17 +626,15 @@ export default function Conversations() {
                     onChange={e => { handleAttachFiles(Array.from(e.target.files)); e.target.value = ''; }}
                   />
                 </label>
-                <textarea
+                <MentionHashtagInput
+                  ref={inputRef}
                   value={newMsg}
-                  onChange={e => setNewMsg(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                  placeholder="Type a message..."
-                  rows={1}
-                  style={{
-                    flex: 1, resize: 'none', background: 'var(--surface-2)', border: '1px solid var(--border-strong)',
-                    borderRadius: 8, padding: '10px 12px', fontSize: 13.5, color: 'var(--tx-1)', outline: 'none',
-                    fontFamily: 'inherit', minHeight: 40, maxHeight: 120,
-                  }}
+                  onChange={setNewMsg}
+                  onSend={sendMessage}
+                  users={users}
+                  threadType={activeThread?.type}
+                  onCommandExecute={handleCommandExecute}
+                  placeholder="Type a message... Use @ to mention, # for commands"
                 />
                 <button onClick={sendMessage} disabled={sending || (!newMsg.trim() && pendingAttachments.length === 0)}
                   style={{
