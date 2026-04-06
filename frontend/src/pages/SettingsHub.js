@@ -8,6 +8,7 @@ import {
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
   X, Loader2, Clock, Package, Layers, Zap, EyeOff, Video, Camera, FileText, BarChart2,
   Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid, Tag, CreditCard, DollarSign, Star,
+  Bell, ListChecks,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -23,6 +24,8 @@ const SECTIONS = [
   { id: 'specialties', label: 'Specialties', icon: Tag, inline: true },
   { id: 'plans', label: 'Subscription Plans', icon: CreditCard, inline: true },
   { id: 'categories', label: 'Categories', icon: FolderTree, inline: false, path: '/categories' },
+  { id: 'statuses', label: 'Statuses', icon: ListChecks, inline: true },
+  { id: 'notification-rules', label: 'Notification Rules', icon: Bell, inline: true },
   { id: 'finance-categories', label: 'Finance Categories', icon: DollarSign, inline: true },
   { id: 'project-templates', label: 'Project Templates', icon: Layers, inline: true },
   { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
@@ -117,6 +120,7 @@ function MyProfileSection() {
 function GeneralSection() {
   const { currentOrg, loading: orgLoading, refreshOrgs } = useOrg();
   const [orgName, setOrgName] = useState('');
+  const [supportEmail, setSupportEmail] = useState('');
   const [timezone, setTimezone] = useState('UTC');
   const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
   const [saving, setSaving] = useState(false);
@@ -126,6 +130,7 @@ function GeneralSection() {
   useEffect(() => {
     if (currentOrg && !loaded) {
       setOrgName(currentOrg?.name || '');
+      setSupportEmail(currentOrg?.settings?.support_email || '');
       setTimezone(currentOrg?.settings?.timezone || 'UTC');
       setDateFormat(currentOrg?.settings?.date_format || 'MM/DD/YYYY');
       setLoaded(true);
@@ -147,7 +152,7 @@ function GeneralSection() {
       if (currentOrg) {
         await ax().patch(`${API}/organizations/${currentOrg?.id || currentOrg?._id}`, {
           name: orgName,
-          settings: { timezone, date_format: dateFormat },
+          settings: { timezone, date_format: dateFormat, support_email: supportEmail },
         });
         toast.success('Organization settings saved');
       } else {
@@ -182,6 +187,21 @@ function GeneralSection() {
             </label>
             <input type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)}
               placeholder="Your organization name" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
+              Support Email
+            </label>
+            <input type="email" value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)}
+              placeholder="support@youragency.com" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
+              Organization Logo
+            </label>
+            <div style={{ padding: '14px 16px', background: 'var(--bg-elevated)', border: '1px dashed var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--tx-3)' }}>
+              Logo upload coming soon
+            </div>
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: 'var(--tx-2)' }}>
@@ -1540,6 +1560,165 @@ function SubscriptionPlansSection() {
   );
 }
 
+// ── Statuses Section ──────────────────────────────────────────────────────────
+
+const CANONICAL_STATUSES = [
+  { status: 'Draft',       color: '#94a3b8', desc: 'Saved but not submitted. Only visible to the requester.', usedIn: ['Orders'] },
+  { status: 'Open',        color: '#3b82f6', desc: 'Submitted and waiting to be picked up by the team.', usedIn: ['Orders', 'Requests'] },
+  { status: 'In Progress', color: '#f59e0b', desc: 'Being actively worked on.', usedIn: ['Orders', 'Requests'] },
+  { status: 'Pending',     color: '#a855f7', desc: 'Waiting on client input or approval before work continues.', usedIn: ['Orders', 'Requests'] },
+  { status: 'Delivered',   color: '#22c55e', desc: 'Work is complete. Client is reviewing deliverables.', usedIn: ['Orders', 'Requests'] },
+  { status: 'Closed',      color: '#606060', desc: 'Request fully completed and closed.', usedIn: ['Orders', 'Requests'] },
+  { status: 'Canceled',    color: '#ef4444', desc: 'Request was canceled before completion.', usedIn: ['Orders', 'Requests'] },
+];
+
+function StatusesSection() {
+  return (
+    <div>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: 'var(--tx-1)' }}>Request Statuses</h3>
+      <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>
+        These are the status stages used across all requests and orders.
+      </p>
+
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px', padding: '10px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Status</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Description</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Used In</span>
+        </div>
+        {CANONICAL_STATUSES.map((s, i) => (
+          <div key={s.status} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px', padding: '12px 16px', borderBottom: i < CANONICAL_STATUSES.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 5, background: s.color + '18', color: s.color, width: 'fit-content' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: s.color }} />
+              {s.status}
+            </span>
+            <span style={{ fontSize: 13, color: 'var(--tx-2)' }}>{s.desc}</span>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {s.usedIn.map(u => (
+                <span key={u} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--tx-3)', fontWeight: 600 }}>{u}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Color reference swatches */}
+      <div style={{ marginBottom: 20 }}>
+        <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 10 }}>Color Reference</h4>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {CANONICAL_STATUSES.map(s => (
+            <div key={s.status} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 12, height: 12, borderRadius: 3, background: s.color }} />
+              <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{s.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p style={{ fontSize: 12, color: 'var(--tx-3)', padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)' }}>
+        To change the status of a request, open the request and use the action buttons, or use the status dropdown in the Requests board.
+      </p>
+    </div>
+  );
+}
+
+// ── Notification Rules Section ────────────────────────────────────────────────
+
+const DEFAULT_RULES = [
+  { event: 'new_order',       label: 'New Request Submitted', notify_roles: ['Administrator', 'Operator'], in_app: true, email: false },
+  { event: 'status_change',   label: 'Status Changed',        notify_roles: ['Administrator', 'Operator'], in_app: true, email: true },
+  { event: 'new_message',     label: 'New Message',            notify_roles: ['Administrator', 'Operator'], in_app: true, email: false },
+  { event: 'sla_breach',      label: 'SLA Breach',             notify_roles: ['Administrator'],             in_app: true, email: true },
+  { event: 'order_delivered', label: 'Order Delivered',         notify_roles: ['Administrator'],             in_app: true, email: true },
+];
+
+const ALL_ROLES = ['Administrator', 'Operator', 'Standard User'];
+
+function NotificationRulesSection() {
+  const [rules, setRules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    ax().get(`${API}/settings/notification-rules`)
+      .then(r => setRules(r.data?.rules || DEFAULT_RULES))
+      .catch(() => setRules(DEFAULT_RULES))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const toggleRole = (idx, role) => {
+    setRules(prev => prev.map((r, i) => {
+      if (i !== idx) return r;
+      const has = r.notify_roles.includes(role);
+      return { ...r, notify_roles: has ? r.notify_roles.filter(x => x !== role) : [...r.notify_roles, role] };
+    }));
+  };
+
+  const toggleField = (idx, field) => {
+    setRules(prev => prev.map((r, i) => i === idx ? { ...r, [field]: !r[field] } : r));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await ax().patch(`${API}/settings/notification-rules`, { rules });
+      toast.success('Notification rules saved');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to save rules');
+    } finally { setSaving(false); }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>;
+  }
+
+  const chkStyle = { width: 16, height: 16, accentColor: 'var(--accent)', cursor: 'pointer' };
+
+  return (
+    <div>
+      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, color: 'var(--tx-1)' }}>Notification Rules</h3>
+      <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>
+        Configure which events send notifications and to whom.
+      </p>
+
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', marginBottom: 20 }}>
+        {/* Header */}
+        <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 60px 60px', padding: '10px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)', gap: 8 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Event</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Who Gets Notified</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: 'center' }}>In-App</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: 'center' }}>Email</span>
+        </div>
+        {/* Rows */}
+        {rules.map((rule, idx) => (
+          <div key={rule.event} style={{ display: 'grid', gridTemplateColumns: '180px 1fr 60px 60px', padding: '12px 16px', borderBottom: idx < rules.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tx-1)' }}>{rule.label}</span>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {ALL_ROLES.map(role => (
+                <label key={role} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--tx-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={rule.notify_roles.includes(role)} onChange={() => toggleRole(idx, role)} style={chkStyle} />
+                  {role}
+                </label>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <input type="checkbox" checked={rule.in_app} onChange={() => toggleField(idx, 'in_app')} style={chkStyle} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <input type="checkbox" checked={rule.email} onChange={() => toggleField(idx, 'email')} style={chkStyle} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button onClick={handleSave} disabled={saving}
+        style={{ padding: '10px 24px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
+        {saving ? 'Saving...' : 'Save Rules'}
+      </button>
+    </div>
+  );
+}
+
 // ── Navigation Card ───────────────────────────────────────────────────────────
 
 function NavigationCard({ section }) {
@@ -1681,6 +1860,8 @@ export default function SettingsHub() {
           {activeSection === 'services' && <ServicesSection />}
           {activeSection === 'specialties' && <SpecialtiesSection />}
           {activeSection === 'plans' && <SubscriptionPlansSection />}
+          {activeSection === 'statuses' && <StatusesSection />}
+          {activeSection === 'notification-rules' && <NotificationRulesSection />}
           {activeSection === 'finance-categories' && <FinanceCategoriesSection />}
           {activeSection === 'project-templates' && <ProjectTemplatesSection />}
           {SECTIONS.find((s) => s.id === activeSection && !s.inline) && (

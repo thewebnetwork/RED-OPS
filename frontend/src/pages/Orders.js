@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { Search, Filter, X, Inbox, ChevronRight } from 'lucide-react';
+import { Search, Filter, X, Inbox, ChevronRight, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useAuth } from '../contexts/AuthContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const tok = () => localStorage.getItem('token');
+const jhdrs = () => ({ Authorization: `Bearer ${tok()}`, 'Content-Type': 'application/json' });
 
-const STATUS_OPTIONS = ['Open', 'In Progress', 'Needs Client Review', 'Revision Requested', 'Delivered', 'Closed', 'Canceled'];
+// Canonical order status set (see SettingsHub → Statuses section).
+// Matches OrderDetail.js and Requests.js kanban stages.
+const STATUS_OPTIONS = ['Open', 'In Progress', 'Pending', 'Delivered', 'Closed', 'Canceled'];
 
 const QUEUE_OPTIONS = [
   { value: 'ACCOUNT_MANAGER', label: 'Account Manager' },
@@ -20,13 +25,12 @@ const QUEUE_OPTIONS = [
 ];
 
 const STATUS_COLORS = {
-  'Open':                 { color: '#3b82f6', bg: '#3b82f618' },
-  'In Progress':          { color: '#f59e0b', bg: '#f59e0b18' },
-  'Needs Client Review':  { color: '#a855f7', bg: '#a855f718' },
-  'Revision Requested':   { color: '#f97316', bg: '#f9731618' },
-  'Delivered':            { color: '#22c55e', bg: '#22c55e18' },
-  'Closed':               { color: '#606060', bg: '#60606020' },
-  'Canceled':             { color: '#ef4444', bg: '#ef444418' },
+  'Open':         { color: '#3b82f6', bg: '#3b82f618' },
+  'In Progress':  { color: '#f59e0b', bg: '#f59e0b18' },
+  'Pending':      { color: '#a855f7', bg: '#a855f718' },
+  'Delivered':    { color: '#22c55e', bg: '#22c55e18' },
+  'Closed':       { color: '#606060', bg: '#60606020' },
+  'Canceled':     { color: '#ef4444', bg: '#ef444418' },
 };
 
 function StatusPill({ status }) {
@@ -41,6 +45,101 @@ function StatusPill({ status }) {
   );
 }
 
+// Valid next-status transitions (no self-transitions, no backward jumps)
+const NEXT_STATUSES = {
+  'Open':        ['In Progress'],
+  'In Progress': ['Pending', 'Delivered'],
+  'Pending':     ['In Progress', 'Delivered'],
+  'Delivered':   ['Closed'],
+};
+
+// Status → action endpoint mapping (matches Requests.js L492)
+const STATUS_ENDPOINTS = {
+  'In Progress': { endpoint: 'pick',              body: {} },
+  'Pending':     { endpoint: 'submit-for-review', body: {} },
+  'Delivered':   { endpoint: 'deliver',            body: { resolution_notes: '' } },
+  'Closed':      { endpoint: 'close',              body: { reason: 'Completed' } },
+};
+
+function StatusSelect({ orderId, currentStatus, onUpdate }) {
+  const [open, setOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const ref = useRef(null);
+  const c = STATUS_COLORS[currentStatus] || { color: 'var(--tx-3)', bg: 'var(--bg-elevated)' };
+  const nextOptions = NEXT_STATUSES[currentStatus] || [];
+
+  useEffect(() => {
+    if (!open) return;
+    function handleOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [open]);
+
+  const handleSelect = async (newStatus) => {
+    setOpen(false);
+    const mapping = STATUS_ENDPOINTS[newStatus];
+    if (!mapping) return;
+    setUpdating(true);
+    try {
+      await fetch(`${API}/orders/${orderId}/${mapping.endpoint}`, {
+        method: 'POST', headers: jhdrs(), body: JSON.stringify(mapping.body),
+      });
+      toast.success(`Status → ${newStatus}`);
+      onUpdate();
+    } catch {
+      toast.error('Failed to update status');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  if (nextOptions.length === 0) return <StatusPill status={currentStatus} />;
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpen(o => !o); }}
+        disabled={updating}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          fontSize: 11, fontWeight: 600, padding: '3px 8px 3px 9px', borderRadius: 5,
+          background: c.bg, color: c.color, border: `1px solid ${c.color}44`,
+          cursor: 'pointer', whiteSpace: 'nowrap', opacity: updating ? 0.6 : 1,
+        }}
+      >
+        {currentStatus} <ChevronDown size={11} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 500,
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(0,0,0,.35)', minWidth: 150, padding: 4,
+        }}>
+          {nextOptions.map(s => {
+            const sc = STATUS_COLORS[s] || { color: 'var(--tx-2)', bg: 'var(--bg-elevated)' };
+            return (
+              <div key={s}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); handleSelect(s); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',
+                  borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 500, color: sc.color,
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = sc.bg)}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: sc.color }} />
+                {s}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const queueLabel = (key) => {
   if (!key) return '—';
   const found = QUEUE_OPTIONS.find(q => q.value === key);
@@ -48,6 +147,8 @@ const queueLabel = (key) => {
 };
 
 export default function Orders() {
+  const { user } = useAuth();
+  const isOperator = ['Administrator', 'Admin', 'Operator'].includes(user?.role);
   const location = useLocation();
   const isAllRequests = location.pathname === '/all-requests';
   const [orders, setOrders] = useState([]);
@@ -190,7 +291,11 @@ export default function Orders() {
                       {order.service_name || '—'}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <StatusPill status={order.status} />
+                      {isOperator ? (
+                        <StatusSelect orderId={order.id} currentStatus={order.status} onUpdate={fetchOrders} />
+                      ) : (
+                        <StatusPill status={order.status} />
+                      )}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {order.assigned_queue_key ? (

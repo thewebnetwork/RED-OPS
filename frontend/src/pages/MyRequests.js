@@ -23,18 +23,21 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
 const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
-const CANCELLABLE_STATUSES = ['New', 'Open', 'Submitted', 'In Progress', 'Pending', 'Pending Review'];
+const CANCELLABLE_STATUSES = ['Open', 'In Progress', 'Pending'];
 
+// Canonical status set. Legacy aliases ('New', 'Submitted', 'Pending Review')
+// kept as fallback entries so old data still renders correctly.
 const STATUS_CONFIG = {
-  'New':            { color: '#3b82f6', bg: '#3b82f618', icon: Circle,        label: 'New' },
   'Open':           { color: '#3b82f6', bg: '#3b82f618', icon: Circle,        label: 'Open' },
-  'Submitted':      { color: '#3b82f6', bg: '#3b82f618', icon: Circle,        label: 'Submitted' },
   'In Progress':    { color: '#a855f7', bg: '#a855f718', icon: Loader2,       label: 'In Progress' },
-  'Pending':        { color: '#f97316', bg: '#f9731618', icon: MessageSquare, label: 'In Review' },
-  'Pending Review': { color: '#f59e0b', bg: '#f59e0b18', icon: Eye,           label: 'Review' },
+  'Pending':        { color: '#f59e0b', bg: '#f59e0b18', icon: MessageSquare, label: 'Pending' },
   'Delivered':      { color: '#22c55e', bg: '#22c55e18', icon: Truck,         label: 'Delivered' },
   'Closed':         { color: '#606060', bg: '#60606018', icon: CheckCircle2,  label: 'Closed' },
   'Canceled':       { color: '#ef4444', bg: '#ef444418', icon: XCircle,       label: 'Canceled' },
+  // Legacy aliases — render old data gracefully
+  'New':            { color: '#3b82f6', bg: '#3b82f618', icon: Circle,        label: 'Open' },
+  'Submitted':      { color: '#3b82f6', bg: '#3b82f618', icon: Circle,        label: 'Open' },
+  'Pending Review': { color: '#f59e0b', bg: '#f59e0b18', icon: Eye,           label: 'Pending' },
 };
 
 // Timeline steps in order
@@ -434,9 +437,11 @@ export default function MyRequests() {
           }}
         >
           <option value="all">All Statuses</option>
-          {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
+          {Object.entries(STATUS_CONFIG)
+            .filter(([k]) => !['New', 'Submitted', 'Pending Review'].includes(k))
+            .map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
         </select>
       </div>
 

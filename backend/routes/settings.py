@@ -1046,3 +1046,36 @@ async def reset_pool_picker_rules_to_defaults(
         )
     
     return {"message": "Pool picker rules reset to defaults", "defaults": DEFAULT_POOL_PICKER_RULES}
+
+
+# ============== NOTIFICATION RULES ==============
+
+DEFAULT_NOTIFICATION_RULES = [
+    {"event": "new_order",       "label": "New Request Submitted", "notify_roles": ["Administrator", "Operator"], "in_app": True, "email": False},
+    {"event": "status_change",   "label": "Status Changed",        "notify_roles": ["Administrator", "Operator"], "in_app": True, "email": True},
+    {"event": "new_message",     "label": "New Message",            "notify_roles": ["Administrator", "Operator"], "in_app": True, "email": False},
+    {"event": "sla_breach",      "label": "SLA Breach",             "notify_roles": ["Administrator"],             "in_app": True, "email": True},
+    {"event": "order_delivered", "label": "Order Delivered",         "notify_roles": ["Administrator"],             "in_app": True, "email": True},
+]
+
+
+@router.get("/settings/notification-rules")
+async def get_notification_rules(current_user: dict = Depends(require_roles(["Admin"]))):
+    """Get system notification rules"""
+    rules = await db.notification_rules.find({}, {"_id": 0}).to_list(100)
+    if not rules:
+        return {"rules": DEFAULT_NOTIFICATION_RULES}
+    return {"rules": rules}
+
+
+@router.patch("/settings/notification-rules")
+async def update_notification_rules(
+    data: dict,
+    current_user: dict = Depends(require_roles(["Admin"]))
+):
+    """Update system notification rules"""
+    rules = data.get("rules", [])
+    await db.notification_rules.delete_many({})
+    if rules:
+        await db.notification_rules.insert_many(rules)
+    return {"success": True, "rules": rules}
