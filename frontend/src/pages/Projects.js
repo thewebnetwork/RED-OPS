@@ -916,6 +916,7 @@ function Projects() {
 
       {/* Modal */}
       {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clientsList} teamMembers={teamMembersList} onClose={() => setModal(null)} onSave={async (proj) => {
+        if (!proj) { await fetchProjects(); setModal(null); return; }
         setSaving(true);
         try {
           if (proj.id) {
@@ -1225,6 +1226,7 @@ function AdminProjectsHub() {
 
       {/* Modal */}
       {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clients} teamMembers={teamMembersList} onClose={() => setModal(null)} onSave={async (proj) => {
+        if (!proj) { await fetchData(); setModal(null); return; }
         setSaving(true);
         try {
           if (proj.id) {
