@@ -354,6 +354,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
   });
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [mode, setMode] = useState('manual'); // 'manual' | 'template'
 
   useEffect(() => {
     if (!project) {
@@ -370,10 +371,8 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
   };
 
   const handleSave = async () => {
-    if (!form.name?.trim() && !selectedTemplate) return toast.error('Project name required');
-
-    if (selectedTemplate) {
-      // Apply template instead of creating manually
+    if (mode === 'template') {
+      if (!selectedTemplate) return toast.error('Select a template');
       try {
         const res = await ax().post(`${API}/project-templates/${selectedTemplate.id}/apply`, {
           client_id: form.client_id || null,
@@ -381,7 +380,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
           start_date: new Date().toISOString(),
         });
         toast.success(`Created project with ${res.data.tasks_created} tasks`);
-        onSave(null); // trigger refresh without double-creating
+        onSave(null);
         onClose();
       } catch (err) {
         toast.error(err.response?.data?.detail || 'Failed to apply template');
@@ -389,9 +388,19 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
       return;
     }
 
+    if (!form.name?.trim()) return toast.error('Project name required');
     await onSave(form);
     onClose();
   };
+
+  const TEMPLATE_TYPES = [
+    { key: 'engagement', label: 'Client Engagements', icon: '🤝' },
+    { key: 'content', label: 'Content Production', icon: '🎥' },
+    { key: 'campaign', label: 'Campaigns', icon: '📣' },
+    { key: 'funnel', label: 'Funnels', icon: '🎬' },
+    { key: 'process', label: 'Processes', icon: '🔄' },
+    { key: 'internal', label: 'Internal Ops', icon: '⚙️' },
+  ];
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
@@ -401,30 +410,44 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', fontSize: 20 }}><X /></button>
         </div>
 
+        {/* Tab bar — only on new project */}
+        {!project && templates.length > 0 && (
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
+            {[
+              { id: 'manual', label: 'Create Manual' },
+              { id: 'template', label: 'From Template' },
+            ].map(tab => (
+              <button key={tab.id} onClick={() => { setMode(tab.id); if (tab.id === 'manual') setSelectedTemplate(null); }}
+                style={{
+                  flex: 1, padding: '12px 16px', fontSize: 13, fontWeight: mode === tab.id ? 700 : 500,
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: mode === tab.id ? 'var(--accent)' : 'var(--tx-3)',
+                  borderBottom: `2px solid ${mode === tab.id ? 'var(--accent)' : 'transparent'}`,
+                  transition: 'all .15s',
+                }}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Template selector (new projects only) */}
-          {!project && templates.length > 0 && (
-            <div style={{ padding: 14, borderRadius: 10, border: '1px solid var(--accent)', background: 'rgba(201,42,62,0.04)' }}>
-              <label style={{ ...labelStyle, marginBottom: 8 }}>Start from a template</label>
-              {[
-                { key: 'engagement', label: 'Client Engagements', icon: '🤝' },
-                { key: 'campaign', label: 'Campaigns', icon: '📣' },
-                { key: 'funnel', label: 'Funnels', icon: '🎬' },
-                { key: 'process', label: 'Processes', icon: '🔄' },
-                { key: 'internal', label: 'Internal Ops', icon: '⚙️' },
-              ].map(type => {
+          {/* ── Template picker (only in template mode) ── */}
+          {mode === 'template' && !project && (
+            <div>
+              {TEMPLATE_TYPES.map(type => {
                 const group = templates.filter(t => (t.type || 'engagement') === type.key);
                 if (!group.length) return null;
                 return (
-                  <div key={type.key} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>
+                  <div key={type.key} style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
                       {type.icon} {type.label}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       {group.map(t => (
                         <button key={t.id} type="button" onClick={() => setSelectedTemplate(selectedTemplate?.id === t.id ? null : t)}
                           style={{
-                            textAlign: 'left', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
+                            textAlign: 'left', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', border: '1px solid',
                             borderColor: selectedTemplate?.id === t.id ? 'var(--accent)' : 'var(--border)',
                             background: selectedTemplate?.id === t.id ? 'rgba(201,42,62,0.08)' : 'var(--surface-2)',
                           }}>
@@ -432,21 +455,39 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
                             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-1)' }}>{t.icon || '📋'} {t.name}</span>
                             <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{t.tasks?.length || 0} tasks</span>
                           </div>
-                          {t.description && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description}</div>}
+                          {t.description && <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 3 }}>{t.description}</div>}
+                          {selectedTemplate?.id === t.id && (
+                            <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: 6, fontWeight: 600 }}>
+                              ✓ {t.phases?.length || 0} phases · {t.tasks?.length || 0} tasks will be created
+                            </div>
+                          )}
                         </button>
                       ))}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Client selector for template mode */}
               {selectedTemplate && (
-                <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6, fontWeight: 500 }}>
-                  ✓ Tasks will be created automatically from this template
+                <div style={{ marginTop: 4 }}>
+                  <label style={labelStyle}>Assign to Client (optional)</label>
+                  <select value={form.client_id || ''} onChange={e => {
+                    const sel = clients.find(c => (c.id || c._id) === e.target.value);
+                    handleChange('client_id', e.target.value || null);
+                    handleChange('client_name', sel?.name || sel?.company_name || '');
+                  }} className="input-field">
+                    <option value="">No client (internal project)</option>
+                    {clients.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.company_name || c.name}</option>)}
+                  </select>
                 </div>
               )}
             </div>
           )}
 
+          {/* ── Manual form fields (only in manual mode or editing) ── */}
+          {(mode === 'manual' || project) && (
+            <>
           <div>
             <label style={labelStyle}>Project Name</label>
             <input type="text" value={form.name || ''} onChange={e => handleChange('name', e.target.value)} placeholder="Project name" className="input-field" />
@@ -549,6 +590,8 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
             <label style={labelStyle}>Progress (%)</label>
             <input type="number" min="0" max="100" value={form.progress || 0} onChange={e => handleChange('progress', parseInt(e.target.value))} className="input-field" />
           </div>
+            </>
+          )}
         </div>
 
         <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
@@ -559,9 +602,9 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
           )}
           <div style={{ flex: 1 }} />
           <button onClick={onClose} className="btn-ghost">Cancel</button>
-          <button onClick={handleSave} disabled={loading} className="btn-primary">
+          <button onClick={handleSave} disabled={loading || (mode === 'template' && !selectedTemplate && !project)} className="btn-primary">
             {loading ? <Loader2 size={14} className="spin" style={{ marginRight: 6 }} /> : <Plus size={14} style={{ marginRight: 6 }} />}
-            {project ? 'Update' : 'Create'}
+            {project ? 'Update' : mode === 'template' ? 'Create from Template' : 'Create'}
           </button>
         </div>
       </div>
