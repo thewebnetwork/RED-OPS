@@ -126,6 +126,9 @@ export default function CommandCenter() {
       setLoading(false);
     };
     load();
+    // Auto-refresh dashboard every 60s
+    const interval = setInterval(load, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const formatTimeAgo = (date) => {

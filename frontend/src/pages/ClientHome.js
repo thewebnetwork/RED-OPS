@@ -61,6 +61,7 @@ export default function ClientHome() {
   const [loading, setLoading]   = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [onboarding, setOnboarding] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
 
   // Preview-as-client support: use preview client's name and fetch their data
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
@@ -111,6 +112,16 @@ export default function ClientHome() {
   };
 
   useEffect(() => { fetchData(); }, []); // eslint-disable-line
+
+  // Fetch org team members for "My Team" section
+  useEffect(() => {
+    const orgId = user?.org_id;
+    if (!orgId) return;
+    ax().get(`${API}/organizations/${orgId}/members`).then(r => {
+      const members = r.data?.members || r.data || [];
+      setTeamMembers(Array.isArray(members) ? members.slice(0, 8) : []);
+    }).catch(() => {});
+  }, [user?.org_id]); // eslint-disable-line
 
   // Derive account manager from user data (or from client record when available)
   const am = user?.account_manager || null;
@@ -272,6 +283,30 @@ export default function ClientHome() {
               </div>
             </div>
           ) : null}
+
+          {/* My Team Card */}
+          {teamMembers.length > 0 && (
+            <div className="card" style={{ padding: '16px 18px' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx-1)', marginBottom: 12 }}>My Team</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {teamMembers.map(m => (
+                  <div key={m.user_id || m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: '50%', background: 'var(--accent-soft)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 700, color: 'var(--accent)', flexShrink: 0,
+                    }}>
+                      {(m.name || m.email || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name || m.email}</div>
+                      <div style={{ fontSize: 10, color: 'var(--tx-3)' }}>{m.role || m.org_role || 'Member'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Request Summary Card */}
           {!loading && requests.length > 0 && (

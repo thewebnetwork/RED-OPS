@@ -1129,6 +1129,12 @@ export default function Tasks() {
 
   useEffect(() => { fetchTasks(); fetchProjects(); fetchUsers(); }, [fetchTasks, fetchProjects, fetchUsers]);
 
+  // Auto-refresh every 30s for real-time feel
+  useEffect(() => {
+    const interval = setInterval(() => { fetchTasks(); }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchTasks]);
+
   // Active filter count
   const activeFilterCount = [filterStatus, filterPriority, filterAssignee, filterProject].filter(f => f !== 'all').length;
 
