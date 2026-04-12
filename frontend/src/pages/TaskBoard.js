@@ -78,13 +78,17 @@ function fmtDate(d) {
 
 function InlineCreate({ colId, onSave, onCancel }) {
   const [val, setVal] = useState('');
+  const [saving, setSaving] = useState(false);
   const ref = useRef(null);
   useEffect(() => { ref.current?.focus(); }, []);
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (!val.trim()) return onCancel();
-    onSave(colId, val.trim());
-    setVal('');
+    if (!val.trim() || saving) return;
+    setSaving(true);
+    try {
+      await onSave(colId, val.trim());
+      setVal('');
+    } finally { setSaving(false); }
   }
   return (
     <form onSubmit={submit} style={{ marginTop: 8 }}>
@@ -92,14 +96,16 @@ function InlineCreate({ colId, onSave, onCancel }) {
         ref={ref} value={val} onChange={e => setVal(e.target.value)}
         onKeyDown={e => e.key === 'Escape' && onCancel()}
         placeholder="Task name…"
+        disabled={saving}
         style={{
           width: '100%', padding: '7px 10px', background: 'var(--bg-elevated)',
           border: '1px solid var(--border)', borderRadius: 8, color: 'var(--tx-1)',
           fontSize: 13, outline: 'none', boxSizing: 'border-box',
+          opacity: saving ? 0.6 : 1,
         }}
       />
       <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-        <button type="submit" style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 0', borderRadius: 6, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer' }}>Add</button>
+        <button type="submit" disabled={saving} style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 0', borderRadius: 6, background: 'var(--accent)', color: '#fff', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Adding…' : 'Add'}</button>
         <button type="button" onClick={onCancel} style={{ flex: 1, fontSize: 12, fontWeight: 600, padding: '6px 0', borderRadius: 6, background: 'var(--bg-elevated)', color: 'var(--tx-2)', border: '1px solid var(--border)', cursor: 'pointer' }}>Cancel</button>
       </div>
     </form>

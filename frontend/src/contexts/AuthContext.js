@@ -26,6 +26,22 @@ export function AuthProvider({ children }) {
     delete axios.defaults.headers.common['Authorization'];
   }, []);
 
+  // Global 401 interceptor — redirect to login on token expiry
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      res => res,
+      err => {
+        if (err.response?.status === 401 && token) {
+          // Token expired or invalid — force logout
+          logout();
+          window.location.href = '/login';
+        }
+        return Promise.reject(err);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [token, logout]);
+
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;

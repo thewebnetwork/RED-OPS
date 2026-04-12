@@ -124,9 +124,9 @@ export default function TeamMemberPage() {
 
   const fetchTasks = useCallback(async () => {
     try {
-      const r = await ax().get(`${API}/tasks`);
+      const r = await ax().get(`${API}/tasks?assignee_user_id=${id}&limit=50`);
       const all = r.data?.data || r.data || [];
-      setTasks(all.filter(t => (t.assignee_user_id || t.assignee_id) === id));
+      setTasks(Array.isArray(all) ? all : []);
     } catch { /* ignore */ }
   }, [id]);
 

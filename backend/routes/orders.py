@@ -1231,7 +1231,13 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    
+
+    # Org isolation — user can only see orders from their own org
+    user_org = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    order_org = order.get("org_id")
+    if order_org and user_org and order_org != user_org:
+        raise HTTPException(status_code=404, detail="Order not found")
+
     role = current_user.get("role", "")
     
     # Access control - drafts only visible to owner

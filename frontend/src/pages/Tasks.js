@@ -1109,8 +1109,8 @@ export default function Tasks() {
   const fetchTasks = useCallback(async () => {
     try {
       const url = isPreview && previewClientId
-        ? `${API}/tasks?assignee_user_id=${previewClientId}`
-        : `${API}/tasks`;
+        ? `${API}/tasks?assignee_user_id=${previewClientId}&limit=200`
+        : `${API}/tasks?limit=200`;
       const r = await ax().get(url);
       const d = r.data;
       const arr = Array.isArray(d) ? d : d?.items || [];

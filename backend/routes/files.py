@@ -148,11 +148,20 @@ async def upload_file_universal(
     current_user: dict = Depends(get_current_user)
 ):
     """Upload a file to the universal file system."""
+    # File size limit: 100MB
+    MAX_FILE_SIZE = 100 * 1024 * 1024
+    # Block executable extensions
+    BLOCKED_EXTS = {'.exe', '.bat', '.cmd', '.sh', '.php', '.jsp', '.cgi', '.com', '.scr', '.pif', '.msi'}
+
     file_id = str(uuid.uuid4())
-    file_ext = os.path.splitext(file.filename)[1] if file.filename else ''
+    file_ext = os.path.splitext(file.filename)[1].lower() if file.filename else ''
+    if file_ext in BLOCKED_EXTS:
+        raise HTTPException(status_code=400, detail=f"File type {file_ext} is not allowed")
     stored_filename = f"{file_id}{file_ext}"
     content = await file.read()
     file_size = len(content)
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File exceeds 100MB limit")
     storage_backend = "local"
 
     if nc_enabled():

@@ -341,7 +341,7 @@ export default function SOPs() {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-              <div style={{ color: 'var(--tx-1)', lineHeight: 1.75, fontSize: 14, maxWidth: 740 }} dangerouslySetInnerHTML={{ __html: selectedDoc.body }} />
+              <div style={{ color: 'var(--tx-1)', lineHeight: 1.75, fontSize: 14, maxWidth: 740 }} dangerouslySetInnerHTML={{ __html: (selectedDoc.body || '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/on\w+\s*=\s*"[^"]*"/gi, '').replace(/on\w+\s*=\s*'[^']*'/gi, '') }} />
             </div>
           </div>
         )}
