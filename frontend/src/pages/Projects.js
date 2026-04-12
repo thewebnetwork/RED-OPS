@@ -355,6 +355,21 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [mode, setMode] = useState('manual'); // 'manual' | 'template'
+  const [hasEdits, setHasEdits] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // Browser refresh/close guard if user has unsaved edits
+  useEffect(() => {
+    if (!hasEdits) return;
+    const handler = (e) => { e.preventDefault(); e.returnValue = ''; return ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasEdits]);
+
+  const handleClose = () => {
+    if (hasEdits && !window.confirm('You have unsaved changes. Close anyway?')) return;
+    onClose();
+  };
 
   useEffect(() => {
     if (!project) {
@@ -362,7 +377,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
     }
   }, [project]);
 
-  const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); };
+  const handleChange = (field, value) => { setForm(f => ({ ...f, [field]: value })); setHasEdits(true); };
   const toggleTeamMember = (userId) => {
     setForm(f => {
       const ids = f.team_member_ids || [];
@@ -388,7 +403,10 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
       return;
     }
 
-    if (!form.name?.trim()) return toast.error('Project name required');
+    const nextErrors = {};
+    if (!form.name?.trim()) nextErrors.name = 'Project name is required';
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     await onSave(form);
     onClose();
   };
@@ -407,7 +425,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
       <div style={{ background: 'var(--bg)', borderRadius: 12, maxWidth: 520, width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border)' }}>
         <div style={{ padding: 20, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{project ? 'Edit Project' : 'New Project'}</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', fontSize: 20 }}><X /></button>
+          <button onClick={handleClose} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', fontSize: 20 }}><X /></button>
         </div>
 
         {/* Tab bar — only on new project */}
@@ -490,7 +508,8 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
             <>
           <div>
             <label style={labelStyle}>Project Name</label>
-            <input type="text" value={form.name || ''} onChange={e => handleChange('name', e.target.value)} placeholder="Project name" className="input-field" />
+            <input type="text" value={form.name || ''} onChange={e => { handleChange('name', e.target.value); if (errors.name) setErrors(p => ({ ...p, name: undefined })); }} placeholder="Project name" className="input-field" style={errors.name ? { borderColor: 'var(--color-red)', boxShadow: '0 0 0 3px var(--color-red-soft)' } : undefined} />
+            {errors.name && <div style={{ fontSize: 11, color: 'var(--color-red)', marginTop: 4 }}>{errors.name}</div>}
           </div>
 
           <div>
@@ -601,7 +620,7 @@ function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [
             </button>
           )}
           <div style={{ flex: 1 }} />
-          <button onClick={onClose} className="btn-ghost">Cancel</button>
+          <button onClick={handleClose} className="btn-ghost">Cancel</button>
           <button onClick={handleSave} disabled={loading || (mode === 'template' && !selectedTemplate && !project)} className="btn-primary">
             {loading ? <Loader2 size={14} className="spin" style={{ marginRight: 6 }} /> : <Plus size={14} style={{ marginRight: 6 }} />}
             {project ? 'Update' : mode === 'template' ? 'Create from Template' : 'Create'}
