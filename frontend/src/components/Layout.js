@@ -584,7 +584,7 @@ export default function Layout({ children }) {
         )}
 
         {/* Top bar */}
-        <div className="top-bar">
+        <div className="top-bar glass-subtle">
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}
             style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)', display:'flex', padding:0 }}>
             <Menu size={18} />
