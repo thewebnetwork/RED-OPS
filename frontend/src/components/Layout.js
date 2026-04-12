@@ -538,8 +538,10 @@ export default function Layout({ children }) {
         <div style={{ padding:'8px', borderTop:'1px solid var(--border)', flexShrink:0 }}>
           <div className="sidebar-user-btn" style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 8px', borderRadius:7, cursor:'pointer' }}
             onClick={() => navigate(isClient ? '/my-account' : '/settings')}>
-            <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0 }}>
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            <div style={{ width:26, height:26, background:'var(--red)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:11, color:'white', flexShrink:0, overflow:'hidden' }}>
+              {user?.avatar ? (
+                <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (user?.name?.charAt(0)?.toUpperCase() || 'U')}
             </div>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontSize:12.5, fontWeight:600, color:'var(--tx-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name || 'User'}</div>

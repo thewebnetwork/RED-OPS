@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -42,6 +42,7 @@ function MyProfileSection() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     if (loaded) return;
@@ -51,6 +52,18 @@ function MyProfileSection() {
       setLoaded(true);
     }).catch(() => {});
   }, [loaded]);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error('Image must be under 2MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    const reader = new FileReader();
+    reader.onloadend = () => setProfile(p => ({ ...p, avatar: reader.result }));
+    reader.readAsDataURL(file);
+  };
+
+  const removeAvatar = () => setProfile(p => ({ ...p, avatar: '' }));
 
   const handleSave = async () => {
     if (!profile.name.trim()) { toast.error('Name is required'); return; }
@@ -76,14 +89,34 @@ function MyProfileSection() {
       <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>Your name and details shown across RED-OPS.</p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, overflow: 'hidden', flexShrink: 0 }}>
-          {profile.avatar
-            ? <img src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : (profile.name?.charAt(0)?.toUpperCase() || '?')}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, fontWeight: 700, overflow: 'hidden', border: '2px solid var(--border)' }}>
+            {profile.avatar
+              ? <img src={profile.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : (profile.name?.charAt(0)?.toUpperCase() || '?')}
+          </div>
+          <button type="button" onClick={() => fileInputRef.current?.click()}
+            title="Upload photo"
+            style={{ position: 'absolute', bottom: -2, right: -2, width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', border: '2px solid var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}>
+            <Camera size={12} />
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
         </div>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{profile.name || 'No name set'}</div>
-          <div style={{ fontSize: 12, color: 'var(--tx-3)' }}>{profile.title || 'No title set'}</div>
+          <div style={{ fontSize: 12, color: 'var(--tx-3)', marginBottom: 6 }}>{profile.title || 'No title set'}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" onClick={() => fileInputRef.current?.click()}
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px 10px', fontSize: 11.5, fontWeight: 500, color: 'var(--tx-1)', cursor: 'pointer' }}>
+              Upload photo
+            </button>
+            {profile.avatar && (
+              <button type="button" onClick={removeAvatar}
+                style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: 7, padding: '4px 10px', fontSize: 11.5, fontWeight: 500, color: 'var(--tx-3)', cursor: 'pointer' }}>
+                Remove
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -99,10 +132,6 @@ function MyProfileSection() {
         <div>
           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Phone</label>
           <input style={inpStyle} value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} placeholder="+1 (403) 555-0000" />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>Avatar URL <span style={{ color: 'var(--tx-3)' }}>(optional)</span></label>
-          <input style={inpStyle} value={profile.avatar} onChange={e => setProfile(p => ({ ...p, avatar: e.target.value }))} placeholder="https://..." />
         </div>
       </div>
 

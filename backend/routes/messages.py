@@ -86,7 +86,23 @@ async def list_threads(
 
     threads = await db.threads.find(query, {"_id": 0}).sort("last_message_at", -1).to_list(200)
 
-    # Enrich with unread count per thread
+    # Collect all unique member IDs across DM threads for avatar lookup
+    dm_member_ids = set()
+    for t in threads:
+        if t.get("type") == "dm":
+            for mid in (t.get("members") or []):
+                if mid != user_id:
+                    dm_member_ids.add(mid)
+
+    dm_avatars = {}
+    if dm_member_ids:
+        async for u in db.users.find(
+            {"id": {"$in": list(dm_member_ids)}},
+            {"_id": 0, "id": 1, "avatar": 1}
+        ):
+            dm_avatars[u["id"]] = u.get("avatar") or None
+
+    # Enrich with unread count + other-party avatar for DMs
     for t in threads:
         unread = await db.messages.count_documents({
             "thread_id": t["id"],
@@ -94,6 +110,9 @@ async def list_threads(
             "read_by": {"$nin": [user_id]},
         })
         t["unread_count"] = unread
+        if t.get("type") == "dm":
+            other_id = next((m for m in (t.get("members") or []) if m != user_id), None)
+            t["other_avatar"] = dm_avatars.get(other_id) if other_id else None
 
     return threads
 
@@ -356,6 +375,19 @@ async def list_messages(
         {"thread_id": thread_id}, {"_id": 0}
     ).sort("created_at", 1).skip(offset).limit(limit).to_list(limit)
 
+    # Enrich each message with the sender's current avatar (so photo changes
+    # retroactively reflect on old messages — cheaper than storing on write).
+    sender_ids = list({m.get("sender_id") for m in messages if m.get("sender_id")})
+    avatars = {}
+    if sender_ids:
+        async for u in db.users.find(
+            {"id": {"$in": sender_ids}},
+            {"_id": 0, "id": 1, "avatar": 1}
+        ):
+            avatars[u["id"]] = u.get("avatar") or None
+    for m in messages:
+        m["sender_avatar"] = avatars.get(m.get("sender_id"))
+
     # Mark all as read by current user
     unread_ids = [m["id"] for m in messages if current_user["id"] not in (m.get("read_by") or [])]
     if unread_ids:
@@ -420,6 +452,9 @@ async def send_message(
     }
 
     await db.messages.insert_one(message)
+
+    # Include sender avatar in the response so optimistic UI shows photo
+    message["sender_avatar"] = current_user.get("avatar") or None
 
     # Notify mentioned users
     for mentioned_user_id in (body.mentions or []):

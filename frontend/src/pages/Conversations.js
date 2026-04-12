@@ -12,7 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   MessageSquare, Plus, X, Send, Hash, FileText, Search,
   Loader2, Pencil, Trash2, Check, Paperclip, Download, Image as ImageIcon,
-  Settings, LogOut, UserPlus, MessageCircle,
+  Settings, LogOut, MessageCircle,
 } from 'lucide-react';
 import MentionHashtagInput from '../components/MentionHashtagInput';
 import EmptyState from '../components/EmptyState';
@@ -141,7 +141,7 @@ function renderMsgBody(body) {
 }
 
 /* ── Conversation row (iMessage-style) ── */
-function ConversationRow({ thread, active, onClick, displayName, subtitle, timestamp, unreadCount, type }) {
+function ConversationRow({ thread, active, onClick, displayName, subtitle, timestamp, unreadCount, type, photoUrl }) {
   return (
     <div onClick={onClick}
       style={{
@@ -154,14 +154,17 @@ function ConversationRow({ thread, active, onClick, displayName, subtitle, times
       onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--surface-2)'; }}
       onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
     >
-      {/* Avatar */}
+      {/* Avatar — photo for DMs if available, else initials/icon */}
       <div style={{
         width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
         background: type === 'channel' ? 'var(--surface-3)' : avatarBg(thread.id),
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 13, fontWeight: 700, color: '#fff',
+        overflow: 'hidden',
       }}>
-        {type === 'channel' ? <Hash size={18} style={{ color: 'var(--tx-2)' }} /> :
+        {photoUrl && type === 'dm' ? (
+          <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : type === 'channel' ? <Hash size={18} style={{ color: 'var(--tx-2)' }} /> :
          type === 'request' ? <FileText size={18} style={{ color: 'var(--tx-2)' }} /> :
          initials(displayName)}
       </div>
@@ -595,6 +598,12 @@ export default function Conversations() {
                     displayName={getThreadDisplayName(t)}
                     subtitle={t.last_message_preview || ''}
                     timestamp={conversationTime(t.last_message_at || t.created_at)}
+                    photoUrl={t.other_avatar || (() => {
+                      // Fallback for DMs: look up other member in users list
+                      if (t.type !== 'dm') return null;
+                      const otherId = (t.members || []).find(m => m !== user?.id);
+                      return users.find(u => u.id === otherId)?.avatar || null;
+                    })()}
                     unreadCount={t.unread_count || 0}
                   />
                 ))}
@@ -624,17 +633,26 @@ export default function Conversations() {
           <>
             {/* Thread header (iMessage-style) */}
             <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative', background: 'var(--surface)' }}>
-              {/* Avatar */}
-              <div style={{
-                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                background: activeThread.type === 'channel' ? 'var(--surface-3)' : avatarBg(activeThread.id),
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 700, color: '#fff',
-              }}>
-                {activeThread.type === 'channel' ? <Hash size={16} style={{ color: 'var(--tx-2)' }} /> :
-                 activeThread.type === 'request' ? <FileText size={16} style={{ color: 'var(--tx-2)' }} /> :
-                 initials(getThreadDisplayName(activeThread))}
-              </div>
+              {/* Avatar — photo for DMs if available */}
+              {(() => {
+                const otherId = activeThread.type === 'dm' ? (activeThread.members || []).find(m => m !== user?.id) : null;
+                const otherPhoto = activeThread.other_avatar || users.find(u => u.id === otherId)?.avatar;
+                return (
+                  <div style={{
+                    width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                    background: activeThread.type === 'channel' ? 'var(--surface-3)' : avatarBg(activeThread.id),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, color: '#fff',
+                    overflow: 'hidden',
+                  }}>
+                    {otherPhoto && activeThread.type === 'dm' ? (
+                      <img src={otherPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : activeThread.type === 'channel' ? <Hash size={16} style={{ color: 'var(--tx-2)' }} /> :
+                     activeThread.type === 'request' ? <FileText size={16} style={{ color: 'var(--tx-2)' }} /> :
+                     initials(getThreadDisplayName(activeThread))}
+                  </div>
+                );
+              })()}
               <div style={{ flex: 1, minWidth: 0, cursor: activeThread.type !== 'dm' ? 'pointer' : 'default' }}
                 onClick={() => { if (activeThread.type !== 'dm') setShowSettings(true); }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -698,11 +716,14 @@ export default function Conversations() {
                           fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
                           cursor: activeThread.type !== 'dm' ? 'pointer' : 'default',
                           transition: 'transform 0.15s',
+                          overflow: 'hidden',
                         }}
                         onMouseEnter={e => { if (activeThread.type !== 'dm') e.currentTarget.style.transform = 'scale(1.08)'; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
                       >
-                        {initials(msg.sender_name)}
+                        {(msg.sender_avatar || users.find(u => u.id === msg.sender_id)?.avatar) ? (
+                          <img src={msg.sender_avatar || users.find(u => u.id === msg.sender_id)?.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : initials(msg.sender_name)}
                       </div>
                     ) : !isMine ? <div style={{ width: 28, flexShrink: 0 }} /> : null}
                     <div style={{
@@ -983,8 +1004,11 @@ export default function Conversations() {
                               background: avatarBg(mid),
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               fontSize: 12, fontWeight: 700, color: '#fff',
+                              overflow: 'hidden',
                             }}>
-                              {initials(mu?.name || '?')}
+                              {(mu?.avatar || (isMe ? user?.avatar : null)) ? (
+                                <img src={mu?.avatar || user?.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : initials(mu?.name || '?')}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
