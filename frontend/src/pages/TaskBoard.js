@@ -277,10 +277,10 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
       style={{
         position: 'relative', background: 'var(--bg-card)', borderRadius: 10,
         border: `1px solid ${isDragging ? 'var(--red)' : 'var(--border)'}`,
-        boxShadow: isDragging ? '0 12px 40px #0009' : '0 1px 4px #0003',
-        cursor: 'pointer', overflow: 'hidden',
-        transform: isDragging ? 'rotate(1.5deg)' : 'none',
-        transition: 'box-shadow 0.15s, border-color 0.15s',
+        boxShadow: isDragging ? '0 16px 48px rgba(0,0,0,0.5)' : '0 1px 4px rgba(0,0,0,0.12)',
+        cursor: isDragging ? 'grabbing' : 'pointer', overflow: 'hidden',
+        transform: isDragging ? 'rotate(1.5deg) scale(1.03)' : 'none',
+        transition: 'box-shadow 0.15s, border-color 0.15s, transform 0.15s',
       }}
       onClick={() => onEdit(task)}
       onMouseEnter={e => { if (!isDragging) e.currentTarget.style.borderColor = '#3a3a3a'; }}

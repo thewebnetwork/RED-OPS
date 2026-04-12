@@ -600,7 +600,7 @@ export default function Layout({ children }) {
         </div>
 
         {/* Page content — flex:1 with proper scroll/fill handling */}
-        <div style={{ flex:1, minHeight:0, display:'flex', flexDirection:'column', overflow:'auto' }}>
+        <div key={location.pathname} style={{ flex:1, minHeight:0, display:'flex', flexDirection:'column', overflow:'auto' }}>
           {children}
         </div>
       </div>

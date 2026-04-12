@@ -163,10 +163,12 @@
 .tiptap p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--tx-3); pointer-events: none; height: 0; float: left; }
 
 /* ── 3. SCROLLBAR ─────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; transition: background .2s; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+*:hover::-webkit-scrollbar { width: 7px; }
+*:hover::-webkit-scrollbar-thumb { background: var(--border-hi); }
 
 /* ── 4. ANIMATIONS ────────────────────────────────────────── */
 @keyframes fadeIn    { from { opacity: 0 } to { opacity: 1 } }
