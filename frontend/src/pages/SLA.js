@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import EmptyState from '../components/EmptyState';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -544,10 +545,8 @@ export default function SLA() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {slaDefinitions.length === 0 ? (
           <Card className="col-span-full">
-            <CardContent className="p-12 text-center">
-              <Clock size={48} className="mx-auto text-slate-300 mb-3" />
-              <p>No SLAs defined yet</p>
-              <p className="text-sm mt-1">Create your first SLA to define response time targets</p>
+            <CardContent>
+              <EmptyState icon="tasks" title="No SLAs defined yet" description="Create an SLA to define response time targets." />
             </CardContent>
           </Card>
         ) : (

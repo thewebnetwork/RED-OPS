@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { SkeletonTable } from '../components/Skeleton';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -127,11 +128,8 @@ export default function PoolPickerRulesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]" data-testid="pool-rules-loading">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#A2182C] mx-auto mb-2" />
-          <p className="">Loading pool picker rules...</p>
-        </div>
+      <div className="page-content" style={{ animation: 'none' }}>
+        <SkeletonTable rows={4} columns={4} />
       </div>
     );
   }

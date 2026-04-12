@@ -434,6 +434,12 @@ export default function Layout({ children }) {
     return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
   }, [cmdQuery]);
 
+  // ── Restore theme preference on mount ──
+  useEffect(() => {
+    const saved = localStorage.getItem('redops-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  }, []);
+
   // ── Fetch unread notifications ──
   useEffect(() => {
     let dead = false;

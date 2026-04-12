@@ -5,6 +5,7 @@
  * Admins: see all tickets, assign, respond, resolve
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import EmptyState from '../components/EmptyState';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -191,9 +192,11 @@ export default function Support() {
           {loading ? (
             <div style={{ textAlign: 'center', padding: 30 }}><Loader2 size={18} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
           ) : tickets.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--tx-3)', fontSize: 13 }}>
-              {filterStatus !== 'all' ? 'No tickets with this status' : 'No support tickets yet'}
-            </div>
+            <EmptyState
+              icon="inbox"
+              title={filterStatus !== 'all' ? 'No tickets with this status' : 'No support tickets'}
+              description={filterStatus !== 'all' ? 'Try changing your filter.' : 'Tickets will appear here once submitted.'}
+            />
           ) : (
             tickets.map(t => {
               const sc = STATUS_CONFIG[t.status] || STATUS_CONFIG.open;

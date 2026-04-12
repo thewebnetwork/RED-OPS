@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { SkeletonCardList } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
@@ -264,16 +266,11 @@ export default function SOPs() {
             {/* Doc list */}
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {loading ? (
-                <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--tx-3)' }}>
-                  <Loader size={28} style={{ animation: 'spin 1s linear infinite', marginBottom: 12 }} />
-                  <p style={{ margin: 0, fontSize: 13 }}>Loading documents...</p>
+                <div style={{ padding: '20px 24px' }}>
+                  <SkeletonCardList count={5} />
                 </div>
               ) : filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--tx-3)' }}>
-                  <FileText size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
-                  <p style={{ margin: 0, fontSize: 13 }}>No documents found</p>
-                  <button className="btn-primary btn-sm" style={{ marginTop: 14 }} onClick={openCreate}><Plus size={13} /> New Document</button>
-                </div>
+                <EmptyState icon="files" title="No documents found" description="Create SOPs, playbooks, and training docs." action={{ label: 'New Document', onClick: openCreate }} />
               ) : (
                 filtered.map(doc => (
                   <div key={doc.id}

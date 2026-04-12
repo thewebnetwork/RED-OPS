@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import EmptyState from '../components/EmptyState';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -260,12 +261,8 @@ const [activeTab, setActiveTab] = useState('list');
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
-            <div className="py-12 text-center">
-              <Megaphone size={48} className="mx-auto mb-4 text-slate-300" />
-              <p>{"No announcements yet"}</p>
-              <Button className="mt-4 bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
-                {"Create Your First Announcement"}
-              </Button>
+            <div>
+              <EmptyState icon="inbox" title="No announcements yet" description="Create an announcement to notify your team." action={{ label: 'Create Announcement', onClick: () => openDialog() }} />
             </div>
           ) : (
             <div className="space-y-4">

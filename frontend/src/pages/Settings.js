@@ -710,7 +710,7 @@ export default function Settings() {
               <div style={{ display: 'flex', gap: '12px' }}>
                 {['dark', 'light'].map(theme => (
                   <label key={theme} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                    <input type="radio" name="theme" value={theme} checked={appearance.theme === theme} onChange={e => { const u = { ...appearance, theme: e.target.value }; setAppearance(u); savePrefs('appearance', u); }} style={{ cursor: 'pointer' }} />
+                    <input type="radio" name="theme" value={theme} checked={appearance.theme === theme} onChange={e => { const u = { ...appearance, theme: e.target.value }; setAppearance(u); savePrefs('appearance', u); document.documentElement.setAttribute('data-theme', e.target.value); localStorage.setItem('redops-theme', e.target.value); }} style={{ cursor: 'pointer' }} />
                     <span style={{ fontSize: '13px', color: 'var(--tx-1)', textTransform: 'capitalize' }}>{theme}</span>
                   </label>
                 ))}

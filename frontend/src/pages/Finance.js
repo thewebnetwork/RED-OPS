@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
+import EmptyState from '../components/EmptyState';
 import { toast } from 'sonner';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Search, RefreshCw, Loader2,
-  ArrowUpDown, Pencil, Trash2, X, Calendar, Receipt, PiggyBank, Wallet,
+  ArrowUpDown, Pencil, Trash2, X, Calendar, PiggyBank, Wallet,
   ChevronLeft, ChevronRight, Download, Filter, Printer,
 } from 'lucide-react';
 import {
@@ -635,18 +636,12 @@ export default function Finance() {
 
         {/* Rows */}
         {filtered.length === 0 ? (
-          <div style={{ padding: 40, textAlign: 'center' }}>
-            <Receipt size={32} style={{ color: 'var(--tx-3)', marginBottom: 8, opacity: 0.4 }} />
-            <p style={{ fontSize: 13, color: 'var(--tx-3)', margin: '0 0 12px' }}>
-              {transactions.length === 0 ? 'No transactions yet for this month' : 'No transactions match your filters'}
-            </p>
-            {transactions.length === 0 && (
-              <button onClick={() => { setEditingTx(null); setDialogOpen(true); }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '8px 16px', fontSize: 12, fontWeight: 700, borderRadius: 8, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer' }}>
-                <Plus size={13} /> Add First Transaction
-              </button>
-            )}
-          </div>
+          <EmptyState
+            icon="inbox"
+            title={transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filters'}
+            description={transactions.length === 0 ? 'Add your first transaction to start tracking finances.' : 'Try adjusting your filters or date range.'}
+            action={transactions.length === 0 ? { label: 'Add Transaction', onClick: () => { setEditingTx(null); setDialogOpen(true); } } : undefined}
+          />
         ) : (
           filtered.map(tx => (
             <div

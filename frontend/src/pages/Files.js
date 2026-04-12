@@ -11,6 +11,7 @@
  *   • Breadcrumb navigation
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import EmptyState from '../components/EmptyState';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -662,14 +663,7 @@ export default function Files({ defaultContext }) {
                       <p style={{ margin: 0, fontSize: 13 }}>Loading documents...</p>
                     </div>
                   ) : kbFiltered.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--tx-3)' }}>
-                      <BookOpen size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
-                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--tx-2)' }}>No documents found</p>
-                      <p style={{ margin: '6px 0 0', fontSize: 12 }}>Create SOPs, playbooks, and training docs</p>
-                      <button onClick={openKbCreate} style={{ ...btnPrimary, margin: '16px auto 0', display: 'inline-flex' }}>
-                        <Plus size={13} /> New Document
-                      </button>
-                    </div>
+                    <EmptyState icon="files" title="No documents found" description="Create SOPs, playbooks, and training docs." action={{ label: 'New Document', onClick: openKbCreate }} />
                   ) : view === 'grid' ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12, padding: 16 }}>
                       {kbFiltered.map(doc => (
@@ -810,10 +804,8 @@ export default function Files({ defaultContext }) {
               <div style={{
                 textAlign: 'center', padding: '60px 20px', color: 'var(--tx-3)',
               }}>
-                <HardDrive size={48} style={{ marginBottom: 12, opacity: 0.4 }} />
-                <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx-2)', marginBottom: 4 }}>No files yet</p>
-                <p style={{ fontSize: 13, marginBottom: 16 }}>Upload files or create folders to get started</p>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <EmptyState icon="files" title="No files yet" description="Upload files or create folders to get started." />
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: -8 }}>
                   <button onClick={() => setShowNewFolder(true)} style={btnSecondary}>
                     <FolderPlus size={16} /> New Folder
                   </button>
