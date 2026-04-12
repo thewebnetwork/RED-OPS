@@ -10,8 +10,8 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  MessageSquare, Plus, X, Send, Hash, User, FileText,
-  Loader2, Pencil, Trash2, Users, Check, Paperclip, Download, Image as ImageIcon,
+  MessageSquare, Plus, X, Send, Hash, FileText, Search,
+  Loader2, Pencil, Trash2, Check, Paperclip, Download, Image as ImageIcon,
 } from 'lucide-react';
 import MentionHashtagInput from '../components/MentionHashtagInput';
 import EmptyState from '../components/EmptyState';
@@ -139,6 +139,84 @@ function renderMsgBody(body) {
   );
 }
 
+/* ── Conversation row (iMessage-style) ── */
+function ConversationRow({ thread, active, onClick, displayName, subtitle, timestamp, unreadCount, type }) {
+  return (
+    <div onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+        borderRadius: 10, cursor: 'pointer',
+        background: active ? 'var(--accent-soft)' : 'transparent',
+        transition: 'background 0.15s var(--apple-spring, ease)',
+        position: 'relative',
+      }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--surface-2)'; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+    >
+      {/* Avatar */}
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+        background: type === 'channel' ? 'var(--surface-3)' : avatarBg(thread.id),
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 13, fontWeight: 700, color: '#fff',
+      }}>
+        {type === 'channel' ? <Hash size={18} style={{ color: 'var(--tx-2)' }} /> :
+         type === 'request' ? <FileText size={18} style={{ color: 'var(--tx-2)' }} /> :
+         initials(displayName)}
+      </div>
+
+      {/* Name + preview */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+          <span style={{
+            flex: 1, fontSize: 14, fontWeight: unreadCount > 0 ? 700 : 600,
+            color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {displayName}
+          </span>
+          {timestamp && (
+            <span style={{ fontSize: 11, color: unreadCount > 0 ? 'var(--accent)' : 'var(--tx-3)', fontWeight: unreadCount > 0 ? 600 : 400, flexShrink: 0 }}>
+              {timestamp}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            flex: 1, fontSize: 12.5, color: unreadCount > 0 ? 'var(--tx-1)' : 'var(--tx-3)',
+            fontWeight: unreadCount > 0 ? 500 : 400,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {subtitle || 'No messages yet'}
+          </span>
+          {unreadCount > 0 && (
+            <span style={{
+              minWidth: 18, height: 18, padding: '0 6px', borderRadius: 9,
+              background: 'var(--accent)', color: '#fff', fontSize: 10.5, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Time helper for sidebar ── */
+function conversationTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / 86400000);
+  if (diffDays === 0) {
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return d.toLocaleDateString('en-US', { weekday: 'short' });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 /* ── Main Page ── */
 export default function Conversations() {
   const { user } = useAuth();
@@ -153,7 +231,7 @@ export default function Conversations() {
   const [users, setUsers] = useState([]);
   const [showNewModal, setShowNewModal] = useState(null); // 'channel' | 'dm' | null
   const [showMembers, setShowMembers] = useState(false);
-  const [memberSearch, setMemberSearch] = useState('');
+  const [sidebarSearch, setSidebarSearch] = useState('');
   const [editingMsg, setEditingMsg] = useState(null);
   const [editText, setEditText] = useState('');
   const [pendingAttachments, setPendingAttachments] = useState([]);
@@ -305,7 +383,6 @@ export default function Conversations() {
     try {
       const res = await ax().patch(`${API}/messages/threads/${activeThread.id}/members`, { add: [userId] });
       setActiveThread(res.data);
-      setMemberSearch('');
       fetchThreads();
     } catch { toast.error('Failed to add member'); }
   };
@@ -346,9 +423,7 @@ export default function Conversations() {
     } catch (err) { toast.error(err.response?.data?.detail || 'Failed to create'); }
   };
 
-  const channels = threads.filter(t => t.type === 'channel');
-  const dms = threads.filter(t => t.type === 'dm');
-  const requestThreads = threads.filter(t => t.type === 'request');
+  // Old typed filters removed — sidebar uses unified sorted list (see render below)
 
   const getThreadDisplayName = (thread) => {
     if (thread.type === 'channel') return thread.name || '#general';
@@ -359,84 +434,116 @@ export default function Conversations() {
     return other?.name || 'Direct Message';
   };
 
-  const ThreadIcon = ({ type }) => {
-    if (type === 'channel') return <Hash size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />;
-    if (type === 'request') return <FileText size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />;
-    return <User size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />;
-  };
 
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      {/* ── Thread Sidebar ── */}
-      <div style={{ width: 280, minWidth: 280, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)', flexShrink: 0 }}>
-        <div style={{ padding: '14px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <MessageSquare size={16} style={{ color: 'var(--accent)' }} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>Messages</span>
+      {/* ── Thread Sidebar (iMessage-style) ── */}
+      <div style={{ width: 320, minWidth: 320, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)', flexShrink: 0 }}>
+        {/* Header */}
+        <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--tx-1)', letterSpacing: '-0.02em' }}>Messages</span>
+            {!isClient && (
+              <button onClick={() => setShowNewModal('dm')}
+                title="New message"
+                style={{
+                  background: 'var(--accent)', color: '#fff', border: 'none',
+                  borderRadius: '50%', width: 28, height: 28, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(139,21,56,0.4)',
+                }}>
+                <Plus size={15} />
+              </button>
+            )}
+          </div>
+          {/* Search */}
+          <div style={{ position: 'relative' }}>
+            <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--tx-3)', pointerEvents: 'none' }} />
+            <input
+              value={sidebarSearch}
+              onChange={e => setSidebarSearch(e.target.value)}
+              placeholder="Search"
+              style={{
+                width: '100%', padding: '8px 10px 8px 30px', fontSize: 13,
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                borderRadius: 10, color: 'var(--tx-1)', outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+            {sidebarSearch && (
+              <button onClick={() => setSidebarSearch('')}
+                style={{
+                  position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)',
+                  padding: 4, display: 'flex',
+                }}>
+                <X size={12} />
+              </button>
+            )}
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 6px' }}>
+        {/* Thread list (unified, search-filtered) */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: 20 }}><Loader2 size={16} className="spin" style={{ color: 'var(--tx-3)' }} /></div>
-          ) : (
-            <>
-              {/* Channels (admin/operator only) */}
-              {!isClient && (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 8px 4px', fontSize: 10.5, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
-                    Channels
-                    <button onClick={() => setShowNewModal('channel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 0, display: 'flex' }}><Plus size={13} /></button>
-                  </div>
-                  {channels.map(t => (
-                    <div key={t.id} onClick={() => selectThread(t)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 5, cursor: 'pointer', background: activeThread?.id === t.id ? 'var(--accent-soft)' : 'transparent', color: activeThread?.id === t.id ? 'var(--accent)' : 'var(--tx-2)', fontSize: 13, fontWeight: 500 }}
-                      onMouseEnter={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'var(--surface-3)'; }}
-                      onMouseLeave={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'transparent'; }}>
-                      <Hash size={13} />
-                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(t.name || '').replace('#', '')}</span>
-                      {(t.unread_count || 0) > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
-                    </div>
-                  ))}
-                </>
-              )}
+          ) : (() => {
+            const q = sidebarSearch.trim().toLowerCase();
+            // Unified sorted list: most recent first
+            const allSorted = [...threads].sort((a, b) => {
+              const ta = new Date(a.last_message_at || a.created_at || 0).getTime();
+              const tb = new Date(b.last_message_at || b.created_at || 0).getTime();
+              return tb - ta;
+            });
+            const filtered = q
+              ? allSorted.filter(t => getThreadDisplayName(t).toLowerCase().includes(q) || (t.last_message_preview || '').toLowerCase().includes(q))
+              : allSorted;
 
-              {/* Direct Messages */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 8px 4px', fontSize: 10.5, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
-                Direct Messages
-                <button onClick={() => setShowNewModal('dm')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 0, display: 'flex' }}><Plus size={13} /></button>
-              </div>
-              {dms.map(t => (
-                <div key={t.id} onClick={() => selectThread(t)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 5, cursor: 'pointer', background: activeThread?.id === t.id ? 'var(--accent-soft)' : 'transparent', color: activeThread?.id === t.id ? 'var(--accent)' : 'var(--tx-2)', fontSize: 13, fontWeight: 500 }}
-                  onMouseEnter={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'var(--surface-3)'; }}
-                  onMouseLeave={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'transparent'; }}>
-                  <User size={13} />
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getThreadDisplayName(t)}</span>
-                  {(t.unread_count || 0) > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
+            if (filtered.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--tx-3)', fontSize: 13 }}>
+                  {q ? 'No conversations match your search' : 'No conversations yet.'}
+                  {!q && !isClient && (
+                    <button onClick={() => setShowNewModal('dm')}
+                      style={{ display: 'block', margin: '12px auto 0', background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 12.5, fontWeight: 600 }}>
+                      Start a new message
+                    </button>
+                  )}
                 </div>
-              ))}
+              );
+            }
 
-              {/* Request Threads */}
-              {requestThreads.length > 0 && (
-                <>
-                  <div style={{ padding: '10px 8px 4px', fontSize: 10.5, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
-                    Request Threads
-                  </div>
-                  {requestThreads.map(t => (
-                    <div key={t.id} onClick={() => selectThread(t)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 5, cursor: 'pointer', background: activeThread?.id === t.id ? 'var(--accent-soft)' : 'transparent', color: activeThread?.id === t.id ? 'var(--accent)' : 'var(--tx-2)', fontSize: 13, fontWeight: 500 }}
-                      onMouseEnter={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'var(--surface-3)'; }}
-                      onMouseLeave={e => { if (activeThread?.id !== t.id) e.currentTarget.style.background = 'transparent'; }}>
-                      <FileText size={13} />
-                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name || 'Request'}</span>
-                      {(t.unread_count || 0) > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
-                    </div>
-                  ))}
-                </>
-              )}
-            </>
-          )}
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {filtered.map(t => (
+                  <ConversationRow key={t.id}
+                    thread={t}
+                    type={t.type}
+                    active={activeThread?.id === t.id}
+                    onClick={() => selectThread(t)}
+                    displayName={getThreadDisplayName(t)}
+                    subtitle={t.last_message_preview || ''}
+                    timestamp={conversationTime(t.last_message_at || t.created_at)}
+                    unreadCount={t.unread_count || 0}
+                  />
+                ))}
+
+                {!isClient && (
+                  <button onClick={() => setShowNewModal('channel')}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
+                      marginTop: 8, borderRadius: 10, cursor: 'pointer', background: 'transparent',
+                      border: '1px dashed var(--border)', color: 'var(--tx-3)', fontSize: 12.5,
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <Hash size={13} />
+                    <span>New Channel</span>
+                  </button>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -444,14 +551,30 @@ export default function Conversations() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {activeThread ? (
           <>
-            {/* Thread header */}
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative' }}>
-              <ThreadIcon type={activeThread.type} />
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>{getThreadDisplayName(activeThread)}</span>
-              <button onClick={() => setShowMembers(!showMembers)}
-                style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Users size={12} /> {activeThread.members?.length || 0} members
-              </button>
+            {/* Thread header (iMessage-style) */}
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative', background: 'var(--surface)' }}>
+              {/* Avatar */}
+              <div style={{
+                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                background: activeThread.type === 'channel' ? 'var(--surface-3)' : avatarBg(activeThread.id),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 700, color: '#fff',
+              }}>
+                {activeThread.type === 'channel' ? <Hash size={16} style={{ color: 'var(--tx-2)' }} /> :
+                 activeThread.type === 'request' ? <FileText size={16} style={{ color: 'var(--tx-2)' }} /> :
+                 initials(getThreadDisplayName(activeThread))}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {getThreadDisplayName(activeThread)}
+                </div>
+                {activeThread.type !== 'dm' && (
+                  <button onClick={() => setShowMembers(!showMembers)}
+                    style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 1 }}>
+                    {activeThread.members?.length || 0} {activeThread.members?.length === 1 ? 'member' : 'members'}
+                  </button>
+                )}
+              </div>
 
               {/* Members panel */}
               {showMembers && (
