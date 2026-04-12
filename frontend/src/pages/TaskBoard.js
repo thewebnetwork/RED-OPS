@@ -16,7 +16,6 @@ import {
   Plus,
   Calendar,
   User as UserIcon,
-  GripVertical,
   Pencil,
   Search,
   CheckCircle2,
@@ -274,25 +273,24 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
   const assigneeName = task.assigned_user?.name || task.assignee_name || null;
   return (
     <div
+      {...dragHandleProps}
       style={{
         position: 'relative', background: 'var(--bg-card)', borderRadius: 10,
-        border: `1px solid ${isDragging ? 'var(--red)' : 'var(--border)'}`,
+        border: `1px solid ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
         boxShadow: isDragging ? '0 16px 48px rgba(0,0,0,0.5)' : '0 1px 4px rgba(0,0,0,0.12)',
-        cursor: isDragging ? 'grabbing' : 'pointer', overflow: 'hidden',
+        cursor: isDragging ? 'grabbing' : 'grab', overflow: 'hidden',
         transform: isDragging ? 'rotate(1.5deg) scale(1.03)' : 'none',
         transition: 'box-shadow 0.15s, border-color 0.15s, transform 0.15s',
+        touchAction: 'none',
       }}
       onClick={() => onEdit(task)}
-      onMouseEnter={e => { if (!isDragging) e.currentTarget.style.borderColor = '#3a3a3a'; }}
+      onMouseEnter={e => { if (!isDragging) e.currentTarget.style.borderColor = 'var(--border-hi)'; }}
       onMouseLeave={e => { if (!isDragging) e.currentTarget.style.borderColor = 'var(--border)'; }}
     >
       {/* Priority bar */}
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: pri.color, borderRadius: '10px 0 0 10px' }} />
-      <div style={{ paddingLeft: 10, paddingRight: 12, paddingTop: 10, paddingBottom: 8 }}>
+      <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 10, paddingBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-          <div {...dragHandleProps} style={{ marginTop: 2, flexShrink: 0, cursor: 'grab', color: 'var(--tx-3)', opacity: 0.4 }} onClick={e => e.stopPropagation()}>
-            <GripVertical size={13} />
-          </div>
           <p style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--tx-1)', lineHeight: 1.4, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.title}</p>
           <button
             style={{ flexShrink: 0, padding: 3, borderRadius: 5, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', opacity: 0.4, display: 'flex' }}

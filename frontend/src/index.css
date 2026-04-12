@@ -12,11 +12,11 @@
 /* ── 1. CSS CUSTOM PROPERTIES ─────────────────────────────── */
 @layer base {
   :root {
-    /* Backgrounds — layered dark surfaces */
-    --bg:         #0d0f14;
-    --surface:    #161920;
-    --surface-2:  #1e2129;
-    --surface-3:  #252830;
+    /* Backgrounds — deep premium dark surfaces */
+    --bg:         #0a0b10;
+    --surface:    #12141a;
+    --surface-2:  #1a1c24;
+    --surface-3:  #22252e;
 
     /* Legacy aliases — old token names resolve to new design system */
     --bg-card:    var(--surface);
@@ -34,15 +34,15 @@
     --tx-2: #9ca3af;  /* secondary text */
     --tx-3: #4b5563;  /* muted/placeholder text */
 
-    /* Brand / Accent */
-    --accent: #c92a3e;
-    --accent-hover: #a8202f;
-    --accent-soft: rgba(201, 42, 62, 0.12);
+    /* Brand / Accent — premium burgundy */
+    --accent: #8B1538;
+    --accent-hover: #6B102B;
+    --accent-soft: rgba(139, 21, 56, 0.14);
 
     /* Legacy brand aliases */
     --red:    var(--accent);
     --red-bg: var(--accent-soft);
-    --red-lo: rgba(201, 42, 62, 0.06);
+    --red-lo: rgba(139, 21, 56, 0.06);
 
     /* Status — legacy aliases point to semantic tokens */
     --green:  var(--color-green);
@@ -78,7 +78,7 @@
     --card-foreground:    0 0% 94%;
     --popover:            0 0% 9%;
     --popover-foreground: 0 0% 94%;
-    --primary:            348 72% 47%;
+    --primary:            340 74% 33%;
     --primary-foreground: 0 0% 98%;
     --secondary:          0 0% 12%;
     --secondary-foreground: 0 0% 94%;
@@ -90,7 +90,7 @@
     --destructive-foreground: 0 0% 98%;
     /* NOTE: --border intentionally NOT redefined here — use --border: #2a2a2a from above */
     --input:              0 0% 14%;
-    --ring:               348 72% 47%;
+    --ring:               340 74% 33%;
     --radius:             0.5rem;
 
     /* Transition speeds */
@@ -130,10 +130,10 @@
     --tx-2: #6b7280;
     --tx-3: #9ca3af;
 
-    --accent: #c92a3e;
-    --accent-hover: #a8202f;
-    --accent-soft: rgba(201, 42, 62, 0.08);
-    --red-lo: rgba(201, 42, 62, 0.04);
+    --accent: #8B1538;
+    --accent-hover: #6B102B;
+    --accent-soft: rgba(139, 21, 56, 0.10);
+    --red-lo: rgba(139, 21, 56, 0.04);
 
     --color-green-soft: rgba(34, 197, 94, 0.10);
     --color-yellow-soft: rgba(245, 158, 11, 0.10);
@@ -180,7 +180,7 @@
     background: #e5e7eb;
   }
   :root[data-theme="light"] .ambient-glow::before {
-    background: radial-gradient(circle, rgba(201,42,62,0.03) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(139,21,56,0.03) 0%, transparent 70%);
   }
   :root[data-theme="light"] .ambient-glow::after {
     background: radial-gradient(circle, rgba(59,130,246,0.02) 0%, transparent 70%);
@@ -409,7 +409,7 @@
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(201,42,62,0.08);
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(139,21,56,0.08);
   font-weight: 600;
 }
 
@@ -532,7 +532,7 @@
 .pill-blue   { background: var(--color-blue-soft);   color: var(--color-blue);   border: 1px solid rgba(59,130,246,0.2); box-shadow: 0 0 8px rgba(59,130,246,0.08); }
 .pill-purple { background: var(--color-purple-soft); color: var(--color-purple); border: 1px solid rgba(168,85,247,0.2); box-shadow: 0 0 8px rgba(168,85,247,0.08); }
 .pill-gray   { background: var(--surface-2); color: var(--tx-2); border: 1px solid var(--border); }
-.pill-brand  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(201,42,62,0.2); box-shadow: 0 0 8px rgba(201,42,62,0.08); }
+.pill-brand  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(139,21,56,0.2); box-shadow: 0 0 8px rgba(139,21,56,0.08); }
 
 /* ── 10. KANBAN ───────────────────────────────────────────── */
 .kanban-col {
@@ -614,7 +614,7 @@
 
 .input-field:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(201,42,62,0.12), 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 3px rgba(139,21,56,0.12), 0 0 0 1px var(--accent);
   background: var(--surface-3);
 }
 
@@ -643,7 +643,7 @@ select.input-field { appearance: none; cursor: pointer; }
 
 .btn-primary:hover {
   background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 40%), var(--accent-hover);
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 4px 14px rgba(201,42,62,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 4px 14px rgba(139,21,56,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
   transform: translateY(-0.5px);
 }
 
@@ -1305,7 +1305,7 @@ kbd {
   right: -120px;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(201,42,62,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139,21,56,0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -1332,7 +1332,7 @@ kbd {
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #f87171 0%, #c92a3e 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #f87171 0%, #8B1538 50%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1343,7 +1343,7 @@ kbd {
   transition: box-shadow 0.2s;
 }
 .hover-glow-accent:hover {
-  box-shadow: 0 0 20px rgba(201,42,62,0.15);
+  box-shadow: 0 0 20px rgba(139,21,56,0.15);
 }
 
 /* ── 29. FINANCE PAGE ──────────────────────────────────────── */
@@ -1821,4 +1821,31 @@ button:focus-visible, a:focus-visible, select:focus-visible,
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+}
+
+/* ── 49. MOBILE TOUCH TARGETS + SAFE AREAS ───────────────── */
+@media (max-width: 767px) {
+  /* Minimum 44px touch targets */
+  .btn-sm { padding: 10px 14px !important; font-size: 13px !important; min-height: 44px; }
+  .btn-xs { padding: 8px 12px !important; font-size: 12px !important; min-height: 40px; }
+  .nav-item { padding: 12px 14px; min-height: 44px; font-size: 14px; }
+  .input-field { padding: 12px 14px; min-height: 44px; }
+  .pill { padding: 5px 12px; font-size: 12px; }
+
+  /* Font size floor — no text below 11px on mobile */
+  .nav-badge { font-size: 10px; min-width: 18px; }
+
+  /* Safe area insets for notch phones */
+  .page-content {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0)) !important;
+  }
+}
+
+/* Safe areas — always applied (desktop falls back to 0) */
+.app-sidebar {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.top-bar {
+  padding-top: env(safe-area-inset-top, 0);
 }

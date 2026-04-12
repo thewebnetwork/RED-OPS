@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#8B1538" />
+  <title>RED-OPS — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0b10;
+      color: #f1f3f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      text-align: center;
+      padding: 24px;
+    }
+    .container { max-width: 360px; }
+    .logo {
+      width: 56px; height: 56px;
+      background: #8B1538;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 22px; color: #fff;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 20px rgba(139,21,56,0.3);
+    }
+    h1 {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 14px; color: #9ca3af;
+      line-height: 1.6; margin-bottom: 24px;
+    }
+    .icon {
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+      opacity: 0.3;
+    }
+    .icon svg { width: 100%; height: 100%; }
+    button {
+      background: #8B1538; color: #fff;
+      border: none; padding: 12px 28px;
+      border-radius: 12px; font-size: 14px;
+      font-weight: 600; cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(139,21,56,0.35);
+      transition: background 0.2s;
+    }
+    button:hover { background: #6B102B; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">R</div>
+    <div class="icon">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="28" r="8" stroke="#f1f3f5" stroke-width="2"/>
+        <path d="M20 56c0-11 9-20 20-20s20 9 20 20" stroke="#f1f3f5" stroke-width="2" stroke-linecap="round"/>
+        <path d="M28 48c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="#f1f3f5" stroke-width="2" stroke-linecap="round"/>
+        <line x1="38" y1="62" x2="42" y2="62" stroke="#f1f3f5" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>Check your internet connection and try again. RED-OPS needs a network connection to load your data.</p>
+    <button onclick="window.location.reload()">Try Again</button>
+  </div>
+</body>
+</html>

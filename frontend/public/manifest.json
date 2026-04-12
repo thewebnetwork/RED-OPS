@@ -3,9 +3,10 @@
   "short_name": "RED-OPS",
   "description": "Red Ribbon Group Operations Platform",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f0f1a",
-  "theme_color": "#A2182C",
+  "background_color": "#0a0b10",
+  "theme_color": "#8B1538",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -1,9 +1,14 @@
 // Red Ops service worker — network-first with offline fallback.
 // Activated only in production builds (see src/index.js).
 
-const CACHE = 'redops-v1';
+const CACHE = 'redops-v2';
+const OFFLINE_PAGE = '/offline.html';
 
-self.addEventListener('install', () => {
+self.addEventListener('install', (e) => {
+  // Pre-cache the offline page so it's always available
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.add(OFFLINE_PAGE))
+  );
   self.skipWaiting();
 });
 
@@ -31,6 +36,16 @@ self.addEventListener('fetch', (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(e.request))
+      .catch(() =>
+        // Try cache first, fall back to offline page for navigation requests
+        caches.match(e.request).then((cached) => {
+          if (cached) return cached;
+          // For navigation requests (HTML pages), show the branded offline page
+          if (e.request.mode === 'navigate') {
+            return caches.match(OFFLINE_PAGE);
+          }
+          return cached; // undefined — browser shows default error
+        })
+      )
   );
 });
