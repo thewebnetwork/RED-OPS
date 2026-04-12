@@ -46,7 +46,8 @@ import {
   Package,
   Hourglass,
   CircleDot,
-  Eye
+  Eye,
+  Printer
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -525,7 +526,15 @@ export default function OrderDetail() {
       })()}
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3" data-no-print>
+        <button
+          onClick={() => window.print()}
+          className="btn-ghost btn-sm"
+          style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+          title="Print this request"
+        >
+          <Printer size={14} /> Print
+        </button>
         {!showAsClient && canPick && (
           <Button 
             className="bg-rose-600 hover:bg-rose-700"

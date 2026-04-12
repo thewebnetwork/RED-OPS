@@ -609,15 +609,43 @@ export default function Settings() {
                   <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '4px' }}>Two-Factor Authentication</h3>
                   <p style={{ fontSize: '12px', color: 'var(--tx-3)' }}>
                     {security.twoFactorEnabled
-                      ? 'TOTP authenticator is enabled on your account.'
-                      : '2FA is not yet configured. TOTP setup will be available in a future update.'}
+                      ? 'TOTP authenticator app is active on your account. Your account is protected.'
+                      : 'Add an extra layer of security. Use any authenticator app (Google Authenticator, Authy).'}
                   </p>
                 </div>
-                <span style={{ fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 5,
-                  background: security.twoFactorEnabled ? '#22c55e18' : 'var(--bg-overlay)',
-                  color: security.twoFactorEnabled ? '#22c55e' : 'var(--tx-3)' }}>
-                  {security.twoFactorEnabled ? 'Active' : 'Not Set Up'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 16 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: 5,
+                    background: security.twoFactorEnabled ? '#22c55e18' : 'var(--bg-overlay)',
+                    color: security.twoFactorEnabled ? '#22c55e' : 'var(--tx-3)' }}>
+                    {security.twoFactorEnabled ? 'Active' : 'Not Set Up'}
+                  </span>
+                  {security.twoFactorEnabled ? (
+                    <button
+                      className="btn-ghost btn-sm"
+                      style={{ color: 'var(--red)', borderColor: 'var(--red)', fontSize: '12px' }}
+                      onClick={async () => {
+                        if (!window.confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.')) return;
+                        try {
+                          await axh().delete(`${API}/auth/otp/disable`);
+                          setSecurity(prev => ({ ...prev, twoFactorEnabled: false }));
+                          toast.success('Two-factor authentication disabled');
+                        } catch (err) {
+                          toast.error(err.response?.data?.detail || 'Failed to disable 2FA');
+                        }
+                      }}
+                    >
+                      Disable
+                    </button>
+                  ) : (
+                    <button
+                      className="btn-primary btn-sm"
+                      style={{ fontSize: '12px' }}
+                      onClick={() => navigate('/setup-otp')}
+                    >
+                      Set Up 2FA
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

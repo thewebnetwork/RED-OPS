@@ -1597,3 +1597,23 @@ button:focus-visible, a:focus-visible, select:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ── 48. PRINT ──────────────────────────────────────────── */
+@media print {
+  .app-sidebar,
+  .app-topbar,
+  [data-no-print],
+  .modal-overlay {
+    display: none !important;
+  }
+  .page-content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

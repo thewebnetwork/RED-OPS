@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Search, RefreshCw, Loader2,
   ArrowUpDown, Pencil, Trash2, X, Calendar, Receipt, PiggyBank, Wallet,
-  ChevronLeft, ChevronRight, Download, Filter,
+  ChevronLeft, ChevronRight, Download, Filter, Printer,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -448,8 +448,11 @@ export default function Finance() {
           <button onClick={() => setShowImportModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
             ↑ Import
           </button>
-          <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
+          <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }} data-no-print>
             <Download size={13} /> Export
+          </button>
+          <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }} data-no-print>
+            <Printer size={13} /> Print
           </button>
           <button onClick={() => { setEditingTx(null); setDialogOpen(true); }}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', fontSize: 12, fontWeight: 700, borderRadius: 8, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer' }}>

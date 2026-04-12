@@ -299,7 +299,19 @@ const { login } = useAuth();
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
+          <Link
+            to="/forgot-password"
+            className="text-sm"
+            style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}
+            onMouseEnter={e => (e.target.style.color = 'rgba(220,38,38,0.8)')}
+            onMouseLeave={e => (e.target.style.color = 'rgba(255,255,255,0.45)')}
+          >
+            Forgot your password?
+          </Link>
+        </div>
+
+        <div className="mt-4 text-center">
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
             © {new Date().getFullYear()} Red Ribbon Group. All rights reserved.
           </p>

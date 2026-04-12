@@ -6,7 +6,7 @@ import {
 import {
   TrendingUp, Clock, CheckCircle2, AlertCircle, Layers, Download,
   RefreshCw, Loader2, FileText, ChevronRight, ArrowLeft, Table2,
-  BarChart3, PieChart as PieIcon, Shield, Users, Tag, Zap, Filter, X,
+  BarChart3, PieChart as PieIcon, Shield, Users, Tag, Zap, Filter, X, Printer,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -231,8 +231,11 @@ export default function Reports() {
             <h1 style={{ fontSize:20,fontWeight:700,color:'var(--tx-1)',margin:0 }}>{activeReport?.name}</h1>
             <p style={{ margin:'2px 0 0',fontSize:12,color:'var(--tx-3)' }}>{activeReport?.description}</p>
           </div>
+          <button onClick={() => window.print()} className="btn-ghost btn-sm" style={{ display:'flex',alignItems:'center',gap:5 }} data-no-print>
+            <Printer size={13} /> Print
+          </button>
           {reportData && reportData.total_rows > 0 && (
-            <button onClick={exportCSV} className="btn-ghost btn-sm" style={{ display:'flex',alignItems:'center',gap:5 }}>
+            <button onClick={exportCSV} className="btn-ghost btn-sm" style={{ display:'flex',alignItems:'center',gap:5 }} data-no-print>
               <Download size={13} /> Export CSV
             </button>
           )}

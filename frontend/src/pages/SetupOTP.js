@@ -65,7 +65,7 @@ export default function SetupOTP() {
       }
       
       toast.success('Two-factor authentication enabled successfully!');
-      navigate('/');
+      navigate('/settings');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Invalid verification code');
     } finally {
