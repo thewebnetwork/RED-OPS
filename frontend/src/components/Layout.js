@@ -465,7 +465,7 @@ export default function Layout({ children }) {
       )}
 
       {/* ══ SIDEBAR ══ */}
-      <aside className={`app-sidebar fixed lg:static transition-transform duration-200 ${
+      <aside className={`app-sidebar glass fixed lg:static transition-transform duration-200 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
 

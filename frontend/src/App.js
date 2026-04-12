@@ -1,10 +1,12 @@
 import "@/App.css";
+import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { OrgProvider } from "./contexts/OrgContext";
 import { Toaster } from "./components/ui/sonner";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { SkeletonPage } from "./components/Skeleton";
 
 // Helper component for redirecting with params
 function RedirectWithParams({ to }) {
@@ -15,69 +17,79 @@ function RedirectWithParams({ to }) {
   });
   return <Navigate to={path} replace />;
 }
+
+// ── Eager imports (auth flow — must load instantly) ──
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import RateSurvey from "./pages/RateSurvey";
-import Dashboard from "./pages/Dashboard";
-import ClientHome from "./pages/ClientHome";
-import Clients from "./pages/Clients";
-import ServiceCatalog from "./pages/ServiceCatalog";
-import MyAccount from "./pages/MyAccount";
-import Orders from "./pages/Orders";
-import Requests from "./pages/Requests";
-import Settings from "./pages/Settings";
-import OrderDetail from "./pages/OrderDetail";
-import Users from "./pages/Users";
-import Notifications from "./pages/Notifications";
-import CommandCenter from "./pages/CommandCenter";
-import Categories from "./pages/Categories";
-import Profile from "./pages/Profile";
-import Roles from "./pages/Roles";
-import Teams from "./pages/Teams";
-import Workflows from "./pages/Workflows";
-import WorkflowEditor from "./pages/WorkflowEditor";
-import Announcements from "./pages/Announcements";
-import Logs from "./pages/Logs";
-import Integrations from "./pages/Integrations";
-import Services from "./pages/Services";
-import EmailSettings from "./pages/EmailSettings";
-import DraftEditor from "./pages/DraftEditor";
-import Reports from "./pages/Reports";
-import SpecialtiesAdmin from "./pages/SpecialtiesAdmin";
-import MyRequests from "./pages/MyRequests";
-import ReportIssue from "./pages/ReportIssue";
-import IAMPage from "./pages/IAMPage";
-import SettingsHub from "./pages/SettingsHub";
-import DeletedTickets from "./pages/DeletedTickets";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import SetupOTP from "./pages/SetupOTP";
 import VerifyOTP from "./pages/VerifyOTP";
-import OnboardingWizard from "./pages/OnboardingWizard";
-import DocumentationPage from "./pages/DocumentationPage";
-import TranslationEditorPage from "./pages/TranslationEditorPage";
-import DashboardBuilder from "./pages/DashboardBuilder";
-import TaskBoard from "./pages/TaskBoard";
-import Tasks from "./pages/Tasks";
-import Projects from "./pages/Projects";
-import ProjectPage from "./pages/ProjectPage";
-import Finance from "./pages/Finance";
-import SOPs from "./pages/SOPs";
-import CRM from "./pages/CRM";
-import Ambassador from "./pages/Ambassador";
-import AIAssistant from "./pages/AIAssistant";
-import Files from "./pages/Files";
-import ClientPage from "./pages/ClientPage";
-import Team from "./pages/Team";
-import TeamMemberPage from "./pages/TeamMemberPage";
-import AdPerformance from "./pages/AdPerformance";
-import Onboarding from "./pages/Onboarding";
-import Documents from "./pages/Documents";
-import KnowledgeBase from "./pages/KnowledgeBase";
-import Conversations from "./pages/Conversations";
-import Support from "./pages/Support";
-import NotFound from "./pages/NotFound";
+
+// ── Lazy imports (code-split — loaded on demand) ──
+const RateSurvey = React.lazy(() => import("./pages/RateSurvey"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const ClientHome = React.lazy(() => import("./pages/ClientHome"));
+const Clients = React.lazy(() => import("./pages/Clients"));
+const ServiceCatalog = React.lazy(() => import("./pages/ServiceCatalog"));
+const MyAccount = React.lazy(() => import("./pages/MyAccount"));
+const Orders = React.lazy(() => import("./pages/Orders"));
+const Requests = React.lazy(() => import("./pages/Requests"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const OrderDetail = React.lazy(() => import("./pages/OrderDetail"));
+const Users = React.lazy(() => import("./pages/Users"));
+const Notifications = React.lazy(() => import("./pages/Notifications"));
+const CommandCenter = React.lazy(() => import("./pages/CommandCenter"));
+const Categories = React.lazy(() => import("./pages/Categories"));
+const Profile = React.lazy(() => import("./pages/Profile"));
+const Roles = React.lazy(() => import("./pages/Roles"));
+const Teams = React.lazy(() => import("./pages/Teams"));
+const Workflows = React.lazy(() => import("./pages/Workflows"));
+const WorkflowEditor = React.lazy(() => import("./pages/WorkflowEditor"));
+const Announcements = React.lazy(() => import("./pages/Announcements"));
+const Logs = React.lazy(() => import("./pages/Logs"));
+const Integrations = React.lazy(() => import("./pages/Integrations"));
+const Services = React.lazy(() => import("./pages/Services"));
+const EmailSettings = React.lazy(() => import("./pages/EmailSettings"));
+const DraftEditor = React.lazy(() => import("./pages/DraftEditor"));
+const Reports = React.lazy(() => import("./pages/Reports"));
+const SpecialtiesAdmin = React.lazy(() => import("./pages/SpecialtiesAdmin"));
+const MyRequests = React.lazy(() => import("./pages/MyRequests"));
+const ReportIssue = React.lazy(() => import("./pages/ReportIssue"));
+const IAMPage = React.lazy(() => import("./pages/IAMPage"));
+const SettingsHub = React.lazy(() => import("./pages/SettingsHub"));
+const DeletedTickets = React.lazy(() => import("./pages/DeletedTickets"));
+const OnboardingWizard = React.lazy(() => import("./pages/OnboardingWizard"));
+const DocumentationPage = React.lazy(() => import("./pages/DocumentationPage"));
+const TranslationEditorPage = React.lazy(() => import("./pages/TranslationEditorPage"));
+const DashboardBuilder = React.lazy(() => import("./pages/DashboardBuilder"));
+const TaskBoard = React.lazy(() => import("./pages/TaskBoard"));
+const Tasks = React.lazy(() => import("./pages/Tasks"));
+const Projects = React.lazy(() => import("./pages/Projects"));
+const ProjectPage = React.lazy(() => import("./pages/ProjectPage"));
+const Finance = React.lazy(() => import("./pages/Finance"));
+const SOPs = React.lazy(() => import("./pages/SOPs"));
+const CRM = React.lazy(() => import("./pages/CRM"));
+const Ambassador = React.lazy(() => import("./pages/Ambassador"));
+const AIAssistant = React.lazy(() => import("./pages/AIAssistant"));
+const Files = React.lazy(() => import("./pages/Files"));
+const ClientPage = React.lazy(() => import("./pages/ClientPage"));
+const Team = React.lazy(() => import("./pages/Team"));
+const TeamMemberPage = React.lazy(() => import("./pages/TeamMemberPage"));
+const AdPerformance = React.lazy(() => import("./pages/AdPerformance"));
+const Onboarding = React.lazy(() => import("./pages/Onboarding"));
+const Documents = React.lazy(() => import("./pages/Documents"));
+const KnowledgeBase = React.lazy(() => import("./pages/KnowledgeBase"));
+const Conversations = React.lazy(() => import("./pages/Conversations"));
+const Support = React.lazy(() => import("./pages/Support"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
+
+// Suspense fallback shown while lazy chunks load
+function PageLoader() {
+  return <SkeletonPage />;
+}
 
 // Home route — Command Center for internal roles, ClientHome for clients
 function HomeRoute() {
@@ -599,7 +611,9 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <OrgProvider>
-            <AppRoutes />
+            <Suspense fallback={<PageLoader />}>
+              <AppRoutes />
+            </Suspense>
             <Toaster position="top-right" richColors closeButton duration={4000} />
           </OrgProvider>
         </AuthProvider>

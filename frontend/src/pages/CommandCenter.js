@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { SkeletonCardList } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 import useCountUp from '../hooks/useCountUp';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -221,11 +222,7 @@ export default function CommandCenter() {
               );
             })
           ) : (
-            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'20px 0',textAlign:'center'}}>
-              <div style={{ fontSize:20, marginBottom:6, opacity:0.4 }}>✅</div>
-              <div style={{ marginBottom:4, fontWeight:500, color:'var(--tx-2)' }}>No tasks yet</div>
-              <div style={{ fontSize:11.5 }}>Create a task to start tracking work</div>
-            </div>
+            <EmptyState icon="tasks" title="No tasks yet" description="Create a task to start tracking work" />
           )}
           <button onClick={() => navigate('/tasks?new=1')} style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 0 0', color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer', fontSize:12 }}>
             <Plus size={12}/> Add task
@@ -254,11 +251,7 @@ export default function CommandCenter() {
               </div>
             ))
           ) : (
-            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'20px 0',textAlign:'center'}}>
-              <div style={{ fontSize:20, marginBottom:6, opacity:0.4 }}>👥</div>
-              <div style={{ marginBottom:4, fontWeight:500, color:'var(--tx-2)' }}>No team members yet</div>
-              <div style={{ fontSize:11.5 }}>Add your team to start collaborating</div>
-            </div>
+            <EmptyState icon="projects" title="No team members yet" description="Add your team to start collaborating" />
           )}
           <button onClick={() => navigate('/clients?new=1')} style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 0 0', color:'var(--tx-3)', background:'none', border:'none', cursor:'pointer', fontSize:12 }}>
             <Plus size={12}/> Add member
@@ -289,11 +282,7 @@ export default function CommandCenter() {
               );
             })
           ) : (
-            <div style={{color:'var(--tx-3)',fontSize:12.5,padding:'20px 0',textAlign:'center'}}>
-              <div style={{ fontSize:20, marginBottom:6, opacity:0.4 }}>📊</div>
-              <div style={{ marginBottom:4, fontWeight:500, color:'var(--tx-2)' }}>No recent activity</div>
-              <div style={{ fontSize:11.5 }}>Activity will appear here as your team works</div>
-            </div>
+            <EmptyState icon="inbox" title="No recent activity" description="Activity will appear here as your team works" />
           )}
         </div>
       </div>

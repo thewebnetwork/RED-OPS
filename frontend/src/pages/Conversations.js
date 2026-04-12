@@ -14,6 +14,7 @@ import {
   Loader2, Pencil, Trash2, Users, Check, Paperclip, Download, Image as ImageIcon,
 } from 'lucide-react';
 import MentionHashtagInput from '../components/MentionHashtagInput';
+import EmptyState from '../components/EmptyState';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -488,7 +489,7 @@ export default function Conversations() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
               {messages.length === 0 && (
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <p style={{ fontSize: 13, color: 'var(--tx-3)' }}>No messages yet. Start the conversation!</p>
+                  <EmptyState icon="chat" title="No messages yet" description="Start the conversation!" />
                 </div>
               )}
               {messages.map((msg, idx) => {
