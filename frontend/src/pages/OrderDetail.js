@@ -54,6 +54,8 @@ import { format } from 'date-fns';
 import MentionHashtagInput from '../components/MentionHashtagInput';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const tok = () => localStorage.getItem('token');
+const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
 const statusConfig = {
   'Draft':      { style: { background: '#60606020', color: '#888' }, dot: '#888' },
@@ -149,7 +151,7 @@ export default function OrderDetail() {
     fetchOrderData();
     fetchCancellationReasons();
     // Fetch team members for @mention autocomplete
-    axios.get(`${API}/users`).then(r => {
+    ax().get(`${API}/users`).then(r => {
       const arr = Array.isArray(r.data) ? r.data : r.data?.users || [];
       setThreadUsers(arr.filter(u => u.role !== 'Media Client').map(u => ({ id: u.id, name: u.name, role: u.role })));
     }).catch(() => {});
@@ -161,7 +163,7 @@ export default function OrderDetail() {
 
   const fetchCancellationReasons = async () => {
     try {
-      const res = await axios.get(`${API}/orders/cancellation-reasons`);
+      const res = await ax().get(`${API}/orders/cancellation-reasons`);
       setCancellationReasons(res.data.reasons || []);
     } catch (error) {
       console.error('Failed to fetch cancellation reasons');
@@ -175,9 +177,9 @@ export default function OrderDetail() {
   const fetchOrderData = async () => {
     try {
       const [orderRes, messagesRes, filesRes] = await Promise.all([
-        axios.get(`${API}/orders/${orderId}`),
-        axios.get(`${API}/orders/${orderId}/messages`),
-        axios.get(`${API}/orders/${orderId}/files`)
+        ax().get(`${API}/orders/${orderId}`),
+        ax().get(`${API}/orders/${orderId}/messages`),
+        ax().get(`${API}/orders/${orderId}/files`)
       ]);
       setOrder(orderRes.data);
       setMessages(messagesRes.data);
@@ -185,7 +187,7 @@ export default function OrderDetail() {
       
       // Fetch linked tasks
       try {
-        const tasksRes = await axios.get(`${API}/tasks`, { params: { request_id: orderRes.data.id } });
+        const tasksRes = await ax().get(`${API}/tasks`, { params: { request_id: orderRes.data.id } });
         setLinkedTasks(Array.isArray(tasksRes.data) ? tasksRes.data : []);
       } catch {
         setLinkedTasks([]);
@@ -193,7 +195,7 @@ export default function OrderDetail() {
       
       // Fetch account manager for the requester
       try {
-        const amRes = await axios.get(`${API}/tasks/account-manager/${orderRes.data.requester_id}`);
+        const amRes = await ax().get(`${API}/tasks/account-manager/${orderRes.data.requester_id}`);
         setAccountManager(amRes.data?.account_manager || null);
       } catch {
         setAccountManager(null);
@@ -217,10 +219,10 @@ export default function OrderDetail() {
       const payload = { message_body: newMessage.trim() };
       if (mentionedIds.length > 0) payload.mentions = mentionedIds;
       if (metadata.urgent) payload.metadata = metadata;
-      await axios.post(`${API}/orders/${orderId}/messages`, payload);
+      await ax().post(`${API}/orders/${orderId}/messages`, payload);
       setNewMessage('');
       orderInputRef.current?.resetState();
-      const messagesRes = await axios.get(`${API}/orders/${orderId}/messages`);
+      const messagesRes = await ax().get(`${API}/orders/${orderId}/messages`);
       setMessages(messagesRes.data);
     } catch (error) {
       toast.error('Failed to send message');
@@ -233,7 +235,7 @@ export default function OrderDetail() {
     if (command === 'createtask') {
       const title = args || 'Task from order thread';
       try {
-        await axios.post(`${API}/tasks`, { title, request_id: orderId });
+        await ax().post(`${API}/tasks`, { title, request_id: orderId });
         toast.success(`Task created: "${title}"`);
       } catch {
         toast.error('Failed to create task');
@@ -245,7 +247,7 @@ export default function OrderDetail() {
 
   const handlePickOrder = async () => {
     try {
-      await axios.post(`${API}/orders/${orderId}/pick`);
+      await ax().post(`${API}/orders/${orderId}/pick`);
       toast.success('Order picked successfully!');
       fetchOrderData();
     } catch (error) {
@@ -255,7 +257,7 @@ export default function OrderDetail() {
 
   const handleSubmitForReview = async () => {
     try {
-      await axios.post(`${API}/orders/${orderId}/submit-for-review`);
+      await ax().post(`${API}/orders/${orderId}/submit-for-review`);
       toast.success('Order submitted for review');
       fetchOrderData();
     } catch (error) {
@@ -265,7 +267,7 @@ export default function OrderDetail() {
 
   const handleRespondToOrder = async () => {
     try {
-      await axios.post(`${API}/orders/${orderId}/respond`);
+      await ax().post(`${API}/orders/${orderId}/respond`);
       toast.success('Response sent to editor');
       fetchOrderData();
     } catch (error) {
@@ -281,7 +283,7 @@ export default function OrderDetail() {
 
     setDeliveringOrder(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/deliver`, {
+      await ax().post(`${API}/orders/${orderId}/deliver`, {
         resolution_notes: deliveryNotes.trim()
       });
       toast.success('Order delivered!');
@@ -307,7 +309,7 @@ export default function OrderDetail() {
 
     setCancelingOrder(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/cancel`, {
+      await ax().post(`${API}/orders/${orderId}/cancel`, {
         reason: cancelReason,
         notes: cancelNotes.trim() || null
       });
@@ -326,7 +328,7 @@ export default function OrderDetail() {
   // Reassign handlers
   const openReassignDialog = async () => {
     try {
-      const res = await axios.get(`${API}/orders/${orderId}/reassign-options`);
+      const res = await ax().get(`${API}/orders/${orderId}/reassign-options`);
       setReassignOptions(res.data);
       setReassignDialogOpen(true);
     } catch (error) {
@@ -342,7 +344,7 @@ export default function OrderDetail() {
 
     setReassigning(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/reassign`, {
+      await ax().post(`${API}/orders/${orderId}/reassign`, {
         reassign_type: reassignType,
         target_id: reassignTargetId,
         reason: reassignReason.trim() || null
@@ -369,7 +371,7 @@ export default function OrderDetail() {
 
     setDeletingOrder(true);
     try {
-      await axios.delete(`${API}/orders/${orderId}`, {
+      await ax().delete(`${API}/orders/${orderId}`, {
         data: { reason: deleteReason.trim() }
       });
       toast.success('Ticket soft-deleted successfully');
@@ -391,7 +393,7 @@ export default function OrderDetail() {
     }
 
     try {
-      await axios.post(`${API}/orders/${orderId}/files`, newFile);
+      await ax().post(`${API}/orders/${orderId}/files`, newFile);
       toast.success('File added successfully');
       setAddFileOpen(false);
       setNewFile({ file_type: 'Export', label: '', url: '' });
@@ -403,7 +405,7 @@ export default function OrderDetail() {
 
   const handleMarkFinal = async (fileId) => {
     try {
-      await axios.patch(`${API}/orders/${orderId}/files/${fileId}/mark-final`);
+      await ax().patch(`${API}/orders/${orderId}/files/${fileId}/mark-final`);
       toast.success('File marked as final delivery');
       fetchOrderData();
     } catch (error) {
@@ -419,7 +421,7 @@ export default function OrderDetail() {
 
     setClosingOrder(true);
     try {
-      await axios.post(`${API}/orders/${orderId}/close`, {
+      await ax().post(`${API}/orders/${orderId}/close`, {
         reason: closeReason.trim()
       });
       toast.success('Ticket closed successfully');
