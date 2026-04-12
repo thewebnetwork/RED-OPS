@@ -1243,8 +1243,11 @@ export default function Tasks() {
       toast.error('This task is blocked by incomplete tasks');
       return;
     }
-    try { await ax().patch(`${API}/tasks/${id}`, { status: newStatus }); fetchTasks(); }
-    catch { toast.error('Failed to update task'); }
+    // Optimistic update — UI responds instantly, reverts on API failure
+    const oldStatus = task.status;
+    setTasks(prev => prev.map(t => t._id === id ? { ...t, status: newStatus === 'done' ? 'Done' : 'Todo' } : t));
+    try { await ax().patch(`${API}/tasks/${id}`, { status: newStatus }); }
+    catch { setTasks(prev => prev.map(t => t._id === id ? { ...t, status: oldStatus } : t)); toast.error('Failed to update task'); }
   };
 
   const handleDelete = async (id) => {

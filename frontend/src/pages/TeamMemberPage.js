@@ -242,6 +242,13 @@ export default function TeamMemberPage() {
   const saveSopLinks = (links) => {
     setLinkedSops(links);
     localStorage.setItem(`member_sops_${id}`, JSON.stringify(links));
+    // Prune old member_sops keys — keep max 50 to prevent localStorage bloat
+    try {
+      const sopKeys = Object.keys(localStorage).filter(k => k.startsWith('member_sops_'));
+      if (sopKeys.length > 50) {
+        sopKeys.slice(0, sopKeys.length - 50).forEach(k => localStorage.removeItem(k));
+      }
+    } catch { /* ignore */ }
   };
 
   if (loading) {

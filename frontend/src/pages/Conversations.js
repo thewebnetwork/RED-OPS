@@ -182,7 +182,7 @@ export default function Conversations() {
 
   const loadMessages = useCallback(async (threadId) => {
     try {
-      const res = await ax().get(`${API}/messages/threads/${threadId}/messages`);
+      const res = await ax().get(`${API}/messages/threads/${threadId}/messages?limit=100`);
       setMessages(res.data || []);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch { toast.error('Failed to load messages'); }

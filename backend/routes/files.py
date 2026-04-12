@@ -120,6 +120,11 @@ async def delete_folder(folder_id: str, current_user: dict = Depends(get_current
     folder = await db.file_folders.find_one({"id": folder_id}, {"_id": 0})
     if not folder:
         raise HTTPException(status_code=404, detail="Folder not found")
+    # Org isolation
+    user_org = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    folder_org = folder.get("org_id")
+    if folder_org and user_org and folder_org != user_org:
+        raise HTTPException(status_code=404, detail="Folder not found")
 
     parent_id = folder.get("parent_folder_id")
     # Move children folders up
@@ -332,10 +337,15 @@ async def update_file(file_id: str, data: FileUpdate, current_user: dict = Depen
 @router.delete("/{file_id}")
 async def delete_file(file_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a file record. Does not delete from storage (soft delete)."""
-    result = await db.files.delete_one({"id": file_id})
-    if result.deleted_count == 0:
+    # Verify file belongs to user's org before deleting
+    user_org = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    file_doc = await db.files.find_one({"id": file_id}, {"_id": 0, "org_id": 1, "uploaded_by_user_id": 1})
+    if not file_doc:
         raise HTTPException(status_code=404, detail="File not found")
-    # Also clean order_files
+    file_org = file_doc.get("org_id")
+    if file_org and user_org and file_org != user_org:
+        raise HTTPException(status_code=404, detail="File not found")
+    await db.files.delete_one({"id": file_id})
     await db.order_files.delete_one({"id": file_id})
     return {"message": "File deleted"}
 
