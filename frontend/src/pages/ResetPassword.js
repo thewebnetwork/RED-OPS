@@ -111,7 +111,7 @@ export default function ResetPassword() {
         <div className="bg-[#161616] border border-[#2a2a2a] rounded-2xl shadow-2xl p-8">
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-[var(--accent)] rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-xl">RR</span>
             </div>
             <div>
@@ -131,7 +131,7 @@ export default function ResetPassword() {
                 This password reset link is invalid or has expired. Please request a new one.
               </p>
               <Link to="/forgot-password">
-                <Button className="w-full bg-rose-600 hover:bg-rose-700 mb-3">
+                <Button className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] mb-3">
                   Request New Link
                 </Button>
               </Link>
@@ -155,7 +155,7 @@ export default function ResetPassword() {
                 Your password has been successfully reset. You can now log in with your new password.
               </p>
               <Link to="/login">
-                <Button className="w-full bg-rose-600 hover:bg-rose-700">
+                <Button className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                   Go to Login
                 </Button>
               </Link>
@@ -213,7 +213,7 @@ export default function ResetPassword() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-rose-600 hover:bg-rose-700"
+                  className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                   disabled={loading}
                   data-testid="reset-password-btn"
                 >

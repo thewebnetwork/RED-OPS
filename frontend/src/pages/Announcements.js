@@ -73,7 +73,7 @@ const [activeTab, setActiveTab] = useState('list');
     start_at: '',
     end_at: '',
     priority: 1,
-    background_color: '#A2182C',
+    background_color: 'var(--accent)',
     text_color: '#FFFFFF'
   });
 
@@ -115,7 +115,7 @@ const [activeTab, setActiveTab] = useState('list');
         start_at: formatDateTimeLocal(announcement.start_at) || '',
         end_at: formatDateTimeLocal(announcement.end_at) || '',
         priority: announcement.priority || 1,
-        background_color: announcement.background_color || '#A2182C',
+        background_color: announcement.background_color || 'var(--accent)',
         text_color: announcement.text_color || '#FFFFFF'
       });
     } else {
@@ -131,7 +131,7 @@ const [activeTab, setActiveTab] = useState('list');
         start_at: '',
         end_at: '',
         priority: 1,
-        background_color: '#A2182C',
+        background_color: 'var(--accent)',
         text_color: '#FFFFFF'
       });
     }
@@ -206,7 +206,7 @@ const [activeTab, setActiveTab] = useState('list');
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div></div>;
   }
 
   return (
@@ -214,12 +214,12 @@ const [activeTab, setActiveTab] = useState('list');
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Megaphone className="text-[#A2182C]" />
+            <Megaphone className="text-[var(--accent)]" />
             {"Announcements"}
           </h1>
           <p className="mt-1">{"Create and manage platform announcements for users"}</p>
         </div>
-        <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openDialog()}>
+        <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openDialog()}>
           <Plus size={16} className="mr-2" />
           {"New Announcement"}
         </Button>
@@ -530,7 +530,7 @@ const [activeTab, setActiveTab] = useState('list');
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{"Cancel"}</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleSave} data-testid="save-announcement-btn">
+              <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={handleSave} data-testid="save-announcement-btn">
                 {editingAnnouncement ? "Update" : "Create"} {"Announcement"}
               </Button>
             </div>

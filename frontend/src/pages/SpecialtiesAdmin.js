@@ -114,7 +114,7 @@ export default function SpecialtiesAdmin() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -125,13 +125,13 @@ export default function SpecialtiesAdmin() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Briefcase className="text-[#A2182C]" />
+            <Briefcase className="text-[var(--accent)]" />
             Specialty Management
           </h1>
           <p className="mt-1">{specialties.length} specialties defined</p>
         </div>
         <Button
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           onClick={() => handleOpenDialog()}
           data-testid="add-specialty-btn"
         >
@@ -263,7 +263,7 @@ export default function SpecialtiesAdmin() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-rose-600 hover:bg-rose-700" data-testid="save-specialty-btn">
+              <Button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="save-specialty-btn">
                 {editingSpecialty ? 'Save Changes' : 'Create Specialty'}
               </Button>
             </div>

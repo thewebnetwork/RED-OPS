@@ -1315,7 +1315,7 @@ function PolicyTemplates({ roles, teams, specialties, accessTiers, onApplyTempla
                           </div>
                           <Button
                             size="sm"
-                            className="mt-3 w-full bg-rose-600 hover:bg-rose-700"
+                            className="mt-3 w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                             onClick={() => onApplyTemplate(template.config)}
                             data-testid={`use-template-${template.id}`}
                           >

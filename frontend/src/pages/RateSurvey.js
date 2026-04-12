@@ -117,7 +117,7 @@ export default function RateSurvey() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-rose-600 text-white p-6 text-center">
+          <div className="bg-[var(--accent)] text-white p-6 text-center">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <span className="font-bold text-xl">RR</span>
             </div>
@@ -158,7 +158,7 @@ export default function RateSurvey() {
                   {renderStars(false)}
                 </div>
                 <Link to="/login">
-                  <Button className="bg-rose-600 hover:bg-rose-700">
+                  <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                     Go to Portal
                   </Button>
                 </Link>
@@ -216,7 +216,7 @@ export default function RateSurvey() {
                 <Button
                   onClick={handleSubmit}
                   disabled={submitting || rating === 0}
-                  className="w-full bg-rose-600 hover:bg-rose-700"
+                  className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                   data-testid="submit-rating-btn"
                 >
                   {submitting ? (

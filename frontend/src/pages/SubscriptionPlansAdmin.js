@@ -141,7 +141,7 @@ export default function SubscriptionPlansAdmin() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -152,13 +152,13 @@ export default function SubscriptionPlansAdmin() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <CreditCard className="text-[#A2182C]" />
+            <CreditCard className="text-[var(--accent)]" />
             Subscription Plans
           </h1>
           <p className="mt-1">Manage Partner subscription plans and features</p>
         </div>
         <Button
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           onClick={() => handleOpenDialog()}
           data-testid="add-plan-btn"
         >
@@ -358,7 +358,7 @@ Custom Integrations"
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-rose-600 hover:bg-rose-700" data-testid="save-plan-btn">
+              <Button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="save-plan-btn">
                 {editingPlan ? 'Save Changes' : 'Create Plan'}
               </Button>
             </div>

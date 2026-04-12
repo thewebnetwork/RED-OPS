@@ -145,7 +145,7 @@ export default function PoolPickerRulesPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Shield className="text-[#A2182C]" />
+              <Shield className="text-[var(--accent)]" />
               Pool Picker Rules
             </h1>
             <p className="text-sm mt-1">
@@ -167,7 +167,7 @@ export default function PoolPickerRulesPage() {
           <Button
             onClick={saveRules}
             disabled={saving || !hasChanges}
-            className="bg-[#A2182C] hover:bg-[#8a1526]"
+            className="bg-[var(--accent)] hover:bg-[#8a1526]"
             data-testid="save-rules-btn"
           >
             {saving ? (
@@ -234,7 +234,7 @@ export default function PoolPickerRulesPage() {
                       key={pool.value}
                       className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                         rule.allowed_pools?.includes(pool.value)
-                          ? 'border-[#A2182C]'
+                          ? 'border-[var(--accent)]'
                           : 'hover:border-slate-300'
                       }`}
                     >

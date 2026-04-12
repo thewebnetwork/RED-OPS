@@ -435,7 +435,7 @@ const navigate = useNavigate();
               <p className="">Drag and drop widgets to customize layout</p>
             </div>
           </div>
-          <Button onClick={handleSave} className="bg-rose-600 hover:bg-rose-700 gap-2">
+          <Button onClick={handleSave} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] gap-2">
             <Save size={18} />
             Save Dashboard
           </Button>
@@ -550,7 +550,7 @@ const navigate = useNavigate();
           <h1 className="text-2xl font-bold">Dashboard Builder</h1>
           <p className="mt-1">Create and manage dashboard templates</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="bg-rose-600 hover:bg-rose-700 gap-2">
+        <Button onClick={() => setShowCreateDialog(true)} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] gap-2">
           <Plus size={18} />
           Create Dashboard
         </Button>
@@ -622,7 +622,7 @@ const navigate = useNavigate();
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-            <Button onClick={handleCreate} className="bg-rose-600 hover:bg-rose-700">Create Dashboard</Button>
+            <Button onClick={handleCreate} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]">Create Dashboard</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -645,7 +645,7 @@ const navigate = useNavigate();
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCloneDialog(false)}>Cancel</Button>
-            <Button onClick={handleClone} className="bg-rose-600 hover:bg-rose-700">Clone Dashboard</Button>
+            <Button onClick={handleClone} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]">Clone Dashboard</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

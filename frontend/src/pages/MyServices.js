@@ -92,7 +92,7 @@ export default function MyServices() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function MyServices() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <PackageOpen className="text-[#A2182C]" />
+            <PackageOpen className="text-[var(--accent)]" />
             My Services
           </h1>
           <p className="mt-1">View your account details and service information</p>

@@ -500,7 +500,7 @@ const reactFlowWrapper = useRef(null);
             variant={hasChanges ? "default" : "outline"}
             onClick={handleSave}
             disabled={saving}
-            className={hasChanges ? "bg-rose-600 hover:bg-rose-700" : ""}
+            className={hasChanges ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)]" : ""}
             data-testid="save-workflow-btn"
           >
             <Save size={16} className="mr-2" />
@@ -891,7 +891,7 @@ const reactFlowWrapper = useRef(null);
             <Button variant="outline" onClick={handleDiscardChanges}>
               Discard Changes
             </Button>
-            <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-rose-600 hover:bg-rose-700">
+            <AlertDialogAction onClick={handleSaveAndNavigate} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
               Save and Leave
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -130,7 +130,7 @@ const [tickets, setTickets] = useState([]);
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-rose-600 hover:bg-rose-700" data-testid="create-ticket-btn">
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="create-ticket-btn">
               <Plus size={18} className="mr-2" />
               Create New Ticket
             </Button>
@@ -197,7 +197,7 @@ const [tickets, setTickets] = useState([]);
                   className="mt-1.5"
                 />
               </div>
-              <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">
+              <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                 Create New Ticket
               </Button>
             </form>
@@ -263,7 +263,7 @@ const [tickets, setTickets] = useState([]);
                     <td>
                       <Link 
                         to={`/tickets/${ticket.id}`}
-                        className="hover:text-rose-600"
+                        className="hover:text-[var(--accent)]"
                         data-testid={`ticket-link-${ticket.ticket_code}`}
                       >
                         <span className="font-mono text-xs block">{ticket.ticket_code}</span>
@@ -273,7 +273,7 @@ const [tickets, setTickets] = useState([]);
                     <td>{ticket.client_name || '-'}</td>
                     <td>
                       {ticket.related_order_code ? (
-                        <Link to={`/orders/${ticket.related_order_id}`} className="flex items-center gap-1 text-rose-600 hover:text-rose-700">
+                        <Link to={`/orders/${ticket.related_order_id}`} className="flex items-center gap-1 text-[var(--accent)] hover:text-[var(--accent-hover)]">
                           <LinkIcon size={12} />
                           {ticket.related_order_code}
                         </Link>

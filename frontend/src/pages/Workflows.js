@@ -376,7 +376,7 @@ export default function Workflows() {
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           data-testid="create-workflow-btn"
         >
           <Plus size={18} className="mr-2" />
@@ -431,7 +431,7 @@ export default function Workflows() {
                 </p>
                 <Button
                   onClick={() => setShowCreateDialog(true)}
-                  className="bg-rose-600 hover:bg-rose-700"
+                  className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                 >
                   <Plus size={18} className="mr-2" />
                   Create First Workflow
@@ -574,7 +574,7 @@ export default function Workflows() {
                 variant={selectedTemplateCategory === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedTemplateCategory('all')}
-                className={selectedTemplateCategory === 'all' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+                className={selectedTemplateCategory === 'all' ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)]' : ''}
               >
                 All
               </Button>
@@ -584,7 +584,7 @@ export default function Workflows() {
                   variant={selectedTemplateCategory === cat ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedTemplateCategory(cat)}
-                  className={selectedTemplateCategory === cat ? 'bg-rose-600 hover:bg-rose-700' : ''}
+                  className={selectedTemplateCategory === cat ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)]' : ''}
                 >
                   {cat}
                 </Button>
@@ -868,7 +868,7 @@ export default function Workflows() {
             </Button>
             <Button
               onClick={handleCreateWorkflow}
-              className="bg-rose-600 hover:bg-rose-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               data-testid="confirm-create-workflow"
             >
               Create Workflow
@@ -903,7 +903,7 @@ export default function Workflows() {
             </Button>
             <Button
               onClick={handleDuplicateWorkflow}
-              className="bg-rose-600 hover:bg-rose-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
             >
               Duplicate
             </Button>

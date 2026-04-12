@@ -201,7 +201,7 @@ export default function Logs() {
           <Button
             variant={isStreaming ? "default" : "outline"}
             onClick={toggleStreaming}
-            className={isStreaming ? "bg-rose-600 hover:bg-rose-700" : ""}
+            className={isStreaming ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)]" : ""}
             data-testid="stream-logs-btn"
             title="Stream logs in real-time as they occur"
           >

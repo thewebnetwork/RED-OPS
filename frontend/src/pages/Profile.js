@@ -142,7 +142,7 @@ export default function Profile() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center text-white hover:bg-rose-700 transition-colors"
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-[var(--accent)] rounded-full flex items-center justify-center text-white hover:bg-[var(--accent-hover)] transition-colors"
                 >
                   <Camera size={14} />
                 </button>
@@ -197,7 +197,7 @@ export default function Profile() {
 
             <Button 
               type="submit" 
-              className="bg-rose-600 hover:bg-rose-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               disabled={savingProfile}
               data-testid="save-profile-btn"
             >

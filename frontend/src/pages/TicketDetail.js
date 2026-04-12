@@ -176,7 +176,7 @@ const messagesEndRef = useRef(null);
                   />
                   <Button 
                     type="submit" 
-                    className="bg-rose-600 hover:bg-rose-700"
+                    className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                     disabled={sendingMessage || !newMessage.trim()}
                     data-testid="send-ticket-message-btn"
                   >

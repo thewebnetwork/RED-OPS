@@ -129,7 +129,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
   };
 
   const PoolRequestCard = ({ request, canPick, poolNumber }) => (
-    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-[#A2182C]" data-testid={`pool-request-${request.id}`}>
+    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-[var(--accent)]" data-testid={`pool-request-${request.id}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -184,7 +184,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -197,7 +197,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Layers className="text-[#A2182C]" />
+          <Layers className="text-[var(--accent)]" />
           Request Pools
         </h1>
         <p className="mt-1">

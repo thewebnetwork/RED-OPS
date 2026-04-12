@@ -163,7 +163,7 @@ const [settings, setSettings] = useState([]);
           <Button
             onClick={handleSave}
             disabled={saving || !hasChanges}
-            className="bg-rose-600 hover:bg-rose-700"
+            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
             data-testid="save-settings-btn"
           >
             <Save size={16} className="mr-2" />

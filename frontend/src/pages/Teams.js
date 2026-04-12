@@ -180,7 +180,7 @@ const [teams, setTeams] = useState([]);
           <p className="mt-1">{"Organize team members into groups"}</p>
         </div>
         <Button
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           onClick={() => openDialog()}
           data-testid="add-team-btn"
         >
@@ -439,7 +439,7 @@ const [teams, setTeams] = useState([]);
               </Select>
             </div>
 
-            <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-team-btn">
+            <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="save-team-btn">
               {editingTeam ? "Save" : "Create"}
             </Button>
           </form>

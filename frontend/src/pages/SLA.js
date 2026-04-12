@@ -396,7 +396,7 @@ export default function SLA() {
           <div className="flex justify-end">
             <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
-                <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => handleOpenDialog()} data-testid="create-sla-btn">
+                <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => handleOpenDialog()} data-testid="create-sla-btn">
                   <Plus size={16} className="mr-2" />
                   Create SLA
                 </Button>
@@ -529,7 +529,7 @@ export default function SLA() {
                 </Button>
                 <Button 
                   onClick={handleSave}
-                  className="flex-1 bg-rose-600 hover:bg-rose-700"
+                  className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                   disabled={!formData.name || !formData.applies_to_id}
                   data-testid="save-sla-btn"
                 >

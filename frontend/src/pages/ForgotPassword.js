@@ -57,7 +57,7 @@ const [email, setEmail] = useState('');
             <img 
               src="/assets/logos/logo-badge.jpg" 
               alt="Red Ribbon" 
-              className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-[#A2182C]"
+              className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-[var(--accent)]"
             />
           </div>
 
@@ -80,7 +80,7 @@ const [email, setEmail] = useState('');
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold text-[#A2182C]">Forgot Your Password?</h2>
+                <h2 className="text-xl font-semibold text-[var(--accent)]">Forgot Your Password?</h2>
                 <p className="text-sm mt-1">
                   Enter your email address and we'll send you a link to reset your password.
                 </p>
@@ -95,14 +95,14 @@ const [email, setEmail] = useState('');
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@redribbongroup.ca"
-                    className="mt-1.5 border-slate-300 focus:border-[#A2182C] focus:ring-[#A2182C]"
+                    className="mt-1.5 border-slate-300 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                     data-testid="forgot-email-input"
                   />
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#A2182C] hover:bg-[#8a1526]"
+                  className="w-full bg-[var(--accent)] hover:bg-[#8a1526]"
                   disabled={loading}
                   data-testid="send-reset-link-btn"
                 >
@@ -126,7 +126,7 @@ const [email, setEmail] = useState('');
               <div className="mt-6 text-center">
                 <Link
                   to="/login"
-                  className="text-sm hover:text-[#A2182C] inline-flex items-center gap-1"
+                  className="text-sm hover:text-[var(--accent)] inline-flex items-center gap-1"
                 >
                   <ArrowLeft size={14} />
                   Back to Login

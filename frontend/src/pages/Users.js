@@ -322,7 +322,7 @@ const { user: currentUser } = useAuth();
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -336,7 +336,7 @@ const { user: currentUser } = useAuth();
           <p style={{ fontSize: 13, color: 'var(--tx-3)', marginTop: 4 }}>{users.length} users</p>
         </div>
         <Button 
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           onClick={() => handleOpenDialog()}
           data-testid="add-user-btn"
         >
@@ -695,7 +695,7 @@ const { user: currentUser } = useAuth();
               <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-rose-600 hover:bg-rose-700" data-testid="save-user-btn">
+              <Button type="submit" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="save-user-btn">
                 {editingUser ? 'Save Changes' : 'Create User'}
               </Button>
             </div>

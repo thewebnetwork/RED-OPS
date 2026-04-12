@@ -276,7 +276,7 @@ export default function EscalationPolicies() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
       </div>
     );
   }
@@ -306,7 +306,7 @@ export default function EscalationPolicies() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold text-[#A2182C]">{stats.currently_escalated_orders}</div>
+              <div className="text-2xl font-bold text-[var(--accent)]">{stats.currently_escalated_orders}</div>
               <div className="text-sm text-gray-600">Escalated Orders</div>
             </CardContent>
           </Card>
@@ -407,7 +407,7 @@ export default function EscalationPolicies() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       {policy.levels?.map((level, i) => (
                         <div key={i} className="px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          <span className="w-5 h-5 bg-[#A2182C] text-white rounded-full text-xs flex items-center justify-center">
+                          <span className="w-5 h-5 bg-[var(--accent)] text-white rounded-full text-xs flex items-center justify-center">
                             {level.level}
                           </span>
                           <span>{level.name}</span>
@@ -435,7 +435,7 @@ export default function EscalationPolicies() {
           ) : (
             <div className="space-y-3">
               {escalatedOrders.map((order) => (
-                <Card key={order.order_id} className="border-l-4 border-l-[#A2182C]">
+                <Card key={order.order_id} className="border-l-4 border-l-[var(--accent)]">
                   <CardContent className="py-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
@@ -597,7 +597,7 @@ export default function EscalationPolicies() {
                     onClick={() => setExpandedLevels({ ...expandedLevels, [levelIndex]: !expandedLevels[levelIndex] })}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 bg-[#A2182C] text-white rounded-full text-sm flex items-center justify-center">
+                      <span className="w-6 h-6 bg-[var(--accent)] text-white rounded-full text-sm flex items-center justify-center">
                         {level.level}
                       </span>
                       <span className="font-medium">{level.name}</span>

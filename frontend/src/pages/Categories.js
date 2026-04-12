@@ -300,7 +300,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
           <p className="mt-1">{"Manage request categories (2-level hierarchy)"}</p>
         </div>
         <Button
-          className="bg-rose-600 hover:bg-rose-700"
+          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
           onClick={() => openDialog('l1')}
           data-testid="add-category-l1-btn"
         >
@@ -578,7 +578,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
               </>
             )}
 
-            <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700" data-testid="save-category-btn">
+            <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]" data-testid="save-category-btn">
               {editingCategory ? "Save" : "Create"}
             </Button>
           </form>

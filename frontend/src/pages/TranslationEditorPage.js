@@ -134,8 +134,8 @@ const [selectedLang, setSelectedLang] = useState('es');
       const updatedFlat = { ...targetTranslations, ...langChanges };
       const updatedNested = unflattenObject(updatedFlat);
       
-      // Log the changes for manual update
-      console.log('Updated translations for', selectedLang, ':', JSON.stringify(updatedNested, null, 2));
+      // eslint-disable-next-line no-console
+      console.debug('Updated translations for', selectedLang, ':', JSON.stringify(updatedNested, null, 2));
       
       toast.success("Translations Saved");
       toast.info('Changes logged to console. In production, these would be saved to the server.');
@@ -176,7 +176,7 @@ const [selectedLang, setSelectedLang] = useState('es');
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Languages className="text-[#A2182C]" />
+              <Languages className="text-[var(--accent)]" />
               Translation Editor
             </h1>
             <p className="text-sm mt-1">
@@ -188,7 +188,7 @@ const [selectedLang, setSelectedLang] = useState('es');
         <Button
           onClick={saveTranslations}
           disabled={saving || !hasChanges}
-          className="bg-[#A2182C] hover:bg-[#8a1526]"
+          className="bg-[var(--accent)] hover:bg-[#8a1526]"
           data-testid="save-translations-btn"
         >
           {saving ? (

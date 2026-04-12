@@ -538,7 +538,7 @@ export default function OrderDetail() {
         </Button>
         {!showAsClient && canPick && (
           <Button 
-            className="bg-rose-600 hover:bg-rose-700"
+            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
             onClick={handlePickOrder}
             data-testid="pick-order-btn"
           >
@@ -1104,7 +1104,7 @@ export default function OrderDetail() {
                         />
                         <Button
                           onClick={() => handleSendMessage()}
-                          className="bg-rose-600 hover:bg-rose-700"
+                          className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
                           disabled={sendingMessage || !newMessage.trim()}
                           data-testid="send-message-btn"
                         >
@@ -1166,7 +1166,7 @@ export default function OrderDetail() {
                               className="mt-1.5"
                             />
                           </div>
-                          <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700">
+                          <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
                             Add File
                           </Button>
                         </form>
@@ -1316,7 +1316,7 @@ export default function OrderDetail() {
                 <div data-testid="account-manager-info">
                   <Label style={{ fontSize: 11, color: 'var(--tx-3)', fontWeight: 600 }}>Account Manager</Label>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <User size={16} className="text-[#A2182C]" />
+                    <User size={16} className="text-[var(--accent)]" />
                     <span className="font-medium">{accountManager.name}</span>
                   </div>
                   {accountManager.email && (

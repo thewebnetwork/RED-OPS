@@ -121,7 +121,7 @@ export default function SetupOTP() {
           {/* Step 1: QR Code */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+              <div className="w-6 h-6 bg-[var(--accent)] text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
               <Label className="text-base font-medium">Scan QR Code</Label>
             </div>
             <p className="text-sm ml-8">
@@ -166,7 +166,7 @@ export default function SetupOTP() {
           <form onSubmit={handleVerify} className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-rose-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                <div className="w-6 h-6 bg-[var(--accent)] text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
                 <Label className="text-base font-medium">Verify Setup</Label>
               </div>
               <p className="text-sm ml-8">
@@ -206,7 +206,7 @@ export default function SetupOTP() {
 
             <Button
               type="submit"
-              className="w-full bg-rose-600 hover:bg-rose-700"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               disabled={loading || verificationCode.length !== 6}
               data-testid="verify-otp-submit"
             >

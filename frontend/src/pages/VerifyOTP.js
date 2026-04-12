@@ -119,7 +119,7 @@ export default function VerifyOTP() {
 
             <Button
               type="submit"
-              className="w-full bg-rose-600 hover:bg-rose-700"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               disabled={loading || verificationCode.length !== 6}
               data-testid="verify-otp-btn"
             >

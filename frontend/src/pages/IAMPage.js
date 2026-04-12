@@ -482,7 +482,7 @@ const { user: currentUser } = useAuth();
   const teamOptions = [{ value: '', label: 'No team' }, ...teams.map(t => ({ value: t.id, label: t.name }))];
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A2182C]"></div></div>;
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div></div>;
   }
 
   const filteredUsers = users.filter(u => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase()));
@@ -493,7 +493,7 @@ const { user: currentUser } = useAuth();
     <div className="space-y-6 animate-fade-in" data-testid="iam-page">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <KeyRound className="text-[#A2182C]" />
+          <KeyRound className="text-[var(--accent)]" />
           {"Identity & Access"}
         </h1>
         <p className="mt-1">{"Manage users, teams, roles, and specialties"}</p>
@@ -524,7 +524,7 @@ const { user: currentUser } = useAuth();
               <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder={"Search users..."} value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="pl-10" />
             </div>
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openUserDialog()} data-testid="add-user-btn">
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openUserDialog()} data-testid="add-user-btn">
               <Plus size={16} className="mr-2" />{"New User"}
             </Button>
           </div>
@@ -590,7 +590,7 @@ const { user: currentUser } = useAuth();
               <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder="Search teams..." value={teamSearch} onChange={(e) => setTeamSearch(e.target.value)} className="pl-10" />
             </div>
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openTeamDialog()}>
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openTeamDialog()}>
               <Plus size={16} className="mr-2" />Add Team
             </Button>
           </div>
@@ -635,7 +635,7 @@ const { user: currentUser } = useAuth();
               <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={18} />
               <Input placeholder="Search specialties..." value={specialtySearch} onChange={(e) => setSpecialtySearch(e.target.value)} className="pl-10" />
             </div>
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openSpecialtyDialog()}>
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openSpecialtyDialog()}>
               <Plus size={16} className="mr-2" />Add Specialty
             </Button>
           </div>
@@ -665,7 +665,7 @@ const { user: currentUser } = useAuth();
         {/* ROLES TAB */}
         <TabsContent value="roles" className="mt-6">
           <div className="flex justify-end mb-4">
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openRoleDialog()}>
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openRoleDialog()}>
               <Plus size={16} className="mr-2" />Add Role
             </Button>
           </div>
@@ -709,7 +709,7 @@ const { user: currentUser } = useAuth();
         {/* ACCOUNT TYPES TAB */}
         <TabsContent value="account-types" className="mt-6">
           <div className="flex justify-end mb-4">
-            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => openAccountTypeDialog()}>
+            <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={() => openAccountTypeDialog()}>
               <Plus size={16} className="mr-2" />Add Account Type
             </Button>
           </div>
@@ -921,7 +921,7 @@ const { user: currentUser } = useAuth();
                         {userForm.specialty_ids.includes(spec.value) && (
                           <Badge 
                             variant={userForm.primary_specialty_id === spec.value ? "default" : "outline"} 
-                            className={`text-xs cursor-pointer ${userForm.primary_specialty_id === spec.value ? 'bg-rose-600' : ''}`}
+                            className={`text-xs cursor-pointer ${userForm.primary_specialty_id === spec.value ? 'bg-[var(--accent)]' : ''}`}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1013,7 +1013,7 @@ const { user: currentUser } = useAuth();
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancel</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create User'}</Button>
+              <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={saveUser} data-testid="save-user-btn">{editingUser ? 'Save' : 'Create User'}</Button>
             </div>
           </div>
         </DialogContent>
@@ -1046,7 +1046,7 @@ const { user: currentUser } = useAuth();
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" onClick={() => setTeamDialogOpen(false)}>Cancel</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveTeam} data-testid="save-team-btn">Save</Button>
+              <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={saveTeam} data-testid="save-team-btn">Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -1060,7 +1060,7 @@ const { user: currentUser } = useAuth();
             <div><Label>Name *</Label><Input value={specialtyForm.name} onChange={(e) => setSpecialtyForm({ ...specialtyForm, name: e.target.value })} /></div>
             <div><Label>Description</Label><Input value={specialtyForm.description} onChange={(e) => setSpecialtyForm({ ...specialtyForm, description: e.target.value })} /></div>
             <div><Label>Color</Label><div className="flex gap-2"><Input type="color" value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} className="w-16 h-10 p-1" /><Input value={specialtyForm.color} onChange={(e) => setSpecialtyForm({ ...specialtyForm, color: e.target.value })} /></div></div>
-            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setSpecialtyDialogOpen(false)}>Cancel</Button><Button className="bg-rose-600 hover:bg-rose-700" onClick={saveSpecialty}>Save</Button></div>
+            <div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setSpecialtyDialogOpen(false)}>Cancel</Button><Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={saveSpecialty}>Save</Button></div>
           </div>
         </DialogContent>
       </Dialog>
@@ -1164,7 +1164,7 @@ const { user: currentUser } = useAuth();
             
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveRole} data-testid="save-role-btn">
+              <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={saveRole} data-testid="save-role-btn">
                 {editingRole ? 'Save Changes' : 'Create Role'}
               </Button>
             </div>
@@ -1216,7 +1216,7 @@ const { user: currentUser } = useAuth();
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setAccountTypeDialogOpen(false)}>Cancel</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={saveAccountType} data-testid="save-account-type-btn">
+              <Button className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]" onClick={saveAccountType} data-testid="save-account-type-btn">
                 {editingAccountType ? 'Save' : 'Create'}
               </Button>
             </div>

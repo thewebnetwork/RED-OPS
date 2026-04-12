@@ -282,7 +282,7 @@ export default function DraftEditor() {
             </Button>
             <Button 
               type="button" 
-              className="flex-1 bg-rose-600 hover:bg-rose-700" 
+              className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)]" 
               onClick={handleSubmit}
               disabled={saving || submitting}
               data-testid="submit-draft-btn"
