@@ -180,11 +180,19 @@ export default function Conversations() {
     }).catch(() => {});
   }, [user?.id]);
 
-  const loadMessages = useCallback(async (threadId) => {
+  const loadMessages = useCallback(async (threadId, { scroll = true } = {}) => {
     try {
       const res = await ax().get(`${API}/messages/threads/${threadId}/messages?limit=100`);
-      setMessages(res.data || []);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      const serverMessages = res.data || [];
+      // Merge: keep any optimistic messages not yet in server response
+      setMessages(prev => {
+        const serverIds = new Set(serverMessages.map(m => m.id));
+        const localOnly = prev.filter(m => !serverIds.has(m.id));
+        return [...serverMessages, ...localOnly];
+      });
+      if (scroll) {
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
     } catch { toast.error('Failed to load messages'); }
   }, []);
 
@@ -195,11 +203,11 @@ export default function Conversations() {
     setThreads(prev => prev.map(t => t.id === thread.id ? { ...t, unread_count: 0 } : t));
   };
 
-  // Poll for new messages every 10 seconds
+  // Poll for new messages every 10 seconds — no auto-scroll (keeps user's scroll position)
   useEffect(() => {
     if (pollRef.current) clearInterval(pollRef.current);
     if (activeThread) {
-      pollRef.current = setInterval(() => loadMessages(activeThread.id), 10000);
+      pollRef.current = setInterval(() => loadMessages(activeThread.id, { scroll: false }), 10000);
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [activeThread, loadMessages]);
@@ -587,16 +595,27 @@ export default function Conversations() {
                         </>
                       )}
                     </div>
-                    {/* Hover action bar — only for own messages */}
+                    {/* Hover action bar — only for own messages; positioned next to the bubble */}
                     {isMine && !isEditing && (
-                      <div data-actions style={{ position: 'absolute', right: 0, top: showAvatar ? 6 : 0, display: 'flex', gap: 2, opacity: 0, transition: 'opacity .1s', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 5, padding: 2 }}>
+                      <div data-actions style={{
+                        display: 'flex', gap: 2, opacity: 0, transition: 'opacity .1s',
+                        background: 'var(--surface)', border: '1px solid var(--border)',
+                        borderRadius: 8, padding: 3, alignSelf: 'center', flexShrink: 0,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      }}>
                         <button onClick={() => { setEditingMsg(msg.id); setEditText(msg.body); }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 3, display: 'flex' }}>
-                          <Pencil size={12} />
+                          title="Edit message"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-2)', padding: 4, display: 'flex', borderRadius: 5 }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                          <Pencil size={13} />
                         </button>
                         <button onClick={() => deleteMsg(msg.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 3, display: 'flex' }}>
-                          <Trash2 size={12} />
+                          title="Delete message"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-red)', padding: 4, display: 'flex', borderRadius: 5 }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--color-red-soft)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     )}
