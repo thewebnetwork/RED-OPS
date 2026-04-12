@@ -160,6 +160,84 @@ async def get_thread(
     return thread
 
 
+@router.patch("/threads/{thread_id}")
+async def update_thread(
+    thread_id: str,
+    body: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Rename a thread or update its icon. DMs cannot be renamed."""
+    thread = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    if current_user["id"] not in thread.get("members", []):
+        raise HTTPException(status_code=403, detail="Not a member of this thread")
+    if thread.get("type") == "dm":
+        raise HTTPException(status_code=400, detail="DM threads cannot be renamed")
+
+    updates = {}
+    if "name" in body and isinstance(body["name"], str):
+        name = body["name"].strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="Name cannot be empty")
+        updates["name"] = name
+    if "icon" in body and isinstance(body["icon"], str):
+        updates["icon"] = body["icon"][:8]  # emoji or short string
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    await db.threads.update_one({"id": thread_id}, {"$set": updates})
+    updated = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    return updated
+
+
+@router.delete("/threads/{thread_id}")
+async def delete_thread(
+    thread_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a thread. Only the creator (or an admin) can delete a channel.
+    DM threads cannot be deleted. Members use leave instead."""
+    thread = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    if thread.get("type") == "dm":
+        raise HTTPException(status_code=400, detail="DM threads cannot be deleted. Use 'leave' or delete individual messages.")
+
+    is_creator = thread.get("created_by") == current_user["id"]
+    is_admin = current_user.get("role") in ("Administrator", "Admin")
+    if not (is_creator or is_admin):
+        raise HTTPException(status_code=403, detail="Only the creator or an admin can delete this thread")
+
+    # Delete all messages in the thread + the thread itself
+    await db.messages.delete_many({"thread_id": thread_id})
+    await db.threads.delete_one({"id": thread_id})
+    return {"status": "deleted", "id": thread_id}
+
+
+@router.post("/threads/{thread_id}/leave")
+async def leave_thread(
+    thread_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove the current user from a channel thread."""
+    thread = await db.threads.find_one({"id": thread_id}, {"_id": 0})
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    if thread.get("type") == "dm":
+        raise HTTPException(status_code=400, detail="Cannot leave a DM thread")
+    if current_user["id"] not in thread.get("members", []):
+        raise HTTPException(status_code=403, detail="Not a member")
+
+    await db.threads.update_one(
+        {"id": thread_id},
+        {"$pull": {"members": current_user["id"]}}
+    )
+    return {"status": "left", "id": thread_id}
+
+
 @router.patch("/threads/{thread_id}/members")
 async def update_thread_members(
     thread_id: str,

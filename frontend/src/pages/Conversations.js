@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   MessageSquare, Plus, X, Send, Hash, FileText, Search,
   Loader2, Pencil, Trash2, Check, Paperclip, Download, Image as ImageIcon,
+  Settings, LogOut, UserPlus, MessageCircle,
 } from 'lucide-react';
 import MentionHashtagInput from '../components/MentionHashtagInput';
 import EmptyState from '../components/EmptyState';
@@ -230,8 +231,11 @@ export default function Conversations() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [showNewModal, setShowNewModal] = useState(null); // 'channel' | 'dm' | null
-  const [showMembers, setShowMembers] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const [editingRename, setEditingRename] = useState(false);
+  const [memberCardFor, setMemberCardFor] = useState(null); // userId to show DM card for
   const [editingMsg, setEditingMsg] = useState(null);
   const [editText, setEditText] = useState('');
   const [pendingAttachments, setPendingAttachments] = useState([]);
@@ -423,6 +427,73 @@ export default function Conversations() {
     } catch (err) { toast.error(err.response?.data?.detail || 'Failed to create'); }
   };
 
+  // Start or open a DM with a specific user (from group chat avatar click)
+  const openDmWith = async (targetUserId) => {
+    if (!targetUserId || targetUserId === user?.id) return;
+    // Check if a DM thread already exists in local state
+    const existing = threads.find(t =>
+      t.type === 'dm' &&
+      (t.members || []).length === 2 &&
+      (t.members || []).includes(targetUserId) &&
+      (t.members || []).includes(user.id)
+    );
+    if (existing) {
+      selectThread(existing);
+      setMemberCardFor(null);
+      setShowSettings(false);
+      return;
+    }
+    // Create (or reuse — backend dedupes) a new DM thread
+    try {
+      const res = await ax().post(`${API}/messages/threads`, {
+        type: 'dm', name: null, members: [targetUserId],
+      });
+      await fetchThreads();
+      selectThread(res.data);
+      setMemberCardFor(null);
+      setShowSettings(false);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to open DM');
+    }
+  };
+
+  const renameThread = async () => {
+    if (!activeThread || !renameValue.trim()) { setEditingRename(false); return; }
+    try {
+      const res = await ax().patch(`${API}/messages/threads/${activeThread.id}`, { name: renameValue.trim() });
+      setActiveThread(res.data);
+      setEditingRename(false);
+      fetchThreads();
+      toast.success('Renamed');
+    } catch (err) { toast.error(err.response?.data?.detail || 'Rename failed'); }
+  };
+
+  const leaveThread = async () => {
+    if (!activeThread || !window.confirm(`Leave "${getThreadDisplayName(activeThread)}"? You'll need to be re-added to see new messages.`)) return;
+    try {
+      await ax().post(`${API}/messages/threads/${activeThread.id}/leave`);
+      setShowSettings(false);
+      setActiveThread(null);
+      setMessages([]);
+      fetchThreads();
+      toast.success('Left the conversation');
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to leave'); }
+  };
+
+  const deleteThread = async () => {
+    if (!activeThread) return;
+    const name = getThreadDisplayName(activeThread);
+    if (!window.confirm(`Delete "${name}" and ALL its messages? This cannot be undone.`)) return;
+    try {
+      await ax().delete(`${API}/messages/threads/${activeThread.id}`);
+      setShowSettings(false);
+      setActiveThread(null);
+      setMessages([]);
+      fetchThreads();
+      toast.success('Conversation deleted');
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete'); }
+  };
+
   // Old typed filters removed — sidebar uses unified sorted list (see render below)
 
   const getThreadDisplayName = (thread) => {
@@ -564,57 +635,29 @@ export default function Conversations() {
                  activeThread.type === 'request' ? <FileText size={16} style={{ color: 'var(--tx-2)' }} /> :
                  initials(getThreadDisplayName(activeThread))}
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, cursor: activeThread.type !== 'dm' ? 'pointer' : 'default' }}
+                onClick={() => { if (activeThread.type !== 'dm') setShowSettings(true); }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {getThreadDisplayName(activeThread)}
                 </div>
                 {activeThread.type !== 'dm' && (
-                  <button onClick={() => setShowMembers(!showMembers)}
-                    style={{ fontSize: 11, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 1 }}>
-                    {activeThread.members?.length || 0} {activeThread.members?.length === 1 ? 'member' : 'members'}
-                  </button>
+                  <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 1 }}>
+                    {activeThread.members?.length || 0} {activeThread.members?.length === 1 ? 'member' : 'members'} · Tap to manage
+                  </div>
                 )}
               </div>
-
-              {/* Members panel */}
-              {showMembers && (
-                <>
-                  <div style={{ position: 'fixed', inset: 0, zIndex: 450 }} onClick={() => setShowMembers(false)} />
-                  <div style={{
-                    position: 'absolute', right: 20, top: '100%', marginTop: 4, width: 260, zIndex: 451,
-                    background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 10,
-                    boxShadow: '0 8px 24px rgba(0,0,0,.4)', overflow: 'hidden',
-                  }}>
-                    <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>Members</div>
-                    <div style={{ maxHeight: 200, overflowY: 'auto' }}>
-                      {(activeThread.members || []).map(mid => {
-                        const mu = users.find(u => u.id === mid);
-                        return (
-                          <div key={mid} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', fontSize: 12 }}>
-                            <div style={{ width: 22, height: 22, borderRadius: '50%', background: avatarBg(mid), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-                              {initials(mu?.name || '?')}
-                            </div>
-                            <span style={{ flex: 1, color: 'var(--tx-1)' }}>{mu?.name || mid.slice(0, 8)}</span>
-                            {mid !== user?.id && activeThread.type === 'channel' && (
-                              <button onClick={() => removeMember(mid)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2 }}><X size={12} /></button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {activeThread.type === 'channel' && (
-                      <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)' }}>
-                        <select className="input-field" value="" onChange={e => { if (e.target.value) addMember(e.target.value); }}
-                          style={{ fontSize: 11, padding: '4px 8px' }}>
-                          <option value="">Add member...</option>
-                          {users.filter(u => !(activeThread.members || []).includes(u.id)).map(u => (
-                            <option key={u.id} value={u.id}>{u.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                </>
+              {/* Settings gear — only for non-DM */}
+              {activeThread.type !== 'dm' && (
+                <button onClick={() => setShowSettings(true)}
+                  title="Settings"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 8,
+                    color: 'var(--tx-2)', display: 'flex', borderRadius: 8, flexShrink: 0,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <Settings size={16} />
+                </button>
               )}
             </div>
 
@@ -641,7 +684,24 @@ export default function Conversations() {
                     onMouseEnter={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 1; }}
                     onMouseLeave={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 0; }}>
                     {showAvatar && !isMine ? (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: avatarBg(msg.sender_id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                      <div
+                        onClick={() => {
+                          // In group/channel: clicking avatar opens a direct DM with that person
+                          if (activeThread.type !== 'dm' && msg.sender_id !== user?.id) {
+                            openDmWith(msg.sender_id);
+                          }
+                        }}
+                        title={activeThread.type !== 'dm' ? `Message ${msg.sender_name} directly` : msg.sender_name}
+                        style={{
+                          width: 28, height: 28, borderRadius: '50%', background: avatarBg(msg.sender_id),
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0,
+                          cursor: activeThread.type !== 'dm' ? 'pointer' : 'default',
+                          transition: 'transform 0.15s',
+                        }}
+                        onMouseEnter={e => { if (activeThread.type !== 'dm') e.currentTarget.style.transform = 'scale(1.08)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
                         {initials(msg.sender_name)}
                       </div>
                     ) : !isMine ? <div style={{ width: 28, flexShrink: 0 }} /> : null}
@@ -824,6 +884,170 @@ export default function Conversations() {
           </div>
         )}
       </div>
+
+      {/* ── Thread Settings Panel (WhatsApp-style) ── */}
+      {showSettings && activeThread && activeThread.type !== 'dm' && (() => {
+        const isCreator = activeThread.created_by === user?.id;
+        const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
+        const canDelete = isCreator || isAdmin;
+        const canRename = activeThread.type === 'channel';
+        return (
+          <>
+            <div onClick={() => { setShowSettings(false); setEditingRename(false); setMemberCardFor(null); }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', zIndex: 1100 }} />
+            <div style={{
+              position: 'fixed', top: 0, right: 0, height: '100vh', width: 380, zIndex: 1101,
+              background: 'var(--surface)', borderLeft: '1px solid var(--border-hi)',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              animation: 'slideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) both',
+              boxShadow: '-16px 0 48px rgba(0,0,0,0.4)',
+            }}>
+              {/* Header */}
+              <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>Conversation Settings</span>
+                <button onClick={() => { setShowSettings(false); setEditingRename(false); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--tx-2)', borderRadius: 6, display: 'flex' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 18px' }}>
+                {/* Hero: big avatar + name */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                  <div style={{
+                    width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                    background: activeThread.type === 'channel' ? 'var(--surface-3)' : avatarBg(activeThread.id),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 28, fontWeight: 700, color: '#fff',
+                    border: '2px solid var(--border-hi)',
+                  }}>
+                    {activeThread.type === 'channel' ? <Hash size={36} style={{ color: 'var(--tx-2)' }} /> :
+                     activeThread.type === 'request' ? <FileText size={36} style={{ color: 'var(--tx-2)' }} /> :
+                     initials(getThreadDisplayName(activeThread))}
+                  </div>
+                  {editingRename ? (
+                    <div style={{ display: 'flex', gap: 6, width: '100%' }}>
+                      <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') renameThread(); if (e.key === 'Escape') setEditingRename(false); }}
+                        className="input-field" style={{ flex: 1, fontSize: 15, fontWeight: 600 }} />
+                      <button onClick={renameThread} className="btn-primary btn-sm"><Check size={13} /></button>
+                      <button onClick={() => setEditingRename(false)} className="btn-ghost btn-sm"><X size={13} /></button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--tx-1)' }}>
+                        {getThreadDisplayName(activeThread)}
+                      </span>
+                      {canRename && (
+                        <button onClick={() => { setRenameValue(activeThread.name || ''); setEditingRename(true); }}
+                          title="Rename"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4, display: 'flex', borderRadius: 6 }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                          <Pencil size={13} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 12, color: 'var(--tx-3)' }}>
+                    {activeThread.type === 'channel' ? 'Channel' : activeThread.type === 'request' ? 'Request Thread' : 'Conversation'}
+                    {' · '}{activeThread.members?.length || 0} {activeThread.members?.length === 1 ? 'member' : 'members'}
+                  </div>
+                </div>
+
+                {/* Members section */}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10, padding: '0 4px' }}>
+                    Members
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {(activeThread.members || []).map(mid => {
+                      const mu = users.find(u => u.id === mid) || (mid === user?.id ? { id: user.id, name: user.name } : null);
+                      const isMe = mid === user?.id;
+                      const showCard = memberCardFor === mid;
+                      return (
+                        <div key={mid} style={{ position: 'relative' }}>
+                          <div onClick={() => { if (!isMe) setMemberCardFor(showCard ? null : mid); }}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                              borderRadius: 8, cursor: isMe ? 'default' : 'pointer',
+                              background: showCard ? 'var(--surface-2)' : 'transparent',
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => { if (!isMe && !showCard) e.currentTarget.style.background = 'var(--surface-2)'; }}
+                            onMouseLeave={e => { if (!isMe && !showCard) e.currentTarget.style.background = 'transparent'; }}>
+                            <div style={{
+                              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                              background: avatarBg(mid),
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 12, fontWeight: 700, color: '#fff',
+                            }}>
+                              {initials(mu?.name || '?')}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {mu?.name || mid.slice(0, 8)}
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>
+                                {isMe ? 'You' : mu?.role || 'Member'}
+                                {mid === activeThread.created_by && ' · Creator'}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Expandable member actions */}
+                          {showCard && !isMe && (
+                            <div style={{
+                              display: 'flex', gap: 6, padding: '6px 10px 10px', marginLeft: 46,
+                            }}>
+                              <button onClick={() => openDmWith(mid)} className="btn-primary btn-sm" style={{ gap: 5, fontSize: 12 }}>
+                                <MessageCircle size={12} /> Message directly
+                              </button>
+                              {activeThread.type === 'channel' && (isCreator || isAdmin) && (
+                                <button onClick={() => { removeMember(mid); setMemberCardFor(null); }}
+                                  className="btn-ghost btn-sm" style={{ gap: 5, fontSize: 12, color: 'var(--color-red)', borderColor: 'var(--color-red-soft)' }}>
+                                  <X size={12} /> Remove
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Add member */}
+                  {activeThread.type === 'channel' && (
+                    <div style={{ marginTop: 10 }}>
+                      <select value="" onChange={e => { if (e.target.value) { addMember(e.target.value); } }}
+                        className="input-field" style={{ fontSize: 13, cursor: 'pointer' }}>
+                        <option value="">+ Add member...</option>
+                        {users.filter(u => !(activeThread.members || []).includes(u.id)).map(u => (
+                          <option key={u.id} value={u.id}>{u.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Danger zone */}
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button onClick={leaveThread} className="btn-ghost" style={{ width: '100%', justifyContent: 'center', gap: 6 }}>
+                    <LogOut size={14} /> Leave conversation
+                  </button>
+                  {canDelete && (
+                    <button onClick={deleteThread} className="btn-ghost"
+                      style={{ width: '100%', justifyContent: 'center', gap: 6, color: 'var(--color-red)', borderColor: 'rgba(239,68,68,0.3)' }}>
+                      <Trash2 size={14} /> Delete conversation
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* New Thread Modal */}
       {showNewModal && (
