@@ -80,6 +80,7 @@ const AdPerformance = React.lazy(() => import("./pages/AdPerformance"));
 const Onboarding = React.lazy(() => import("./pages/Onboarding"));
 const Documents = React.lazy(() => import("./pages/Documents"));
 const KnowledgeBase = React.lazy(() => import("./pages/KnowledgeBase"));
+const Drive = React.lazy(() => import("./pages/Drive"));
 const Conversations = React.lazy(() => import("./pages/Conversations"));
 const Support = React.lazy(() => import("./pages/Support"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -190,7 +191,7 @@ function PrivateRoute({ children, roles }) {
   // Preview-as-client enforcement: block non-client routes
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/files', '/sops', '/ad-performance', '/notifications', '/conversations', '/knowledge-base', '/support'];
+    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/drive', '/files', '/sops', '/ad-performance', '/notifications', '/conversations', '/knowledge-base', '/support'];
     const path = location.pathname;
     const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
     if (!allowed) {
@@ -341,8 +342,10 @@ function AppRoutes() {
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
-      <Route path="/knowledge-base" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
-      <Route path="/sops" element={<Navigate to="/knowledge-base?tab=sops" replace />} />
+      <Route path="/drive" element={<PrivateRoute><Drive /></PrivateRoute>} />
+      <Route path="/knowledge-base" element={<Navigate to="/drive" replace />} />
+      <Route path="/knowledge-base/legacy" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
+      <Route path="/sops" element={<Navigate to="/drive" replace />} />
       <Route path="/conversations" element={<PrivateRoute><Conversations /></PrivateRoute>} />
       <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
       <Route path="/ad-performance" element={<PrivateRoute><AdPerformance /></PrivateRoute>} />
@@ -350,8 +353,9 @@ function AppRoutes() {
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
       <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
-      <Route path="/docs" element={<Navigate to="/knowledge-base?tab=docs" replace />} />
-      <Route path="/files" element={<PrivateRoute><Files /></PrivateRoute>} />
+      <Route path="/docs" element={<Navigate to="/drive" replace />} />
+      <Route path="/files" element={<Navigate to="/drive" replace />} />
+      <Route path="/files/legacy" element={<PrivateRoute><Files /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/team/:id" element={<PrivateRoute roles={['Administrator','Operator']}><TeamMemberPage /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
