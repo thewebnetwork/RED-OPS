@@ -758,6 +758,72 @@ export default function Settings() {
                 ))}
               </div>
             </div>
+
+            {/* ── Chat Customization ── */}
+            <div style={{ marginTop: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', marginBottom: 16 }}>Chat Customization</h3>
+
+              {/* Bubble Color */}
+              <div className="card" style={{ padding: 20, marginBottom: 16 }}>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', marginBottom: 8 }}>Sent Bubble Color</h4>
+                <p style={{ fontSize: 12, color: 'var(--tx-3)', marginBottom: 12 }}>Choose the background color for your sent messages.</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Red', value: '#c92a3e' },
+                    { label: 'Blue', value: '#3b82f6' },
+                    { label: 'Purple', value: '#8b5cf6' },
+                    { label: 'Green', value: '#059669' },
+                    { label: 'Orange', value: '#ea580c' },
+                    { label: 'Pink', value: '#ec4899' },
+                    { label: 'Teal', value: '#0891b2' },
+                    { label: 'Dark', value: '#374151' },
+                  ].map(c => {
+                    const current = localStorage.getItem('redops-chat-bubble-color') || '#c92a3e';
+                    return (
+                      <div key={c.value} onClick={() => { localStorage.setItem('redops-chat-bubble-color', c.value); setAppearance(p => ({ ...p, _tick: Date.now() })); }}
+                        style={{
+                          width: 36, height: 36, borderRadius: 12, background: c.value, cursor: 'pointer',
+                          border: current === c.value ? '2px solid #fff' : '2px solid transparent',
+                          boxShadow: current === c.value ? `0 0 0 2px ${c.value}` : 'none',
+                          transition: 'all 0.2s',
+                        }}
+                        title={c.label}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Chat Background */}
+              <div className="card" style={{ padding: 20 }}>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', marginBottom: 8 }}>Chat Background</h4>
+                <p style={{ fontSize: 12, color: 'var(--tx-3)', marginBottom: 12 }}>Set a background for your conversation view.</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Default', value: 'default', bg: 'transparent', border: '1px dashed var(--border)' },
+                    { label: 'Dark Navy', value: '#0a0e1a', bg: '#0a0e1a' },
+                    { label: 'Charcoal', value: '#1a1a2e', bg: '#1a1a2e' },
+                    { label: 'Midnight', value: '#0f172a', bg: '#0f172a' },
+                    { label: 'Warm Dark', value: '#1c1917', bg: '#1c1917' },
+                    { label: 'Gradient 1', value: 'linear-gradient(135deg, #0a0e1a 0%, #1a1a2e 100%)', bg: 'linear-gradient(135deg, #0a0e1a 0%, #1a1a2e 100%)' },
+                    { label: 'Gradient 2', value: 'linear-gradient(135deg, #1a1a2e 0%, #0f172a 50%, #1e1b4b 100%)', bg: 'linear-gradient(135deg, #1a1a2e 0%, #0f172a 50%, #1e1b4b 100%)' },
+                    { label: 'Gradient 3', value: 'linear-gradient(180deg, #0c1220 0%, #1a0a0a 100%)', bg: 'linear-gradient(180deg, #0c1220 0%, #1a0a0a 100%)' },
+                  ].map(c => {
+                    const current = localStorage.getItem('redops-chat-bg') || 'default';
+                    return (
+                      <div key={c.value} onClick={() => { localStorage.setItem('redops-chat-bg', c.value); setAppearance(p => ({ ...p, _tick: Date.now() })); }}
+                        style={{
+                          width: 48, height: 36, borderRadius: 10, background: c.bg, cursor: 'pointer',
+                          border: current === c.value ? '2px solid var(--accent)' : (c.border || '1px solid var(--border)'),
+                          transition: 'all 0.2s',
+                        }}
+                        title={c.label}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

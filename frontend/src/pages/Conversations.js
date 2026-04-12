@@ -142,6 +142,8 @@ function renderMsgBody(body) {
 /* ── Main Page ── */
 export default function Conversations() {
   const { user } = useAuth();
+  const chatBubbleColor = localStorage.getItem('redops-chat-bubble-color') || '#c92a3e';
+  const chatBg = localStorage.getItem('redops-chat-bg') || 'default';
   const [threads, setThreads] = useState([]);
   const [activeThread, setActiveThread] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -486,7 +488,10 @@ export default function Conversations() {
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{
+              flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 2,
+              ...(chatBg !== 'default' ? { background: chatBg, backgroundSize: 'cover' } : {}),
+            }}>
               {messages.length === 0 && (
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <EmptyState icon="chat" title="No messages yet" description="Start the conversation!" />
@@ -497,19 +502,36 @@ export default function Conversations() {
                 const showAvatar = idx === 0 || messages[idx - 1]?.sender_id !== msg.sender_id;
                 const isEditing = editingMsg === msg.id;
                 return (
-                  <div key={msg.id} style={{ display: 'flex', gap: 10, padding: showAvatar ? '8px 0 2px' : '1px 0', alignItems: 'flex-start', position: 'relative' }}
+                  <div key={msg.id} style={{
+                    display: 'flex', gap: 10, padding: showAvatar ? '6px 0 2px' : '1px 0',
+                    alignItems: 'flex-end', position: 'relative',
+                    flexDirection: isMine ? 'row-reverse' : 'row',
+                  }}
                     onMouseEnter={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 1; }}
                     onMouseLeave={e => { const a = e.currentTarget.querySelector('[data-actions]'); if (a) a.style.opacity = 0; }}>
-                    {showAvatar ? (
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: avatarBg(msg.sender_id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0, marginTop: 2 }}>
+                    {showAvatar && !isMine ? (
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: avatarBg(msg.sender_id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
                         {initials(msg.sender_name)}
                       </div>
-                    ) : <div style={{ width: 28, flexShrink: 0 }} />}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      {showAvatar && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-1)' }}>{msg.sender_name}</span>
-                          <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>{timeAgo(msg.created_at)}</span>
+                    ) : !isMine ? <div style={{ width: 28, flexShrink: 0 }} /> : null}
+                    <div style={{
+                      maxWidth: '75%', minWidth: 0,
+                      background: isMine ? chatBubbleColor : 'var(--surface-2)',
+                      borderRadius: isMine
+                        ? (showAvatar ? '18px 18px 4px 18px' : '18px 18px 4px 18px')
+                        : (showAvatar ? '18px 18px 18px 4px' : '18px 18px 18px 4px'),
+                      padding: '8px 14px',
+                      color: isMine ? '#fff' : 'var(--tx-1)',
+                    }}>
+                      {showAvatar && !isMine && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                          <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>{msg.sender_name}</span>
+                          <span style={{ fontSize: 9, opacity: 0.5 }}>{timeAgo(msg.created_at)}</span>
+                        </div>
+                      )}
+                      {showAvatar && isMine && (
+                        <div style={{ textAlign: 'right', marginBottom: 2 }}>
+                          <span style={{ fontSize: 9, opacity: 0.6 }}>{timeAgo(msg.created_at)}</span>
                         </div>
                       )}
                       {isEditing ? (
@@ -529,7 +551,7 @@ export default function Conversations() {
                             </span>
                           )}
                           {msg.body && (
-                            <p style={{ margin: 0, fontSize: 13.5, color: 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                            <p style={{ margin: 0, fontSize: 13.5, color: isMine ? '#fff' : 'var(--tx-1)', lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                               {renderMsgBody(msg.body)}
                             </p>
                           )}
