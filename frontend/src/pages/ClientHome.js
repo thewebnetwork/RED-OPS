@@ -7,6 +7,8 @@ import {
   Phone, MessageSquare, BookOpen, LifeBuoy, Upload, Star,
   ArrowUpRight, Calendar, Layers, Activity, TrendingUp, RefreshCw,
 } from 'lucide-react';
+import { SkeletonCardList } from '../components/Skeleton';
+import useCountUp from '../hooks/useCountUp';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok  = () => localStorage.getItem('token');
@@ -22,14 +24,15 @@ function StatusPill({ status }) {
   return <span style={{ fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:4, background:`${c}22`, color:c }}>{status}</span>;
 }
 
-function MetricCard({ icon: Icon, label, value, color, sub }) {
+function MetricCard({ icon: Icon, label, value, color, sub, stagger = 0 }) {
+  const animatedValue = useCountUp(value, 700);
   return (
-    <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:10, padding:'16px 18px', display:'flex', flexDirection:'column', gap:10 }}>
+    <div className={stagger ? `stagger-${stagger}` : ''} style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:10, padding:'16px 18px', display:'flex', flexDirection:'column', gap:10 }}>
       <div style={{ width:34, height:34, borderRadius:8, background:`${color}18`, display:'flex', alignItems:'center', justifyContent:'center' }}>
         <Icon size={16} color={color} />
       </div>
       <div>
-        <div style={{ fontSize:24, fontWeight:700, color:'var(--tx-1)', letterSpacing:'-.03em', lineHeight:1 }}>{value}</div>
+        <div style={{ fontSize:24, fontWeight:700, color:'var(--tx-1)', letterSpacing:'-.03em', lineHeight:1 }}>{animatedValue}</div>
         <div style={{ fontSize:12, color:'var(--tx-3)', marginTop:4 }}>{label}</div>
         {sub && <div style={{ fontSize:11, color:'var(--tx-3)', marginTop:2, opacity:.7 }}>{sub}</div>}
       </div>
@@ -161,14 +164,14 @@ export default function ClientHome() {
 
       {/* Metrics */}
       <div className="metrics-grid-4">
-        <MetricCard icon={Clock}        label="Active Requests"     value={loading ? '—' : metrics.active}    color='#3b82f6' />
-        <MetricCard icon={AlertCircle}  label="In Review"           value={loading ? '—' : metrics.review}    color='#f59e0b' />
-        <MetricCard icon={CheckCircle2} label="Delivered This Month" value={loading ? '—' : metrics.delivered} color='#22c55e' />
-        <MetricCard icon={FileText}     label="Total Requests"      value={loading ? '—' : metrics.total}     color='#a855f7' />
+        <MetricCard icon={Clock}        label="Active Requests"     value={loading ? '—' : metrics.active}    color='#3b82f6' stagger={1} />
+        <MetricCard icon={AlertCircle}  label="In Review"           value={loading ? '—' : metrics.review}    color='#f59e0b' stagger={2} />
+        <MetricCard icon={CheckCircle2} label="Delivered This Month" value={loading ? '—' : metrics.delivered} color='#22c55e' stagger={3} />
+        <MetricCard icon={FileText}     label="Total Requests"      value={loading ? '—' : metrics.total}     color='#a855f7' stagger={4} />
       </div>
 
       {/* Quick Actions */}
-      <div className="quick-actions-grid" style={{ marginBottom:24 }}>
+      <div className="quick-actions-grid anim-fade-up" style={{ marginBottom:24, animationDelay: '0.2s' }}>
         <QuickAction icon={Plus}       label="New Request"     onClick={() => navigate('/services')}    color='#3b82f6' />
         <QuickAction icon={FileText}   label="My Requests"     onClick={() => navigate('/my-requests')} color='var(--red)' />
         <QuickAction icon={BookOpen}   label="Resources"       onClick={() => navigate('/knowledge-base?tab=sops')} color='#a855f7' />
@@ -188,7 +191,7 @@ export default function ClientHome() {
           </div>
 
           {loading ? (
-            <div style={{ padding:'40px 20px', textAlign:'center', color:'var(--tx-3)', fontSize:13 }}>Loading your requests...</div>
+            <SkeletonCardList count={4} />
           ) : requests.length === 0 ? (
             <div style={{ padding:'40px 20px', textAlign:'center' }}>
               <Layers size={28} color="var(--tx-3)" style={{ marginBottom:8 }} />

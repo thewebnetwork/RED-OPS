@@ -7,6 +7,8 @@ import {
   Activity, DollarSign, Package, UserPlus, Star,
 } from 'lucide-react';
 import axios from 'axios';
+import { SkeletonCardList } from '../components/Skeleton';
+import useCountUp from '../hooks/useCountUp';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok  = () => localStorage.getItem('token');
@@ -14,9 +16,10 @@ const ax   = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } 
 const health = s => s >= 70 ? 'var(--green)' : s >= 40 ? 'var(--yellow)' : 'var(--red)';
 const PRIORITY_COLORS = { Urgent:'#ef4444', High:'#f59e0b', Normal:'var(--tx-2)', Low:'var(--tx-3)' };
 
-function PulseCard({ icon: Icon, label, value, sub, color='var(--red)', trend }) {
+function PulseCard({ icon: Icon, label, value, sub, color='var(--red)', trend, stagger = 0 }) {
+  const animatedValue = useCountUp(value, 700);
   return (
-    <div className="metric-card">
+    <div className={`metric-card${stagger ? ` stagger-${stagger}` : ''}`}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
         <div style={{ width:32, height:32, background:`${color}22`, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center' }} className="icon-box">
           <Icon size={15} style={{ color }} />
@@ -27,7 +30,7 @@ function PulseCard({ icon: Icon, label, value, sub, color='var(--red)', trend })
           </span>
         )}
       </div>
-      <div className="metric-value">{value}</div>
+      <div className="metric-value">{animatedValue}</div>
       <div style={{ fontSize:11.5, color:'var(--tx-3)', marginTop:4 }}>{label}</div>
       {sub && <div style={{ fontSize:11, color:'var(--tx-3)', marginTop:2 }}>{sub}</div>}
     </div>
@@ -172,14 +175,14 @@ export default function CommandCenter() {
 
       {/* Pulse */}
       <div className="metrics-grid-4" style={{ marginBottom:20 }}>
-        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='#3b82f6' trend={pulse.requests_trend} />
-        <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? '#ef4444' : '#22c55e'} />
-        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='#22c55e' />
-        <PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} />
+        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='#3b82f6' trend={pulse.requests_trend} stagger={1} />
+        <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? '#ef4444' : '#22c55e'} stagger={2} />
+        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='#22c55e' stagger={3} />
+        <PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} stagger={4} />
       </div>
 
       {/* Quick actions */}
-      <div className="quick-actions-grid" style={{ marginBottom:20 }}>
+      <div className="quick-actions-grid anim-fade-up" style={{ marginBottom:20, animationDelay: '0.2s' }}>
         <QuickAction icon={FileText}     label="New Request"  to="/requests?new=1" color='#3b82f6' />
         <QuickAction icon={CheckSquare}  label="New Task"     to="/tasks?new=1"    color='#22c55e' />
         <QuickAction icon={FolderKanban} label="New Project"  to="/projects?new=1" color='#a855f7' />
@@ -200,7 +203,7 @@ export default function CommandCenter() {
             </button>
           </div>
           {loading ? (
-            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+            <SkeletonCardList count={4} />
           ) : tasks.length > 0 ? (
             tasks.slice(0,5).map(t => {
               const tid = t._id || t.id;
@@ -238,7 +241,7 @@ export default function CommandCenter() {
             </button>
           </div>
           {loading ? (
-            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+            <SkeletonCardList count={4} />
           ) : clients.length > 0 ? (
             clients.slice(0, 5).map(c => (
               <div key={c.user_id || c.id} onClick={() => navigate('/clients')} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid var(--border)', cursor:'pointer' }}
@@ -269,7 +272,7 @@ export default function CommandCenter() {
             <div style={{ width:7, height:7, borderRadius:'50%', background:'var(--green)', boxShadow:'0 0 5px var(--green)80' }}/>
           </div>
           {loading ? (
-            <div style={{color:'var(--tx-3)',fontSize:13,padding:'16px 0',textAlign:'center'}}>Loading…</div>
+            <SkeletonCardList count={4} />
           ) : activity.length > 0 ? (
             activity.slice(0, 6).map(e => {
               const icons = { task:<CheckSquare size={12}/>, request:<FileText size={12}/>, file:<Package size={12}/>, client:<UserPlus size={12}/> };

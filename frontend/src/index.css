@@ -311,9 +311,10 @@
   color: var(--tx-2);
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
   overflow: hidden;
+  position: relative;
 }
 
 .nav-item:hover {
@@ -324,11 +325,13 @@
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .nav-item svg {
   flex-shrink: 0;
   opacity: 0.8;
+  transition: opacity 0.15s;
 }
 
 .nav-item.active svg { opacity: 1; }
@@ -344,6 +347,22 @@
   min-width: 16px;
   text-align: center;
   flex-shrink: 0;
+}
+
+.badge-pulse {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  animation: pulse-soft 2s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--red);
 }
 
 /* ── 7. CARDS & SURFACES ──────────────────────────────────── */
@@ -553,8 +572,8 @@ select.input-field { appearance: none; cursor: pointer; }
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -721,6 +740,8 @@ kbd {
   top: 5px;
   right: 5px;
   border: 1.5px solid var(--bg-card);
+  animation: pulse-soft 2s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--red);
 }
 
 .empty-state {

@@ -9,6 +9,12 @@ export function SkeletonLine({ width = '100%', height = 12, style = {} }) {
   );
 }
 
+export function SkeletonCircle({ size = 32, style = {} }) {
+  return (
+    <div className="skeleton-pulse" style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, ...style }} />
+  );
+}
+
 export function SkeletonCard({ style = {} }) {
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, ...style }}>
@@ -52,10 +58,30 @@ export function SkeletonKPI({ count = 4 }) {
   return (
     <div className="metrics-grid-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+        <div key={i} className={`stagger-${i + 1}`} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
           <SkeletonLine width={32} height={32} style={{ borderRadius: 8, marginBottom: 12 }} />
           <SkeletonLine width="40%" height={24} style={{ marginBottom: 6 }} />
           <SkeletonLine width="60%" height={10} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonCardList({ count = 3 }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className={`stagger-${Math.min(i + 1, 6)}`} style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10,
+        }}>
+          <SkeletonCircle size={28} />
+          <div style={{ flex: 1 }}>
+            <SkeletonLine width="55%" height={12} style={{ marginBottom: 6 }} />
+            <SkeletonLine width="35%" height={8} />
+          </div>
+          <SkeletonLine width={60} height={20} style={{ borderRadius: 4 }} />
         </div>
       ))}
     </div>

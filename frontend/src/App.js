@@ -600,7 +600,7 @@ function App() {
         <AuthProvider>
           <OrgProvider>
             <AppRoutes />
-            <Toaster position="top-right" richColors />
+            <Toaster position="top-right" richColors closeButton duration={4000} />
           </OrgProvider>
         </AuthProvider>
       </BrowserRouter>
