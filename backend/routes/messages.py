@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from database import db
 from utils.auth import get_current_user
+from services.notifications import create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -346,7 +347,6 @@ async def send_message(
     for mentioned_user_id in (body.mentions or []):
         if mentioned_user_id != current_user["id"]:
             try:
-                from services.notifications import create_notification
                 await create_notification(
                     db,
                     user_id=mentioned_user_id,

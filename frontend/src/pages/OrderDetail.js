@@ -46,7 +46,6 @@ import {
   Package,
   Hourglass,
   CircleDot,
-  Eye,
   Printer
 } from 'lucide-react';
 import { toast } from 'sonner';

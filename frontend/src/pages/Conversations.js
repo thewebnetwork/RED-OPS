@@ -310,7 +310,7 @@ export default function Conversations() {
 
   // Message edit/delete
   const saveEditMsg = async () => {
-    if (!editingMsg || !editText.trim()) return;
+    if (!editingMsg || !editText.trim() || !activeThread) return;
     try {
       await ax().patch(`${API}/messages/threads/${activeThread.id}/messages/${editingMsg}`, { body: editText.trim() });
       setMessages(prev => prev.map(m => m.id === editingMsg ? { ...m, body: editText.trim() } : m));
@@ -320,7 +320,7 @@ export default function Conversations() {
   };
 
   const deleteMsg = async (msgId) => {
-    if (!window.confirm('Delete this message?')) return;
+    if (!activeThread || !window.confirm('Delete this message?')) return;
     try {
       await ax().delete(`${API}/messages/threads/${activeThread.id}/messages/${msgId}`);
       setMessages(prev => prev.filter(m => m.id !== msgId));
