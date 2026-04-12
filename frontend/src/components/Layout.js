@@ -457,7 +457,7 @@ export default function Layout({ children }) {
   const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
-    <div className="app-shell">
+    <div className="app-shell ambient-glow">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden animate-fade-in"

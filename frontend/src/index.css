@@ -128,15 +128,20 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.011em;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.03em;
     color: var(--tx-1);
   }
+
+  h1 { letter-spacing: -0.04em; }
+  h2 { letter-spacing: -0.035em; }
 
   a { color: inherit; text-decoration: none; }
   button { font-family: inherit; }
@@ -173,6 +178,7 @@
 /* ── 4. ANIMATIONS ────────────────────────────────────────── */
 @keyframes fadeIn    { from { opacity: 0 } to { opacity: 1 } }
 @keyframes fadeUp    { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes modalEnter { from { opacity: 0; transform: translateY(12px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
 @keyframes slideRight{ from { opacity: 0; transform: translateX(16px) } to { opacity: 1; transform: translateX(0) } }
 @keyframes slideLeft { from { opacity: 0; transform: translateX(-16px) } to { opacity: 1; transform: translateX(0) } }
 @keyframes pulse-soft{ 0%, 100% { opacity: 1 } 50% { opacity: 0.5 } }
@@ -320,14 +326,15 @@
 }
 
 .nav-item:hover {
-  background: var(--surface-3);
+  background: rgba(255,255,255,0.04);
   color: var(--tx-1);
 }
 
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 3px 0 0 var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(201,42,62,0.08);
+  font-weight: 600;
 }
 
 .nav-item svg {
@@ -372,6 +379,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
 .hover-card {
@@ -379,20 +387,30 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-.hover-card:hover { border-color: var(--border-strong); }
+.hover-card:hover {
+  border-color: var(--border-hi);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: translateY(-1px);
+}
 
 .metric-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 18px 20px;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-.metric-card:hover { border-color: var(--border-strong); }
+.metric-card:hover {
+  border-color: var(--border-hi);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
 
 .metric-value {
   font-size: 28px;
@@ -424,20 +442,21 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
-.pill-green  { background: var(--color-green-soft);  color: var(--color-green);  border: 1px solid rgba(34,197,94,0.2); }
-.pill-yellow { background: var(--color-yellow-soft); color: var(--color-yellow); border: 1px solid rgba(245,158,11,0.2); }
-.pill-red    { background: var(--color-red-soft);    color: var(--color-red);    border: 1px solid rgba(239,68,68,0.2); }
-.pill-blue   { background: var(--color-blue-soft);   color: var(--color-blue);   border: 1px solid rgba(59,130,246,0.2); }
-.pill-purple { background: var(--color-purple-soft); color: var(--color-purple); border: 1px solid rgba(168,85,247,0.2); }
+.pill-green  { background: var(--color-green-soft);  color: var(--color-green);  border: 1px solid rgba(34,197,94,0.2);  box-shadow: 0 0 8px rgba(34,197,94,0.08); }
+.pill-yellow { background: var(--color-yellow-soft); color: var(--color-yellow); border: 1px solid rgba(245,158,11,0.2); box-shadow: 0 0 8px rgba(245,158,11,0.08); }
+.pill-red    { background: var(--color-red-soft);    color: var(--color-red);    border: 1px solid rgba(239,68,68,0.2);  box-shadow: 0 0 8px rgba(239,68,68,0.08); }
+.pill-blue   { background: var(--color-blue-soft);   color: var(--color-blue);   border: 1px solid rgba(59,130,246,0.2); box-shadow: 0 0 8px rgba(59,130,246,0.08); }
+.pill-purple { background: var(--color-purple-soft); color: var(--color-purple); border: 1px solid rgba(168,85,247,0.2); box-shadow: 0 0 8px rgba(168,85,247,0.08); }
 .pill-gray   { background: var(--surface-2); color: var(--tx-2); border: 1px solid var(--border); }
-.pill-brand  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(201,42,62,0.2); }
+.pill-brand  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(201,42,62,0.2); box-shadow: 0 0 8px rgba(201,42,62,0.08); }
 
 /* ── 10. KANBAN ───────────────────────────────────────────── */
 .kanban-col {
@@ -506,15 +525,23 @@
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  padding: 8px 12px;
+  padding: 9px 12px;
   font-size: 13.5px;
   color: var(--tx-1);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   font-family: inherit;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
 }
 
-.input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.input-field:hover { border-color: var(--border-hi); }
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201,42,62,0.15), inset 0 1px 2px rgba(0,0,0,0.1);
+  background: var(--surface-3);
+}
+
 .input-field::placeholder { color: var(--tx-3); }
 textarea.input-field { resize: vertical; min-height: 80px; line-height: 1.6; }
 select.input-field { appearance: none; cursor: pointer; }
@@ -524,21 +551,26 @@ select.input-field { appearance: none; cursor: pointer; }
   background: var(--accent);
   color: #fff;
   border: none;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: var(--radius);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.15s;
+  transition: background 0.15s, box-shadow 0.2s, transform 0.1s;
   font-family: inherit;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
-.btn-primary:hover { background: var(--accent-hover); }
-.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 14px rgba(201,42,62,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btn-primary:active { transform: scale(0.97); box-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* Legacy compat */
@@ -548,7 +580,7 @@ select.input-field { appearance: none; cursor: pointer; }
   background: transparent;
   color: var(--tx-2);
   border: 1px solid var(--border-strong);
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
@@ -556,12 +588,19 @@ select.input-field { appearance: none; cursor: pointer; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.2s, transform 0.1s;
   font-family: inherit;
   white-space: nowrap;
 }
 
-.btn-ghost:hover { background: var(--surface-3); color: var(--tx-1); }
+.btn-ghost:hover {
+  background: var(--surface-3);
+  color: var(--tx-1);
+  border-color: var(--border-hi);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-ghost:active { transform: scale(0.97); }
 
 /* Legacy compat */
 .btn-ghost-dark { @apply btn-ghost; }
@@ -573,9 +612,9 @@ select.input-field { appearance: none; cursor: pointer; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -586,14 +625,14 @@ select.input-field { appearance: none; cursor: pointer; }
 
 .modal-box {
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-hi);
+  border-radius: 14px;
   width: 520px;
   max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  animation: fadeUp 0.2s ease;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+  animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 22px;
 }
 
@@ -1177,6 +1216,56 @@ kbd {
   background: rgba(22, 25, 32, 0.6) !important;
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* ── 28c. AMBIENT EFFECTS ─────────────────────────────────── */
+/* Subtle accent glow in top-right corner of the page — adds depth */
+.ambient-glow::before {
+  content: '';
+  position: fixed;
+  top: -120px;
+  right: -120px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(201,42,62,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bottom-left blue glow — secondary ambient */
+.ambient-glow::after {
+  content: '';
+  position: fixed;
+  bottom: -100px;
+  left: -100px;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, var(--tx-1) 0%, var(--tx-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #f87171 0%, #c92a3e 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hover glow utility — add to any element for accent glow on hover */
+.hover-glow-accent {
+  transition: box-shadow 0.2s;
+}
+.hover-glow-accent:hover {
+  box-shadow: 0 0 20px rgba(201,42,62,0.15);
 }
 
 /* ── 29. FINANCE PAGE ──────────────────────────────────────── */
