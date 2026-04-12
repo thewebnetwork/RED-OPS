@@ -128,16 +128,16 @@ const MentionHashtagInput = forwardRef(function MentionHashtagInput({
       {/* Urgent indicator strip */}
       {urgent && (
         <div style={{
-          fontSize: 11, fontWeight: 600, color: '#ef4444',
-          background: '#ef444412', border: '1px solid #ef444430',
-          borderRadius: '6px 6px 0 0', padding: '3px 10px',
-          display: 'flex', alignItems: 'center', gap: 5,
+          fontSize: 11, fontWeight: 600, color: 'var(--red-status, #ef4444)',
+          background: 'var(--red-status, #ef4444)12', border: '1px solid var(--red-status, #ef4444)30',
+          borderRadius: '6px 6px 0 0', padding: '4px 12px',
+          display: 'flex', alignItems: 'center', gap: 6,
         }}>
           <span>{'\u26A1'} Urgent</span>
-          <span style={{ color: 'var(--tx-3)' }}>&mdash;</span>
+          <span style={{ color: 'var(--tx-3)', fontSize: 10 }}>&mdash;</span>
           <button
             onClick={() => setUrgent(false)}
-            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 11, padding: 0, textDecoration: 'underline' }}
+            style={{ background: 'none', border: 'none', color: 'var(--red-status, #ef4444)', cursor: 'pointer', fontSize: 11, padding: 0, textDecoration: 'underline' }}
           >
             remove
           </button>
@@ -167,8 +167,8 @@ const MentionHashtagInput = forwardRef(function MentionHashtagInput({
         <div style={{
           position: 'absolute', bottom: '100%', left: 0, right: 0,
           background: 'var(--bg-card, #1a1a2e)', border: '1px solid var(--border)',
-          borderRadius: 8, marginBottom: 4, overflow: 'hidden',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.3)', zIndex: 50,
+          borderRadius: 8, marginBottom: 4, maxHeight: 260, overflowY: 'auto',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)', zIndex: 50,
         }}>
           {popup.type === 'mention' && (
             <div style={{ padding: '4px 0' }}>

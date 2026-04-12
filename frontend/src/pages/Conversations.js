@@ -523,7 +523,7 @@ export default function Conversations() {
                       ) : (
                         <>
                           {msg.metadata?.urgent && (
-                            <span style={{ fontSize: 10, fontWeight: 700, color: '#ef4444', background: '#ef444415', padding: '1px 6px', borderRadius: 4, marginBottom: 3, display: 'inline-block' }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--red-status, #ef4444)', background: 'var(--red-status, #ef4444)15', padding: '2px 8px', borderRadius: 4, marginBottom: 4, display: 'inline-block' }}>
                               {'\u26A1'} URGENT
                             </span>
                           )}

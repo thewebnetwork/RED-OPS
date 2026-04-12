@@ -106,7 +106,8 @@ function StatusSelect({ orderId, currentStatus, onUpdate }) {
           display: 'inline-flex', alignItems: 'center', gap: 4,
           fontSize: 11, fontWeight: 600, padding: '3px 8px 3px 9px', borderRadius: 5,
           background: c.bg, color: c.color, border: `1px solid ${c.color}44`,
-          cursor: 'pointer', whiteSpace: 'nowrap', opacity: updating ? 0.6 : 1,
+          cursor: updating ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
+          opacity: updating ? 0.6 : 1, transition: 'opacity .15s, box-shadow .15s',
         }}
       >
         {currentStatus} <ChevronDown size={11} />

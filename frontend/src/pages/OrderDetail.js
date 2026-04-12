@@ -528,14 +528,14 @@ export default function OrderDetail() {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3" data-no-print>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => window.print()}
-          className="btn-ghost btn-sm"
-          style={{ display: 'flex', alignItems: 'center', gap: 5 }}
           title="Print this request"
         >
-          <Printer size={14} /> Print
-        </button>
+          <Printer size={14} className="mr-1.5" /> Print
+        </Button>
         {!showAsClient && canPick && (
           <Button 
             className="bg-rose-600 hover:bg-rose-700"
@@ -1066,7 +1066,7 @@ export default function OrderDetail() {
                               <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-elevated)', color: 'var(--tx-3)', border: '1px solid var(--border)' }}>{msg.author_role}</span>
                             </div>
                             {msg.metadata?.urgent && (
-                              <span style={{ fontSize: 10, fontWeight: 700, color: '#ef4444', background: '#ef444415', padding: '1px 6px', borderRadius: 4, marginBottom: 3, display: 'inline-block' }}>
+                              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--red-status, #ef4444)', background: 'var(--red-status, #ef4444)15', padding: '2px 8px', borderRadius: 4, marginBottom: 4, display: 'inline-block' }}>
                                 {'\u26A1'} URGENT
                               </span>
                             )}

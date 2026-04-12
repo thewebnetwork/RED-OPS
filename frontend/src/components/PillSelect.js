@@ -68,10 +68,13 @@ export default function PillSelect({
     return () => document.removeEventListener('mousedown', handleOutside);
   }, [open]);
 
-  const pad = size === 'sm' ? '3px 10px' : '5px 12px';
+  const pad = size === 'sm' ? '4px 10px' : '6px 14px';
   const fs = size === 'sm' ? 11 : 13;
 
   const rect = open && ref.current ? ref.current.getBoundingClientRect() : null;
+  // Drop downward by default; flip upward if near the bottom of the viewport
+  const spaceBelow = rect ? window.innerHeight - rect.bottom : 999;
+  const flipUp = spaceBelow < 220;
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block', minWidth }}>
@@ -84,8 +87,10 @@ export default function PillSelect({
           border: `1px solid ${selected ? selected.color + '88' : 'var(--border, #444)'}`,
           color: selected ? selected.color : 'var(--tx-3, #aaa)',
           fontSize: fs, fontWeight: 600,
-          transition: 'background .12s, border-color .12s',
+          transition: 'background .12s, border-color .12s, box-shadow .12s',
         }}
+        onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 0 2px ${selected ? selected.color + '33' : 'var(--border)'}` ; }}
+        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
       >
         {selected ? (
           <>
@@ -103,14 +108,17 @@ export default function PillSelect({
           onClick={e => e.stopPropagation()}
           style={{
             position: 'fixed',
-            top: rect.bottom + 4,
-            left: rect.left,
+            ...(flipUp
+              ? { bottom: window.innerHeight - rect.top + 4, left: rect.left }
+              : { top: rect.bottom + 4, left: rect.left }),
             background: 'var(--surface, #1e1e2e)',
             border: '1px solid var(--border, #333)',
             borderRadius: 10,
             padding: 6,
             zIndex: 99999,
             minWidth: Math.max(rect.width, 160),
+            maxHeight: 280,
+            overflowY: 'auto',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}
         >
