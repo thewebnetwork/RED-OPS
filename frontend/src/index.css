@@ -1951,10 +1951,11 @@ button:focus-visible, a:focus-visible, select:focus-visible,
     grid-template-columns: 1fr !important;
   }
 
-  /* Table cards: let horizontal scrolling happen inside the card, not the page */
-  .card:has(> table),
-  .card:has(> .data-table),
-  .card:has(> div > table) {
+  /* Table cards: let horizontal scrolling happen inside the card, not the page.
+     Avoids :has() (build pipeline compat) — apply directly to the table. */
+  .data-table {
+    display: block;
     overflow-x: auto;
+    max-width: 100%;
   }
 }
