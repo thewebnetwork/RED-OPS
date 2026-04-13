@@ -51,17 +51,17 @@
     --purple: var(--color-purple);
     --red-status: var(--color-red);
 
-    /* Status soft backgrounds */
-    --color-green: #22c55e;
-    --color-green-soft: rgba(34, 197, 94, 0.12);
-    --color-yellow: #f59e0b;
-    --color-yellow-soft: rgba(245, 158, 11, 0.12);
-    --color-red: #ef4444;
-    --color-red-soft: rgba(239, 68, 68, 0.12);
-    --color-blue: #3b82f6;
-    --color-blue-soft: rgba(59, 130, 246, 0.12);
-    --color-purple: #a855f7;
-    --color-purple-soft: rgba(168, 85, 247, 0.12);
+    /* Status — muted royal tones, luxury burgundy palette */
+    --color-green: #3d6b54;        /* deep forest */
+    --color-green-soft: rgba(61, 107, 84, 0.14);
+    --color-yellow: #9c7a2e;       /* antique gold */
+    --color-yellow-soft: rgba(156, 122, 46, 0.14);
+    --color-red: #8e2a2a;          /* oxblood */
+    --color-red-soft: rgba(142, 42, 42, 0.14);
+    --color-blue: #2e4a6b;         /* midnight royal */
+    --color-blue-soft: rgba(46, 74, 107, 0.14);
+    --color-purple: #5b3a6b;       /* deep aubergine */
+    --color-purple-soft: rgba(91, 58, 107, 0.14);
 
     /* Layout — macOS Sonoma scale */
     --radius: 12px;
@@ -508,10 +508,10 @@
   border-left: 3px solid var(--border);
 }
 
-.insight.warn  { border-left-color: var(--yellow);       background: #f59e0b0d; }
-.insight.danger{ border-left-color: var(--red-status);   background: #ef44440d; }
-.insight.good  { border-left-color: var(--green);        background: #22c55e0d; }
-.insight.info  { border-left-color: var(--blue);         background: #3b82f60d; }
+.insight.warn  { border-left-color: var(--yellow);       background: var(--color-yellow-soft); }
+.insight.danger{ border-left-color: var(--red-status);   background: var(--color-red-soft); }
+.insight.good  { border-left-color: var(--green);        background: var(--color-green-soft); }
+.insight.info  { border-left-color: var(--blue);         background: var(--color-blue-soft); }
 
 /* ── 9. BADGES / STATUS PILLS ─────────────────────────────── */
 .pill {
@@ -1332,7 +1332,7 @@ kbd {
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #f87171 0%, #8B1538 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #b4264a 0%, #8B1538 50%, #5b3a6b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
