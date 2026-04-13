@@ -21,10 +21,12 @@ BORDER_GRAY = colors.HexColor("#dddddd")
 TEXT_SECONDARY = colors.HexColor("#666666")
 
 
-def _fmt_currency(val):
+def _fmt_currency(val, currency="USD"):
     if val is None:
         return "—"
-    return f"${val:,.2f}"
+    symbols = {"USD": "$", "CAD": "CA$", "EUR": "€", "GBP": "£", "AUD": "AU$"}
+    prefix = symbols.get((currency or "USD").upper(), f"{currency} ")
+    return f"{prefix}{val:,.2f}"
 
 
 def _fmt_number(val):
@@ -157,21 +159,26 @@ def generate_ad_performance_pdf(
 
     kpi_rows = [kpi_headers]
 
+    cur = metrics.get("currency", "USD")
+    prev_cur = prev_metrics.get("currency", cur)
     kpi_items = [
-        ("Ad Spend", _fmt_currency(metrics.get("ad_spend")),
-         _fmt_currency(prev_metrics.get("ad_spend")),
+        ("Ad Spend", _fmt_currency(metrics.get("ad_spend"), cur),
+         _fmt_currency(prev_metrics.get("ad_spend"), prev_cur),
          _pct_change(metrics.get("ad_spend"), prev_metrics.get("ad_spend"))),
         ("Impressions", _fmt_number(metrics.get("impressions")),
          _fmt_number(prev_metrics.get("impressions")),
          _pct_change(metrics.get("impressions"), prev_metrics.get("impressions"))),
+        ("Reach", _fmt_number(metrics.get("reach")),
+         _fmt_number(prev_metrics.get("reach")),
+         _pct_change(metrics.get("reach"), prev_metrics.get("reach"))),
         ("Clicks", _fmt_number(metrics.get("clicks")),
          _fmt_number(prev_metrics.get("clicks")),
          _pct_change(metrics.get("clicks"), prev_metrics.get("clicks"))),
         ("Leads", _fmt_number(metrics.get("leads")),
          _fmt_number(prev_metrics.get("leads")),
          _pct_change(metrics.get("leads"), prev_metrics.get("leads"))),
-        ("Cost per Lead", _fmt_currency(metrics.get("cpl")),
-         _fmt_currency(prev_metrics.get("cpl")),
+        ("Cost per Lead", _fmt_currency(metrics.get("cpl"), cur),
+         _fmt_currency(prev_metrics.get("cpl"), prev_cur),
          _pct_change(metrics.get("cpl"), prev_metrics.get("cpl"))),
         ("CTR", _fmt_pct((metrics.get("ctr") or 0) * 100),
          _fmt_pct((prev_metrics.get("ctr") or 0) * 100),
@@ -215,9 +222,9 @@ def generate_ad_performance_pdf(
             c_data = c if isinstance(c, dict) else c
             camp_rows.append([
                 c_data.get("name", "—"),
-                _fmt_currency(c_data.get("spend")),
+                _fmt_currency(c_data.get("spend"), cur),
                 _fmt_number(c_data.get("leads")),
-                _fmt_currency(c_data.get("cpl")),
+                _fmt_currency(c_data.get("cpl"), cur),
             ])
 
         camp_widths = [3.0 * inch, 1.3 * inch, 1.0 * inch, 1.3 * inch]

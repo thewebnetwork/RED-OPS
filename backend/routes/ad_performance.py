@@ -30,15 +30,18 @@ router = APIRouter(prefix="/ad-performance", tags=["ad-performance"])
 
 class MetricsDict(BaseModel):
     """Ad performance metrics"""
-    ad_spend: float = Field(..., description="Total spend in dollars")
+    ad_spend: float = Field(..., description="Total spend in the snapshot's currency")
     impressions: int = Field(default=0, description="Number of impressions")
+    reach: int = Field(default=0, description="Unique people reached")
     clicks: int = Field(default=0, description="Number of clicks")
     leads: int = Field(default=0, description="Form fills, calls, etc.")
     cpl: Optional[float] = Field(None, description="Cost per lead (calculated or manual)")
     ctr: Optional[float] = Field(None, description="Click-through rate %")
     conversions: int = Field(default=0, description="Actual conversions (calls booked, deals)")
-    roas: Optional[float] = Field(None, description="Return on ad spend")
+    revenue: Optional[float] = Field(None, description="Revenue attributed to this ad period")
+    roas: Optional[float] = Field(None, description="Return on ad spend (revenue / ad_spend)")
     cpc: Optional[float] = Field(None, description="Cost per click")
+    currency: str = Field(default="USD", description="ISO currency code (USD, CAD, etc.)")
 
 
 class CampaignBreakdown(BaseModel):
@@ -111,6 +114,7 @@ class PlatformSummary(BaseModel):
     leads: int
     ctr: float
     cpl: float
+    currency: str = "USD"
 
 
 class ClientSummary(BaseModel):
@@ -123,6 +127,7 @@ class ClientSummary(BaseModel):
     monthly_trends: List[ClientSummaryPeriod]
     active_platforms: List[str]
     platforms: List[PlatformSummary] = []  # Detailed per-platform breakdown
+    currency: str = "USD"  # Primary currency across this client's snapshots
 
 
 class PerClientAgencySummary(BaseModel):
@@ -350,8 +355,10 @@ async def delete_snapshot(
 # Column name mappings: Meta Ads Manager header → internal field
 _META_COLUMN_MAP = {
     "amount spent (usd)": "ad_spend",
+    "amount spent (cad)": "ad_spend",
     "amount spent": "ad_spend",
     "impressions": "impressions",
+    "reach": "reach",
     "link clicks": "clicks",
     "clicks (all)": "clicks",
     "leads": "leads",
@@ -360,9 +367,33 @@ _META_COLUMN_MAP = {
     "ctr (link click-through rate)": "ctr",
     "ctr (all)": "ctr",
     "cost per result": "cpl",
+    "cost per results": "cpl",
     "cost per lead": "cpl",
     "campaign name": "campaign_name",
+    "campaign delivery": "campaign_status",
 }
+
+# Map Meta's campaign delivery values to our internal statuses
+_DELIVERY_STATUS_MAP = {
+    "active": "active",
+    "not_delivering": "paused",
+    "paused": "paused",
+    "completed": "completed",
+    "scheduled": "scheduled",
+    "in_review": "active",
+    "rejected": "paused",
+}
+
+
+def _detect_currency(headers: List[str]) -> str:
+    """Infer currency from Meta's 'Amount spent (XXX)' header."""
+    for h in headers:
+        lo = h.strip().lower()
+        if "amount spent" in lo and "(" in lo and ")" in lo:
+            code = lo.split("(", 1)[1].split(")", 1)[0].strip().upper()
+            if len(code) == 3:
+                return code
+    return "USD"
 
 
 def _resolve_column(headers: List[str]) -> Dict[str, int]:
@@ -421,6 +452,7 @@ async def import_meta_csv(
 
     headers = rows[0]
     col_map = _resolve_column(headers)
+    currency = _detect_currency(headers)
     warnings: List[str] = []
 
     # Validate required columns
@@ -433,6 +465,7 @@ async def import_meta_csv(
     campaigns: Dict[str, Dict[str, Any]] = {}
     total_spend = 0.0
     total_impressions = 0
+    total_reach = 0
     total_clicks = 0
     total_leads = 0
     total_ctr_weighted = 0.0  # impressions-weighted CTR sum
@@ -446,11 +479,14 @@ async def import_meta_csv(
         try:
             spend = _safe_float(row[col_map["ad_spend"]]) if "ad_spend" in col_map else 0.0
             impressions = int(_safe_float(row[col_map["impressions"]])) if "impressions" in col_map else 0
+            reach = int(_safe_float(row[col_map["reach"]])) if "reach" in col_map else 0
             clicks = int(_safe_float(row[col_map["clicks"]])) if "clicks" in col_map else 0
             leads = int(_safe_float(row[col_map["leads"]])) if "leads" in col_map else 0
             ctr_raw = _safe_float(row[col_map["ctr"]]) if "ctr" in col_map else 0.0
             cpl_raw = _safe_float(row[col_map["cpl"]]) if "cpl" in col_map else 0.0
             campaign = row[col_map["campaign_name"]].strip() if "campaign_name" in col_map else "Unknown Campaign"
+            status_raw = row[col_map["campaign_status"]].strip().lower() if "campaign_status" in col_map else "active"
+            status = _DELIVERY_STATUS_MAP.get(status_raw, "active")
         except (IndexError, KeyError):
             skipped += 1
             warnings.append(f"Row {row_idx}: malformed — skipped")
@@ -461,12 +497,16 @@ async def import_meta_csv(
 
         # Aggregate into campaign bucket
         if campaign not in campaigns:
-            campaigns[campaign] = {"spend": 0.0, "impressions": 0, "clicks": 0, "leads": 0, "cpl_sum": 0.0, "cpl_count": 0}
+            campaigns[campaign] = {"spend": 0.0, "impressions": 0, "reach": 0, "clicks": 0, "leads": 0, "cpl_sum": 0.0, "cpl_count": 0, "status": status}
         c = campaigns[campaign]
         c["spend"] += spend
         c["impressions"] += impressions
+        c["reach"] += reach
         c["clicks"] += clicks
         c["leads"] += leads
+        # Last non-active status wins (any paused/completed row flags the campaign)
+        if status != "active":
+            c["status"] = status
         if cpl_raw > 0:
             c["cpl_sum"] += cpl_raw
             c["cpl_count"] += 1
@@ -474,6 +514,7 @@ async def import_meta_csv(
         # Totals
         total_spend += spend
         total_impressions += impressions
+        total_reach += reach
         total_clicks += clicks
         total_leads += leads
         # CTR from Meta is already a percentage; weight by impressions for averaging
@@ -494,7 +535,7 @@ async def import_meta_csv(
         )
         campaign_list.append({
             "name": name,
-            "status": "active",
+            "status": data.get("status", "active"),
             "spend": round(data["spend"], 2),
             "leads": data["leads"],
             "cpl": cpl,
@@ -510,13 +551,16 @@ async def import_meta_csv(
     metrics = {
         "ad_spend": round(total_spend, 2),
         "impressions": total_impressions,
+        "reach": total_reach,
         "clicks": total_clicks,
         "leads": total_leads,
         "cpl": overall_cpl,
         "ctr": overall_ctr_decimal,
         "conversions": 0,
+        "revenue": None,
         "roas": None,
         "cpc": overall_cpc,
+        "currency": currency,
     }
 
     # Check for existing snapshot (same client + period + Meta)
@@ -659,9 +703,16 @@ async def get_client_summary(
             plat_clicks = sum(s["metrics"].get("clicks", 0) for s in plat_snapshots)
             plat_ctr = round((plat_clicks / plat_impressions) * 100, 2) if plat_impressions > 0 else 0
             plat_cpl = round(plat_spend / plat_leads, 2) if plat_leads > 0 else 0
+            plat_currency = next((s["metrics"].get("currency") for s in plat_snapshots if s["metrics"].get("currency")), "USD")
             platform_summaries.append(PlatformSummary(
-                platform=plat, ad_spend=plat_spend, leads=plat_leads, ctr=plat_ctr, cpl=plat_cpl
+                platform=plat, ad_spend=plat_spend, leads=plat_leads, ctr=plat_ctr, cpl=plat_cpl, currency=plat_currency
             ))
+
+    # Primary currency — most recent snapshot's currency
+    primary_currency = "USD"
+    if snapshots:
+        latest = max(snapshots, key=lambda s: s.get("updated_at", ""))
+        primary_currency = latest.get("metrics", {}).get("currency") or "USD"
 
     return ClientSummary(
         client_id=client_id,
@@ -671,7 +722,8 @@ async def get_client_summary(
         all_time_totals=all_time_totals,
         monthly_trends=monthly_trends,
         active_platforms=active_platforms,
-        platforms=platform_summaries
+        platforms=platform_summaries,
+        currency=primary_currency,
     )
 
 
@@ -783,9 +835,12 @@ def aggregate_snapshots(snapshots: List[dict]) -> Dict[str, Any]:
 
     total_spend = sum(s["metrics"].get("ad_spend", 0) for s in snapshots)
     total_impressions = sum(s["metrics"].get("impressions", 0) for s in snapshots)
+    total_reach = sum(s["metrics"].get("reach", 0) for s in snapshots)
     total_clicks = sum(s["metrics"].get("clicks", 0) for s in snapshots)
     total_leads = sum(s["metrics"].get("leads", 0) for s in snapshots)
     total_conversions = sum(s["metrics"].get("conversions", 0) for s in snapshots)
+    # Currency: take from first snapshot that has one, else USD
+    currency = next((s["metrics"].get("currency") for s in snapshots if s["metrics"].get("currency")), "USD")
 
     # Calculate derived metrics
     cpl = round(total_spend / total_leads, 2) if total_leads > 0 else 0
@@ -796,6 +851,7 @@ def aggregate_snapshots(snapshots: List[dict]) -> Dict[str, Any]:
     return {
         "ad_spend": total_spend,
         "impressions": total_impressions,
+        "reach": total_reach,
         "clicks": total_clicks,
         "leads": total_leads,
         "conversions": total_conversions,
@@ -803,6 +859,7 @@ def aggregate_snapshots(snapshots: List[dict]) -> Dict[str, Any]:
         "ctr": ctr,
         "cpc": cpc,
         "roas": roas,
+        "currency": currency,
         "platforms": sorted(set(s["platform"] for s in snapshots))
     }
 

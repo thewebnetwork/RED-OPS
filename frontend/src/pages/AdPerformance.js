@@ -28,14 +28,18 @@ const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } })
    UTILITIES
    ──────────────────────────────────────────────────────────────────────────── */
 
-const formatCurrency = (val) => {
+const formatCurrency = (val, currency = 'USD') => {
   if (!val && val !== 0) return '—';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(val);
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: (currency || 'USD').toUpperCase(),
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(val);
+  } catch {
+    return `$${Number(val).toFixed(2)}`;
+  }
 };
 
 const formatNumber = (val) => {
@@ -336,6 +340,7 @@ function ClientAdDashboard() {
 
   const hasData = snapshots && snapshots.length > 0;
   const currentMonth = summary?.current_month || {};
+  const currency = summary?.currency || currentMonth?.currency || 'USD';
   const previousMonth = summary?.previous_month || {};
   const monthlyTrend = summary?.monthly_trends || [];
 
@@ -453,7 +458,7 @@ function ClientAdDashboard() {
             <KPICard
               label="Total Spend"
               value={currentMonth.ad_spend}
-              formattedValue={formatCurrency(currentMonth.ad_spend)}
+              formattedValue={formatCurrency(currentMonth.ad_spend, currency)}
               delta={spendDelta}
               isPositiveDelta={false}
               subtitle="Current month"
@@ -469,7 +474,7 @@ function ClientAdDashboard() {
             <KPICard
               label="Cost Per Lead"
               value={currentMonth.cpl}
-              formattedValue={formatCurrency(currentMonth.cpl)}
+              formattedValue={formatCurrency(currentMonth.cpl, currency)}
               delta={cplDelta}
               isPositiveDelta={false}
               subtitle="Lower is better"
@@ -509,7 +514,7 @@ function ClientAdDashboard() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: 'var(--tx-2)' }}>Spend:</span>
-                      <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{formatCurrency(plat.ad_spend)}</span>
+                      <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{formatCurrency(plat.ad_spend, plat.currency || currency)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: 'var(--tx-2)' }}>Leads:</span>
@@ -549,6 +554,8 @@ function ClientAdDashboard() {
                       <th>Period</th>
                       <th>Platform</th>
                       <th>Spend</th>
+                      <th>Impr.</th>
+                      <th>Reach</th>
                       <th>Leads</th>
                       <th>CPL</th>
                       <th>CTR</th>
@@ -560,9 +567,11 @@ function ClientAdDashboard() {
                       <tr key={snap.id}>
                         <td>{getMonthName(snap.period)}</td>
                         <td>{snap.platform}</td>
-                        <td>{formatCurrency(snap.metrics?.ad_spend)}</td>
+                        <td>{formatCurrency(snap.metrics?.ad_spend, snap.metrics?.currency || currency)}</td>
+                        <td>{formatNumber(snap.metrics?.impressions)}</td>
+                        <td>{formatNumber(snap.metrics?.reach)}</td>
                         <td>{formatNumber(snap.metrics?.leads)}</td>
-                        <td>{formatCurrency(snap.metrics?.cpl)}</td>
+                        <td>{formatCurrency(snap.metrics?.cpl, snap.metrics?.currency || currency)}</td>
                         <td>{formatPercent(snap.metrics?.ctr)}</td>
                         <td>{snap.metrics?.roas?.toFixed(2)}x</td>
                       </tr>
