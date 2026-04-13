@@ -25,6 +25,7 @@ import {
   File as FileIcon, Image as ImageIcon, FileSpreadsheet, FileVideo, FileAudio,
   Loader2, X, Edit2,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import DocEditor from '../components/DocEditor';
 import EmptyState from '../components/EmptyState';
 import { SkeletonCardList } from '../components/Skeleton';
@@ -290,6 +291,8 @@ function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload }) {
 
 // ── Main Page ────────────────────────────────────────────────────
 export default function Drive() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin' || user?.role === 'Operator';
   const [section, setSection] = useState('my-drive'); // my-drive | shared | starred | recent | trash
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]); // [{id, name}]
@@ -558,8 +561,29 @@ export default function Drive() {
             onClick={() => setSection('trash')} />
         </div>
 
+        {/* NAS link (admin/operator only) */}
+        {isAdmin && (
+          <a
+            href="https://ops.redribbongroup.ca/login?redirect_url=/apps/dashboard/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginTop: 'auto', marginBottom: 10, padding: '10px 12px',
+              display: 'flex', alignItems: 'center', gap: 10,
+              border: '1px solid var(--border)', borderRadius: 10,
+              background: 'var(--surface-2)', color: 'var(--tx-1)',
+              textDecoration: 'none', fontSize: 13, fontWeight: 500,
+            }}
+            title="Open Nextcloud NAS for large video files"
+          >
+            <HardDrive size={16} style={{ color: 'var(--accent)' }} />
+            <span style={{ flex: 1 }}>Open NAS</span>
+            <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>↗</span>
+          </a>
+        )}
+
         {/* Storage (placeholder — could wire to real quota later) */}
-        <div style={{ marginTop: 'auto', padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
+        <div style={{ marginTop: isAdmin ? 0 : 'auto', padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>Storage</div>
           <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden', marginBottom: 6 }}>
             <div style={{ height: '100%', width: '14%', background: 'var(--accent)' }} />

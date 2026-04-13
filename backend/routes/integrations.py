@@ -19,10 +19,14 @@ logger = logging.getLogger(__name__)
 class IntegrationConfig(BaseModel):
     api_key: Optional[str] = None
     webhook_url: Optional[str] = None
+    # Nextcloud / WebDAV specific
+    url: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
 
 class IntegrationConnect(BaseModel):
     provider: str
-    auth_type: Literal["api_key", "webhook"] = "api_key"
+    auth_type: Literal["api_key", "webhook", "webdav"] = "api_key"
     config: IntegrationConfig
 
 # ============== SUPPORTED PROVIDERS ==============
@@ -32,7 +36,7 @@ SUPPORTED_PROVIDERS = {
     "slack_webhook": {"name": "Slack",         "auth_type": "webhook"},
     "stripe":        {"name": "Stripe",        "auth_type": "api_key"},
     "ghl":           {"name": "GoHighLevel",   "auth_type": "api_key"},
-    "nextcloud":     {"name": "Nextcloud",     "auth_type": "api_key"},
+    "nextcloud":     {"name": "Nextcloud",     "auth_type": "webdav"},
     "zapier":        {"name": "Zapier",        "auth_type": "webhook"},
 }
 
@@ -73,6 +77,27 @@ async def _test_stripe(config: dict) -> bool:
     except Exception:
         return False
 
+async def _test_nextcloud(config: dict) -> bool:
+    """PROPFIND the user's root — verifies URL + credentials in one request."""
+    url = (config.get("url") or "").rstrip("/")
+    username = config.get("username") or ""
+    password = config.get("password") or ""
+    if not url or not username or not password:
+        return False
+    try:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+            r = await client.request(
+                "PROPFIND",
+                f"{url}/remote.php/dav/files/{username}/",
+                auth=(username, password),
+                headers={"Depth": "0"},
+            )
+            # 207 Multi-Status = success, 401 = bad credentials, 404 = bad URL
+            return r.status_code == 207
+    except Exception as e:
+        logger.warning(f"Nextcloud test failed: {e}")
+        return False
+
 async def test_integration(provider: str, config: dict) -> bool:
     if provider == "openai" and config.get("api_key"):
         return await _test_openai(config)
@@ -80,6 +105,8 @@ async def test_integration(provider: str, config: dict) -> bool:
         return await _test_slack(config)
     if provider == "stripe" and config.get("api_key"):
         return await _test_stripe(config)
+    if provider == "nextcloud":
+        return await _test_nextcloud(config)
     # For others, accept if non-empty credential provided
     return bool(config.get("api_key") or config.get("webhook_url"))
 
@@ -100,6 +127,8 @@ async def list_integrations(current_user: dict = Depends(get_current_user)):
             cfg["api_key"] = _mask(cfg["api_key"])
         if cfg.get("webhook_url"):
             cfg["webhook_url"] = _mask(cfg["webhook_url"])
+        if cfg.get("password"):
+            cfg["password"] = _mask(cfg["password"])
     return integrations
 
 
@@ -116,6 +145,8 @@ async def get_integration(provider: str, current_user: dict = Depends(get_curren
         cfg["api_key"] = _mask(cfg["api_key"])
     if cfg.get("webhook_url"):
         cfg["webhook_url"] = _mask(cfg["webhook_url"])
+    if cfg.get("password"):
+        cfg["password"] = _mask(cfg["password"])
     return integration
 
 

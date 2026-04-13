@@ -63,9 +63,11 @@ const allIntegrations = [
     icon: 'A', color: '#4285f4', authType: 'oauth', oauthLabel: 'Sign in with Google',
   },
   {
-    id: 'nextcloud', name: 'Nextcloud', category: 'Storage',
-    description: 'Primary file storage for all deliverables and client assets.',
-    icon: 'N', color: '#0082c9', authType: 'api_key', keyLabel: 'Nextcloud App Password',
+    id: 'nextcloud', name: 'Nextcloud (NAS)', category: 'Storage',
+    description: 'Link your self-hosted Nextcloud / TrueNAS for large file storage (videos, raw footage, deliverables).',
+    icon: 'N', color: '#0082c9', authType: 'webdav',
+    openUrl: 'https://ops.redribbongroup.ca/login?redirect_url=/apps/dashboard/',
+    docsUrl: 'https://docs.nextcloud.com/server/latest/user_manual/en/session_management.html#managing-devices',
   },
   {
     id: 'openai', name: 'OpenAI', category: 'AI',
@@ -101,6 +103,9 @@ export default function Integrations() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
   const [apiKey, setApiKey] = useState('');
+  const [ncUrl, setNcUrl] = useState('');
+  const [ncUser, setNcUser] = useState('');
+  const [ncPass, setNcPass] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(null);
   const [confirmDisconnect, setConfirmDisconnect] = useState(null);
@@ -140,6 +145,10 @@ export default function Integrations() {
       toast.error(`Please enter your ${integration.keyLabel || 'key'} to connect.`);
       return;
     }
+    if (integration.authType === 'webdav' && (!ncUrl.trim() || !ncUser.trim() || !ncPass.trim())) {
+      toast.error('URL, username, and app password are all required.');
+      return;
+    }
 
     if (integration.authType === 'oauth') {
       toast.info(`${integration.name} OAuth coming soon. Use API key if available.`);
@@ -148,7 +157,14 @@ export default function Integrations() {
 
     setConnecting(true);
     try {
-      const config = integration.authType === 'webhook' ? { webhook_url: apiKey } : { api_key: apiKey };
+      let config;
+      if (integration.authType === 'webhook') {
+        config = { webhook_url: apiKey };
+      } else if (integration.authType === 'webdav') {
+        config = { url: ncUrl.trim().replace(/\/+$/, ''), username: ncUser.trim(), password: ncPass };
+      } else {
+        config = { api_key: apiKey };
+      }
       const res = await ax().post(`${API}/integrations/${integration.id}/connect`, {
         provider: integration.id,
         auth_type: integration.authType,
@@ -162,6 +178,7 @@ export default function Integrations() {
       fetchIntegrations();
       setModal(null);
       setApiKey('');
+      setNcUrl(''); setNcUser(''); setNcPass('');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to connect');
     } finally {
@@ -351,6 +368,67 @@ export default function Integrations() {
                   <a href={modal.integration.docsUrl} target="_blank" rel="noopener noreferrer"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--tx-3)', textDecoration: 'none', marginBottom: 20 }}>
                     <ExternalLink size={11} /> Where do I find this key?
+                  </a>
+                )}
+              </div>
+            ) : modal.integration.authType === 'webdav' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                    Nextcloud URL
+                  </label>
+                  <input
+                    className="input-field"
+                    type="url"
+                    placeholder="https://ops.redribbongroup.ca"
+                    value={ncUrl}
+                    onChange={e => setNcUrl(e.target.value)}
+                    autoFocus
+                  />
+                  <div style={{ fontSize: 10.5, color: 'var(--tx-3)', marginTop: 4 }}>
+                    Your Nextcloud instance root (no trailing slash).
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                    Username
+                  </label>
+                  <input
+                    className="input-field"
+                    type="text"
+                    placeholder="e.g. admin or your Nextcloud username"
+                    value={ncUser}
+                    onChange={e => setNcUser(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                    App Password
+                  </label>
+                  <input
+                    className="input-field"
+                    type="password"
+                    placeholder="Generate in Nextcloud \u2192 Security \u2192 Devices & sessions"
+                    value={ncPass}
+                    onChange={e => setNcPass(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleConnect()}
+                  />
+                  {modal.integration.docsUrl && (
+                    <a href={modal.integration.docsUrl} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--tx-3)', textDecoration: 'none', marginTop: 6 }}>
+                      <ExternalLink size={11} /> How to generate an app password
+                    </a>
+                  )}
+                </div>
+                {modal.integration.openUrl && (
+                  <a href={modal.integration.openUrl} target="_blank" rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px',
+                      background: 'var(--surface-2)', border: '1px solid var(--border)',
+                      borderRadius: 8, fontSize: 12, color: 'var(--tx-1)', textDecoration: 'none',
+                      alignSelf: 'flex-start',
+                    }}>
+                    <ExternalLink size={12} /> Open Nextcloud
                   </a>
                 )}
               </div>
