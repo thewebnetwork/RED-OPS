@@ -12,7 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   MessageSquare, Plus, X, Send, Hash, FileText, Search,
   Loader2, Pencil, Trash2, Check, Paperclip, Download, Image as ImageIcon,
-  Settings, LogOut, MessageCircle,
+  Settings, LogOut, MessageCircle, ChevronLeft,
 } from 'lucide-react';
 import MentionHashtagInput from '../components/MentionHashtagInput';
 import EmptyState from '../components/EmptyState';
@@ -510,9 +510,9 @@ export default function Conversations() {
 
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+    <div className={`conv-shell${activeThread ? ' conv-show-thread' : ''}`} style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       {/* ── Thread Sidebar (iMessage-style) ── */}
-      <div style={{ width: 320, minWidth: 320, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)', flexShrink: 0 }}>
+      <div className="conv-list" style={{ width: 320, minWidth: 320, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)', flexShrink: 0 }}>
         {/* Header */}
         <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -628,11 +628,23 @@ export default function Conversations() {
       </div>
 
       {/* ── Message View ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="conv-message" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {activeThread ? (
           <>
             {/* Thread header (iMessage-style) */}
             <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative', background: 'var(--surface)' }}>
+              <button
+                className="conv-back"
+                onClick={() => setActiveThread(null)}
+                aria-label="Back to conversations"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--accent)', padding: 4, alignItems: 'center',
+                  marginLeft: -4, marginRight: 2,
+                }}
+              >
+                <ChevronLeft size={22} />
+              </button>
               {/* Avatar — photo for DMs if available */}
               {(() => {
                 const otherId = activeThread.type === 'dm' ? (activeThread.members || []).find(m => m !== user?.id) : null;

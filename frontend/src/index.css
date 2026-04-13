@@ -1849,3 +1849,112 @@ button:focus-visible, a:focus-visible, select:focus-visible,
 .top-bar {
   padding-top: env(safe-area-inset-top, 0);
 }
+
+/* ============================================================
+   50. MOBILE OPTIMIZATION — responsive typography + layout
+   ============================================================ */
+
+/* Responsive type scale via clamp(min, preferred, max) */
+.page-title      { font-size: clamp(18px, 4.5vw, 22px); font-weight: 700; letter-spacing: -0.01em; color: var(--tx-1); }
+.section-title   { font-size: clamp(13px, 3vw, 15px);   font-weight: 600; color: var(--tx-1); }
+.kpi-value       { font-size: clamp(20px, 5.5vw, 28px); font-weight: 700; color: var(--tx-1); letter-spacing: -0.01em; }
+.subtle-label    { font-size: clamp(11px, 2.4vw, 12px); color: var(--tx-2); }
+
+/* Form grid — auto-stacks to single column on narrow screens */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .form-grid-2,
+  .form-grid-3 { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* Vertical stack helpers — shrink margins on mobile */
+.stack-lg > * + * { margin-top: 24px; }
+.stack-md > * + * { margin-top: 16px; }
+.stack-sm > * + * { margin-top: 10px; }
+@media (max-width: 600px) {
+  .stack-lg > * + * { margin-top: 14px; }
+  .stack-md > * + * { margin-top: 10px; }
+}
+
+/* ─── Mobile sidebar drawer ───
+   Applies to any element with class .mobile-drawer that toggles .is-open.
+   Default (desktop): element behaves normally, no transform.
+   Mobile: off-canvas left drawer, slides in when .is-open is set. */
+.mobile-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 89;
+  opacity: 0;
+  transition: opacity var(--speed-normal) var(--apple-spring);
+}
+.mobile-drawer-overlay.is-open {
+  display: block;
+  opacity: 1;
+}
+
+@media (max-width: 767px) {
+  .mobile-drawer {
+    position: fixed !important;
+    top: 0; bottom: 0; left: 0;
+    width: min(280px, 82vw) !important;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform var(--speed-normal) var(--apple-spring);
+    z-index: 90;
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.4);
+  }
+  .mobile-drawer.is-open {
+    transform: translateX(0);
+  }
+  /* Hamburger button — only visible on mobile */
+  .mobile-hamburger { display: inline-flex !important; }
+}
+.mobile-hamburger { display: none; }
+
+/* ─── Conversations mobile stack ───
+   Parent has .conv-shell. At <=767px, thread list and message view stack,
+   with .conv-show-thread class toggling which one is visible. */
+@media (max-width: 767px) {
+  .conv-shell .conv-list    { width: 100% !important; flex: 1 1 auto !important; }
+  .conv-shell .conv-message { width: 100% !important; flex: 1 1 auto !important; }
+  .conv-shell:not(.conv-show-thread) .conv-message { display: none !important; }
+  .conv-shell.conv-show-thread       .conv-list    { display: none !important; }
+  .conv-back { display: inline-flex !important; }
+}
+.conv-back { display: none; }
+
+/* ─── Safety clamp: any absolutely-sized modal gets tamed on narrow screens ─── */
+@media (max-width: 600px) {
+  .modal-box,
+  [class*="modal"] > div[style*="width"] {
+    max-width: 100vw !important;
+  }
+
+  /* Catch-all for inline 2-col grids that never got converted to .form-grid-2
+     — matches `style="... grid-template-columns: 1fr 1fr ..."` and repeat() variants */
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: repeat(2"],
+  [style*="grid-template-columns:repeat(2"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Table cards: let horizontal scrolling happen inside the card, not the page */
+  .card:has(> table),
+  .card:has(> .data-table),
+  .card:has(> div > table) {
+    overflow-x: auto;
+  }
+}

@@ -23,7 +23,7 @@ import {
   Home, ChevronRight, ChevronDown, Star, Clock, Trash2,
   Download, MoreVertical, HardDrive, Users as UsersIcon,
   File as FileIcon, Image as ImageIcon, FileSpreadsheet, FileVideo, FileAudio,
-  Loader2, X, Edit2,
+  Loader2, X, Edit2, Menu,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import DocEditor from '../components/DocEditor';
@@ -293,6 +293,7 @@ function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload }) {
 export default function Drive() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin' || user?.role === 'Operator';
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [section, setSection] = useState('my-drive'); // my-drive | shared | starred | recent | trash
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]); // [{id, name}]
@@ -314,6 +315,8 @@ export default function Drive() {
   const fileInputRef = useRef(null);
 
   useEffect(() => { localStorage.setItem('drive_view', view); }, [view]);
+  // Auto-close drawer when changing section or navigating
+  useEffect(() => { setSidebarOpen(false); }, [section, currentFolderId]);
 
   // ── Load data ────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -523,13 +526,21 @@ export default function Drive() {
   // ── Render ───────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden', background: 'var(--bg)' }}>
+      {/* Mobile drawer overlay */}
+      <div
+        className={`mobile-drawer-overlay${sidebarOpen ? ' is-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
       {/* ── Sidebar ── */}
-      <aside style={{
-        width: 240, minWidth: 240, flexShrink: 0,
-        borderRight: '1px solid var(--border)',
-        background: 'var(--surface)',
-        display: 'flex', flexDirection: 'column', padding: '16px 12px', gap: 16,
-      }}>
+      <aside
+        className={`mobile-drawer${sidebarOpen ? ' is-open' : ''}`}
+        style={{
+          width: 240, minWidth: 240, flexShrink: 0,
+          borderRight: '1px solid var(--border)',
+          background: 'var(--surface)',
+          display: 'flex', flexDirection: 'column', padding: '16px 12px', gap: 16,
+        }}
+      >
         {/* + New button */}
         <div style={{ position: 'relative' }}>
           <button onClick={() => setNewMenuOpen(true)} className="btn-primary" style={{
@@ -600,6 +611,19 @@ export default function Drive() {
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', flexShrink: 0,
           background: 'var(--surface)',
         }}>
+          {/* Mobile menu button */}
+          <button
+            className="mobile-hamburger"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open drive menu"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--tx-1)', alignItems: 'center', justifyContent: 'center',
+              padding: 6, borderRadius: 6,
+            }}
+          >
+            <Menu size={20} />
+          </button>
           {/* Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 600, color: 'var(--tx-1)' }}>
             {section === 'my-drive' && breadcrumbs.length > 0 ? (
