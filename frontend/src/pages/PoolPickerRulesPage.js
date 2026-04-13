@@ -235,7 +235,7 @@ export default function PoolPickerRulesPage() {
                       className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                         rule.allowed_pools?.includes(pool.value)
                           ? 'border-[var(--accent)]'
-                          : 'hover:border-slate-300'
+                          : 'hover:border-[var(--border-hi)]'
                       }`}
                     >
                       <Checkbox

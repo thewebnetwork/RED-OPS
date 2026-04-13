@@ -37,7 +37,7 @@ function StatusPill({ status }) {
   const c = STATUS_COLORS[status] || { color: 'var(--tx-3)', bg: 'var(--bg-elevated)' };
   return (
     <span style={{
-      fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5,
+      fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 6,
       background: c.bg, color: c.color, whiteSpace: 'nowrap',
     }}>
       {status}
@@ -104,7 +104,7 @@ function StatusSelect({ orderId, currentStatus, onUpdate }) {
         disabled={updating}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
-          fontSize: 11, fontWeight: 600, padding: '3px 8px 3px 9px', borderRadius: 5,
+          fontSize: 11, fontWeight: 600, padding: '3px 8px 3px 9px', borderRadius: 6,
           background: c.bg, color: c.color, border: `1px solid ${c.color}44`,
           cursor: updating ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
           opacity: updating ? 0.6 : 1, transition: 'opacity .15s, box-shadow .15s',
@@ -301,7 +301,7 @@ export default function Orders() {
                     <td style={{ padding: '12px 16px' }}>
                       {order.assigned_queue_key ? (
                         <span style={{
-                          fontSize: 11, padding: '3px 8px', borderRadius: 5,
+                          fontSize: 11, padding: '3px 8px', borderRadius: 6,
                           background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                           color: 'var(--tx-2)', whiteSpace: 'nowrap',
                         }}>

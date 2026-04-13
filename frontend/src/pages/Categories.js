@@ -600,7 +600,7 @@ const [categoriesL1, setCategoriesL1] = useState([]);
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseDialog}
-              className="bg-slate-600 hover:bg-slate-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               data-testid="leave-btn"
             >
               {"Leave without saving"}

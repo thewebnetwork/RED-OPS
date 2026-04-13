@@ -340,7 +340,7 @@ const [teams, setTeams] = useState([]);
                     </div>
                   ) : teamMembers.length === 0 ? (
                     <div className="p-8 text-center">
-                      <Users size={32} className="mx-auto mb-2 text-slate-300" />
+                      <Users size={32} className="mx-auto mb-2 text-[var(--tx-3)]" />
                       <p>{"No members"}</p>
                     </div>
                   ) : (
@@ -372,7 +372,7 @@ const [teams, setTeams] = useState([]);
           ) : (
             <Card className="">
               <CardContent className="p-12 text-center">
-                <UsersRound size={48} className="mx-auto mb-4 text-slate-300" />
+                <UsersRound size={48} className="mx-auto mb-4 text-[var(--tx-3)]" />
                 <p>{"Select a team"}</p>
               </CardContent>
             </Card>

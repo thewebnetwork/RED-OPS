@@ -867,7 +867,7 @@ const { user: currentUser } = useAuth();
                 {userSpecialtySearch && (
                   <button 
                     onClick={() => setUserSpecialtySearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-[var(--tx-2)]"
                   >
                     <X size={16} />
                   </button>

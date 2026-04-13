@@ -95,7 +95,7 @@ const [email, setEmail] = useState('');
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@redribbongroup.ca"
-                    className="mt-1.5 border-slate-300 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
+                    className="mt-1.5 border-[var(--border-hi)] focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                     data-testid="forgot-email-input"
                   />
                 </div>

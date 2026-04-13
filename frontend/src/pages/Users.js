@@ -154,9 +154,9 @@ const { user: currentUser } = useAuth();
 
   const getRoleColor = (roleName) => {
     const colors = {
-      'Administrator': { bg: '#dc262620', text: '#dc2626' },
-      'Operator': { bg: '#2563eb20', text: '#2563eb' },
-      'Standard User': { bg: '#16a34a20', text: '#16a34a' }
+      'Administrator': { bg: 'var(--accent-soft)', text: 'var(--accent)' },
+      'Operator': { bg: '#3b82f620', text: '#3b82f6' },
+      'Standard User': { bg: '#22c55e20', text: '#22c55e' }
     };
     return colors[roleName] || { bg: '#e2e8f0', text: '#475569' };
   };

@@ -253,7 +253,7 @@ const [searchParams] = useSearchParams();
             {policies.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Shield className="w-12 h-12 mx-auto text-slate-300 mb-4" />
+                  <Shield className="w-12 h-12 mx-auto text-[var(--tx-3)] mb-4" />
                   <p className="">No policies created yet</p>
                   <Button 
                     variant="outline" 

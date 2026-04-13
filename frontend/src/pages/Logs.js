@@ -320,7 +320,7 @@ export default function Logs() {
                 </div>
               ) : filteredLogs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 p-8">
-                  <FileText size={48} className="text-slate-300 mb-3" />
+                  <FileText size={48} className="text-[var(--tx-3)] mb-3" />
                   <p className="text-lg font-medium mb-2">No logs found</p>
                   <p className="text-sm text-center max-w-md">
                     {activeTab === 'system' && 'System logs track server events, startup, and scheduled tasks. Logs appear here as system activity occurs.'}

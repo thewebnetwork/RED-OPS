@@ -598,7 +598,7 @@ export default function Workflows() {
               return (
                 <Card
                   key={template.id}
-                  className="group hover:shadow-lg transition-all duration-200 hover:border-slate-300"
+                  className="group hover:shadow-lg transition-all duration-200 hover:border-[var(--border-hi)]"
                   data-testid={`template-card-${template.id}`}
                 >
                   <CardHeader className="pb-3">
@@ -640,7 +640,7 @@ export default function Workflows() {
                     <Button
                       onClick={() => handleInstallTemplate(template.id)}
                       disabled={installingTemplate === template.id}
-                      className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white group"
+                      className="w-full mt-4 bg-slate-900 hover:bg-[var(--surface)] text-white group"
                       data-testid={`install-template-${template.id}`}
                     >
                       {installingTemplate === template.id ? (
@@ -692,7 +692,7 @@ export default function Workflows() {
             <CardContent className="p-0">
               {categories.length === 0 ? (
                 <div className="p-12 text-center">
-                  <FolderTree size={48} className="mx-auto text-slate-300 mb-3" />
+                  <FolderTree size={48} className="mx-auto text-[var(--tx-3)] mb-3" />
                   <p>No categories configured</p>
                   <p className="text-sm mt-1">Create categories first to set up workflow triggers</p>
                 </div>
@@ -757,7 +757,7 @@ export default function Workflows() {
             <CardContent className="p-0">
               {executions.length === 0 ? (
                 <div className="p-12 text-center">
-                  <History size={48} className="mx-auto text-slate-300 mb-3" />
+                  <History size={48} className="mx-auto text-[var(--tx-3)] mb-3" />
                   <p>No executions yet</p>
                   <p className="text-sm mt-1">Workflow executions will appear here once workflows are triggered</p>
                 </div>
@@ -947,7 +947,7 @@ export default function Workflows() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseCreateDialog}
-              className="bg-slate-600 hover:bg-slate-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               data-testid="leave-btn"
             >
               Leave without saving
@@ -971,7 +971,7 @@ export default function Workflows() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseDuplicateDialog}
-              className="bg-slate-600 hover:bg-slate-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               data-testid="leave-btn"
             >
               Leave without saving

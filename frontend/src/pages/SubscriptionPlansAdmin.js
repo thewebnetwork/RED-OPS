@@ -269,7 +269,7 @@ export default function SubscriptionPlansAdmin() {
 
       {filteredPlans.length === 0 && (
         <div className="text-center py-12">
-          <CreditCard size={48} className="mx-auto mb-4 text-slate-300" />
+          <CreditCard size={48} className="mx-auto mb-4 text-[var(--tx-3)]" />
           <p>No subscription plans found</p>
           <p className="text-sm mt-1">Create your first plan to get started</p>
         </div>

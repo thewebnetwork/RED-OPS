@@ -222,7 +222,7 @@ const [settings, setSettings] = useState([]);
           {filteredSettings.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Type size={32} className="text-slate-300 mb-4" />
+                <Type size={32} className="text-[var(--tx-3)] mb-4" />
                 <p className="">No settings found</p>
               </CardContent>
             </Card>

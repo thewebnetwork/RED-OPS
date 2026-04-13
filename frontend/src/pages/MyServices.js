@@ -297,7 +297,7 @@ For support, email support@example.com"
             </div>
           ) : (
             <div className="text-center py-8">
-              <PackageOpen size={40} className="mx-auto mb-3 text-slate-300" />
+              <PackageOpen size={40} className="mx-auto mb-3 text-[var(--tx-3)]" />
               <p>No service information has been configured.</p>
               {isAdmin && (
                 <p className="text-sm mt-2">Click "Edit Content" to add information.</p>

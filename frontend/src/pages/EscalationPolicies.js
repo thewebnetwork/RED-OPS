@@ -287,7 +287,7 @@ export default function EscalationPolicies() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">Escalation Policies</h1>
-          <p className="text-gray-600">Configure automatic escalation rules for SLA breaches</p>
+          <p className="text-[var(--tx-2)]">Configure automatic escalation rules for SLA breaches</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleTriggerCheck} data-testid="trigger-check-btn">
@@ -307,25 +307,25 @@ export default function EscalationPolicies() {
           <Card>
             <CardContent className="pt-4">
               <div className="text-2xl font-bold text-[var(--accent)]">{stats.currently_escalated_orders}</div>
-              <div className="text-sm text-gray-600">Escalated Orders</div>
+              <div className="text-sm text-[var(--tx-2)]">Escalated Orders</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
               <div className="text-2xl font-bold text-orange-600">{stats.unacknowledged}</div>
-              <div className="text-sm text-gray-600">Unacknowledged</div>
+              <div className="text-sm text-[var(--tx-2)]">Unacknowledged</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
               <div className="text-2xl font-bold">{stats.escalations_today}</div>
-              <div className="text-sm text-gray-600">Today</div>
+              <div className="text-sm text-[var(--tx-2)]">Today</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
               <div className="text-2xl font-bold text-green-600">{stats.active_policies}</div>
-              <div className="text-sm text-gray-600">Active Policies</div>
+              <div className="text-sm text-[var(--tx-2)]">Active Policies</div>
             </CardContent>
           </Card>
         </div>
@@ -349,9 +349,9 @@ export default function EscalationPolicies() {
           {policies.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <Shield className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <Shield className="w-12 h-12 mx-auto text-[var(--tx-3)] mb-4" />
                 <h3 className="text-lg font-medium">No Escalation Policies</h3>
-                <p className="text-gray-600 mt-1">Create your first policy to automate escalations</p>
+                <p className="text-[var(--tx-2)] mt-1">Create your first policy to automate escalations</p>
                 <Button onClick={handleCreatePolicy} className="mt-4">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Policy
@@ -429,7 +429,7 @@ export default function EscalationPolicies() {
               <CardContent className="py-12 text-center">
                 <Check className="w-12 h-12 mx-auto text-green-500 mb-4" />
                 <h3 className="text-lg font-medium">No Escalated Orders</h3>
-                <p className="text-gray-600 mt-1">All tickets are within SLA thresholds</p>
+                <p className="text-[var(--tx-2)] mt-1">All tickets are within SLA thresholds</p>
               </CardContent>
             </Card>
           ) : (

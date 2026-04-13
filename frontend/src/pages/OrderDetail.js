@@ -887,8 +887,8 @@ export default function OrderDetail() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Order Details Card */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="border-[var(--border)]">
+            <CardHeader className="border-b border-[var(--border)] pb-4">
               <CardTitle>Request Details</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
@@ -996,7 +996,7 @@ export default function OrderDetail() {
 
             {/* Linked Tasks Tab */}
             <TabsContent value="tasks" className="mt-4">
-              <Card className="border-slate-200">
+              <Card className="border-[var(--border)]">
                 <CardContent className="p-4">
                   {linkedTasks.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px 16px' }}>
@@ -1044,7 +1044,7 @@ export default function OrderDetail() {
             </TabsContent>
 
             <TabsContent value="messages" className="mt-4">
-              <Card className="border-slate-200">
+              <Card className="border-[var(--border)]">
                 <CardContent className="p-0">
                   <div className="h-80 overflow-y-auto p-4 space-y-4">
                     {messages.length === 0 ? (
@@ -1090,7 +1090,7 @@ export default function OrderDetail() {
                   
                   {/* Message Composer */}
                   {(order.editor_id === user?.id || order.requester_id === user?.id || user?.role === 'Administrator' || user?.role === 'Admin') && (
-                    <div className="border-t border-slate-100 p-4">
+                    <div className="border-t border-[var(--border)] p-4">
                       <div className="flex gap-3" style={{ alignItems: 'flex-end' }}>
                         <MentionHashtagInput
                           ref={orderInputRef}
@@ -1118,8 +1118,8 @@ export default function OrderDetail() {
             </TabsContent>
 
             <TabsContent value="files" className="mt-4">
-              <Card className="border-slate-200">
-                <CardHeader className="border-b border-slate-100 pb-4 flex flex-row items-center justify-between">
+              <Card className="border-[var(--border)]">
+                <CardHeader className="border-b border-[var(--border)] pb-4 flex flex-row items-center justify-between">
                   <CardTitle className="text-base">Order Files</CardTitle>
                   {canAddFile && (
                     <Dialog open={addFileOpen} onOpenChange={setAddFileOpen}>
@@ -1251,8 +1251,8 @@ export default function OrderDetail() {
         {/* Right Sidebar */}
         <div className="space-y-6">
           {/* Order Summary */}
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <Card className="border-[var(--border)]">
+            <CardHeader className="border-b border-[var(--border)] pb-4">
               <CardTitle className="text-base">Request Info</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">

@@ -103,10 +103,10 @@ function SortableWidgetItem({ widget, onRemove, onResize }) {
       className={`p-4 border rounded-lg bg-white shadow-sm ${isDragging ? 'ring-2 ring-rose-500' : ''}`}
     >
       <div className="flex items-center gap-3">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:text-slate-600">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:text-[var(--tx-2)]">
           <GripVertical size={20} />
         </button>
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${widget.config?.color || 'bg-slate-500'}`}>
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${widget.config?.color || 'bg-[var(--surface-2)]0'}`}>
           <Icon size={20} className="text-white" />
         </div>
         <div className="flex-1">
@@ -141,7 +141,7 @@ function WidgetLibraryItem({ widget, onAdd }) {
       onClick={() => onAdd(widget)}
     >
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${widget.config?.color || 'bg-slate-500'}`}>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${widget.config?.color || 'bg-[var(--surface-2)]0'}`}>
           <Icon size={16} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
@@ -706,7 +706,7 @@ const navigate = useNavigate();
                   <div className="space-y-2">
                     {previewData.dashboard?.widgets?.map((widget, idx) => (
                       <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border">
-                        <div className={`w-6 h-6 rounded ${widget.config?.color || 'bg-slate-500'} flex items-center justify-center`}>
+                        <div className={`w-6 h-6 rounded ${widget.config?.color || 'bg-[var(--surface-2)]0'} flex items-center justify-center`}>
                           <Inbox size={12} className="text-white" />
                         </div>
                         <span className="text-sm">{widget.title}</span>

@@ -205,7 +205,7 @@ export default function SpecialtiesAdmin() {
 
       {filteredSpecialties.length === 0 && (
         <div className="text-center py-12">
-          <Briefcase size={48} className="mx-auto mb-4 text-slate-300" />
+          <Briefcase size={48} className="mx-auto mb-4 text-[var(--tx-3)]" />
           <p>No specialties found</p>
           {search && <p className="text-sm mt-1">Try a different search term</p>}
         </div>

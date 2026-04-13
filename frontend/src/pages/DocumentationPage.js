@@ -408,7 +408,7 @@ export default function DocumentationPage() {
 
       {/* Documentation Content */}
       <Card data-testid="documentation-content">
-        <CardContent className="p-6 prose prose-slate max-w-none prose-headings:text-slate-900 prose-h1:text-2xl prose-h2:text-xl prose-h2:border-b prose-h2:pb-2 prose-h2:mb-4 prose-h3:text-lg prose-table:text-sm prose-th:bg-slate-100 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-td:border prose-th:border prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[var(--accent)] prose-code:before:content-none prose-code:after:content-none">
+        <CardContent className="p-6 prose prose-slate max-w-none prose-headings:text-slate-900 prose-h1:text-2xl prose-h2:text-xl prose-h2:border-b prose-h2:pb-2 prose-h2:mb-4 prose-h3:text-lg prose-table:text-sm prose-th:bg-[var(--surface-2)] prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-td:border prose-th:border prose-code:bg-[var(--surface-2)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[var(--accent)] prose-code:before:content-none prose-code:after:content-none">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {content}
           </ReactMarkdown>

@@ -522,7 +522,7 @@ const reactFlowWrapper = useRef(null);
               {nodePalette.map((item) => (
                 <div
                   key={item.type}
-                  className="p-3 rounded-lg border cursor-grab hover:border-slate-300 hover:shadow-sm transition-all"
+                  className="p-3 rounded-lg border cursor-grab hover:border-[var(--border-hi)] hover:shadow-sm transition-all"
                   draggable
                   onDragStart={(e) => onDragStart(e, item.type)}
                   data-testid={`palette-${item.type}`}

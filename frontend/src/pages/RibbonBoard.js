@@ -270,7 +270,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
             {filterRequests(pool1Requests).length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Layers size={48} className="mx-auto mb-4 text-slate-300" />
+                  <Layers size={48} className="mx-auto mb-4 text-[var(--tx-3)]" />
                   <p style={{ color: "var(--tx-3)" }}>{'No requests in Pool 1'}</p>
                 </CardContent>
               </Card>
@@ -307,7 +307,7 @@ const [pool1Requests, setPool1Requests] = useState([]);
             {filterRequests(pool2Requests).length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Layers size={48} className="mx-auto mb-4 text-slate-300" />
+                  <Layers size={48} className="mx-auto mb-4 text-[var(--tx-3)]" />
                   <p style={{ color: "var(--tx-3)" }}>{'No requests in Pool 2'}</p>
                 </CardContent>
               </Card>

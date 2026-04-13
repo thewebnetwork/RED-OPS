@@ -633,7 +633,7 @@ export default function Files({ defaultContext }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {kbStarred.slice(0, 5).map(doc => (
                     <button key={doc.id} onClick={() => selectKbDoc(doc)}
-                      style={{ padding: '7px 10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: 5, cursor: 'pointer', textAlign: 'left', fontSize: 12, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'all .12s' }}
+                      style={{ padding: '7px 10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', textAlign: 'left', fontSize: 12, color: 'var(--tx-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'all .12s' }}
                       title={doc.title}>
                       <Star size={11} style={{ marginRight: 5, display: 'inline', color: '#f59e0b' }} />
                       {doc.title}
@@ -722,7 +722,7 @@ export default function Files({ defaultContext }) {
                   ))}
                   <div>
                     <span style={{ fontSize: 10, color: 'var(--tx-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 2 }}>Access</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4, ...ACCESS_STYLES[selectedDoc.access] }}>{selectedDoc.access}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, ...ACCESS_STYLES[selectedDoc.access] }}>{selectedDoc.access}</span>
                   </div>
                 </div>
 
@@ -1066,10 +1066,10 @@ function KBDocCard({ doc, isStarred, onSelect, onStar, onEdit, onDelete }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.title}</p>
           <div style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: 'var(--card)', color: 'var(--tx-2)', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: 'var(--card)', color: 'var(--tx-2)', border: '1px solid var(--border)' }}>
               {KB_FOLDER_MAP[doc.folder]?.label || doc.folder}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 4, ...ACCESS_STYLES[doc.access] }}>
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, ...ACCESS_STYLES[doc.access] }}>
               {doc.access === 'internal' ? <><Lock size={9} style={{ marginRight: 3, display: 'inline' }} />Internal</> : <><Globe size={9} style={{ marginRight: 3, display: 'inline' }} />Shared</>}
             </span>
           </div>
@@ -1109,11 +1109,11 @@ function KBDocRow({ doc, isStarred, onSelect, onStar, onEdit, onDelete }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--tx-1)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.title}</span>
         <div style={{ display: 'flex', gap: 10, marginTop: 4, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, background: 'var(--bg)', color: 'var(--tx-2)', border: '1px solid var(--border)' }}>{KB_FOLDER_MAP[doc.folder]?.label || doc.folder}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: 'var(--bg)', color: 'var(--tx-2)', border: '1px solid var(--border)' }}>{KB_FOLDER_MAP[doc.folder]?.label || doc.folder}</span>
           <span style={{ fontSize: 11, color: 'var(--tx-3)', display: 'flex', alignItems: 'center', gap: 3 }}><Clock size={11} />{timeAgo(doc.updated_at)}</span>
           <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{doc.created_by_name || 'Unknown'}</span>
           {doc.version > 1 && <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>v{doc.version}</span>}
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, ...ACCESS_STYLES[doc.access] }}>{doc.access === 'internal' ? <><Lock size={9} style={{ marginRight: 3, display: 'inline' }} />Internal</> : <><Globe size={9} style={{ marginRight: 3, display: 'inline' }} />Shared</>}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, ...ACCESS_STYLES[doc.access] }}>{doc.access === 'internal' ? <><Lock size={9} style={{ marginRight: 3, display: 'inline' }} />Internal</> : <><Globe size={9} style={{ marginRight: 3, display: 'inline' }} />Shared</>}</span>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
@@ -1233,7 +1233,7 @@ function FileRowList({ file, onDownload, onContext, onToggleDeliverable }) {
       </td>
       <td style={tdStyle}>{humanSize(file.file_size)}</td>
       <td style={tdStyle}>
-        <span style={{ fontSize: 11, padding: '2px 6px', background: 'var(--bg-2)', borderRadius: 4 }}>
+        <span style={{ fontSize: 11, padding: '2px 6px', background: 'var(--bg-2)', borderRadius: 6 }}>
           {file.content_type?.split('/').pop()?.toUpperCase() || 'FILE'}
         </span>
       </td>

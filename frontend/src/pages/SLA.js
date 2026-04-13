@@ -647,7 +647,7 @@ export default function SLA() {
             <CardContent>
               {slaAlerts.length === 0 ? (
                 <div className="p-12 text-center">
-                  <Bell size={48} className="mx-auto text-slate-300 mb-3" />
+                  <Bell size={48} className="mx-auto text-[var(--tx-3)] mb-3" />
                   <p>No SLA alerts</p>
                   <p className="text-sm mt-1">All orders are within SLA targets</p>
                 </div>
@@ -722,7 +722,7 @@ export default function SLA() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCloseDialog}
-              className="bg-slate-600 hover:bg-slate-700"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
               data-testid="leave-btn"
             >
               Leave without saving
