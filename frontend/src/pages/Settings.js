@@ -21,10 +21,78 @@ import {
   Trash2,
   Loader2,
 } from 'lucide-react';
+import usePushNotifications from '../hooks/usePushNotifications';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
 const axh = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
+
+function PushNotificationCard() {
+  const { isSupported, permission, isSubscribed, loading, subscribe, unsubscribe } = usePushNotifications();
+
+  if (!isSupported) {
+    return (
+      <div className="card" style={{ padding: '20px', marginTop: '16px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '8px' }}>Push Notifications</h3>
+        <p style={{ fontSize: '12px', color: 'var(--tx-3)' }}>Push notifications are not supported in this browser. Try Chrome or Safari on desktop, or add RED OPS to your home screen on mobile.</p>
+      </div>
+    );
+  }
+
+  if (permission === 'denied') {
+    return (
+      <div className="card" style={{ padding: '20px', marginTop: '16px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '8px' }}>Push Notifications</h3>
+        <p style={{ fontSize: '12px', color: 'var(--tx-3)' }}>Push notifications are blocked. To enable them, click the lock icon in your browser address bar and allow notifications for this site.</p>
+      </div>
+    );
+  }
+
+  const handleToggle = async () => {
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      const ok = await subscribe();
+      if (ok) {
+        toast.success('Push notifications enabled');
+      }
+    }
+  };
+
+  return (
+    <div className="card" style={{ padding: '20px', marginTop: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '2px' }}>Push Notifications</div>
+          <div style={{ fontSize: '12px', color: 'var(--tx-3)' }}>
+            {isSubscribed
+              ? 'You will receive push notifications on this device.'
+              : 'Get real-time alerts even when RED OPS is closed.'}
+          </div>
+        </div>
+        <div
+          onClick={loading ? undefined : handleToggle}
+          style={{
+            position: 'relative', width: '36px', height: '20px', flexShrink: 0,
+            cursor: loading ? 'wait' : 'pointer', marginLeft: '16px', opacity: loading ? 0.5 : 1,
+          }}
+        >
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: '10px',
+            backgroundColor: isSubscribed ? 'var(--accent)' : 'var(--bg-overlay)',
+            transition: 'background 0.2s',
+          }} />
+          <div style={{
+            position: 'absolute', top: '2px',
+            left: isSubscribed ? '18px' : '2px',
+            width: '16px', height: '16px', borderRadius: '50%',
+            backgroundColor: 'var(--tx-1)', transition: 'left 0.2s',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -490,6 +558,8 @@ export default function Settings() {
                 </div>
               ))}
             </div>
+            {/* Push Notifications */}
+            <PushNotificationCard />
           </div>
 
           {/* BILLING SECTION */}
