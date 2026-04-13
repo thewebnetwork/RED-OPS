@@ -39,6 +39,7 @@ from .documents import router as documents_router
 from .messages import router as messages_router
 from .support import router as support_router
 from .project_templates import router as project_templates_router
+from .push import router as push_router
 
 __all__ = [
     "auth_router",
@@ -79,4 +80,5 @@ __all__ = [
     "messages_router",
     "support_router",
     "project_templates_router",
+    "push_router",
 ]

@@ -56,6 +56,7 @@ from routes import (
     messages_router,
     support_router,
     project_templates_router,
+    push_router,
 )
 from routes.reports import router as reports_router
 from routes.iam import router as iam_router
@@ -314,6 +315,7 @@ app.include_router(documents_router, prefix="/api")  # Document Editor
 app.include_router(messages_router, prefix="/api")  # In-Platform Messaging
 app.include_router(support_router, prefix="/api")  # Support Tickets
 app.include_router(project_templates_router, prefix="/api")  # Project Templates
+app.include_router(push_router, prefix="/api")  # PWA Push Notifications
 
 
 @app.get("/")

@@ -38,6 +38,7 @@ import { Badge } from './ui/badge';
 import NotificationDropdown from './NotificationDropdown';
 import LanguageSwitcher from './LanguageSwitcher';
 import AnnouncementTicker from './AnnouncementTicker';
+import PushNotificationPrompt from './PushNotificationPrompt';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -436,6 +437,8 @@ const { user, logout } = useAuth();
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
+
+                <PushNotificationPrompt />
 
         {/* Page content */}
         <main className="p-4 lg:p-8">
