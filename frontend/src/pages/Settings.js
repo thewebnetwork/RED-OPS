@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
@@ -124,6 +125,9 @@ function PushNotificationCard() {
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
+  const isOperator = user?.role === 'Operator';
   const fileInputRef = useRef(null);
 
   const [activeSection, setActiveSection] = useState('profile');
@@ -388,15 +392,20 @@ export default function Settings() {
         {/* Left Sidebar */}
         <div className="settings-sidebar">
           {[
-            { id: 'profile', label: 'Profile', icon: User },
-            { id: 'account', label: 'Account', icon: SettingsIcon },
-            { id: 'team', label: 'Team & Roles', icon: Users },
-            { id: 'notifications', label: 'Notifications', icon: Bell },
-            { id: 'billing', label: 'Billing', icon: CreditCard },
-            { id: 'integrations', label: 'Integrations', icon: Plug, badge: connectedCount > 0 ? `${connectedCount} connected` : null },
-            { id: 'security', label: 'Security', icon: Shield },
-            { id: 'appearance', label: 'Appearance', icon: Palette },
-          ].map(item => {
+            { id: 'profile', label: 'Profile', icon: User,        allow: 'all' },
+            { id: 'account', label: 'Account', icon: SettingsIcon, allow: 'admin' },
+            { id: 'team', label: 'Team & Roles', icon: Users,     allow: 'admin' },
+            { id: 'notifications', label: 'Notifications', icon: Bell, allow: 'all' },
+            { id: 'billing', label: 'Billing', icon: CreditCard,  allow: 'admin' },
+            { id: 'integrations', label: 'Integrations', icon: Plug, allow: 'admin_or_operator', badge: connectedCount > 0 ? `${connectedCount} connected` : null },
+            { id: 'security', label: 'Security', icon: Shield,    allow: 'all' },
+            { id: 'appearance', label: 'Appearance', icon: Palette, allow: 'all' },
+          ].filter(item => {
+            if (item.allow === 'all') return true;
+            if (item.allow === 'admin') return isAdmin;
+            if (item.allow === 'admin_or_operator') return isAdmin || isOperator;
+            return false;
+          }).map(item => {
             const IconComp = item.icon;
             return (
               <div

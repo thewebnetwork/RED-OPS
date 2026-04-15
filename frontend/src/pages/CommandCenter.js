@@ -60,6 +60,7 @@ function QuickAction({ icon: Icon, label, to, color='var(--red)' }) {
 export default function CommandCenter() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
   const [tasks, setTasks]       = useState([]);
   const [clients, setClients]   = useState([]);
   const [activity, setActivity] = useState([]);
@@ -75,11 +76,13 @@ export default function CommandCenter() {
     const load = async () => {
       try {
         const instance = ax();
+        // Skip admin-only endpoints for non-admins — they return 403 and
+        // aren't rendered anyway. Keeps the console clean and is faster.
         const [tRes, cRes, aRes, dRes] = await Promise.allSettled([
           instance.get(`${API}/tasks?limit=6`),
-          instance.get(`${API}/users`),
+          isAdmin ? instance.get(`${API}/users`) : Promise.resolve({ data: [] }),
           instance.get(`${API}/dashboard/activity?limit=10`),
-          instance.get(`${API}/dashboard/financial-stats`),
+          isAdmin ? instance.get(`${API}/dashboard/financial-stats`) : Promise.resolve({ data: {} }),
         ]);
 
         // Load tasks
@@ -179,10 +182,10 @@ export default function CommandCenter() {
 
       {/* Pulse */}
       <div className="metrics-grid-4" style={{ marginBottom:20 }}>
-        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='var(--blue)' trend={pulse.requests_trend} stagger={1} />
+        <PulseCard icon={FileText}    label={isAdmin ? "Requests this month" : "My open requests"} value={pulse.requests}          color='var(--blue)' trend={pulse.requests_trend} stagger={1} />
         <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? 'var(--red-status)' : 'var(--green)'} stagger={2} />
-        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='var(--green)' stagger={3} />
-        <PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} stagger={4} />
+        {isAdmin && (<PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='var(--green)' stagger={3} />)}
+        {isAdmin && (<PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} stagger={4} />)}
       </div>
 
       {/* Quick actions */}
@@ -232,7 +235,8 @@ export default function CommandCenter() {
           </button>
         </div>
 
-        {/* Clients */}
+        {/* Team Members — admin only (uses /api/users which is admin-gated) */}
+        {isAdmin && (
         <div className="card" style={{ padding:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
             <span style={{ fontSize:13, fontWeight:700 }}>Team Members</span>
@@ -260,6 +264,7 @@ export default function CommandCenter() {
             <Plus size={12}/> Add member
           </button>
         </div>
+        )}
 
         {/* Activity */}
         <div className="card" style={{ padding:16 }}>
