@@ -21,7 +21,7 @@ import {
   Trash2,
   Loader2,
 } from 'lucide-react';
-import usePushNotifications from '../hooks/usePushNotifications';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
