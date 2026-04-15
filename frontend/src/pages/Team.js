@@ -878,10 +878,10 @@ function AddMemberModal({ teams, specialties, onClose, onCreated }) {
     <Modal onClose={onClose} title="Add Team Member" icon={<UserPlus size={18} />}>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Field label="Full Name *">
-          <input autoFocus style={inp} placeholder="e.g. Taryn Pessanha" value={form.name} onChange={e => set('name', e.target.value)} />
+          <input autoFocus style={inp} placeholder="e.g. Jane Smith" value={form.name} onChange={e => set('name', e.target.value)} />
         </Field>
         <Field label="Email *">
-          <input style={inp} type="email" placeholder="taryn@company.com" value={form.email} onChange={e => set('email', e.target.value)} />
+          <input style={inp} type="email" placeholder="name@company.com" value={form.email} onChange={e => set('email', e.target.value)} />
         </Field>
         <Field label="Temporary Password *">
           <input style={inp} type="password" placeholder="Min 6 characters" value={form.password} onChange={e => set('password', e.target.value)} />

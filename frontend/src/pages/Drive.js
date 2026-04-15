@@ -343,10 +343,12 @@ export default function Drive() {
         setFolders([]); setFiles([]);
       } else {
         // my-drive
-        const folderParam = currentFolderId ? { folder_id: currentFolderId } : {};
+        // Note: /files/folders filters by parent_folder_id; /files filters by folder_id
+        const foldersParams = currentFolderId ? { parent_folder_id: currentFolderId } : {};
+        const filesParams   = currentFolderId ? { folder_id: currentFolderId } : {};
         const [fdrRes, fRes, dRes] = await Promise.allSettled([
-          ax().get(`${API}/files/folders`, { params: folderParam }),
-          ax().get(`${API}/files`, { params: folderParam }),
+          ax().get(`${API}/files/folders`, { params: foldersParams }),
+          ax().get(`${API}/files`, { params: filesParams }),
           // docs are only shown at root for now
           currentFolderId ? null : ax().get(`${API}/documents`),
         ].filter(Boolean));
