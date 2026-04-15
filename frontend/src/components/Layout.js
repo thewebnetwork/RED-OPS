@@ -6,6 +6,7 @@ import InstallPrompt from './InstallPrompt';
 import {
   LayoutDashboard,
   CheckSquare,
+  Calendar as CalendarIcon,
   FolderKanban,
   FileText,
   Users,
@@ -43,6 +44,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const NAV_MAIN = [
   { path: '/',         icon: LayoutDashboard, label: 'Home',     roles: ['Administrator','Operator','Standard User'] },
   { path: '/task-board', icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/calendar', icon: CalendarIcon,    label: 'Calendar', roles: ['Administrator','Operator','Standard User'] },
   { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
   { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/conversations', icon: MessageSquare, label: 'Messages', roles: ['Administrator','Operator','Standard User','Media Client'] },

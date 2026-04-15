@@ -81,6 +81,7 @@ const Onboarding = React.lazy(() => import("./pages/Onboarding"));
 const Documents = React.lazy(() => import("./pages/Documents"));
 const KnowledgeBase = React.lazy(() => import("./pages/KnowledgeBase"));
 const Drive = React.lazy(() => import("./pages/Drive"));
+const Calendar = React.lazy(() => import("./pages/Calendar"));
 const Conversations = React.lazy(() => import("./pages/Conversations"));
 const Support = React.lazy(() => import("./pages/Support"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -341,6 +342,7 @@ function AppRoutes() {
       <Route path="/tasks" element={<Navigate to="/task-board" replace />} />
       <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
       <Route path="/projects/:id" element={<PrivateRoute><ProjectPage /></PrivateRoute>} />
+      <Route path="/calendar" element={<PrivateRoute><Calendar /></PrivateRoute>} />
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/drive" element={<PrivateRoute><Drive /></PrivateRoute>} />
       <Route path="/knowledge-base" element={<Navigate to="/drive" replace />} />
