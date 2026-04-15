@@ -20,6 +20,7 @@ import {
   CheckSquare, MessageSquare, Plus, Search, X, Edit2, ChevronRight,
   Eye, DollarSign, Calendar, Zap, ExternalLink, Tag, Loader2,
   AlertCircle, TrendingUp, ShoppingBag, Layers, Briefcase, Trash2,
+  ClipboardCheck,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -76,11 +77,12 @@ function timeAgo(dt) {
 
 // ── Tabs ──
 const TABS = [
-  { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'tasks',     label: 'Tasks',     icon: CheckSquare },
-  { id: 'projects',  label: 'Projects',  icon: FolderKanban },
-  { id: 'requests',  label: 'Requests',  icon: ShoppingBag },
-  { id: 'notes',     label: 'Notes',     icon: MessageSquare },
+  { id: 'overview',   label: 'Overview',   icon: Eye },
+  { id: 'tasks',      label: 'Tasks',      icon: CheckSquare },
+  { id: 'projects',   label: 'Projects',   icon: FolderKanban },
+  { id: 'requests',   label: 'Requests',   icon: ShoppingBag },
+  { id: 'onboarding', label: 'Onboarding', icon: ClipboardCheck },
+  { id: 'notes',      label: 'Notes',      icon: MessageSquare },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -727,6 +729,40 @@ export default function ClientPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Onboarding Tab ── */}
+      {tab === 'onboarding' && (
+        <div style={{ maxWidth: 640 }}>
+          <div className="card" style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: 'var(--accent-soft)', color: 'var(--accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <ClipboardCheck size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-1)' }}>Client Onboarding</div>
+                <div style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 2 }}>
+                  Discovery, kickoff checklist, deliverables — scoped to {client?.name || 'this client'}.
+                </div>
+              </div>
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.6, marginBottom: 16 }}>
+              Run the onboarding flow for this client from here. Progress is tracked per-client and
+              feeds into the client's projects and tasks.
+            </p>
+            <button
+              onClick={() => navigate(`/client-onboarding?client_id=${client?.id || id}`)}
+              className="btn-primary"
+              style={{ gap: 6, padding: '9px 14px', fontSize: 13 }}
+            >
+              <ClipboardCheck size={14} /> Open onboarding
+            </button>
+          </div>
         </div>
       )}
 

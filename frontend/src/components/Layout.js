@@ -10,7 +10,6 @@ import {
   FolderKanban,
   FileText,
   Users,
-  UsersRound,
   DollarSign,
   BookOpen,
   Sparkles,
@@ -32,7 +31,6 @@ import {
   Building2,
   ArrowLeftRight,
   Eye,
-  ClipboardCheck,
   MessageSquare,
   LifeBuoy,
 } from 'lucide-react';
@@ -41,20 +39,23 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // ─────────────────────────────────────────────
 // Navigation config
+// NAV_MAIN — top-level admin/operator/standard-user nav.
+//   • Team management lives in Settings → Team & Roles (admin only), not here.
+//   • Client onboarding is accessed from inside a client's page, not as a top-level link.
+//   • Ad Performance stays here for Administrator + Operator; Media Clients get
+//     their own entry via NAV_CLIENT below.
 const NAV_MAIN = [
-  { path: '/',         icon: LayoutDashboard, label: 'Home',     roles: ['Administrator','Operator','Standard User'] },
-  { path: '/task-board', icon: CheckSquare,     label: 'Tasks',    roles: ['Administrator','Operator','Standard User'], badge: true },
-  { path: '/calendar', icon: CalendarIcon,    label: 'Calendar', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/projects', icon: FolderKanban,    label: 'Projects', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/requests', icon: FileText,        label: 'Requests', roles: ['Administrator','Operator','Standard User'], badge: true },
-  { path: '/conversations', icon: MessageSquare, label: 'Messages', roles: ['Administrator','Operator','Standard User','Media Client'] },
-  { path: '/clients',  icon: Users,      label: 'Clients',  roles: ['Administrator','Operator'] },
-  { path: '/client-onboarding', icon: ClipboardCheck, label: 'Onboarding', roles: ['Administrator','Operator'] },
-  { path: '/team',     icon: UsersRound, label: 'Team',     roles: ['Administrator','Operator'] },
-  { path: '/drive', icon: BookOpen, label: 'Drive', roles: ['Administrator','Operator','Standard User'] },
-  { path: '/finance',  icon: DollarSign, label: 'Finance',  roles: ['Administrator'] },
-  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Administrator','Operator'] },
-  { path: '/support', icon: LifeBuoy, label: 'Support', roles: ['Administrator','Operator'] },
+  { path: '/',              icon: LayoutDashboard, label: 'Home',           roles: ['Administrator','Operator','Standard User'] },
+  { path: '/task-board',    icon: CheckSquare,     label: 'Tasks',          roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/calendar',      icon: CalendarIcon,    label: 'Calendar',       roles: ['Administrator','Operator','Standard User'] },
+  { path: '/projects',      icon: FolderKanban,    label: 'Projects',       roles: ['Administrator','Operator','Standard User'] },
+  { path: '/requests',      icon: FileText,        label: 'Requests',       roles: ['Administrator','Operator','Standard User'], badge: true },
+  { path: '/conversations', icon: MessageSquare,   label: 'Messages',       roles: ['Administrator','Operator','Standard User','Media Client'] },
+  { path: '/clients',       icon: Users,           label: 'Clients',        roles: ['Administrator','Operator'] },
+  { path: '/drive',         icon: BookOpen,        label: 'Drive',          roles: ['Administrator','Operator','Standard User'] },
+  { path: '/ad-performance',icon: BarChart2,       label: 'Ad Performance', roles: ['Administrator','Operator'] },
+  { path: '/finance',       icon: DollarSign,      label: 'Finance',        roles: ['Administrator'] },
+  { path: '/support',       icon: LifeBuoy,        label: 'Support',        roles: ['Administrator','Operator'] },
 ];
 const NAV_BUSINESS = [];
 const NAV_SERVICES = [];
