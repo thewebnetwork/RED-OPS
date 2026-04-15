@@ -23,7 +23,7 @@ export default class ErrorBoundary extends Component {
         }}>
           <div style={{ textAlign: 'center', maxWidth: 420, padding: '0 20px' }}>
             <div style={{
-              width: 56, height: 56, borderRadius: 14, background: '#c92a3e18',
+              width: 56, height: 56, borderRadius: 14, background: 'var(--accent-soft)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 20px', fontSize: 24,
             }}>

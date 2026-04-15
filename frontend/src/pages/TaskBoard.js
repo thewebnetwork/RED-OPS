@@ -128,7 +128,7 @@ function AssigneePicker({ users, value, onChange }) {
       >
         {selected ? (
           <>
-            <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(selected.name)}</span>
+            <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(selected.name)}</span>
             <span style={{ flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.name}</span>
           </>
         ) : (
@@ -157,12 +157,12 @@ function AssigneePicker({ users, value, onChange }) {
               onClick={() => { onChange(u.id); setOpen(false); }}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                padding: '8px 12px', fontSize: 13, background: u.id === value ? '#c92a3e18' : 'none',
+                padding: '8px 12px', fontSize: 13, background: u.id === value ? 'var(--accent-soft)' : 'none',
                 color: u.id === value ? 'var(--red)' : 'var(--tx-1)',
                 border: 'none', cursor: 'pointer', textAlign: 'left',
               }}
             >
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(u.name)}</span>
+              <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(u.name)}</span>
               {u.name}
             </button>
           ))}
@@ -307,7 +307,7 @@ function AssigneeChip({ task, users, onAssign }) {
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
           }}
         >
-          <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
+          <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
         </button>
       ) : (
         <button
@@ -341,12 +341,12 @@ function AssigneeChip({ task, users, onAssign }) {
             <button key={u.id} type="button" onClick={() => pick(u.id)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 8px', fontSize: 12, background: u.id === task.assignee_user_id ? '#c92a3e18' : 'none',
+                padding: '6px 8px', fontSize: 12, background: u.id === task.assignee_user_id ? 'var(--accent-soft)' : 'none',
                 color: u.id === task.assignee_user_id ? 'var(--red)' : 'var(--tx-1)',
                 border: 'none', cursor: 'pointer', textAlign: 'left', borderRadius: 6,
               }}
             >
-              <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(u.name)}</span>
+              <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(u.name)}</span>
               {u.name}
             </button>
           ))}
@@ -410,7 +410,7 @@ function TaskCard({ task, onEdit, users = [], onAssign, dragHandleProps, isDragg
             <AssigneeChip task={task} users={users} onAssign={onAssign} />
           ) : assigneeName && (
             <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
+              <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
             </span>
           )}
         </div>
@@ -887,7 +887,7 @@ export default function TaskBoard() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
                 fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                background: hideCompleted ? '#c92a3e18' : 'var(--bg-elevated)',
+                background: hideCompleted ? 'var(--accent-soft)' : 'var(--bg-elevated)',
                 color: hideCompleted ? 'var(--red)' : 'var(--tx-2)', cursor: 'pointer',
                 borderColor: hideCompleted ? 'var(--red)' : 'var(--border)',
               }}
@@ -899,7 +899,7 @@ export default function TaskBoard() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
                 fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                background: showFilters ? '#c92a3e18' : 'var(--bg-elevated)',
+                background: showFilters ? 'var(--accent-soft)' : 'var(--bg-elevated)',
                 color: showFilters ? 'var(--red)' : 'var(--tx-2)', cursor: 'pointer',
                 borderColor: showFilters ? 'var(--red)' : 'var(--border)',
               }}
@@ -1050,7 +1050,7 @@ export default function TaskBoard() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {assigneeName ? (
                       <>
-                        <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(assigneeName)}</span>
+                        <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(assigneeName)}</span>
                         <span style={{ fontSize: 12, color: 'var(--tx-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{assigneeName}</span>
                       </>
                     ) : (

@@ -191,7 +191,7 @@ function ServiceCard({ template, onClick }) {
       }}>
       <div style={{
         width:40, height:40, borderRadius:10,
-        background: hov ? 'var(--red)' : '#c92a3e18',
+        background: hov ? 'var(--red)' : 'var(--accent-soft)',
         display:'flex', alignItems:'center', justifyContent:'center', transition:'all .15s',
       }}>
         {isCall
@@ -213,7 +213,7 @@ function ServiceCard({ template, onClick }) {
         </div>
         <span style={{
           fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:4,
-          background: isCall ? '#c92a3e18' : 'var(--bg-elevated)',
+          background: isCall ? 'var(--accent-soft)' : 'var(--bg-elevated)',
           color: isCall ? 'var(--red)' : 'var(--tx-3)',
         }}>
           {isCall ? 'Book a Call' : `${template.form_schema?.length || 0} fields`}

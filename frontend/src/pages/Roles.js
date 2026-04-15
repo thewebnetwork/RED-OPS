@@ -19,8 +19,8 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const roleConfig = {
   'Administrator': {
     icon: Shield,
-    color: '#c92a3e',
-    bgColor: '#c92a3e15'
+    color: 'var(--accent)',
+    bgColor: 'var(--accent-soft)'
   },
   'Privileged User': {
     icon: ShieldCheck,

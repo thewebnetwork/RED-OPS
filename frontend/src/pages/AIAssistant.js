@@ -26,15 +26,15 @@ export default function AIAssistant() {
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         padding: '6px 14px', borderRadius: 20,
-        background: 'linear-gradient(135deg, rgba(201,42,62,0.12), rgba(168,85,247,0.12))',
+        background: 'var(--color-purple-soft)',
         marginBottom: 12,
       }}>
-        <Zap size={13} color="#a855f7" />
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#a855f7' }}>Coming Soon</span>
+        <Zap size={13} color="var(--purple)" />
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--purple)' }}>Coming soon</span>
       </div>
 
       <p style={{ fontSize: 14, color: 'var(--tx-3)', margin: '0 0 36px', textAlign: 'center', maxWidth: 420, lineHeight: 1.6 }}>
-        We're building powerful AI features to help you manage projects, generate briefs, and get smart insights — all inside RED OPS.
+        AI features for writing briefs, summarizing projects, and surfacing insights — in progress.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, width: '100%', maxWidth: 560 }}>

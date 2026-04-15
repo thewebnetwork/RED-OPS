@@ -148,7 +148,7 @@ const messagesEndRef = useRef(null);
                       key={msg.id}
                       className={`flex ${msg.author_user_id === user?.id ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div style={{ maxWidth: '80%', background: msg.author_user_id === user?.id ? '#c92a3e18' : 'var(--bg-elevated)', borderRadius: 10, padding: 16 }}>
+                      <div style={{ maxWidth: '80%', background: msg.author_user_id === user?.id ? 'var(--accent-soft)' : 'var(--bg-elevated)', borderRadius: 10, padding: 16 }}>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-medium text-sm">{msg.author_name}</span>
                           <Badge variant="outline" className="text-xs">{msg.author_role}</Badge>
