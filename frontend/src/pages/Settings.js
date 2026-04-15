@@ -392,14 +392,17 @@ export default function Settings() {
         {/* Left Sidebar */}
         <div className="settings-sidebar">
           {[
-            { id: 'profile', label: 'Profile', icon: User,        allow: 'all' },
-            { id: 'account', label: 'Account', icon: SettingsIcon, allow: 'admin' },
-            { id: 'team', label: 'Team & Roles', icon: Users,     allow: 'admin' },
-            { id: 'notifications', label: 'Notifications', icon: Bell, allow: 'all' },
-            { id: 'billing', label: 'Billing', icon: CreditCard,  allow: 'admin' },
-            { id: 'integrations', label: 'Integrations', icon: Plug, allow: 'admin_or_operator', badge: connectedCount > 0 ? `${connectedCount} connected` : null },
-            { id: 'security', label: 'Security', icon: Shield,    allow: 'all' },
-            { id: 'appearance', label: 'Appearance', icon: Palette, allow: 'all' },
+            // Personal — everyone gets these
+            { id: 'profile',       label: 'Profile',          icon: User,         allow: 'all' },
+            { id: 'notifications', label: 'Notifications',    icon: Bell,         allow: 'all' },
+            { id: 'appearance',    label: 'Display & Language', icon: Palette,    allow: 'all' },
+            // Operator workspace
+            { id: 'security',      label: 'Sessions',         icon: Shield,       allow: 'admin_or_operator' },
+            // Admin-only — org config + management
+            { id: 'account',       label: 'Account',          icon: SettingsIcon, allow: 'admin' },
+            { id: 'team',          label: 'Team & Roles',     icon: Users,        allow: 'admin' },
+            { id: 'integrations',  label: 'Integrations',     icon: Plug,         allow: 'admin', badge: connectedCount > 0 ? `${connectedCount} connected` : null },
+            { id: 'billing',       label: 'Billing',          icon: CreditCard,   allow: 'admin' },
           ].filter(item => {
             if (item.allow === 'all') return true;
             if (item.allow === 'admin') return isAdmin;
@@ -809,19 +812,66 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* APPEARANCE SECTION */}
+          {/* APPEARANCE / DISPLAY & LANGUAGE SECTION */}
           <div className={`settings-section ${activeSection === 'appearance' ? 'active' : ''}`}>
-            <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: 'var(--tx-1)' }}>Appearance</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: 'var(--tx-1)' }}>Display &amp; Language</h2>
             <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '12px' }}>Theme</h3>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                {['dark', 'light'].map(theme => (
-                  <label key={theme} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                    <input type="radio" name="theme" value={theme} checked={appearance.theme === theme} onChange={e => { const u = { ...appearance, theme: e.target.value }; setAppearance(u); savePrefs('appearance', u); document.documentElement.setAttribute('data-theme', e.target.value); localStorage.setItem('redops-theme', e.target.value); }} style={{ cursor: 'pointer' }} />
-                    <span style={{ fontSize: '13px', color: 'var(--tx-1)', textTransform: 'capitalize' }}>{theme}</span>
-                  </label>
-                ))}
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '4px' }}>Theme</h3>
+              <p style={{ fontSize: '12px', color: 'var(--tx-3)', margin: '0 0 14px' }}>Switch instantly — no reload.</p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[
+                  { id: 'dark',  label: 'Dark',  desc: 'Burgundy on near-black' },
+                  { id: 'light', label: 'Light', desc: 'Clean and neutral' },
+                ].map(opt => {
+                  const active = appearance.theme === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        const u = { ...appearance, theme: opt.id };
+                        setAppearance(u);
+                        savePrefs('appearance', u);
+                        document.documentElement.setAttribute('data-theme', opt.id);
+                        localStorage.setItem('redops-theme', opt.id);
+                      }}
+                      style={{
+                        flex: 1, padding: '12px 14px', borderRadius: 10, cursor: 'pointer',
+                        background: active ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+                        border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                        textAlign: 'left',
+                      }}
+                    >
+                      <div style={{ fontSize: 13, fontWeight: 700, color: active ? 'var(--accent)' : 'var(--tx-1)' }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 2 }}>{opt.desc}</div>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Language */}
+            <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '4px' }}>Language</h3>
+              <p style={{ fontSize: '12px', color: 'var(--tx-3)', margin: '0 0 12px' }}>Used for UI labels and dates across the app.</p>
+              <select
+                value={typeof window !== 'undefined' ? (localStorage.getItem('language') || 'en') : 'en'}
+                onChange={async e => {
+                  const lang = e.target.value;
+                  localStorage.setItem('language', lang);
+                  try {
+                    const i18n = (await import('../i18n/i18n')).default;
+                    if (i18n?.changeLanguage) await i18n.changeLanguage(lang);
+                  } catch { /* i18n optional */ }
+                  toast.success('Language updated');
+                }}
+                className="input-field"
+                style={{ width: '100%', maxWidth: 280 }}
+              >
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="pt">Português</option>
+              </select>
             </div>
             <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--tx-1)', marginBottom: '12px' }}>Accent Color</h3>
