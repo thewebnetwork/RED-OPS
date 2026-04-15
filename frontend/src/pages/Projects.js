@@ -265,9 +265,18 @@ function ProjectCard({ project, onEdit, onClick }) {
             )}
           </div>
         </div>
-        <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', padding: 0, fontSize: 16 }}>
-          <MoreHorizontal size={14} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {project.project_manager && (
+            <span title={`PM · ${project.project_manager.name}`} style={{ width: 22, height: 22, borderRadius: '50%', background: avatarBg(project.project_manager.id), color: '#fff', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              {project.project_manager.avatar ? (
+                <img src={project.project_manager.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : initials(project.project_manager.name)}
+            </span>
+          )}
+          <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} style={{ background: 'none', border: 'none', color: 'var(--tx-3)', cursor: 'pointer', padding: 0, fontSize: 16 }}>
+            <MoreHorizontal size={14} />
+          </button>
+        </div>
       </div>
 
       <div style={{ marginBottom: 10 }}>
@@ -574,6 +583,24 @@ export function ProjectModal({ project, onClose, onSave, onDelete, loading, clie
                 style={{ width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', padding: 2, background: form.client_visible ? 'var(--accent)' : 'var(--border)', transition: 'background .2s', display: 'flex', alignItems: 'center' }}>
                 <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'transform .2s', transform: form.client_visible ? 'translateX(18px)' : 'translateX(0)' }} />
               </button>
+            </div>
+          )}
+
+          {/* Project Manager */}
+          {teamMembers.length > 0 && (
+            <div>
+              <label style={labelStyle}>Project Manager</label>
+              <select
+                value={form.project_manager_user_id || ''}
+                onChange={e => handleChange('project_manager_user_id', e.target.value || null)}
+                className="input-field"
+                style={{ width: '100%' }}
+              >
+                <option value="">— None —</option>
+                {teamMembers.map(m => (
+                  <option key={m.id || m._id} value={m.id || m._id}>{m.name}</option>
+                ))}
+              </select>
             </div>
           )}
 

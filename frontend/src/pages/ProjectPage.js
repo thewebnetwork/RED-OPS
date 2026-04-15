@@ -991,10 +991,20 @@ export default function ProjectPage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--tx-3)' }}>
+          <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--tx-3)', flexWrap: 'wrap', alignItems: 'center' }}>
             <span><Calendar size={10} style={{ marginRight: 3 }} /> Due {project.due_date ? new Date(project.due_date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</span>
             <span><Users size={10} style={{ marginRight: 3 }} /> {(project.team_members || []).length} member{(project.team_members || []).length !== 1 ? 's' : ''}</span>
             <span><Target size={10} style={{ marginRight: 3 }} /> {completedMilestones}/{(project.milestones || []).length} milestones</span>
+            {project.project_manager && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '2px 8px 2px 2px', borderRadius: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--accent-soft, #c92a3e22)', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {project.project_manager.avatar ? (
+                    <img src={project.project_manager.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (project.project_manager.name || '').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase()}
+                </span>
+                <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>PM · {project.project_manager.name}</span>
+              </span>
+            )}
           </div>
         </div>
 

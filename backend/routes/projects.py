@@ -112,6 +112,19 @@ async def _enrich_project(project: dict) -> dict:
         if creator:
             project["created_by_name"] = creator.get("full_name") or creator.get("name")
 
+    # Project manager (name + avatar)
+    if project.get("project_manager_user_id"):
+        pm = await db.users.find_one(
+            {"id": project["project_manager_user_id"]},
+            {"_id": 0, "id": 1, "full_name": 1, "name": 1, "avatar": 1}
+        )
+        if pm:
+            project["project_manager"] = {
+                "id": pm["id"],
+                "name": pm.get("full_name") or pm.get("name") or "",
+                "avatar": pm.get("avatar"),
+            }
+
     # Task counts
     task_count = await db.tasks.count_documents({
         "project_id": project["id"],
@@ -177,6 +190,7 @@ async def create_project(
         "client_visible": data.client_visible,
         "due_date": data.due_date,
         "team_member_ids": data.team_member_ids,
+        "project_manager_user_id": data.project_manager_user_id,
         "milestones": milestones,
         "payment_status": data.payment_status,
         "tags": data.tags,
@@ -295,7 +309,8 @@ async def update_project(
 
     update_data = {}
     for field in ["name", "description", "project_type", "status", "priority",
-                   "client_id", "client_name", "client_visible", "due_date", "team_member_ids", "payment_status", "tags"]:
+                   "client_id", "client_name", "client_visible", "due_date", "team_member_ids",
+                   "project_manager_user_id", "payment_status", "tags"]:
         value = getattr(data, field, None)
         if value is not None:
             update_data[field] = value

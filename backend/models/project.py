@@ -53,6 +53,7 @@ class ProjectCreate(BaseModel):
     client_visible: bool = False
     due_date: Optional[datetime] = None
     team_member_ids: List[str] = []
+    project_manager_user_id: Optional[str] = None  # PM is a single owner, separate from team
     milestones: List[MilestoneCreate] = []
     payment_status: PaymentStatus = "not_applicable"
     tags: List[str] = []
@@ -70,6 +71,7 @@ class ProjectUpdate(BaseModel):
     client_visible: Optional[bool] = None
     due_date: Optional[datetime] = None
     team_member_ids: Optional[List[str]] = None
+    project_manager_user_id: Optional[str] = None
     payment_status: Optional[PaymentStatus] = None
     tags: Optional[List[str]] = None
 
@@ -86,6 +88,7 @@ class ProjectResponse(BaseModel):
     client_name: Optional[str] = None
     due_date: Optional[datetime] = None
     team_member_ids: List[str] = []
+    project_manager_user_id: Optional[str] = None
     milestones: List[MilestoneResponse] = []
     payment_status: PaymentStatus = "not_applicable"
     tags: List[str] = []
@@ -102,4 +105,5 @@ class ProjectResponse(BaseModel):
 
     # Enriched fields
     team_members: Optional[List[dict]] = None
+    project_manager: Optional[dict] = None  # { id, name, avatar }
     created_by_name: Optional[str] = None
