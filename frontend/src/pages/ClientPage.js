@@ -14,6 +14,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowLeft, Users, Mail, Phone, Globe, Building2, CheckCircle2,
   Circle, Send, Clock, Star, Activity, FileText, FolderKanban,
@@ -89,10 +90,15 @@ const TABS = [
 export default function ClientPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
 
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
+  const [internalUsers, setInternalUsers] = useState([]);
+  const [amPickerOpen, setAmPickerOpen] = useState(false);
+  const [savingAm, setSavingAm] = useState(false);
 
   // Data
   const [tasks, setTasks] = useState([]);
@@ -235,6 +241,38 @@ export default function ClientPage() {
       fetchUsers();
     }
   }, [client, fetchTasks, fetchProjects, fetchOrders, fetchUsers]);
+
+  // Admins need the internal-users list to populate the AM picker.
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancel = false;
+    ax().get(`${API}/users`).then(r => {
+      if (cancel) return;
+      const list = Array.isArray(r.data) ? r.data : (r.data?.data || []);
+      setInternalUsers(list.filter(u =>
+        u.id !== id &&
+        u.active !== false &&
+        u.account_type !== 'Media Client' &&
+        u.role !== 'Media Client'
+      ));
+    }).catch(() => {});
+    return () => { cancel = true; };
+  }, [isAdmin, id]);
+
+  const saveAccountManager = async (amUserId) => {
+    if (savingAm) return;
+    setSavingAm(true);
+    try {
+      const { data } = await ax().patch(`${API}/users/${id}`, { account_manager: amUserId || null });
+      setClient(data);
+      setAmPickerOpen(false);
+      toast.success(amUserId ? 'Account Manager updated' : 'Account Manager cleared');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update Account Manager');
+    } finally {
+      setSavingAm(false);
+    }
+  };
 
   // Save notes to localStorage
   useEffect(() => {
@@ -491,6 +529,83 @@ export default function ClientPage() {
       {/* ── Overview ── */}
       {tab === 'overview' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          {/* Account Manager card — spans both columns */}
+          <div style={{ gridColumn: '1 / -1', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: client.account_manager_info || amPickerOpen ? 14 : 0 }}>
+              <div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: 'var(--tx-1)' }}>Account Manager</h3>
+                <div style={{ fontSize: 11.5, color: 'var(--tx-3)', marginTop: 2 }}>Primary contact for this client. Receives activity + message notifications.</div>
+              </div>
+              {isAdmin && !amPickerOpen && (
+                <button
+                  onClick={() => setAmPickerOpen(true)}
+                  className="btn-ghost btn-sm"
+                  style={{ gap: 5, fontSize: 11 }}
+                >
+                  <Edit2 size={12} /> {client.account_manager_info ? 'Change' : 'Assign'}
+                </button>
+              )}
+            </div>
+
+            {/* Current AM display */}
+            {!amPickerOpen && client.account_manager_info && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--accent-soft)', color: 'var(--accent)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700, overflow: 'hidden',
+                }}>
+                  {client.account_manager_info.avatar ? (
+                    <img src={client.account_manager_info.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    (client.account_manager_info.name || '').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() || '?'
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx-1)' }}>{client.account_manager_info.name}</div>
+                  {client.account_manager_info.email && (
+                    <div style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 1 }}>{client.account_manager_info.email}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state (no AM assigned) */}
+            {!amPickerOpen && !client.account_manager_info && (
+              <div style={{ fontSize: 13, color: 'var(--tx-3)' }}>
+                {isAdmin ? 'No Account Manager assigned yet.' : 'No Account Manager assigned. Ask an admin to set one.'}
+              </div>
+            )}
+
+            {/* Admin picker */}
+            {amPickerOpen && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <select
+                  value={client.account_manager || ''}
+                  onChange={e => saveAccountManager(e.target.value || null)}
+                  disabled={savingAm}
+                  className="input-field"
+                  style={{ width: '100%' }}
+                  autoFocus
+                >
+                  <option value="">— No Account Manager —</option>
+                  {internalUsers.map(u => (
+                    <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => setAmPickerOpen(false)}
+                    disabled={savingAm}
+                    className="btn-ghost btn-sm"
+                    style={{ fontSize: 12 }}
+                  >Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Client Info */}
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

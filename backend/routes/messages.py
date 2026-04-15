@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from database import db
 from utils.auth import get_current_user
 from services.notifications import create_notification
+from routes.push import send_push_to_user
 
 logger = logging.getLogger(__name__)
 
@@ -469,6 +470,41 @@ async def send_message(
                 )
             except Exception:
                 pass  # non-fatal
+
+    # If the sender is a Media Client, ping their Account Manager so the AM
+    # gets an in-app notification + lock-screen push. Skip if the AM is
+    # already a thread member (they'll see the message directly) or if the
+    # AM was mentioned (already notified above).
+    try:
+        if current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client":
+            am_id = current_user.get("account_manager")
+            if (
+                am_id
+                and am_id != current_user["id"]
+                and am_id not in (body.mentions or [])
+                and am_id not in thread.get("members", [])
+            ):
+                sender_name = current_user.get("name") or current_user.get("email") or "A client"
+                preview_text = body_text[:120] if body_text else f"Sent {len(attachments)} attachment(s)"
+                await create_notification(
+                    db,
+                    user_id=am_id,
+                    type="client_message",
+                    title=f"New message from {sender_name}",
+                    message=preview_text,
+                )
+                try:
+                    await send_push_to_user(
+                        user_id=am_id,
+                        title=f"{sender_name} sent a message",
+                        body=preview_text,
+                        url="/conversations",
+                        tag=f"client-msg-{current_user['id']}",
+                    )
+                except Exception:
+                    pass  # push is best-effort — in-app notif still lands
+    except Exception:
+        pass  # AM notification is non-fatal for the message send itself
 
     # Update thread's last message
     preview = body_text[:80] if body_text else f"📎 {len(attachments)} attachment{'s' if len(attachments) != 1 else ''}"

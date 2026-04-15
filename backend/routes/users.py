@@ -157,7 +157,8 @@ class UserResponse(BaseModel):
     industry: Optional[str] = None
     website: Optional[str] = None
     phone: Optional[str] = None
-    account_manager: Optional[str] = None
+    account_manager: Optional[str] = None  # User ID of the designated AM
+    account_manager_info: Optional[Dict] = None  # Enriched: { id, name, avatar, email }
     notes: Optional[str] = None
     tags: List[str] = []
 
@@ -289,9 +290,31 @@ async def build_user_response(user: dict) -> UserResponse:
         website=user.get("website"),
         phone=user.get("phone"),
         account_manager=user.get("account_manager"),
+        account_manager_info=await _resolve_account_manager(user.get("account_manager")),
         notes=user.get("notes"),
         tags=user.get("tags", []),
     )
+
+
+async def _resolve_account_manager(am_value: Optional[str]) -> Optional[Dict]:
+    """Resolve account_manager value to enriched info.
+    Accepts either a user ID or legacy free-form name string — if lookup fails
+    the value is echoed back as a plain name so legacy data still displays."""
+    if not am_value:
+        return None
+    am = await db.users.find_one(
+        {"id": am_value},
+        {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "avatar": 1}
+    )
+    if am:
+        return {
+            "id": am["id"],
+            "name": am.get("full_name") or am.get("name") or am.get("email", ""),
+            "email": am.get("email"),
+            "avatar": am.get("avatar"),
+        }
+    # Legacy: value wasn't an ID — treat as display name
+    return {"id": None, "name": am_value, "email": None, "avatar": None}
 
 
 # ============== IDENTITY CONFIG ROUTES ==============
@@ -672,6 +695,20 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: dict = 
     if "account_type" in update_dict:
         if update_dict["account_type"] not in ACCOUNT_TYPES:
             raise HTTPException(status_code=400, detail=f"Invalid account type. Must be one of: {', '.join(ACCOUNT_TYPES)}")
+
+    # Validate account_manager — must be a real internal user, never the client
+    # themselves, and never another Media Client.
+    if "account_manager" in update_dict and update_dict["account_manager"]:
+        am_id = update_dict["account_manager"]
+        if am_id == user_id:
+            raise HTTPException(status_code=400, detail="A client cannot be their own Account Manager")
+        am_user = await db.users.find_one({"id": am_id}, {"_id": 0, "role": 1, "account_type": 1, "active": 1})
+        if not am_user:
+            raise HTTPException(status_code=400, detail="Account Manager user not found")
+        if am_user.get("account_type") == "Media Client" or am_user.get("role") == "Media Client":
+            raise HTTPException(status_code=400, detail="Account Manager must be an internal team member, not a client")
+        if am_user.get("active") is False:
+            raise HTTPException(status_code=400, detail="Account Manager must be an active user")
     
     # Handle multi-specialty update
     if "specialty_ids" in update_dict:
