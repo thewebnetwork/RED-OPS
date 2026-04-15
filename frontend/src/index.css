@@ -299,6 +299,8 @@
     top: 0;
     left: 0;
     box-shadow: 8px 0 30px rgba(0,0,0,0.5);
+    /* Respect notch so the drawer's logo header doesn't sit under the status bar */
+    padding-top: env(safe-area-inset-top, 0);
   }
 }
 
@@ -311,9 +313,10 @@
   background: var(--bg);
 }
 
-/* Top bar — sticky header inside app-main */
+/* Top bar — sticky header inside app-main.
+   Uses min-height instead of a fixed height so safe-area-inset-top padding
+   (added below for notch phones) grows the bar instead of squishing content. */
 .top-bar {
-  height: var(--topbar-height);
   min-height: var(--topbar-height);
   flex-shrink: 0;
   display: flex;
@@ -328,7 +331,15 @@
 }
 
 @media (max-width: 1023px) {
-  .top-bar { padding: 0 12px; gap: 8px; }
+  .top-bar {
+    padding: 0 12px;
+    gap: 8px;
+    /* Grow the bar to absorb the notch so the hamburger/logo/bell row
+       sits *below* the status bar, not under it. */
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: max(env(safe-area-inset-left, 0), 12px);
+    padding-right: max(env(safe-area-inset-right, 0), 12px);
+  }
 }
 
 /* Hide elements on mobile */

@@ -609,7 +609,26 @@ export default function Layout({ children }) {
             <Menu size={17} />
           </button>
 
-          <span style={{ color:'var(--tx-1)', fontWeight:600, fontSize:13, letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pageTitle}</span>
+          {/* Mobile brand mark — desktop already has the logo in the sidebar */}
+          <Link
+            to="/"
+            className="lg:hidden"
+            aria-label="Home"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}
+          >
+            <div style={{
+              width: 26, height: 26, background: 'var(--accent)', borderRadius: 7,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: 12, color: '#fff', letterSpacing: '-.02em',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+            }}>R</div>
+            <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--tx-1)' }}>RED OPS</span>
+          </Link>
+
+          <span
+            className="hide-mobile"
+            style={{ color:'var(--tx-1)', fontWeight:600, fontSize:13, letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}
+          >{pageTitle}</span>
 
           <div style={{ flex:1 }} />
 
