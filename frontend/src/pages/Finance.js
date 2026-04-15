@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import EmptyState from '../components/EmptyState';
+import StripePaymentsPanel from '../components/StripePaymentsPanel';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Search, RefreshCw, Loader2,
@@ -216,6 +218,8 @@ function SortHeader({ label, sortKey, sort, setSort }) {
 // ── Main Page ───────────────────────────────────────────────────────────────
 
 export default function Finance() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -461,6 +465,9 @@ export default function Finance() {
           </button>
         </div>
       </div>
+
+      {/* Stripe live payments (admin only) */}
+      {isAdmin && <StripePaymentsPanel />}
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 14, marginBottom: 24 }}>

@@ -7,6 +7,11 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
 const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 
+const smtpLabel = {
+  display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--tx-3)',
+  textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6,
+};
+
 const allIntegrations = [
   {
     id: 'ghl', name: 'GoHighLevel', category: 'CRM',
@@ -75,6 +80,12 @@ const allIntegrations = [
     icon: 'O', color: '#10a37f', authType: 'api_key', keyLabel: 'OpenAI API Key',
     docsUrl: 'https://platform.openai.com/api-keys',
   },
+  {
+    id: 'email_smtp', name: 'Email (SMTP)', category: 'Communication',
+    description: 'Send RED OPS notifications (task assigned, new message, client activity, reminders) from your own SMTP server or Gmail app password.',
+    icon: 'M', color: '#0f766e', authType: 'smtp',
+    docsUrl: 'https://support.google.com/accounts/answer/185833',
+  },
 ];
 
 const comingSoon = [
@@ -106,6 +117,13 @@ export default function Integrations() {
   const [ncUrl, setNcUrl] = useState('');
   const [ncUser, setNcUser] = useState('');
   const [ncPass, setNcPass] = useState('');
+  // Email SMTP form state
+  const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
+  const [smtpPort, setSmtpPort] = useState(587);
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
+  const [smtpFrom, setSmtpFrom] = useState('');
+  const [smtpTls, setSmtpTls] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(null);
   const [confirmDisconnect, setConfirmDisconnect] = useState(null);
@@ -149,6 +167,10 @@ export default function Integrations() {
       toast.error('URL, username, and app password are all required.');
       return;
     }
+    if (integration.authType === 'smtp' && (!smtpHost.trim() || !smtpUser.trim() || !smtpPass.trim())) {
+      toast.error('SMTP host, username, and password are all required.');
+      return;
+    }
 
     if (integration.authType === 'oauth') {
       toast.info(`${integration.name} OAuth coming soon. Use API key if available.`);
@@ -162,6 +184,15 @@ export default function Integrations() {
         config = { webhook_url: apiKey };
       } else if (integration.authType === 'webdav') {
         config = { url: ncUrl.trim().replace(/\/+$/, ''), username: ncUser.trim(), password: ncPass };
+      } else if (integration.authType === 'smtp') {
+        config = {
+          smtp_host: smtpHost.trim(),
+          smtp_port: Number(smtpPort) || 587,
+          smtp_user: smtpUser.trim(),
+          smtp_password: smtpPass,
+          smtp_from: smtpFrom.trim() || smtpUser.trim(),
+          smtp_use_tls: smtpTls,
+        };
       } else {
         config = { api_key: apiKey };
       }
@@ -179,6 +210,8 @@ export default function Integrations() {
       setModal(null);
       setApiKey('');
       setNcUrl(''); setNcUser(''); setNcPass('');
+      setSmtpHost('smtp.gmail.com'); setSmtpPort(587);
+      setSmtpUser(''); setSmtpPass(''); setSmtpFrom(''); setSmtpTls(true);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to connect');
     } finally {
@@ -431,6 +464,44 @@ export default function Integrations() {
                     <ExternalLink size={12} /> Open Nextcloud
                   </a>
                 )}
+              </div>
+            ) : modal.integration.authType === 'smtp' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={smtpLabel}>SMTP Host</label>
+                    <input className="input-field" placeholder="smtp.gmail.com" value={smtpHost} onChange={e => setSmtpHost(e.target.value)} autoFocus />
+                  </div>
+                  <div>
+                    <label style={smtpLabel}>Port</label>
+                    <input className="input-field" type="number" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label style={smtpLabel}>Username (email address)</label>
+                  <input className="input-field" type="email" placeholder="you@yourdomain.com" value={smtpUser} onChange={e => setSmtpUser(e.target.value)} />
+                </div>
+                <div>
+                  <label style={smtpLabel}>Password or App Password</label>
+                  <input className="input-field" type="password" placeholder="For Gmail, create an app password" value={smtpPass} onChange={e => setSmtpPass(e.target.value)} />
+                  {modal.integration.docsUrl && (
+                    <a href={modal.integration.docsUrl} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--tx-3)', textDecoration: 'none', marginTop: 6 }}>
+                      <ExternalLink size={11} /> How to generate a Gmail app password
+                    </a>
+                  )}
+                </div>
+                <div>
+                  <label style={smtpLabel}>From address (optional)</label>
+                  <input className="input-field" type="email" placeholder="no-reply@yourdomain.com (defaults to username)" value={smtpFrom} onChange={e => setSmtpFrom(e.target.value)} />
+                </div>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--tx-2)' }}>
+                  <input type="checkbox" checked={smtpTls} onChange={e => setSmtpTls(e.target.checked)} />
+                  Use STARTTLS (recommended for port 587)
+                </label>
+                <div style={{ padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)', fontSize: 11.5, color: 'var(--tx-3)', lineHeight: 1.55 }}>
+                  Notifications wired to this integration: task assigned, new message from a client, client order activity. Time-based reminders (overdue, calendar) require the scheduler worker — documented in the repo.
+                </div>
               </div>
             ) : (
               <div style={{ marginBottom: 20, padding: '14px 16px', background: 'var(--bg-elevated)', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--tx-2)', lineHeight: 1.5 }}>

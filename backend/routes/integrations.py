@@ -23,10 +23,17 @@ class IntegrationConfig(BaseModel):
     url: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
+    # Email SMTP specific
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
+    smtp_from: Optional[str] = None      # "Red Ops <no-reply@...>" or just the address
+    smtp_use_tls: Optional[bool] = True
 
 class IntegrationConnect(BaseModel):
     provider: str
-    auth_type: Literal["api_key", "webhook", "webdav"] = "api_key"
+    auth_type: Literal["api_key", "webhook", "webdav", "smtp"] = "api_key"
     config: IntegrationConfig
 
 # ============== SUPPORTED PROVIDERS ==============
@@ -38,6 +45,7 @@ SUPPORTED_PROVIDERS = {
     "ghl":           {"name": "GoHighLevel",   "auth_type": "api_key"},
     "nextcloud":     {"name": "Nextcloud",     "auth_type": "webdav"},
     "zapier":        {"name": "Zapier",        "auth_type": "webhook"},
+    "email_smtp":    {"name": "Email (SMTP)",  "auth_type": "smtp"},
 }
 
 def _org_id(user: dict) -> str:
@@ -98,6 +106,31 @@ async def _test_nextcloud(config: dict) -> bool:
         logger.warning(f"Nextcloud test failed: {e}")
         return False
 
+async def _test_email_smtp(config: dict) -> bool:
+    """Open an SMTP connection and attempt login — no message sent."""
+    import smtplib
+    host = config.get("smtp_host")
+    port = int(config.get("smtp_port") or 587)
+    user = config.get("smtp_user")
+    password = config.get("smtp_password")
+    use_tls = bool(config.get("smtp_use_tls", True))
+    if not host or not user or not password:
+        return False
+    try:
+        if port == 465:
+            with smtplib.SMTP_SSL(host, port, timeout=10) as s:
+                s.login(user, password)
+        else:
+            with smtplib.SMTP(host, port, timeout=10) as s:
+                if use_tls:
+                    s.starttls()
+                s.login(user, password)
+        return True
+    except Exception as e:
+        logger.warning(f"SMTP test failed: {e}")
+        return False
+
+
 async def test_integration(provider: str, config: dict) -> bool:
     if provider == "openai" and config.get("api_key"):
         return await _test_openai(config)
@@ -107,6 +140,8 @@ async def test_integration(provider: str, config: dict) -> bool:
         return await _test_stripe(config)
     if provider == "nextcloud":
         return await _test_nextcloud(config)
+    if provider == "email_smtp":
+        return await _test_email_smtp(config)
     # For others, accept if non-empty credential provided
     return bool(config.get("api_key") or config.get("webhook_url"))
 
@@ -129,6 +164,8 @@ async def list_integrations(current_user: dict = Depends(get_current_user)):
             cfg["webhook_url"] = _mask(cfg["webhook_url"])
         if cfg.get("password"):
             cfg["password"] = _mask(cfg["password"])
+        if cfg.get("smtp_password"):
+            cfg["smtp_password"] = _mask(cfg["smtp_password"])
     return integrations
 
 

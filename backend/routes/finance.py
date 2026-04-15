@@ -231,6 +231,70 @@ class FinanceCategoryUpdate(BaseModel):
     color: Optional[str] = None
 
 
+@router.get("/stripe/payments")
+async def stripe_live_payments(
+    limit: int = Query(25, ge=1, le=100),
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Pull recent successful charges from the org's connected Stripe account.
+    Returns {connected, payments, total_cents_30d}. Admin-only.
+
+    If no Stripe integration is connected, returns connected=False with an
+    empty list so the Finance page can render a "Connect Stripe" nudge
+    instead of erroring."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    integ = await db.integrations.find_one(
+        {"org_id": org_id, "provider": "stripe", "status": "connected"}
+    )
+    if not integ:
+        return {"connected": False, "payments": [], "total_cents_30d": 0}
+
+    api_key = (integ.get("config") or {}).get("api_key")
+    if not api_key:
+        return {"connected": False, "payments": [], "total_cents_30d": 0}
+
+    try:
+        import stripe as stripe_sdk
+        stripe_sdk.api_key = api_key
+        # Use the Charges API — works for any live account without requiring
+        # Connect setup. List recent succeeded charges.
+        charges = stripe_sdk.Charge.list(limit=limit)
+        payments = []
+        for c in charges.data:
+            if c.get("status") != "succeeded":
+                continue
+            payments.append({
+                "id": c["id"],
+                "amount": c["amount"],               # in cents
+                "currency": (c.get("currency") or "usd").upper(),
+                "description": c.get("description") or "",
+                "customer_email": (c.get("billing_details") or {}).get("email"),
+                "customer_name": (c.get("billing_details") or {}).get("name"),
+                "created": c["created"],             # epoch seconds
+                "receipt_url": c.get("receipt_url"),
+            })
+
+        # 30-day total — paginate once with a created filter
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        cutoff = int((_dt.now(_tz.utc) - _td(days=30)).timestamp())
+        total = 0
+        cursor = None
+        pages = 0
+        while pages < 5:  # safety cap
+            page = stripe_sdk.Charge.list(limit=100, created={"gte": cutoff}, starting_after=cursor)
+            for c in page.data:
+                if c.get("status") == "succeeded":
+                    total += c.get("amount", 0)
+            if not page.get("has_more"):
+                break
+            cursor = page.data[-1]["id"] if page.data else None
+            pages += 1
+
+        return {"connected": True, "payments": payments, "total_cents_30d": total}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Stripe error: {str(e)[:200]}")
+
+
 @router.get("/categories")
 async def get_finance_categories(
     current_user: dict = Depends(get_current_user)

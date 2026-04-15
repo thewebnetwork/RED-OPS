@@ -605,6 +605,39 @@ async def create_order(
     
     await db.orders.insert_one(order)
 
+    # ── Notify the client's Account Manager on new order (client activity) ────
+    # Best-effort — never blocks order creation.
+    try:
+        if not is_draft and (
+            current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client"
+        ):
+            am_id = current_user.get("account_manager")
+            if am_id and am_id != current_user["id"]:
+                from services.notifications import create_notification
+                from routes.push import send_push_to_user
+                client_name = current_user.get("name") or current_user.get("email") or "A client"
+                order_title = order.get("title") or "a new request"
+                await create_notification(
+                    db,
+                    user_id=am_id,
+                    type="client_activity",
+                    title=f"New request from {client_name}",
+                    message=order_title[:160],
+                    related_order_id=order.get("id"),
+                )
+                try:
+                    await send_push_to_user(
+                        user_id=am_id,
+                        title=f"{client_name} filed a request",
+                        body=order_title[:160],
+                        url=f"/requests",
+                        tag=f"client-request-{order.get('id')}",
+                    )
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
     # ── Auto-create admin project for Media Client service requests ──────────
     if not is_draft and current_user.get("account_type") == "Media Client":
         try:

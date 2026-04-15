@@ -23,10 +23,50 @@ def get_smtp_config():
     }
 
 
-async def send_email_notification(to_email: str, subject: str, body: str, html_body: str = None):
-    """Send email notification via SMTP"""
-    config = get_smtp_config()
-    
+async def _config_from_org_integration(org_id: str):
+    """Look up a connected Email SMTP integration for the given org and return
+    a config dict in the same shape as get_smtp_config(). Returns None if no
+    integration is wired up. Keeps services/email.py self-contained so
+    per-org SMTP just works without changing call sites."""
+    if not org_id:
+        return None
+    try:
+        from database import db
+        row = await db.integrations.find_one(
+            {"org_id": org_id, "provider": "email_smtp", "status": "connected"}
+        )
+        if not row:
+            return None
+        cfg = row.get("config") or {}
+        if not cfg.get("smtp_host") or not cfg.get("smtp_user") or not cfg.get("smtp_password"):
+            return None
+        return {
+            "host": cfg["smtp_host"],
+            "port": int(cfg.get("smtp_port") or 587),
+            "user": cfg["smtp_user"],
+            "password": cfg["smtp_password"],
+            "from_addr": cfg.get("smtp_from") or cfg["smtp_user"],
+            "frontend_url": os.environ.get("FRONTEND_URL", "https://redops.redribbongroup.ca"),
+            "use_tls": bool(cfg.get("smtp_use_tls", True)),
+        }
+    except Exception as e:
+        logging.debug(f"org SMTP lookup failed: {e}")
+        return None
+
+
+async def send_email_notification(to_email: str, subject: str, body: str, html_body: str = None, org_id: str = None):
+    """Send email notification via SMTP.
+
+    If an Email (SMTP) integration is connected for the given org, use that
+    (per-org config entered from Settings → Integrations). Otherwise fall
+    back to the environment-level SMTP config.
+    """
+    config = None
+    if org_id:
+        config = await _config_from_org_integration(org_id)
+    if not config:
+        config = get_smtp_config()
+
     # Check if SMTP is configured
     if not config['user'] or not config['password']:
         logging.warning(f"[EMAIL SKIPPED] SMTP not configured (SMTP_USER/SMTP_PASSWORD missing) — To: {to_email}, Subject: {subject}")
