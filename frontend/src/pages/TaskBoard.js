@@ -279,7 +279,84 @@ function DraggableTaskCard(props) {
   return (<div ref={setNodeRef} style={style}><TaskCard {...props} dragHandleProps={{ ...attributes, ...listeners }} isDragging={isDragging} /></div>);
 }
 
-function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
+function AssigneeChip({ task, users, onAssign }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const assigneeName = task.assigned_user?.name || task.assignee_name || null;
+  async function pick(userId) {
+    setOpen(false);
+    await onAssign(task.id, userId);
+  }
+
+  return (
+    <span ref={ref} style={{ position: 'relative', marginLeft: 'auto' }}>
+      {assigneeName ? (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
+          title={`Reassign — currently ${assigneeName}`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          }}
+        >
+          <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 3,
+            padding: '2px 6px', fontSize: 10, fontWeight: 600,
+            borderRadius: 4, border: '1px dashed var(--border-hi)',
+            background: 'none', color: 'var(--tx-3)', cursor: 'pointer',
+          }}
+        >
+          <UserIcon size={9} /> Assign
+        </button>
+      )}
+      {open && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute', top: '100%', right: 0, marginTop: 4,
+            zIndex: 60, minWidth: 180, maxHeight: 240, overflowY: 'auto',
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 10, boxShadow: '0 8px 32px #000a', padding: 4,
+          }}
+        >
+          <button type="button" onClick={() => pick(null)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', fontSize: 12, color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', borderRadius: 6 }}>
+            <UserIcon size={12} /> Unassigned
+          </button>
+          {users.map(u => (
+            <button key={u.id} type="button" onClick={() => pick(u.id)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 8px', fontSize: 12, background: u.id === task.assignee_user_id ? '#c92a3e18' : 'none',
+                color: u.id === task.assignee_user_id ? 'var(--red)' : 'var(--tx-1)',
+                border: 'none', cursor: 'pointer', textAlign: 'left', borderRadius: 6,
+              }}
+            >
+              <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{avatar(u.name)}</span>
+              {u.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+}
+
+function TaskCard({ task, onEdit, users = [], onAssign, dragHandleProps, isDragging }) {
   const pri = PRIORITY[task.priority] || PRIORITY.medium;
   const date = fmtDate(task.due_at);
   const assigneeName = task.assigned_user?.name || task.assignee_name || null;
@@ -329,7 +406,9 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
               <Calendar size={9} />{new Date(task.calendar_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           )}
-          {assigneeName && (
+          {onAssign ? (
+            <AssigneeChip task={task} users={users} onAssign={onAssign} />
+          ) : assigneeName && (
             <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
             </span>
@@ -340,7 +419,7 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
   );
 }
 
-function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCreate }) {
+function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCreate, users, onAssign }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.id });
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 272, maxWidth: 272 }}>
@@ -373,7 +452,7 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
         overflowY: 'auto', WebkitOverflowScrolling: 'touch',
         transition: 'background 0.15s',
       }}>
-        {tasks.map(task => (<DraggableTaskCard key={task.id} task={task} onEdit={onEdit} />))}
+        {tasks.map(task => (<DraggableTaskCard key={task.id} task={task} onEdit={onEdit} users={users} onAssign={onAssign} />))}
         {inlineCreate === col.id && (<InlineCreate colId={col.id} onSave={onAddTask} onCancel={() => setInlineCreate(null)} />)}
         {tasks.length === 0 && inlineCreate !== col.id && (
           isOver ? (
@@ -540,6 +619,8 @@ export default function TaskBoard() {
   const [assignableUsers, setAssignableUsers] = useState([]);
   const [activeTask, setActiveTask] = useState(null);
   const [filterAssignee, setFilterAssignee] = useState('');
+  const [filterClient, setFilterClient] = useState('');
+  const [clientsList, setClientsList] = useState([]);
   const [filterStatus, setFilterStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [inlineCreateCol, setInlineCreateCol] = useState(null);
@@ -575,6 +656,14 @@ export default function TaskBoard() {
 
   useEffect(() => { loadTasks(); }, [loadTasks]);
   useEffect(() => { loadUsers(); }, [loadUsers]);
+  useEffect(() => {
+    axios.get(`${API}/users`, { headers: headers() })
+      .then(r => {
+        const list = r.data?.data || r.data || [];
+        setClientsList((Array.isArray(list) ? list : []).filter(u => u.account_type === 'Media Client' || u.role === 'Media Client'));
+      })
+      .catch(() => {});
+  }, [headers]);
 
   async function handleSave(formData) {
     setSaving(true);
@@ -641,6 +730,21 @@ export default function TaskBoard() {
     }
   }
 
+  async function handleAssign(taskId, userId) {
+    const prev = tasks.find(t => t.id === taskId);
+    // Optimistic
+    setTasks(list => list.map(t => t.id === taskId ? { ...t, assignee_user_id: userId, assignee_name: userId ? (assignableUsers.find(u => u.id === userId)?.name || '') : null, assigned_user: userId ? { id: userId, name: assignableUsers.find(u => u.id === userId)?.name || '' } : null } : t));
+    try {
+      const { data } = await axios.patch(`${API}/tasks/${taskId}`, { assignee_user_id: userId }, { headers: headers() });
+      setTasks(list => list.map(t => t.id === taskId ? data : t));
+      toast.success(userId ? 'Assignee updated' : 'Unassigned');
+    } catch (err) {
+      // Roll back
+      if (prev) setTasks(list => list.map(t => t.id === taskId ? prev : t));
+      toast.error(err.response?.data?.detail || 'Failed to reassign');
+    }
+  }
+
   function openEdit(task) { setEditingTask(task); setDialogOpen(true); }
   function openNew(colId) { setEditingTask({ status: colId || 'todo' }); setDialogOpen(true); }
 
@@ -668,6 +772,7 @@ export default function TaskBoard() {
       if (hideCompleted && t.status === 'done') return false;
       if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
+      if (filterClient && t.client_id !== filterClient) return false;
       return true;
     });
   }
@@ -676,13 +781,14 @@ export default function TaskBoard() {
   const doneTasks = tasks.filter(t => t.status === 'done').length;
   const visibleCount = hideCompleted ? totalTasks - doneTasks : totalTasks;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-  const hasFilters = filterAssignee || filterStatus || searchQuery;
+  const hasFilters = filterAssignee || filterClient || filterStatus || searchQuery;
 
   // Filtered + sorted tasks for list view
   const filteredTasks = tasks.filter(t => {
     if (hideCompleted && t.status === 'done') return false;
     if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
+    if (filterClient && t.client_id !== filterClient) return false;
     if (filterStatus && t.status !== filterStatus) return false;
     return true;
   });
@@ -815,6 +921,10 @@ export default function TaskBoard() {
               <option value="">All Assignees</option>
               {assignableUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
+            <select value={filterClient} onChange={e => setFilterClient(e.target.value)} style={selectStyle}>
+              <option value="">All Clients</option>
+              {clientsList.map(c => <option key={c.id} value={c.id}>{c.name || c.username || c.email}</option>)}
+            </select>
             <PillSelect
               value={filterStatus || ''}
               onChange={setFilterStatus}
@@ -824,7 +934,7 @@ export default function TaskBoard() {
             />
             {hasFilters && (
               <button
-                onClick={() => { setFilterAssignee(''); setFilterStatus(''); setSearchQuery(''); }}
+                onClick={() => { setFilterAssignee(''); setFilterClient(''); setFilterStatus(''); setSearchQuery(''); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
               >
                 <X size={11} /> Clear
@@ -868,6 +978,7 @@ export default function TaskBoard() {
                 <KanbanColumn key={col.id} col={col} tasks={tasksForCol(col.id)}
                   onAddTask={handleInlineSave} onEdit={openEdit}
                   inlineCreate={inlineCreateCol} setInlineCreate={setInlineCreateCol}
+                  users={assignableUsers} onAssign={handleAssign}
                 />
               ))}
             </div>
