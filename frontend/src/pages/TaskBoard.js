@@ -43,19 +43,19 @@ import PillSelect, {
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const COLUMNS = [
-  { id: 'backlog',          label: 'Backlog',      color: '#94a3b8' },
-  { id: 'todo',             label: 'To Do',        color: '#3b82f6' },
-  { id: 'doing',            label: 'In Progress',  color: '#f59e0b' },
-  { id: 'waiting_on_client',label: 'Waiting',      color: '#8b5cf6' },
-  { id: 'review',           label: 'Review',       color: '#06b6d4' },
-  { id: 'done',             label: 'Done',         color: '#22c55e' },
+  { id: 'backlog',          label: 'Backlog',      color: 'var(--tx-3)' },
+  { id: 'todo',             label: 'To Do',        color: 'var(--blue)' },
+  { id: 'doing',            label: 'In Progress',  color: 'var(--yellow)' },
+  { id: 'waiting_on_client',label: 'Waiting',      color: 'var(--purple)' },
+  { id: 'review',           label: 'Review',       color: '#2d6b6b' },
+  { id: 'done',             label: 'Done',         color: 'var(--green)' },
 ];
 
 const PRIORITY = {
-  urgent: { label: 'Urgent', color: '#ef4444', bg: '#ef444418' },
-  high:   { label: 'High',   color: '#f97316', bg: '#f9731618' },
-  medium: { label: 'Medium', color: '#f59e0b', bg: '#f59e0b18' },
-  low:    { label: 'Low',    color: '#94a3b8', bg: '#94a3b818' },
+  urgent: { label: 'Urgent', color: 'var(--red-status)', bg: 'var(--color-red-soft)' },
+  high:   { label: 'High',   color: 'var(--yellow)',     bg: 'var(--color-yellow-soft)' },
+  medium: { label: 'Medium', color: 'var(--yellow)',     bg: 'var(--color-yellow-soft)' },
+  low:    { label: 'Low',    color: 'var(--tx-3)',       bg: 'var(--bg-elevated)' },
 };
 
 function avatar(name) {
@@ -69,9 +69,9 @@ function fmtDate(d) {
     const dt = new Date(d);
     const now = new Date();
     const diff = Math.floor((dt - now) / 86400000);
-    if (diff < 0) return { text: 'Overdue', color: '#ef4444', bg: '#ef444418' };
-    if (diff === 0) return { text: 'Today',    color: '#f59e0b', bg: '#f59e0b18' };
-    if (diff === 1) return { text: 'Tomorrow', color: '#f59e0b', bg: '#f59e0b18' };
+    if (diff < 0) return { text: 'Overdue', color: 'var(--red-status)', bg: 'var(--color-red-soft)' };
+    if (diff === 0) return { text: 'Today',    color: 'var(--yellow)', bg: 'var(--color-yellow-soft)' };
+    if (diff === 1) return { text: 'Tomorrow', color: 'var(--yellow)', bg: 'var(--color-yellow-soft)' };
     return { text: dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), color: 'var(--tx-3)', bg: 'var(--bg-elevated)' };
   } catch { return null; }
 }
@@ -821,9 +821,9 @@ export default function TaskBoard() {
               {totalTasks > 0 && (
                 <span style={{ marginLeft: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ display: 'inline-block', width: 60, height: 5, background: 'var(--bg-elevated)', borderRadius: 3, overflow: 'hidden' }}>
-                    <span style={{ display: 'block', width: `${progress}%`, height: '100%', background: '#22c55e', borderRadius: 3, transition: 'width 0.4s' }} />
+                    <span style={{ display: 'block', width: `${progress}%`, height: '100%', background: 'var(--green)', borderRadius: 3, transition: 'width 0.4s' }} />
                   </span>
-                  <span style={{ color: '#22c55e', fontWeight: 600 }}>{progress}%</span>
+                  <span style={{ color: 'var(--green)', fontWeight: 600 }}>{progress}%</span>
                 </span>
               )}
             </p>

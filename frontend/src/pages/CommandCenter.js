@@ -15,7 +15,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok  = () => localStorage.getItem('token');
 const ax   = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } });
 const health = s => s >= 70 ? 'var(--green)' : s >= 40 ? 'var(--yellow)' : 'var(--red)';
-const PRIORITY_COLORS = { Urgent:'#ef4444', High:'#f59e0b', Normal:'var(--tx-2)', Low:'var(--tx-3)' };
+const PRIORITY_COLORS = { Urgent:'var(--red-status)', High:'var(--yellow)', Normal:'var(--tx-2)', Low:'var(--tx-3)' };
 
 function PulseCard({ icon: Icon, label, value, sub, color='var(--red)', trend, stagger = 0 }) {
   const animatedValue = useCountUp(value, 700);
@@ -179,20 +179,20 @@ export default function CommandCenter() {
 
       {/* Pulse */}
       <div className="metrics-grid-4" style={{ marginBottom:20 }}>
-        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='#3b82f6' trend={pulse.requests_trend} stagger={1} />
-        <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? '#ef4444' : '#22c55e'} stagger={2} />
-        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='#22c55e' stagger={3} />
+        <PulseCard icon={FileText}    label="Requests this month" value={pulse.requests}          color='var(--blue)' trend={pulse.requests_trend} stagger={1} />
+        <PulseCard icon={AlertCircle} label="Overdue items"       value={pulse.overdue}           color={pulse.overdue > 0 ? 'var(--red-status)' : 'var(--green)'} stagger={2} />
+        <PulseCard icon={Users}       label="Team utilization"    value={`${pulse.utilization}%`} color='var(--green)' stagger={3} />
         <PulseCard icon={DollarSign}  label={pulse.target > 0 ? 'MRR vs target' : 'Monthly Revenue'} value={`$${pulse.mrr.toLocaleString()}`} sub={mrrPct !== null ? `${mrrPct}% of $${pulse.target.toLocaleString()}` : null} color='var(--red)' trend={pulse.mrr_trend} stagger={4} />
       </div>
 
       {/* Quick actions */}
       <div className="quick-actions-grid anim-fade-up" style={{ marginBottom:20, animationDelay: '0.2s' }}>
-        <QuickAction icon={FileText}     label="New Request"  to="/requests?new=1" color='#3b82f6' />
-        <QuickAction icon={CheckSquare}  label="New Task"     to="/tasks?new=1"    color='#22c55e' />
-        <QuickAction icon={FolderKanban} label="New Project"  to="/projects?new=1" color='#a855f7' />
+        <QuickAction icon={FileText}     label="New Request"  to="/requests?new=1" color='var(--blue)' />
+        <QuickAction icon={CheckSquare}  label="New Task"     to="/tasks?new=1"    color='var(--green)' />
+        <QuickAction icon={FolderKanban} label="New Project"  to="/projects?new=1" color='var(--purple)' />
         <QuickAction icon={UserPlus}     label="New Client"   to="/clients?new=1"  color='var(--red)' />
-        <QuickAction icon={Star}         label="RRG Services" to="/services"       color='#f59e0b' />
-        <QuickAction icon={Zap}          label="AI Brief"     to="/ai?mode=brief"  color='#a855f7' />
+        <QuickAction icon={Star}         label="RRG Services" to="/services"       color='var(--yellow)' />
+        <QuickAction icon={Zap}          label="AI Brief"     to="/ai?mode=brief"  color='var(--purple)' />
       </div>
 
       {/* 3-col */}

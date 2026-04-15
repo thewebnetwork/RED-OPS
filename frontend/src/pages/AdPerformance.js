@@ -67,7 +67,7 @@ const getLastNMonths = (n) => {
 };
 
 const getDeltaColor = (isPositive) => {
-  return isPositive ? '#22c55e' : '#ef4444';
+  return isPositive ? 'var(--green)' : 'var(--red-status)';
 };
 
 const getDeltaIcon = (isPositive) => {
@@ -849,8 +849,8 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
           </p>
           {csvResults && (
             <div style={{ marginTop: 8, fontSize: 11, display: 'flex', gap: 10 }}>
-              <span style={{ color: '#22c55e', fontWeight: 600 }}>{csvResults.success} imported</span>
-              {csvResults.failed > 0 && <span style={{ color: '#ef4444', fontWeight: 600 }}>{csvResults.failed} failed</span>}
+              <span style={{ color: 'var(--green)', fontWeight: 600 }}>{csvResults.success} imported</span>
+              {csvResults.failed > 0 && <span style={{ color: 'var(--red-status)', fontWeight: 600 }}>{csvResults.failed} failed</span>}
             </div>
           )}
         </div>
@@ -1182,7 +1182,7 @@ function ImportCSVModal({ open, onClose, onSuccess, clients }) {
           /* Success state */
           <div>
             <div style={{ padding: '20px', textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: '8px', marginBottom: '16px' }}>
-              <CheckCircle2 size={36} style={{ color: '#22c55e', marginBottom: '8px' }} />
+              <CheckCircle2 size={36} style={{ color: 'var(--green)', marginBottom: '8px' }} />
               <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px', color: 'var(--tx-1)' }}>Import Successful</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px', textAlign: 'left', maxWidth: '280px', margin: '0 auto' }}>
                 <div>
@@ -1200,8 +1200,8 @@ function ImportCSVModal({ open, onClose, onSuccess, clients }) {
               </div>
             </div>
             {result.warnings?.length > 0 && (
-              <div style={{ padding: '10px 12px', background: '#f59e0b12', border: '1px solid #f59e0b30', borderRadius: '6px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: '#f59e0b', marginBottom: '4px' }}>Warnings</div>
+              <div style={{ padding: '10px 12px', background: 'var(--color-yellow-soft)', border: '1px solid var(--color-yellow-soft)', borderRadius: '6px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--yellow)', marginBottom: '4px' }}>Warnings</div>
                 {result.warnings.map((w, i) => (
                   <div key={i} style={{ fontSize: '11px', color: 'var(--tx-2)', lineHeight: 1.5 }}>{w}</div>
                 ))}
@@ -1679,16 +1679,16 @@ function AdminAdDashboard() {
                           style={{
                             backgroundColor:
                               client.health === 'strong'
-                                ? '#22c55e18'
+                                ? 'var(--color-green-soft)'
                                 : client.health === 'ok'
-                                ? '#f59e0b18'
-                                : '#ef444418',
+                                ? 'var(--color-yellow-soft)'
+                                : 'var(--color-red-soft)',
                             color:
                               client.health === 'strong'
-                                ? '#22c55e'
+                                ? 'var(--green)'
                                 : client.health === 'ok'
-                                ? '#f59e0b'
-                                : '#ef4444',
+                                ? 'var(--yellow)'
+                                : 'var(--red-status)',
                           }}
                         >
                           {client.health === 'strong'
@@ -1742,7 +1742,7 @@ function AdminAdDashboard() {
                                         <Pencil size={11} />
                                       </button>
                                       <button onClick={(e) => { e.stopPropagation(); deleteSnapshot(snap); }}
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2 }}>
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red-status)', padding: 2 }}>
                                         <Trash2 size={11} />
                                       </button>
                                     </div>
