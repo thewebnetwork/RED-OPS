@@ -354,11 +354,12 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
       </div>
       {/* Body — registered as droppable target */}
       <div ref={setNodeRef} style={{
-        flex: 1, borderRadius: '0 0 10px 10px',
+        flex: 1, minHeight: 0, borderRadius: '0 0 10px 10px',
         border: '1px solid var(--border)', borderTop: 'none',
         background: isOver ? `${col.color}15` : col.color + '08',
         outline: isOver ? `1px dashed ${col.color}60` : 'none',
-        padding: 8, minHeight: 120, display: 'flex', flexDirection: 'column', gap: 6,
+        padding: 8, display: 'flex', flexDirection: 'column', gap: 6,
+        overflowY: 'auto', WebkitOverflowScrolling: 'touch',
         transition: 'background 0.15s',
       }}>
         {tasks.map(task => (<DraggableTaskCard key={task.id} task={task} onEdit={onEdit} />))}

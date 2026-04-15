@@ -10,6 +10,7 @@ import {
   File, FilePlus, FolderOpen, Bold, Italic, List, Link2, Type, Grip,
   LayoutGrid,
 } from 'lucide-react';
+import { ProjectModal } from './Projects';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -876,6 +877,8 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('overview');
   const [allUsers, setAllUsers] = useState([]);
+  const [editOpen, setEditOpen] = useState(false);
+  const [clientsList, setClientsList] = useState([]);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -897,7 +900,9 @@ export default function ProjectPage() {
   useEffect(() => {
     ax().get(`${API}/users`).then(r => {
       const list = r.data?.data || r.data || [];
-      setAllUsers(Array.isArray(list) ? list.map(u => ({ id: u.id, name: u.name || u.username || 'Unknown' })) : []);
+      const users = Array.isArray(list) ? list : [];
+      setAllUsers(users.map(u => ({ id: u.id, name: u.name || u.username || 'Unknown' })));
+      setClientsList(users.filter(u => u.account_type === 'Media Client' || u.role === 'Media Client'));
     }).catch(() => {});
   }, []);
 
@@ -922,6 +927,25 @@ export default function ProjectPage() {
 
   return (
     <div className="page-fill" style={{ flexDirection: 'column', overflow: 'hidden' }}>
+      {editOpen && (
+        <ProjectModal
+          project={project}
+          clients={clientsList}
+          teamMembers={allUsers}
+          onClose={() => setEditOpen(false)}
+          onSave={async (form) => {
+            if (!form) { await fetchProject(); return; }
+            try {
+              const { id: _omit, created_at, updated_at, created_by_user_id, client_name, task_count, completed_task_count, progress, ...patch } = form;
+              await ax().patch(`${API}/projects/${project.id}`, patch);
+              toast.success('Project updated');
+              await fetchProject();
+            } catch (err) {
+              toast.error(err.response?.data?.detail || 'Failed to update project');
+            }
+          }}
+        />
+      )}
       {/* Top bar */}
       <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         {/* Breadcrumb */}
@@ -950,7 +974,7 @@ export default function ProjectPage() {
             )}
           </div>
 
-          <button onClick={() => navigate(`/projects?edit=${project.id}`)} className="btn-ghost btn-sm" style={{ gap: 4 }}>
+          <button onClick={() => setEditOpen(true)} className="btn-ghost btn-sm" style={{ gap: 4 }}>
             <Edit3 size={12} /> Edit
           </button>
         </div>

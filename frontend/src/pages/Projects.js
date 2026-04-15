@@ -347,7 +347,7 @@ function GroupHeader({ label, count, color, collapsed, onToggle }) {
   );
 }
 
-function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [], teamMembers = [] }) {
+export function ProjectModal({ project, onClose, onSave, onDelete, loading, clients = [], teamMembers = [] }) {
   const [form, setForm] = useState(() => {
     const init = project || {};
     return { ...init, team_member_ids: init.team_member_ids || (init.team_members || []).map(m => m.id) || [] };
