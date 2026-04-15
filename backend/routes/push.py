@@ -173,8 +173,8 @@ async def send_push_to_user(user_id: str, title: str, body: str, url: str = "/",
 @router.post("/send")
 async def push_send(req: PushSendRequest, user=Depends(get_current_user)):
     """Send a push notification to a specific user (admin/internal use)."""
-    # Only allow admins or sending to self
-    if user.get("role") not in ("admin", "administrator") and req.user_id != user["id"]:
+    # Only allow admins/operators or sending to self
+    if user.get("role") not in ("Administrator", "Admin", "Operator") and req.user_id != user["id"]:
         raise HTTPException(status_code=403, detail="Can only send push to yourself or must be admin")
 
     sent = await send_push_to_user(

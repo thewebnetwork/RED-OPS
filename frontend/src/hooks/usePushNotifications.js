@@ -11,6 +11,12 @@ import axios from 'axios';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const VAPID_PUBLIC_KEY = process.env.REACT_APP_VAPID_PUBLIC_KEY;
 
+// Attach the JWT on every push-API call — backend uses get_current_user on all routes.
+const authHeaders = () => {
+  const t = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return t ? { Authorization: `Bearer ${t}` } : {};
+};
+
 /**
  * Convert a base64 VAPID key to Uint8Array for pushManager.subscribe()
  */
@@ -84,11 +90,11 @@ export function usePushNotifications() {
       const isMobile = /Mobi|Android/.test(navigator.userAgent);
       const device = isIOS ? 'ios' : isMobile ? 'android' : 'desktop';
 
-      // Send subscription to backend
+      // Send subscription to backend (authenticated)
       await axios.post(`${API}/push/subscribe`, {
         subscription: subscription.toJSON(),
         device,
-      });
+      }, { headers: authHeaders() });
 
       setIsSubscribed(true);
       setLoading(false);
@@ -114,7 +120,7 @@ export function usePushNotifications() {
       if (subscription) {
         await axios.post(`${API}/push/unsubscribe`, {
           endpoint: subscription.endpoint,
-        });
+        }, { headers: authHeaders() });
         await subscription.unsubscribe();
       }
 

@@ -90,6 +90,34 @@ function PushNotificationCard() {
           }} />
         </div>
       </div>
+
+      {isSubscribed && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          <button
+            onClick={async () => {
+              try {
+                const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API}/push/test`, {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('failed');
+                toast.success('Test sent — check your lock screen.');
+              } catch {
+                toast.error('Test failed. Check browser notification settings.');
+              }
+            }}
+            style={{
+              padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8,
+              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+              color: 'var(--tx-2)', cursor: 'pointer',
+            }}
+          >
+            Send test notification
+          </button>
+        </div>
+      )}
     </div>
   );
 }

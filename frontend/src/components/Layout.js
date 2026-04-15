@@ -591,20 +591,34 @@ export default function Layout({ children }) {
 
         {/* Top bar */}
         <div className="top-bar glass-subtle">
-          <button className="lg:hidden" onClick={() => setSidebarOpen(true)}
-            style={{ background:'none', border:'none', cursor:'pointer', color:'var(--tx-2)', display:'flex', padding:0 }}>
-            <Menu size={18} />
+          <button
+            className="lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation"
+            style={{
+              width: 34, height: 34,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              color: 'var(--tx-1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0, flexShrink: 0,
+            }}
+          >
+            <Menu size={17} />
           </button>
 
-          <span style={{ color:'var(--tx-1)', fontWeight:600, fontSize:12.5 }}>{pageTitle}</span>
+          <span style={{ color:'var(--tx-1)', fontWeight:600, fontSize:13, letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pageTitle}</span>
 
           <div style={{ flex:1 }} />
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ position:'relative' }}>
               <Link to="/notifications"
-                style={{ width:32, height:32, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-2)' }}>
-                <Bell size={14} />
+                aria-label="Notifications"
+                style={{ width:34, height:34, background:'var(--bg-elevated)', border:'1px solid var(--border)', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--tx-2)', flexShrink:0 }}>
+                <Bell size={15} />
               </Link>
               {unread > 0 && <div className="notif-dot" />}
             </div>
