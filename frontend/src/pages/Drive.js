@@ -16,6 +16,7 @@
  *   Right-click any item → context menu
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -93,20 +94,32 @@ function SidebarButton({ icon: Icon, label, active, onClick, count, children }) 
 function ItemCard({ item, view, onOpen, onContext, onStar }) {
   const isFolder = item.kind === 'folder';
   const isDoc = item.kind === 'doc';
+  const isSheet = item.kind === 'sheet';
+  const isExternal = item.kind === 'external';
   const isStarred = item.starred_by_me || item.is_starred;
 
   const icon = isFolder
     ? <Folder size={32} style={{ color: '#f59e0b' }} />
     : isDoc
       ? <span style={{ fontSize: 28 }}>{item.icon || '📄'}</span>
-      : fileIcon(item.content_type, 32);
+      : isSheet
+        ? <FileSpreadsheet size={32} style={{ color: '#3d6b54' }} />
+        : isExternal
+          ? (item.icon_link
+              ? <img src={item.icon_link} alt="" style={{ width: 28, height: 28 }} />
+              : <FileIcon size={32} style={{ color: '#4285F4' }} />)
+          : fileIcon(item.content_type, 32);
 
   const name = item.name || item.title || item.label || item.original_filename || 'Untitled';
   const subtitle = isFolder
     ? `${item.item_count || 0} items`
     : isDoc
       ? (item.updated_at ? timeAgo(item.updated_at) : 'New')
-      : `${humanSize(item.file_size)} · ${timeAgo(item.updated_at || item.created_at)}`;
+      : isSheet
+        ? `${item.row_count || 0} rows · ${timeAgo(item.updated_at || item.created_at)}`
+        : isExternal
+          ? `Google Drive · ${timeAgo(item.modified_time)}`
+          : `${humanSize(item.file_size)} · ${timeAgo(item.updated_at || item.created_at)}`;
 
   if (view === 'list') {
     return (
@@ -251,7 +264,7 @@ function ContextMenu({ menu, onClose, onAction }) {
 }
 
 // ── New Menu ─────────────────────────────────────────────────────
-function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload }) {
+function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload, onNewSheet }) {
   if (!open) return null;
   return (
     <>
@@ -259,12 +272,13 @@ function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload }) {
       <div style={{
         position: 'absolute', top: '100%', left: 0, marginTop: 6, zIndex: 901,
         background: 'var(--surface)', border: '1px solid var(--border-hi)',
-        borderRadius: 12, padding: 6, minWidth: 200,
+        borderRadius: 12, padding: 6, minWidth: 220,
         boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
         animation: 'fadeIn 0.15s ease',
       }}>
         {[
           { icon: FileText, label: 'New Document', onClick: onNewDoc, desc: 'Rich text doc' },
+          { icon: FileSpreadsheet, label: 'New Sheet', onClick: onNewSheet, desc: 'Rows & columns' },
           { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder, desc: 'Organize files' },
           { icon: Upload, label: 'Upload File', onClick: onUpload, desc: 'From your computer' },
         ].map((i, idx) => (
@@ -292,6 +306,7 @@ function NewMenu({ open, onClose, onNewDoc, onNewFolder, onUpload }) {
 // ── Main Page ────────────────────────────────────────────────────
 export default function Drive() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin' || user?.role === 'Operator';
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [section, setSection] = useState('my-drive'); // my-drive | shared | starred | recent | trash
@@ -300,6 +315,8 @@ export default function Drive() {
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [docs, setDocs] = useState([]);
+  const [sheets, setSheets] = useState([]);
+  const [externalFiles, setExternalFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [view, setView] = useState(() => localStorage.getItem('drive_view') || 'grid');
@@ -346,16 +363,22 @@ export default function Drive() {
         // Note: /files/folders filters by parent_folder_id; /files filters by folder_id
         const foldersParams = currentFolderId ? { parent_folder_id: currentFolderId } : {};
         const filesParams   = currentFolderId ? { folder_id: currentFolderId } : {};
-        const [fdrRes, fRes, dRes] = await Promise.allSettled([
+        const sheetsParams  = currentFolderId ? { folder_id: currentFolderId } : {};
+        const [fdrRes, fRes, dRes, sRes, xfRes] = await Promise.allSettled([
           ax().get(`${API}/files/folders`, { params: foldersParams }),
           ax().get(`${API}/files`, { params: filesParams }),
-          // docs are only shown at root for now
+          // docs + synced external files only show at root for now
           currentFolderId ? null : ax().get(`${API}/documents`),
+          ax().get(`${API}/sheets`, { params: sheetsParams }),
+          currentFolderId ? null : ax().get(`${API}/drive-sync/files`),
         ].filter(Boolean));
         setFolders(fdrRes.status === 'fulfilled' ? (fdrRes.value.data || []).map(f => ({ ...f, kind: 'folder' })) : []);
         setFiles(fRes.status === 'fulfilled' ? (fRes.value.data || []).map(f => ({ ...f, kind: 'file' })) : []);
         setDocs(!currentFolderId && dRes && dRes.status === 'fulfilled'
           ? (dRes.value.data || []).map(d => ({ ...d, kind: 'doc' })) : []);
+        setSheets(sRes.status === 'fulfilled' ? (sRes.value.data || []).map(s => ({ ...s, kind: 'sheet' })) : []);
+        setExternalFiles(!currentFolderId && xfRes && xfRes.status === 'fulfilled'
+          ? (xfRes.value.data || []).map(f => ({ ...f, kind: 'external' })) : []);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -367,7 +390,7 @@ export default function Drive() {
 
   // ── Derived: combined + sorted + searched ────────────────────
   const items = useMemo(() => {
-    const all = [...folders, ...docs, ...files];
+    const all = [...folders, ...docs, ...sheets, ...files, ...externalFiles];
     const q = search.trim().toLowerCase();
     const filtered = q
       ? all.filter(i => {
@@ -396,7 +419,7 @@ export default function Drive() {
     });
 
     return sorted;
-  }, [folders, docs, files, search, sortBy]);
+  }, [folders, docs, sheets, files, externalFiles, search, sortBy]);
 
   const folderItems = items.filter(i => i.kind === 'folder');
   const fileItems = items.filter(i => i.kind !== 'folder');
@@ -408,6 +431,11 @@ export default function Drive() {
       setBreadcrumbs(prev => [...prev, { id: item.id, name: item.name }]);
     } else if (item.kind === 'doc') {
       setOpeningDoc(item.id);
+    } else if (item.kind === 'sheet') {
+      navigate(`/drive/sheet/${item.id}`);
+    } else if (item.kind === 'external') {
+      // External files open in the provider's viewer in a new tab
+      if (item.web_view_link) window.open(item.web_view_link, '_blank', 'noopener');
     } else {
       // file — download
       downloadFile(item);
@@ -443,6 +471,16 @@ export default function Drive() {
       setOpeningDoc(r.data.id);
       fetchData();
     } catch { toast.error('Failed to create document'); }
+  };
+
+  const createSheet = async () => {
+    try {
+      const r = await ax().post(`${API}/sheets`, {
+        name: 'Untitled sheet',
+        folder_id: currentFolderId || null,
+      });
+      navigate(`/drive/sheet/${r.data.id}`);
+    } catch { toast.error('Failed to create sheet'); }
   };
 
   const createFolder = async () => {
@@ -492,11 +530,16 @@ export default function Drive() {
       return;
     }
     if (action === 'delete') {
+      if (item.kind === 'external') {
+        toast.info('External files must be deleted from their source calendar / drive.');
+        return;
+      }
       if (!window.confirm(`Delete "${item.name || item.title || item.label}"?`)) return;
       try {
         if (item.kind === 'folder') await ax().delete(`${API}/files/folders/${item.id}`);
         else if (item.kind === 'file') await ax().delete(`${API}/files/${item.id}`);
         else if (item.kind === 'doc') await ax().delete(`${API}/documents/${item.id}`);
+        else if (item.kind === 'sheet') await ax().delete(`${API}/sheets/${item.id}`);
         toast.success('Deleted');
         fetchData();
       } catch (err) { toast.error(err.response?.data?.detail || 'Failed to delete'); }
@@ -511,6 +554,7 @@ export default function Drive() {
       if (kind === 'folder') await ax().patch(`${API}/files/folders/${id}`, { name: newName });
       else if (kind === 'doc') await ax().patch(`${API}/documents/${id}`, { title: newName });
       else if (kind === 'file') await ax().patch(`${API}/files/${id}`, { label: newName });
+      else if (kind === 'sheet') await ax().patch(`${API}/sheets/${id}`, { name: newName });
       setRenameTarget(null);
       setRenameValue('');
       fetchData();
@@ -555,6 +599,7 @@ export default function Drive() {
             open={newMenuOpen}
             onClose={() => setNewMenuOpen(false)}
             onNewDoc={createDoc}
+            onNewSheet={createSheet}
             onNewFolder={() => setShowNewFolder(true)}
             onUpload={() => fileInputRef.current?.click()}
           />

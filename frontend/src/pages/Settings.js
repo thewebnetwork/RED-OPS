@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CalendarConnections from '../components/CalendarConnections';
+import DriveConnections from '../components/DriveConnections';
 import TeamCalendarConnections from '../components/TeamCalendarConnections';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -583,6 +584,9 @@ export default function Settings() {
             <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: 'var(--tx-1)' }}>Notifications &amp; Calendar</h2>
             <div style={{ marginBottom: 20 }}>
               <CalendarConnections />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <DriveConnections />
             </div>
             <div className="card" style={{ padding: '20px' }}>
               {[
