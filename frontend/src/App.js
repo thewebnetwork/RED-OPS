@@ -82,6 +82,8 @@ const Documents = React.lazy(() => import("./pages/Documents"));
 const KnowledgeBase = React.lazy(() => import("./pages/KnowledgeBase"));
 const Drive = React.lazy(() => import("./pages/Drive"));
 const Calendar = React.lazy(() => import("./pages/Calendar"));
+const OperatorDashboard = React.lazy(() => import("./pages/OperatorDashboard"));
+const StandardDashboard = React.lazy(() => import("./pages/StandardDashboard"));
 const Conversations = React.lazy(() => import("./pages/Conversations"));
 const Support = React.lazy(() => import("./pages/Support"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -93,12 +95,22 @@ function PageLoader() {
   return <SkeletonPage />;
 }
 
-// Home route — Command Center for internal roles, ClientHome for clients
+// Home route — three distinct dashboards by role + client portal for Media Clients.
+//   Administrator      → CommandCenter (full agency visibility)
+//   Operator           → OperatorDashboard (task-first execution)
+//   Standard User      → StandardDashboard (minimal, calm)
+//   Media Client       → ClientHome (client portal)
 function HomeRoute() {
   const { user } = useAuth();
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   const isClient = isPreview || user?.account_type === 'Media Client' || user?.role === 'Media Client';
   if (isClient) return <ClientHome />;
+
+  const role = user?.role;
+  if (role === 'Operator') return <OperatorDashboard />;
+  if (role === 'Standard User') return <StandardDashboard />;
+  // Administrator, Admin alias, Privileged User, and anything else falls
+  // back to the full agency Command Center.
   return <CommandCenter />;
 }
 
