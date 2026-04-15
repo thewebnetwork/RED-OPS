@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import InstallPrompt from './InstallPrompt';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -464,6 +465,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="app-shell ambient-glow">
+      <InstallPrompt />
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden animate-fade-in"

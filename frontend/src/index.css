@@ -1844,11 +1844,65 @@ button:focus-visible, a:focus-visible, select:focus-visible,
 /* Safe areas — always applied (desktop falls back to 0) */
 .app-sidebar {
   padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
 }
 
 .top-bar {
   padding-top: env(safe-area-inset-top, 0);
+  padding-left: max(env(safe-area-inset-left, 0), 12px);
+  padding-right: max(env(safe-area-inset-right, 0), 12px);
 }
+
+.page-content {
+  padding-left: max(env(safe-area-inset-left, 0), 12px);
+  padding-right: max(env(safe-area-inset-right, 0), 12px);
+}
+
+/* Bottom-sheet modals: keep CTAs above the iPhone home indicator */
+@media (max-width: 600px) {
+  .modal-box {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0)) !important;
+  }
+}
+
+/* ============================================================
+   51. STANDALONE PWA MODE — installed-app discipline
+   Only fires when the app is launched from the home screen.
+   Kills rubber-band, pull-to-refresh, long-press context menus,
+   and image drag — the giveaways that it's "a website."
+   ============================================================ */
+@media (display-mode: standalone) {
+  html, body {
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  body {
+    -webkit-touch-callout: none;
+  }
+  /* Re-enable long-press + selection on editable surfaces */
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+    -webkit-touch-callout: default;
+  }
+  /* Main scrollers shouldn't trigger pull-to-refresh */
+  .page-content,
+  .app-main {
+    overscroll-behavior-y: contain;
+  }
+  /* No image/link dragging in standalone — feels more native */
+  img, a {
+    -webkit-user-drag: none;
+  }
+}
+/* Same rules via the JS-added class, for browsers that under-report display-mode */
+html.is-standalone body { overscroll-behavior: none; -webkit-touch-callout: none; }
+html.is-standalone input,
+html.is-standalone textarea,
+html.is-standalone [contenteditable="true"] { -webkit-touch-callout: default; }
+html.is-standalone .page-content,
+html.is-standalone .app-main { overscroll-behavior-y: contain; }
 
 /* ============================================================
    50. MOBILE OPTIMIZATION — responsive typography + layout
