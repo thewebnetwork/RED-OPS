@@ -179,6 +179,7 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, onDelete, savi
     status: task?.status || columns[0]?.id || 'todo', priority: task?.priority || 'medium',
     assignee_user_id: task?.assignee_user_id || null,
     due_at: task?.due_at ? task.due_at.substring(0, 10) : '',
+    calendar_date: task?.calendar_date || '',
   });
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
   function submit(e) { e.preventDefault(); if (!form.title.trim()) return toast.error('Title is required'); onSave({ ...task, ...form }); }
@@ -241,6 +242,11 @@ function QuickTaskDialog({ task, users, columns, onSave, onClose, onDelete, savi
               <label style={labelStyle}>Due Date</label>
               <input type="date" value={form.due_at} onChange={e => set('due_at', e.target.value)} style={{ ...inputStyle, colorScheme: 'dark' }} />
             </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Scheduled for</label>
+            <input type="date" value={form.calendar_date} onChange={e => set('calendar_date', e.target.value)} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            <div style={{ fontSize: 11, color: 'var(--tx-3)', marginTop: 4 }}>The day you plan to actually do the work — separate from the deadline.</div>
           </div>
         </form>
         {/* Footer */}
@@ -318,6 +324,11 @@ function TaskCard({ task, onEdit, dragHandleProps, isDragging }) {
               <Calendar size={9} />{date.text}
             </span>
           )}
+          {task.calendar_date && (
+            <span title={`Scheduled for ${task.calendar_date}`} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-soft)', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <Calendar size={9} />{new Date(task.calendar_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
           {assigneeName && (
             <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#c92a3e22', color: 'var(--red)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{avatar(assigneeName)}</span>
@@ -387,6 +398,123 @@ function KanbanColumn({ col, tasks, onAddTask, onEdit, inlineCreate, setInlineCr
   );
 }
 
+// ── Calendar View ──────────────────────────────────────────────────────────────
+function CalendarView({ tasks, onEdit }) {
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date(); d.setDate(1); return d;
+  });
+
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const monthLabel = cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Build the grid: 6 weeks × 7 days, starting on Sunday
+  const firstOfMonth = new Date(year, month, 1);
+  const startWeekday = firstOfMonth.getDay(); // 0 = Sun
+  const gridStart = new Date(year, month, 1 - startWeekday);
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(gridStart);
+    d.setDate(gridStart.getDate() + i);
+    cells.push(d);
+  }
+
+  // Group tasks by YYYY-MM-DD calendar_date
+  const tasksByDate = {};
+  tasks.forEach(t => {
+    if (!t.calendar_date) return;
+    if (!tasksByDate[t.calendar_date]) tasksByDate[t.calendar_date] = [];
+    tasksByDate[t.calendar_date].push(t);
+  });
+
+  const todayKey = new Date().toISOString().substring(0, 10);
+  const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  function shiftMonth(delta) {
+    setCursor(c => { const d = new Date(c); d.setMonth(d.getMonth() + delta); return d; });
+  }
+  function goToday() {
+    const d = new Date(); d.setDate(1); setCursor(d);
+  }
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 20, gap: 14 }}>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button onClick={() => shiftMonth(-1)} title="Previous month" style={calNavBtn}><ChevronDown size={14} style={{ transform: 'rotate(90deg)' }} /></button>
+        <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx-1)', minWidth: 180 }}>{monthLabel}</div>
+        <button onClick={() => shiftMonth(1)} title="Next month" style={calNavBtn}><ChevronDown size={14} style={{ transform: 'rotate(-90deg)' }} /></button>
+        <button onClick={goToday} style={{ ...calNavBtn, padding: '6px 12px', width: 'auto', fontSize: 12, fontWeight: 600, color: 'var(--tx-2)' }}>Today</button>
+      </div>
+
+      {/* Day-of-week header */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+          <div key={d} style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em', padding: '0 6px' }}>{d}</div>
+        ))}
+      </div>
+
+      {/* Calendar grid */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: '1fr', gap: 4, overflow: 'hidden' }}>
+        {cells.map((d, i) => {
+          const inMonth = d.getMonth() === month;
+          const key = dayKey(d);
+          const isToday = key === todayKey;
+          const dayTasks = tasksByDate[key] || [];
+          return (
+            <div
+              key={i}
+              style={{
+                background: inMonth ? 'var(--bg-card)' : 'var(--bg-elevated)',
+                border: `1px solid ${isToday ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: 8, padding: 6,
+                display: 'flex', flexDirection: 'column', gap: 3,
+                opacity: inMonth ? 1 : 0.5, overflow: 'hidden', minHeight: 0,
+              }}
+            >
+              <div style={{
+                fontSize: 11, fontWeight: 700,
+                color: isToday ? 'var(--accent)' : (inMonth ? 'var(--tx-1)' : 'var(--tx-3)'),
+                marginBottom: 2,
+              }}>{d.getDate()}</div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', minHeight: 0 }}>
+                {dayTasks.slice(0, 4).map(t => {
+                  const pri = PRIORITY[t.priority] || PRIORITY.medium;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => onEdit(t)}
+                      title={t.title}
+                      style={{
+                        textAlign: 'left', background: pri.bg, color: pri.color,
+                        border: `1px solid ${pri.color}33`, borderRadius: 4,
+                        padding: '2px 5px', fontSize: 10.5, fontWeight: 600,
+                        cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4,
+                      }}
+                    >
+                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: pri.color, flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</span>
+                    </button>
+                  );
+                })}
+                {dayTasks.length > 4 && (
+                  <div style={{ fontSize: 10, color: 'var(--tx-3)', padding: '0 4px' }}>+{dayTasks.length - 4} more</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+const calNavBtn = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  width: 32, height: 32, borderRadius: 8, border: '1px solid var(--border)',
+  background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer',
+};
+
 function SortHeader({ label, sortKey, listSort, setListSort }) {
   const active = listSort.key === sortKey;
   return (
@@ -454,6 +582,7 @@ export default function TaskBoard() {
       // Clean empty strings for Pydantic validation
       const payload = { ...formData };
       if (payload.due_at === '') payload.due_at = null;
+      if (payload.calendar_date === '') payload.calendar_date = null;
       if (payload.assignee_user_id === '' || payload.assignee_user_id === undefined) payload.assignee_user_id = null;
       if (payload.description === '') payload.description = null;
       // Remove read-only fields that backend doesn't accept on create
@@ -625,10 +754,21 @@ export default function TaskBoard() {
                   display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
                   background: viewMode === 'list' ? 'var(--red)' : 'var(--bg-elevated)',
                   color: viewMode === 'list' ? '#fff' : 'var(--tx-3)',
-                  border: 'none', cursor: 'pointer',
+                  border: 'none', cursor: 'pointer', borderRight: '1px solid var(--border)',
                 }}
               >
                 <ListIcon size={13} /> List
+              </button>
+              <button
+                onClick={() => { setViewMode('calendar'); localStorage.setItem('taskboard_view', 'calendar'); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 12, fontWeight: 600,
+                  background: viewMode === 'calendar' ? 'var(--red)' : 'var(--bg-elevated)',
+                  color: viewMode === 'calendar' ? '#fff' : 'var(--tx-3)',
+                  border: 'none', cursor: 'pointer',
+                }}
+              >
+                <Calendar size={13} /> Calendar
               </button>
             </div>
             <button
@@ -718,6 +858,8 @@ export default function TaskBoard() {
             </button>
           </div>
         </div>
+      ) : viewMode === 'calendar' ? (
+        <CalendarView tasks={filteredTasks} onEdit={openEdit} />
       ) : viewMode === 'board' ? (
         <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
           <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>

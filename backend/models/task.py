@@ -41,6 +41,7 @@ class TaskCreate(BaseModel):
     visibility: TaskVisibility = "internal"
     task_type: TaskType = "manual"
     due_at: Optional[datetime] = None
+    calendar_date: Optional[str] = None  # YYYY-MM-DD — day work is scheduled (separate from due_at deadline)
     position: Optional[float] = None
     reminder_minutes_before: Optional[int] = None
     reminder_channels: Optional[List[str]] = []
@@ -58,6 +59,7 @@ class TaskUpdate(BaseModel):
     visibility: Optional[TaskVisibility] = None
     task_type: Optional[TaskType] = None
     due_at: Optional[datetime] = None
+    calendar_date: Optional[str] = None  # YYYY-MM-DD
     position: Optional[float] = None
     completed_at: Optional[datetime] = None
     project_id: Optional[str] = None
@@ -122,6 +124,7 @@ class TaskResponse(BaseModel):
     visibility: TaskVisibility
     task_type: TaskType
     due_at: Optional[datetime] = None
+    calendar_date: Optional[str] = None  # YYYY-MM-DD — scheduled work day
     position: Optional[float] = None
     created_source: CreatedSource
     completed_at: Optional[datetime] = None
