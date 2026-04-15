@@ -416,6 +416,7 @@ export default function TaskBoard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [inlineCreateCol, setInlineCreateCol] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(() => localStorage.getItem('task_hide_completed') === 'true');
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('taskboard_view') || 'board');
   const [listSort, setListSort] = useState({ key: 'status', dir: 'asc' });
   const tk = useCallback(() => localStorage.getItem('token'), []);
@@ -535,6 +536,7 @@ export default function TaskBoard() {
   function tasksForCol(colId) {
     return tasks.filter(t => {
       if (t.status !== colId) return false;
+      if (hideCompleted && t.status === 'done') return false;
       if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
       return true;
@@ -543,11 +545,13 @@ export default function TaskBoard() {
 
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter(t => t.status === 'done').length;
+  const visibleCount = hideCompleted ? totalTasks - doneTasks : totalTasks;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
   const hasFilters = filterAssignee || filterStatus || searchQuery;
 
   // Filtered + sorted tasks for list view
   const filteredTasks = tasks.filter(t => {
+    if (hideCompleted && t.status === 'done') return false;
     if (searchQuery && !t.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (filterAssignee && t.assignee_user_id !== filterAssignee) return false;
     if (filterStatus && t.status !== filterStatus) return false;
@@ -578,7 +582,7 @@ export default function TaskBoard() {
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--tx-1)', margin: 0, letterSpacing: '-0.03em' }}>Task Board</h1>
             <p style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 3 }}>
-              {totalTasks} tasks · {doneTasks} done
+              {hideCompleted ? `${visibleCount} of ${totalTasks} tasks` : `${totalTasks} tasks`} · {doneTasks} done
               {totalTasks > 0 && (
                 <span style={{ marginLeft: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ display: 'inline-block', width: 60, height: 5, background: 'var(--bg-elevated)', borderRadius: 3, overflow: 'hidden' }}>
@@ -627,6 +631,23 @@ export default function TaskBoard() {
                 <ListIcon size={13} /> List
               </button>
             </div>
+            <button
+              onClick={() => {
+                const next = !hideCompleted;
+                setHideCompleted(next);
+                localStorage.setItem('task_hide_completed', String(next));
+              }}
+              title={hideCompleted ? 'Show completed tasks' : 'Hide completed tasks'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
+                fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+                background: hideCompleted ? '#c92a3e18' : 'var(--bg-elevated)',
+                color: hideCompleted ? 'var(--red)' : 'var(--tx-2)', cursor: 'pointer',
+                borderColor: hideCompleted ? 'var(--red)' : 'var(--border)',
+              }}
+            >
+              <CheckCircle2 size={13} /> {hideCompleted ? 'Show done' : 'Hide done'}
+            </button>
             <button
               onClick={() => setShowFilters(f => !f)}
               style={{
