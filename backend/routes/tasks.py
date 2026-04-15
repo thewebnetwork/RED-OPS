@@ -626,6 +626,39 @@ async def create_task(
         channels=task_data.reminder_channels or [],
     )
 
+    # Best-effort email to the assignee if the task has both a due date and
+    # an assignee that isn't the same person who created it. Silent on failure.
+    try:
+        if (
+            task_data.due_at
+            and task_data.assignee_user_id
+            and task_data.assignee_user_id != current_user["id"]
+        ):
+            assignee = await db.users.find_one(
+                {"id": task_data.assignee_user_id},
+                {"_id": 0, "email": 1, "name": 1, "full_name": 1},
+            )
+            if assignee and assignee.get("email"):
+                from services.email import send_email_notification
+                due_str = task_data.due_at.strftime("%a %b %d, %Y · %I:%M %p UTC")
+                creator = current_user.get("name") or current_user.get("email") or "A teammate"
+                pri = (task_data.priority or "medium").upper()
+                text = (
+                    f"{creator} assigned you a task on RED OPS:\n\n"
+                    f"  {task_data.title}\n\n"
+                    f"Due:      {due_str}\n"
+                    f"Priority: {pri}\n"
+                )
+                if task_data.description:
+                    text += f"\n{task_data.description}\n"
+                await send_email_notification(
+                    to_email=assignee["email"],
+                    subject=f"📋 New task: {task_data.title}",
+                    body=text,
+                )
+    except Exception:
+        pass  # Email failure must not break task creation
+
     task_response = {k: v for k, v in task.items() if k != "_id"}
     return TaskResponse(**task_response)
 

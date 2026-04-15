@@ -65,6 +65,7 @@ from routes.dashboard_v2 import router as dashboard_v2_router
 from routes.dashboard_builder import router as dashboard_builder_router
 from routes.files import router as files_router
 from routes.events import router as events_router
+from routes.calendar_sync import router as calendar_sync_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
@@ -307,6 +308,7 @@ app.include_router(ambassador_router, prefix="/api")  # Ambassador + Marketplace
 app.include_router(files_router, prefix="/api")  # Universal File Management
 app.include_router(ad_performance_router, prefix="/api")  # Ad Performance Tracking (Hyros Lite)
 app.include_router(events_router, prefix="/api")  # Calendar events (internal + future external sync)
+app.include_router(calendar_sync_router, prefix="/api")  # Per-user Google/Outlook OAuth + sync
 app.include_router(search_router, prefix="/api")  # Global Search
 app.include_router(integrations_router, prefix="/api")  # Integration Management
 app.include_router(ai_router, prefix="/api")  # AI Features

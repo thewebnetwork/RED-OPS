@@ -128,6 +128,25 @@ async def create_event(
         "updated_at": now,
     }
     await db.calendar_events.insert_one(event)
+
+    # Best-effort confirmation email — never blocks the response.
+    try:
+        from services.email import send_email_notification
+        if current_user.get("email"):
+            when = body.starts_at.strftime("%a %b %d, %Y") if body.all_day else body.starts_at.strftime("%a %b %d, %Y · %I:%M %p UTC")
+            text = f"You scheduled '{body.title}' on RED OPS Calendar.\n\nWhen: {when}\n"
+            if body.location:
+                text += f"Where: {body.location}\n"
+            if body.description:
+                text += f"\n{body.description}\n"
+            await send_email_notification(
+                to_email=current_user["email"],
+                subject=f"📅 Event added: {body.title}",
+                body=text,
+            )
+    except Exception:
+        pass  # Email failure must not break event creation
+
     return EventResponse(**event)
 
 
