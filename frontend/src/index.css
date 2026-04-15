@@ -12,11 +12,14 @@
 /* ── 1. CSS CUSTOM PROPERTIES ─────────────────────────────── */
 @layer base {
   :root {
-    /* Backgrounds — deep premium dark surfaces */
-    --bg:         #0a0b10;
-    --surface:    #12141a;
-    --surface-2:  #1a1c24;
-    --surface-3:  #22252e;
+    /* ── DARK THEME — burgundy-family surfaces (not slate gray) ──
+       Brand is #A2182C. Dark surfaces are built on the burgundy axis:
+       deep-mahogany near-black bg, cards with a perceptible warm tint,
+       borders tinted off-white (rose-warm) at low alpha. */
+    --bg:         #130a0d;   /* deep mahogany — warm near-black */
+    --surface:    #1c1115;   /* card surface, ~7% lighter */
+    --surface-2:  #261820;   /* elevated (hover, inputs) */
+    --surface-3:  #30202a;   /* topmost (popovers, modals inner) */
 
     /* Legacy aliases — old token names resolve to new design system */
     --bg-card:    var(--surface);
@@ -24,25 +27,25 @@
     --bg-overlay: var(--surface-3);
     --card:       var(--surface);
 
-    /* Borders */
-    --border:        rgba(255, 255, 255, 0.07);
-    --border-hi:     rgba(255, 255, 255, 0.12);
-    --border-strong: rgba(255, 255, 255, 0.12);
+    /* Borders — warm off-white at low alpha reads as subtle rose on burgundy */
+    --border:        rgba(255, 220, 228, 0.07);
+    --border-hi:     rgba(255, 220, 228, 0.14);
+    --border-strong: rgba(255, 220, 228, 0.14);
 
-    /* Text */
-    --tx-1: #f1f3f5;  /* primary text */
-    --tx-2: #9ca3af;  /* secondary text */
-    --tx-3: #4b5563;  /* muted/placeholder text */
+    /* Text — warm neutrals, no cool blue-gray */
+    --tx-1: #f5eff1;  /* primary text — warm off-white */
+    --tx-2: #a8979c;  /* secondary text — warm muted */
+    --tx-3: #5e4f54;  /* muted/placeholder text */
 
-    /* Brand / Accent — premium burgundy */
-    --accent: #8B1538;
-    --accent-hover: #6B102B;
-    --accent-soft: rgba(139, 21, 56, 0.14);
+    /* Brand / Accent — premium burgundy #A2182C */
+    --accent:       #A2182C;
+    --accent-hover: #7d1122;
+    --accent-soft:  rgba(162, 24, 44, 0.16);
 
     /* Legacy brand aliases */
     --red:    var(--accent);
     --red-bg: var(--accent-soft);
-    --red-lo: rgba(139, 21, 56, 0.06);
+    --red-lo: rgba(162, 24, 44, 0.06);
 
     /* Status — legacy aliases point to semantic tokens */
     --green:  var(--color-green);
@@ -71,26 +74,25 @@
     --sidebar-width: 220px;
     --topbar-height: 52px;
 
-    /* shadcn/ui compatibility */
-    --background:         0 0% 5%;
-    --foreground:         0 0% 94%;
-    --card:               0 0% 8%;
-    --card-foreground:    0 0% 94%;
-    --popover:            0 0% 9%;
-    --popover-foreground: 0 0% 94%;
-    --primary:            340 74% 33%;
+    /* shadcn/ui compatibility — HSL triples used as hsl(var(--name))
+       IMPORTANT: these must NOT collide with string tokens above.
+       `--accent` is a hex string above; do NOT redefine it here. */
+    --background:         354 33% 6%;
+    --foreground:         340 15% 95%;
+    --card-foreground:    340 15% 95%;
+    --popover:            354 30% 11%;
+    --popover-foreground: 340 15% 95%;
+    --primary:            351 74% 36%;  /* #A2182C */
     --primary-foreground: 0 0% 98%;
-    --secondary:          0 0% 12%;
-    --secondary-foreground: 0 0% 94%;
-    --muted:              0 0% 12%;
-    --muted-foreground:   0 0% 45%;
-    --accent:             0 0% 14%;
-    --accent-foreground:  0 0% 94%;
+    --secondary:          354 25% 13%;
+    --secondary-foreground: 340 15% 95%;
+    --muted:              354 20% 14%;
+    --muted-foreground:   340 8% 55%;
+    --accent-foreground:  340 15% 95%;
     --destructive:        0 70% 55%;
     --destructive-foreground: 0 0% 98%;
-    /* NOTE: --border intentionally NOT redefined here — use --border: #2a2a2a from above */
-    --input:              0 0% 14%;
-    --ring:               340 74% 33%;
+    --input:              354 20% 14%;
+    --ring:               351 74% 36%;
     --radius:             0.5rem;
 
     /* Transition speeds */
@@ -103,66 +105,62 @@
     --purple-bg-hi:  rgba(168, 85, 247, 0.12);
     --purple-border: rgba(168, 85, 247, 0.3);
 
-    /* Extended for components */
-    --surface-2: 0 0% 12%;
-    --surface-3: 0 0% 15%;
-    --text-1: 0 0% 94%;
-    --text-2: 0 0% 62%;
-    --text-3: 0 0% 38%;
+    /* NOTE: --surface-2 / --surface-3 are defined as hex strings above,
+       do NOT redefine them here or the string values get shadowed. */
   }
 
-  /* ── 1b. LIGHT THEME ─────────────────────────────────────── */
+  /* ── 1b. LIGHT THEME — clean, neutral, subtle warmth ───────
+     Off-white bg with barely-there pink warmth that echoes the brand;
+     pure white cards; warm near-black text; burgundy accent unchanged. */
   :root[data-theme="light"] {
-    --bg:         #f5f5f7;
-    --surface:    #ffffff;
-    --surface-2:  #f0f0f2;
-    --surface-3:  #e8e8ec;
-    --bg-card:    #ffffff;
-    --bg-elevated:#f0f0f2;
-    --bg-overlay: #e8e8ec;
-    --card:       #ffffff;
+    --bg:         #faf7f8;   /* warm off-white */
+    --surface:    #ffffff;   /* clean white cards */
+    --surface-2:  #f3eff0;   /* elevated (inputs, hover) */
+    --surface-3:  #ebe5e7;   /* topmost (popover inner) */
+    --bg-card:    var(--surface);
+    --bg-elevated:var(--surface-2);
+    --bg-overlay: var(--surface-3);
+    --card:       var(--surface);
 
-    --border:        rgba(0, 0, 0, 0.08);
-    --border-hi:     rgba(0, 0, 0, 0.14);
-    --border-strong: rgba(0, 0, 0, 0.14);
+    --border:        rgba(26, 16, 18, 0.09);
+    --border-hi:     rgba(26, 16, 18, 0.15);
+    --border-strong: rgba(26, 16, 18, 0.15);
 
-    --tx-1: #1a1a2e;
-    --tx-2: #6b7280;
-    --tx-3: #9ca3af;
+    --tx-1: #1a1012;   /* warm near-black */
+    --tx-2: #6b5a5d;   /* warm muted */
+    --tx-3: #9c8a8f;   /* warm placeholder */
 
-    --accent: #8B1538;
-    --accent-hover: #6B102B;
-    --accent-soft: rgba(139, 21, 56, 0.10);
-    --red-lo: rgba(139, 21, 56, 0.04);
+    --accent:       #A2182C;
+    --accent-hover: #7d1122;
+    --accent-soft:  rgba(162, 24, 44, 0.10);
+    --red-lo:       rgba(162, 24, 44, 0.04);
 
-    --color-green-soft: rgba(34, 197, 94, 0.10);
-    --color-yellow-soft: rgba(245, 158, 11, 0.10);
-    --color-red-soft: rgba(239, 68, 68, 0.10);
-    --color-blue-soft: rgba(59, 130, 246, 0.10);
-    --color-purple-soft: rgba(168, 85, 247, 0.10);
+    /* Status softs stay muted royal tones, adjusted alpha for light bg */
+    --color-green-soft:  rgba(61, 107, 84, 0.10);
+    --color-yellow-soft: rgba(156, 122, 46, 0.10);
+    --color-red-soft:    rgba(142, 42, 42, 0.10);
+    --color-blue-soft:   rgba(46, 74, 107, 0.10);
+    --color-purple-soft: rgba(91, 58, 107, 0.10);
 
-    --purple-bg:     rgba(168, 85, 247, 0.06);
-    --purple-bg-hi:  rgba(168, 85, 247, 0.10);
-    --purple-border: rgba(168, 85, 247, 0.25);
+    --purple-bg:     rgba(91, 58, 107, 0.06);
+    --purple-bg-hi:  rgba(91, 58, 107, 0.10);
+    --purple-border: rgba(91, 58, 107, 0.22);
 
-    /* shadcn/ui overrides for light */
-    --background:         0 0% 96%;
-    --foreground:         0 0% 10%;
-    --card:               0 0% 100%;
-    --card-foreground:    0 0% 10%;
+    /* shadcn/ui HSL overrides for light */
+    --background:         340 10% 98%;
+    --foreground:         354 10% 9%;
+    --card-foreground:    354 10% 9%;
     --popover:            0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --secondary:          0 0% 94%;
-    --secondary-foreground: 0 0% 10%;
-    --muted:              0 0% 94%;
-    --muted-foreground:   0 0% 45%;
-    --input:              0 0% 90%;
-
-    --surface-2: 0 0% 94%;
-    --surface-3: 0 0% 91%;
-    --text-1: 0 0% 10%;
-    --text-2: 0 0% 42%;
-    --text-3: 0 0% 62%;
+    --popover-foreground: 354 10% 9%;
+    --primary:            351 74% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary:          340 8% 94%;
+    --secondary-foreground: 354 10% 9%;
+    --muted:              340 8% 94%;
+    --muted-foreground:   340 5% 38%;
+    --accent-foreground:  354 10% 9%;
+    --input:              340 8% 91%;
+    --ring:               351 74% 36%;
   }
 
   /* Light mode component overrides */
