@@ -380,15 +380,32 @@ async def list_tasks(
         if not is_admin:
             raise HTTPException(status_code=403, detail="Cannot access other org tasks")
         query["org_id"] = org_id
+    elif is_admin:
+        # Administrator: full org visibility.
+        query["org_id"] = user_org_id
     else:
-        # Internal staff viewing task board: include tasks assigned to them + their org
-        if is_internal and not request_id:
-            query["$or"] = [
-                {"org_id": user_org_id},
-                {"assignee_user_id": current_user["id"]},
-            ]
-        else:
-            query["org_id"] = user_org_id
+        # Operator / Standard User / Privileged User: focused workspace —
+        # only tasks they're actually involved with. Not "all tasks in org."
+        # Scope = assigned to me, created by me, or inside a project I'm on.
+        uid = current_user["id"]
+        my_projects = await db.projects.find(
+            {
+                "org_id": user_org_id,
+                "$or": [
+                    {"created_by_user_id": uid},
+                    {"project_manager_user_id": uid},
+                    {"team_member_ids": uid},
+                ],
+            },
+            {"_id": 0, "id": 1},
+        ).to_list(500)
+        my_project_ids = [p["id"] for p in my_projects]
+        query["org_id"] = user_org_id
+        query["$or"] = [
+            {"assignee_user_id": uid},
+            {"created_by_user_id": uid},
+            {"project_id": {"$in": my_project_ids}} if my_project_ids else {"_never_matches": True},
+        ]
 
     # Apply visibility filter based on user type (skip for clients — already scoped above)
     if is_client:

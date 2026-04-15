@@ -73,8 +73,9 @@ async def create_team(team_data: TeamCreate, current_user: dict = Depends(requir
 
 
 @router.get("", response_model=List[TeamResponse])
-async def list_teams(current_user: dict = Depends(get_current_user)):
-    """List all active teams"""
+async def list_teams(current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
+    """List all active teams. Restricted to Administrator + Operator —
+    Standard Users and Media Clients never see team management data."""
     teams = await db.teams.find({"active": True}, {"_id": 0}).to_list(100)
     
     # Get member counts and resolve specialty names

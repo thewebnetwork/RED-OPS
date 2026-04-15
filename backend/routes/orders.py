@@ -881,30 +881,30 @@ async def list_orders(
     elif role == "Standard User":
         query["requester_id"] = current_user["id"]
         # Standard Users can see their own drafts
-    # Operator = can see assigned orders + open pool
+    # Operator = focused workspace — only their assigned orders + orders they
+    # requested. The open-pool / claim-work view lives at a separate endpoint
+    # so operators don't see other operators' in-flight work in the main list.
     elif role == "Operator":
-        # Operators cannot see drafts, only Open and their assigned orders
         query["$or"] = [
-            {"status": "Open"},
-            {"editor_id": current_user["id"]}
+            {"editor_id": current_user["id"]},
+            {"requester_id": current_user["id"]},
         ]
     # Administrator = full access
     else:
         # Admin - exclude drafts from general view unless filtering by Draft status
         if status != "Draft":
             query["status"] = {"$ne": "Draft"}
-    
+
     if status:
         if role == "Operator":
-            if status == "Open":
-                # Show only the open pool (unassigned)
-                query = {"status": "Open", "editor_id": {"$in": [None, ""]}}
-            else:
-                # Show operator's own orders with this status, plus open pool
-                query = {"$or": [
-                    {"editor_id": current_user["id"], "status": status},
-                    {"status": "Open"}
-                ]}
+            # Keep the same scope (own work) but narrow by status
+            query = {"$and": [
+                {"$or": [
+                    {"editor_id": current_user["id"]},
+                    {"requester_id": current_user["id"]},
+                ]},
+                {"status": status},
+            ]}
         elif role != "Operator":
             query["status"] = status
     

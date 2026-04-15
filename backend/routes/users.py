@@ -485,8 +485,11 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
 
 
 @router.get("", response_model=List[UserResponse])
-async def list_users(current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
-    """List all active users"""
+async def list_users(current_user: dict = Depends(require_roles(["Administrator"]))):
+    """List all active users. Admin-only — frontend /users route is admin-gated
+    and this endpoint exposes sensitive fields (roles, permissions, teams).
+    Operators who need a list of assignable teammates should use
+    GET /api/tasks/assignable-users, which returns a scoped, minimal shape."""
     users = await db.users.find({"active": True}, {"_id": 0, "password": 0}).to_list(1000)
     return [await build_user_response(u) for u in users]
 

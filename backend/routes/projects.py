@@ -81,11 +81,16 @@ def _can_manage_project(org_role: str, user: dict = None) -> bool:
 
 
 def _can_view_project(project: dict, user_id: str, org_role: str) -> bool:
-    """Check if user can view this project."""
-    if org_role in ("owner", "admin", "manager"):
+    """Check if user can view this project.
+    Admins/owners see everything; everyone else must be involved in the project."""
+    if org_role in ("owner", "admin"):
         return True
-    # Members/viewers can see projects they're on or all org projects
-    return True  # All org members can see org projects
+    return (
+        project.get("created_by_user_id") == user_id
+        or project.get("project_manager_user_id") == user_id
+        or user_id in (project.get("team_member_ids") or [])
+        or project.get("client_id") == user_id
+    )
 
 
 async def _enrich_project(project: dict) -> dict:
@@ -226,7 +231,22 @@ async def list_projects(
         ]}
     else:
         org_id = await _get_org_id(current_user)
-        query = {"org_id": org_id}
+        role = current_user.get("role", "")
+        # Administrators see all org projects. Operators and Standard Users see
+        # only projects where they're involved — created by them, team member,
+        # or PM. This is the role-scoped workspace rule.
+        if role in ("Administrator", "Admin"):
+            query = {"org_id": org_id}
+        else:
+            uid = current_user["id"]
+            query = {
+                "org_id": org_id,
+                "$or": [
+                    {"created_by_user_id": uid},
+                    {"project_manager_user_id": uid},
+                    {"team_member_ids": uid},
+                ],
+            }
 
     if status:
         query["status"] = status
