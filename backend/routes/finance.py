@@ -1,6 +1,6 @@
 """Finance management routes - manual transaction tracking & dashboard"""
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -325,6 +325,125 @@ async def get_financial_summary(
         "monthly_trend": trend,
         "top_clients": top_clients,
         "transaction_count": len(month_txns),
+    }
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# DASHBOARD — three-period KPIs + 12-month trend + weekly cash flow
+# ════════════════════════════════════════════════════════════════════════════
+
+@router.get("/dashboard")
+async def get_finance_dashboard(
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """One call → everything the Finance dashboard needs:
+      • month / quarter / YTD KPIs (income, expense, net, top expense category)
+      • 12-month bar series (income vs expense + net line)
+      • weekly cash flow for the current month
+    All amounts in CAD. Org-scoped. Cheap to compute even on thousands of rows
+    because it's a single fetch + in-memory aggregation."""
+    from datetime import date as _date
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    now = datetime.now(timezone.utc)
+    today = now.date()
+
+    # Window: 13 months back → today (12 full months + current month-to-date)
+    window_start = (today.replace(day=1) - timedelta(days=370)).replace(day=1).isoformat()
+
+    txs = await db.finance_transactions.find(
+        {
+            "org_id": org_id,
+            "date": {"$gte": window_start},
+        },
+        {"_id": 0, "type": 1, "amount": 1, "date": 1, "category": 1},
+    ).to_list(20000)
+
+    month_str = today.strftime("%Y-%m")
+    year_str = today.strftime("%Y")
+    quarter_idx = (today.month - 1) // 3
+    quarter_start_month = quarter_idx * 3 + 1
+    quarter_prefix_months = {f"{year_str}-{quarter_start_month + i:02d}" for i in range(3)}
+
+    def empty_period():
+        return {"income": 0.0, "expense": 0.0, "net": 0.0, "top_expense_category": None}
+
+    month = empty_period()
+    quarter = empty_period()
+    ytd = empty_period()
+    month_cat_expense = {}
+    quarter_cat_expense = {}
+    ytd_cat_expense = {}
+
+    # 12-month bar buckets (chronological — oldest first)
+    bucket_keys = []
+    cursor_dt = today.replace(day=1)
+    for _ in range(13):
+        bucket_keys.append(cursor_dt.strftime("%Y-%m"))
+        cursor_dt = (cursor_dt - timedelta(days=1)).replace(day=1)
+    bucket_keys = list(reversed(bucket_keys))
+    monthly = {k: {"month": k, "income": 0.0, "expense": 0.0, "net": 0.0} for k in bucket_keys}
+
+    # Weekly cash flow for the current month (week buckets ISO week #)
+    weekly = {}
+
+    for t in txs:
+        d = t.get("date") or ""
+        amt = float(t.get("amount") or 0)
+        ttype = t.get("type", "expense")
+        cat = t.get("category") or "Uncategorized"
+        m = d[:7]
+
+        # Monthly bar series
+        if m in monthly:
+            monthly[m][ttype] += amt
+            monthly[m]["net"] = monthly[m]["income"] - monthly[m]["expense"]
+
+        # Periods
+        if m == month_str:
+            month[ttype] += amt
+            if ttype == "expense":
+                month_cat_expense[cat] = month_cat_expense.get(cat, 0) + amt
+            # Weekly bucket
+            try:
+                day_dt = _date.fromisoformat(d[:10])
+                week_label = f"Week {((day_dt.day - 1) // 7) + 1}"
+                weekly.setdefault(week_label, {"label": week_label, "income": 0.0, "expense": 0.0})
+                weekly[week_label][ttype] += amt
+            except ValueError:
+                pass
+        if m in quarter_prefix_months:
+            quarter[ttype] += amt
+            if ttype == "expense":
+                quarter_cat_expense[cat] = quarter_cat_expense.get(cat, 0) + amt
+        if d.startswith(year_str):
+            ytd[ttype] += amt
+            if ttype == "expense":
+                ytd_cat_expense[cat] = ytd_cat_expense.get(cat, 0) + amt
+
+    def finish(p, cat_map):
+        p["net"] = p["income"] - p["expense"]
+        p["income"] = round(p["income"], 2)
+        p["expense"] = round(p["expense"], 2)
+        p["net"] = round(p["net"], 2)
+        if cat_map:
+            top = max(cat_map.items(), key=lambda kv: kv[1])
+            p["top_expense_category"] = {"category": top[0], "amount": round(top[1], 2)}
+        return p
+
+    return {
+        "as_of": now.isoformat(),
+        "current_month": month_str,
+        "month": finish(month, month_cat_expense),
+        "quarter": finish(quarter, quarter_cat_expense),
+        "ytd": finish(ytd, ytd_cat_expense),
+        "monthly_series": [
+            {**v, "income": round(v["income"], 2), "expense": round(v["expense"], 2), "net": round(v["net"], 2)}
+            for v in monthly.values()
+        ],
+        "weekly_cash_flow": [
+            {**v, "income": round(v["income"], 2), "expense": round(v["expense"], 2)}
+            for v in sorted(weekly.values(), key=lambda x: x["label"])
+        ],
     }
 
 

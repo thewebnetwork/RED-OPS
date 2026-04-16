@@ -4,6 +4,7 @@ import axios from 'axios';
 import EmptyState from '../components/EmptyState';
 import StripePaymentsPanel from '../components/StripePaymentsPanel';
 import FinanceImportModal from '../components/FinanceImportModal';
+import FinanceDashboard from '../components/FinanceDashboard';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -484,7 +485,14 @@ export default function Finance() {
       {/* Stripe live payments (admin only) */}
       {isAdmin && <StripePaymentsPanel />}
 
-      {/* KPI Cards */}
+      {/* Multi-period dashboard: month / quarter / YTD KPIs + 12mo bars + weekly cash flow */}
+      {isAdmin && (
+        <div style={{ marginBottom: 18 }}>
+          <FinanceDashboard refreshKey={transactions.length} />
+        </div>
+      )}
+
+      {/* KPI Cards (legacy single-period strip — kept until users adopt the new dashboard) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 14, marginBottom: 24 }}>
         <div style={{ padding: '18px 20px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
