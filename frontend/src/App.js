@@ -44,8 +44,9 @@ const Categories = React.lazy(() => import("./pages/Categories"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const Roles = React.lazy(() => import("./pages/Roles"));
 const Teams = React.lazy(() => import("./pages/Teams"));
-const Workflows = React.lazy(() => import("./pages/Workflows"));
-const WorkflowEditor = React.lazy(() => import("./pages/WorkflowEditor"));
+// Workflows removed from UI (backend stays for internal automation).
+// const Workflows = React.lazy(() => import("./pages/Workflows"));
+// const WorkflowEditor = React.lazy(() => import("./pages/WorkflowEditor"));
 const Announcements = React.lazy(() => import("./pages/Announcements"));
 const Logs = React.lazy(() => import("./pages/Logs"));
 const Integrations = React.lazy(() => import("./pages/Integrations"));
@@ -519,22 +520,8 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      <Route 
-        path="/workflows" 
-        element={
-          <PrivateRoute roles={["Administrator", "Operator"]}>
-            <Workflows />
-          </PrivateRoute>
-        } 
-      />
-      <Route 
-        path="/workflows/:workflowId" 
-        element={
-          <PrivateRoute roles={["Administrator", "Operator"]}>
-            <WorkflowEditor />
-          </PrivateRoute>
-        } 
-      />
+      {/* Workflows routes removed — feature hidden from UI per admin request.
+          Backend routes stay intact for internal automation/webhook triggers. */}
       <Route 
         path="/reports" 
         element={

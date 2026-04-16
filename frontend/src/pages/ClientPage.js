@@ -151,6 +151,8 @@ export default function ClientPage() {
       industry: client.industry || '',
       website: client.website || '',
       active: client.active !== false,
+      subscription_plan_name: client.subscription_plan_name || '',
+      client_visible: client.client_visible !== false,
     });
     setShowEditModal(true);
   };
@@ -1100,11 +1102,25 @@ export default function ClientPage() {
                 </div>
               ))}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Status</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Plan</label>
+                <input className="input-field" value={editData.subscription_plan_name || ''}
+                  placeholder="e.g. SCP (Starter), SCP (Growth)"
+                  onChange={e => setEditData(prev => ({ ...prev, subscription_plan_name: e.target.value }))} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Portal access</label>
+                <select className="input-field" value={editData.client_visible ? 'enabled' : 'disabled'}
+                  onChange={e => setEditData(prev => ({ ...prev, client_visible: e.target.value === 'enabled' }))}>
+                  <option value="enabled">Enabled — client can see shared projects + deliverables</option>
+                  <option value="disabled">Disabled — internal only</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx-2)', display: 'block', marginBottom: 4 }}>Account status</label>
                 <select className="input-field" value={editData.active ? 'active' : 'inactive'}
                   onChange={e => setEditData(prev => ({ ...prev, active: e.target.value === 'active' }))}>
                   <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="inactive">Deactivated</option>
                 </select>
               </div>
             </div>

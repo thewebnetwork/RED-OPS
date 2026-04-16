@@ -1268,8 +1268,10 @@ export default function Clients() {
   const handleCreated = (newClient) => {
     setClients(prev => [newClient, ...prev]);
     setShowWizard(false);
-    setSelected(newClient._id);
     toast.success(`${newClient.name} created — ${newClient.portal === 'invited' ? 'invite sent!' : 'no invite sent'}`);
+    // Navigate to the new client's profile page instead of just selecting
+    // in the sidebar — gives the user the full ClientPage context immediately.
+    if (newClient._id) navigate(`/clients/${newClient._id}`);
   };
 
   const handleUpdateClient = (updated) => {

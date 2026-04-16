@@ -10,7 +10,7 @@ Identity Model:
 """
 import uuid
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List, Dict, Any
 
@@ -508,12 +508,17 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
 
 
 @router.get("", response_model=List[UserResponse])
-async def list_users(current_user: dict = Depends(require_roles(["Administrator"]))):
-    """List all active users. Admin-only — frontend /users route is admin-gated
-    and this endpoint exposes sensitive fields (roles, permissions, teams).
-    Operators who need a list of assignable teammates should use
-    GET /api/tasks/assignable-users, which returns a scoped, minimal shape."""
-    users = await db.users.find({"active": True}, {"_id": 0, "password": 0}).to_list(1000)
+async def list_users(
+    include_inactive: bool = Query(False, description="Include deactivated users"),
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """List users. Admin-only. By default returns active users only;
+    pass ?include_inactive=true to include deactivated users (for the
+    Team management view where admins need to see and reactivate them)."""
+    query: dict = {"password": {"$exists": True}}  # just exclude broken docs
+    if not include_inactive:
+        query = {"active": True}
+    users = await db.users.find(query, {"_id": 0, "password": 0}).to_list(1000)
     return [await build_user_response(u) for u in users]
 
 

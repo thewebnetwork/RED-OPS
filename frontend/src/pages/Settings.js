@@ -187,13 +187,15 @@ export default function Settings() {
   }, []);
 
   // ── Fetch team members from /users ──
+  const [teamFilter, setTeamFilter] = useState('active'); // active | inactive | all
+
   const fetchTeamMembers = useCallback(async () => {
     setTeamLoading(true);
     try {
-      const res = await axh().get(`${API}/users`);
+      const res = await axh().get(`${API}/users?include_inactive=true`);
       const users = Array.isArray(res.data) ? res.data : (res.data?.users || []);
       setTeamMembers(users);
-      setMemberCount(users.length);
+      setMemberCount(users.filter(u => u.active !== false).length);
     } catch { /* silently fail for non-admins */ }
     setTeamLoading(false);
   }, []);
@@ -534,6 +536,22 @@ export default function Settings() {
                 <Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} />
               </div>
             ) : (
+              <>
+              {/* Filter toggle */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                {['active', 'inactive', 'all'].map(f => (
+                  <button key={f} onClick={() => setTeamFilter(f)}
+                    style={{
+                      padding: '5px 12px', fontSize: 12, fontWeight: 600,
+                      borderRadius: 6, border: '1px solid var(--border)',
+                      background: teamFilter === f ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+                      color: teamFilter === f ? 'var(--accent)' : 'var(--tx-3)',
+                      cursor: 'pointer', textTransform: 'capitalize',
+                    }}
+                  >{f}</button>
+                ))}
+              </div>
+
               <div className="card" style={{ overflow: 'hidden' }}>
                 <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -546,8 +564,10 @@ export default function Settings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {teamMembers.map((member, idx) => (
-                      <tr key={member.id} style={{ borderBottom: idx < teamMembers.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    {teamMembers
+                      .filter(m => teamFilter === 'all' ? true : teamFilter === 'active' ? m.active !== false : m.active === false)
+                      .map((member, idx, arr) => (
+                      <tr key={member.id} style={{ borderBottom: idx < arr.length - 1 ? '1px solid var(--border)' : 'none', opacity: member.active === false ? 0.65 : 1 }}>
                         <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--tx-1)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: getAvatarColor(member.name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#fff', flexShrink: 0 }}>
@@ -560,22 +580,41 @@ export default function Settings() {
                         <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--tx-2)' }}>{member.email}</td>
                         <td style={{ padding: '12px 16px', fontSize: '13px' }}>
                           <span className={`pill ${member.active !== false ? 'pill-green' : 'pill-red'}`} style={{ padding: '3px 8px', fontSize: '11px' }}>
-                            {member.active !== false ? 'Active' : 'Inactive'}
+                            {member.active !== false ? 'Active' : 'Deactivated'}
                           </span>
                         </td>
                         <td style={{ padding: '12px 16px', fontSize: '13px' }}>
-                          <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleRemoveTeamMember(member.id)}>
-                            Deactivate
-                          </button>
+                          {member.active !== false ? (
+                            <button className="btn-ghost" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleRemoveTeamMember(member.id)}>
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-ghost"
+                              style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--green)' }}
+                              onClick={async () => {
+                                try {
+                                  await axh().patch(`${API}/users/${member.id}`, { active: true });
+                                  toast.success(`${member.name} reactivated`);
+                                  fetchTeamMembers();
+                                } catch (err) {
+                                  toast.error(err.response?.data?.detail || 'Failed to reactivate');
+                                }
+                              }}
+                            >
+                              Reactivate
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
-                    {teamMembers.length === 0 && (
-                      <tr><td colSpan={5} style={{ padding: '24px 16px', textAlign: 'center', fontSize: '13px', color: 'var(--tx-3)' }}>No team members found</td></tr>
+                    {teamMembers.filter(m => teamFilter === 'all' ? true : teamFilter === 'active' ? m.active !== false : m.active === false).length === 0 && (
+                      <tr><td colSpan={5} style={{ padding: '24px 16px', textAlign: 'center', fontSize: '13px', color: 'var(--tx-3)' }}>No {teamFilter === 'all' ? '' : teamFilter} team members found</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
 
