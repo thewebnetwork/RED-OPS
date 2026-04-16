@@ -269,10 +269,14 @@ export default function Conversations() {
     try {
       const res = await ax().get(`${API}/messages/threads/${threadId}/messages?limit=100`);
       const serverMessages = res.data || [];
-      // Merge: keep any optimistic messages not yet in server response
+      // Merge: keep any optimistic messages from THIS thread only that
+      // haven't been confirmed by the server yet. Messages from other
+      // threads are NEVER carried over — that would be a privacy leak.
       setMessages(prev => {
         const serverIds = new Set(serverMessages.map(m => m.id));
-        const localOnly = prev.filter(m => !serverIds.has(m.id));
+        const localOnly = prev.filter(m =>
+          !serverIds.has(m.id) && m.thread_id === threadId
+        );
         return [...serverMessages, ...localOnly];
       });
       if (scroll) {
@@ -282,6 +286,11 @@ export default function Conversations() {
   }, []);
 
   const selectThread = (thread) => {
+    // CRITICAL: clear messages from the previous thread BEFORE loading the
+    // new one. Without this, the merge logic in loadMessages keeps stale
+    // messages from thread A when switching to thread B — causing one user's
+    // private messages to bleed into another conversation.
+    setMessages([]);
     setActiveThread(thread);
     loadMessages(thread.id);
     // Update thread unread count locally
