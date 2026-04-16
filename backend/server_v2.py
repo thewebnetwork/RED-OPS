@@ -4,10 +4,13 @@ Red Ribbon Ops Portal API - V2 (Modular)
 This is the refactored version using modular routes.
 All routes have been extracted from the monolithic server.py.
 """
-from fastapi import FastAPI, Request, Response, Depends
+from fastapi import FastAPI, HTTPException, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import os
+import uuid
+import traceback
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -82,6 +85,27 @@ logger = logging.getLogger(__name__)
 # SLA monitor background task
 sla_monitor_task = None
 reminder_worker_task = None
+
+
+# ============== CATCH-ALL EXCEPTION MIDDLEWARE ==============
+# @app.exception_handler(Exception) doesn't work reliably with
+# BaseHTTPMiddleware (Starlette re-raises through TaskGroup).
+# Using a middleware ensures the catch-all is outermost.
+
+class UnhandledExceptionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        try:
+            return await call_next(request)
+        except Exception:
+            error_id = uuid.uuid4().hex[:8]
+            logger.error(
+                "Unhandled exception [%s] on %s %s:\n%s",
+                error_id, request.method, request.url.path, traceback.format_exc(),
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"error": {"code": 500, "message": "Internal server error", "type": "internal_error", "error_id": error_id}},
+            )
 
 
 # ============== IFRAME EMBEDDING MIDDLEWARE ==============
@@ -273,6 +297,20 @@ app.add_middleware(
 
 # Add iframe embedding middleware
 app.add_middleware(IframeEmbeddingMiddleware)
+
+# Catch-all exception middleware — added last so it wraps outermost
+app.add_middleware(UnhandledExceptionMiddleware)
+
+
+# Global exception handlers — refs docs/audits/AUDIT_2026-04-16.md §1.1
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.info("HTTP %s on %s %s: %s", exc.status_code, request.method, request.url.path, exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": {"code": exc.status_code, "message": exc.detail, "type": "http_error"}},
+    )
+
 
 # Include all routers with /api prefix
 app.include_router(auth_router, prefix="/api")
