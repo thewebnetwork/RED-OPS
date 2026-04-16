@@ -3,12 +3,13 @@ import { createPortal } from 'react-dom';
 import axios from 'axios';
 import EmptyState from '../components/EmptyState';
 import StripePaymentsPanel from '../components/StripePaymentsPanel';
+import FinanceImportModal from '../components/FinanceImportModal';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Search, RefreshCw, Loader2,
   ArrowUpDown, Pencil, Trash2, X, Calendar, PiggyBank, Wallet,
-  ChevronLeft, ChevronRight, Download, Filter, Printer,
+  ChevronLeft, ChevronRight, Download, Filter, Printer, Upload,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -221,6 +222,7 @@ export default function Finance() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
   const [loading, setLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [totalTx, setTotalTx] = useState(0);
@@ -459,12 +461,25 @@ export default function Finance() {
           <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }} data-no-print>
             <Printer size={13} /> Print
           </button>
+          {isAdmin && (
+            <button onClick={() => setShowImport(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--tx-2)', cursor: 'pointer' }}>
+              <Upload size={13} /> Import CSV
+            </button>
+          )}
           <button onClick={() => { setEditingTx(null); setDialogOpen(true); }}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', fontSize: 12, fontWeight: 700, borderRadius: 8, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer' }}>
             <Plus size={14} /> Add Transaction
           </button>
         </div>
       </div>
+
+      {showImport && (
+        <FinanceImportModal
+          onClose={() => setShowImport(false)}
+          onImported={() => fetchAll && fetchAll()}
+        />
+      )}
 
       {/* Stripe live payments (admin only) */}
       {isAdmin && <StripePaymentsPanel />}
