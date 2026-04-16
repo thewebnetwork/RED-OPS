@@ -96,6 +96,85 @@ async def create_template(
     return doc
 
 
+@router.patch("/{template_id}")
+async def update_template(
+    template_id: str,
+    data: ProjectTemplateCreate,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Update an existing custom template. Cannot edit global/seeded ones."""
+    tpl = await db.project_templates.find_one({"id": template_id}, {"_id": 0})
+    if not tpl:
+        raise HTTPException(status_code=404, detail="Template not found")
+    if tpl.get("is_global"):
+        raise HTTPException(status_code=403, detail="Cannot edit built-in templates — duplicate it first")
+
+    update = {
+        "name": data.name,
+        "description": data.description,
+        "offer_type": data.offer_type,
+        "phases": data.phases,
+        "tasks": [t.dict() for t in data.tasks],
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.project_templates.update_one({"id": template_id}, {"$set": update})
+    updated = await db.project_templates.find_one({"id": template_id}, {"_id": 0})
+    return updated
+
+
+@router.post("/from-project/{project_id}")
+async def create_template_from_project(
+    project_id: str,
+    current_user: dict = Depends(require_roles(["Administrator"]))
+):
+    """Save an existing project as a reusable template. Copies the project's
+    tasks (with their phases / checklists / assignee_roles) into a new
+    template document. The project itself is not modified."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    project = await db.projects.find_one({"id": project_id, "org_id": org_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    tasks_raw = await db.tasks.find(
+        {"project_id": project_id, "parent_task_id": {"$in": [None, ""]}},
+        {"_id": 0},
+    ).to_list(500)
+
+    # Derive phases from task status + any explicit phase field
+    phases = list(dict.fromkeys(
+        t.get("phase") or t.get("status", "todo") for t in tasks_raw
+    ))
+
+    template_tasks = []
+    for t in tasks_raw:
+        template_tasks.append({
+            "title": t.get("title", ""),
+            "description": t.get("description"),
+            "phase": t.get("phase") or t.get("status", "todo"),
+            "day_offset": 0,
+            "duration_days": 1,
+            "assignee_role": None,
+            "sop_reference": None,
+            "is_client_visible": t.get("visibility") in ("client", "both"),
+            "checklist": [],
+        })
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "org_id": org_id,
+        "is_global": False,
+        "name": f"{project.get('name', 'Untitled')} Template",
+        "description": f"Saved from project {project.get('name', '')}.",
+        "offer_type": "custom",
+        "phases": phases,
+        "tasks": template_tasks,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.project_templates.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
 @router.delete("/{template_id}")
 async def delete_template(
     template_id: str,

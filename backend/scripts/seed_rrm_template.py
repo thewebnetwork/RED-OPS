@@ -284,6 +284,81 @@ CLIENT_VIDEO_TEMPLATE = {
     ]
 }
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  STARTER ONBOARDING TEMPLATES (4-month, 6-month, 12-month)
+# ══════════════════════════════════════════════════════════════════════════════
+
+_SETUP_TASKS = [
+    {"title": "Client intake questionnaire",   "phase": "Setup",  "day_offset": 0,  "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Send questionnaire", "Collect business goals", "Collect target audience", "Collect branding assets"]},
+    {"title": "Set up client workspace",        "phase": "Setup",  "day_offset": 1,  "assignee_role": "operator",        "is_client_visible": False, "checklist": ["Create project in RED OPS", "Create Drive folder", "Add to Slack/WhatsApp group"]},
+    {"title": "Kick-off call",                  "phase": "Setup",  "day_offset": 3,  "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Introduce team", "Walk through timeline", "Confirm deliverables", "Set communication cadence"]},
+    {"title": "Access & credentials audit",     "phase": "Setup",  "day_offset": 4,  "assignee_role": "operator",        "is_client_visible": False, "checklist": ["Collect ad account access", "Collect CRM login", "Collect website admin access"]},
+]
+
+_LAUNCH_TASKS = [
+    {"title": "Build initial ad creative",      "phase": "Launch", "day_offset": 7,  "assignee_role": "operator",        "is_client_visible": False, "checklist": ["3 ad variations", "Copy for each", "Client approval"]},
+    {"title": "Launch campaigns",               "phase": "Launch", "day_offset": 14, "assignee_role": "operator",        "is_client_visible": True,  "checklist": ["Set budgets", "Launch ads", "Confirm tracking pixels"]},
+    {"title": "Week 1 performance check-in",    "phase": "Launch", "day_offset": 21, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Share early metrics", "Adjust bids if needed", "Send mini-report"]},
+]
+
+_OPT_TASKS = [
+    {"title": "Monthly performance report",     "phase": "Optimization", "day_offset": 30, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Spend vs budget", "Leads generated", "CPL", "Appointments booked", "Next month plan"]},
+    {"title": "Creative refresh",               "phase": "Optimization", "day_offset": 45, "assignee_role": "operator",        "is_client_visible": False, "checklist": ["New ad copy", "New visuals", "A/B test plan"]},
+    {"title": "Bi-weekly check-in call",        "phase": "Optimization", "day_offset": 42, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Review KPIs", "Client feedback", "Adjust strategy"]},
+]
+
+_REVIEW_TASKS = [
+    {"title": "Quarterly strategy review",      "phase": "Review", "day_offset": 90, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Full quarter metrics", "ROI analysis", "Next quarter roadmap"]},
+    {"title": "Renewal preparation",            "phase": "Review", "day_offset": 105, "assignee_role": "account_manager", "is_client_visible": False, "checklist": ["Prepare renewal options", "Internal health check", "Draft renewal proposal"]},
+    {"title": "Renewal call (R.E.N.E.W.)",      "phase": "Review", "day_offset": 110, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Review results", "Present options", "Get decision", "Lock next steps"]},
+]
+
+_SCALE_TASKS = [
+    {"title": "Budget scale review",            "phase": "Scale",       "day_offset": 150, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Evaluate scaling readiness", "Propose budget increase", "New channel recommendations"]},
+    {"title": "New channel pilot",              "phase": "Scale",       "day_offset": 165, "assignee_role": "operator",        "is_client_visible": False, "checklist": ["Research new channel", "Build test campaign", "Set KPI targets"]},
+    {"title": "Mid-year performance review",    "phase": "Scale",       "day_offset": 180, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["6-month metrics", "Channel comparison", "Client satisfaction"]},
+]
+
+_SUSTAIN_TASKS = [
+    {"title": "Annual planning session",        "phase": "Sustain",     "day_offset": 330, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Year review", "Next year goals", "Budget planning"]},
+    {"title": "Case study + testimonial",       "phase": "Sustain",     "day_offset": 340, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Draft case study", "Record testimonial", "Client sign-off"]},
+    {"title": "Year-end renewal",               "phase": "Sustain",     "day_offset": 350, "assignee_role": "account_manager", "is_client_visible": True,  "checklist": ["Prepare renewal", "Present annual results", "Lock next year"]},
+]
+
+ONBOARDING_4_MONTH = {
+    "id": "onboarding-4-month-v1",
+    "name": "4-Month Client Onboarding",
+    "description": "Fast-start onboarding: Setup → Launch → Optimization → Review with renewal at month 4.",
+    "offer_type": "onboarding_4m",
+    "is_global": True,
+    "duration_months": 4,
+    "phases": ["Setup", "Launch", "Optimization", "Review"],
+    "tasks": _SETUP_TASKS + _LAUNCH_TASKS + _OPT_TASKS + _REVIEW_TASKS,
+}
+
+ONBOARDING_6_MONTH = {
+    "id": "onboarding-6-month-v1",
+    "name": "6-Month Client Onboarding",
+    "description": "Standard engagement: Setup → Launch → Optimization → Review → Scale. Includes mid-contract performance review.",
+    "offer_type": "onboarding_6m",
+    "is_global": True,
+    "duration_months": 6,
+    "phases": ["Setup", "Launch", "Optimization", "Review", "Scale"],
+    "tasks": _SETUP_TASKS + _LAUNCH_TASKS + _OPT_TASKS + _REVIEW_TASKS + _SCALE_TASKS,
+}
+
+ONBOARDING_12_MONTH = {
+    "id": "onboarding-12-month-v1",
+    "name": "12-Month Client Onboarding",
+    "description": "Full-year engagement: Setup → Launch → Optimization → Review → Scale → Sustain. Covers quarterly reviews, scaling, and annual renewal.",
+    "offer_type": "onboarding_12m",
+    "is_global": True,
+    "duration_months": 12,
+    "phases": ["Setup", "Launch", "Optimization", "Review", "Scale", "Sustain"],
+    "tasks": _SETUP_TASKS + _LAUNCH_TASKS + _OPT_TASKS + _REVIEW_TASKS + _SCALE_TASKS + _SUSTAIN_TASKS,
+}
+
+
 ALL_TEMPLATES = [
     RRM_MEDIA_CLIENT_TEMPLATE,
     CAMPAIGN_LAUNCH_TEMPLATE,
@@ -293,4 +368,7 @@ ALL_TEMPLATES = [
     ISA_HIRE_TEMPLATE,
     YOUTUBE_VIDEO_TEMPLATE,
     CLIENT_VIDEO_TEMPLATE,
+    ONBOARDING_4_MONTH,
+    ONBOARDING_6_MONTH,
+    ONBOARDING_12_MONTH,
 ]

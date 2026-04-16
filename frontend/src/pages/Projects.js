@@ -995,9 +995,132 @@ function Projects() {
    ADMIN PROJECTS HUB COMPONENT
    ═══════════════════════════════════════════════════════════ */
 
+// ── Templates View ────────────────────────────────────────────────────────────
+function TemplatesView() {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(null);
+
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const { data } = await ax().get(`${API}/project-templates`);
+      setTemplates(Array.isArray(data) ? data : []);
+    } catch { toast.error('Failed to load templates'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Delete template "${name}"?`)) return;
+    try {
+      await ax().delete(`${API}/project-templates/${id}`);
+      toast.success('Template deleted');
+      fetchTemplates();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Cannot delete this template');
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 60 }}><Loader2 size={20} className="spin" style={{ color: 'var(--tx-3)' }} /></div>;
+  }
+
+  return (
+    <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        <p style={{ fontSize: 13, color: 'var(--tx-3)', marginBottom: 20 }}>
+          Templates pre-populate a new project with phases, tasks, and checklists. Choose one when creating a project to save setup time.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {templates.map(tpl => {
+            const isOpen = expanded === tpl.id;
+            const taskCount = (tpl.tasks || []).length;
+            const phases = tpl.phases || [];
+            return (
+              <div key={tpl.id} className="card" style={{ overflow: 'hidden' }}>
+                <button
+                  onClick={() => setExpanded(isOpen ? null : tpl.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                    padding: '16px 18px', background: 'none', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                  }}
+                >
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                    background: tpl.is_global ? 'var(--accent-soft)' : 'var(--bg-elevated)',
+                    color: tpl.is_global ? 'var(--accent)' : 'var(--tx-2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <FolderKanban size={18} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-1)' }}>{tpl.name}</span>
+                      {tpl.is_global && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'var(--accent-soft)', color: 'var(--accent)' }}>Built-in</span>}
+                      {tpl.duration_months && <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--tx-3)' }}>{tpl.duration_months}mo</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--tx-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {tpl.description || `${taskCount} tasks · ${phases.length} phases`}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    <span style={{ fontSize: 11, color: 'var(--tx-3)' }}>{taskCount} tasks</span>
+                    <ChevronDown size={14} style={{ color: 'var(--tx-3)', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div style={{ padding: '0 18px 16px', borderTop: '1px solid var(--border)' }}>
+                    {/* Phases + tasks */}
+                    {phases.map(phase => {
+                      const phaseTasks = (tpl.tasks || []).filter(t => t.phase === phase);
+                      return (
+                        <div key={phase} style={{ marginTop: 14 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx-2)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.04em' }}>{phase}</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {phaseTasks.map((t, i) => (
+                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 6, background: 'var(--bg-elevated)', fontSize: 12.5 }}>
+                                <CheckSquare size={12} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+                                <span style={{ flex: 1, color: 'var(--tx-1)' }}>{t.title}</span>
+                                {t.day_offset > 0 && <span style={{ fontSize: 10, color: 'var(--tx-3)' }}>Day {t.day_offset}</span>}
+                                {t.assignee_role && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: 'var(--surface-3)', color: 'var(--tx-3)' }}>{t.assignee_role}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
+                      {!tpl.is_global && (
+                        <button
+                          onClick={() => handleDelete(tpl.id, tpl.name)}
+                          className="btn-ghost" style={{ fontSize: 12, color: 'var(--red-status)' }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function AdminProjectsHub() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [pageMode, setPageMode] = useState('projects'); // 'projects' | 'templates'
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1146,15 +1269,31 @@ function AdminProjectsHub() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <FolderKanban size={20} color="var(--accent)" />
           <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Projects</h1>
-          <span style={{ fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 4 }}>
-            {projects.length}
-          </span>
+          {/* Tab toggle: Projects | Templates */}
+          <div style={{ display: 'flex', gap: 0, marginLeft: 10, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            {['projects', 'templates'].map(m => (
+              <button key={m} onClick={() => setPageMode(m)}
+                style={{
+                  padding: '5px 14px', fontSize: 12, fontWeight: 600, textTransform: 'capitalize',
+                  background: pageMode === m ? 'var(--accent)' : 'var(--bg-elevated)',
+                  color: pageMode === m ? '#fff' : 'var(--tx-3)',
+                  border: 'none', cursor: 'pointer',
+                }}>{m}</button>
+            ))}
+          </div>
         </div>
-        <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
-          <Plus size={14} /> New Project
-        </button>
+        {pageMode === 'projects' && (
+          <button onClick={() => setModal('new')} className="btn-primary" style={{ gap: 6 }}>
+            <Plus size={14} /> New Project
+          </button>
+        )}
       </div>
 
+      {/* ── TEMPLATES VIEW ── */}
+      {pageMode === 'templates' && <TemplatesView />}
+
+      {/* ── PROJECTS VIEW ── */}
+      {pageMode === 'projects' && <>
       {/* KPI Strip */}
       <div style={{ padding: '16px 20px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
@@ -1269,6 +1408,8 @@ function AdminProjectsHub() {
           </div>
         )}
       </div>
+
+      </>}
 
       {/* Modal */}
       {modal && <ProjectModal project={modal === 'new' ? null : modal} clients={clients} teamMembers={teamMembersList} onClose={() => setModal(null)} onSave={async (proj) => {
