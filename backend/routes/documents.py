@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
+def _resolve_org_id(user: dict) -> str:
+    return user.get("org_id") or user.get("team_id") or user.get("id")
+
+
 # ============== MODELS ==============
 
 class DocumentCreate(BaseModel):
@@ -61,8 +65,10 @@ async def create_document(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new document/page."""
+    org_id = _resolve_org_id(current_user)
+
     if body.parent_id:
-        parent = await db.documents.find_one({"id": body.parent_id, "archived": {"$ne": True}})
+        parent = await db.documents.find_one({"id": body.parent_id, "org_id": org_id, "archived": {"$ne": True}})
         if not parent:
             raise HTTPException(status_code=404, detail="Parent document not found")
 
@@ -74,6 +80,7 @@ async def create_document(
         "parent_id": body.parent_id,
         "icon": body.icon or "📄",
         "tags": body.tags or [],
+        "org_id": org_id,
         "created_by": current_user["id"],
         "created_by_name": current_user.get("name"),
         "created_at": now,
@@ -94,21 +101,21 @@ async def list_documents(
     current_user: dict = Depends(get_current_user)
 ):
     """List documents. Filter by parent_id for hierarchy navigation."""
-    query = {"archived": {"$ne": True}}
+    org_id = _resolve_org_id(current_user)
+    query = {"archived": {"$ne": True}, "org_id": org_id}
 
     if parent_id:
         query["parent_id"] = parent_id
     elif search:
         query["title"] = {"$regex": search, "$options": "i"}
     else:
-        # Root level — no parent
         query["parent_id"] = {"$in": [None, ""]}
 
     docs = await db.documents.find(query, {"_id": 0}).sort("updated_at", -1).to_list(500)
 
     result = []
     for d in docs:
-        d["child_count"] = await db.documents.count_documents({"parent_id": d["id"], "archived": {"$ne": True}})
+        d["child_count"] = await db.documents.count_documents({"parent_id": d["id"], "org_id": org_id, "archived": {"$ne": True}})
         result.append(d)
 
     return result
@@ -120,11 +127,12 @@ async def get_document(
     current_user: dict = Depends(get_current_user)
 ):
     """Get a single document with its content."""
-    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    org_id = _resolve_org_id(current_user)
+    doc = await db.documents.find_one({"id": doc_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    doc["child_count"] = await db.documents.count_documents({"parent_id": doc_id, "archived": {"$ne": True}})
+    doc["child_count"] = await db.documents.count_documents({"parent_id": doc_id, "org_id": org_id, "archived": {"$ne": True}})
     return DocumentResponse(**doc)
 
 
@@ -135,7 +143,8 @@ async def update_document(
     current_user: dict = Depends(get_current_user)
 ):
     """Update a document's title, content, or metadata."""
-    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    org_id = _resolve_org_id(current_user)
+    doc = await db.documents.find_one({"id": doc_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
@@ -157,10 +166,10 @@ async def update_document(
 
     update["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    await db.documents.update_one({"id": doc_id}, {"$set": update})
+    await db.documents.update_one({"id": doc_id, "org_id": org_id}, {"$set": update})
 
-    updated = await db.documents.find_one({"id": doc_id}, {"_id": 0})
-    updated["child_count"] = await db.documents.count_documents({"parent_id": doc_id, "archived": {"$ne": True}})
+    updated = await db.documents.find_one({"id": doc_id, "org_id": org_id}, {"_id": 0})
+    updated["child_count"] = await db.documents.count_documents({"parent_id": doc_id, "org_id": org_id, "archived": {"$ne": True}})
     return DocumentResponse(**updated)
 
 
@@ -170,14 +179,14 @@ async def delete_document(
     current_user: dict = Depends(get_current_user)
 ):
     """Soft-delete (archive) a document and its children."""
-    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    org_id = _resolve_org_id(current_user)
+    doc = await db.documents.find_one({"id": doc_id, "org_id": org_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     now = datetime.now(timezone.utc).isoformat()
-    # Archive this doc and all children recursively
-    await db.documents.update_one({"id": doc_id}, {"$set": {"archived": True, "updated_at": now}})
-    await db.documents.update_many({"parent_id": doc_id}, {"$set": {"archived": True, "updated_at": now}})
+    await db.documents.update_one({"id": doc_id, "org_id": org_id}, {"$set": {"archived": True, "updated_at": now}})
+    await db.documents.update_many({"parent_id": doc_id, "org_id": org_id}, {"$set": {"archived": True, "updated_at": now}})
 
     return {"success": True, "archived_doc_id": doc_id}
 
@@ -188,12 +197,17 @@ async def list_children(
     current_user: dict = Depends(get_current_user)
 ):
     """List child pages of a document."""
+    org_id = _resolve_org_id(current_user)
+    parent = await db.documents.find_one({"id": doc_id, "org_id": org_id})
+    if not parent:
+        raise HTTPException(status_code=404, detail="Document not found")
+
     children = await db.documents.find(
-        {"parent_id": doc_id, "archived": {"$ne": True}},
+        {"parent_id": doc_id, "org_id": org_id, "archived": {"$ne": True}},
         {"_id": 0}
     ).sort("title", 1).to_list(100)
 
     for c in children:
-        c["child_count"] = await db.documents.count_documents({"parent_id": c["id"], "archived": {"$ne": True}})
+        c["child_count"] = await db.documents.count_documents({"parent_id": c["id"], "org_id": org_id, "archived": {"$ne": True}})
 
     return children
