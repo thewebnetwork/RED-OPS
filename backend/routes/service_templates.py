@@ -68,8 +68,9 @@ class ServiceTemplateUpdate(BaseModel):
 # ─── Read Endpoints ──────────────────────────────────────────────────────────
 
 @router.get("", response_model=List[ServiceTemplateResponse])
-async def list_service_templates():
-    """Client-facing catalog — active and visible templates only."""
+async def list_service_templates(current_user: dict = Depends(get_current_user)):
+    """Client-facing service catalog — active and client-visible templates only.
+    Requires auth so unauthenticated requests can't enumerate the catalog."""
     templates = await db.service_templates.find(
         {"active": True, "client_visible": True},
         {"_id": 0}
@@ -79,16 +80,16 @@ async def list_service_templates():
 
 @router.get("/all", response_model=List[ServiceTemplateResponse])
 async def list_all_service_templates(
-    current_user: dict = Depends(require_roles(["Administrator", "Account Manager", "Internal Staff"]))
+    current_user: dict = Depends(require_roles(["Administrator", "Operator"]))
 ):
-    """Admin: all templates including inactive."""
+    """Admin/Operator: every template including inactive / internal."""
     templates = await db.service_templates.find({}, {"_id": 0}).sort("sort_order", 1).to_list(None)
     return templates
 
 
 @router.get("/{template_id}", response_model=ServiceTemplateResponse)
-async def get_service_template(template_id: str):
-    """Single template with full form schema."""
+async def get_service_template(template_id: str, current_user: dict = Depends(get_current_user)):
+    """Single template with full form schema. Requires auth."""
     template = await db.service_templates.find_one({"id": template_id}, {"_id": 0})
     if not template:
         raise HTTPException(status_code=404, detail="Service template not found")

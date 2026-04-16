@@ -164,13 +164,25 @@ async def list_workflows(
     templates_only: bool = False,
     current_user: dict = Depends(get_current_user)
 ):
-    """List all workflows"""
-    query = {}
+    """List workflows scoped to the caller's org. Admins only — Media Clients
+    and Standard Users don't configure automation and must not be able to
+    enumerate it either."""
+    role = current_user.get("role", "")
+    if role not in ("Administrator", "Admin", "Operator"):
+        raise HTTPException(status_code=403, detail="Workflows are admin-only")
+
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    query = {
+        "$or": [
+            {"org_id": org_id},
+            {"org_id": {"$exists": False}},   # legacy docs without org_id — admin sees them
+        ]
+    }
     if active_only:
         query["active"] = True
     if templates_only:
         query["is_template"] = True
-    
+
     workflows = await db.workflows.find(query, {"_id": 0}).sort("name", 1).to_list(1000)
     return [WorkflowResponse(**normalize_workflow(w)) for w in workflows]
 

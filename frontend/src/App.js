@@ -202,12 +202,33 @@ function PrivateRoute({ children, roles }) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Preview-as-client enforcement: block non-client routes
+  // Client-route enforcement: applies to real Media Clients AND admins in
+  // preview-as-client mode. Trims internal-only routes (task-board kanban,
+  // SOPs, knowledge base, internal support, the /team /users /finance
+  // /clients /integrations /crm /ambassador /workflows admin surfaces).
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
-  if (isPreview) {
-    const CLIENT_ALLOWED = ['/', '/services', '/my-requests', '/tasks', '/task-board', '/projects', '/my-account', '/drive', '/files', '/sops', '/ad-performance', '/notifications', '/conversations', '/knowledge-base', '/support'];
+  const isMediaClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
+  if (isPreview || isMediaClient) {
+    const CLIENT_ALLOWED = [
+      '/',                // home (ClientHome dispatches)
+      '/services',
+      '/my-requests',
+      '/tasks',           // their own tasks (filtered server-side)
+      '/projects',        // their own projects (filtered server-side)
+      '/my-account',
+      '/drive',           // their own files + docs (filtered server-side)
+      '/files',           // legacy alias
+      '/ad-performance',  // their own ad report
+      '/notifications',
+      '/conversations',
+    ];
     const path = location.pathname;
-    const allowed = CLIENT_ALLOWED.includes(path) || path.startsWith('/requests') || path.startsWith('/projects/');
+    const allowed =
+      CLIENT_ALLOWED.includes(path) ||
+      path.startsWith('/requests') ||        // request detail view of their own request
+      path.startsWith('/projects/') ||       // project detail — backend 404s non-assigned
+      path.startsWith('/drive/') ||          // drive sub-routes (sheet editor etc.)
+      path.startsWith('/notifications/');
     if (!allowed) {
       return <Navigate to="/" replace />;
     }

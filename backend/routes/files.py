@@ -88,8 +88,19 @@ async def list_folders(
     parent_folder_id: Optional[str] = Query(None),
     current_user: dict = Depends(get_current_user)
 ):
-    """List folders, optionally filtered by context and parent."""
-    query = {"org_id": current_user.get("org_id")}
+    """List folders scoped to the caller. Media Clients only ever see
+    folders they created or folders explicitly tied to their account."""
+    is_client = current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client"
+    if is_client:
+        # Media Client: only their own uploads or folders keyed to them
+        query = {
+            "$or": [
+                {"created_by_user_id": current_user["id"]},
+                {"context_type": "client", "context_id": current_user["id"]},
+            ]
+        }
+    else:
+        query = {"org_id": current_user.get("org_id")}
     if context_type:
         query["context_type"] = context_type
     if context_id:
@@ -241,8 +252,19 @@ async def list_files(
     search: Optional[str] = Query(None),
     current_user: dict = Depends(get_current_user)
 ):
-    """List files with optional context/folder filtering."""
-    query = {"org_id": current_user.get("org_id")}
+    """List files with optional context/folder filtering. Media Clients see
+    only their own uploads or files explicitly tied to their client account —
+    never the agency's internal file library."""
+    is_client = current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client"
+    if is_client:
+        query = {
+            "$or": [
+                {"uploaded_by_user_id": current_user["id"]},
+                {"context_type": "client", "context_id": current_user["id"]},
+            ]
+        }
+    else:
+        query = {"org_id": current_user.get("org_id")}
     if context_type:
         query["context_type"] = context_type
     if context_id:

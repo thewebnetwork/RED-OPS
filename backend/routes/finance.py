@@ -75,8 +75,10 @@ async def list_transactions(
     skip: int = Query(0),
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
-    """List financial transactions with optional filters"""
-    query = {}
+    """List financial transactions with optional filters. Admin-only AND
+    org-scoped — defense in depth so multi-org never leaks across tenants."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    query = {"$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
     if type:
         query["type"] = type
     if category:
@@ -101,8 +103,13 @@ async def get_transaction(
     transaction_id: str,
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
-    """Get a single transaction"""
-    tx = await db.finance_transactions.find_one({"id": transaction_id}, {"_id": 0})
+    """Get a single transaction. Admin + org-scoped — a transaction from
+    another tenant returns 404 even if the ID is known."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    tx = await db.finance_transactions.find_one(
+        {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]},
+        {"_id": 0},
+    )
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return tx
@@ -114,17 +121,19 @@ async def update_transaction(
     data: TransactionUpdate,
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
-    """Update a transaction"""
-    tx = await db.finance_transactions.find_one({"id": transaction_id})
+    """Update a transaction. Admin + org-scoped."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    scope = {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
+    tx = await db.finance_transactions.find_one(scope)
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
     update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_dict:
         update_dict["updated_at"] = get_utc_now()
-        await db.finance_transactions.update_one({"id": transaction_id}, {"$set": update_dict})
+        await db.finance_transactions.update_one(scope, {"$set": update_dict})
 
-    updated = await db.finance_transactions.find_one({"id": transaction_id}, {"_id": 0})
+    updated = await db.finance_transactions.find_one(scope, {"_id": 0})
     return updated
 
 
@@ -133,11 +142,13 @@ async def delete_transaction(
     transaction_id: str,
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
-    """Delete a transaction"""
-    tx = await db.finance_transactions.find_one({"id": transaction_id})
+    """Delete a transaction. Admin + org-scoped."""
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    scope = {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
+    tx = await db.finance_transactions.find_one(scope)
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
-    await db.finance_transactions.delete_one({"id": transaction_id})
+    await db.finance_transactions.delete_one(scope)
     return {"message": "Transaction deleted"}
 
 

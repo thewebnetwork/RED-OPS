@@ -235,10 +235,20 @@ async def list_contacts(
     limit: int = Query(100, ge=1, le=500),
     current_user: dict = Depends(get_current_user),
 ):
-    """List contacts with filtering."""
-    org_id = await _get_org_id(current_user)
+    """List contacts with filtering. CRM is admin/operator only —
+    Media Clients and Standard Users never see the contact book."""
+    role = current_user.get("role", "")
+    if role in ("Media Client",) or current_user.get("account_type") == "Media Client":
+        raise HTTPException(status_code=403, detail="CRM contacts are not available to Media Clients")
+    if role not in ("Administrator", "Admin", "Operator", "Privileged User"):
+        raise HTTPException(status_code=403, detail="CRM access requires Operator or Administrator")
 
+    org_id = await _get_org_id(current_user)
     query = {"org_id": org_id}
+
+    # Operators only see contacts assigned to them — not every lead in the org.
+    if role == "Operator":
+        query["assigned_to_user_id"] = current_user["id"]
 
     if status:
         query["status"] = status

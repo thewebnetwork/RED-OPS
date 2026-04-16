@@ -362,7 +362,12 @@ async def list_marketplace_listings(
     category: str = Query(None),
     current_user: dict = Depends(get_current_user),
 ):
-    """List all active marketplace listings (public within platform)."""
+    """List active marketplace listings within the caller's org.
+    The ambassador marketplace is an internal peer surface — Media Clients
+    never see it; only internal roles can enumerate listings."""
+    if current_user.get("account_type") == "Media Client" or current_user.get("role") == "Media Client":
+        raise HTTPException(status_code=403, detail="Marketplace is not available to Media Clients")
+
     org_id = await _get_org_id(current_user)
 
     query = {

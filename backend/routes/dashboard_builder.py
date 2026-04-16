@@ -473,10 +473,16 @@ def filter_widgets_by_permissions(widgets: List[Dict], user_permissions: Dict) -
 
 @router.get("/list")
 async def list_dashboards(current_user: dict = Depends(get_current_user)):
-    """List all available dashboard templates"""
+    """List dashboards available to the caller: built-in templates + any
+    dashboards scoped to their org. Never leaks other orgs' custom dashboards."""
     await ensure_default_dashboards()
-    
-    dashboards = await db.dashboards.find({}, {"_id": 0}).to_list(None)
+
+    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    # Built-in templates don't have an org_id; org-specific dashboards do.
+    dashboards = await db.dashboards.find(
+        {"$or": [{"org_id": {"$in": [None, ""]}}, {"org_id": {"$exists": False}}, {"org_id": org_id}]},
+        {"_id": 0}
+    ).to_list(None)
     return {"dashboards": dashboards}
 
 

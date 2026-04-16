@@ -240,11 +240,14 @@ async def submit_feature_request_draft(request_id: str, current_user: dict = Dep
 
 @router.get("/feature-requests", response_model=List[FeatureRequestResponse])
 async def list_feature_requests(current_user: dict = Depends(get_current_user)):
-    """List feature requests"""
+    """List feature requests.
+    Non-admin roles (Media Client, Standard User, Requester) only see their own
+    submissions — never other users' requests."""
+    role = current_user.get("role", "")
     query = {}
-    if current_user["role"] == "Requester":
+    if role not in ("Administrator", "Admin", "Operator", "Privileged User"):
         query["requester_id"] = current_user["id"]
-    
+
     requests = await db.feature_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return [FeatureRequestResponse(**r) for r in requests]
 
@@ -256,9 +259,11 @@ async def get_feature_request(request_id: str, current_user: dict = Depends(get_
     if not request:
         raise HTTPException(status_code=404, detail="Feature request not found")
     
-    if current_user["role"] == "Requester" and request["requester_id"] != current_user["id"]:
+    role = current_user.get("role", "")
+    is_admin_like = role in ("Administrator", "Admin", "Operator", "Privileged User")
+    if not is_admin_like and request.get("requester_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+
     return FeatureRequestResponse(**request)
 
 
@@ -454,27 +459,31 @@ async def submit_bug_report_draft(report_id: str, current_user: dict = Depends(g
 
 @router.get("/bug-reports", response_model=List[BugReportResponse])
 async def list_bug_reports(current_user: dict = Depends(get_current_user)):
-    """List bug reports"""
+    """List bug reports. Non-admin roles see only their own."""
+    role = current_user.get("role", "")
     query = {}
-    if current_user["role"] == "Requester":
+    if role not in ("Administrator", "Admin", "Operator", "Privileged User"):
         query["requester_id"] = current_user["id"]
-    
+
     reports = await db.bug_reports.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return [BugReportResponse(**r) for r in reports]
 
 
 @router.get("/bug-reports/{report_id}", response_model=BugReportResponse)
 async def get_bug_report(report_id: str, current_user: dict = Depends(get_current_user)):
-    """Get a specific bug report"""
+    """Get a specific bug report. Non-admins can only see their own."""
     report = await db.bug_reports.find_one({"id": report_id}, {"_id": 0})
     if not report:
         raise HTTPException(status_code=404, detail="Bug report not found")
-    
-    # Drafts only visible to owner
-    if report["status"] == "Draft" and report["requester_id"] != current_user["id"]:
+
+    role = current_user.get("role", "")
+    is_admin_like = role in ("Administrator", "Admin", "Operator", "Privileged User")
+
+    # Drafts only visible to owner (even admins don't peek)
+    if report.get("status") == "Draft" and report.get("requester_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
-    
-    if current_user["role"] == "Requester" and report["requester_id"] != current_user["id"]:
+
+    if not is_admin_like and report.get("requester_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     return BugReportResponse(**report)
