@@ -73,6 +73,9 @@ agenthub/agents/youtube/db
 *.deb
 *.dylib
 
+# Prevent snapshot backups from being committed to repo root
+/backup_*.json
+
 # Build caches
 .cache/
 

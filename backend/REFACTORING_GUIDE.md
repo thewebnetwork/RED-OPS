@@ -39,7 +39,6 @@ The backend has been **fully refactored** from a monolithic `server.py` to a mod
 ├── database.py         # MongoDB connection
 ├── server.py           # Entry point (imports server_v2)
 ├── server_v2.py        # Main application with all routers
-├── server_legacy.py    # Backup of old monolithic server
 ├── models/             # ✅ Pydantic models
 │   ├── __init__.py
 │   ├── auth.py         # LoginRequest, LoginResponse, etc.
@@ -142,7 +141,6 @@ After any changes:
 
 ## Notes
 
-- The legacy `server_legacy.py` is kept as a backup
 - All routes use the same authentication middleware from `utils/auth.py`
 - Database connection is shared via `database.py`
 - Background tasks (SLA monitor) are managed in `server_v2.py`
