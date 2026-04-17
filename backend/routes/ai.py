@@ -7,6 +7,7 @@ from typing import List, Optional
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 from services.openai_service import generate_brief, chat_completion_stream, summarize_activity
 
 router = APIRouter(prefix="/ai", tags=["AI"])
@@ -37,7 +38,7 @@ async def generate_brief_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     """Generate an AI creative brief from an order."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
 
     order = await db.orders.find_one({"id": data.order_id}, {"_id": 0})
     if not order:
@@ -63,7 +64,7 @@ async def chat_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     """Streaming AI chat."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
 
     messages = [
         {"role": "system", "content": (
@@ -99,7 +100,7 @@ async def summarize_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     """Summarize order activity timeline."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
 
     order = await db.orders.find_one({"id": data.order_id}, {"_id": 0})
     if not order:

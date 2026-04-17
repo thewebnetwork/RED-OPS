@@ -1,5 +1,9 @@
 """Organization / Workspace Management
 
+DEPRECATED under single-tenant-per-user architecture (2026-04-17).
+Scheduled for removal in a separate pass.
+See docs/audits/AUDIT_2026-04-16.md §4.2.1 decision log.
+
 The foundational multi-tenant layer for Red Ops.
 Every business that uses Red Ops gets an Organization.
 All data is scoped to org_id.

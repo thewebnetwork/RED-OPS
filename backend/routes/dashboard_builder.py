@@ -7,6 +7,7 @@ import uuid
 
 from database import db
 from utils.auth import get_current_user, require_admin
+from utils.tenancy import resolve_org_id
 
 router = APIRouter(prefix="/dashboards", tags=["Dashboard Management"])
 
@@ -477,7 +478,7 @@ async def list_dashboards(current_user: dict = Depends(get_current_user)):
     dashboards scoped to their org. Never leaks other orgs' custom dashboards."""
     await ensure_default_dashboards()
 
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     # Built-in templates don't have an org_id; org-specific dashboards do.
     dashboards = await db.dashboards.find(
         {"$or": [{"org_id": {"$in": [None, ""]}}, {"org_id": {"$exists": False}}, {"org_id": org_id}]},

@@ -16,6 +16,7 @@ import uuid
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 from models.project import (
     ProjectCreate,
     ProjectUpdate,
@@ -30,28 +31,8 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 async def _get_org_id(user: dict) -> str:
-    """Extract org_id from authenticated user. Auto-provisions platform org for admins."""
-    org_id = user.get("org_id") or user.get("team_id") or user.get("id")
-    if org_id:
-        return org_id
-    if user.get("role") == "Administrator":
-        platform_org = await db.organizations.find_one({"org_type": "platform"}, {"_id": 0})
-        if platform_org:
-            org_id = platform_org["id"]
-        else:
-            import uuid as _uuid
-            from datetime import timezone as _tz
-            org_id = str(_uuid.uuid4())
-            now = datetime.now(_tz.utc).isoformat()
-            await db.organizations.insert_one({
-                "id": org_id, "name": "RRG Platform", "slug": "rrg-platform",
-                "org_type": "platform", "status": "active",
-                "created_by_user_id": user["id"], "created_at": now, "updated_at": now,
-                "members": [{"user_id": user["id"], "role": "owner", "joined_at": now}],
-            })
-        await db.users.update_one({"id": user["id"]}, {"$set": {"org_id": org_id}})
-        return org_id
-    raise HTTPException(status_code=400, detail="No organization context. Join or create an organization first.")
+    """Extract org_id from authenticated user."""
+    return resolve_org_id(user)
 
 
 def _get_org_role(user: dict) -> str:

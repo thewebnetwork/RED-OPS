@@ -7,6 +7,7 @@ from typing import Optional, List
 from database import db
 from utils.auth import require_roles, get_current_user
 from utils.helpers import get_utc_now
+from utils.tenancy import resolve_org_id
 
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
@@ -75,7 +76,7 @@ async def create_team(team_data: TeamCreate, current_user: dict = Depends(requir
 @router.get("", response_model=List[TeamResponse])
 async def list_teams(current_user: dict = Depends(require_roles(["Administrator", "Operator"]))):
     """List active teams scoped to the caller's org. Admin + Operator only."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     teams = await db.teams.find(
         {"active": True, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]},
         {"_id": 0}

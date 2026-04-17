@@ -6,6 +6,7 @@ from typing import Optional, List
 
 from database import db
 from utils.auth import get_current_user, require_roles
+from utils.tenancy import resolve_org_id
 from utils.helpers import get_utc_now
 from models.workflow import (
     WorkflowCreate, WorkflowUpdate, WorkflowResponse
@@ -171,7 +172,7 @@ async def list_workflows(
     if role not in ("Administrator", "Admin", "Operator"):
         raise HTTPException(status_code=403, detail="Workflows are admin-only")
 
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     query = {
         "$or": [
             {"org_id": org_id},

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
 def _resolve_org_id(user: dict) -> str:
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 
 # ============== MODELS ==============

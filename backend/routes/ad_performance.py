@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 from services.report_generator import generate_ad_performance_pdf
 
 logger = logging.getLogger(__name__)
@@ -184,7 +185,7 @@ def calculate_metrics(metrics_dict: dict) -> dict:
 
 def get_org_id(user: dict) -> str:
     """Resolve org ID from user object"""
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 
 def is_media_client(user: dict) -> bool:

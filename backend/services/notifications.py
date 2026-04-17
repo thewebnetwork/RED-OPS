@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone
 from .sse import publish
 from .slack_service import send_slack_notification
+from utils.tenancy import resolve_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ async def create_notification(db, user_id: str, type: str, title: str, message: 
     try:
         user = await db.users.find_one({"id": user_id}, {"_id": 0, "org_id": 1, "team_id": 1, "id": 1})
         if user:
-            org_id = user.get("org_id") or user.get("team_id") or user.get("id")
+            org_id = resolve_org_id(user)
             slack = await db.integrations.find_one(
                 {"org_id": org_id, "provider": "slack_webhook", "status": "connected"}
             )

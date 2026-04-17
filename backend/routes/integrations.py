@@ -10,6 +10,7 @@ from typing import Optional, List, Literal
 
 from database import db
 from utils.auth import get_current_user, require_roles
+from utils.tenancy import resolve_org_id
 
 router = APIRouter(prefix="/integrations", tags=["Integrations"])
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ SUPPORTED_PROVIDERS = {
 }
 
 def _org_id(user: dict) -> str:
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 def _mask(key: str) -> str:
     """Mask an API key for safe display."""
