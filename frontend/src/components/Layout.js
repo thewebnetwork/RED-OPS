@@ -64,18 +64,9 @@ const NAV_SYSTEM = [
   { path: '/settings', icon: Settings,  label: 'Settings',     roles: ['Administrator'] },
 ];
 
-// Client portal nav (shown only to Media Client role)
+// Client portal nav — minimal (full portal is a single page at /portal)
 const NAV_CLIENT = [
-  { path: '/',             icon: LayoutDashboard, label: 'Dashboard',      roles: ['Media Client'] },
-  { path: '/tasks',        icon: CheckSquare,     label: 'My Tasks',       roles: ['Media Client'] },
-  { path: '/projects',     icon: FolderKanban,    label: 'My Projects',    roles: ['Media Client'] },
-  { path: '/my-requests',  icon: FileText,        label: 'My Requests',    roles: ['Media Client'] },
-  { path: '/conversations', icon: MessageSquare, label: 'Messages', roles: ['Media Client'] },
-  { path: '/services',     icon: ShoppingBag,     label: 'Services',       roles: ['Media Client'] },
-  { path: '/ad-performance', icon: BarChart2, label: 'Ad Performance', roles: ['Media Client'] },
-  { path: '/drive', icon: BookOpen, label: 'Resources', roles: ['Media Client'] },
-  { path: '/support',      icon: LifeBuoy,        label: 'Support',        roles: ['Media Client'] },
-  { path: '/my-account',   icon: User,            label: 'My Account',     roles: ['Media Client'] },
+  { path: '/portal', icon: LayoutDashboard, label: 'Portal', roles: ['Media Client'] },
 ];
 
 // Command palette items
