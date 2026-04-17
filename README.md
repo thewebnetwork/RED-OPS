@@ -33,7 +33,6 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for complete instructions.
 - 👥 Role-based access control (RBAC)
 - 📊 Real-time dashboards
 - 🎯 SLA tracking
-- 🔄 Workflow automation
 - 💬 Request management with messaging
 - 📈 Analytics and reporting
 

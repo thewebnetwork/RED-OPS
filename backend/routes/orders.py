@@ -19,7 +19,6 @@ from utils.helpers import (
     is_sla_breached, normalize_order, get_next_code, create_notification
 )
 from services.webhooks import trigger_webhooks
-from services.workflow_engine import get_workflows_for_trigger, execute_workflow
 from services.task_generator import generate_tasks_for_event, complete_open_tasks_for_request, sync_progress_task_status
 from utils.nextcloud import upload_file as nc_upload, download_file as nc_download, order_file_path, is_configured as nc_enabled
 from services.email import (
@@ -64,12 +63,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # ============== WORKFLOW TRIGGER HELPER ==============
 
 async def trigger_order_workflows(event: str, order: dict, user: dict, background_tasks: BackgroundTasks):
-    """Fire all matching workflows for a given trigger event in the background."""
-    async def _run():
-        wfs = await get_workflows_for_trigger(db, event, order.get("category_l2_id"))
-        for wf in wfs:
-            await execute_workflow(db, wf["id"], event, {"order": order, "user": user})
-    background_tasks.add_task(_run)
+    """No-op. Workflows feature removed per AUDIT §4.2.2. Client automation lives in GHL."""
+    pass
 
 
 # ============== MODELS ==============
@@ -724,16 +719,6 @@ async def create_order(
             "pool_stage": routing_info["pool_stage"] if routing_info else None
         })
         
-        # Execute workflows triggered by order.created
-        async def run_workflows():
-            workflows = await get_workflows_for_trigger(db, "order.created", order_data.category_l2_id)
-            for workflow in workflows:
-                await execute_workflow(db, workflow["id"], "order.created", {
-                    "order": order,
-                    "user": current_user
-                })
-        background_tasks.add_task(run_workflows)
-        
         # Notify eligible pool users (only those matching the specialty)
         if routing_info:
             await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
@@ -810,17 +795,6 @@ async def submit_draft(
         "status": "Open",
         "pool_stage": routing_info["pool_stage"]
     })
-    
-    # Execute workflows triggered by order.created
-    async def run_workflows():
-        workflows = await get_workflows_for_trigger(db, "order.created", order.get("category_l2_id"))
-        for workflow in workflows:
-            order["status"] = "Open"  # Update status for workflow context
-            await execute_workflow(db, workflow["id"], "order.created", {
-                "order": order,
-                "user": current_user
-            })
-    background_tasks.add_task(run_workflows)
     
     # Notify eligible pool users (only those matching the specialty)
     await notify_pool_users(order, routing_info["pool_stage"], routing_info, background_tasks)
@@ -1461,16 +1435,6 @@ async def submit_for_review(
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Pending", current_user)
     
     # Trigger workflows for pending_review event
-    async def run_pending_workflows():
-        workflows = await get_workflows_for_trigger(db, "order.pending_review", order.get("category_l2_id"))
-        for workflow in workflows:
-            await execute_workflow(db, workflow["id"], "order.pending_review", {
-                "order": {**order, "status": "Pending", "review_started_at": now},
-                "user": current_user
-            })
-    background_tasks.add_task(run_pending_workflows)
-    await trigger_order_workflows("order.status_changed", updated_order, current_user, background_tasks)
-
     # Auto-generate tasks for status_changed_to_review
     await generate_tasks_for_event("status_changed_to_review", updated_order, current_user)
     
