@@ -614,7 +614,6 @@ async def create_order(
         ):
             am_id = current_user.get("account_manager")
             if am_id and am_id != current_user["id"]:
-                from services.notifications import create_notification
                 from routes.push import send_push_to_user
                 client_name = current_user.get("name") or current_user.get("email") or "A client"
                 order_title = order.get("title") or "a new request"
@@ -712,7 +711,7 @@ async def create_order(
         )
         
         # Trigger webhooks
-        background_tasks.add_task(trigger_webhooks, "order.created", {
+        background_tasks.add_task(trigger_webhooks, db, "order.created", {
             "order_id": order["id"],
             "order_code": order_code,
             "title": order_data.title,
@@ -799,7 +798,7 @@ async def submit_draft(
     )
 
     # Trigger webhooks for order.submitted (and order.created for backwards compat)
-    background_tasks.add_task(trigger_webhooks, "order.created", {
+    background_tasks.add_task(trigger_webhooks, db, "order.created", {
         "order_id": order["id"],
         "order_code": order["order_code"],
         "title": order["title"],
@@ -1085,7 +1084,7 @@ async def force_ticket_to_pool_2(
     await db.order_messages.insert_one(log_message)
     
     # Trigger webhook
-    background_tasks.add_task(trigger_webhooks, "order.forced_to_pool_2", {
+    background_tasks.add_task(trigger_webhooks, db, "order.forced_to_pool_2", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -1405,7 +1404,7 @@ async def pick_order(
         order_id
     )
     
-    background_tasks.add_task(trigger_webhooks, "order.status_changed", {
+    background_tasks.add_task(trigger_webhooks, db, "order.status_changed", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -1572,7 +1571,7 @@ async def deliver_order(
     updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     background_tasks.add_task(notify_status_change, updated_order, old_status, "Delivered", current_user)
     
-    background_tasks.add_task(trigger_webhooks, "order.delivered", {
+    background_tasks.add_task(trigger_webhooks, db, "order.delivered", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -1705,7 +1704,7 @@ async def close_order(
             order_id=order_id
         )
     
-    background_tasks.add_task(trigger_webhooks, "order.closed", {
+    background_tasks.add_task(trigger_webhooks, db, "order.closed", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "close_reason": close_data.reason,
@@ -1790,7 +1789,7 @@ async def soft_delete_order(
             order_id
         )
     
-    background_tasks.add_task(trigger_webhooks, "order.deleted", {
+    background_tasks.add_task(trigger_webhooks, db, "order.deleted", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -1860,7 +1859,7 @@ async def restore_deleted_order(
             order_id
         )
     
-    background_tasks.add_task(trigger_webhooks, "order.restored", {
+    background_tasks.add_task(trigger_webhooks, db, "order.restored", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -1986,7 +1985,7 @@ async def reopen_order(
                 order_id=order_id
             )
     
-    background_tasks.add_task(trigger_webhooks, "order.reopened", {
+    background_tasks.add_task(trigger_webhooks, db, "order.reopened", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
@@ -2090,7 +2089,7 @@ async def cancel_order(
         )
     
     # Trigger webhook
-    background_tasks.add_task(trigger_webhooks, "order.status_changed", {
+    background_tasks.add_task(trigger_webhooks, db, "order.status_changed", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "old_status": old_status,
@@ -2320,7 +2319,7 @@ async def reassign_order(
             )
     
     # Trigger webhook
-    background_tasks.add_task(trigger_webhooks, "order.reassigned", {
+    background_tasks.add_task(trigger_webhooks, db, "order.reassigned", {
         "order_id": order_id,
         "order_code": order["order_code"],
         "title": order.get("title"),
