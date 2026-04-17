@@ -187,7 +187,9 @@ Preview-as-client mode: Layout.js checks `localStorage.getItem('preview_as_clien
 
 ## Backend Route Modules (35 files)
 
-`backend/routes/`: access_tiers, ad_performance, ambassador, api_keys, auth, categories, crm, dashboard, dashboard_builder, dashboard_v2, documentation, escalation, feedback, files, iam, knowledge_base, notifications, orders, organizations, projects, ratings, reports, roles, service_templates, settings, sla, sla_policies, specialties, subscription_plans, tasks, teams, users, webhooks, workflows
+`backend/routes/`: access_tiers, ad_performance, ambassador, api_keys, auth, categories, crm, dashboard, dashboard_builder, dashboard_v2, documentation, escalation, feedback, files, iam, knowledge_base, notifications, orders, organizations, projects, ratings, reports, roles, service_templates, settings, sla, sla_policies, specialties, subscription_plans, tasks, teams, users, webhooks
+
+> **Note:** Workflows feature removed on 2026-04-17 per AUDIT §4.2.2 decision. Client-facing automation lives in GHL.
 
 ---
 
