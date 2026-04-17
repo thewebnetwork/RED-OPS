@@ -87,6 +87,7 @@ const Conversations = React.lazy(() => import("./pages/Conversations"));
 const Support = React.lazy(() => import("./pages/Support"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const ClientPortalAdmin = React.lazy(() => import("./pages/ClientPortalAdmin"));
+const ClientPortal = React.lazy(() => import("./pages/ClientPortal"));
 
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -104,7 +105,7 @@ function HomeRoute() {
   const { user } = useAuth();
   const isPreview = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
   const isClient = isPreview || user?.account_type === 'Media Client' || user?.role === 'Media Client';
-  if (isClient) return <ClientHome />;
+  if (isClient) return <Navigate to="/portal" replace />;
 
   const role = user?.role;
   if (role === 'Operator') return <OperatorDashboard />;
@@ -209,7 +210,8 @@ function PrivateRoute({ children, roles }) {
   const isMediaClient = user?.account_type === 'Media Client' || user?.role === 'Media Client';
   if (isPreview || isMediaClient) {
     const CLIENT_ALLOWED = [
-      '/',                // home (ClientHome dispatches)
+      '/',                // home → redirects to /portal
+      '/portal',          // client portal page
       '/services',
       '/my-requests',
       '/tasks',           // their own tasks (filtered server-side)
@@ -303,6 +305,9 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
+
+      {/* ========== CLIENT PORTAL ========== */}
+      <Route path="/portal" element={<PrivateRoute><ClientPortal /></PrivateRoute>} />
 
       {/* ========== RED OPS CORE ROUTES ========== */}
       {/* RRG Services Marketplace */}
