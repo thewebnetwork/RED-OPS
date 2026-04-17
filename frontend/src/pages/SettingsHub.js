@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useOrg } from '@/contexts/OrgContext';
 import {
-  Settings, Users, Shield, Building2, FolderTree, Palette, Mail, Plug,
+  Settings, Users, Shield, Building2, FolderTree, GitBranch, Palette, Mail, Plug,
   Search, ChevronRight, CheckCircle2, Circle, Eye, ShoppingBag, Plus, Pencil, Trash2,
   X, Loader2, Clock, Package, Layers, Zap, EyeOff, Video, Camera, FileText, BarChart2,
   Megaphone, Globe, Mic, Phone, BookOpen, LayoutGrid, Tag, CreditCard, DollarSign, Star,
@@ -28,6 +28,7 @@ const SECTIONS = [
   { id: 'notification-rules', label: 'Notification Rules', icon: Bell, inline: true },
   { id: 'finance-categories', label: 'Finance Categories', icon: DollarSign, inline: true },
   { id: 'project-templates', label: 'Project Templates', icon: Layers, inline: true },
+  { id: 'workflows', label: 'Workflows', icon: GitBranch, inline: false, path: '/workflows' },
   { id: 'email', label: 'Email', icon: Mail, inline: false, path: '/email-settings' },
   { id: 'integrations', label: 'Integrations', icon: Plug, inline: false, path: '/integrations' },
 ];
@@ -1767,6 +1768,7 @@ function NavigationCard({ section }) {
         {section.id === 'roles' && 'Configure roles and their permissions.'}
         {section.id === 'services' && 'Manage your service catalog and templates.'}
         {section.id === 'categories' && 'Manage service and ticket classification.'}
+        {section.id === 'workflows' && 'Automate status changes and notifications.'}
         {section.id === 'ui' && 'Customize colors, logo, and branding.'}
         {section.id === 'email' && 'Configure email settings and templates.'}
         {section.id === 'integrations' && 'Manage third-party integrations.'}

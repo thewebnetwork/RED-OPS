@@ -177,6 +177,7 @@ export default function Roles() {
       teams: 'Teams',
       roles: 'Roles',
       categories: 'Categories',
+      workflows: 'Workflows',
       escalation: 'Escalation',
       sla: 'SLA Management',
       integrations: 'Integrations',
