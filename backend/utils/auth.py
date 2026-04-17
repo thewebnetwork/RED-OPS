@@ -26,25 +26,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
 
-        # Attach org context if user has a primary org
-        primary_org_id = user.get("primary_org_id")
-        if primary_org_id:
-            membership = await db.org_members.find_one(
-                {"user_id": user_id, "org_id": primary_org_id, "active": True},
-                {"_id": 0}
-            )
-            if membership:
-                user["org_id"] = primary_org_id
-                user["org_role"] = membership.get("org_role", "member")
-                user["org_permissions"] = membership.get("permissions", {})
-            else:
-                user["org_id"] = None
-                user["org_role"] = None
-                user["org_permissions"] = {}
-        else:
-            user["org_id"] = None
-            user["org_role"] = None
-            user["org_permissions"] = {}
+        # Single-tenant architecture: org_id is always the user's own id.
+        # See docs/audits/AUDIT_2026-04-16.md §4.2.1 decision.
+        user["org_id"] = user["id"]
 
         return user
     except jwt.ExpiredSignatureError:

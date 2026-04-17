@@ -15,6 +15,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 
 from database import db
+from utils.tenancy import resolve_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -266,7 +267,7 @@ async def generate_tasks_for_event(
         await ensure_seed_templates()
 
         request_id = order.get("id")
-        org_id = order.get("requester_team_id") or triggered_by_user.get("team_id") or triggered_by_user.get("org_id")
+        org_id = resolve_org_id(triggered_by_user)
         if not org_id:
             logger.warning(f"No org_id for order {request_id}, skipping task generation")
             return []

@@ -16,6 +16,7 @@ from typing import Optional, List, Dict, Any
 
 from database import db
 from utils.auth import require_roles, get_current_user
+from utils.tenancy import resolve_org_id
 from utils.helpers import hash_password, get_utc_now
 from models.identity import (
     DEFAULT_PERMISSIONS, PERMISSION_MODULES, 
@@ -479,7 +480,7 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
 
         try:
             from services.task_templates import create_tasks_for_new_client
-            user_org_id = user.get("team_id") or user.get("org_id") or current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+            user_org_id = resolve_org_id(current_user)
             await create_tasks_for_new_client(
                 client_id=user["id"],
                 client_name=user_data.name,

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from database import db
 from utils.auth import require_roles, get_current_user
 from utils.helpers import get_utc_now
+from utils.tenancy import resolve_org_id
 
 router = APIRouter(prefix="/finance", tags=["Finance"])
 
@@ -189,7 +190,7 @@ async def list_transactions(
 ):
     """List financial transactions with optional filters. Admin-only AND
     org-scoped — defense in depth so multi-org never leaks across tenants."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     query = {"$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
     if type:
         query["type"] = type
@@ -217,7 +218,7 @@ async def get_transaction(
 ):
     """Get a single transaction. Admin + org-scoped — a transaction from
     another tenant returns 404 even if the ID is known."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     tx = await db.finance_transactions.find_one(
         {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]},
         {"_id": 0},
@@ -234,7 +235,7 @@ async def update_transaction(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Update a transaction. Admin + org-scoped."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     scope = {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
     tx = await db.finance_transactions.find_one(scope)
     if not tx:
@@ -255,7 +256,7 @@ async def delete_transaction(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Delete a transaction. Admin + org-scoped."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     scope = {"id": transaction_id, "$or": [{"org_id": org_id}, {"org_id": {"$exists": False}}]}
     tx = await db.finance_transactions.find_one(scope)
     if not tx:
@@ -343,7 +344,7 @@ async def get_finance_dashboard(
     All amounts in CAD. Org-scoped. Cheap to compute even on thousands of rows
     because it's a single fetch + in-memory aggregation."""
     from datetime import date as _date
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     now = datetime.now(timezone.utc)
     today = now.date()
 
@@ -484,7 +485,7 @@ async def stripe_live_payments(
     If no Stripe integration is connected, returns connected=False with an
     empty list so the Finance page can render a "Connect Stripe" nudge
     instead of erroring."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     integ = await db.integrations.find_one(
         {"org_id": org_id, "provider": "stripe", "status": "connected"}
     )
@@ -542,7 +543,7 @@ async def get_finance_categories(
     current_user: dict = Depends(get_current_user)
 ):
     """Get finance categories. Auto-seeds defaults if none exist."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     count = await db.finance_categories.count_documents({"org_id": org_id})
 
     if count == 0:
@@ -576,7 +577,7 @@ async def create_finance_category(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Create a new finance category."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     doc = {
         "id": str(uuid.uuid4()),
         "org_id": org_id,
@@ -771,7 +772,7 @@ async def preview_csv_import(
     Auto-detects format, runs auto-categorization, flags duplicates against
     existing finance_transactions in the org. The frontend renders a table
     of parsed rows + warnings; user clicks Confirm to call /commit-import."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     raw = await file.read()
     try:
         text = raw.decode("utf-8-sig")
@@ -848,7 +849,7 @@ async def commit_csv_import(
     """Persist the user-confirmed transactions from a previous /preview-import.
     Body: {transactions: [...]}. Skips any row marked _duplicate=true.
     Returns {imported, skipped, import_id}."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     txs = (body or {}).get("transactions") or []
     if not isinstance(txs, list):
         raise HTTPException(status_code=400, detail="transactions must be an array")
@@ -902,7 +903,7 @@ async def list_categorization_rules(
     current_user: dict = Depends(require_roles(["Administrator"])),
 ):
     """List the org's learned categorization rules."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     rules = await db.categorization_rules.find(
         {"org_id": org_id}, {"_id": 0}
     ).sort("created_at", -1).to_list(500)
@@ -917,7 +918,7 @@ async def create_categorization_rule(
     """Save a "categorize anything matching X as Y" rule. Future imports
     apply it automatically before falling back to defaults.
     Body: {pattern, category, subcategory?, type?, recurring?, apply_to_existing?}."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     pattern = (body.get("pattern") or "").strip()
     category = (body.get("category") or "").strip()
     if not pattern or not category:
@@ -974,6 +975,6 @@ async def delete_categorization_rule(
     current_user: dict = Depends(require_roles(["Administrator"])),
 ):
     """Forget a learned rule. Existing transactions keep their current category."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     await db.categorization_rules.delete_one({"id": rule_id, "org_id": org_id})
     return {"success": True}

@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 from services.notifications import create_notification
 from routes.push import send_push_to_user
 
@@ -42,7 +43,7 @@ class MessageCreate(BaseModel):
 # ============== HELPERS ==============
 
 def get_org_id(user: dict) -> str:
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 
 def is_client(user: dict) -> bool:

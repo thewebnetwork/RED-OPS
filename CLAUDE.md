@@ -16,6 +16,16 @@
 
 ---
 
+## Tenancy Model: Single-Tenant-Per-User
+
+Every user is their own org: `org_id = user.id`, unconditionally.
+No `org_members` table, no `primary_org_id`, no multi-org switching.
+Decision logged in `docs/audits/AUDIT_2026-04-16.md` §4.2.1.
+
+Always use: `from utils.tenancy import resolve_org_id` — never inline the resolution.
+
+---
+
 ## Architecture Rules
 
 ### Backend Patterns
@@ -41,8 +51,9 @@ if current_user.get("role") not in ["Administrator", "Admin"]:
 # User ID — UUID string
 user_id = current_user["id"]
 
-# Org ID resolution — 3-level fallback (ALWAYS use this pattern)
-org_id = user.get("org_id") or user.get("team_id") or user.get("id")
+# Org ID resolution — single-tenant-per-user (ALWAYS use the shared helper)
+from utils.tenancy import resolve_org_id
+org_id = resolve_org_id(current_user)  # returns user["id"]
 
 # Role alias system in utils/auth.py
 # ROLE_ALIASES maps "Admin" → "Administrator", "Editor" → "Operator", etc.

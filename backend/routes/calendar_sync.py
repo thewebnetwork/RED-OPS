@@ -36,6 +36,7 @@ from pydantic import BaseModel
 
 from database import db
 from utils.auth import get_current_user, require_roles
+from utils.tenancy import resolve_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class TeamMemberConnections(BaseModel):
 # ============== HELPERS ==============
 
 def _org_id(user: dict) -> str:
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 
 def _provider_config(provider: str) -> dict:

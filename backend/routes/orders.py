@@ -13,6 +13,7 @@ from typing import Optional, List, Literal
 
 from database import db
 from utils.auth import get_current_user, require_roles
+from utils.tenancy import resolve_org_id
 from utils.helpers import (
     get_utc_now, get_utc_now_dt, calculate_sla_deadline, 
     is_sla_breached, normalize_order, get_next_code, create_notification
@@ -1266,7 +1267,7 @@ async def get_order(order_id: str, current_user: dict = Depends(get_current_user
         raise HTTPException(status_code=404, detail="Order not found")
 
     # Org isolation — user can only see orders from their own org
-    user_org = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    user_org = resolve_org_id(current_user)
     order_org = order.get("org_id")
     if order_org and user_org and order_org != user_org:
         raise HTTPException(status_code=404, detail="Order not found")

@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from database import db
 from utils.auth import get_current_user, require_roles
+from utils.tenancy import resolve_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ async def list_templates(
     current_user: dict = Depends(get_current_user)
 ):
     """List all project templates."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
 
     # Seed on first access
     await seed_rrm_template()
@@ -79,7 +80,7 @@ async def create_template(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Create a custom project template."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     doc = {
         "id": str(uuid.uuid4()),
         "org_id": org_id,
@@ -130,7 +131,7 @@ async def create_template_from_project(
     """Save an existing project as a reusable template. Copies the project's
     tasks (with their phases / checklists / assignee_roles) into a new
     template document. The project itself is not modified."""
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     project = await db.projects.find_one({"id": project_id, "org_id": org_id}, {"_id": 0})
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -211,7 +212,7 @@ async def apply_template(
     except (ValueError, TypeError):
         start_date = datetime.now(timezone.utc)
 
-    org_id = current_user.get("org_id") or current_user.get("team_id") or current_user.get("id")
+    org_id = resolve_org_id(current_user)
     now = datetime.now(timezone.utc)
 
     # Create the project

@@ -13,6 +13,7 @@ import uuid
 
 from database import db
 from utils.auth import get_current_user
+from utils.tenancy import resolve_org_id
 from models.task import (
     TaskCreate,
     TaskUpdate,
@@ -76,7 +77,7 @@ async def _upsert_task_reminder(
 
 def get_user_org_id(user: dict) -> str | None:
     """Get the effective org_id for a user, with fallback chain."""
-    return user.get("org_id") or user.get("team_id") or user.get("id")
+    return resolve_org_id(user)
 
 
 async def get_account_manager_id(user: dict) -> str | None:

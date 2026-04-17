@@ -36,10 +36,8 @@ USER_A = {
     "name": "Alice",
     "email": "alice@orgx.com",
     "role": "Administrator",
-    "org_id": "org-x",
+    "org_id": "user-aaa-111",
     "team_id": None,
-    "org_role": "owner",
-    "org_permissions": {},
 }
 
 USER_B = {
@@ -47,10 +45,8 @@ USER_B = {
     "name": "Bob",
     "email": "bob@orgy.com",
     "role": "Administrator",
-    "org_id": "org-y",
+    "org_id": "user-bbb-222",
     "team_id": None,
-    "org_role": "owner",
-    "org_permissions": {},
 }
 
 
@@ -62,7 +58,7 @@ DOC_ORG_X = {
     "parent_id": None,
     "icon": "📄",
     "tags": [],
-    "org_id": "org-x",
+    "org_id": "user-aaa-111",
     "created_by": "user-aaa-111",
     "created_by_name": "Alice",
     "created_at": "2026-04-16T00:00:00+00:00",
@@ -186,13 +182,13 @@ def _patch_db(col):
 
 # ── resolve_org_id sanity ──
 
-def test_resolve_org_id_primary():
-    assert _resolve_org_id({"org_id": "org-x", "team_id": "t1", "id": "u1"}) == "org-x"
+def test_resolve_org_id_always_returns_user_id():
+    assert _resolve_org_id({"org_id": "org-x", "team_id": "t1", "id": "u1"}) == "u1"
 
-def test_resolve_org_id_fallback_team():
-    assert _resolve_org_id({"org_id": None, "team_id": "t1", "id": "u1"}) == "t1"
+def test_resolve_org_id_ignores_team_id():
+    assert _resolve_org_id({"org_id": None, "team_id": "t1", "id": "u1"}) == "u1"
 
-def test_resolve_org_id_fallback_user():
+def test_resolve_org_id_minimal_user():
     assert _resolve_org_id({"org_id": None, "team_id": None, "id": "u1"}) == "u1"
 
 
@@ -323,4 +319,4 @@ async def test_create_stamps_org_id(client_user_a):
             assert resp.status_code == 200
             inserted = [d for d in col._store if d["title"] == "New Doc"]
             assert len(inserted) == 1
-            assert inserted[0]["org_id"] == "org-x"
+            assert inserted[0]["org_id"] == "user-aaa-111"
