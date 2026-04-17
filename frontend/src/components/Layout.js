@@ -56,6 +56,7 @@ const NAV_MAIN = [
   { path: '/ad-performance',icon: BarChart2,       label: 'Ad Performance', roles: ['Administrator','Operator'] },
   { path: '/finance',       icon: DollarSign,      label: 'Finance',        roles: ['Administrator'] },
   { path: '/support',       icon: LifeBuoy,        label: 'Support',        roles: ['Administrator','Operator'] },
+  { path: '/admin/client-portal', icon: Users, label: 'Client Portal',  roles: ['Administrator','Operator'] },
 ];
 const NAV_BUSINESS = [];
 const NAV_SERVICES = [];
