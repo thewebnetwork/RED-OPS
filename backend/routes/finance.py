@@ -273,12 +273,13 @@ async def get_financial_summary(
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Get financial summary — totals, by-category breakdown, monthly trend"""
+    org_id = resolve_org_id(current_user)
     now = datetime.now(timezone.utc)
     current_month = period or now.strftime("%Y-%m")
     year = current_month[:4]
 
     # Current month totals
-    month_query = {"date": {"$regex": f"^{current_month}"}}
+    month_query = {"org_id": org_id, "date": {"$regex": f"^{current_month}"}}
     month_txns = await db.finance_transactions.find(month_query, {"_id": 0}).to_list(5000)
 
     income_total = sum(t["amount"] for t in month_txns if t["type"] == "income")
@@ -292,7 +293,7 @@ async def get_financial_summary(
     categories = [{"type": k[0], "category": k[1], "total": v} for k, v in sorted(cat_map.items(), key=lambda x: -x[1])]
 
     # Year-to-date totals
-    ytd_query = {"date": {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}}
+    ytd_query = {"org_id": org_id, "date": {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}}
     ytd_txns = await db.finance_transactions.find(ytd_query, {"_id": 0, "type": 1, "amount": 1, "date": 1}).to_list(10000)
 
     ytd_income = sum(t["amount"] for t in ytd_txns if t["type"] == "income")
@@ -1113,3 +1114,98 @@ async def ai_categorize_uncategorized(
             updated += 1
 
     return {"updated": updated, "total_uncategorized": len(uncategorized)}
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# AI ADVISOR CHAT — Claude-powered financial advisor
+# ════════════════════════════════════════════════════════════════════════════
+
+class AdvisorChatRequest(BaseModel):
+    question: str
+    date_range_days: int = 90
+    conversation_history: Optional[list] = None
+
+
+ADVISOR_SYSTEM_PROMPT = """You are a CFO-level financial advisor for Vitto Pessanha and Red Ribbon Group, a digital agency serving Canadian real estate agents. You have direct access to their transaction history.
+
+You give direct, specific, data-driven answers. You speak plainly — no corporate hedge language, no bullet-point spam unless asked. Numbers always include the dollar sign and specific amounts. When you see a trend, you name it. When you see a problem, you flag it.
+
+You know:
+- The agency (Red Ribbon Media / RRM) charges $3,500 flat for 4-month service contracts
+- They serve Canadian real estate agents (10-30 deals/year)
+- Primary costs: Meta ad spend on behalf of clients, Anthropic API, GoHighLevel, Vercel, Railway, contractor editors and ISAs, owner compensation
+- The user may also ask about personal finances (Airbnb income, condo fees, personal spending)
+
+When answering:
+- Cite specific transactions when helpful ("Your biggest ad spend this month was $847 on March 14 to Meta Platforms")
+- Distinguish agency vs personal spend when the user's question is ambiguous
+- If data is insufficient to answer confidently, say so — don't make up numbers
+- Keep responses under 300 words unless a full breakdown is requested"""
+
+
+@router.post("/advisor/chat")
+async def advisor_chat(
+    body: AdvisorChatRequest,
+    current_user: dict = Depends(require_roles(["Administrator", "Operator"]))
+):
+    """Chat with AI financial advisor. Sends transaction context to Claude."""
+    from config import ANTHROPIC_API_KEY
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="Advisor temporarily unavailable — API key not configured.")
+
+    org_id = resolve_org_id(current_user)
+
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(days=body.date_range_days)
+    date_range = {"start": start_date.strftime("%Y-%m-%d"), "end": end_date.strftime("%Y-%m-%d")}
+
+    txs = await db.finance_transactions.find(
+        {"org_id": org_id, "date": {"$gte": date_range["start"], "$lte": date_range["end"]}},
+        {"_id": 0, "date": 1, "amount": 1, "type": 1, "description": 1, "category": 1, "vendor": 1}
+    ).sort("date", -1).to_list(500)
+
+    tx_lines = []
+    for t in txs:
+        sign = "" if t.get("type") == "income" else "-"
+        vendor = t.get("vendor") or t.get("description", "")
+        tx_lines.append(f"{t.get('date','')} | {sign}${t.get('amount',0):.2f} | {vendor} | {t.get('category','')}")
+
+    tx_block = "\n".join(tx_lines) if tx_lines else "(No transactions in this period)"
+
+    user_msg = f"""Date range: {date_range['start']} to {date_range['end']}
+Transaction count: {len(txs)}
+
+Transactions:
+{tx_block}
+
+---
+
+User question: {body.question}"""
+
+    messages = []
+    if body.conversation_history:
+        for turn in body.conversation_history[-10:]:
+            messages.append({"role": turn.get("role", "user"), "content": turn.get("content", "")})
+    messages.append({"role": "user", "content": user_msg})
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            temperature=0.3,
+            system=ADVISOR_SYSTEM_PROMPT,
+            messages=messages,
+        )
+        answer = response.content[0].text
+    except Exception as e:
+        import logging
+        logging.error(f"Advisor chat error: {e}")
+        raise HTTPException(status_code=503, detail="Advisor temporarily unavailable. Try again in a moment.")
+
+    return {
+        "response": answer,
+        "transactions_referenced": len(txs),
+        "date_range": date_range,
+    }

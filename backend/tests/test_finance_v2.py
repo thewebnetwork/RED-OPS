@@ -139,3 +139,69 @@ async def test_ai_categorize_fallback_on_api_error():
             result = await categorize_transactions(txs)
             assert len(result) == 1
             assert "ai_category" not in result[0]
+
+
+# ── Advisor chat endpoint ──
+
+from httpx import AsyncClient, ASGITransport
+from utils.auth import get_current_user
+
+ADMIN_USER = {"id": "admin-fin", "name": "Admin", "role": "Administrator", "org_id": "admin-fin", "email": "a@t.com"}
+NON_ADMIN = {"id": "user-fin", "name": "User", "role": "Standard User", "org_id": "user-fin", "email": "u@t.com"}
+
+def _auth(user):
+    async def _override():
+        return user
+    return _override
+
+
+@pytest.mark.asyncio
+async def test_advisor_requires_auth():
+    app.dependency_overrides[get_current_user] = _auth(NON_ADMIN)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post("/api/finance/advisor/chat", json={"question": "test"})
+        assert resp.status_code == 403
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_advisor_returns_503_on_no_key():
+    app.dependency_overrides[get_current_user] = _auth(ADMIN_USER)
+    with _patch("config.ANTHROPIC_API_KEY", None):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            mock_db = MagicMock()
+            mock_db.finance_transactions.find.return_value.sort.return_value.to_list = AsyncMock(return_value=[])
+            with _patch("routes.finance.db", mock_db):
+                resp = await ac.post("/api/finance/advisor/chat", json={"question": "test"})
+                assert resp.status_code == 503
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_advisor_returns_structured_response():
+    app.dependency_overrides[get_current_user] = _auth(ADMIN_USER)
+    import anthropic as _anthropic_mod
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text="Your biggest expense is Ad Spend at $2,400.")]
+    mock_client.messages.create.return_value = mock_response
+
+    mock_db = MagicMock()
+    mock_db.finance_transactions.find.return_value.sort.return_value.to_list = AsyncMock(return_value=[
+        {"date": "2026-04-01", "amount": 2400, "type": "expense", "description": "Meta Ads", "category": "Ad Spend"},
+    ])
+
+    with _patch("config.ANTHROPIC_API_KEY", "fake-key"):
+        with _patch.object(_anthropic_mod, "Anthropic", return_value=mock_client):
+            with _patch("routes.finance.db", mock_db):
+                transport = ASGITransport(app=app)
+                async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                    resp = await ac.post("/api/finance/advisor/chat", json={"question": "biggest expense?"})
+                    assert resp.status_code == 200
+                    data = resp.json()
+                    assert "response" in data
+                    assert data["transactions_referenced"] == 1
+                    assert "date_range" in data
+    app.dependency_overrides.pop(get_current_user, None)

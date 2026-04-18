@@ -10,12 +10,13 @@ import { toast } from 'sonner';
 import {
   DollarSign, TrendingUp, TrendingDown, Plus, Search, RefreshCw, Loader2,
   ArrowUpDown, Pencil, Trash2, X, Calendar, PiggyBank, Wallet,
-  ChevronLeft, ChevronRight, Download, Filter, Printer, Upload,
+  ChevronLeft, ChevronRight, Download, Filter, Printer, Upload, Sparkles,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import BulkActionBar from '../components/BulkActionBar';
+import FinanceAdvisorChat from '../components/finance/FinanceAdvisorChat';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const tok = () => localStorage.getItem('token');
@@ -224,6 +225,7 @@ export default function Finance() {
   const isAdmin = user?.role === 'Administrator' || user?.role === 'Admin';
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
+  const [showAdvisor, setShowAdvisor] = useState(false);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [totalTx, setTotalTx] = useState(0);
@@ -471,6 +473,10 @@ export default function Finance() {
           <button onClick={() => { setEditingTx(null); setDialogOpen(true); }}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', fontSize: 12, fontWeight: 700, borderRadius: 8, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer' }}>
             <Plus size={14} /> Add Transaction
+          </button>
+          <button onClick={() => setShowAdvisor(v => !v)} data-no-print
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', fontSize: 12, fontWeight: 700, borderRadius: 8, background: showAdvisor ? 'var(--accent)' : 'var(--bg-elevated)', color: showAdvisor ? '#fff' : 'var(--tx-2)', border: showAdvisor ? 'none' : '1px solid var(--border)', cursor: 'pointer' }}>
+            <Sparkles size={14} /> {showAdvisor ? 'Close Advisor' : 'Ask Advisor'}
           </button>
         </div>
       </div>
@@ -908,6 +914,7 @@ export default function Finance() {
         </div>,
         document.body
       )}
+      <FinanceAdvisorChat open={showAdvisor} onClose={() => setShowAdvisor(false)} />
     </div>
   );
 }
