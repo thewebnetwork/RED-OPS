@@ -49,7 +49,6 @@ from routes import (
     ad_performance_router,
     search_router,
     integrations_router,
-    ai_router,
     finance_router,
     onboarding_router,
     exports_router,
@@ -347,7 +346,6 @@ app.include_router(events_router, prefix="/api")  # Calendar events (internal + 
 app.include_router(sheets_router, prefix="/api")         # Basic spreadsheet CRUD
 app.include_router(search_router, prefix="/api")  # Global Search
 app.include_router(integrations_router, prefix="/api")  # Integration Management
-app.include_router(ai_router, prefix="/api")  # AI Features
 app.include_router(finance_router, prefix="/api")  # Finance Dashboard
 app.include_router(onboarding_router, prefix="/api")  # Client Onboarding Checklists
 app.include_router(exports_router, prefix="/api")  # CSV Exports

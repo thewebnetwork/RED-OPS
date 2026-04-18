@@ -29,7 +29,6 @@ from .ambassador import router as ambassador_router
 from .ad_performance import router as ad_performance_router
 from .search import router as search_router
 from .integrations import router as integrations_router
-from .ai import router as ai_router
 from .finance import router as finance_router
 from .onboarding import router as onboarding_router
 from .exports import router as exports_router
@@ -70,7 +69,6 @@ __all__ = [
     "ad_performance_router",
     "search_router",
     "integrations_router",
-    "ai_router",
     "finance_router",
     "onboarding_router",
     "exports_router",

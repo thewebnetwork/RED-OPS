@@ -370,7 +370,6 @@ export default function Drive() {
           // docs + synced external files only show at root for now
           currentFolderId ? null : ax().get(`${API}/documents`),
           ax().get(`${API}/sheets`, { params: sheetsParams }),
-          currentFolderId ? null : ax().get(`${API}/drive-sync/files`),
         ].filter(Boolean));
         setFolders(fdrRes.status === 'fulfilled' ? (fdrRes.value.data || []).map(f => ({ ...f, kind: 'folder' })) : []);
         setFiles(fRes.status === 'fulfilled' ? (fRes.value.data || []).map(f => ({ ...f, kind: 'file' })) : []);

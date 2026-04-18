@@ -67,15 +67,11 @@ const Finance = React.lazy(() => import("./pages/Finance"));
 const SOPs = React.lazy(() => import("./pages/SOPs"));
 const CRM = React.lazy(() => import("./pages/CRM"));
 const Ambassador = React.lazy(() => import("./pages/Ambassador"));
-const AIAssistant = React.lazy(() => import("./pages/AIAssistant"));
-const Files = React.lazy(() => import("./pages/Files"));
 const ClientPage = React.lazy(() => import("./pages/ClientPage"));
 const Team = React.lazy(() => import("./pages/Team"));
 const TeamMemberPage = React.lazy(() => import("./pages/TeamMemberPage"));
 const AdPerformance = React.lazy(() => import("./pages/AdPerformance"));
 const Onboarding = React.lazy(() => import("./pages/Onboarding"));
-const Documents = React.lazy(() => import("./pages/Documents"));
-const KnowledgeBase = React.lazy(() => import("./pages/KnowledgeBase"));
 const Drive = React.lazy(() => import("./pages/Drive"));
 const Calendar = React.lazy(() => import("./pages/Calendar"));
 const SheetEditor = React.lazy(() => import("./pages/SheetEditor"));
@@ -384,7 +380,6 @@ function AppRoutes() {
       <Route path="/finance" element={<PrivateRoute roles={['Administrator']}><Finance /></PrivateRoute>} />
       <Route path="/drive" element={<PrivateRoute><Drive /></PrivateRoute>} />
       <Route path="/knowledge-base" element={<Navigate to="/drive" replace />} />
-      <Route path="/knowledge-base/legacy" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
       <Route path="/sops" element={<Navigate to="/drive" replace />} />
       <Route path="/conversations" element={<PrivateRoute><Conversations /></PrivateRoute>} />
       <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
@@ -392,10 +387,9 @@ function AppRoutes() {
       <Route path="/client-onboarding" element={<PrivateRoute roles={['Administrator','Operator']}><Onboarding /></PrivateRoute>} />
       <Route path="/crm" element={<PrivateRoute roles={['Administrator','Operator']}><CRM /></PrivateRoute>} />
       <Route path="/ambassador" element={<PrivateRoute><Ambassador /></PrivateRoute>} />
-      <Route path="/ai" element={<PrivateRoute><AIAssistant /></PrivateRoute>} />
+      <Route path="/ai" element={<Navigate to="/admin/jarvis" replace />} />
       <Route path="/docs" element={<Navigate to="/drive" replace />} />
       <Route path="/files" element={<Navigate to="/drive" replace />} />
-      <Route path="/files/legacy" element={<PrivateRoute><Files /></PrivateRoute>} />
       <Route path="/team" element={<PrivateRoute roles={['Administrator','Operator']}><Team /></PrivateRoute>} />
       <Route path="/team/:id" element={<PrivateRoute roles={['Administrator','Operator']}><TeamMemberPage /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
