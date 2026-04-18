@@ -205,3 +205,123 @@ async def test_advisor_returns_structured_response():
                     assert data["transactions_referenced"] == 1
                     assert "date_range" in data
     app.dependency_overrides.pop(get_current_user, None)
+
+
+# ── AI-first CSV format detection + smart parser ──
+
+from services.csv_smart_parser import parse_with_format_spec
+
+BMO_SPEC = {
+    "format_name": "BMO Credit Card",
+    "skip_rows": 3,
+    "header_columns": ["First Bank Card", "Transaction Type", "Date Posted", "Transaction Amount", "Description"],
+    "date_column": "Date Posted",
+    "date_format": "YYYYMMDD",
+    "amount_column": "Transaction Amount",
+    "debit_column": None,
+    "credit_column": None,
+    "direction_column": None,
+    "direction_positive_value": None,
+    "description_column": "Description",
+    "strip_value_quotes": True,
+    "confidence": 0.95,
+}
+
+WISE_SPEC = {
+    "format_name": "Wise",
+    "skip_rows": 0,
+    "header_columns": ["TransferWise ID", "Date", "Amount", "Currency", "Description"],
+    "date_column": "Date",
+    "date_format": "YYYY-MM-DD",
+    "amount_column": "Amount",
+    "debit_column": None,
+    "credit_column": None,
+    "direction_column": None,
+    "direction_positive_value": None,
+    "description_column": "Description",
+    "strip_value_quotes": False,
+    "confidence": 0.92,
+}
+
+
+def test_smart_parser_bmo():
+    csv_text = (FIXTURES / "bmo_credit_card_sample.csv").read_text()
+    rows, errors = parse_with_format_spec(csv_text, BMO_SPEC)
+    assert len(rows) >= 3, f"Expected >=3 rows, got {len(rows)}"
+    coffee = next((r for r in rows if "COFFEE" in r["description"]), None)
+    assert coffee is not None
+    assert coffee["type"] == "expense"
+    assert coffee["amount"] == 50.0
+    payment = next((r for r in rows if "PAYMENT" in r["description"]), None)
+    assert payment is not None
+    assert payment["type"] == "income"
+    assert payment["amount"] == 500.0
+
+
+def test_smart_parser_wise():
+    csv_text = (FIXTURES / "wise_full_sample.csv").read_text()
+    rows, errors = parse_with_format_spec(csv_text, WISE_SPEC)
+    assert len(rows) >= 2, f"Expected >=2 rows, got {len(rows)}"
+    income_row = next((r for r in rows if r["type"] == "income"), None)
+    assert income_row is not None
+    assert income_row["amount"] == 100.0
+    expense_row = next((r for r in rows if "Meta" in r.get("description", "")), None)
+    assert expense_row is not None
+    assert expense_row["type"] == "expense"
+    assert expense_row["amount"] == 250.0
+
+
+@pytest.mark.asyncio
+async def test_ai_detect_bmo_format():
+    from services.csv_format_detector import detect_csv_format
+    import anthropic as _anthropic_mod
+    import json
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps(BMO_SPEC))]
+    mock_client.messages.create.return_value = mock_response
+    with _patch("config.ANTHROPIC_API_KEY", "fake-key"):
+        with _patch.object(_anthropic_mod, "Anthropic", return_value=mock_client):
+            spec = await detect_csv_format("fake csv", "bmo.csv")
+            assert spec["format_name"] == "BMO Credit Card"
+            assert spec["confidence"] == 0.95
+            assert spec["skip_rows"] == 3
+
+
+@pytest.mark.asyncio
+async def test_ai_detect_unknown_falls_back():
+    from services.csv_format_detector import detect_csv_format
+    import anthropic as _anthropic_mod
+    import json
+    mock_client = MagicMock()
+    low_conf = {"format_name": "Unknown", "confidence": 0.3}
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps(low_conf))]
+    mock_client.messages.create.return_value = mock_response
+    with _patch("config.ANTHROPIC_API_KEY", "fake-key"):
+        with _patch.object(_anthropic_mod, "Anthropic", return_value=mock_client):
+            spec = await detect_csv_format("bad csv", "unknown.csv")
+            assert spec["format_name"] == "Unknown"
+            assert spec["confidence"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_ai_detect_no_api_key():
+    from services.csv_format_detector import detect_csv_format
+    with _patch("config.ANTHROPIC_API_KEY", None):
+        spec = await detect_csv_format("any csv", "test.csv")
+        assert spec["format_name"] == "Unknown"
+        assert spec["confidence"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_ai_detect_api_failure():
+    from services.csv_format_detector import detect_csv_format
+    import anthropic as _anthropic_mod
+    mock_client = MagicMock()
+    mock_client.messages.create.side_effect = Exception("API down")
+    with _patch("config.ANTHROPIC_API_KEY", "fake-key"):
+        with _patch.object(_anthropic_mod, "Anthropic", return_value=mock_client):
+            spec = await detect_csv_format("csv text", "test.csv")
+            assert spec["format_name"] == "Unknown"
+            assert spec["confidence"] == 0.0
