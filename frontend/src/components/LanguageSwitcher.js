@@ -1,3 +1,4 @@
+import i18n from '../i18n/i18n';
 import { Globe } from 'lucide-react';
 import {
   DropdownMenu,
