@@ -1,3 +1,16 @@
+/**
+ * Requests.js — Admin Request Management (Kanban + List)
+ *
+ * Full CRUD for all orders/requests. Kanban board with drag-drop status
+ * transitions, assignee management, create new, close, cancel, reassign.
+ *
+ * NOT the same as Orders.js (operator queue table), MyRequests.js (client
+ * portal), or OrderDetail.js (single-request detail). All are role-based
+ * views of the same backend entity (orders.py).
+ *
+ * Route: /requests
+ * Roles: Administrator, Operator, Standard User
+ */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';

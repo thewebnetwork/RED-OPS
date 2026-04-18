@@ -1,3 +1,13 @@
+/**
+ * OrderDetail.js — Single Request Detail View
+ *
+ * Full detail page for a single order/request. Shared by both admin
+ * (Requests.js) and client (MyRequests.js) flows — admin sees full
+ * controls (reassign, close, status transitions), clients see read-only.
+ *
+ * Route: /requests/:orderId
+ * Roles: All authenticated (actions gated by role)
+ */
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
