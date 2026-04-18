@@ -28,7 +28,6 @@ import VerifyOTP from "./pages/VerifyOTP";
 
 // ── Lazy imports (code-split — loaded on demand) ──
 const RateSurvey = React.lazy(() => import("./pages/RateSurvey"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const ClientHome = React.lazy(() => import("./pages/ClientHome"));
 const Clients = React.lazy(() => import("./pages/Clients"));
 const ServiceCatalog = React.lazy(() => import("./pages/ServiceCatalog"));
@@ -62,7 +61,6 @@ const DocumentationPage = React.lazy(() => import("./pages/DocumentationPage"));
 const TranslationEditorPage = React.lazy(() => import("./pages/TranslationEditorPage"));
 const DashboardBuilder = React.lazy(() => import("./pages/DashboardBuilder"));
 const TaskBoard = React.lazy(() => import("./pages/TaskBoard"));
-const Tasks = React.lazy(() => import("./pages/Tasks"));
 const Projects = React.lazy(() => import("./pages/Projects"));
 const ProjectPage = React.lazy(() => import("./pages/ProjectPage"));
 const Finance = React.lazy(() => import("./pages/Finance"));
@@ -425,17 +423,6 @@ function AppRoutes() {
           </PrivateRoute>
         } 
       />
-      {/* MVP: Pool routing disabled - routes commented out */}
-      {/* Pool - Available requests to pick */}
-      {/* <Route 
-        path="/pool" 
-        element={
-          <PrivateRoute>
-            <RibbonBoard />
-          </PrivateRoute>
-        } 
-      /> */}
-      
       {/* All Requests - Internal staff and admin only */}
       <Route 
         path="/all-requests" 
