@@ -861,10 +861,9 @@ async def preview_csv_import(
     file: UploadFile = File(...),
     current_user: dict = Depends(require_roles(["Administrator"])),
 ):
-    """Parse a CSV (bank or Wise) and return a preview WITHOUT saving.
-    Auto-detects format, runs auto-categorization, flags duplicates against
-    existing finance_transactions in the org. The frontend renders a table
-    of parsed rows + warnings; user clicks Confirm to call /commit-import."""
+    """Parse a CSV and return a preview WITHOUT saving.
+    AI-first format detection with regex fallback. Runs auto-categorization,
+    flags duplicates against existing finance_transactions in the org."""
     org_id = resolve_org_id(current_user)
     raw = await file.read()
     try:
@@ -872,28 +871,53 @@ async def preview_csv_import(
     except UnicodeDecodeError:
         text = raw.decode("latin-1", errors="replace")
 
-    reader = _csv.reader(_io.StringIO(text))
-    rows = list(reader)
-    if len(rows) < 2:
-        raise HTTPException(status_code=400, detail="CSV must have a header row and at least one data row")
+    fallback_used = False
+    ai_spec = None
 
-    headers = rows[0]
-    fmt = _detect_format(headers)
-    if fmt == "unknown":
-        raise HTTPException(status_code=400, detail="Could not detect CSV format. Supported: Wise, Stripe, Meta Ads, credit card, or bank statement with date/amount/description columns.")
+    # AI-first format detection
+    try:
+        from services.csv_format_detector import detect_csv_format
+        from services.csv_smart_parser import parse_with_format_spec
+        ai_spec = await detect_csv_format(text, file.filename or "upload.csv")
+    except Exception as e:
+        import logging
+        logging.error("AI format detection import/call error: %s", e)
 
-    parser = FORMAT_PARSERS.get(fmt, _row_to_tx_bank)
-    raw_dicts = [dict(zip(headers, r)) for r in rows[1:] if any(c.strip() for c in r)]
+    if ai_spec and ai_spec.get("confidence", 0) >= 0.5:
+        parsed, errors = parse_with_format_spec(text, ai_spec)
+        fmt = ai_spec.get("format_name", "ai_detected")
+        for tx in parsed:
+            signed = tx["amount"] if tx["type"] == "income" else -tx["amount"]
+            cat = await auto_categorize(tx["description"], signed, org_id)
+            tx["category"] = cat["category"]
+            tx["subcategory"] = cat.get("subcategory")
+            tx["recurring"] = cat["recurring"]
+            if cat.get("type"):
+                tx["type"] = cat["type"]
+    else:
+        # Fallback to regex-based detection
+        fallback_used = True
+        reader = _csv.reader(_io.StringIO(text))
+        rows = list(reader)
+        if len(rows) < 2:
+            raise HTTPException(status_code=400, detail="CSV must have a header row and at least one data row")
 
-    parsed, errors = [], []
-    for i, row in enumerate(raw_dicts, start=2):
-        tx = parser(row)
-        if not tx:
-            errors.append({"row": i, "reason": "Could not parse — missing date or amount"})
-            continue
-        # Auto-categorize
-        signed = tx["amount"] if tx["type"] == "income" else -tx["amount"]
-        cat = await auto_categorize(tx["description"], signed, org_id)
+        headers = rows[0]
+        fmt = _detect_format(headers)
+        if fmt == "unknown":
+            raise HTTPException(status_code=400, detail="Could not detect CSV format. Try a different export or contact support.")
+
+        parser = FORMAT_PARSERS.get(fmt, _row_to_tx_bank)
+        raw_dicts = [dict(zip(headers, r)) for r in rows[1:] if any(c.strip() for c in r)]
+
+        parsed, errors = [], []
+        for i, row in enumerate(raw_dicts, start=2):
+            tx = parser(row)
+            if not tx:
+                errors.append({"row": i, "reason": "Could not parse — missing date or amount"})
+                continue
+            signed = tx["amount"] if tx["type"] == "income" else -tx["amount"]
+            cat = await auto_categorize(tx["description"], signed, org_id)
         tx["category"] = cat["category"]
         tx["subcategory"] = cat.get("subcategory")
         tx["recurring"] = cat["recurring"]
@@ -925,13 +949,17 @@ async def preview_csv_import(
         if is_dup:
             duplicate_count += 1
 
-    return {
+    result = {
         "format": fmt,
-        "total_rows": len(raw_dicts),
+        "total_rows": len(parsed) + len(errors),
         "parsed": parsed,
         "errors": errors,
         "duplicate_count": duplicate_count,
+        "fallback_used": fallback_used,
     }
+    if ai_spec and ai_spec.get("confidence", 0) >= 0.5:
+        result["ai_confidence"] = ai_spec.get("confidence")
+    return result
 
 
 @router.post("/transactions/commit-import")
