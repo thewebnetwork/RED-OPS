@@ -1,3 +1,14 @@
+/**
+ * Orders.js — Operator Queue View
+ *
+ * Simple table view of orders for operators monitoring their queue.
+ * NOT the same as Requests.js (admin kanban with full CRUD) or
+ * MyRequests.js (client portal view). All three are role-based views
+ * of the same backend entity (orders.py).
+ *
+ * Routes: /queue, /all-requests
+ * Roles: Administrator, Operator (via ModeRoute gate)
+ */
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';

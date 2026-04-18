@@ -1,3 +1,11 @@
+/**
+ * DeletedTickets.js — Soft-Deleted Orders Recovery
+ *
+ * Administrator-only page for viewing and restoring soft-deleted orders.
+ *
+ * Route: /deleted-tickets
+ * Roles: Administrator only
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
