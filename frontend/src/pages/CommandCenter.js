@@ -1,3 +1,15 @@
+/**
+ * CommandCenter.js — Administrator Home Dashboard
+ *
+ * Full agency visibility: KPIs, today's tasks, team overview, activity feed,
+ * financial snapshot. Shown to Administrator role on / route via HomeRoute.
+ *
+ * NOT the same as OperatorDashboard (ops-focused, tasks + projects only)
+ * or StandardDashboard (personal work + messages). Each is a role-appropriate
+ * view, not a duplicate.
+ *
+ * API: /tasks, /users, /dashboard/activity, /dashboard/financial-stats
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';

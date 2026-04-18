@@ -151,7 +151,8 @@ async def get_quick_stats(current_user: dict = Depends(get_current_user)):
     if user_role == "Admin":
         stats["total_users"] = await db.users.count_documents({"active": True})
         stats["total_orders"] = await db.orders.count_documents({})
-        stats["total_workflows"] = await db.workflows.count_documents({"active": True})
+        # workflows engine archived (Sprint 1) — no writers, collection orphaned
+        stats["total_workflows"] = 0
         
         # Active announcements
         ann = await db.announcement_settings.find_one({"is_active": True}, {"_id": 0})
