@@ -27,6 +27,10 @@ if not ANTHROPIC_API_KEY:
     import logging as _logging
     _logging.getLogger(__name__).warning("ANTHROPIC_API_KEY not set — AI categorization will fall back to regex")
 
+# Jarvis access control
+MATT_EMAIL = os.environ.get('MATT_EMAIL', '')
+JARVIS_OPERATOR_EMAILS = [e.strip().lower() for e in os.environ.get('JARVIS_OPERATOR_EMAILS', '').split(',') if e.strip()]
+
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]
 ORDER_STATUSES = ["Draft", "Open", "In Progress", "Pending", "Delivered", "Closed", "Canceled"]
