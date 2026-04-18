@@ -42,7 +42,6 @@ from routes import (
     sla_policies_router,
     tasks_router,
     service_templates_router,
-    organizations_router,
     projects_router,
     knowledge_base_router,
     crm_router,
@@ -69,8 +68,6 @@ from routes.dashboard_v2 import router as dashboard_v2_router
 from routes.dashboard_builder import router as dashboard_builder_router
 from routes.files import router as files_router
 from routes.events import router as events_router
-from routes.calendar_sync import router as calendar_sync_router
-from routes.drive_sync import router as drive_sync_router
 from routes.sheets import router as sheets_router
 
 # Import SLA monitor service
@@ -340,7 +337,6 @@ app.include_router(dashboard_v2_router, prefix="/api")
 app.include_router(dashboard_builder_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")  # MVP Task Board
 app.include_router(service_templates_router, prefix="/api")  # Service Templates
-app.include_router(organizations_router, prefix="/api")  # Multi-tenant Organizations
 app.include_router(projects_router, prefix="/api")  # Projects (Phase 1)
 app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base / SOPs (Phase 2)
 app.include_router(crm_router, prefix="/api")  # CRM / Pipeline (Phase 3)
@@ -348,8 +344,6 @@ app.include_router(ambassador_router, prefix="/api")  # Ambassador + Marketplace
 app.include_router(files_router, prefix="/api")  # Universal File Management
 app.include_router(ad_performance_router, prefix="/api")  # Ad Performance Tracking (Hyros Lite)
 app.include_router(events_router, prefix="/api")  # Calendar events (internal + future external sync)
-app.include_router(calendar_sync_router, prefix="/api")  # Per-user Google/Outlook OAuth + sync
-app.include_router(drive_sync_router, prefix="/api")     # Per-user Google Drive OAuth + file sync
 app.include_router(sheets_router, prefix="/api")         # Basic spreadsheet CRUD
 app.include_router(search_router, prefix="/api")  # Global Search
 app.include_router(integrations_router, prefix="/api")  # Integration Management
