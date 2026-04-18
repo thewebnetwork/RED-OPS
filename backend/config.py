@@ -21,6 +21,12 @@ SLA_WARNING_HOURS = 24  # Hours before SLA breach to trigger warning
 # Frontend URL
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://redops.redribbongroup.ca')
 
+# AI (Anthropic Claude)
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+if not ANTHROPIC_API_KEY:
+    import logging as _logging
+    _logging.getLogger(__name__).warning("ANTHROPIC_API_KEY not set — AI categorization will fall back to regex")
+
 # Enums
 SYSTEM_ROLES = ["Admin", "Requester"]
 ORDER_STATUSES = ["Draft", "Open", "In Progress", "Pending", "Delivered", "Closed", "Canceled"]

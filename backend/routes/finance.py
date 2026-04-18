@@ -626,6 +626,9 @@ from datetime import datetime as _dt
 
 WISE_REQUIRED_COLS = {"id", "direction", "source amount"}
 BANK_HINT_COLS = {"card number", "transaction type"}
+STRIPE_HINT_COLS = {"created (utc)", "amount", "fee", "net"}
+META_ADS_HINT_COLS = {"campaign name", "amount spent"}
+CREDIT_CARD_HINT_COLS = {"transaction date", "posting date"}
 
 
 def _normalize_header(s: str) -> str:
@@ -636,10 +639,15 @@ def _detect_format(headers: list[str]) -> str:
     h = {_normalize_header(c) for c in headers}
     if WISE_REQUIRED_COLS.issubset(h):
         return "wise"
+    if STRIPE_HINT_COLS.issubset(h):
+        return "stripe"
+    if META_ADS_HINT_COLS.issubset(h):
+        return "meta_ads"
+    if CREDIT_CARD_HINT_COLS.issubset(h):
+        return "credit_card"
     if BANK_HINT_COLS & h:
         return "bank"
-    # Generic fallback: needs at least date + amount + description
-    if {"date", "amount"}.issubset(h) and ("description" in h or "memo" in h):
+    if {"date", "amount"}.issubset(h) and ("description" in h or "memo" in h or "payee" in h or "merchant" in h):
         return "bank"
     return "unknown"
 
@@ -763,6 +771,90 @@ def _row_to_tx_bank(row: dict) -> Optional[dict]:
     }
 
 
+def _row_to_tx_stripe(row: dict) -> Optional[dict]:
+    """Map a Stripe payments export CSV row."""
+    norm = {_normalize_header(k): v for k, v in row.items()}
+    amt = _parse_amount(norm.get("amount") or norm.get("net"))
+    date = _parse_date(norm.get("created (utc)") or norm.get("created") or "")
+    desc = (norm.get("description") or norm.get("customer email") or norm.get("customer description") or "").strip()
+
+    if amt is None or not date:
+        return None
+
+    return {
+        "type": "income" if amt >= 0 else "expense",
+        "amount": abs(amt),
+        "original_amount": abs(amt),
+        "original_currency": (norm.get("currency") or "CAD").upper(),
+        "exchange_rate": 1.0,
+        "cad_amount": abs(amt),
+        "description": desc or "Stripe payment",
+        "date": date,
+        "account": "stripe",
+        "external_id": (norm.get("id") or norm.get("payment_intent_id") or "").strip() or None,
+        "source": "stripe_import",
+    }
+
+
+def _row_to_tx_meta_ads(row: dict) -> Optional[dict]:
+    """Map a Meta Ads Manager export CSV row."""
+    norm = {_normalize_header(k): v for k, v in row.items()}
+    amt = _parse_amount(norm.get("amount spent") or norm.get("amount_spent") or norm.get("spend"))
+    date = _parse_date(norm.get("day") or norm.get("date") or norm.get("reporting starts") or "")
+    campaign = (norm.get("campaign name") or norm.get("campaign") or "Meta Ad").strip()
+
+    if amt is None or not date:
+        return None
+
+    return {
+        "type": "expense",
+        "amount": abs(amt),
+        "original_amount": abs(amt),
+        "original_currency": "CAD",
+        "exchange_rate": 1.0,
+        "cad_amount": abs(amt),
+        "description": f"Meta Ads: {campaign}",
+        "date": date,
+        "account": "meta_ads",
+        "external_id": None,
+        "source": "meta_ads_import",
+    }
+
+
+def _row_to_tx_credit_card(row: dict) -> Optional[dict]:
+    """Map a credit card statement CSV row."""
+    norm = {_normalize_header(k): v for k, v in row.items()}
+    amt = _parse_amount(norm.get("amount"))
+    date = _parse_date(norm.get("transaction date") or norm.get("posting date") or "")
+    desc = (norm.get("description") or norm.get("merchant") or norm.get("name") or "").strip()
+
+    if amt is None or not date:
+        return None
+
+    return {
+        "type": "expense" if amt > 0 else "income",
+        "amount": abs(amt),
+        "original_amount": abs(amt),
+        "original_currency": "CAD",
+        "exchange_rate": 1.0,
+        "cad_amount": abs(amt),
+        "description": desc or "(no description)",
+        "date": date,
+        "account": "credit_card",
+        "external_id": None,
+        "source": "credit_card_import",
+    }
+
+
+FORMAT_PARSERS = {
+    "wise": _row_to_tx_wise,
+    "bank": _row_to_tx_bank,
+    "stripe": _row_to_tx_stripe,
+    "meta_ads": _row_to_tx_meta_ads,
+    "credit_card": _row_to_tx_credit_card,
+}
+
+
 @router.post("/transactions/preview-import")
 async def preview_csv_import(
     file: UploadFile = File(...),
@@ -787,9 +879,9 @@ async def preview_csv_import(
     headers = rows[0]
     fmt = _detect_format(headers)
     if fmt == "unknown":
-        raise HTTPException(status_code=400, detail="Could not detect format. Expected a Wise transfers export or a bank statement with date/amount/description columns.")
+        raise HTTPException(status_code=400, detail="Could not detect CSV format. Supported: Wise, Stripe, Meta Ads, credit card, or bank statement with date/amount/description columns.")
 
-    parser = _row_to_tx_wise if fmt == "wise" else _row_to_tx_bank
+    parser = FORMAT_PARSERS.get(fmt, _row_to_tx_bank)
     raw_dicts = [dict(zip(headers, r)) for r in rows[1:] if any(c.strip() for c in r)]
 
     parsed, errors = [], []
@@ -978,3 +1070,46 @@ async def delete_categorization_rule(
     org_id = resolve_org_id(current_user)
     await db.categorization_rules.delete_one({"id": rule_id, "org_id": org_id})
     return {"success": True}
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# AI CATEGORIZATION — Claude-powered enhancement over regex rules
+# ════════════════════════════════════════════════════════════════════════════
+
+@router.post("/ai-categorize")
+async def ai_categorize_uncategorized(
+    current_user: dict = Depends(require_roles(["Administrator"])),
+):
+    """Run AI categorization on all Uncategorized transactions for this org.
+    Updates transactions in-place. Returns count of updated records."""
+    from services.finance_ai import categorize_transactions
+    org_id = resolve_org_id(current_user)
+
+    uncategorized = await db.finance_transactions.find(
+        {"org_id": org_id, "category": "Uncategorized"},
+        {"_id": 0}
+    ).to_list(500)
+
+    if not uncategorized:
+        return {"updated": 0, "message": "No uncategorized transactions found"}
+
+    results = await categorize_transactions(uncategorized)
+
+    updated = 0
+    now = get_utc_now()
+    for tx in results:
+        ai_cat = tx.get("ai_category")
+        if ai_cat and ai_cat != "Uncategorized":
+            await db.finance_transactions.update_one(
+                {"id": tx["id"], "org_id": org_id},
+                {"$set": {
+                    "category": ai_cat,
+                    "subcategory": tx.get("ai_subcategory"),
+                    "ai_confidence": tx.get("ai_confidence", 0.0),
+                    "ai_vendor": tx.get("ai_vendor"),
+                    "updated_at": now,
+                }}
+            )
+            updated += 1
+
+    return {"updated": updated, "total_uncategorized": len(uncategorized)}

@@ -1,0 +1,3 @@
+id,Created (UTC),Amount,Fee,Net,Currency,Description,Customer Email
+ch_1A2B3C,2026-04-01 12:00:00,500.00,14.80,485.20,cad,Monthly subscription,client@example.com
+ch_4D5E6F,2026-04-02 09:30:00,1200.00,35.10,1164.90,cad,Project payment,vip@realty.ca
