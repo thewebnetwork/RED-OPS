@@ -40,6 +40,7 @@ from .support import router as support_router
 from .project_templates import router as project_templates_router
 from .push import router as push_router
 from .client_portal import router as client_portal_router
+from .jarvis import router as jarvis_router
 
 __all__ = [
     "auth_router",
@@ -81,4 +82,5 @@ __all__ = [
     "project_templates_router",
     "push_router",
     "client_portal_router",
+    "jarvis_router",
 ]

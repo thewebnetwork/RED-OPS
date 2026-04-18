@@ -88,6 +88,7 @@ const Support = React.lazy(() => import("./pages/Support"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const ClientPortalAdmin = React.lazy(() => import("./pages/ClientPortalAdmin"));
 const ClientPortal = React.lazy(() => import("./pages/ClientPortal"));
+const AdminJarvis = React.lazy(() => import("./pages/AdminJarvis"));
 
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -491,6 +492,14 @@ function AppRoutes() {
       {/* ========== ADMIN STUDIO ROUTES ========== */}
       {/* Admin redirect */}
       <Route path="/admin" element={<Navigate to="/" replace />} />
+      <Route
+        path="/admin/jarvis"
+        element={
+          <PrivateRoute roles={["Administrator", "Operator"]}>
+            <AdminJarvis />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/admin/client-portal"
         element={

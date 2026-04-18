@@ -57,6 +57,7 @@ const NAV_MAIN = [
   { path: '/finance',       icon: DollarSign,      label: 'Finance',        roles: ['Administrator'] },
   { path: '/support',       icon: LifeBuoy,        label: 'Support',        roles: ['Administrator','Operator'] },
   { path: '/admin/client-portal', icon: Users, label: 'Client Portal',  roles: ['Administrator','Operator'] },
+  { path: '/admin/jarvis',  icon: Sparkles,        label: 'Jarvis',         roles: ['Administrator','Operator'] },
 ];
 const NAV_BUSINESS = [];
 const NAV_SERVICES = [];
