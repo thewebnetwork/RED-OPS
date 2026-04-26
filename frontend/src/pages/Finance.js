@@ -226,6 +226,7 @@ export default function Finance() {
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
   const [showAdvisor, setShowAdvisor] = useState(false);
+  const [finScope, setFinScope] = useState('all');
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [totalTx, setTotalTx] = useState(0);
@@ -282,9 +283,10 @@ export default function Finance() {
     try {
       const range = getDateRange();
       const summaryPeriod = rangeMode === 'month' ? period : `${rangeYear}-01`;
+      const scopeParam = finScope !== 'all' ? finScope : undefined;
       const [sumRes, txRes, catRes, usersRes] = await Promise.allSettled([
-        ax().get(`${API}/finance/summary`, { params: { period: summaryPeriod } }),
-        ax().get(`${API}/finance/transactions`, { params: range }),
+        ax().get(`${API}/finance/summary`, { params: { period: summaryPeriod, scope: scopeParam } }),
+        ax().get(`${API}/finance/transactions`, { params: { ...range, scope: scopeParam } }),
         ax().get(`${API}/finance/categories`),
         ax().get(`${API}/users`),
       ]);
@@ -301,7 +303,7 @@ export default function Finance() {
       }
     } catch { toast.error('Failed to load financial data'); }
     finally { setLoading(false); }
-  }, [period, rangeMode, rangeYear, getDateRange]);
+  }, [period, rangeMode, rangeYear, getDateRange, finScope]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -418,6 +420,17 @@ export default function Finance() {
           <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--tx-3)' }}>Track income, expenses, and profitability</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Scope Toggle */}
+          <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            {['all', 'agency', 'personal'].map(s => (
+              <button key={s} onClick={() => setFinScope(s)} style={{
+                padding: '5px 10px', fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+                background: finScope === s ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: finScope === s ? '#fff' : 'var(--tx-3)',
+                textTransform: 'capitalize',
+              }}>{s === 'all' ? 'All' : s}</button>
+            ))}
+          </div>
           {/* Range Mode Selector */}
           <div style={{ display: 'flex', borderRadius: 7, border: '1px solid var(--border)', overflow: 'hidden' }}>
             {[

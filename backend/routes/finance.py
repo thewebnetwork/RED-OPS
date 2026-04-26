@@ -184,6 +184,7 @@ async def list_transactions(
     client_id: Optional[str] = Query(None),
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),
+    scope: Optional[str] = Query(None, description="personal|agency|all"),
     limit: int = Query(200, le=1000),
     skip: int = Query(0),
     current_user: dict = Depends(require_roles(["Administrator"]))
@@ -205,6 +206,13 @@ async def list_transactions(
         if date_to:
             date_q["$lte"] = date_to
         query["date"] = date_q
+    if scope and scope != "all":
+        scope_cats = await db.finance_categories.find(
+            {"org_id": org_id, "scope": {"$in": [scope, "both"]}}, {"_id": 0, "name": 1}
+        ).to_list(500)
+        cat_names = [c["name"] for c in scope_cats]
+        if cat_names:
+            query["category"] = {"$in": cat_names}
 
     total = await db.finance_transactions.count_documents(query)
     items = await db.finance_transactions.find(query, {"_id": 0}).sort("date", -1).skip(skip).limit(limit).to_list(limit)
@@ -270,6 +278,7 @@ async def delete_transaction(
 @router.get("/summary")
 async def get_financial_summary(
     period: Optional[str] = Query(None, description="YYYY-MM filter"),
+    scope: Optional[str] = Query(None, description="personal|agency|all"),
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Get financial summary — totals, by-category breakdown, monthly trend"""
@@ -278,8 +287,18 @@ async def get_financial_summary(
     current_month = period or now.strftime("%Y-%m")
     year = current_month[:4]
 
+    # Scope filter: resolve category names matching the requested scope
+    _scope_cat_names = None
+    if scope and scope != "all":
+        scope_cats = await db.finance_categories.find(
+            {"org_id": org_id, "scope": {"$in": [scope, "both"]}}, {"_id": 0, "name": 1}
+        ).to_list(500)
+        _scope_cat_names = [c["name"] for c in scope_cats]
+
     # Current month totals
     month_query = {"org_id": org_id, "date": {"$regex": f"^{current_month}"}}
+    if _scope_cat_names is not None:
+        month_query["category"] = {"$in": _scope_cat_names}
     month_txns = await db.finance_transactions.find(month_query, {"_id": 0}).to_list(5000)
 
     income_total = sum(t["amount"] for t in month_txns if t["type"] == "income")
@@ -294,6 +313,8 @@ async def get_financial_summary(
 
     # Year-to-date totals
     ytd_query = {"org_id": org_id, "date": {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}}
+    if _scope_cat_names is not None:
+        ytd_query["category"] = {"$in": _scope_cat_names}
     ytd_txns = await db.finance_transactions.find(ytd_query, {"_id": 0, "type": 1, "amount": 1, "date": 1}).to_list(10000)
 
     ytd_income = sum(t["amount"] for t in ytd_txns if t["type"] == "income")
@@ -452,14 +473,21 @@ async def get_finance_dashboard(
 # ── Categories Endpoint ──────────────────────────────────────────────────────
 
 DEFAULT_FINANCE_CATEGORIES = [
-    {"name": "Ad Spend", "type": "expense", "color": "#ef4444"},
-    {"name": "Software & Tools", "type": "expense", "color": "#f97316"},
-    {"name": "Salary", "type": "expense", "color": "#eab308"},
-    {"name": "Freelancer", "type": "expense", "color": "#a855f7"},
-    {"name": "Revenue", "type": "income", "color": "#22c55e"},
-    {"name": "Retainer", "type": "income", "color": "#10b981"},
-    {"name": "Refund", "type": "income", "color": "#06b6d4"},
-    {"name": "Other", "type": "both", "color": "#6b7280"},
+    {"name": "Ad Spend", "type": "expense", "color": "#ef4444", "scope": "agency"},
+    {"name": "Software & Tools", "type": "expense", "color": "#f97316", "scope": "agency"},
+    {"name": "Salary", "type": "expense", "color": "#eab308", "scope": "agency"},
+    {"name": "Freelancer", "type": "expense", "color": "#a855f7", "scope": "agency"},
+    {"name": "Revenue", "type": "income", "color": "#22c55e", "scope": "agency"},
+    {"name": "Retainer", "type": "income", "color": "#10b981", "scope": "agency"},
+    {"name": "Refund", "type": "income", "color": "#06b6d4", "scope": "both"},
+    {"name": "Other", "type": "both", "color": "#6b7280", "scope": "both"},
+    {"name": "Food & Dining", "type": "expense", "color": "#f97316", "scope": "personal"},
+    {"name": "Rent & Housing", "type": "expense", "color": "#64748b", "scope": "personal"},
+    {"name": "Transportation", "type": "expense", "color": "#8b5cf6", "scope": "personal"},
+    {"name": "Shopping", "type": "expense", "color": "#ec4899", "scope": "personal"},
+    {"name": "Travel", "type": "expense", "color": "#14b8a6", "scope": "both"},
+    {"name": "Bank Fee", "type": "expense", "color": "#94a3b8", "scope": "both"},
+    {"name": "Transfer", "type": "expense", "color": "#475569", "scope": "both"},
 ]
 
 
@@ -467,10 +495,12 @@ class FinanceCategoryCreate(BaseModel):
     name: str
     type: str = "expense"  # income | expense | both
     color: Optional[str] = "#6366f1"
+    scope: str = "both"  # personal | agency | both
 
 
 class FinanceCategoryUpdate(BaseModel):
     name: Optional[str] = None
+    scope: Optional[str] = None
     type: Optional[str] = None
     color: Optional[str] = None
 
@@ -556,6 +586,7 @@ async def get_finance_categories(
                 "name": d["name"],
                 "type": d["type"],
                 "color": d["color"],
+                "scope": d.get("scope", "both"),
             })
         await db.finance_categories.insert_many(docs)
 

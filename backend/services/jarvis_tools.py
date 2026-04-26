@@ -21,16 +21,18 @@ TOOLS = [
                 "search_term": {"type": "string", "description": "Text search in description"},
                 "amount_min": {"type": "number"},
                 "amount_max": {"type": "number"},
+                "scope": {"type": "string", "description": "personal|agency|all — filter by category scope", "default": "all"},
                 "limit": {"type": "integer", "default": 100}
             }
         }
     },
     {
         "name": "query_finance_summary",
-        "description": "Get aggregate financial summary: income, expenses, net, category breakdown for a time period.",
+        "description": "Get aggregate financial summary: income, expenses, net, category breakdown for a time period. Use scope to filter personal vs agency expenses.",
         "input_schema": {
             "type": "object",
             "properties": {
+                "scope": {"type": "string", "description": "personal|agency|all", "default": "all"},
                 "period": {"type": "string", "enum": ["this_month", "last_month", "this_quarter", "ytd", "custom"]},
                 "date_from": {"type": "string"},
                 "date_to": {"type": "string"}
@@ -145,6 +147,13 @@ async def _query_finance(org_id: str, inp: dict) -> str:
         if inp.get("amount_min") is not None: aq["$gte"] = inp["amount_min"]
         if inp.get("amount_max") is not None: aq["$lte"] = inp["amount_max"]
         query["amount"] = aq
+    scope = inp.get("scope")
+    if scope and scope != "all":
+        scope_cats = await db.finance_categories.find(
+            {"org_id": org_id, "scope": {"$in": [scope, "both"]}}, {"_id": 0, "name": 1}
+        ).to_list(500)
+        if scope_cats:
+            query["category"] = {"$in": [c["name"] for c in scope_cats]}
     limit = min(inp.get("limit", 100), 500)
     txs = await db.finance_transactions.find(
         query, {"_id": 0, "id": 1, "date": 1, "amount": 1, "type": 1, "description": 1, "category": 1}
@@ -169,8 +178,16 @@ async def _query_summary(org_id: str, inp: dict) -> str:
     else:
         start = inp.get("date_from", f"{now.year}-01-01")
         end = inp.get("date_to", now.strftime("%Y-%m-%d"))
+    fin_query = {"org_id": org_id, "date": {"$gte": start, "$lte": end}}
+    scope = inp.get("scope")
+    if scope and scope != "all":
+        scope_cats = await db.finance_categories.find(
+            {"org_id": org_id, "scope": {"$in": [scope, "both"]}}, {"_id": 0, "name": 1}
+        ).to_list(500)
+        if scope_cats:
+            fin_query["category"] = {"$in": [c["name"] for c in scope_cats]}
     txs = await db.finance_transactions.find(
-        {"org_id": org_id, "date": {"$gte": start, "$lte": end}}, {"_id": 0, "type": 1, "amount": 1, "category": 1}
+        fin_query, {"_id": 0, "type": 1, "amount": 1, "category": 1}
     ).to_list(10000)
     inc = sum(t["amount"] for t in txs if t.get("type") == "income")
     exp = sum(t["amount"] for t in txs if t.get("type") == "expense")
