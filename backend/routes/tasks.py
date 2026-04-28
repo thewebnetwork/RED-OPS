@@ -263,8 +263,12 @@ async def list_assignable_users(
     result = []
 
     if current_user.get("role") == "Administrator":
+        # Single-tenant-per-user (CLAUDE.md): no cross-user team scoping. Legacy
+        # team_id filter never matches because org_id resolves to the admin's
+        # own user.id while users carry stale team_id values from the
+        # multi-tenant era.
         users = await db.users.find(
-            {"team_id": user_org_id, "active": {"$ne": False}},
+            {"active": {"$ne": False}},
             {"_id": 0, "id": 1, "name": 1, "full_name": 1, "email": 1, "account_type": 1, "role": 1}
         ).to_list(200)
         for u in users:
