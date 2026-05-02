@@ -260,3 +260,57 @@ CSS foundation is done (breakpoints for sidebar, grids, modals, tables, page pad
 - Dashboard builder custom widgets
 - Client invoice/billing integration
 - Team capacity heatmap
+
+---
+
+## gstack (engineering workflow skills)
+
+This repo uses **gstack** (Garry Tan, MIT) — a structured set of Claude Code slash commands that replace ad-hoc prompts with named specialist roles. Installed at `~/.claude/skills/gstack`. Update with `cd ~/.claude/skills/gstack && git pull && ./setup`.
+
+### Browser tooling rule
+
+For all web browsing in this repo, use the gstack `/browse` skill. Do **not** use `mcp__claude-in-chrome__*` tools directly — `/browse` is the wrapper that handles auth, scoping, and logging.
+
+### When to reach for which skill
+
+**Plan a feature before building:**
+- `/office-hours` — six forcing questions, reframes the product before code is written. Writes a design doc that downstream skills read.
+- `/plan-ceo-review` — strategic challenge: expansion / selective expansion / hold scope / reduction.
+- `/plan-eng-review` — locks architecture, data flow, edge cases, test plan. Diagrams.
+- `/plan-design-review` — rates each design dimension 0–10, edits the plan to hit 10. AI slop detection.
+- `/plan-devex-review` — DX audit on docs, onboarding, magical moment.
+- `/autoplan` — end-to-end planning pipeline that chains the above into a single approved plan.
+
+**Build / fix / ship:**
+- `/design-consultation`, `/design-shotgun`, `/design-html`, `/design-review` — design system, mockup variants, production HTML, design audit with commits.
+- `/review` — staff-engineer code review on the current branch. Auto-fixes obvious issues, asks before risky ones.
+- `/investigate` — systematic root-cause debug. Iron Law: no fix without diagnosis. Stops after 3 failed hypotheses.
+- `/qa <staging-url>` — opens a real browser, clicks through flows, finds bugs, commits fixes, generates regression tests.
+- `/qa-only` — same audit, report only, no commits.
+- `/cso` — OWASP Top 10 + STRIDE security audit. 8/10+ confidence gate.
+- `/ship` — sync main, run tests, audit coverage, push, open PR.
+- `/land-and-deploy` — merge PR, wait for CI/deploy, verify production.
+- `/canary` — post-deploy monitoring loop.
+- `/benchmark` — page load + Core Web Vitals before/after.
+
+**Reflection / hygiene:**
+- `/retro` — weekly engineering retrospective.
+- `/learn` — log a learning to the skills cache.
+- `/freeze` / `/unfreeze` / `/guard` / `/careful` — protect critical paths during risky work.
+- `/document-release` — generate release notes from merged PRs.
+- `/gstack-upgrade` — pull the latest gstack and re-run setup.
+
+### Default RED OPS workflow
+
+For a new feature:
+`/office-hours` → `/autoplan` → `[approve plan, exit plan mode]` → `/review` → `/qa <staging-url>` → `/ship`
+
+For a production bug:
+`/investigate` → fix → `/review` → `/qa <staging-url>` → `/ship`
+
+For a security pass before release:
+`/cso` → fix findings → `/review` → `/ship`
+
+### Scope
+
+This gstack section applies to the **RED OPS repo and any other code repos**. It does **not** apply to RRG/RRM strategy, copy, SOPs, or document creation work — those continue under the RRG operator system in the user's global Cowork instructions.
