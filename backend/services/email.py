@@ -447,7 +447,7 @@ Red Ops Team
 
 async def send_test_email(to_email: str):
     """Send a test email to verify SMTP configuration"""
-    subject = "email coming from emergent test platform"
+    subject = "Red Ops SMTP test"
     body = """
 This is a test email from Red Ops to verify SMTP configuration.
 

@@ -1,10 +1,15 @@
+import os
 import requests
 import sys
 import json
 from datetime import datetime
 
 class RedRibbonOpsAPITester:
-    def __init__(self, base_url="https://service-portal-134.preview.emergentagent.com/api"):
+    def __init__(self, base_url=None):
+        if base_url is None:
+            base_url = os.environ.get("BASE_URL")
+        if not base_url:
+            raise RuntimeError("BASE_URL env var must be set (e.g. http://localhost:8000/api)")
         self.base_url = base_url
         self.admin_token = None
         self.editor_token = None
