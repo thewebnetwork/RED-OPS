@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
 
 from database import db
 from utils.auth import get_current_user
@@ -43,6 +43,16 @@ class MetricsDict(BaseModel):
     roas: Optional[float] = Field(None, description="Return on ad spend (revenue / ad_spend)")
     cpc: Optional[float] = Field(None, description="Cost per click")
     currency: str = Field(default="USD", description="ISO currency code (USD, CAD, etc.)")
+
+    @model_serializer(mode='wrap')
+    def _serialize_with_rrm_aliases(self, handler):
+        # RRM terminology rule (Master KB §9): user-facing surfaces must say
+        # "Booked Appointments" / "CPBA". DB and Python attrs stay `leads`/`cpl`
+        # for back-compat; we emit the new keys alongside until a future migration.
+        data = handler(self)
+        data['booked_appointments'] = data.get('leads')
+        data['cpba'] = data.get('cpl')
+        return data
 
 
 class CampaignBreakdown(BaseModel):
@@ -363,6 +373,8 @@ _META_COLUMN_MAP = {
     "link clicks": "clicks",
     "clicks (all)": "clicks",
     "leads": "leads",
+    "booked_appointments": "leads",
+    "booked appointments": "leads",
     "results": "leads",
     "lead gen form leads": "leads",
     "ctr (link click-through rate)": "ctr",
@@ -370,6 +382,9 @@ _META_COLUMN_MAP = {
     "cost per result": "cpl",
     "cost per results": "cpl",
     "cost per lead": "cpl",
+    "cpba": "cpl",
+    "cost per booked appointment": "cpl",
+    "cost per booked appt": "cpl",
     "campaign name": "campaign_name",
     "campaign delivery": "campaign_status",
 }
