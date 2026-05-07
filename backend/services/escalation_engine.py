@@ -1,6 +1,7 @@
 """Escalation engine service - processes escalation rules and triggers actions"""
 import uuid
 import asyncio
+import json
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
@@ -264,25 +265,58 @@ async def execute_escalation_action(action: dict, order: dict, level: dict, poli
             method = action.get("webhook_method", "POST")
             headers = action.get("webhook_headers", {})
             body_template = action.get("webhook_body_template", "{}")
-            
-            # Build body with order data
-            body_str = body_template.replace("{order_id}", order.get("id", ""))
-            body_str = body_str.replace("{order_code}", order.get("order_code", ""))
-            body_str = body_str.replace("{title}", order.get("title", ""))
-            body_str = body_str.replace("{status}", order.get("status", ""))
-            body_str = body_str.replace("{priority}", order.get("priority", ""))
-            body_str = body_str.replace("{level}", str(level["level"]))
-            body_str = body_str.replace("{level_name}", level.get("name", ""))
-            body_str = body_str.replace("{policy_name}", policy.get("name", ""))
-            
+
+            substitutions = {
+                "{order_id}": order.get("id", ""),
+                "{order_code}": order.get("order_code", ""),
+                "{title}": order.get("title", ""),
+                "{status}": order.get("status", ""),
+                "{priority}": order.get("priority", ""),
+                "{level}": str(level["level"]),
+                "{level_name}": level.get("name", ""),
+                "{policy_name}": policy.get("name", ""),
+            }
+
+            def _substitute(value):
+                if isinstance(value, str):
+                    for placeholder, replacement in substitutions.items():
+                        value = value.replace(placeholder, replacement)
+                    return value
+                if isinstance(value, dict):
+                    return {k: _substitute(v) for k, v in value.items()}
+                if isinstance(value, list):
+                    return [_substitute(v) for v in value]
+                return value
+
+            json_payload = None
+            string_body = None
+            stripped = body_template.strip()
+            if stripped.startswith(("{", "[")):
+                try:
+                    json_payload = _substitute(json.loads(body_template))
+                except json.JSONDecodeError as exc:
+                    logger.warning(
+                        f"Invalid webhook_body_template JSON for policy {policy.get('id')}: {exc}"
+                    )
+                    string_body = body_template
+                    for placeholder, replacement in substitutions.items():
+                        string_body = string_body.replace(placeholder, replacement)
+            else:
+                string_body = body_template
+                for placeholder, replacement in substitutions.items():
+                    string_body = string_body.replace(placeholder, replacement)
+
             async with httpx.AsyncClient(timeout=30) as client:
                 if method.upper() == "POST":
-                    response = await client.post(url, json=eval(body_str) if body_str.startswith("{") else body_str, headers=headers)
+                    if json_payload is not None:
+                        response = await client.post(url, json=json_payload, headers=headers)
+                    else:
+                        response = await client.post(url, content=string_body, headers=headers)
                 elif method.upper() == "GET":
                     response = await client.get(url, headers=headers)
                 else:
                     response = await client.request(method, url, headers=headers)
-                
+
                 result["success"] = response.status_code < 400
                 result["details"]["status_code"] = response.status_code
                 result["details"]["url"] = url
