@@ -33,6 +33,8 @@ import {
   Eye,
   MessageSquare,
   LifeBuoy,
+  ClipboardList,
+  Inbox,
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -52,6 +54,8 @@ const NAV_MAIN = [
   { path: '/requests',      icon: FileText,        label: 'Requests',       roles: ['Administrator','Operator','Standard User'], badge: true },
   { path: '/conversations', icon: MessageSquare,   label: 'Messages',       roles: ['Administrator','Operator','Standard User','Media Client'] },
   { path: '/clients',       icon: Users,           label: 'Clients',        roles: ['Administrator','Operator'] },
+  { path: '/briefs',        icon: ClipboardList,   label: 'Briefs',         roles: ['Administrator','Operator'], badge: true },
+  { path: '/freelancers',   icon: Users,           label: 'Freelancers',    roles: ['Administrator','Operator'] },
   { path: '/drive',         icon: BookOpen,        label: 'Drive',          roles: ['Administrator','Operator','Standard User'] },
   { path: '/ad-performance',icon: BarChart2,       label: 'Ad Performance', roles: ['Administrator','Operator'] },
   { path: '/finance',       icon: DollarSign,      label: 'Finance',        roles: ['Administrator'] },
@@ -68,6 +72,13 @@ const NAV_SYSTEM = [
 // Client portal nav — minimal (full portal is a single page at /portal)
 const NAV_CLIENT = [
   { path: '/portal', icon: LayoutDashboard, label: 'Portal', roles: ['Media Client'] },
+];
+
+// Freelancer nav (Editor Module Phase 1) — only assigned briefs, own profile, own payment history
+const NAV_FREELANCER = [
+  { path: '/my-queue',    icon: Inbox,      label: 'My Queue',    roles: ['Freelancer'], badge: true },
+  { path: '/my-profile',  icon: User,       label: 'My Profile',  roles: ['Freelancer'] },
+  { path: '/my-payments', icon: DollarSign, label: 'My Payments', roles: ['Freelancer'] },
 ];
 
 // Command palette items
@@ -368,14 +379,17 @@ export default function Layout({ children }) {
   // Filter items by role — preview-as-client mode forces client nav
   const filter = (items) => items.filter(i => !i.roles || i.roles.includes(user?.role));
   const isPreviewClient = typeof window !== 'undefined' && localStorage.getItem('preview_as_client') === 'true';
+  const isFreelancer = user?.role === 'Freelancer';
   const isClient    = isPreviewClient || user?.role === 'Media Client' || user?.account_type === 'Media Client';
-  const mainItems     = isClient ? NAV_CLIENT : filter(NAV_MAIN);
-  const businessItems = isClient ? [] : filter(NAV_BUSINESS);
-  const servicesItems = isClient ? [] : filter(NAV_SERVICES);
-  const systemItems   = isClient ? [] : filter(NAV_SYSTEM);
+  const mainItems     = isFreelancer ? NAV_FREELANCER : (isClient ? NAV_CLIENT : filter(NAV_MAIN));
+  const businessItems = (isFreelancer || isClient) ? [] : filter(NAV_BUSINESS);
+  const servicesItems = (isFreelancer || isClient) ? [] : filter(NAV_SERVICES);
+  const systemItems   = (isFreelancer || isClient) ? [] : filter(NAV_SYSTEM);
 
   // Page title for breadcrumb
-  const allNavItems = isClient ? NAV_CLIENT : [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SERVICES, ...NAV_SYSTEM];
+  const allNavItems = isFreelancer
+    ? NAV_FREELANCER
+    : (isClient ? NAV_CLIENT : [...NAV_MAIN, ...NAV_BUSINESS, ...NAV_SERVICES, ...NAV_SYSTEM]);
   const pageTitle = allNavItems
     .find(i => i.path && (i.path === '/' ? location.pathname === '/' : location.pathname.startsWith(i.path)))?.label || '';
 
