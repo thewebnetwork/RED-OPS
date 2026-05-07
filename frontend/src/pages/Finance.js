@@ -41,14 +41,33 @@ const monthLabel = (ym) => {
   return `${months[parseInt(m)-1]} ${y}`;
 };
 
+// Entity partition — splits holding (RRG), operating (RRM), Taryn's brokerage,
+// Matt's personal, and a default bucket pending classification.
+const ENTITY_OPTIONS = [
+  { id: 'all', label: 'All' },
+  { id: 'RRG', label: 'RRG' },
+  { id: 'RRM', label: 'RRM' },
+  { id: 'RealEstate', label: 'Real Estate' },
+  { id: 'Personal', label: 'Personal' },
+  { id: 'Unassigned', label: 'Unassigned' },
+];
+
+const ENTITY_STORAGE_KEY = 'finance_entity_filter';
+
 // ── Transaction Form ────────────────────────────────────────────────────────
 
 // Categories fetched from DB — no hardcoded list
 
-function TransactionDialog({ tx, categories, clients, users, onSave, onClose, saving }) {
+function TransactionDialog({ tx, categories, clients, users, onSave, onClose, saving, currentEntity }) {
   const isEdit = !!tx?.id;
   const [assignType, setAssignType] = useState(tx?.team_member_id ? 'team_member' : 'client');
+  // Default new transactions to the page's currently-selected entity so the
+  // user doesn't re-pick. Editing keeps the row's stored entity.
+  const _defaultEntity = tx?.entity
+    || (currentEntity && currentEntity !== 'all' ? currentEntity : '')
+    || 'Unassigned';
   const [form, setForm] = useState({
+    entity: _defaultEntity,
     type: tx?.type || 'income',
     category: tx?.category || '',
     description: tx?.description || '',
@@ -68,6 +87,7 @@ function TransactionDialog({ tx, categories, clients, users, onSave, onClose, sa
 
   const handleSubmit = () => {
     const cat = form.category === '__custom__' ? customCat.trim() : form.category;
+    if (!form.entity) return toast.error('Entity is required');
     if (!cat) return toast.error('Category is required');
     if (!form.description.trim()) return toast.error('Description is required');
     if (!form.amount || Number(form.amount) <= 0) return toast.error('Amount must be greater than 0');
@@ -85,6 +105,23 @@ function TransactionDialog({ tx, categories, clients, users, onSave, onClose, sa
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--tx-1)' }}>{isEdit ? 'Edit Transaction' : 'Add Transaction'}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', padding: 4 }}><X size={18} /></button>
+        </div>
+
+        {/* Entity selector — primary partition (RRG / RRM / RealEstate / Personal) */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={lblStyle}>Entity *</label>
+          <select
+            value={form.entity}
+            onChange={e => setForm(f => ({ ...f, entity: e.target.value }))}
+            style={inpStyle}
+          >
+            <option value="">Select…</option>
+            <option value="RRG">RRG (holding)</option>
+            <option value="RRM">RRM (operating)</option>
+            <option value="RealEstate">Real Estate (Taryn's brokerage)</option>
+            <option value="Personal">Personal (Matt's family)</option>
+            <option value="Unassigned">Unassigned</option>
+          </select>
         </div>
 
         {/* Type toggle */}
@@ -227,6 +264,17 @@ export default function Finance() {
   const [showImport, setShowImport] = useState(false);
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [finScope, setFinScope] = useState('all');
+  const [entity, setEntityState] = useState(() => {
+    if (typeof window === 'undefined') return 'all';
+    return localStorage.getItem(ENTITY_STORAGE_KEY) || 'all';
+  });
+  const setEntity = (next) => {
+    setEntityState(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(ENTITY_STORAGE_KEY, next);
+    }
+  };
+  const [unassignedCount, setUnassignedCount] = useState(0);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [totalTx, setTotalTx] = useState(0);
@@ -284,12 +332,20 @@ export default function Finance() {
       const range = getDateRange();
       const summaryPeriod = rangeMode === 'month' ? period : `${rangeYear}-01`;
       const scopeParam = finScope !== 'all' ? finScope : undefined;
-      const [sumRes, txRes, catRes, usersRes] = await Promise.allSettled([
-        ax().get(`${API}/finance/summary`, { params: { period: summaryPeriod, scope: scopeParam } }),
-        ax().get(`${API}/finance/transactions`, { params: { ...range, scope: scopeParam } }),
+      const entityParam = entity && entity !== 'all' ? entity : undefined;
+      const reqs = [
+        ax().get(`${API}/finance/summary`, { params: { period: summaryPeriod, scope: scopeParam, entity: entityParam } }),
+        ax().get(`${API}/finance/transactions`, { params: { ...range, scope: scopeParam, entity: entityParam } }),
         ax().get(`${API}/finance/categories`),
         ax().get(`${API}/users`),
-      ]);
+      ];
+      // Fetch the Unassigned count independently so the (Unassigned: N)
+      // affordance is visible even when filtering to other entities.
+      if (entity !== 'Unassigned') {
+        reqs.push(ax().get(`${API}/finance/transactions`, { params: { entity: 'Unassigned', limit: 1 } }));
+      }
+      const results = await Promise.allSettled(reqs);
+      const [sumRes, txRes, catRes, usersRes, unassignedRes] = results;
       if (sumRes.status === 'fulfilled') setSummary(sumRes.value.data);
       if (txRes.status === 'fulfilled') {
         setTransactions(txRes.value.data.items || []);
@@ -301,9 +357,15 @@ export default function Finance() {
         setClients(all.filter(u => u.account_type === 'Media Client'));
         setTeamUsers(all.filter(u => u.account_type !== 'Media Client' && u.active !== false));
       }
+      if (entity === 'Unassigned') {
+        // Already filtered to Unassigned — main fetch holds the count
+        setUnassignedCount(txRes.status === 'fulfilled' ? (txRes.value.data.total || 0) : 0);
+      } else if (unassignedRes && unassignedRes.status === 'fulfilled') {
+        setUnassignedCount(unassignedRes.value.data.total || 0);
+      }
     } catch { toast.error('Failed to load financial data'); }
     finally { setLoading(false); }
-  }, [period, rangeMode, rangeYear, getDateRange, finScope]);
+  }, [period, rangeMode, rangeYear, getDateRange, finScope, entity]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -413,6 +475,42 @@ export default function Finance() {
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', padding: '24px 28px' }}>
 
+      {/* Entity selector — primary partition before the period filter */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+          Entity
+        </span>
+        <div style={{ display: 'flex', borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
+          {ENTITY_OPTIONS.map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => setEntity(opt.id)}
+              style={{
+                padding: '6px 12px', fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer',
+                background: entity === opt.id ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: entity === opt.id ? '#fff' : 'var(--tx-2)',
+                transition: 'background .12s, color .12s',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {unassignedCount > 0 && entity !== 'Unassigned' && (
+          <button
+            onClick={() => setEntity('Unassigned')}
+            title="Filter to Unassigned for batch reclassification"
+            style={{
+              padding: '5px 11px', fontSize: 11, fontWeight: 600,
+              background: 'rgba(245, 158, 11, 0.12)', color: 'var(--yellow)',
+              border: '1px solid var(--yellow)', borderRadius: 14, cursor: 'pointer',
+            }}
+          >
+            Unassigned: {unassignedCount}
+          </button>
+        )}
+      </div>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
@@ -507,7 +605,7 @@ export default function Finance() {
       {/* Multi-period dashboard: month / quarter / YTD KPIs + 12mo bars + weekly cash flow */}
       {isAdmin && (
         <div style={{ marginBottom: 18 }}>
-          <FinanceDashboard refreshKey={transactions.length} />
+          <FinanceDashboard refreshKey={transactions.length} entity={entity} />
         </div>
       )}
 
@@ -801,6 +899,7 @@ export default function Finance() {
           onSave={handleSave}
           onClose={() => { setDialogOpen(false); setEditingTx(null); }}
           saving={saving}
+          currentEntity={entity}
         />
       )}
 
