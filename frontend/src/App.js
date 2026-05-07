@@ -64,7 +64,6 @@ const TaskBoard = React.lazy(() => import("./pages/TaskBoard"));
 const Projects = React.lazy(() => import("./pages/Projects"));
 const ProjectPage = React.lazy(() => import("./pages/ProjectPage"));
 const Finance = React.lazy(() => import("./pages/Finance"));
-const SOPs = React.lazy(() => import("./pages/SOPs"));
 const CRM = React.lazy(() => import("./pages/CRM"));
 const Ambassador = React.lazy(() => import("./pages/Ambassador"));
 const ClientPage = React.lazy(() => import("./pages/ClientPage"));

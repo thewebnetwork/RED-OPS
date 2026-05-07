@@ -83,6 +83,7 @@ agenthub/agents/youtube/db
 outputs/
 memory/
 .git_corrupted
+.gstack/
 
 # Uploads and agent config
 uploads/
