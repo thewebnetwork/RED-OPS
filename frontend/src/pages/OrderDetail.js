@@ -210,8 +210,15 @@ export default function OrderDetail() {
         setAccountManager(null);
       }
     } catch (error) {
-      toast.error('Failed to load request');
-      navigate('/');
+      const status = error?.response?.status;
+      const detail = error?.response?.data?.detail;
+      const message = detail
+        ? `Failed to load request: ${detail}`
+        : status
+          ? `Failed to load request (HTTP ${status})`
+          : `Failed to load request: ${error?.message || 'unknown error'}`;
+      toast.error(message);
+      navigate('/requests');
     } finally {
       setLoading(false);
     }

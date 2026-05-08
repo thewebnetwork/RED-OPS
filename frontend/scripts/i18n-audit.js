@@ -57,7 +57,7 @@ const CONFIG = {
   // Allowlist - known exceptions that are intentionally hardcoded
   allowlist: [
     // Brand names
-    'Red Ribbon', 'RED OPS', 'Emergent',
+    'Red Ribbon', 'RED OPS',
     // Technical constants
     'Bearer', 'application/json', 'multipart/form-data',
     // Library-specific

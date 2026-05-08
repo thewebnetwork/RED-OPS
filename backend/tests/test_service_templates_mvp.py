@@ -11,7 +11,7 @@ import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://service-portal-134.preview.emergentagent.com"
+    raise RuntimeError("REACT_APP_BACKEND_URL env var must be set for tests")
 
 # Test credentials
 ADMIN_EMAIL = "admin@redribbonops.com"

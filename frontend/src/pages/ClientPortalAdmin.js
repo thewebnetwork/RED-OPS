@@ -254,7 +254,7 @@ export default function ClientPortalAdmin() {
                     <input type="date" value={newAppt.appointment_date} onChange={e => setNewAppt({ ...newAppt, appointment_date: e.target.value })} style={inputStyle} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Lead Name</label>
+                    <label style={labelStyle}>Name</label>
                     <input value={newAppt.lead_name} onChange={e => setNewAppt({ ...newAppt, lead_name: e.target.value })} placeholder="Name" style={inputStyle} />
                   </div>
                   <div>

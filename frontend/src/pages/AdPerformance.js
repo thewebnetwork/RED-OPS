@@ -208,7 +208,7 @@ function BarChart({ data, height = 200 }) {
                     position: 'relative',
                     cursor: 'pointer',
                   }}
-                  title={`Leads: ${formatNumber(item.leads)}`}
+                  title={`Booked Appointments: ${formatNumber(item.leads)}`}
                 />
               )}
             </div>
@@ -243,7 +243,7 @@ function BarChart({ data, height = 200 }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--tx-2)' }}>
           <div style={{ width: '10px', height: '10px', backgroundColor: 'var(--red)', borderRadius: '2px' }} />
-          Leads
+          Booked Appointments
         </div>
       </div>
     </div>
@@ -464,7 +464,7 @@ function ClientAdDashboard() {
               subtitle="Current month"
             />
             <KPICard
-              label="Total Leads"
+              label="Booked Appointments"
               value={currentMonth.leads}
               formattedValue={formatNumber(currentMonth.leads)}
               delta={leadsDelta}
@@ -472,7 +472,7 @@ function ClientAdDashboard() {
               subtitle="Current month"
             />
             <KPICard
-              label="Cost Per Lead"
+              label="Cost Per Booked Appt"
               value={currentMonth.cpl}
               formattedValue={formatCurrency(currentMonth.cpl, currency)}
               delta={cplDelta}
@@ -517,7 +517,7 @@ function ClientAdDashboard() {
                       <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{formatCurrency(plat.ad_spend, plat.currency || currency)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--tx-2)' }}>Leads:</span>
+                      <span style={{ color: 'var(--tx-2)' }}>Booked Appts:</span>
                       <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{formatNumber(plat.leads)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -556,8 +556,8 @@ function ClientAdDashboard() {
                       <th>Spend</th>
                       <th>Impr.</th>
                       <th>Reach</th>
-                      <th>Leads</th>
-                      <th>CPL</th>
+                      <th>Booked Appts</th>
+                      <th>CPBA</th>
                       <th>CTR</th>
                       <th>ROAS</th>
                     </tr>
@@ -759,7 +759,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
       return;
     }
     if (!formData.ad_spend || !formData.leads) {
-      toast.error('Spend and Leads are required');
+      toast.error('Spend and Booked Appointments are required');
       return;
     }
 
@@ -845,7 +845,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
             </label>
           </div>
           <p style={{ fontSize: 11, color: 'var(--tx-3)', margin: 0, lineHeight: 1.5 }}>
-            CSV columns: <strong>client</strong>, platform, period (YYYY-MM), ad_spend, impressions, clicks, leads, conversions, roas, notes
+            CSV columns: <strong>client</strong>, platform, period (YYYY-MM), ad_spend, impressions, clicks, booked_appointments (or leads), conversions, roas, notes
           </p>
           {csvResults && (
             <div style={{ marginTop: 8, fontSize: 11, display: 'flex', gap: 10 }}>
@@ -937,7 +937,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
             <input
               type="number"
               className="input-field"
-              placeholder="Leads"
+              placeholder="Booked Appointments"
               value={formData.leads}
               onChange={(e) => handleFieldChange('leads', e.target.value)}
             />
@@ -971,7 +971,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
             }}
           >
             <div>
-              <div style={{ color: 'var(--tx-3)', fontSize: '11px', marginBottom: '2px' }}>CPL</div>
+              <div style={{ color: 'var(--tx-3)', fontSize: '11px', marginBottom: '2px' }}>CPBA</div>
               <div style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{calculateCPL()}</div>
             </div>
             <div>
@@ -1033,7 +1033,7 @@ function AddSnapshotModal({ open, onClose, onSave, clients }) {
                 <input
                   type="number"
                   className="input-field"
-                  placeholder="Leads"
+                  placeholder="Booked Appts"
                   value={newCampaign.leads}
                   onChange={(e) => setNewCampaign({ ...newCampaign, leads: e.target.value })}
                 />
@@ -1194,7 +1194,7 @@ function ImportCSVModal({ open, onClose, onSuccess, clients }) {
                   <div style={{ fontWeight: 600, color: 'var(--tx-1)' }}>{formatCurrency(result.total_spend)}</div>
                 </div>
                 <div>
-                  <div style={{ color: 'var(--tx-3)', fontSize: '11px' }}>Total Leads</div>
+                  <div style={{ color: 'var(--tx-3)', fontSize: '11px' }}>Total Booked Appointments</div>
                   <div style={{ fontWeight: 600, color: 'var(--tx-1)' }}>{formatNumber(result.total_leads)}</div>
                 </div>
               </div>
@@ -1585,12 +1585,12 @@ function AdminAdDashboard() {
           formattedValue={formatCurrency(kpis.current_month_total_spend)}
         />
         <KPICard
-          label="Total Leads (MTD)"
+          label="Booked Appointments (MTD)"
           value={kpis.current_month_total_leads}
           formattedValue={formatNumber(kpis.current_month_total_leads)}
         />
         <KPICard
-          label="Avg CPL"
+          label="Avg CPBA"
           value={kpis.avg_cpl}
           formattedValue={formatCurrency(kpis.avg_cpl)}
         />
@@ -1642,8 +1642,8 @@ function AdminAdDashboard() {
                 <tr>
                   <th>Client</th>
                   <th>Current Spend</th>
-                  <th>Current Leads</th>
-                  <th>CPL</th>
+                  <th>Booked Appts</th>
+                  <th>CPBA</th>
                   <th>Platforms</th>
                   <th>Health</th>
                   <th></th>
@@ -1791,8 +1791,8 @@ function AdminAdDashboard() {
                 { key: 'ad_spend', label: 'Ad Spend ($)', type: 'number', step: '0.01' },
                 { key: 'impressions', label: 'Impressions', type: 'number', step: '1' },
                 { key: 'clicks', label: 'Clicks', type: 'number', step: '1' },
-                { key: 'leads', label: 'Leads', type: 'number', step: '1' },
-                { key: 'cpl', label: 'CPL ($)', type: 'number', step: '0.01' },
+                { key: 'leads', label: 'Booked Appointments', type: 'number', step: '1' },
+                { key: 'cpl', label: 'CPBA ($)', type: 'number', step: '0.01' },
                 { key: 'ctr', label: 'CTR (%)', type: 'number', step: '0.01' },
               ].map(f => (
                 <div key={f.key}>
