@@ -1,46 +1,21 @@
-# Pin nixpacks build behavior to recover from May 2 Railway deploy outage.
-# Without this, NIXPACKS auto-detects Python config and the auto-detected
-# behavior changed at some point between Apr 26 and May 2 2026, breaking
-# every subsequent deploy.
-
-[phases.setup]
-nixPkgs = [
-  "python311",
-  "gcc",
-  "libffi",
-  "openssl",
-  "libjpeg",
-  "zlib",
-  "rustc",
-  "cargo",
-  "pkg-config",
-]
-aptPkgs = [
-  "build-essential",
-  "libssl-dev",
-  "libffi-dev",
-]
-
-[phases.install]
-cmds = [
-  "python --version",
-  "pip install --upgrade pip setuptools wheel",
-  "pip install --no-cache-dir -r requirements.txt",
-]
-
-# NOTE 1: requirements.txt now lives at repo root (mirroring backend/requirements.txt).
-# NIXPACKS' Python provider only copies files at the repo root into the install layer
-# — it does NOT copy nested directories like backend/ at install time. Apr 26 deploy
-# worked because older NIXPACKS auto-scanned nested paths; that behavior was removed
-# around May 2 2026, breaking every deploy until this fix.
+# Minimal NIXPACKS config — let auto-detection handle Python build.
 #
-# NOTE 2: do NOT add a [phases.build] step that imports the app — database.py
-# instantiates the Motor client at import time, which means any `python -c 'import
-# server_v2'` smoke test during build will hang waiting for MongoDB (no MONGO_URL
-# env at build phase). Smoke tests belong post-deploy via /api/health, not in nixpacks.
-
-[start]
-cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"
+# History:
+# - Apr 26 2026: deploys worked with NO nixpacks.toml + railway.json
+#   buildCommand "pip install -r backend/requirements.txt"
+# - May 2 2026: NIXPACKS upstream change broke nested-dir scanning. Every
+#   deploy failed with "backend/requirements.txt not found" at install.
+# - May 7 2026: requirements.txt moved to repo root + railway.json
+#   buildCommand removed. Install now works from root.
+# - May 7 2026 v2: explicit [phases.install] in earlier nixpacks.toml
+#   bypassed NIXPACKS' default `COPY . .` — runtime image was missing
+#   backend/. Stripped down to env vars only so auto-detection runs the
+#   standard Python flow (setup → install → COPY . . → start).
+#
+# Start command lives in railway.json (`cd backend && uvicorn server:app`).
+# DO NOT add [phases.install] or [phases.build] without confirming backend/
+# is still in the runtime image (check deploy logs for "cd: backend: No
+# such file or directory").
 
 [variables]
 PYTHONUNBUFFERED = "1"
