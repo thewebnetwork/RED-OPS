@@ -68,6 +68,8 @@ from routes.dashboard_builder import router as dashboard_builder_router
 from routes.files import router as files_router
 from routes.events import router as events_router
 from routes.sheets import router as sheets_router
+from routes.freelancers import router as freelancers_router
+from routes.briefs import router as briefs_router
 
 # Import SLA monitor service
 from services.sla_monitor import check_sla_breaches
@@ -356,6 +358,8 @@ app.include_router(project_templates_router, prefix="/api")  # Project Templates
 app.include_router(push_router, prefix="/api")  # PWA Push Notifications
 app.include_router(client_portal_router, prefix="/api")  # Client Portal Data
 app.include_router(jarvis_router, prefix="/api")  # Jarvis Command Center
+app.include_router(freelancers_router, prefix="/api")  # Editor/Freelancer Management Phase 1
+app.include_router(briefs_router, prefix="/api")  # Briefs lifecycle + queue + payments
 
 
 @app.get("/")

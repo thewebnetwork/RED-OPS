@@ -82,6 +82,14 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const ClientPortalAdmin = React.lazy(() => import("./pages/ClientPortalAdmin"));
 const ClientPortal = React.lazy(() => import("./pages/ClientPortal"));
 const AdminJarvis = React.lazy(() => import("./pages/AdminJarvis"));
+// Editor Module Phase 1
+const Freelancers = React.lazy(() => import("./pages/Freelancers"));
+const Briefs = React.lazy(() => import("./pages/Briefs"));
+const BriefDetail = React.lazy(() => import("./pages/BriefDetail"));
+const MyQueue = React.lazy(() => import("./pages/MyQueue"));
+const MyQueueBrief = React.lazy(() => import("./pages/MyQueueBrief"));
+const MyProfile = React.lazy(() => import("./pages/MyProfile"));
+const MyPayments = React.lazy(() => import("./pages/MyPayments"));
 
 import { useAppMode, APP_MODES } from "./hooks/useAppMode";
 
@@ -102,6 +110,7 @@ function HomeRoute() {
   if (isClient) return <Navigate to="/portal" replace />;
 
   const role = user?.role;
+  if (role === 'Freelancer') return <Navigate to="/my-queue" replace />;
   if (role === 'Operator') return <OperatorDashboard />;
   if (role === 'Standard User') return <StandardDashboard />;
   // Administrator, Admin alias, Privileged User, and anything else falls
@@ -393,6 +402,14 @@ function AppRoutes() {
       <Route path="/team/:id" element={<PrivateRoute roles={['Administrator','Operator']}><TeamMemberPage /></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute roles={['Administrator','Operator']}><Clients /></PrivateRoute>} />
       <Route path="/clients/:id" element={<PrivateRoute roles={['Administrator','Operator']}><ClientPage /></PrivateRoute>} />
+      {/* Editor Module Phase 1 */}
+      <Route path="/briefs" element={<PrivateRoute roles={['Administrator','Operator']}><Briefs /></PrivateRoute>} />
+      <Route path="/briefs/:id" element={<PrivateRoute roles={['Administrator','Operator']}><BriefDetail /></PrivateRoute>} />
+      <Route path="/freelancers" element={<PrivateRoute roles={['Administrator','Operator']}><Freelancers /></PrivateRoute>} />
+      <Route path="/my-queue" element={<PrivateRoute roles={['Freelancer']}><MyQueue /></PrivateRoute>} />
+      <Route path="/my-queue/:id" element={<PrivateRoute roles={['Freelancer']}><MyQueueBrief /></PrivateRoute>} />
+      <Route path="/my-profile" element={<PrivateRoute roles={['Freelancer']}><MyProfile /></PrivateRoute>} />
+      <Route path="/my-payments" element={<PrivateRoute roles={['Freelancer']}><MyPayments /></PrivateRoute>} />
       <Route path="/requests" element={<PrivateRoute roles={['Administrator','Operator','Standard User']}><Requests /></PrivateRoute>} />
 
       {/* ========== OPERATOR CONSOLE ROUTES ========== */}

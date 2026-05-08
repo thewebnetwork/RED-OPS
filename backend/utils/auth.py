@@ -7,12 +7,16 @@ from config import SECRET_KEY, ALGORITHM
 
 security = HTTPBearer()
 
-# Role mapping for backward compatibility during migration
+# Role mapping for backward compatibility during migration.
+# Note: "Freelancer" is a first-class role (no alias) — added per Editor Module
+# Phase 1. It maps only to itself; freelancers see only assigned briefs and
+# never see other freelancers, internal-only fields, or admin/operator routes.
 ROLE_ALIASES = {
     "Admin": "Administrator",
     "Manager": "Privileged User",
     "Requester": "Standard User",
     "Editor": "Operator",  # Workers/pickers are now Operators, not Standard Users
+    "Freelancer": "Freelancer",
 }
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
