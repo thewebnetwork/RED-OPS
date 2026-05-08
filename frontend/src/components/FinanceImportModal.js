@@ -28,8 +28,22 @@ const CATEGORIES = [
   'Uncategorized',
 ];
 
+const ENTITY_OPTIONS = [
+  { id: 'RRG', label: 'RRG (holding entity)', desc: 'Red Ribbon Group corporate transactions' },
+  { id: 'RRM', label: 'RRM (operating entity)', desc: 'Red Ribbon Media revenue and expenses' },
+  { id: 'RealEstate', label: 'Real Estate', desc: "Taryn's brokerage operations — commissions, board fees" },
+  { id: 'Personal', label: 'Personal', desc: "Matt's personal / family transactions — Wise, retail, dining" },
+  { id: 'Unassigned', label: 'Unassigned', desc: 'Re-tag each row individually after import' },
+];
+
+const LAST_ENTITY_KEY = 'finance_import_last_entity';
+
 export default function FinanceImportModal({ onClose, onImported }) {
-  const [step, setStep] = useState('upload'); // upload | preview | committing
+  const [step, setStep] = useState('entity'); // entity | upload | preview | committing
+  const [entity, setEntity] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return localStorage.getItem(LAST_ENTITY_KEY) || '';
+  });
   const [busy, setBusy] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -70,6 +84,7 @@ export default function FinanceImportModal({ onClose, onImported }) {
     try {
       const { data } = await ax().post(`${API}/finance/transactions/commit-import`, {
         transactions: selected,
+        entity,
       });
       toast.success(`Imported ${data.imported} transaction${data.imported === 1 ? '' : 's'}${data.skipped ? ` · skipped ${data.skipped} duplicate${data.skipped === 1 ? '' : 's'}` : ''}`);
       onImported?.();
@@ -98,9 +113,60 @@ export default function FinanceImportModal({ onClose, onImported }) {
             <Upload size={18} style={{ color: 'var(--accent)' }} />
             <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Import transactions</h2>
             {preview && <span style={badge}>{preview.format}</span>}
+            {entity && step !== 'entity' && <span style={badge}>{entity}</span>}
           </div>
           <button onClick={onClose} style={closeBtn}><X size={18} /></button>
         </div>
+
+        {/* Step: entity — pick the entity for every row in this import */}
+        {step === 'entity' && (
+          <>
+            <div style={{ padding: '32px 28px', flex: 1, overflow: 'auto' }}>
+              <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 700, color: 'var(--tx-1)' }}>
+                Which entity does this CSV belong to?
+              </div>
+              <div style={{ marginBottom: 20, fontSize: 12, color: 'var(--tx-3)' }}>
+                Every row in this import is tagged with the selected entity. Pick once — you can re-tag individual rows later.
+              </div>
+              <div style={{ display: 'grid', gap: 10 }}>
+                {ENTITY_OPTIONS.map(opt => {
+                  const active = entity === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => setEntity(opt.id)}
+                      style={{
+                        padding: '14px 16px', borderRadius: 10, fontSize: 13, textAlign: 'left',
+                        background: active ? 'rgba(99, 102, 241, 0.12)' : 'var(--surface-2)',
+                        color: 'var(--tx-1)',
+                        border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                        cursor: 'pointer', transition: 'background .12s, border-color .12s',
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: 2 }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>{opt.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div style={footer}>
+              <button onClick={onClose} className="btn-ghost">Cancel</button>
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') localStorage.setItem(LAST_ENTITY_KEY, entity);
+                  setStep('upload');
+                }}
+                disabled={!entity}
+                className="btn-primary"
+                style={{ gap: 6 }}
+              >
+                Continue
+                <ChevronRight size={12} />
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Step: upload */}
         {step === 'upload' && (

@@ -16,17 +16,18 @@ const ax = () => axios.create({ headers: { Authorization: `Bearer ${tok()}` } })
 const fmt = (n) => `$${Math.round(n || 0).toLocaleString()}`;
 const fmtSigned = (n) => `${n >= 0 ? '+' : '−'}${fmt(Math.abs(n))}`;
 
-export default function FinanceDashboard({ refreshKey }) {
+export default function FinanceDashboard({ refreshKey, entity }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDash = useCallback(async () => {
     try {
-      const { data: d } = await ax().get(`${API}/finance/dashboard`);
+      const entityParam = entity && entity !== 'all' ? entity : undefined;
+      const { data: d } = await ax().get(`${API}/finance/dashboard`, { params: { entity: entityParam } });
       setData(d);
     } catch { /* silent — caller already has fetchAll error toasts */ }
     finally { setLoading(false); }
-  }, []);
+  }, [entity]);
 
   useEffect(() => { fetchDash(); }, [fetchDash, refreshKey]);
 

@@ -13,9 +13,18 @@ from utils.tenancy import resolve_org_id
 router = APIRouter(prefix="/finance", tags=["Finance"])
 
 
+# Allowed values for the per-transaction `entity` partition. Splits the
+# holding entity (RRG), the operating entity (RRM), Taryn's brokerage data,
+# Matt's personal/family transactions, and a default bucket for legacy rows
+# pending classification.
+ENTITY_VALUES = {"RRG", "RRM", "RealEstate", "Personal", "Unassigned"}
+ENTITY_PATTERN = r"^(RRG|RRM|RealEstate|Personal|Unassigned)$"
+
+
 # ── Pydantic Models ──────────────────────────────────────────────────────────
 
 class TransactionCreate(BaseModel):
+    entity: str = Field(..., pattern=ENTITY_PATTERN)  # RRG | RRM | RealEstate | Personal | Unassigned
     type: str = Field(..., pattern="^(income|expense)$")
     category: str
     subcategory: Optional[str] = None
@@ -40,6 +49,7 @@ class TransactionCreate(BaseModel):
     import_id: Optional[str] = None                 # Which import batch this row came from
 
 class TransactionUpdate(BaseModel):
+    entity: Optional[str] = Field(None, pattern=ENTITY_PATTERN)
     type: Optional[str] = None
     category: Optional[str] = None
     subcategory: Optional[str] = None
@@ -182,6 +192,7 @@ async def list_transactions(
     type: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     client_id: Optional[str] = Query(None),
+    entity: Optional[str] = Query(None, description="RRG|RRM|RealEstate|Personal|Unassigned|all"),
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),
     scope: Optional[str] = Query(None, description="personal|agency|all"),
@@ -199,6 +210,8 @@ async def list_transactions(
         query["category"] = category
     if client_id:
         query["client_id"] = client_id
+    if entity and entity != "all":
+        query["entity"] = entity
     if date_from or date_to:
         date_q = {}
         if date_from:
@@ -279,6 +292,7 @@ async def delete_transaction(
 async def get_financial_summary(
     period: Optional[str] = Query(None, description="YYYY-MM filter"),
     scope: Optional[str] = Query(None, description="personal|agency|all"),
+    entity: Optional[str] = Query(None, description="RRG|RRM|RealEstate|Personal|Unassigned|all"),
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """Get financial summary — totals, by-category breakdown, monthly trend"""
@@ -295,10 +309,14 @@ async def get_financial_summary(
         ).to_list(500)
         _scope_cat_names = [c["name"] for c in scope_cats]
 
+    _entity_filter = entity if (entity and entity != "all") else None
+
     # Current month totals
     month_query = {"org_id": org_id, "date": {"$regex": f"^{current_month}"}}
     if _scope_cat_names is not None:
         month_query["category"] = {"$in": _scope_cat_names}
+    if _entity_filter:
+        month_query["entity"] = _entity_filter
     month_txns = await db.finance_transactions.find(month_query, {"_id": 0}).to_list(5000)
 
     income_total = sum(t["amount"] for t in month_txns if t["type"] == "income")
@@ -315,6 +333,8 @@ async def get_financial_summary(
     ytd_query = {"org_id": org_id, "date": {"$gte": f"{year}-01-01", "$lte": f"{year}-12-31"}}
     if _scope_cat_names is not None:
         ytd_query["category"] = {"$in": _scope_cat_names}
+    if _entity_filter:
+        ytd_query["entity"] = _entity_filter
     ytd_txns = await db.finance_transactions.find(ytd_query, {"_id": 0, "type": 1, "amount": 1, "date": 1}).to_list(10000)
 
     ytd_income = sum(t["amount"] for t in ytd_txns if t["type"] == "income")
@@ -357,6 +377,7 @@ async def get_financial_summary(
 
 @router.get("/dashboard")
 async def get_finance_dashboard(
+    entity: Optional[str] = Query(None, description="RRG|RRM|RealEstate|Personal|Unassigned|all"),
     current_user: dict = Depends(require_roles(["Administrator"]))
 ):
     """One call → everything the Finance dashboard needs:
@@ -373,11 +394,15 @@ async def get_finance_dashboard(
     # Window: 13 months back → today (12 full months + current month-to-date)
     window_start = (today.replace(day=1) - timedelta(days=370)).replace(day=1).isoformat()
 
+    tx_query = {
+        "org_id": org_id,
+        "date": {"$gte": window_start},
+    }
+    if entity and entity != "all":
+        tx_query["entity"] = entity
+
     txs = await db.finance_transactions.find(
-        {
-            "org_id": org_id,
-            "date": {"$gte": window_start},
-        },
+        tx_query,
         {"_id": 0, "type": 1, "amount": 1, "date": 1, "category": 1},
     ).to_list(20000)
 
@@ -1006,6 +1031,16 @@ async def commit_csv_import(
     if not isinstance(txs, list):
         raise HTTPException(status_code=400, detail="transactions must be an array")
 
+    # Entity is mandatory at the wizard step. Fall back to "Unassigned" so a
+    # stray request still persists instead of 500'ing — but reject anything
+    # outside the allowlist so we never leak a typo into the dataset.
+    entity = (body or {}).get("entity") or "Unassigned"
+    if entity not in ENTITY_VALUES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid entity '{entity}'. Must be one of: {sorted(ENTITY_VALUES)}",
+        )
+
     import_id = str(uuid.uuid4())
     now = get_utc_now()
     imported = 0
@@ -1019,6 +1054,7 @@ async def commit_csv_import(
         doc = {
             "id": str(uuid.uuid4()),
             "org_id": org_id,
+            "entity": entity,
             "type": tx.get("type", "expense"),
             "category": tx.get("category", "Uncategorized"),
             "subcategory": tx.get("subcategory"),
