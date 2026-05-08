@@ -1,0 +1,41 @@
+# Pin nixpacks build behavior to recover from May 2 Railway deploy outage.
+# Without this, NIXPACKS auto-detects Python config and the auto-detected
+# behavior changed at some point between Apr 26 and May 2 2026, breaking
+# every subsequent deploy.
+
+[phases.setup]
+nixPkgs = [
+  "python311",
+  "gcc",
+  "libffi",
+  "openssl",
+  "libjpeg",
+  "zlib",
+  "rustc",
+  "cargo",
+  "pkg-config",
+]
+aptPkgs = [
+  "build-essential",
+  "libssl-dev",
+  "libffi-dev",
+]
+
+[phases.install]
+cmds = [
+  "python --version",
+  "pip install --upgrade pip setuptools wheel",
+  "pip install --no-cache-dir -r backend/requirements.txt",
+]
+
+[phases.build]
+cmds = [
+  "cd backend && python -c 'import server_v2; print(\"server_v2 imports OK\")'",
+]
+
+[start]
+cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"
+
+[variables]
+PYTHONUNBUFFERED = "1"
+PIP_NO_CACHE_DIR = "1"
