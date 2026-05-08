@@ -28,10 +28,11 @@ cmds = [
   "pip install --no-cache-dir -r backend/requirements.txt",
 ]
 
-[phases.build]
-cmds = [
-  "cd backend && python -c 'import server_v2; print(\"server_v2 imports OK\")'",
-]
+# NOTE: do NOT add a [phases.build] step that imports the app —
+# database.py instantiates the Motor client at import time, which means
+# any `python -c 'import server_v2'` smoke test during build will hang
+# waiting for MongoDB (no MONGO_URL env at build phase). Smoke tests
+# belong post-deploy via /api/health, not in nixpacks.
 
 [start]
 cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"
