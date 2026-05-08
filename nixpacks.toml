@@ -25,14 +25,19 @@ aptPkgs = [
 cmds = [
   "python --version",
   "pip install --upgrade pip setuptools wheel",
-  "pip install --no-cache-dir -r backend/requirements.txt",
+  "pip install --no-cache-dir -r requirements.txt",
 ]
 
-# NOTE: do NOT add a [phases.build] step that imports the app —
-# database.py instantiates the Motor client at import time, which means
-# any `python -c 'import server_v2'` smoke test during build will hang
-# waiting for MongoDB (no MONGO_URL env at build phase). Smoke tests
-# belong post-deploy via /api/health, not in nixpacks.
+# NOTE 1: requirements.txt now lives at repo root (mirroring backend/requirements.txt).
+# NIXPACKS' Python provider only copies files at the repo root into the install layer
+# — it does NOT copy nested directories like backend/ at install time. Apr 26 deploy
+# worked because older NIXPACKS auto-scanned nested paths; that behavior was removed
+# around May 2 2026, breaking every deploy until this fix.
+#
+# NOTE 2: do NOT add a [phases.build] step that imports the app — database.py
+# instantiates the Motor client at import time, which means any `python -c 'import
+# server_v2'` smoke test during build will hang waiting for MongoDB (no MONGO_URL
+# env at build phase). Smoke tests belong post-deploy via /api/health, not in nixpacks.
 
 [start]
 cmd = "cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT"
